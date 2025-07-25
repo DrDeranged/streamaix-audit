@@ -1,0 +1,91 @@
+Build a creative, technologically impressive landing page for a decentralized AI application called “StreamAiX”.
+
+🧠 Project Description:
+StreamAiX is an AI-powered Web3 platform that transforms long-form podcasts, videos, and livestreams into blog-style summaries. It uses decentralized storage (Arweave/IPFS), wallet login, and social integrations (Lens/Farcaster) to make summarized content readable, ownable, and monetizable.
+
+🎯 Key Goals:
+- Capture attention with futuristic visuals and messaging
+- Highlight core features of AI + blockchain fusion
+- Provide live demo areas or animations to show summary transformations
+- Modular sections for easy expansion
+
+🛠️ Build Requirements:
+- Use React (with TailwindCSS preferred for styling)
+- Animate sections using Framer Motion
+- Create smooth scrolling and section snapping
+- Include tech visuals like code snippets, AI-generated flows, and onchain visual metaphors
+- Show subtle Web3 wallet iconography and ENS profile mockups
+- Implement a light/dark theme toggle
+- Use futuristic, clean fonts (like Inter or Orbitron)
+- Optimize for mobile
+
+🧩 Page Sections:
+
+1. **Hero Section**
+   - Tagline: “Stream the Noise. Capture the Signal.”
+   - Subtext: “AI + Web3 platform that transforms long videos into rich, summarized blog posts.”
+   - CTA: “Try the Demo” (scrolls to demo area) & “Join Waitlist” (email input or wallet connect)
+   - Background: AI data visualization, animated waveform, or embedded stream-to-text transformation
+
+2. **How It Works**
+   - Visual timeline (3 steps):
+     1. Upload or link your video
+     2. AI generates a clean, shareable summary
+     3. Publish onchain and get rewarded
+   - Include iconography for Whisper, GPT-4, IPFS, Lens, etc.
+
+3. **Live Demo or Interactive Preview**
+   - Simulate a fake podcast being summarized by AI
+   - Show toggle between raw audio, transcript, TL;DR, blog view
+   - Add "time-stamped AI chapters" as a feature tile
+
+4. **Why Blockchain?**
+   - Grid section:
+     - Onchain memory (never lose knowledge)
+     - Tokenized summaries
+     - Creator ownership
+     - AI-traceable provenance
+     - Transparent social curation
+   - Add animated Arweave, Farcaster, and Lens icons
+
+5. **User Profiles ("Knowledge Avatars")**
+   - Show fake Naval / Vitalik profile mockups
+   - Display what summaries they’ve read, liked, saved
+   - Include option to “follow their trail”
+
+6. **AI-Powered Suggestions**
+   - Explain how StreamAiX gives intelligent content recommendations
+   - Cards showing “Suggested for You”, “Your AI Agent Recommends”, “What Farcaster is Watching”
+
+7. **Monetization & Bounties**
+   - Show a “Summary Bounty Board”
+   - Add mock cards with:
+     - Title: “Summarize ETH Global Keynote – 25 $STREAM”
+     - Creator Profile, Deadline, Tip Pool
+
+8. **Social + Ecosystem**
+   - Logos and mock feeds from:
+     - Farcaster
+     - Lens
+     - Zora
+     - Mirror
+     - Optimism
+   - Animations to show social sharing
+
+9. **Footer**
+   - Links: Docs, GitHub, Discord, Farcaster, Lens
+   - Wallet connect module
+   - ENS name lookup field (mock UI)
+
+🌈 Design Notes:
+- Minimal, clean layout with neon accents
+- Use glassmorphism or frosted UI blocks
+- Floating cards or parallax effects on scroll
+- Interactivity: Hover effects, click to expand features
+- Soft shadows and smooth transitions
+- Consistent icon system (heroicons, lucide-react, or phosphor)
+
+🧠 Optional Bonuses:
+- Add animated AI brain pulsing behind the hero
+- Add “summarize a link” input at the top navbar (demo input box)
+- Responsive nav bar with sticky scroll effect
