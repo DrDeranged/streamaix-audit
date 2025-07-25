@@ -54,14 +54,19 @@ Preferred communication style: Simple, everyday language.
 ## Data Flow
 
 ### Current Implementation
-- **Static Data**: All content currently uses mock data and placeholder images
+- **Database Integration**: Full PostgreSQL database with comprehensive schema deployed
 - **State Management**: React Query for client-side state
-- **Storage Interface**: Abstract storage layer ready for database integration
-- **User Management**: Basic user schema defined but not implemented
+- **Storage Layer**: DatabaseStorage class implementing full CRUD operations
+- **User Management**: Complete user system with Web3 wallet integration support
 
 ### Database Schema
-- **Users Table**: ID, username, password (PostgreSQL with Drizzle ORM)
-- **Extensible**: Schema designed for easy expansion
+- **Users Table**: ID, username, password, email, wallet address, ENS name, avatar, bio
+- **Summaries Table**: Content transformation data with AI processing status, Web3 storage references
+- **Bounties Table**: Community-driven content creation with rewards and tip pools
+- **User Interactions Table**: Likes, bookmarks, shares, views with metadata
+- **Knowledge Stacks Table**: Curated collections of related summaries
+- **Relations**: Comprehensive foreign key relationships between all entities
+- **Database**: PostgreSQL with Drizzle ORM and Neon serverless connection
 
 ## External Dependencies
 
