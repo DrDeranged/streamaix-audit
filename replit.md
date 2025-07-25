@@ -57,7 +57,9 @@ Preferred communication style: Simple, everyday language.
 - **Database Integration**: Full PostgreSQL database with comprehensive schema deployed
 - **State Management**: React Query for client-side state
 - **Storage Layer**: DatabaseStorage class implementing full CRUD operations
-- **User Management**: Complete user system with Web3 wallet integration support
+- **User Management**: Complete user system with JWT authentication and Web3 wallet support
+- **Processing Pipeline**: Real-time stream-to-summary AI processing with status tracking
+- **Wallet Integration**: Mock wallet system with transaction history and reward distribution
 
 ### Database Schema
 - **Users Table**: ID, username, password, email, wallet address, ENS name, avatar, bio

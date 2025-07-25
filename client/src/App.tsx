@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
+import CreateSummary from "@/pages/create-summary";
+import WalletDashboard from "@/pages/wallet-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/" component={isAuthenticated ? Dashboard : Landing} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/create" component={CreateSummary} />
+      <Route path="/wallet" component={WalletDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

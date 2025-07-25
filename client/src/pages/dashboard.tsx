@@ -154,10 +154,18 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Link href="/wallet">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                <Wallet className="w-4 h-4 mr-2" />
+                Wallet
+              </Button>
+            </Link>
+            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -266,10 +274,12 @@ export default function Dashboard() {
                   <Card className="bg-white/5 border-white/10">
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="text-white text-lg">Recent Summaries</CardTitle>
-                      <Button size="sm" variant="outline" className="border-white/20 text-white">
-                        <Plus className="w-4 h-4 mr-2" />
-                        New Summary
-                      </Button>
+                      <Link href="/create">
+                        <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/20">
+                          <Plus className="w-4 h-4 mr-2" />
+                          New Summary
+                        </Button>
+                      </Link>
                     </CardHeader>
                     <CardContent>
                       {summaries.slice(0, 3).map((summary: Summary) => (
@@ -299,7 +309,7 @@ export default function Dashboard() {
                   <Card className="bg-white/5 border-white/10">
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="text-white text-lg">Recent Bounties</CardTitle>
-                      <Button size="sm" variant="outline" className="border-white/20 text-white">
+                      <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/20">
                         <Plus className="w-4 h-4 mr-2" />
                         New Bounty
                       </Button>
@@ -334,10 +344,12 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-white text-lg font-semibold">Your Summaries</h3>
-                    <Button className="bg-gradient-to-r from-blue-500 to-purple-500">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Summary
-                    </Button>
+                    <Link href="/create">
+                      <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Summary
+                      </Button>
+                    </Link>
                   </div>
                   <div className="grid gap-4">
                     {summaries.map((summary: Summary) => (

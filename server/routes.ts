@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
+import { StreamProcessor } from "./services/streamProcessor";
 import { 
   loginSchema, 
   registerSchema, 
@@ -584,6 +585,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/:id/stacks', asyncHandler(async (req: Request, res: Response) => {
     const stacks = await storage.getKnowledgeStacksByUser(req.params.id);
     res.json({ stacks });
+  }));
+
+  // =============================================================================
+  // STREAM PROCESSING ROUTES
+  // =============================================================================
+
+  // Start processing a summary
+  app.post('/api/summaries/:id/process', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const summaryId = req.params.id;
+    const summary = await storage.getSummary(summaryId);
+    
+    if (!summary) {
+      return res.status(404).json({ error: 'Summary not found' });
+    }
+    
+    if (summary.creatorId !== req.user!.id) {
+      return res.status(403).json({ error: 'Unauthorized - not your summary' });
+    }
+    
+    if (summary.processingStatus === 'processing') {
+      return res.status(400).json({ error: 'Summary is already being processed' });
+    }
+    
+    if (summary.processingStatus === 'completed') {
+      return res.status(400).json({ error: 'Summary has already been processed' });
+    }
+    
+    // Start processing in background
+    const processor = StreamProcessor.getInstance();
+    const content = {
+      url: summary.originalUrl,
+      title: summary.title,
+      contentType: summary.contentType as any,
+      platform: summary.platform,
+    };
+    
+    // Don't await - let it process in background
+    processor.processStream(summaryId, content).catch(error => {
+      console.error(`Background processing failed for summary ${summaryId}:`, error);
+    });
+    
+    res.json({
+      message: 'Processing started',
+      summaryId,
+      status: 'processing'
+    });
+  }));
+
+  // Get processing status
+  app.get('/api/summaries/:id/status', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const summaryId = req.params.id;
+    const summary = await storage.getSummary(summaryId);
+    
+    if (!summary) {
+      return res.status(404).json({ error: 'Summary not found' });
+    }
+    
+    if (summary.creatorId !== req.user!.id) {
+      return res.status(403).json({ error: 'Unauthorized - not your summary' });
+    }
+    
+    const processor = StreamProcessor.getInstance();
+    const stages = processor.getProcessingStatus(summaryId);
+    const isProcessing = processor.isProcessing(summaryId);
+    
+    res.json({
+      summaryId,
+      status: summary.processingStatus,
+      isProcessing,
+      stages,
+      currentStage: stages.length > 0 ? stages[stages.length - 1] : null
+    });
+  }));
+
+  // Mock wallet endpoints for demo
+  app.get('/api/wallet/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const balance = {
+      streamTokens: 1247.85 + Math.random() * 100,
+      usdValue: 3743.55 + Math.random() * 300,
+      change24h: (Math.random() - 0.5) * 20,
+      totalEarned: 2890.40,
+      totalSpent: 1642.55,
+      pendingRewards: 156.90,
+    };
+    
+    res.json({ balance });
+  }));
+
+  app.get('/api/wallet/transactions', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const transactions = [
+      {
+        id: Math.random().toString(36).substr(2, 9),
+        type: 'reward',
+        amount: 45.60,
+        description: 'Summary accuracy reward - "Web3 Fundamentals Explained"',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        status: 'completed',
+      },
+      {
+        id: Math.random().toString(36).substr(2, 9),
+        type: 'bounty_payment',
+        amount: -100.00,
+        description: 'Bounty created - "AI Ethics Discussion Analysis"',
+        timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+        status: 'completed',
+      },
+    ];
+    
+    res.json({ transactions });
   }));
 
   // =============================================================================

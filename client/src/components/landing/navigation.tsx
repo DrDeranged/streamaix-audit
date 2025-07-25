@@ -109,6 +109,18 @@ export function Navigation() {
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/create" className="cursor-pointer">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Create Summary
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/wallet" className="cursor-pointer">
+                        <Wallet className="mr-2 h-4 w-4" />
+                        Wallet
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="cursor-pointer">
                       <User className="mr-2 h-4 w-4" />
                       Profile
