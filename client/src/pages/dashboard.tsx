@@ -213,13 +213,13 @@ export default function Dashboard() {
             transition={{ delay: 0.2 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Bounties</p>
-                    <p className="text-2xl font-bold text-white">{stats?.bountiesCount || 0}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Bounties</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.bountiesCount || 0}</p>
                   </div>
-                  <Gift className="w-8 h-8 text-purple-400" />
+                  <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
                 </div>
               </CardContent>
             </Card>
@@ -231,13 +231,13 @@ export default function Dashboard() {
             transition={{ delay: 0.3 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Interactions</p>
-                    <p className="text-2xl font-bold text-white">{stats?.interactionsCount || 0}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Interactions</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.interactionsCount || 0}</p>
                   </div>
-                  <Heart className="w-8 h-8 text-pink-400" />
+                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-pink-400" />
                 </div>
               </CardContent>
             </Card>
@@ -249,13 +249,13 @@ export default function Dashboard() {
             transition={{ delay: 0.4 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Knowledge Stacks</p>
-                    <p className="text-2xl font-bold text-white">{stats?.stacksCount || 0}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Knowledge Stacks</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.stacksCount || 0}</p>
                   </div>
-                  <BarChart3 className="w-8 h-8 text-green-400" />
+                  <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
                 </div>
               </CardContent>
             </Card>
@@ -272,17 +272,17 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4 bg-white/10">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-white/20">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/10">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="summaries" className="data-[state=active]:bg-white/20">
+                <TabsTrigger value="summaries" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
                   Summaries
                 </TabsTrigger>
-                <TabsTrigger value="bounties" className="data-[state=active]:bg-white/20">
+                <TabsTrigger value="bounties" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
                   Bounties
                 </TabsTrigger>
-                <TabsTrigger value="activity" className="data-[state=active]:bg-white/20">
+                <TabsTrigger value="activity" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
                   Activity
                 </TabsTrigger>
               </TabsList>

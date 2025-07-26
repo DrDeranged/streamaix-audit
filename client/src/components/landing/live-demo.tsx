@@ -61,18 +61,18 @@ export function LiveDemo() {
         
         <div className="max-w-6xl mx-auto">
           {/* Demo Controls */}
-          <div className="flex justify-center mb-8">
-            <div className="glass-bg glass-border rounded-xl p-2 flex space-x-2 flex-wrap gap-2">
+          <div className="flex justify-center mb-8 px-4">
+            <div className="glass-bg glass-border rounded-xl p-2 flex space-x-1 sm:space-x-2 flex-wrap gap-1 sm:gap-2 justify-center">
               {demoViews.map((view) => (
                 <Button
                   key={view.id}
                   variant={activeView === view.id ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setActiveView(view.id)}
-                  className={activeView === view.id ? 
+                  className={`text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 ${activeView === view.id ? 
                     "bg-indigo-500 text-white" : 
                     "hover:bg-muted"
-                  }
+                  }`}
                 >
                   <view.icon className="w-4 h-4 mr-2" />
                   {view.label}
@@ -89,7 +89,7 @@ export function LiveDemo() {
             transition={{ duration: 0.3 }}
           >
             <Card className="bg-card border-glass-border shadow-xl">
-              <CardContent className="p-8">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
                 {activeView === "raw" && (
                   <div>
                     <div className="flex items-center mb-6">
