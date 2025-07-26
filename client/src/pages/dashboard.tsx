@@ -158,7 +158,15 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-2 sm:space-x-3">
             <Link href="/wallet-dashboard">
-              <Button size="sm" variant="outline" className="border-purple-400/50 bg-purple-500/20 text-white hover:bg-purple-500/30 hover:border-purple-400 text-xs sm:text-sm">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="border-purple-400/50 bg-purple-500/20 text-white hover:bg-purple-500/30 hover:border-purple-400 text-xs sm:text-sm"
+                onClick={() => {
+                  console.log('Wallet button clicked');
+                  window.location.href = '/wallet-dashboard';
+                }}
+              >
                 <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Wallet</span>
               </Button>

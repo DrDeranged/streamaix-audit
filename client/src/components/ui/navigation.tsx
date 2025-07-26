@@ -39,7 +39,15 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
             {showBackButton ? (
               <div className="flex items-center space-x-3">
                 <Link href="/dashboard">
-                  <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="text-white hover:bg-white/10"
+                    onClick={() => {
+                      console.log('Back to dashboard clicked');
+                      window.location.href = '/dashboard';
+                    }}
+                  >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Dashboard
                   </Button>
@@ -60,6 +68,10 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
                           ? "bg-white/20 hover:bg-white/30" 
                           : "hover:bg-white/10"
                       }`}
+                      onClick={() => {
+                        console.log('Navigating to:', item.path);
+                        window.location.href = item.path;
+                      }}
                     >
                       <item.icon className="w-4 h-4 mr-2" />
                       <span className="hidden sm:inline">{item.label}</span>
