@@ -22,8 +22,8 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
 
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/create", icon: Plus, label: "Create" },
-    { path: "/wallet", icon: Wallet, label: "Wallet" },
+    { path: "/create-summary", icon: Plus, label: "Create" },
+    { path: "/wallet-dashboard", icon: Wallet, label: "Wallet" },
   ];
 
   const handleLogout = () => {

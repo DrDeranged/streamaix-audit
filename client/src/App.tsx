@@ -28,8 +28,8 @@ function Router() {
       <Route path="/" component={isAuthenticated ? Dashboard : Landing} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/create" component={CreateSummary} />
-      <Route path="/wallet" component={WalletDashboard} />
+      <Route path="/create-summary" component={CreateSummary} />
+      <Route path="/wallet-dashboard" component={WalletDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
