@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamAiX Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .error { color: red; background: #ffe6e6; padding: 10px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>StreamAiX Debug Test</h1>
+    <div id="status">Loading...</div>
+    <div id="root">Root div exists</div>
+    
+    <script>
+        console.log('HTML loaded');
+        
+        // Test if CSS loads
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = './frontend-deploy/assets/index-C5g03rmn.css';
+        link.onload = () => console.log('CSS loaded successfully');
+        link.onerror = () => console.error('CSS failed to load');
+        document.head.appendChild(link);
+        
+        // Test if JS loads
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = './frontend-deploy/assets/index-CEfc8IWX.js';
+        script.onload = () => {
+            console.log('JS loaded successfully');
+            document.getElementById('status').innerHTML = '<div class="success">JS and CSS loaded - check console for React errors</div>';
+        };
+        script.onerror = (e) => {
+            console.error('JS failed to load:', e);
+            document.getElementById('status').innerHTML = '<div class="error">JS failed to load</div>';
+        };
+        document.head.appendChild(script);
+        
+        // Log any unhandled errors
+        window.addEventListener('error', (e) => {
+            console.error('Runtime error:', e.error);
+            document.getElementById('status').innerHTML += '<div class="error">Runtime error: ' + e.message + '</div>';
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            document.getElementById('status').innerHTML += '<div class="error">Promise rejection: ' + e.reason + '</div>';
+        });
+    </script>
+</body>
+</html>
