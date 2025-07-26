@@ -27,9 +27,15 @@ function Router() {
     <Switch>
       <Route path="/" component={isAuthenticated ? Dashboard : Landing} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/create-summary" component={CreateSummary} />
-      <Route path="/wallet-dashboard" component={WalletDashboard} />
+      <Route path="/dashboard">
+        {isAuthenticated ? <Dashboard /> : <Landing />}
+      </Route>
+      <Route path="/create-summary">
+        {isAuthenticated ? <CreateSummary /> : <Landing />}
+      </Route>
+      <Route path="/wallet-dashboard">
+        {isAuthenticated ? <WalletDashboard /> : <Landing />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
