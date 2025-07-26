@@ -24,6 +24,7 @@ import {
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import { getAuthHeaders } from '@/lib/auth';
+import { Navigation } from '@/components/ui/navigation';
 
 interface Summary {
   id: string;
@@ -133,6 +134,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navigation />
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">

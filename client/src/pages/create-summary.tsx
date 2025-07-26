@@ -26,6 +26,7 @@ import {
 import { motion } from 'framer-motion';
 import { apiRequest } from '@/lib/queryClient';
 import { getAuthHeaders } from '@/lib/auth';
+import { Navigation } from '@/components/ui/navigation';
 
 interface ProcessingStatus {
   stage: 'uploading' | 'extracting' | 'transcribing' | 'summarizing' | 'storing' | 'completed' | 'failed';
@@ -207,8 +208,10 @@ export default function CreateSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8">
-      <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navigation showBackButton title="Create Summary" />
+      <div className="py-4 sm:py-8">
+        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">Create AI Summary</h1>
@@ -533,6 +536,7 @@ export default function CreateSummary() {
               </CardContent>
             </Card>
           </div>
+        </div>
         </div>
       </div>
     </div>

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getAuthHeaders } from '@/lib/auth';
+import { Navigation } from '@/components/ui/navigation';
 
 interface WalletBalance {
   streamTokens: number;
@@ -200,8 +201,10 @@ export default function WalletDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8">
-      <div className="container mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navigation showBackButton title="Wallet Dashboard" />
+      <div className="py-4 sm:py-8">
+        <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
@@ -266,16 +269,16 @@ export default function WalletDashboard() {
             transition={{ delay: 0.2 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-slate-400 text-sm">Total Earned</span>
-                  <Award className="w-5 h-5 text-green-400" />
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                  <span className="text-slate-400 text-xs sm:text-sm">Total Earned</span>
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-green-400">
+                  <p className="text-lg sm:text-2xl font-bold text-green-400">
                     {walletBalance?.totalEarned.toFixed(2)}
                   </p>
-                  <p className="text-slate-400 text-sm">STREAM tokens</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">STREAM tokens</p>
                 </div>
               </CardContent>
             </Card>
@@ -287,16 +290,16 @@ export default function WalletDashboard() {
             transition={{ delay: 0.3 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-slate-400 text-sm">Pending Rewards</span>
-                  <Clock className="w-5 h-5 text-yellow-400" />
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                  <span className="text-slate-400 text-xs sm:text-sm">Pending Rewards</span>
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-yellow-400">
+                  <p className="text-lg sm:text-2xl font-bold text-yellow-400">
                     {walletBalance?.pendingRewards.toFixed(2)}
                   </p>
-                  <p className="text-slate-400 text-sm">Being processed</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">Being processed</p>
                 </div>
               </CardContent>
             </Card>
@@ -308,16 +311,16 @@ export default function WalletDashboard() {
             transition={{ delay: 0.4 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-slate-400 text-sm">Total Spent</span>
-                  <DollarSign className="w-5 h-5 text-orange-400" />
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                  <span className="text-slate-400 text-xs sm:text-sm">Total Spent</span>
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-orange-400">
+                  <p className="text-lg sm:text-2xl font-bold text-orange-400">
                     {walletBalance?.totalSpent.toFixed(2)}
                   </p>
-                  <p className="text-slate-400 text-sm">STREAM tokens</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">STREAM tokens</p>
                 </div>
               </CardContent>
             </Card>
@@ -544,6 +547,7 @@ export default function WalletDashboard() {
             </Tabs>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
