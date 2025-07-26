@@ -119,7 +119,13 @@ The application is currently in the MVP stage with a complete landing page showc
 
 ## Recent Updates
 
-### Mobile Optimization (Latest)
+### Contact Integration (Latest)
+- Added founder email (arslandin.founder@streamaix.com) to footer contact section
+- Linked "Join Waitlist" button to email with pre-filled subject and message
+- Connected partnership inquiries to founder email for business opportunities
+- Enhanced footer with comprehensive contact information and mailto links
+
+### Mobile Optimization
 - Fully responsive design across all pages and components
 - Optimized navigation and hero section for mobile devices
 - Enhanced dashboard layouts with mobile-friendly spacing and typography

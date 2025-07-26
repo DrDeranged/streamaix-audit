@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wallet, Search, Github, Twitter, MessageCircle, Users } from "lucide-react";
+import { Wallet, Search, Github, Twitter, MessageCircle, Users, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function Footer() {
@@ -21,7 +21,7 @@ export function Footer() {
       </div>
       
       <div className="container mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid lg:grid-cols-5 gap-8 mb-12">
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <motion.div
@@ -88,6 +88,35 @@ export function Footer() {
               <li><a href="#" className="hover:text-indigo-400 transition-colors">Farcaster</a></li>
               <li><a href="#" className="hover:text-indigo-400 transition-colors">Lens Protocol</a></li>
               <li><a href="#" className="hover:text-indigo-400 transition-colors">Twitter</a></li>
+            </ul>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-lg font-semibold mb-4">Contact</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li>
+                <a 
+                  href="mailto:arslandin.founder@streamaix.com" 
+                  className="hover:text-indigo-400 transition-colors flex items-center"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  arslandin.founder@streamaix.com
+                </a>
+              </li>
+              <li><a href="#" className="hover:text-indigo-400 transition-colors">Support Center</a></li>
+              <li>
+                <a 
+                  href="mailto:arslandin.founder@streamaix.com?subject=Partnership Inquiry&body=Hi! I'm interested in exploring partnership opportunities with StreamAiX." 
+                  className="hover:text-indigo-400 transition-colors"
+                >
+                  Partnership
+                </a>
+              </li>
             </ul>
           </motion.div>
         </div>

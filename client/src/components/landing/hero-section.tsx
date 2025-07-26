@@ -84,6 +84,7 @@ export function HeroSection() {
             <Button 
               size="lg"
               variant="outline"
+              onClick={() => window.location.href = 'mailto:arslandin.founder@streamaix.com?subject=StreamAiX Waitlist&body=Hi! I would like to join the StreamAiX waitlist.'}
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base glass-bg glass-border hover:bg-muted transform hover:scale-105 transition-all duration-300"
             >
               <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
