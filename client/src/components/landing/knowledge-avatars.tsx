@@ -8,7 +8,7 @@ export function KnowledgeAvatars() {
     {
       name: "Naval Ravikant",
       handle: "@naval.eth",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+      avatar: "/src/assets/naval-image.png",
       gradient: "from-indigo-500 to-purple-600",
       stats: { summaries: 247, liked: "1.2k", saved: 89 },
       activities: [
@@ -20,7 +20,7 @@ export function KnowledgeAvatars() {
     {
       name: "Vitalik Buterin",
       handle: "@vitalik.lens",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+      avatar: "/src/assets/vitalik-image.png",
       gradient: "from-purple-500 to-cyan-500",
       stats: { summaries: 156, liked: "2.1k", saved: 203 },
       activities: [
@@ -65,7 +65,7 @@ export function KnowledgeAvatars() {
                     <img 
                       src={profile.avatar} 
                       alt={`${profile.name} avatar`} 
-                      className="w-16 h-16 rounded-full border-4 border-card"
+                      className="w-16 h-16 rounded-full border-4 border-card object-cover"
                     />
                   </div>
                 </div>

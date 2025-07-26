@@ -245,9 +245,9 @@ export function LiveDemo() {
                       <div className="flex space-x-4 p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
                         <div className="flex-shrink-0">
                           <img 
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
+                            src="/src/assets/naval-image.png" 
                             alt="Naval" 
-                            className="w-8 h-8 rounded-full"
+                            className="w-8 h-8 rounded-full object-cover"
                           />
                         </div>
                         <div className="flex-1">
@@ -267,9 +267,9 @@ export function LiveDemo() {
                       <div className="flex space-x-4 p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
                         <div className="flex-shrink-0">
                           <img 
-                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
+                            src="/src/assets/vitalik-image.png" 
                             alt="Vitalik" 
-                            className="w-8 h-8 rounded-full"
+                            className="w-8 h-8 rounded-full object-cover"
                           />
                         </div>
                         <div className="flex-1">
@@ -289,9 +289,9 @@ export function LiveDemo() {
                       <div className="flex space-x-4 p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
                         <div className="flex-shrink-0">
                           <img 
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
+                            src="/src/assets/naval-image.png" 
                             alt="Naval" 
-                            className="w-8 h-8 rounded-full"
+                            className="w-8 h-8 rounded-full object-cover"
                           />
                         </div>
                         <div className="flex-1">

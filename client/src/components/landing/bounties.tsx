@@ -7,7 +7,7 @@ export function Bounties() {
     {
       creator: {
         name: "@naval.eth",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+        avatar: "/src/assets/naval-image.png",
         postedTime: "2h ago"
       },
       title: "Summarize ETH Global Keynote",
@@ -23,7 +23,7 @@ export function Bounties() {
     {
       creator: {
         name: "@vitalik.lens",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+        avatar: "/src/assets/vitalik-image.png",
         postedTime: "5h ago"
       },
       title: "AI Safety Research Panel",
@@ -39,7 +39,7 @@ export function Bounties() {
     {
       creator: {
         name: "@balajis.eth",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+        avatar: "/src/assets/naval-image.png",
         postedTime: "1d ago"
       },
       title: "DeFi Protocols Deep Dive",
