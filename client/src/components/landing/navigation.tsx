@@ -110,13 +110,13 @@ export function Navigation() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/create" className="cursor-pointer">
+                      <Link href="/create-summary" className="cursor-pointer">
                         <Sparkles className="mr-2 h-4 w-4" />
                         Create Summary
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/wallet" className="cursor-pointer">
+                      <Link href="/wallet-dashboard" className="cursor-pointer">
                         <Wallet className="mr-2 h-4 w-4" />
                         Wallet
                       </Link>
