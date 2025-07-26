@@ -56,20 +56,13 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl md:text-6xl font-orbitron font-bold mb-6 leading-tight">
-            <span className="block mb-2">
-              <span className="text-white/80">Stream the </span>
-              <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent line-through decoration-2 decoration-purple-500/50">
-                  Noise
-                </span>
-              </span>
+          <h1 className="text-5xl md:text-7xl font-orbitron font-light mb-6 tracking-tight leading-none">
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
+              Stream the Noise.
             </span>
-            <span className="block">
-              <span className="text-white/80">Capture the </span>
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-cyan-500 bg-clip-text text-transparent font-black">
-                Signal
-              </span>
+            <br />
+            <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent font-bold">
+              Capture the Signal.
             </span>
           </h1>
           
