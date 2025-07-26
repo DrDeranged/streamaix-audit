@@ -221,7 +221,7 @@ export default function WalletDashboard() {
               <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Deposit</span>
             </Button>
-            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm">
+            <Button size="sm" variant="outline" className="border-red-400/50 bg-red-500/20 text-white hover:bg-red-500/30 hover:border-red-400 text-xs sm:text-sm">
               <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Withdraw</span>
             </Button>
@@ -534,7 +534,7 @@ export default function WalletDashboard() {
                           </div>
                           
                           <div className="flex justify-end mt-4">
-                            <Button size="sm" variant="outline" className="border-white/20 text-white">
+                            <Button size="sm" variant="outline" className="border-blue-400/50 bg-blue-500/20 text-white hover:bg-blue-500/30 hover:border-blue-400">
                               View Details
                             </Button>
                           </div>

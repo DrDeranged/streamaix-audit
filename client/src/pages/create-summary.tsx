@@ -375,7 +375,7 @@ export default function CreateSummary() {
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                         className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
                       />
-                      <Button type="button" onClick={addTag} variant="outline" className="border-white/20 text-white">
+                      <Button type="button" onClick={addTag} variant="outline" className="border-blue-400/50 bg-blue-500/20 text-white hover:bg-blue-500/30 hover:border-blue-400">
                         Add
                       </Button>
                     </div>

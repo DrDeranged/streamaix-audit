@@ -157,13 +157,13 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <Link href="/wallet">
-              <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm">
+            <Link href="/wallet-dashboard">
+              <Button size="sm" variant="outline" className="border-purple-400/50 bg-purple-500/20 text-white hover:bg-purple-500/30 hover:border-purple-400 text-xs sm:text-sm">
                 <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Wallet</span>
               </Button>
             </Link>
-            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm">
+            <Button size="sm" variant="outline" className="border-slate-400/50 bg-slate-500/20 text-white hover:bg-slate-500/30 hover:border-slate-400 text-xs sm:text-sm">
               <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Settings</span>
             </Button>
