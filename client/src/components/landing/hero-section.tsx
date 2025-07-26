@@ -56,57 +56,22 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="relative mb-12 max-w-2xl mx-auto">
-            {/* Minimalistic tagline with creative typography */}
-            <div className="text-center relative">
-              {/* Background subtle grid pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="w-full h-full" style={{
-                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
-                  backgroundSize: '20px 20px'
-                }}></div>
-              </div>
-              
-              <h1 className="relative text-3xl md:text-4xl font-mono tracking-wider leading-relaxed">
-                {/* First line with striking visual contrast */}
-                <div className="mb-4 flex items-center justify-center gap-3">
-                  <span className="text-slate-400/70 font-light text-lg">Stream the</span>
-                  <span className="relative">
-                    <span className="text-red-400 font-semibold line-through decoration-2 decoration-red-500/60 decoration-wavy">
-                      Noise
-                    </span>
-                    {/* Subtle X mark overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-4 h-0.5 bg-red-500 rotate-45 opacity-30"></div>
-                      <div className="w-4 h-0.5 bg-red-500 -rotate-45 opacity-30 absolute"></div>
-                    </div>
-                  </span>
-                </div>
-                
-                {/* Second line with emphasis */}
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-slate-400/70 font-light text-lg">Capture the</span>
-                  <span className="relative group">
-                    <span className="text-cyan-300 font-semibold tracking-tight">
-                      Signal
-                    </span>
-                    {/* Animated underline */}
-                    <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-indigo-400 group-hover:w-full transition-all duration-700 ease-out"></div>
-                    {/* Subtle glow effect */}
-                    <div className="absolute inset-0 text-cyan-300 font-semibold tracking-tight opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-500">
-                      Signal
-                    </div>
-                  </span>
-                </div>
-              </h1>
-              
-              {/* Minimalistic accent elements */}
-              <div className="absolute -top-6 left-1/4 w-1 h-1 bg-red-400/40 rounded-full animate-pulse"></div>
-              <div className="absolute -bottom-6 right-1/3 w-0.5 h-0.5 bg-cyan-400/60 rounded-full"></div>
-              <div className="absolute top-1/2 -left-8 w-0.5 h-4 bg-gradient-to-b from-transparent to-indigo-400/20"></div>
-              <div className="absolute top-1/2 -right-8 w-0.5 h-4 bg-gradient-to-t from-transparent to-purple-400/20"></div>
-            </div>
-          </div>
+          <h1 className="text-4xl md:text-6xl font-orbitron font-bold mb-6 leading-tight">
+            <span className="block mb-2">
+              <span className="text-white/80">Stream the </span>
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent line-through decoration-2 decoration-purple-500/50">
+                  Noise
+                </span>
+              </span>
+            </span>
+            <span className="block">
+              <span className="text-white/80">Capture the </span>
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-cyan-500 bg-clip-text text-transparent font-black">
+                Signal
+              </span>
+            </span>
+          </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
             AI + Web3 platform that transforms long videos into rich, summarized blog posts.
