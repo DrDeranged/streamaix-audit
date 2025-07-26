@@ -37,6 +37,19 @@ export const removeAuthToken = () => {
   localStorage.removeItem('auth_token');
 };
 
+export const disconnectWallet = async () => {
+  const response = await apiRequest('/api/auth/disconnect-wallet', {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  return response;
+};
+
+export const clearAllUserData = () => {
+  localStorage.clear();
+  sessionStorage.clear();
+};
+
 // Auth API functions
 export const authApi = {
   login: async (username: string, password: string) => {
@@ -104,6 +117,14 @@ export const authApi = {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(updates),
+    });
+    return response;
+  },
+
+  disconnectWallet: async () => {
+    const response = await apiRequest('/api/auth/disconnect-wallet', {
+      method: 'POST',
+      headers: getAuthHeaders(),
     });
     return response;
   },

@@ -171,9 +171,18 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">Wallet</span>
               </Button>
             </Link>
-            <Button size="sm" variant="outline" className="border-slate-400/50 bg-slate-500/20 text-white hover:bg-slate-500/30 hover:border-slate-400 text-xs sm:text-sm">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="border-slate-400/50 bg-slate-500/20 text-white hover:bg-slate-500/30 hover:border-slate-400 text-xs sm:text-sm"
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/dashboard';
+              }}
+            >
               <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Settings</span>
+              <span className="hidden sm:inline">Clear Data</span>
             </Button>
           </div>
         </div>

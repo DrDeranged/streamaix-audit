@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3 } from "lucide-react";
+import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3, Wallet } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";

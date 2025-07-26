@@ -154,3 +154,49 @@ export function useLogout() {
     },
   });
 }
+
+export function useDisconnectWallet() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: () => authApi.disconnectWallet(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      toast({
+        title: 'Wallet disconnected',
+        description: 'Your wallet has been successfully disconnected.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Disconnect failed',
+        description: error.message || 'Failed to disconnect wallet',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+export function useClearBrowserData() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      toast({
+        title: 'Browser data cleared',
+        description: 'All browser data has been cleared. Redirecting...',
+      });
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+    },
+  });
+}
