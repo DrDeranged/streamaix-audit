@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Brain, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import quantumImage from "@assets/image_1753489943045.png";
 
 export function AISuggestions() {
   const suggestions = [
@@ -35,7 +36,7 @@ export function AISuggestions() {
       color: "text-purple-400",
       items: [
         {
-          image: "@assets/image_1753489943045.png",
+          image: quantumImage,
           title: "Quantum Computing Breakthrough",
           duration: "32-min summary",
           source: "IBM Research",
