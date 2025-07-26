@@ -56,7 +56,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl md:text-7xl font-orbitron font-light mb-6 tracking-tight leading-none">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-orbitron font-light mb-6 tracking-tight leading-none">
             <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
               Stream the Noise.
             </span>
@@ -66,48 +66,48 @@ export function HeroSection() {
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
             AI + Web3 platform that transforms long videos into rich, summarized blog posts.
             <span className="text-indigo-500 font-semibold"> Decentralized. Monetizable. Ownable.</span>
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 px-4">
             <Button 
               size="lg"
               onClick={scrollToDemo}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 animate-pulse-glow"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 animate-pulse-glow"
             >
-              <Play className="w-5 h-5 mr-2" />
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Try the Demo
             </Button>
             
             <Button 
               size="lg"
               variant="outline"
-              className="px-8 py-4 glass-bg glass-border hover:bg-muted transform hover:scale-105 transition-all duration-300"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base glass-bg glass-border hover:bg-muted transform hover:scale-105 transition-all duration-300"
             >
-              <Mail className="w-5 h-5 mr-2" />
+              <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Join Waitlist
             </Button>
           </div>
           
           {/* Tech stack indicators */}
-          <div className="flex justify-center items-center space-x-8 opacity-60 flex-wrap gap-4">
-            <div className="flex items-center space-x-2">
-              <Brain className="w-5 h-5 text-indigo-400" />
-              <span className="text-sm">GPT-4</span>
+          <div className="flex justify-center items-center space-x-4 sm:space-x-6 md:space-x-8 opacity-60 flex-wrap gap-2 sm:gap-4 px-4">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+              <span className="text-xs sm:text-sm">GPT-4</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Link2 className="w-5 h-5 text-purple-400" />
-              <span className="text-sm">IPFS</span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+              <span className="text-xs sm:text-sm">IPFS</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Shield className="w-5 h-5 text-cyan-400" />
-              <span className="text-sm">Arweave</span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+              <span className="text-xs sm:text-sm">Arweave</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5 text-green-400" />
-              <span className="text-sm">Lens Protocol</span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+              <span className="text-xs sm:text-sm">Lens</span>
             </div>
           </div>
         </motion.div>

@@ -200,49 +200,49 @@ export default function WalletDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500">
-              <Wallet className="w-8 h-8 text-white" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="p-2 sm:p-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500">
+              <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Wallet Dashboard</h1>
-              <p className="text-slate-300">Manage your STREAM tokens and rewards</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Wallet Dashboard</h1>
+              <p className="text-slate-300 text-sm sm:text-base">Manage your STREAM tokens and rewards</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
-              <ArrowDownLeft className="w-4 h-4 mr-2" />
-              Deposit
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <Button size="sm" className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-xs sm:text-sm">
+              <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Deposit</span>
             </Button>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-              <ArrowUpRight className="w-4 h-4 mr-2" />
-              Withdraw
+            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm">
+              <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Withdraw</span>
             </Button>
           </div>
         </div>
 
         {/* Balance Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-slate-400 text-sm">Total Balance</span>
-                  <Coins className="w-5 h-5 text-yellow-400" />
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                  <span className="text-slate-400 text-xs sm:text-sm">Total Balance</span>
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-lg sm:text-2xl font-bold text-white">
                     {walletBalance?.streamTokens.toFixed(2)} STREAM
                   </p>
-                  <p className="text-slate-300 text-sm">
+                  <p className="text-slate-300 text-xs sm:text-sm">
                     ${walletBalance?.usdValue.toFixed(2)} USD
                   </p>
                   <div className="flex items-center space-x-1">

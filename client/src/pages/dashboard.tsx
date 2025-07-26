@@ -133,56 +133,56 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Avatar className="w-16 h-16 border-2 border-purple-400">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <Avatar className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-purple-400">
               <AvatarImage src={user.avatar} />
-              <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-lg">
+              <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm sm:text-lg">
                 {user.username.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold text-white">{user.username}</h1>
-              {user.bio && <p className="text-slate-300">{user.bio}</p>}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{user.username}</h1>
+              {user.bio && <p className="text-slate-300 text-sm sm:text-base">{user.bio}</p>}
               {user.walletAddress && (
-                <div className="flex items-center mt-2 text-sm text-slate-400">
-                  <Wallet className="w-4 h-4 mr-2" />
+                <div className="flex items-center mt-1 sm:mt-2 text-xs sm:text-sm text-slate-400">
+                  <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   {user.ensName || `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`}
                 </div>
               )}
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <Link href="/wallet">
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                <Wallet className="w-4 h-4 mr-2" />
-                Wallet
+              <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm">
+                <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Wallet</span>
               </Button>
             </Link>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm">
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Settings</span>
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Summaries</p>
-                    <p className="text-2xl font-bold text-white">{stats?.summariesCount || 0}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Summaries</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.summariesCount || 0}</p>
                   </div>
-                  <FileText className="w-8 h-8 text-blue-400" />
+                  <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
                 </div>
               </CardContent>
             </Card>

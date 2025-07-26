@@ -207,12 +207,12 @@ export default function CreateSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Create AI Summary</h1>
-          <p className="text-slate-300 text-lg">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">Create AI Summary</h1>
+          <p className="text-slate-300 text-sm sm:text-base lg:text-lg">
             Transform long-form content into digestible, ownable knowledge assets
           </p>
         </div>
@@ -250,7 +250,7 @@ export default function CreateSummary() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2">
             <Card className="backdrop-blur-lg bg-white/10 border-white/20">

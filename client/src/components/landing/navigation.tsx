@@ -34,32 +34,32 @@ export function Navigation() {
 
   return (
     <nav className="fixed top-0 w-full z-50 glass-bg border-b glass-border transition-all duration-300">
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="font-orbitron font-bold text-2xl bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
               StreamAiX
             </div>
             
             {/* Demo summarize input - hidden on mobile */}
-            <div className="hidden lg:flex items-center space-x-2 ml-8">
+            <div className="hidden lg:flex items-center space-x-2 ml-4 xl:ml-8">
               <div className="relative">
                 <Input 
                   type="text" 
                   placeholder="Paste a video URL to summarize..." 
-                  className="w-80 glass-bg glass-border focus:ring-2 focus:ring-indigo-500"
+                  className="w-64 xl:w-80 glass-bg glass-border focus:ring-2 focus:ring-indigo-500 text-sm"
                 />
                 <Sparkles className="absolute right-3 top-2.5 w-4 h-4 text-indigo-400" />
               </div>
-              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+              <Button size="sm" className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
                 Summarize
               </Button>
             </div>
           </div>
           
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-3 sm:space-x-6">
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
               <button 
                 onClick={() => scrollToSection("demo")}
                 className="text-muted-foreground hover:text-indigo-500 transition-colors"
