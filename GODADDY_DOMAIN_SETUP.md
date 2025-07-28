@@ -1,91 +1,108 @@
-# Connecting StreamAiX to GoDaddy Domain
+# Connect Your Domain to StreamAiX (GoDaddy + Vercel)
 
-## Step-by-Step Domain Connection Process
+## IMPORTANT: Do These Steps in Exact Order
 
-### 1. Deploy to Vercel First
-- Extract `streamaix-IMAGES-FIXED.tar.gz`
-- Upload to GitHub repository
-- Import to Vercel and deploy
-- Note your Vercel deployment URL (e.g., `streamaix-abc123.vercel.app`)
+### STEP 1: Deploy to Vercel First
+1. **Upload your files to GitHub**:
+   - Create new repository on GitHub
+   - Upload contents of `streamaix-IMAGES-FIXED.tar.gz`
+   - Make sure all files are in the root directory
 
-### 2. GoDaddy DNS Configuration
+2. **Connect to Vercel**:
+   - Go to vercel.com and sign up/login
+   - Click "Import Project" 
+   - Select your GitHub repository
+   - **Framework Preset**: Select "Other" (leave blank)
+   - **Build Command**: Leave empty
+   - **Output Directory**: Leave empty
+   - Click "Deploy"
 
-#### A. Log into GoDaddy
-1. Go to godaddy.com and sign in
-2. Navigate to "My Products" → "DNS"
-3. Find your domain and click "Manage"
+3. **Get your Vercel URL**:
+   - After deployment, copy the URL (like `yourproject-abc123.vercel.app`)
+   - Test that your site works on this URL first
 
-#### B. Update DNS Records
-**Delete existing records** (if any):
-- Remove any existing A records
-- Remove any existing CNAME records for @ and www
+### STEP 2: Configure GoDaddy DNS (EXACT STEPS)
 
-**Add new CNAME records**:
-1. **Record 1 (Root domain)**:
-   - Type: CNAME
-   - Name: @
-   - Value: cname.vercel-dns.com
-   - TTL: 3600 (1 hour)
+1. **Login to GoDaddy**:
+   - Go to godaddy.com → Sign in
+   - Click "My Products" 
+   - Find your domain → Click "DNS"
 
-2. **Record 2 (WWW subdomain)**:
-   - Type: CNAME
-   - Name: www
-   - Value: cname.vercel-dns.com
-   - TTL: 3600 (1 hour)
+2. **Delete ALL existing records**:
+   - Look for any A records pointing to @ or www
+   - Look for any CNAME records for @ or www  
+   - Delete them all (click trash icon)
 
-### 3. Vercel Domain Configuration
+3. **Add exactly these 2 records**:
 
-#### A. Add Domain in Vercel
-1. Go to your Vercel project dashboard
-2. Click "Settings" → "Domains"
-3. Add your domain (e.g., `yourdomain.com`)
-4. Add www version (e.g., `www.yourdomain.com`)
+   **Record #1**:
+   - Type: `CNAME`
+   - Name: `@` (exactly the @ symbol)
+   - Value: `cname.vercel-dns.com` (copy this exactly)
+   - TTL: `600` (10 minutes)
 
-#### B. Verification
-- Vercel will automatically verify domain ownership
-- This may take 5-30 minutes for DNS propagation
-- You'll see a green checkmark when successful
+   **Record #2**:
+   - Type: `CNAME` 
+   - Name: `www`
+   - Value: `cname.vercel-dns.com` (same as above)
+   - TTL: `600` (10 minutes)
 
-### 4. SSL Certificate
-- Vercel automatically provides SSL certificates
-- No additional configuration needed
-- Your site will be accessible via https://yourdomain.com
+4. **Save changes** and wait 10 minutes
 
-### 5. Redirect Configuration (Optional)
-Add this to your `vercel.json` for www → non-www redirect:
-```json
-{
-  "redirects": [
-    {
-      "source": "https://www.yourdomain.com/:path*",
-      "destination": "https://yourdomain.com/:path*",
-      "permanent": true
-    }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
-}
-```
+### STEP 3: Add Domain in Vercel
 
-## Troubleshooting
+1. **Go to your Vercel project**:
+   - Dashboard → Select your project
+   - Click "Settings" tab
+   - Click "Domains" in sidebar
 
-### Common Issues:
-1. **DNS Propagation Delay**: Can take up to 48 hours globally
-2. **Cache Issues**: Clear browser cache or try incognito mode
-3. **Wrong DNS Records**: Double-check CNAME values
+2. **Add your domain**:
+   - Click "Add" button
+   - Type your domain: `yourdomain.com` (without www)
+   - Click "Add"
 
-### Verification Commands:
-```bash
-# Check DNS propagation
-nslookup yourdomain.com
+3. **Add www version**:
+   - Click "Add" again  
+   - Type: `www.yourdomain.com`
+   - Click "Add"
 
-# Check CNAME records
-dig CNAME yourdomain.com
-```
+4. **Wait for verification**:
+   - You'll see "Pending" status
+   - Should turn green within 30 minutes
+   - If it stays red, check your DNS settings
 
-## Expected Timeline:
-- DNS updates: 5-30 minutes
-- Global propagation: Up to 48 hours
-- SSL certificate: Automatic within minutes
+### STEP 4: Test Your Domain
 
-Your StreamAiX landing page will be live on your custom domain with professional SSL encryption.
+1. **Wait 30 minutes** after DNS changes
+2. **Test these URLs**:
+   - `http://yourdomain.com`
+   - `https://yourdomain.com` 
+   - `https://www.yourdomain.com`
+3. **All should show your StreamAiX site**
+
+## If Something Goes Wrong
+
+### DNS Not Working?
+- **Check**: DNS records are exactly `cname.vercel-dns.com`
+- **Wait**: Up to 2 hours for global updates
+- **Clear**: Browser cache or use incognito mode
+
+### Vercel Shows Red X?
+- **Double-check**: Domain spelling in Vercel matches your actual domain
+- **Verify**: DNS records are saved in GoDaddy
+- **Wait**: 30 minutes then refresh Vercel page
+
+### Still Not Working?
+1. Go to whatsmydns.net
+2. Enter your domain
+3. Select "CNAME" from dropdown
+4. Check if it shows `cname.vercel-dns.com` globally
+
+## What You Get
+- Your StreamAiX site on your custom domain
+- Automatic SSL certificate (https://)
+- Professional landing page with all images working
+- Mobile responsive design
+- Fast global delivery
+
+**Total setup time: 30 minutes to 2 hours depending on DNS propagation**
