@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamAiX Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container { max-width: 800px; margin: 0 auto; text-align: center; }
+        .status { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .hero { font-size: 3em; margin: 40px 0; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 40px 0; }
+        .feature { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="hero">StreamAiX</h1>
+        <p>Stream the Noise. Capture the Signal.</p>
+        
+        <div class="status">
+            <h2>🚀 Deployment Test Successful</h2>
+            <p>If you can see this page, the deployment is working correctly.</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🤖 AI Processing</h3>
+                <p>Transform long-form content into digestible summaries</p>
+            </div>
+            <div class="feature">
+                <h3>🔗 Web3 Integration</h3>
+                <p>Decentralized storage and ownership</p>
+            </div>
+            <div class="feature">
+                <h3>💰 Monetization</h3>
+                <p>Turn knowledge into valuable assets</p>
+            </div>
+        </div>
+
+        <div class="status">
+            <h3>Next Steps:</h3>
+            <p>This is a working deployment. The React app can be added as the next phase.</p>
+            <button onclick="alert('Contact: arslandin.founder@streamaix.com')" 
+                    style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                Contact Founder
+            </button>
+        </div>
+    </div>
+
+    <script>
+        console.log('✅ Static deployment working');
+        console.log('🔍 This confirms the deployment infrastructure is functional');
+        
+        // Test if we can load external resources
+        fetch('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap')
+            .then(() => console.log('✅ External fonts loading'))
+            .catch(() => console.log('❌ External fonts blocked'));
+    </script>
+</body>
+</html>
