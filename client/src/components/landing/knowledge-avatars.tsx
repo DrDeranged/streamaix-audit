@@ -2,13 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, Heart, Share2, Plus, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import navalAvatar from "@/assets/naval-avatar.svg";
+import vitalikAvatar from "@/assets/vitalik-avatar.svg";
 
 export function KnowledgeAvatars() {
   const profiles = [
     {
       name: "Naval Ravikant",
       handle: "@naval.eth",
-      avatar: "/src/assets/naval-image.png",
+      avatar: navalAvatar,
       gradient: "from-indigo-500 to-purple-600",
       stats: { summaries: 247, liked: "1.2k", saved: 89 },
       activities: [
@@ -20,7 +22,7 @@ export function KnowledgeAvatars() {
     {
       name: "Vitalik Buterin",
       handle: "@vitalik.lens",
-      avatar: "/src/assets/vitalik-image.png",
+      avatar: vitalikAvatar,
       gradient: "from-purple-500 to-cyan-500",
       stats: { summaries: 156, liked: "2.1k", saved: 203 },
       activities: [

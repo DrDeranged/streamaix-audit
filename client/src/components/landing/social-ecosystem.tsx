@@ -1,5 +1,7 @@
 import { MessageCircle, Users, Image, Edit3, Zap, Share2, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import navalAvatar from "@/assets/naval-avatar.svg";
+import vitalikAvatar from "@/assets/vitalik-avatar.svg";
 
 export function SocialEcosystem() {
   const platforms = [
@@ -13,14 +15,14 @@ export function SocialEcosystem() {
   const farcasterFeed = [
     {
       user: "naval.eth",
-      avatar: "/src/assets/naval-image.png",
+      avatar: navalAvatar,
       time: "2h",
       content: "Just shared a StreamAiX summary of the latest AI alignment research. The insights are 🔥",
       engagement: { shares: 23, likes: 89, replies: 12 }
     },
     {
       user: "vitalik.lens",
-      avatar: "/src/assets/vitalik-image.png",
+      avatar: vitalikAvatar,
       time: "4h",
       content: "The decentralized summarization model on StreamAiX is fascinating. AI + blockchain provenance = the future of knowledge curation",
       engagement: { shares: 156, likes: 342, replies: 67 }
@@ -30,7 +32,7 @@ export function SocialEcosystem() {
   const lensFeed = [
     {
       user: "aave.lens",
-      avatar: "/src/assets/naval-image.png",
+      avatar: navalAvatar,
       time: "1h",
       content: "Minted a new knowledge NFT from my DeFi deep-dive summary 📚✨ Ownership meets wisdom on StreamAiX",
       summary: "\"DeFi 2.0 Architecture Patterns\" - 28 min summary",
@@ -38,7 +40,7 @@ export function SocialEcosystem() {
     },
     {
       user: "polygon.lens",
-      avatar: "/src/assets/vitalik-image.png",
+      avatar: vitalikAvatar,
       time: "3h",
       content: "The AI-generated chapter timestamps on StreamAiX are incredibly accurate. Makes navigating long-form content so much easier 🚀",
       engagement: { mirrors: 78, collects: 12, comments: 31 }

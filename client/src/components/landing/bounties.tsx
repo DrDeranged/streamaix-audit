@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import navalAvatar from "@/assets/naval-avatar.svg";
+import vitalikAvatar from "@/assets/vitalik-avatar.svg";
+import lexAvatar from "@/assets/lex-avatar.svg";
 
 export function Bounties() {
   const bounties = [
     {
       creator: {
         name: "@naval.eth",
-        avatar: "/src/assets/naval-image.png",
+        avatar: navalAvatar,
         postedTime: "2h ago"
       },
       title: "Summarize ETH Global Keynote",
@@ -23,7 +26,7 @@ export function Bounties() {
     {
       creator: {
         name: "@vitalik.lens",
-        avatar: "/src/assets/vitalik-image.png",
+        avatar: vitalikAvatar,
         postedTime: "5h ago"
       },
       title: "AI Safety Research Panel",
@@ -39,7 +42,7 @@ export function Bounties() {
     {
       creator: {
         name: "@balajis.eth",
-        avatar: "/src/assets/naval-image.png",
+        avatar: lexAvatar,
         postedTime: "1d ago"
       },
       title: "DeFi Protocols Deep Dive",
