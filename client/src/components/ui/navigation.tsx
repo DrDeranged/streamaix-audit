@@ -7,6 +7,7 @@ import {
   Shield,
   PieChart,
   Image,
+  Users,
   User, 
   LogOut,
   ArrowLeft 
@@ -28,6 +29,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
     { path: "/create-summary", icon: Plus, label: "Create" },
     { path: "/defi-dashboard", icon: PieChart, label: "DeFi" },
     { path: "/nft-gallery", icon: Image, label: "NFTs" },
+    { path: "/governance", icon: Users, label: "DAO" },
     { path: "/web3-wallet", icon: Shield, label: "Wallet" },
   ];
 
