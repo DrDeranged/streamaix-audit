@@ -93,7 +93,7 @@ export const authApi = {
     if (!token) return null;
 
     try {
-      const response = await apiRequest('/api/auth/me', {
+      const response = await apiRequest('/api/users/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

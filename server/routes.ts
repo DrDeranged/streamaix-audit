@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
+import { AIService } from "./services/aiService";
+import { Web3Service } from "./services/web3Service";
 import { 
   loginSchema, 
   registerSchema, 
@@ -17,6 +19,7 @@ import {
   updateKnowledgeStackSchema,
   paginationSchema,
   searchSchema,
+  processContentSchema,
   type LoginRequest,
   type RegisterRequest,
   type WalletLoginRequest
@@ -192,13 +195,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Get current user profile
-  app.get('/api/auth/me', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.get('/api/users/me', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const user = await storage.getUser(req.user!.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const stats = await storage.getUserStats(user.id);
+    // Get user stats
+    const summaries = await storage.getSummariesByUser(req.user!.id);
+    const bounties = await storage.getBountiesByUser(req.user!.id);
+    const interactions = await storage.getUserInteractions(req.user!.id);
+    const stacks = await storage.getKnowledgeStacksByUser(req.user!.id);
+    
+    const stats = {
+      summariesCount: summaries.length,
+      bountiesCount: bounties.length,
+      interactionsCount: interactions.length,
+      stacksCount: stacks.length
+    };
 
     res.json({
       user: {
@@ -257,7 +271,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const stats = await storage.getUserStats(user.id);
+    // Get public user stats
+    const summaries = await storage.getSummariesByUser(req.params.id);
+    const bounties = await storage.getBountiesByUser(req.params.id);
+    const stacks = await storage.getKnowledgeStacksByUser(req.params.id);
+    
+    const stats = {
+      summariesCount: summaries.filter(s => s.isPublic).length,
+      bountiesCount: bounties.length,
+      stacksCount: stacks.filter(s => s.isPublic).length
+    };
 
     res.json({
       user: {
@@ -613,22 +636,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Start processing in background
-    const processor = StreamProcessor.getInstance();
-    const content = {
-      url: summary.originalUrl,
-      title: summary.title,
+    const jobId = await StreamProcessor.queueProcessing(summaryId, summary.originalUrl, {
       contentType: summary.contentType as any,
       platform: summary.platform,
-    };
-    
-    // Don't await - let it process in background
-    processor.processStream(summaryId, content).catch(error => {
-      console.error(`Background processing failed for summary ${summaryId}:`, error);
+      title: summary.title,
     });
     
     res.json({
       message: 'Processing started',
       summaryId,
+      jobId,
       status: 'processing'
     });
   }));
@@ -646,18 +663,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(403).json({ error: 'Unauthorized - not your summary' });
     }
     
-    const processor = StreamProcessor.getInstance();
-    const stages = processor.getProcessingStatus(summaryId);
-    const isProcessing = processor.isProcessing(summaryId);
+    const jobs = StreamProcessor.getJobsForSummary(summaryId);
+    const latestJob = jobs.length > 0 ? jobs[jobs.length - 1] : null;
     
     res.json({
       summaryId,
       status: summary.processingStatus,
-      isProcessing,
-      stages,
-      currentStage: stages.length > 0 ? stages[stages.length - 1] : null
+      job: latestJob ? {
+        id: latestJob.id,
+        status: latestJob.status,
+        progress: latestJob.progress,
+        error: latestJob.error,
+        startedAt: latestJob.startedAt,
+        completedAt: latestJob.completedAt
+      } : null
     });
   }));
+
+  // Process content from URL directly
+  app.post('/api/process-content', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const validation = validateRequest(processContentSchema, req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    const { url, contentType, platform, title, isPublic, tags } = validation.data as any;
+
+    // Create summary entry
+    const summary = await storage.createSummary({
+      title: title || 'Untitled Content',
+      originalUrl: url,
+      contentType,
+      platform,
+      tags: tags || [],
+      creatorId: req.user!.id,
+      isPublic: isPublic ?? true,
+      processingStatus: 'pending'
+    });
+
+    // Start processing
+    const jobId = await StreamProcessor.queueProcessing(summary.id, url, {
+      contentType,
+      platform,
+      title
+    });
+
+    res.status(201).json({
+      message: 'Content processing started',
+      summary: {
+        id: summary.id,
+        title: summary.title,
+        originalUrl: summary.originalUrl,
+        contentType: summary.contentType,
+        platform: summary.platform,
+        processingStatus: summary.processingStatus
+      },
+      jobId
+    });
+  }));
+
+  // =============================================================================
+  // WEB3 & SOCIAL ROUTES
+  // =============================================================================
+
+  // Get wallet authentication nonce
+  app.post('/api/web3/nonce', asyncHandler(async (req: Request, res: Response) => {
+    const { walletAddress } = req.body;
+    
+    if (!walletAddress || !Web3Service.isValidAddress(walletAddress)) {
+      return res.status(400).json({ error: 'Valid wallet address required' });
+    }
+
+    const nonce = Web3Service.generateNonce();
+    const message = Web3Service.generateAuthMessage(walletAddress, nonce);
+
+    res.json({ 
+      nonce, 
+      message,
+      walletAddress 
+    });
+  }));
+
+  // Share summary to social platforms
+  app.post('/api/summaries/:id/share', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const summaryId = req.params.id;
+    const { platform, message } = req.body;
+
+    const summary = await storage.getSummary(summaryId);
+    if (!summary) {
+      return res.status(404).json({ error: 'Summary not found' });
+    }
+
+    const shareContent = {
+      title: summary.title,
+      summary: summary.summary || 'AI-generated summary available on StreamAiX',
+      url: `https://streamaix.com/summaries/${summaryId}`,
+      tags: summary.tags || []
+    };
+
+    let result;
+    switch (platform) {
+      case 'lens':
+        result = await Web3Service.shareToLens(shareContent);
+        break;
+      case 'farcaster':
+        result = await Web3Service.shareToFarcaster(shareContent);
+        break;
+      default:
+        return res.status(400).json({ error: 'Unsupported platform' });
+    }
+
+    // Record share interaction
+    await storage.createUserInteraction({
+      userId: req.user!.id,
+      summaryId,
+      interactionType: 'share',
+      metadata: { platform, result }
+    });
+
+    res.json({
+      message: 'Content shared successfully',
+      platform,
+      result
+    });
+  }));
+
+  // Get user recommendations
+  app.get('/api/recommendations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const user = await storage.getUser(req.user!.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const recentSummaries = await storage.getSummariesByUser(req.user!.id);
+    const interactions = await storage.getUserInteractions(req.user!.id);
+    
+    // Extract user interests from interactions and summaries
+    const userTags = new Set<string>();
+    recentSummaries.forEach(s => s.tags?.forEach(tag => userTags.add(tag)));
+    
+    const recommendations = await AIService.generateRecommendations(
+      req.user!.id,
+      Array.from(userTags),
+      recentSummaries.slice(0, 5)
+    );
+
+    res.json(recommendations);
+  }));
+
+  // =============================================================================
+  // WALLET & REWARDS ROUTES
+  // =============================================================================
 
   // Mock wallet endpoints for demo
   app.get('/api/wallet/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {

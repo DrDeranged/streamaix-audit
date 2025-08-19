@@ -1,512 +1,463 @@
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
 import { 
-  User, 
-  FileText, 
-  Gift, 
-  Heart, 
-  Bookmark, 
-  Share, 
-  Eye, 
   Plus, 
-  Settings,
+  Play, 
+  Clock, 
+  TrendingUp, 
   Wallet,
+  Star,
+  Share,
+  Bookmark,
+  Eye,
+  DollarSign,
+  Award,
+  Zap,
   BarChart3,
-  Clock,
-  Zap
+  Users,
+  Target
 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Link } from 'wouter';
-import { getAuthHeaders } from '@/lib/auth';
-import { Navigation } from '@/components/ui/navigation';
 
 interface Summary {
   id: string;
   title: string;
-  description?: string;
   originalUrl: string;
   contentType: string;
   platform: string;
-  processingStatus: string;
+  processingStatus: 'pending' | 'processing' | 'completed' | 'failed';
   accuracy?: number;
-  createdAt: string;
   tags?: string[];
+  createdAt: string;
+  viewCount: number;
+  likes: number;
 }
 
 interface Bounty {
   id: string;
   title: string;
   description: string;
-  contentUrl: string;
   reward: number;
   status: string;
   deadline?: string;
   createdAt: string;
-  tags?: string[];
 }
 
-interface Interaction {
-  id: string;
-  summaryId: string;
-  interactionType: string;
-  createdAt: string;
-  metadata?: any;
+interface UserStats {
+  totalSummaries: number;
+  totalViews: number;
+  totalLikes: number;
+  totalEarned: number;
+  streakDays: number;
+  rank: string;
 }
 
 export default function Dashboard() {
-  const { user, stats, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Fetch user's summaries
-  const { data: summaries = [] } = useQuery({
-    queryKey: ['user-summaries', user?.id],
-    queryFn: () =>
-      fetch(`/api/users/${user?.id}/summaries`, {
-        headers: getAuthHeaders(),
-      }).then(res => res.json()).then(data => data.summaries),
-    enabled: !!user,
+  // Fetch user summaries
+  const { data: summariesData } = useQuery({
+    queryKey: ['summaries', 'user', user?.id],
+    queryFn: () => apiRequest(`/api/users/${user?.id}/summaries`),
+    enabled: !!user?.id,
   });
 
-  // Fetch user's bounties
-  const { data: bounties = [] } = useQuery({
-    queryKey: ['user-bounties', user?.id],
-    queryFn: () =>
-      fetch(`/api/users/${user?.id}/bounties`, {
-        headers: getAuthHeaders(),
-      }).then(res => res.json()).then(data => data.bounties),
-    enabled: !!user,
+  // Fetch user bounties
+  const { data: bountiesData } = useQuery({
+    queryKey: ['bounties', 'user', user?.id],
+    queryFn: () => apiRequest(`/api/users/${user?.id}/bounties`),
+    enabled: !!user?.id,
   });
 
-  // Fetch user's interactions
-  const { data: interactions = [] } = useQuery({
-    queryKey: ['user-interactions'],
-    queryFn: () =>
-      fetch('/api/users/me/interactions', {
-        headers: getAuthHeaders(),
-      }).then(res => res.json()).then(data => data.interactions),
+  // Fetch wallet balance
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet', 'balance'],
+    queryFn: () => apiRequest('/api/wallet/balance'),
     enabled: !!user,
+    refetchInterval: 30000, // Refresh every 30s
   });
 
-  if (isLoading) {
+  // Fetch user stats
+  const { data: statsData } = useQuery({
+    queryKey: ['stats', 'user', user?.id],
+    queryFn: () => apiRequest(`/api/users/${user?.id}/stats`),
+    enabled: !!user?.id,
+  });
+
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="mb-4">Please sign in to view your dashboard</p>
-          <Link href="/auth">
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-500">
-              Sign In
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold text-white mb-4">Access Restricted</h2>
+            <p className="text-gray-300 mb-4">Please log in to view your dashboard</p>
+            <Button onClick={() => setLocation('/auth')} className="w-full">
+              Go to Login
             </Button>
-          </Link>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
+
+  const summaries: Summary[] = summariesData?.summaries || [];
+  const bounties: Bounty[] = bountiesData?.bounties || [];
+  const balance = walletData?.balance;
+  const stats: UserStats = statsData?.stats || {
+    totalSummaries: summaries.length,
+    totalViews: summaries.reduce((acc, s) => acc + (s.viewCount || 0), 0),
+    totalLikes: summaries.reduce((acc, s) => acc + (s.likes || 0), 0),
+    totalEarned: balance?.totalEarned || 0,
+    streakDays: 5,
+    rank: 'Rising Creator'
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-500/20 text-green-400 border-green-400/30';
-      case 'processing':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-400/30';
-      case 'pending':
-        return 'bg-blue-500/20 text-blue-400 border-blue-400/30';
-      case 'failed':
-        return 'bg-red-500/20 text-red-400 border-red-400/30';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
+      case 'completed': return 'bg-green-500/20 text-green-200 border-green-500/30';
+      case 'processing': return 'bg-blue-500/20 text-blue-200 border-blue-500/30';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-200 border-yellow-500/30';
+      case 'failed': return 'bg-red-500/20 text-red-200 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-500/30';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <Navigation />
-      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <Avatar className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-purple-400">
-              <AvatarImage src={user.avatar} />
-              <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm sm:text-lg">
-                {user.username.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{user.username}</h1>
-              {user.bio && <p className="text-slate-300 text-sm sm:text-base">{user.bio}</p>}
-              {user.walletAddress && (
-                <div className="flex items-center mt-1 sm:mt-2 text-xs sm:text-sm text-slate-400">
-                  <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  {user.ensName || `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`}
-                </div>
-              )}
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Welcome back, {user?.username}! 👋
+            </h1>
+            <p className="text-gray-300 text-lg">
+              Manage your AI summaries and track your progress
+            </p>
           </div>
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <Link href="/wallet-dashboard">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="border-purple-400/50 bg-purple-500/20 text-white hover:bg-purple-500/30 hover:border-purple-400 text-xs sm:text-sm"
-                onClick={() => {
-                  console.log('Wallet button clicked');
-                  window.location.href = '/wallet-dashboard';
-                }}
-              >
-                <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Wallet</span>
-              </Button>
-            </Link>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="border-slate-400/50 bg-slate-500/20 text-white hover:bg-slate-500/30 hover:border-slate-400 text-xs sm:text-sm"
-              onClick={() => {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = '/dashboard';
-              }}
-            >
-              <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Clear Data</span>
-            </Button>
-          </div>
+          <Button
+            onClick={() => setLocation('/create-summary')}
+            className="mt-4 sm:mt-0 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            data-testid="button-create-summary"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Summary
+          </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-3 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-400 text-xs sm:text-sm">Summaries</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.summariesCount || 0}</p>
-                  </div>
-                  <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-300 text-sm">Total Summaries</p>
+                  <p className="text-3xl font-bold text-white" data-testid="stat-total-summaries">
+                    {stats.totalSummaries}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <BarChart3 className="h-8 w-8 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-3 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-400 text-xs sm:text-sm">Bounties</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.bountiesCount || 0}</p>
-                  </div>
-                  <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-300 text-sm">Total Views</p>
+                  <p className="text-3xl font-bold text-white" data-testid="stat-total-views">
+                    {stats.totalViews.toLocaleString()}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <Eye className="h-8 w-8 text-blue-400" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-3 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-400 text-xs sm:text-sm">Interactions</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.interactionsCount || 0}</p>
-                  </div>
-                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-pink-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-300 text-sm">STREAM Tokens</p>
+                  <p className="text-3xl font-bold text-white" data-testid="stat-stream-tokens">
+                    {balance?.streamTokens?.toFixed(2) || '0.00'}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <Wallet className="h-8 w-8 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardContent className="p-3 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-400 text-xs sm:text-sm">Knowledge Stacks</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{stats?.stacksCount || 0}</p>
-                  </div>
-                  <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-300 text-sm">Creator Rank</p>
+                  <p className="text-lg font-bold text-white" data-testid="stat-creator-rank">
+                    {stats.rank}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <Award className="h-8 w-8 text-yellow-400" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content */}
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-          <CardHeader>
-            <CardTitle className="text-white">Your Dashboard</CardTitle>
-            <CardDescription className="text-slate-300">
-              Manage your summaries, bounties, and interactions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/10">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="summaries" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
-                  Summaries
-                </TabsTrigger>
-                <TabsTrigger value="bounties" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
-                  Bounties
-                </TabsTrigger>
-                <TabsTrigger value="activity" className="data-[state=active]:bg-white/20 text-xs sm:text-sm">
-                  Activity
-                </TabsTrigger>
-              </TabsList>
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-600">
+              My Summaries
+            </TabsTrigger>
+            <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-600">
+              Bounties
+            </TabsTrigger>
+            <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-600">
+              Wallet
+            </TabsTrigger>
+          </TabsList>
 
-              <TabsContent value="overview" className="mt-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Recent Summaries */}
-                  <Card className="bg-white/5 border-white/10">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <CardTitle className="text-white text-lg">Recent Summaries</CardTitle>
-                      <Link href="/create">
-                        <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/20">
-                          <Plus className="w-4 h-4 mr-2" />
-                          New Summary
-                        </Button>
-                      </Link>
-                    </CardHeader>
-                    <CardContent>
-                      {summaries.slice(0, 3).map((summary: Summary) => (
-                        <div key={summary.id} className="flex items-center justify-between py-3 border-b border-white/10 last:border-b-0">
-                          <div className="flex-1">
-                            <p className="text-white font-medium truncate">{summary.title}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge className={getStatusColor(summary.processingStatus)}>
-                                {summary.processingStatus}
-                              </Badge>
-                              <span className="text-xs text-slate-400">
-                                {new Date(summary.createdAt).toLocaleDateString()}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Recent Activity */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {summaries.slice(0, 3).map((summary) => (
+                  <div key={summary.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium">{summary.title}</h4>
+                      <p className="text-gray-300 text-sm">{summary.platform} • {summary.contentType}</p>
+                    </div>
+                    <Badge className={getStatusColor(summary.processingStatus)}>
+                      {summary.processingStatus}
+                    </Badge>
+                  </div>
+                ))}
+                {summaries.length === 0 && (
+                  <p className="text-gray-400 text-center py-8">
+                    No summaries yet. Create your first one!
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+                    onClick={() => setLocation('/create-summary')}>
+                <CardContent className="p-6 text-center">
+                  <Plus className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+                  <h3 className="text-white font-semibold mb-2">Create Summary</h3>
+                  <p className="text-gray-300 text-sm">Transform content into AI summaries</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+                    onClick={() => setLocation('/wallet-dashboard')}>
+                <CardContent className="p-6 text-center">
+                  <Wallet className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                  <h3 className="text-white font-semibold mb-2">Wallet Dashboard</h3>
+                  <p className="text-gray-300 text-sm">Manage tokens and rewards</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors">
+                <CardContent className="p-6 text-center">
+                  <Target className="h-12 w-12 text-blue-400 mx-auto mb-4" />
+                  <h3 className="text-white font-semibold mb-2">Browse Bounties</h3>
+                  <p className="text-gray-300 text-sm">Find content to summarize</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="summaries" className="space-y-6">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-white">My Summaries ({summaries.length})</CardTitle>
+                <Button onClick={() => setLocation('/create-summary')} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Summary
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {summaries.map((summary) => (
+                    <div key={summary.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-white font-semibold mb-1">{summary.title}</h3>
+                          <p className="text-gray-300 text-sm mb-2">
+                            {summary.platform} • {summary.contentType} • {new Date(summary.createdAt).toLocaleDateString()}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {summary.viewCount || 0}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Star className="h-3 w-3" />
+                              {summary.likes || 0}
+                            </span>
+                            {summary.accuracy && (
+                              <span className="flex items-center gap-1">
+                                <Zap className="h-3 w-3" />
+                                {summary.accuracy}% accuracy
                               </span>
-                            </div>
+                            )}
                           </div>
                         </div>
-                      ))}
-                      {summaries.length === 0 && (
-                        <p className="text-slate-400 text-center py-8">
-                          No summaries yet. Create your first one!
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(summary.processingStatus)}>
+                            {summary.processingStatus}
+                          </Badge>
+                          <Link href={`/summary/${summary.id}`}>
+                            <Button size="sm" variant="outline">View</Button>
+                          </Link>
+                        </div>
+                      </div>
+                      {summary.processingStatus === 'processing' && (
+                        <div className="mt-3">
+                          <Progress value={65} className="h-2" />
+                          <p className="text-xs text-gray-400 mt-1">Processing... AI analysis in progress</p>
+                        </div>
                       )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Recent Bounties */}
-                  <Card className="bg-white/5 border-white/10">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <CardTitle className="text-white text-lg">Recent Bounties</CardTitle>
-                      <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/20">
-                        <Plus className="w-4 h-4 mr-2" />
-                        New Bounty
+                    </div>
+                  ))}
+                  {summaries.length === 0 && (
+                    <div className="text-center py-12">
+                      <Play className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+                      <h3 className="text-white font-semibold mb-2">No summaries yet</h3>
+                      <p className="text-gray-400 mb-4">Create your first AI-powered summary</p>
+                      <Button onClick={() => setLocation('/create-summary')}>
+                        Get Started
                       </Button>
-                    </CardHeader>
-                    <CardContent>
-                      {bounties.slice(0, 3).map((bounty: Bounty) => (
-                        <div key={bounty.id} className="flex items-center justify-between py-3 border-b border-white/10 last:border-b-0">
-                          <div className="flex-1">
-                            <p className="text-white font-medium truncate">{bounty.title}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-400/30">
-                                {bounty.reward} STREAM
-                              </Badge>
-                              <Badge className={getStatusColor(bounty.status)}>
-                                {bounty.status}
-                              </Badge>
-                            </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bounties" className="space-y-6">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <CardHeader>
+                <CardTitle className="text-white">My Bounties ({bounties.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {bounties.map((bounty) => (
+                    <div key={bounty.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-white font-semibold mb-1">{bounty.title}</h3>
+                          <p className="text-gray-300 text-sm mb-2 line-clamp-2">{bounty.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <DollarSign className="h-3 w-3" />
+                              {bounty.reward} STREAM
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {bounty.deadline ? new Date(bounty.deadline).toLocaleDateString() : 'No deadline'}
+                            </span>
                           </div>
                         </div>
-                      ))}
-                      {bounties.length === 0 && (
-                        <p className="text-slate-400 text-center py-8">
-                          No bounties created yet.
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
+                        <Badge className={getStatusColor(bounty.status)}>
+                          {bounty.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {bounties.length === 0 && (
+                    <div className="text-center py-12">
+                      <Target className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+                      <h3 className="text-white font-semibold mb-2">No bounties created</h3>
+                      <p className="text-gray-400 mb-4">Create bounties to reward content creators</p>
+                    </div>
+                  )}
                 </div>
-              </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <TabsContent value="summaries" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-white text-lg font-semibold">Your Summaries</h3>
-                    <Link href="/create">
-                      <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Summary
-                      </Button>
-                    </Link>
+          <TabsContent value="wallet" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Balance Card */}
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    Wallet Balance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center py-6">
+                    <p className="text-4xl font-bold text-white mb-2">
+                      {balance?.streamTokens?.toFixed(2) || '0.00'}
+                    </p>
+                    <p className="text-gray-300">STREAM Tokens</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      ≈ ${balance?.usdValue?.toFixed(2) || '0.00'} USD
+                    </p>
                   </div>
-                  <div className="grid gap-4">
-                    {summaries.map((summary: Summary) => (
-                      <Card key={summary.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="text-white font-semibold mb-2">{summary.title}</h4>
-                              {summary.description && (
-                                <p className="text-slate-300 text-sm mb-3 line-clamp-2">{summary.description}</p>
-                              )}
-                              <div className="flex items-center space-x-3 text-sm text-slate-400">
-                                <span className="flex items-center">
-                                  <Clock className="w-4 h-4 mr-1" />
-                                  {new Date(summary.createdAt).toLocaleDateString()}
-                                </span>
-                                <span className="flex items-center">
-                                  <Zap className="w-4 h-4 mr-1" />
-                                  {summary.platform}
-                                </span>
-                                {summary.accuracy && (
-                                  <span className="flex items-center">
-                                    <BarChart3 className="w-4 h-4 mr-1" />
-                                    {summary.accuracy}% accuracy
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              <Badge className={getStatusColor(summary.processingStatus)}>
-                                {summary.processingStatus}
-                              </Badge>
-                              <div className="flex space-x-2">
-                                <Button size="sm" variant="outline" className="border-white/20 text-white">
-                                  View
-                                </Button>
-                                <Button size="sm" variant="outline" className="border-white/20 text-white">
-                                  Edit
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <p className="text-green-400 font-semibold">+${balance?.totalEarned?.toFixed(2) || '0.00'}</p>
+                      <p className="text-xs text-gray-400">Total Earned</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-red-400 font-semibold">-${balance?.totalSpent?.toFixed(2) || '0.00'}</p>
+                      <p className="text-xs text-gray-400">Total Spent</p>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </CardContent>
+              </Card>
 
-              <TabsContent value="bounties" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-white text-lg font-semibold">Your Bounties</h3>
-                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Bounty
-                    </Button>
-                  </div>
-                  <div className="grid gap-4">
-                    {bounties.map((bounty: Bounty) => (
-                      <Card key={bounty.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="text-white font-semibold mb-2">{bounty.title}</h4>
-                              <p className="text-slate-300 text-sm mb-3 line-clamp-2">{bounty.description}</p>
-                              <div className="flex items-center space-x-3 text-sm text-slate-400">
-                                <span className="flex items-center">
-                                  <Clock className="w-4 h-4 mr-1" />
-                                  {new Date(bounty.createdAt).toLocaleDateString()}
-                                </span>
-                                {bounty.deadline && (
-                                  <span className="flex items-center">
-                                    <Clock className="w-4 h-4 mr-1" />
-                                    Due: {new Date(bounty.deadline).toLocaleDateString()}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-400/30">
-                                {bounty.reward} STREAM
-                              </Badge>
-                              <Badge className={getStatusColor(bounty.status)}>
-                                {bounty.status}
-                              </Badge>
-                              <div className="flex space-x-2">
-                                <Button size="sm" variant="outline" className="border-white/20 text-white">
-                                  View
-                                </Button>
-                                <Button size="sm" variant="outline" className="border-white/20 text-white">
-                                  Edit
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="activity" className="mt-6">
-                <div className="space-y-4">
-                  <h3 className="text-white text-lg font-semibold">Recent Activity</h3>
-                  <div className="space-y-3">
-                    {interactions.map((interaction: Interaction) => (
-                      <Card key={interaction.id} className="bg-white/5 border-white/10">
-                        <CardContent className="p-4">
-                          <div className="flex items-center space-x-3">
-                            {interaction.interactionType === 'like' && <Heart className="w-5 h-5 text-pink-400" />}
-                            {interaction.interactionType === 'bookmark' && <Bookmark className="w-5 h-5 text-blue-400" />}
-                            {interaction.interactionType === 'share' && <Share className="w-5 h-5 text-green-400" />}
-                            {interaction.interactionType === 'view' && <Eye className="w-5 h-5 text-slate-400" />}
-                            <div className="flex-1">
-                              <p className="text-white text-sm">
-                                You {interaction.interactionType}d a summary
-                              </p>
-                              <p className="text-slate-400 text-xs">
-                                {new Date(interaction.createdAt).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    {interactions.length === 0 && (
-                      <p className="text-slate-400 text-center py-8">
-                        No recent activity.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+              {/* Quick Actions */}
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                <CardHeader>
+                  <CardTitle className="text-white">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => setLocation('/wallet-dashboard')}
+                  >
+                    <Wallet className="h-4 w-4 mr-2" />
+                    Wallet Dashboard
+                  </Button>
+                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                    <Share className="h-4 w-4 mr-2" />
+                    Share Profile
+                  </Button>
+                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                    <Users className="h-4 w-4 mr-2" />
+                    Referral Program
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

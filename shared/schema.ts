@@ -156,6 +156,10 @@ export const insertSummarySchema = createInsertSchema(summaries).pick({
   tags: true,
   creatorId: true,
   isPublic: true,
+  processingStatus: true,
+  accuracy: true,
+  arweaveId: true,
+  ipfsHash: true,
 });
 
 export const insertBountySchema = createInsertSchema(bounties).pick({
