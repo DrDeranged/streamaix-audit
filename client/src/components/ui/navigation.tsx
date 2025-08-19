@@ -5,6 +5,8 @@ import {
   Plus, 
   Wallet, 
   Shield,
+  PieChart,
+  Image,
   User, 
   LogOut,
   ArrowLeft 
@@ -24,8 +26,9 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
     { path: "/create-summary", icon: Plus, label: "Create" },
-    { path: "/wallet-dashboard", icon: Wallet, label: "Rewards" },
-    { path: "/web3-wallet", icon: Shield, label: "Web3 Wallet" },
+    { path: "/defi-dashboard", icon: PieChart, label: "DeFi" },
+    { path: "/nft-gallery", icon: Image, label: "NFTs" },
+    { path: "/web3-wallet", icon: Shield, label: "Wallet" },
   ];
 
   const handleLogout = () => {

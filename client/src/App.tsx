@@ -10,6 +10,8 @@ import Dashboard from "@/pages/dashboard";
 import CreateSummary from "@/pages/create-summary";
 import WalletDashboard from "@/pages/wallet-dashboard";
 import Web3WalletPage from "@/pages/web3-wallet";
+import DeFiDashboard from "@/pages/defi-dashboard";
+import NFTGallery from "@/pages/nft-gallery";
 import SummaryView from "@/pages/summary-view";
 import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/create-summary" component={CreateSummary} />
       <Route path="/wallet-dashboard" component={WalletDashboard} />
       <Route path="/web3-wallet" component={Web3WalletPage} />
+      <Route path="/defi-dashboard" component={DeFiDashboard} />
+      <Route path="/nft-gallery" component={NFTGallery} />
       <Route path="/summary/:id" component={SummaryView} />
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />

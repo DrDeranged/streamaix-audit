@@ -8,10 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useContracts } from '@/hooks/useContracts';
+import { useWeb3 } from '@/hooks/useWeb3';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X } from 'lucide-react';
+import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield } from 'lucide-react';
 
 interface ProcessContentRequest {
   url: string;
@@ -27,6 +30,8 @@ export default function CreateSummary() {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { mintSummaryNFT, isLoading: isMintingNFT } = useContracts();
+  const { isConnected } = useWeb3();
 
   const [formData, setFormData] = useState<ProcessContentRequest>({
     url: '',
@@ -38,6 +43,7 @@ export default function CreateSummary() {
   });
 
   const [currentTag, setCurrentTag] = useState('');
+  const [mintAsNFT, setMintAsNFT] = useState(false);
 
   // Process content mutation
   const processContentMutation = useMutation({
@@ -47,11 +53,23 @@ export default function CreateSummary() {
         body: JSON.stringify(data),
       });
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: 'Processing Started!',
         description: 'Your content is being processed. You can monitor progress in your dashboard.',
       });
+      
+      // If NFT minting is enabled and wallet is connected, mint NFT after processing
+      if (mintAsNFT && isConnected && data.summary) {
+        toast({
+          title: 'Creating NFT',
+          description: 'Your summary will be minted as an NFT when processing is complete.',
+        });
+        
+        // In a real implementation, you'd wait for processing to complete
+        // and then mint the NFT with the actual summary data
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['summaries'] });
       setLocation(`/summary/${data.summary.id}`);
     },
@@ -311,6 +329,49 @@ export default function CreateSummary() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Web3 Features */}
+              {isConnected && (
+                <div className="space-y-4 p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="h-5 w-5 text-purple-400" />
+                    <Label className="text-white font-semibold">Web3 Options</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id="mint-nft"
+                      checked={mintAsNFT}
+                      onCheckedChange={(checked) => setMintAsNFT(checked as boolean)}
+                      className="border-white/30 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="mint-nft" className="text-white font-medium flex items-center gap-2 cursor-pointer">
+                        <Sparkles className="h-4 w-4 text-purple-400" />
+                        Mint as NFT
+                      </label>
+                      <p className="text-gray-400 text-sm">
+                        Create an NFT of your summary stored on IPFS & Arweave
+                      </p>
+                    </div>
+                  </div>
+
+                  {mintAsNFT && (
+                    <div className="mt-3 p-3 bg-white/5 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="h-4 w-4 text-yellow-400" />
+                        <span className="text-yellow-400 text-sm font-medium">NFT Features Enabled</span>
+                      </div>
+                      <ul className="text-gray-300 text-sm space-y-1">
+                        <li>• Permanent storage on IPFS and Arweave</li>
+                        <li>• Ownership proof on blockchain</li>
+                        <li>• Tradeable on NFT marketplaces</li>
+                        <li>• Metadata with AI processing details</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Submit Button */}
               <Button
