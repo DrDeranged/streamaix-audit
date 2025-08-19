@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { WalletConnector } from '@/components/wallet/WalletConnector';
+import { useWeb3 } from '@/hooks/useWeb3';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

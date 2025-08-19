@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import { useLogin, useRegister, useWalletLogin } from '@/hooks/useAuth';
-import { Loader2, Wallet, Mail, User, Lock } from 'lucide-react';
+import { WalletConnector } from '@/components/wallet/WalletConnector';
+import { Loader2, Wallet, Mail, User, Lock, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AuthPage() {
@@ -35,17 +37,11 @@ export default function AuthPage() {
     registerMutation.mutate(registerData);
   };
 
-  const handleWalletConnect = async () => {
-    // Mock wallet connection for now
-    // In a real app, you'd use MetaMask or another wallet provider
-    const mockWalletAddress = '0x742d35Cc6436C0532925a3b5F4353C1bb3f4' + Math.random().toString(36).substr(2, 9);
-    const mockSignature = 'mock_signature_' + Math.random().toString(36).substr(2, 9);
-    const mockMessage = 'Sign this message to log in to StreamAiX';
-    
+  const handleWalletConnect = async (address: string, signature: string, message: string) => {
     walletLoginMutation.mutate({
-      walletAddress: mockWalletAddress,
-      signature: mockSignature,
-      message: mockMessage,
+      walletAddress: address,
+      signature,
+      message,
     });
   };
 
@@ -135,19 +131,18 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  onClick={handleWalletConnect}
-                  className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20"
-                  disabled={walletLoginMutation.isPending}
+                <WalletConnector
+                  onWalletConnected={handleWalletConnect}
+                  showBalance={false}
+                  showNetwork={false}
                 >
-                  {walletLoginMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <Wallet className="w-4 h-4 mr-2" />
-                  )}
-                  Connect Wallet
-                </Button>
+                  <div className="text-center">
+                    <Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-300">
+                      Connect your Web3 wallet to access premium features and earn rewards
+                    </p>
+                  </div>
+                </WalletConnector>
               </TabsContent>
 
               <TabsContent value="register" className="space-y-4">

@@ -1,0 +1,329 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useWeb3 } from '@/hooks/useWeb3';
+import { useToast } from '@/hooks/use-toast';
+import { Wallet, ExternalLink, Copy, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+
+interface WalletConnectorProps {
+  onWalletConnected?: (address: string, signature: string, message: string) => void;
+  onWalletDisconnected?: () => void;
+  children?: any;
+  showBalance?: boolean;
+  showNetwork?: boolean;
+}
+
+export function WalletConnector({ 
+  onWalletConnected, 
+  onWalletDisconnected, 
+  children,
+  showBalance = true,
+  showNetwork = true 
+}: WalletConnectorProps) {
+  const { 
+    wallet, 
+    isConnected, 
+    isConnecting, 
+    error,
+    connectMetaMask, 
+    disconnect, 
+    signMessage,
+    generateAuthMessage,
+    switchNetwork,
+    formatAddress, 
+    formatBalance,
+    getNetworkInfo,
+    isMetaMaskAvailable 
+  } = useWeb3();
+  
+  const { toast } = useToast();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  const handleConnect = async () => {
+    const walletInfo = await connectMetaMask();
+    if (walletInfo && onWalletConnected) {
+      await handleAuthenticate(walletInfo.address);
+    }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    onWalletDisconnected?.();
+  };
+
+  const handleAuthenticate = async (address: string) => {
+    if (!onWalletConnected) return;
+
+    setIsAuthenticating(true);
+    try {
+      // Generate nonce and message
+      const nonce = Math.random().toString(36).substring(7);
+      const message = generateAuthMessage(address, nonce);
+      
+      // Request signature
+      const signature = await signMessage(message);
+      if (signature) {
+        onWalletConnected(address, signature, message);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Authentication Failed',
+        description: error.message || 'Failed to sign authentication message',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: 'Copied!',
+        description: 'Address copied to clipboard',
+      });
+    } catch (error) {
+      toast({
+        title: 'Copy Failed',
+        description: 'Failed to copy address',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const networkInfo = wallet && wallet.chainId ? getNetworkInfo(wallet.chainId) : null;
+
+  if (!isMetaMaskAvailable()) {
+    return (
+      <Card className="bg-yellow-500/10 border-yellow-500/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-yellow-400" />
+            <div className="flex-1">
+              <p className="text-yellow-200 font-medium">MetaMask Required</p>
+              <p className="text-yellow-300/80 text-sm">Please install MetaMask to connect your wallet</p>
+            </div>
+            <a
+              href="https://metamask.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex"
+            >
+              <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Install
+              </Button>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="space-y-4">
+        {children && (
+          <div className="text-center text-gray-300 mb-4">
+            {children}
+          </div>
+        )}
+        
+        <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <CardHeader className="text-center">
+            <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-2" />
+            <CardTitle className="text-white">Connect Your Wallet</CardTitle>
+            <p className="text-gray-300 text-sm">
+              Connect with MetaMask to access Web3 features
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
+              data-testid="button-connect-metamask"
+            >
+              {isConnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Connect MetaMask
+                </>
+              )}
+            </Button>
+
+            {error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <p className="text-red-200 text-sm">{error}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+              <Wallet className="h-5 w-5 text-white" />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-white font-medium" data-testid="wallet-address">
+                  {wallet ? formatAddress(wallet.address) : ''}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => wallet && copyToClipboard(wallet.address)}
+                  className="h-6 w-6 p-0 hover:bg-white/10"
+                  data-testid="button-copy-address"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-2 mt-1">
+                {showNetwork && networkInfo && (
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-blue-500/20 text-blue-200 border-blue-500/30 text-xs"
+                    data-testid="network-badge"
+                  >
+                    {networkInfo.name}
+                  </Badge>
+                )}
+                
+                {showBalance && wallet && wallet.balance && (
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-green-500/20 text-green-200 border-green-500/30 text-xs"
+                    data-testid="balance-badge"
+                  >
+                    {formatBalance(wallet.balance)} {networkInfo?.nativeCurrency.symbol || 'ETH'}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isAuthenticating && (
+              <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+            )}
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-white/20 text-white hover:bg-white/10"
+                  data-testid="button-wallet-details"
+                >
+                  Details
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-900 border-white/20 text-white">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    Wallet Details
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Address</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm bg-white/10 px-2 py-1 rounded font-mono">
+                        {wallet?.address || ''}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => wallet && copyToClipboard(wallet.address)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {wallet?.ensName && (
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">ENS Name</p>
+                      <p className="text-sm text-purple-300">{wallet.ensName}</p>
+                    </div>
+                  )}
+
+                  {networkInfo && (
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Network</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm">{networkInfo.name}</p>
+                        <Badge variant="outline" className="text-xs">
+                          Chain ID: {wallet?.chainId || 0}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+
+                  {wallet?.balance && (
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Balance</p>
+                      <p className="text-sm">
+                        {formatBalance(wallet.balance)} {networkInfo?.nativeCurrency.symbol || 'ETH'}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-4">
+                    {networkInfo && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => switchNetwork(1)} // Switch to Ethereum
+                        className="border-white/20 text-white hover:bg-white/10"
+                      >
+                        Switch Network
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDisconnect}
+                      className="border-white/20 text-white hover:bg-white/10"
+                      data-testid="button-disconnect-wallet"
+                    >
+                      Disconnect
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {children && (
+          <div className="mt-4 pt-4 border-t border-white/10">
+            {children}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

@@ -4,6 +4,7 @@ import {
   Home, 
   Plus, 
   Wallet, 
+  Shield,
   User, 
   LogOut,
   ArrowLeft 
@@ -23,7 +24,8 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
     { path: "/create-summary", icon: Plus, label: "Create" },
-    { path: "/wallet-dashboard", icon: Wallet, label: "Wallet" },
+    { path: "/wallet-dashboard", icon: Wallet, label: "Rewards" },
+    { path: "/web3-wallet", icon: Shield, label: "Web3 Wallet" },
   ];
 
   const handleLogout = () => {
