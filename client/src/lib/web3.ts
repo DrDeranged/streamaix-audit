@@ -155,6 +155,7 @@ class Web3Manager {
     } catch (error: any) {
       // Network not added to MetaMask, try to add it
       if (error.code === 4902) {
+        const ethereum = (window as any).ethereum;
         try {
           await ethereum.request({
             method: 'wallet_addEthereumChain',
