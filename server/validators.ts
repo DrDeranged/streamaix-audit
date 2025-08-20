@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Authentication schemas
 export const registerSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
-  password: z.string().min(8).max(100),
+  password: z.string().min(6).max(100),
   email: z.string().email().optional(),
   walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address').optional(),
   ensName: z.string().optional(),
@@ -28,7 +28,7 @@ export const updateUserSchema = z.object({
   ensName: z.string().optional(),
   avatar: z.string().url().optional(),
   bio: z.string().max(500).optional(),
-  password: z.string().min(8).max(100).optional(),
+  password: z.string().min(6).max(100).optional(),
 });
 
 // Summary schemas

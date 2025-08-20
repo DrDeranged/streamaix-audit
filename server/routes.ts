@@ -59,51 +59,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/register', asyncHandler(async (req: Request, res: Response) => {
     const validation = validateRequest<RegisterRequest>(registerSchema, req.body);
     if (!validation.success) {
+      console.log('Registration validation failed:', validation.error);
       return res.status(400).json({ error: validation.error });
     }
 
     const { username, password, email, walletAddress, ensName, avatar, bio } = validation.data!;
 
-    // Check if user already exists
-    const existingUser = await storage.getUserByUsername(username);
-    if (existingUser) {
-      return res.status(409).json({ error: 'Username already exists' });
-    }
+    try {
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(409).json({ error: 'Username already exists' });
+      }
 
-    // Hash password and create user
-    const hashedPassword = await AuthService.hashPassword(password);
-    const user = await storage.createUser({
-      username,
-      password: hashedPassword,
-      email,
-      walletAddress,
-      ensName,
-      avatar,
-      bio
-    });
+      // Check if wallet address already exists (if provided)
+      if (walletAddress) {
+        const existingWalletUser = await storage.getUserByWalletAddress?.(walletAddress);
+        if (existingWalletUser) {
+          return res.status(400).json({ error: 'Wallet address already registered' });
+        }
+      }
 
-    // Generate token
-    const token = AuthService.generateToken({
-      id: user.id,
-      username: user.username,
-      email: user.email || undefined,
-      walletAddress: user.walletAddress || undefined
-    });
+      // Hash password and create user
+      const hashedPassword = await AuthService.hashPassword(password);
+      const user = await storage.createUser({
+        username,
+        password: hashedPassword,
+        email,
+        walletAddress,
+        ensName,
+        avatar,
+        bio
+      });
 
-    res.status(201).json({
-      message: 'User created successfully',
-      user: {
+      // Generate token
+      const token = AuthService.generateToken({
         id: user.id,
         username: user.username,
-        email: user.email,
-        walletAddress: user.walletAddress,
-        ensName: user.ensName,
-        avatar: user.avatar,
-        bio: user.bio,
-        createdAt: user.createdAt
-      },
-      token
-    });
+        email: user.email || undefined,
+        walletAddress: user.walletAddress || undefined
+      });
+
+      res.status(201).json({
+        message: 'User created successfully',
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          walletAddress: user.walletAddress,
+          ensName: user.ensName,
+          avatar: user.avatar,
+          bio: user.bio,
+          createdAt: user.createdAt
+        },
+        token
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (error.code === '23505') {
+        if (error.detail?.includes('username')) {
+          return res.status(400).json({ error: 'Username already exists' });
+        }
+        if (error.detail?.includes('wallet_address')) {
+          return res.status(400).json({ error: 'Wallet address already registered' });
+        }
+      }
+      return res.status(500).json({ error: 'Registration failed. Please try again.' });
+    }
   }));
 
   // Login with username/password
@@ -164,10 +186,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let user = await storage.getUserByWalletAddress?.(walletAddress);
     
     if (!user) {
-      // Create new user with wallet address
+      // Create new user with wallet address - use full address + timestamp for uniqueness
+      const timestamp = Date.now().toString().slice(-6);
+      const uniqueUsername = `wallet_${walletAddress.slice(-6)}_${timestamp}`;
+      
       user = await storage.createUser({
-        username: `user_${walletAddress.slice(-8)}`,
-        password: 'wallet_auth', // Placeholder for wallet-only accounts
+        username: uniqueUsername,
+        password: 'wallet_auth_placeholder', // Placeholder for wallet-only accounts
         walletAddress,
       });
     }
