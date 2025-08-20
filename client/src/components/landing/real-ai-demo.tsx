@@ -308,13 +308,35 @@ export function RealAIDemo() {
                       </div>
                       <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="font-semibold text-purple-600 dark:text-purple-400">
-                          {result.keyInsights?.length || (result.keyInsights && JSON.parse(result.keyInsights).length) || 'N/A'}
+                          {(() => {
+                            try {
+                              if (Array.isArray(result.keyInsights)) {
+                                return result.keyInsights.length;
+                              } else if (typeof result.keyInsights === 'string' && result.keyInsights) {
+                                return JSON.parse(result.keyInsights).length;
+                              }
+                              return 'N/A';
+                            } catch (e) {
+                              return 'N/A';
+                            }
+                          })()}
                         </div>
                         <div className="text-xs text-muted-foreground">Key Insights</div>
                       </div>
                       <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="font-semibold text-blue-600 dark:text-blue-400">
-                          {result.chapters?.length || (result.chapters && JSON.parse(result.chapters).length) || 'N/A'}
+                          {(() => {
+                            try {
+                              if (Array.isArray(result.chapters)) {
+                                return result.chapters.length;
+                              } else if (typeof result.chapters === 'string' && result.chapters) {
+                                return JSON.parse(result.chapters).length;
+                              }
+                              return 'N/A';
+                            } catch (e) {
+                              return 'N/A';
+                            }
+                          })()}
                         </div>
                         <div className="text-xs text-muted-foreground">Chapters</div>
                       </div>
