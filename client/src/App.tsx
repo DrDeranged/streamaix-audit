@@ -13,6 +13,7 @@ import Web3WalletPage from "@/pages/web3-wallet";
 import DeFiDashboard from "@/pages/defi-dashboard";
 import NFTGallery from "@/pages/nft-gallery";
 import GovernancePage from "@/pages/governance";
+import SocialTradingPage from "@/pages/social-trading";
 import SummaryView from "@/pages/summary-view";
 import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/defi-dashboard" component={DeFiDashboard} />
       <Route path="/nft-gallery" component={NFTGallery} />
       <Route path="/governance" component={GovernancePage} />
+      <Route path="/social-trading" component={SocialTradingPage} />
       <Route path="/summary/:id" component={SummaryView} />
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />

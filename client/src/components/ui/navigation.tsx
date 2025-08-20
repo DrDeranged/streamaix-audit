@@ -8,6 +8,7 @@ import {
   PieChart,
   Image,
   Users,
+  TrendingUp,
   User, 
   LogOut,
   ArrowLeft 
@@ -30,6 +31,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
     { path: "/defi-dashboard", icon: PieChart, label: "DeFi" },
     { path: "/nft-gallery", icon: Image, label: "NFTs" },
     { path: "/governance", icon: Users, label: "DAO" },
+    { path: "/social-trading", icon: TrendingUp, label: "Trading" },
     { path: "/web3-wallet", icon: Shield, label: "Wallet" },
   ];
 
