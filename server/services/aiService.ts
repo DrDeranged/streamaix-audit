@@ -1,5 +1,9 @@
 import OpenAI from 'openai';
 import { ContentExtractor } from './contentExtractor';
+import { exec } from 'child_process';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 export class AIService {
   private static client: OpenAI | null = null;
@@ -180,17 +184,12 @@ export class AIService {
    * Extract audio from video URL using yt-dlp
    */
   private static async extractAudioFromVideo(url: string): Promise<{ audioPath: string; title: string; duration: number }> {
-    const { exec } = require('child_process');
-    const fs = require('fs').promises;
-    const path = require('path');
-    const os = require('os');
-    
     try {
       // Create temporary directory for audio files
-      const tempDir = path.join(os.tmpdir(), 'streamaix-audio');
+      const tempDir = join(tmpdir(), 'streamaix-audio');
       await fs.mkdir(tempDir, { recursive: true });
       
-      const outputPath = path.join(tempDir, `audio_${Date.now()}.mp3`);
+      const outputPath = join(tempDir, `audio_${Date.now()}.mp3`);
       
       // Use yt-dlp to extract audio and get metadata
       const command = `yt-dlp -x --audio-format mp3 --audio-quality 192K -o "${outputPath}" --print title --print duration "${url}"`;
