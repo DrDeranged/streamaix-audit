@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { useLogin, useRegister, useWalletLogin } from '@/hooks/useAuth';
+import { useAuth, useLogin, useRegister, useWalletLogin } from '@/hooks/useAuth';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
 import { Loader2, Wallet, Mail, User, Lock, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AuthPage() {
+  const [, setLocation] = useLocation();
+  const { isAuthenticated } = useAuth();
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [registerData, setRegisterData] = useState({
     username: '',
@@ -26,6 +29,13 @@ export default function AuthPage() {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const walletLoginMutation = useWalletLogin();
+
+  // Redirect to home page if user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLocation('/');
+    }
+  }, [isAuthenticated, setLocation]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
