@@ -122,7 +122,7 @@ export function RealAIDemo() {
   };
 
   return (
-    <section id="real-demo" className="py-12 sm:py-20 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section id="real-demo" className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
@@ -132,65 +132,60 @@ export function RealAIDemo() {
           viewport={{ once: true }}
         >
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            Real AI Processing Demo
+            Try It Live
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            Paste any video or podcast URL and watch our AI extract, transcribe, and analyze the content in real-time
+            Paste any video or podcast URL below and watch real AI extract, transcribe, and analyze the content
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-4">
-            {supportedPlatforms.map((platform) => (
-              <div key={platform.name} className="flex items-center gap-2 px-3 py-2 glass-bg glass-border rounded-lg">
-                <platform.icon className={`w-4 h-4 ${platform.color}`} />
-                <span className="text-sm font-medium">{platform.name}</span>
-              </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
+            {supportedPlatforms.map((platform, index) => (
+              <span key={platform.name} className="flex items-center gap-1">
+                <platform.icon className={`w-3 h-3 ${platform.color}`} />
+                {platform.name}
+                {index < supportedPlatforms.length - 1 && <span className="ml-2">•</span>}
+              </span>
             ))}
           </div>
         </motion.div>
 
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
-          <Card className="mb-8 glass-bg glass-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                Enter Content URL
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3">
+          <div className="max-w-2xl mx-auto mb-12">
+            <div className="bg-card/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
-                  placeholder="https://www.youtube.com/watch?v=... or any podcast/video URL"
+                  placeholder="Paste any YouTube, podcast, or video URL here..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 h-12 text-base border-muted-foreground/20 focus:border-indigo-500 transition-colors"
                   disabled={isProcessing}
                 />
                 <Button 
                   onClick={handleProcess} 
                   disabled={isProcessing || !url.trim()}
-                  className="sm:px-8"
+                  className="h-12 px-8 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                   data-testid="button-process-ai"
                 >
                   {isProcessing ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Processing...
                     </>
                   ) : (
                     <>
-                      <Brain className="w-4 h-4 mr-2" />
-                      Process with AI
+                      <Zap className="w-5 h-5 mr-2" />
+                      Process Now
                     </>
                   )}
                 </Button>
               </div>
               
-              <div className="text-sm text-muted-foreground">
-                <strong>Supported:</strong> YouTube, SoundCloud, Twitch VODs, Podcast RSS feeds, Direct audio/video URLs
-              </div>
-            </CardContent>
-          </Card>
+              <p className="text-sm text-muted-foreground mt-4 text-center">
+                Supports YouTube, SoundCloud, Twitch, podcasts, and direct video URLs
+              </p>
+            </div>
+          </div>
 
           {/* Processing Status */}
           <AnimatePresence>
@@ -226,18 +221,26 @@ export function RealAIDemo() {
                     )}
 
                     {/* Processing Steps */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="flex justify-center items-center space-x-4 my-6">
                       {processingSteps.map((step, index) => (
-                        <div key={step.name} className={`p-4 rounded-lg border ${
-                          progress > index * 25 ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                        }`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <step.icon className={`w-4 h-4 ${progress > index * 25 ? 'text-indigo-500' : 'text-gray-400'}`} />
-                            <span className="font-medium text-sm">{step.name}</span>
+                        <div key={step.name} className="flex items-center">
+                          <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                            progress > index * 25 
+                              ? 'bg-indigo-500 border-indigo-500 text-white' 
+                              : 'bg-muted border-muted-foreground/20 text-muted-foreground'
+                          }`}>
+                            <step.icon className="w-4 h-4" />
                           </div>
-                          <p className="text-xs text-muted-foreground">{step.description}</p>
+                          {index < processingSteps.length - 1 && (
+                            <div className={`w-12 h-0.5 mx-2 ${
+                              progress > index * 25 ? 'bg-indigo-500' : 'bg-muted-foreground/20'
+                            }`} />
+                          )}
                         </div>
                       ))}
+                    </div>
+                    <div className="text-center text-sm text-muted-foreground">
+                      {processingSteps.find((_, index) => progress <= (index + 1) * 25)?.description || "Processing completed!"}
                     </div>
 
                     {/* Error Display */}
@@ -342,26 +345,15 @@ export function RealAIDemo() {
           </AnimatePresence>
 
           {/* Authentication Notice */}
-          {!isAuthenticated && (
+          {!isAuthenticated && !result && !isProcessing && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8"
+              className="text-center mt-8"
             >
-              <Card className="glass-bg glass-border border-indigo-200 dark:border-indigo-800">
-                <CardContent className="p-6 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <Brain className="w-5 h-5 text-indigo-500" />
-                    <span className="font-semibold">Ready to Process Real Content?</span>
-                  </div>
-                  <p className="text-muted-foreground mb-4">
-                    Sign up for free to unlock unlimited AI-powered content processing
-                  </p>
-                  <Button className="bg-indigo-500 hover:bg-indigo-600">
-                    Get Started Free
-                  </Button>
-                </CardContent>
-              </Card>
+              <p className="text-muted-foreground text-sm">
+                <strong>Sign up for free</strong> to unlock unlimited AI-powered content processing
+              </p>
             </motion.div>
           )}
         </div>

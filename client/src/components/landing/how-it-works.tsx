@@ -33,7 +33,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 relative">
+    <section id="how-it-works" className="py-16 relative">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-16"
