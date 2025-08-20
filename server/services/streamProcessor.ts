@@ -1,5 +1,6 @@
 import { AIService } from './aiService';
 import { Web3Service } from './web3Service';
+import { ProcessingStatusService } from './processingStatusService';
 import { storage } from '../storage';
 import { Summary } from '@shared/schema';
 
@@ -17,6 +18,7 @@ export class StreamProcessor {
   private static jobs: Map<string, ProcessingJob> = new Map();
   private static jobQueue: string[] = [];
   private static isProcessing = false;
+  private static statusService = ProcessingStatusService.getInstance();
 
   /**
    * Add content processing job to queue

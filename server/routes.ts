@@ -896,6 +896,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // =============================================================================
+  // REAL PROCESSING ENDPOINTS
+  // =============================================================================
+
+  // Test real processing endpoint
+  app.post('/api/test-processing', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required for processing' });
+    }
+
+    try {
+      console.log(`Starting real processing test for URL: ${url}`);
+      
+      // Create a test summary
+      const summary = await storage.createSummary({
+        title: 'Real Processing Test',
+        originalUrl: url,
+        contentType: 'video',
+        platform: 'test',
+        tags: ['test', 'real-processing'],
+        creatorId: req.user!.id,
+        isPublic: true,
+        processingStatus: 'pending'
+      });
+
+      // Start real processing
+      const jobId = await StreamProcessor.queueProcessing(summary.id, url, {
+        contentType: 'video',
+        platform: 'test',
+        title: 'Real Processing Test'
+      });
+
+      res.status(201).json({
+        message: 'Real AI processing started successfully',
+        summary: {
+          id: summary.id,
+          title: summary.title,
+          originalUrl: summary.originalUrl,
+          processingStatus: summary.processingStatus
+        },
+        jobId,
+        statusUrl: `/api/jobs/${jobId}`,
+        instructions: 'Check the summary endpoint for results after processing completes'
+      });
+    } catch (error) {
+      console.error('Real processing failed to start:', error);
+      res.status(500).json({ 
+        error: 'Failed to start real processing',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get job status endpoint
+  app.get('/api/jobs/:id', asyncHandler(async (req: Request, res: Response) => {
+    const job = StreamProcessor.getJob(req.params.id);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    res.json({ job });
+  }));
+
   const httpServer = createServer(app);
   return httpServer;
 }
