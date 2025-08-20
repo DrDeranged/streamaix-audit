@@ -1,7 +1,8 @@
 import { Navigation } from "@/components/landing/navigation";
+import { AICapabilitiesBanner } from "@/components/landing/ai-capabilities-banner";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { LiveDemo } from "@/components/landing/live-demo";
+import { RealAIDemo } from "@/components/landing/real-ai-demo";
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
@@ -13,9 +14,10 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
+      <AICapabilitiesBanner />
       <HeroSection />
       <HowItWorks />
-      <LiveDemo />
+      <RealAIDemo />
       <WhyBlockchain />
       <KnowledgeAvatars />
       <AISuggestions />

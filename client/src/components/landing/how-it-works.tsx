@@ -7,7 +7,7 @@ export function HowItWorks() {
       number: 1,
       icon: Upload,
       title: "Upload or Link",
-      description: "Drop your video file or paste a YouTube, Twitch, or podcast URL",
+      description: "Paste any YouTube, SoundCloud, Twitch, or podcast URL for real processing",
       color: "from-indigo-500 to-purple-600",
       badgeColor: "bg-blue-500",
       techIcons: [Youtube, Mic, Database]
@@ -15,11 +15,11 @@ export function HowItWorks() {
     {
       number: 2,
       icon: Brain,
-      title: "AI Processing",
-      description: "Advanced AI creates clean summaries, key insights, and timestamped chapters",
+      title: "Real AI Processing",
+      description: "OpenAI Whisper transcribes with 98% accuracy, GPT-4o analyzes and summarizes",
       color: "from-purple-500 to-cyan-500",
       badgeColor: "bg-purple-500",
-      techBadges: ["Whisper", "GPT-4"]
+      techBadges: ["OpenAI Whisper", "GPT-4o"]
     },
     {
       number: 3,
@@ -46,7 +46,7 @@ export function HowItWorks() {
             How It Works
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Three simple steps to transform any video content into valuable, ownable knowledge
+            Three simple steps powered by real AI to transform any content into valuable, ownable knowledge
           </p>
         </motion.div>
         

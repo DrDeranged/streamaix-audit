@@ -67,7 +67,7 @@ export function HeroSection() {
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
-            AI + Web3 platform that transforms long videos into rich, summarized blog posts.
+            Powered by <span className="text-indigo-400 font-semibold">OpenAI Whisper & GPT-4o</span> - Process any video or podcast URL with real AI transcription and analysis. 
             <span className="text-indigo-500 font-semibold"> Decentralized. Monetizable. Ownable.</span>
           </p>
           
@@ -96,7 +96,7 @@ export function HeroSection() {
           <div className="flex justify-center items-center space-x-4 sm:space-x-6 md:space-x-8 opacity-60 flex-wrap gap-2 sm:gap-4 px-4">
             <div className="flex items-center space-x-1 sm:space-x-2">
               <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
-              <span className="text-xs sm:text-sm">GPT-4</span>
+              <span className="text-xs sm:text-sm">OpenAI</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
               <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
