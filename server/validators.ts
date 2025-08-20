@@ -4,11 +4,11 @@ import { z } from 'zod';
 export const registerSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
   password: z.string().min(6).max(100),
-  email: z.string().email().optional(),
-  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address').optional(),
-  ensName: z.string().optional(),
-  avatar: z.string().url().optional(),
-  bio: z.string().max(500).optional(),
+  email: z.string().email().optional().or(z.literal('').transform(() => undefined)),
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address').optional().or(z.literal('').transform(() => undefined)),
+  ensName: z.string().optional().or(z.literal('').transform(() => undefined)),
+  avatar: z.string().url().optional().or(z.literal('').transform(() => undefined)),
+  bio: z.string().max(500).optional().or(z.literal('').transform(() => undefined)),
 });
 
 export const loginSchema = z.object({

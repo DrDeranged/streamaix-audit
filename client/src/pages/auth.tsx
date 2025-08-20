@@ -34,7 +34,18 @@ export default function AuthPage() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    registerMutation.mutate(registerData);
+    
+    // Clean up empty fields before sending
+    const cleanData = {
+      username: registerData.username,
+      password: registerData.password,
+      email: registerData.email || undefined,
+      walletAddress: registerData.walletAddress || undefined,
+      ensName: registerData.ensName || undefined,
+      bio: registerData.bio || undefined,
+    };
+    
+    registerMutation.mutate(cleanData);
   };
 
   const handleWalletConnect = async (address: string, signature: string, message: string) => {
