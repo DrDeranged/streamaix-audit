@@ -74,8 +74,14 @@ export class StreamProcessor {
       } catch (error) {
         console.error(`Job ${jobId} failed:`, error);
         job.status = 'failed';
+        job.progress = 0; // Reset progress on failure
         job.error = error instanceof Error ? error.message : 'Unknown error';
         job.completedAt = new Date();
+        
+        // Update summary status to failed
+        await storage.updateSummary(job.summaryId, {
+          processingStatus: 'failed'
+        });
       }
     }
 
@@ -152,6 +158,11 @@ export class StreamProcessor {
         arweaveId,
         processingStatus: 'completed'
       });
+
+      // Mark job as completed with 100% progress
+      job.progress = 100;
+      job.status = 'completed';
+      job.completedAt = new Date();
 
       // Step 5: Award tokens to creator (mock)
       const tokenReward = Web3Service.calculateTokenReward('summary', 1.0, 1.0);
