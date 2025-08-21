@@ -342,6 +342,111 @@ export function RealAIDemo() {
                       </div>
                     </div>
 
+                    {/* Trading Alpha Section */}
+                    {(result.tradingSignals || result.priceTargets) && (
+                      <div className="border-t pt-4">
+                        <h4 className="font-semibold mb-3 text-green-600 dark:text-green-400">🎯 Trading Alpha</h4>
+                        
+                        {/* Trading Signals */}
+                        {result.tradingSignals && result.tradingSignals.length > 0 && (
+                          <div className="mb-4">
+                            <h5 className="text-sm font-medium mb-2">Trading Signals</h5>
+                            <div className="grid gap-2">
+                              {result.tradingSignals.slice(0, 3).map((signal: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between p-2 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-md">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={signal.signal === 'BUY' ? 'default' : signal.signal === 'SELL' ? 'destructive' : 'secondary'} className="text-xs">
+                                      {signal.asset}
+                                    </Badge>
+                                    <span className="font-medium text-sm">{signal.signal}</span>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">{Math.round(signal.confidence * 100)}% confidence</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Price Targets */}
+                        {result.priceTargets && result.priceTargets.length > 0 && (
+                          <div className="mb-4">
+                            <h5 className="text-sm font-medium mb-2">Price Targets</h5>
+                            <div className="grid gap-2">
+                              {result.priceTargets.slice(0, 2).map((target: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between p-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-md">
+                                  <div>
+                                    <span className="font-medium">{target.asset}</span>
+                                    <span className="ml-2 text-sm text-muted-foreground">{target.timeframe}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-bold text-green-600 dark:text-green-400">{target.target}</div>
+                                    <div className="text-xs text-muted-foreground">{Math.round(target.probability * 100)}% probability</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Market Sentiment & Risk */}
+                        <div className="grid grid-cols-2 gap-3">
+                          {result.marketSentiment && (
+                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+                              <div className={`font-semibold text-sm ${
+                                result.marketSentiment === 'BULLISH' ? 'text-green-600 dark:text-green-400' :
+                                result.marketSentiment === 'BEARISH' ? 'text-red-600 dark:text-red-400' :
+                                'text-yellow-600 dark:text-yellow-400'
+                              }`}>
+                                {result.marketSentiment}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Market Sentiment</div>
+                            </div>
+                          )}
+                          {result.riskAssessment && (
+                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+                              <div className={`font-semibold text-sm ${
+                                result.riskAssessment === 'LOW' ? 'text-green-600 dark:text-green-400' :
+                                result.riskAssessment === 'HIGH' ? 'text-red-600 dark:text-red-400' :
+                                'text-yellow-600 dark:text-yellow-400'
+                              }`}>
+                                {result.riskAssessment}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Risk Level</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Expert Credibility */}
+                    {(result.expertCredibility || result.sourceCredibility) && (
+                      <div className="border-t pt-4">
+                        <h4 className="font-semibold mb-2">Source Credibility</h4>
+                        <div className="flex items-center gap-4">
+                          {result.expertCredibility && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">Expert Score:</span>
+                              <Badge variant="outline" className="font-mono">
+                                {result.expertCredibility}/100
+                              </Badge>
+                            </div>
+                          )}
+                          {result.sourceCredibility && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">Rating:</span>
+                              <Badge variant="outline" className={`font-bold ${
+                                result.sourceCredibility.startsWith('A') ? 'text-green-600 dark:text-green-400' :
+                                result.sourceCredibility.startsWith('B') ? 'text-blue-600 dark:text-blue-400' :
+                                'text-yellow-600 dark:text-yellow-400'
+                              }`}>
+                                {result.sourceCredibility}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Decentralized Storage */}
                     {(result.ipfsHash || result.arweaveId) && (
                       <div className="border-t pt-4">
