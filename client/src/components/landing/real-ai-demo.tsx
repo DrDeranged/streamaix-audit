@@ -100,33 +100,60 @@ export function RealAIDemo() {
       setProgress(10);
       setProcessingStatus("Audio extraction in progress...");
 
-      // Simulate progress updates (in real implementation, use Server-Sent Events)
+      // Progress updates with better timing
       const progressInterval = setInterval(() => {
         setProgress(prev => {
-          if (prev < 90) return prev + 10;
+          if (prev < 85) return prev + 15; // Faster initial progress
+          if (prev < 95) return prev + 2;  // Slower final progress to avoid getting stuck at 90%
           return prev;
         });
-      }, 3000);
+        
+        // Update status messages
+        setProcessingStatus(prev => {
+          if (progress < 30) return "Extracting audio from video...";
+          if (progress < 60) return "AI transcription in progress...";
+          if (progress < 90) return "Generating comprehensive analysis...";
+          return "Finalizing results...";
+        });
+      }, 2000);
 
-      // Check for results
-      setTimeout(async () => {
+      // Check for results with retry mechanism
+      const checkResults = async (attempt = 1, maxAttempts = 8) => {
         try {
+          console.log(`Checking results attempt ${attempt}/${maxAttempts}`);
           const summaryResponse = await apiRequest(`/api/summaries/${response.summary.id}`);
+          
           if (summaryResponse.summary.processingStatus === 'completed') {
             setResult(summaryResponse.summary);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
             clearInterval(progressInterval);
             setIsProcessing(false);
+            return;
           } else if (summaryResponse.summary.processingStatus === 'failed') {
-            throw new Error("Processing failed");
+            throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
-        } catch (checkError) {
-          setError("Processing failed. Please try again with a different URL.");
-          clearInterval(progressInterval);
-          setIsProcessing(false);
+          
+          // Still processing, check again
+          if (attempt < maxAttempts) {
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 3000);
+          } else {
+            throw new Error("Processing timed out after multiple attempts");
+          }
+        } catch (checkError: any) {
+          console.error(`Check attempt ${attempt} failed:`, checkError);
+          if (attempt < maxAttempts) {
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 3000);
+          } else {
+            setError(checkError.message || "Processing failed. Please try again.");
+            clearInterval(progressInterval);
+            setIsProcessing(false);
+          }
         }
-      }, 15000);
+      };
+
+      // Start checking after 10 seconds
+      setTimeout(() => checkResults(), 10000);
 
     } catch (err: any) {
       setError(err.message || "Failed to start processing");
