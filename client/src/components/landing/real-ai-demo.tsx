@@ -36,11 +36,37 @@ export function RealAIDemo() {
     { name: "Store Results", icon: Database, description: "Save to IPFS and database" }
   ];
 
+  const validateUrl = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url);
+      // Check for supported platforms
+      const supportedDomains = [
+        'youtube.com', 'youtu.be', 'soundcloud.com', 'twitch.tv', 
+        'podcasts.apple.com', 'open.spotify.com', 'anchor.fm',
+        'buzzsprout.com', 'libsyn.com', 'vimeo.com'
+      ];
+      return supportedDomains.some(domain => 
+        urlObj.hostname.includes(domain) || urlObj.hostname.endsWith(domain)
+      ) || (urlObj.protocol === 'http:' || urlObj.protocol === 'https:');
+    } catch {
+      return false;
+    }
+  };
+
   const handleProcess = async () => {
     if (!url.trim()) {
       toast({
         title: "URL Required",
         description: "Please enter a video or podcast URL to process.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!validateUrl(url.trim())) {
+      toast({
+        title: "Invalid URL Format",
+        description: "Please enter a valid URL from YouTube, SoundCloud, Twitch, or other supported platforms. Example: https://youtube.com/watch?v=...",
         variant: "destructive"
       });
       return;
@@ -155,7 +181,7 @@ export function RealAIDemo() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
-                  placeholder="Paste any YouTube, podcast, or video URL here..."
+                  placeholder="https://youtube.com/watch?v=... or https://soundcloud.com/..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   className="flex-1 h-12 text-base border-muted-foreground/20 focus:border-indigo-500 transition-colors"
@@ -181,9 +207,14 @@ export function RealAIDemo() {
                 </Button>
               </div>
               
-              <p className="text-sm text-muted-foreground mt-4 text-center">
-                Supports YouTube, SoundCloud, Twitch, podcasts, and direct video URLs
-              </p>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-muted-foreground text-center">
+                  Supports YouTube, SoundCloud, Twitch, podcasts, and direct video URLs
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-400 text-center font-medium">
+                  💡 Enter a valid URL (not descriptive text). Example: https://youtube.com/watch?v=dQw4w9WgXcQ
+                </p>
+              </div>
             </div>
           </div>
 
