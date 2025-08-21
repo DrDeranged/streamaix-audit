@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -34,6 +34,22 @@ export const summaries = pgTable("summaries", {
   isPublic: boolean("is_public").default(true),
   processingStatus: text("processing_status").notNull().default("pending"), // pending, processing, completed, failed
   accuracy: integer("accuracy"), // percentage
+  // Content intelligence fields
+  trends: jsonb("trends"), // trending topics and patterns
+  narratives: jsonb("narratives"), // main storylines and themes
+  executiveSummary: text("executive_summary"), // concise 2-3 sentence summary
+  bulletPoints: jsonb("bullet_points"), // key points array
+  timeline: jsonb("timeline"), // content progression timeline
+  keyQuotes: jsonb("key_quotes"), // notable quotes with timestamps
+  actionItems: jsonb("action_items"), // actionable insights
+  entities: jsonb("entities"), // people, companies, technologies mentioned
+  themes: jsonb("themes"), // central themes and topics
+  marketSentiment: text("market_sentiment"), // sentiment analysis result
+  expertCredibility: integer("expert_credibility"), // credibility score 0-100
+  conflictingViews: jsonb("conflicting_views"), // opposing viewpoints
+  sourceCredibility: text("source_credibility"), // source rating A+ to D
+  confidenceLevel: real("confidence_level"), // AI confidence 0-1
+  marketOutlook: text("market_outlook"), // overall outlook assessment
   arweaveId: text("arweave_id"), // decentralized storage reference
   ipfsHash: text("ipfs_hash"), // alternative decentralized storage
   createdAt: timestamp("created_at").defaultNow(),
