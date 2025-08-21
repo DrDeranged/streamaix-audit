@@ -146,34 +146,37 @@ export class StreamProcessor {
       job.progress = 90;
 
       // Step 4: Update summary with results
-      await storage.updateSummary(job.summaryId, {
+      const updateData: any = {
         transcript: aiResult.transcript,
         summary: aiResult.summary,
         keyInsights: aiResult.keyInsights,
         chapters: aiResult.chapters,
         tags: [...(summary.tags || []), ...aiResult.tags],
         originalDuration: aiResult.duration,
-        // Include all the new content intelligence features
-        trends: aiResult.trends,
-        narratives: aiResult.narratives,
-        executiveSummary: aiResult.executiveSummary,
-        bulletPoints: aiResult.bulletPoints,
-        timeline: aiResult.timeline,
-        keyQuotes: aiResult.keyQuotes,
-        actionItems: aiResult.actionItems,
-        entities: aiResult.entities,
-        themes: aiResult.themes,
-        marketSentiment: aiResult.marketSentiment,
-        expertCredibility: aiResult.expertCredibility,
-        conflictingViews: aiResult.conflictingViews,
-        sourceCredibility: aiResult.sourceCredibility,
-        confidenceLevel: aiResult.confidenceLevel,
-        marketOutlook: aiResult.marketOutlook,
         accuracy: aiResult.accuracy,
         ipfsHash,
         arweaveId,
         processingStatus: 'completed'
-      });
+      };
+
+      // Add content intelligence fields if they exist
+      if (aiResult.trends) updateData.trends = aiResult.trends;
+      if (aiResult.narratives) updateData.narratives = aiResult.narratives;
+      if (aiResult.executiveSummary) updateData.executiveSummary = aiResult.executiveSummary;
+      if (aiResult.bulletPoints) updateData.bulletPoints = aiResult.bulletPoints;
+      if (aiResult.timeline) updateData.timeline = aiResult.timeline;
+      if (aiResult.keyQuotes) updateData.keyQuotes = aiResult.keyQuotes;
+      if (aiResult.actionItems) updateData.actionItems = aiResult.actionItems;
+      if (aiResult.entities) updateData.entities = aiResult.entities;
+      if (aiResult.themes) updateData.themes = aiResult.themes;
+      if (aiResult.marketSentiment) updateData.marketSentiment = aiResult.marketSentiment;
+      if (aiResult.expertCredibility) updateData.expertCredibility = aiResult.expertCredibility;
+      if (aiResult.conflictingViews) updateData.conflictingViews = aiResult.conflictingViews;
+      if (aiResult.sourceCredibility) updateData.sourceCredibility = aiResult.sourceCredibility;
+      if (aiResult.confidenceLevel) updateData.confidenceLevel = aiResult.confidenceLevel;
+      if (aiResult.marketOutlook) updateData.marketOutlook = aiResult.marketOutlook;
+
+      await storage.updateSummary(job.summaryId, updateData);
 
       // Mark job as completed with 100% progress
       job.progress = 100;

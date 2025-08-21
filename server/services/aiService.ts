@@ -309,7 +309,7 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
       
       console.log(`Content processing completed for: ${extractedContent.title}`);
       
-      return {
+      const result: any = {
         transcript,
         summary: aiResult.summary,
         keyInsights: contentIntelligence.keyInsights,
@@ -317,24 +317,27 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
         tags: aiResult.tags,
         duration: extractedContent.duration,
         processingStatus: 'completed' as const,
-        accuracy: 98,
-        // Comprehensive content intelligence features
-        trends: contentIntelligence.trends,
-        narratives: contentIntelligence.narratives,
-        executiveSummary: contentIntelligence.variations.executiveSummary,
-        bulletPoints: contentIntelligence.variations.bulletPoints,
-        timeline: contentIntelligence.variations.timeline,
-        keyQuotes: contentIntelligence.variations.keyQuotes,
-        actionItems: contentIntelligence.variations.actionItems,
-        entities: contentIntelligence.entities,
-        themes: contentIntelligence.themes,
-        marketSentiment: contentIntelligence.sentiment,
-        expertCredibility: contentIntelligence.credibilityScore,
-        conflictingViews: contentIntelligence.conflicts,
-        sourceCredibility: contentIntelligence.sourceRating,
-        confidenceLevel: contentIntelligence.confidence,
-        marketOutlook: contentIntelligence.outlook
+        accuracy: 98
       };
+
+      // Add content intelligence fields if they exist
+      if (contentIntelligence.trends) result.trends = contentIntelligence.trends;
+      if (contentIntelligence.narratives) result.narratives = contentIntelligence.narratives;
+      if (contentIntelligence.variations?.executiveSummary) result.executiveSummary = contentIntelligence.variations.executiveSummary;
+      if (contentIntelligence.variations?.bulletPoints) result.bulletPoints = contentIntelligence.variations.bulletPoints;
+      if (contentIntelligence.variations?.timeline) result.timeline = contentIntelligence.variations.timeline;
+      if (contentIntelligence.variations?.keyQuotes) result.keyQuotes = contentIntelligence.variations.keyQuotes;
+      if (contentIntelligence.variations?.actionItems) result.actionItems = contentIntelligence.variations.actionItems;
+      if (contentIntelligence.entities) result.entities = contentIntelligence.entities;
+      if (contentIntelligence.themes) result.themes = contentIntelligence.themes;
+      if (contentIntelligence.sentiment) result.marketSentiment = contentIntelligence.sentiment;
+      if (contentIntelligence.credibilityScore) result.expertCredibility = contentIntelligence.credibilityScore;
+      if (contentIntelligence.conflicts) result.conflictingViews = contentIntelligence.conflicts;
+      if (contentIntelligence.sourceRating) result.sourceCredibility = contentIntelligence.sourceRating;
+      if (contentIntelligence.confidence) result.confidenceLevel = contentIntelligence.confidence;
+      if (contentIntelligence.outlook) result.marketOutlook = contentIntelligence.outlook;
+
+      return result;
 
     } catch (error) {
       console.error('Content processing failed:', error);
