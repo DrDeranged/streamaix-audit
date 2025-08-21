@@ -342,110 +342,105 @@ export function RealAIDemo() {
                       </div>
                     </div>
 
-                    {/* Trading Alpha Section */}
-                    {(result.tradingSignals || result.priceTargets) && (
+                    {/* Content Intelligence Section */}
+                    {(result.trends || result.narratives || result.bulletPoints) && (
                       <div className="border-t pt-4">
-                        <h4 className="font-semibold mb-3 text-green-600 dark:text-green-400">🎯 Trading Alpha</h4>
+                        <h4 className="font-semibold mb-3 text-indigo-600 dark:text-indigo-400">📊 Content Intelligence</h4>
                         
-                        {/* Trading Signals */}
-                        {result.tradingSignals && result.tradingSignals.length > 0 && (
+                        {/* Executive Summary */}
+                        {result.executiveSummary && (
                           <div className="mb-4">
-                            <h5 className="text-sm font-medium mb-2">Trading Signals</h5>
+                            <h5 className="text-sm font-medium mb-2">Executive Summary</h5>
+                            <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-md">
+                              <p className="text-sm leading-relaxed">{result.executiveSummary}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Bullet Points */}
+                        {result.bulletPoints && result.bulletPoints.length > 0 && (
+                          <div className="mb-4">
+                            <h5 className="text-sm font-medium mb-2">Key Points</h5>
+                            <div className="space-y-2">
+                              {result.bulletPoints.slice(0, 4).map((point: string, idx: number) => (
+                                <div key={idx} className="flex items-start gap-2 p-2 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-md">
+                                  <span className="font-medium text-blue-600 dark:text-blue-400 text-xs mt-0.5">•</span>
+                                  <span className="text-sm">{point}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Trends */}
+                        {result.trends && result.trends.length > 0 && (
+                          <div className="mb-4">
+                            <h5 className="text-sm font-medium mb-2">Key Trends</h5>
                             <div className="grid gap-2">
-                              {result.tradingSignals.slice(0, 3).map((signal: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between p-2 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-md">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant={signal.signal === 'BUY' ? 'default' : signal.signal === 'SELL' ? 'destructive' : 'secondary'} className="text-xs">
-                                      {signal.asset}
+                              {result.trends.slice(0, 2).map((trend: any, idx: number) => (
+                                <div key={idx} className="p-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-md">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium text-sm">{trend.trend}</span>
+                                    <Badge variant="outline" className={`text-xs ${
+                                      trend.strength === 'strong' ? 'text-green-600 dark:text-green-400' :
+                                      trend.strength === 'moderate' ? 'text-yellow-600 dark:text-yellow-400' :
+                                      'text-gray-600 dark:text-gray-400'
+                                    }`}>
+                                      {trend.strength}
                                     </Badge>
-                                    <span className="font-medium text-sm">{signal.signal}</span>
                                   </div>
-                                  <span className="text-xs text-muted-foreground">{Math.round(signal.confidence * 100)}% confidence</span>
+                                  <p className="text-xs text-muted-foreground">{trend.evidence}</p>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )}
 
-                        {/* Price Targets */}
-                        {result.priceTargets && result.priceTargets.length > 0 && (
+                        {/* Key Quotes */}
+                        {result.keyQuotes && result.keyQuotes.length > 0 && (
                           <div className="mb-4">
-                            <h5 className="text-sm font-medium mb-2">Price Targets</h5>
-                            <div className="grid gap-2">
-                              {result.priceTargets.slice(0, 2).map((target: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between p-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-md">
-                                  <div>
-                                    <span className="font-medium">{target.asset}</span>
-                                    <span className="ml-2 text-sm text-muted-foreground">{target.timeframe}</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="font-bold text-green-600 dark:text-green-400">{target.target}</div>
-                                    <div className="text-xs text-muted-foreground">{Math.round(target.probability * 100)}% probability</div>
+                            <h5 className="text-sm font-medium mb-2">Notable Quotes</h5>
+                            <div className="space-y-2">
+                              {result.keyQuotes.slice(0, 2).map((quote: any, idx: number) => (
+                                <div key={idx} className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-md border-l-2 border-amber-400">
+                                  <p className="text-sm italic mb-1">"{quote.quote}"</p>
+                                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <span>{quote.speaker || 'Speaker'}</span>
+                                    <span>{quote.timestamp}</span>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )}
-
-                        {/* Market Sentiment & Risk */}
-                        <div className="grid grid-cols-2 gap-3">
-                          {result.marketSentiment && (
-                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
-                              <div className={`font-semibold text-sm ${
-                                result.marketSentiment === 'BULLISH' ? 'text-green-600 dark:text-green-400' :
-                                result.marketSentiment === 'BEARISH' ? 'text-red-600 dark:text-red-400' :
-                                'text-yellow-600 dark:text-yellow-400'
-                              }`}>
-                                {result.marketSentiment}
-                              </div>
-                              <div className="text-xs text-muted-foreground">Market Sentiment</div>
-                            </div>
-                          )}
-                          {result.riskAssessment && (
-                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
-                              <div className={`font-semibold text-sm ${
-                                result.riskAssessment === 'LOW' ? 'text-green-600 dark:text-green-400' :
-                                result.riskAssessment === 'HIGH' ? 'text-red-600 dark:text-red-400' :
-                                'text-yellow-600 dark:text-yellow-400'
-                              }`}>
-                                {result.riskAssessment}
-                              </div>
-                              <div className="text-xs text-muted-foreground">Risk Level</div>
-                            </div>
-                          )}
-                        </div>
                       </div>
                     )}
 
-                    {/* Expert Credibility */}
-                    {(result.expertCredibility || result.sourceCredibility) && (
-                      <div className="border-t pt-4">
-                        <h4 className="font-semibold mb-2">Source Credibility</h4>
-                        <div className="flex items-center gap-4">
-                          {result.expertCredibility && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">Expert Score:</span>
-                              <Badge variant="outline" className="font-mono">
-                                {result.expertCredibility}/100
-                              </Badge>
+                    {/* Analysis Metrics */}
+                    <div className="border-t pt-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        {result.marketSentiment && (
+                          <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+                            <div className={`font-semibold text-sm ${
+                              result.marketSentiment === 'POSITIVE' || result.marketSentiment === 'BULLISH' ? 'text-green-600 dark:text-green-400' :
+                              result.marketSentiment === 'NEGATIVE' || result.marketSentiment === 'BEARISH' ? 'text-red-600 dark:text-red-400' :
+                              'text-yellow-600 dark:text-yellow-400'
+                            }`}>
+                              {result.marketSentiment}
                             </div>
-                          )}
-                          {result.sourceCredibility && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">Rating:</span>
-                              <Badge variant="outline" className={`font-bold ${
-                                result.sourceCredibility.startsWith('A') ? 'text-green-600 dark:text-green-400' :
-                                result.sourceCredibility.startsWith('B') ? 'text-blue-600 dark:text-blue-400' :
-                                'text-yellow-600 dark:text-yellow-400'
-                              }`}>
-                                {result.sourceCredibility}
-                              </Badge>
+                            <div className="text-xs text-muted-foreground">Sentiment</div>
+                          </div>
+                        )}
+                        {(result.expertCredibility || result.sourceCredibility) && (
+                          <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+                            <div className="font-semibold text-sm text-purple-600 dark:text-purple-400">
+                              {result.sourceCredibility || `${result.expertCredibility}/100`}
                             </div>
-                          )}
-                        </div>
+                            <div className="text-xs text-muted-foreground">Source Rating</div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
 
                     {/* Decentralized Storage */}
                     {(result.ipfsHash || result.arweaveId) && (
