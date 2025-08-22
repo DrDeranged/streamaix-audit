@@ -357,7 +357,7 @@ export default function SummaryView() {
                   <h3 className="text-lg font-semibold text-white">Raw Data Analysis</h3>
                   <div className="bg-black/20 rounded-lg p-4 border border-white/10">
                     <pre className="text-sm text-gray-300 overflow-x-auto">
-                      {JSON.stringify({
+                      {JSON.stringify(summary.rawData || {
                         title: summary.title,
                         source: `${summary.platform} Analysis`,
                         duration: summary.originalDuration ? `${Math.floor(summary.originalDuration / 60)}:${(summary.originalDuration % 60).toString().padStart(2, '0')}` : "20:45",
@@ -394,10 +394,10 @@ export default function SummaryView() {
                   <h3 className="text-lg font-semibold text-white">TL;DR - Quick Summary</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                     <div className="text-gray-300 leading-relaxed">
-                      {summary.summary && summary.summary.includes('AI') ? 
+                      {(summary as any).tldrSummary || (summary.summary && summary.summary.includes('AI') ? 
                         "AI is transforming content creation by reducing production time by 80% while maintaining quality. Machine learning optimizes content in real-time, and ethical considerations around authenticity are becoming critical as AI amplifies rather than replaces human creativity." :
                         "Decentralized applications are revolutionizing software architecture through smart contracts and blockchain technology. Cross-chain interoperability is crucial for scalability, but user experience complexity remains the primary adoption barrier."
-                      }
+                      )}
                     </div>
                   </div>
                 </div>
@@ -407,10 +407,10 @@ export default function SummaryView() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white">Comprehensive Analysis</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-                    {summary.summary ? (
+                    {((summary as any).blogPost || summary.summary) ? (
                       <div className="text-gray-300 leading-relaxed prose prose-invert max-w-none">
                         <div dangerouslySetInnerHTML={{ 
-                          __html: summary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          __html: ((summary as any).blogPost || summary.summary).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                                                .replace(/\n\n/g, '</p><p>')
                                                .replace(/^/, '<p>')
                                                .replace(/$/, '</p>')
@@ -428,7 +428,14 @@ export default function SummaryView() {
                   <h3 className="text-lg font-semibold text-white">Market Intelligence Assessment</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                     <div className="text-gray-300 leading-relaxed prose prose-invert max-w-none">
-                      {summary.summary && summary.summary.includes('AI') ? (
+                      {(summary as any).marketAnalysis ? (
+                        <div dangerouslySetInnerHTML={{ 
+                          __html: (summary as any).marketAnalysis.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                               .replace(/\n\n/g, '</p><p>')
+                                               .replace(/^/, '<p>')
+                                               .replace(/$/, '</p>')
+                        }} />
+                      ) : (summary.summary && summary.summary.includes('AI') ? (
                         <div>
                           <h4 className="text-purple-300 text-lg font-semibold mb-3">AI Content Creation Market Analysis</h4>
                           
@@ -494,7 +501,7 @@ export default function SummaryView() {
                             <p className="text-blue-200"><strong>Emerging High-Value Sector</strong>: DApps represent a maturing technology with proven utility, growing institutional adoption, and significant infrastructure investment supporting long-term growth potential.</p>
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
                 </div>

@@ -84,26 +84,28 @@ export class MockAIService {
 
       The challenges remain significant - user experience, scalability, and regulatory uncertainty are major hurdles that the industry continues to address through innovative solutions and thoughtful design patterns.`;
 
-    // Generate structured content with the requested format
-    const rawData = isYouTube ? {
-      title: "How AI is Revolutionizing Content Creation",
-      source: "YouTube Video Analysis",
+    // Generate structured content for each category
+    const rawData = {
+      title: isYouTube ? "How AI is Revolutionizing Content Creation" : "The Future of Decentralized Applications",
+      source: isYouTube ? "YouTube Video Analysis" : "Blockchain Podcast Analysis", 
       duration: "20:45",
-      platform: "YouTube",
-      quality: "High-definition analysis"
-    } : {
-      title: "The Future of Decentralized Applications", 
-      source: "Blockchain Podcast Analysis",
-      duration: "20:45", 
-      platform: "Podcast",
-      quality: "Professional audio analysis"
+      platform: isYouTube ? "YouTube" : "Podcast",
+      quality: "High-definition analysis",
+      fileSize: "245 MB",
+      resolution: isYouTube ? "1080p" : "320kbps",
+      metadata: {
+        uploadDate: "2024-01-15",
+        views: isYouTube ? "1.2M" : "45K downloads",
+        engagement: "8.5%",
+        language: "English"
+      }
     };
 
-    const tldr = isYouTube ?
+    const tldrSummary = isYouTube ?
       "AI is transforming content creation by reducing production time by 80% while maintaining quality. Machine learning optimizes content in real-time, and ethical considerations around authenticity are becoming critical as AI amplifies rather than replaces human creativity." :
       "Decentralized applications are revolutionizing software architecture through smart contracts and blockchain technology. Cross-chain interoperability is crucial for scalability, but user experience complexity remains the primary adoption barrier.";
 
-    const blogSummary = isYouTube ?
+    const blogPost = isYouTube ?
       `# The AI Content Creation Revolution: Efficiency Meets Ethics
 
 ## Executive Summary
@@ -216,16 +218,8 @@ First-mover advantages exist in sectors addressing current limitations: user exp
 ### Market Recommendation  
 **Emerging High-Value Sector**: DApps represent a maturing technology with proven utility, growing institutional adoption, and significant infrastructure investment supporting long-term growth potential.`;
 
-    const summary = `${blogSummary}
-
-## Raw Data Analysis
-${JSON.stringify(rawData, null, 2)}
-
-## TLDR
-${tldr}
-
-## Market Intelligence Assessment
-${marketAnalysis}`;
+    // Legacy summary field for backward compatibility
+    const summary = blogPost;
       `This in-depth exploration of decentralized applications reveals how blockchain technology is reshaping software architecture and user relationships with digital platforms. The discussion covers fundamental shifts from centralized to distributed systems, emphasizing user sovereignty and data ownership.
 
       **Core Technical Architecture:**
@@ -351,6 +345,10 @@ ${marketAnalysis}`;
     return {
       transcript,
       summary, 
+      tldrSummary,
+      blogPost,
+      marketAnalysis,
+      rawData,
       keyInsights,
       chapters,
       tags,

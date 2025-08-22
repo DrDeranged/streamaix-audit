@@ -27,6 +27,10 @@ export const summaries = pgTable("summaries", {
   platform: text("platform").notNull(), // youtube, spotify, twitch, etc
   transcript: text("transcript"),
   summary: text("summary"),
+  tldrSummary: text("tldr_summary"),
+  blogPost: text("blog_post"),
+  marketAnalysis: text("market_analysis"),
+  rawData: jsonb("raw_data"),
   keyInsights: jsonb("key_insights"), // array of insight objects
   chapters: jsonb("chapters"), // array of chapter objects
   tags: text("tags").array(),
