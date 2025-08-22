@@ -23,6 +23,7 @@ const NFTGallery = React.lazy(() => import("@/pages/nft-gallery"));
 const GovernancePage = React.lazy(() => import("@/pages/governance"));
 const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
+const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
 
 function Router() {
   return (
@@ -82,6 +83,14 @@ function Router() {
         <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
           <SummaryView />
         </Suspense>
+      </Route>
+      
+      <Route path="/results/:id">
+        {(params) => (
+          <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+            <ProcessingResults params={params} />
+          </Suspense>
+        )}
       </Route>
       
       <Route path="/auth" component={Auth} />

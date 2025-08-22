@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 export function RealAIDemo() {
   const [url, setUrl] = useState("");
@@ -21,6 +22,7 @@ export function RealAIDemo() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
 
   const supportedPlatforms = [
     { name: "YouTube", icon: Youtube, color: "text-red-500" },
@@ -183,9 +185,12 @@ export function RealAIDemo() {
                 setIsProcessing(false);
                 toast({
                   title: "Success!",
-                  description: "Content processing completed (detected via diagnostic check).",
+                  description: "Redirecting to results page...",
                   variant: "default"
                 });
+                setTimeout(() => {
+                  setLocation(`/results/${correctedResponse.summary.id}`);
+                }, 1500);
                 return;
               }
             } catch (debugError) {
@@ -202,9 +207,12 @@ export function RealAIDemo() {
             setIsProcessing(false);
             toast({
               title: "Success!",
-              description: "Content has been successfully processed and analyzed.",
+              description: "Redirecting to results page...",
               variant: "default"
             });
+            setTimeout(() => {
+              setLocation(`/results/${summaryResponse.summary.id}`);
+            }, 1500);
             return;
           } else if (summaryResponse.summary.processingStatus === 'failed') {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
@@ -243,9 +251,12 @@ export function RealAIDemo() {
                 setIsProcessing(false);
                 toast({
                   title: "Success!",
-                  description: "Content processing completed (detected via debug check).",
+                  description: "Redirecting to results page...",
                   variant: "default"
                 });
+                setTimeout(() => {
+                  setLocation(`/results/${finalResponse.summary.id}`);
+                }, 1500);
                 return;
               }
             } catch (debugError) {
