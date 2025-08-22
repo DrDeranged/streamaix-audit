@@ -31,7 +31,7 @@ export interface IStorage {
   getSummaries(limit?: number, offset?: number): Promise<Summary[]>;
   getSummariesByUser(userId: string): Promise<Summary[]>;
   createSummary(summary: InsertSummary): Promise<Summary>;
-  updateSummary(id: string, updates: Partial<InsertSummary>): Promise<Summary | undefined>;
+  updateSummary(id: string, updates: any): Promise<Summary | undefined>;
   deleteSummary(id: string): Promise<boolean>;
 
   // Bounty operations
@@ -132,7 +132,7 @@ export class DatabaseStorage implements IStorage {
     return summary;
   }
 
-  async updateSummary(id: string, updates: Partial<InsertSummary>): Promise<Summary | undefined> {
+  async updateSummary(id: string, updates: any): Promise<Summary | undefined> {
     const [summary] = await db
       .update(summaries)
       .set({ ...updates, updatedAt: new Date() })
