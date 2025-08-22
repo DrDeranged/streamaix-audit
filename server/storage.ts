@@ -29,6 +29,7 @@ export interface IStorage {
   // Summary operations
   getSummary(id: string): Promise<Summary | undefined>;
   getSummaries(limit?: number, offset?: number): Promise<Summary[]>;
+  getAllSummaries(): Promise<Summary[]>;
   getSummariesByUser(userId: string): Promise<Summary[]>;
   createSummary(summary: InsertSummary): Promise<Summary>;
   updateSummary(id: string, updates: any): Promise<Summary | undefined>;
@@ -114,6 +115,13 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(summaries.createdAt))
       .limit(limit)
       .offset(offset);
+  }
+
+  async getAllSummaries(): Promise<Summary[]> {
+    return await db
+      .select()
+      .from(summaries)
+      .orderBy(desc(summaries.createdAt));
   }
 
   async getSummariesByUser(userId: string): Promise<Summary[]> {

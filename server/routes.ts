@@ -332,8 +332,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Filter to public summaries with content
       const publicSummaries = summaries
-        .filter(s => s.isPublic && s.processingStatus === 'completed')
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .filter((s: any) => s.isPublic && s.processingStatus === 'completed')
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 10); // Limit to most recent 10
       
       res.json(publicSummaries);
