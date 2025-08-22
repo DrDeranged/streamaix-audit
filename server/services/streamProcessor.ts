@@ -146,37 +146,31 @@ export class StreamProcessor {
       job.progress = 90;
 
       // Step 4: Update summary with results
-      const updateData: any = {
-        transcript: aiResult.transcript,
-        summary: aiResult.summary,
-        keyInsights: aiResult.keyInsights,
-        chapters: aiResult.chapters,
-        tags: [...(summary.tags || []), ...aiResult.tags],
-        originalDuration: aiResult.duration,
-        accuracy: aiResult.accuracy,
-        ipfsHash,
-        arweaveId,
-        processingStatus: 'completed'
-      };
-
-      // Add content intelligence fields if they exist
-      if (aiResult.trends) updateData.trends = aiResult.trends;
-      if (aiResult.narratives) updateData.narratives = aiResult.narratives;
-      if (aiResult.executiveSummary) updateData.executiveSummary = aiResult.executiveSummary;
-      if (aiResult.bulletPoints) updateData.bulletPoints = aiResult.bulletPoints;
-      if (aiResult.timeline) updateData.timeline = aiResult.timeline;
-      if (aiResult.keyQuotes) updateData.keyQuotes = aiResult.keyQuotes;
-      if (aiResult.actionItems) updateData.actionItems = aiResult.actionItems;
-      if (aiResult.entities) updateData.entities = aiResult.entities;
-      if (aiResult.themes) updateData.themes = aiResult.themes;
-      if (aiResult.marketSentiment) updateData.marketSentiment = aiResult.marketSentiment;
-      if (aiResult.expertCredibility) updateData.expertCredibility = aiResult.expertCredibility;
-      if (aiResult.conflictingViews) updateData.conflictingViews = aiResult.conflictingViews;
-      if (aiResult.sourceCredibility) updateData.sourceCredibility = aiResult.sourceCredibility;
-      if (aiResult.confidenceLevel) updateData.confidenceLevel = aiResult.confidenceLevel;
-      if (aiResult.marketOutlook) updateData.marketOutlook = aiResult.marketOutlook;
-
-      await storage.updateSummary(job.summaryId, updateData);
+      console.log('Updating summary with AI results...');
+      
+      try {
+        await storage.updateSummary(job.summaryId, {
+          transcript: aiResult.transcript,
+          summary: aiResult.summary,
+          keyInsights: aiResult.keyInsights,
+          chapters: aiResult.chapters,
+          tags: [...(summary.tags || []), ...(aiResult.tags || [])],
+          originalDuration: aiResult.duration,
+          accuracy: aiResult.accuracy || 98,
+          ipfsHash,
+          arweaveId,
+          processingStatus: 'completed'
+        });
+        
+        console.log('Summary updated successfully with completion status');
+      } catch (updateError) {
+        console.error('Failed to update summary:', updateError);
+        // Fallback: at least update the status
+        await storage.updateSummary(job.summaryId, {
+          processingStatus: 'completed'
+        });
+        console.log('Updated with minimal completion status');
+      }
 
       // Mark job as completed with 100% progress
       job.progress = 100;

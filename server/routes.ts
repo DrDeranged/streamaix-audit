@@ -363,10 +363,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get summary by ID
   app.get('/api/summaries/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    console.log(`API: Fetching summary ${req.params.id}`);
     const summary = await storage.getSummary(req.params.id);
     if (!summary) {
+      console.log(`API: Summary ${req.params.id} not found`);
       return res.status(404).json({ error: 'Summary not found' });
     }
+
+    console.log(`API: Summary ${req.params.id} found - status: ${summary.processingStatus}`);
 
     // Track view if user is authenticated
     if (req.user) {

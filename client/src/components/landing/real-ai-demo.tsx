@@ -124,8 +124,10 @@ export function RealAIDemo() {
           const summaryResponse = await apiRequest(`/api/summaries/${response.summary.id}`);
           
           console.log('Summary status:', summaryResponse.summary?.processingStatus);
+          console.log('Summary object:', JSON.stringify(summaryResponse.summary, null, 2));
           
           if (summaryResponse.summary.processingStatus === 'completed') {
+            console.log('🎉 Processing completed! Setting result...');
             setResult(summaryResponse.summary);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
