@@ -325,20 +325,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SUMMARY ROUTES
   // =============================================================================
 
-  // Get all summaries (public)
+  // Get all summaries (public) - for landing page
   app.get('/api/summaries', asyncHandler(async (req: Request, res: Response) => {
-    const validation = validateRequest(paginationSchema, req.query);
-    if (!validation.success) {
-      return res.status(400).json({ error: validation.error });
+    try {
+      const summaries = await storage.getAllSummaries();
+      
+      // Filter to public summaries with content
+      const publicSummaries = summaries
+        .filter(s => s.isPublic && s.processingStatus === 'completed')
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10); // Limit to most recent 10
+      
+      res.json(publicSummaries);
+    } catch (error) {
+      console.error('Error fetching summaries:', error);
+      res.status(500).json({ error: 'Failed to fetch summaries' });
     }
-
-    const { limit, offset } = validation.data as { limit: number; offset: number };
-    const summaries = await storage.getSummaries(limit, offset);
-
-    res.json({
-      summaries,
-      pagination: { limit, offset, count: summaries.length }
-    });
   }));
 
   // Get trending summaries
@@ -449,6 +451,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const summaries = await storage.getSummariesByUser(req.params.id);
     res.json({ summaries });
   }));
+
+
 
   // =============================================================================
   // BOUNTY ROUTES
