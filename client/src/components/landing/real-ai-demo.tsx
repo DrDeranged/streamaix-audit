@@ -122,12 +122,20 @@ export function RealAIDemo() {
         try {
           console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${response.summary.id}`);
           
-          // Force fresh data by adding cache-busting parameter
+          // Use V2 processing result endpoint for better reliability
           const timestamp = Date.now();
-          const summaryResponse = await fetch(`/api/summaries/${response.summary.id}?t=${timestamp}`, {
+          const processingResult = await fetch(`/api/processing-result/${response.summary.id}?t=${timestamp}`, {
             headers: { 'Content-Type': 'application/json' },
             cache: 'no-cache'
           }).then(res => res.json());
+          
+          // Fallback to regular summary endpoint
+          const summaryResponse = processingResult.success && processingResult.content ? 
+            { summary: processingResult.content } :
+            await fetch(`/api/summaries/${response.summary.id}?t=${timestamp}`, {
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-cache'
+            }).then(res => res.json());
           
           console.log('Summary status:', summaryResponse.summary?.processingStatus);
           console.log('Summary has content:', !!summaryResponse.summary?.summary);

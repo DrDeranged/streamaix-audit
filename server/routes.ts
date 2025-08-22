@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
+import { StreamProcessorV2 } from "./services/streamProcessorV2";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { 
@@ -952,12 +953,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         processingStatus: 'pending'
       });
 
-      // Start real processing
-      const jobId = await StreamProcessor.queueProcessing(summary.id, url, {
-        contentType: 'video',
-        platform: 'test',
-        title: 'Real Processing Test'
-      });
+      // Start real processing with V2 processor
+      console.log('🚀 Starting processing with StreamProcessorV2');
+      const jobId = await StreamProcessorV2.startProcessing(summary.id, url);
 
       res.status(201).json({
         message: 'Real AI processing started successfully',
@@ -988,10 +986,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ error: 'Summary not found' });
     }
 
-    // Get processing job status if possible
+    // Get processing job status from V2 processor
     let processingInfo = 'No active processing info available';
     try {
-      processingInfo = StreamProcessor.getQueueStatus();
+      processingInfo = StreamProcessorV2.getQueueStatus();
     } catch (e) {
       processingInfo = 'Unable to retrieve processing status';
     }
@@ -1020,14 +1018,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
-  // Get job status endpoint
+  // Get job status endpoint (V2)
   app.get('/api/jobs/:id', asyncHandler(async (req: Request, res: Response) => {
-    const job = StreamProcessor.getJob(req.params.id);
+    const job = StreamProcessorV2.getJobStatus(req.params.id);
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
 
     res.json({ job });
+  }));
+
+  // Get processing result endpoint (V2)
+  app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
+    const result = await StreamProcessorV2.getProcessingResult(req.params.summaryId);
+    res.json(result);
   }));
 
   const httpServer = createServer(app);
