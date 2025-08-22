@@ -90,13 +90,15 @@ export default function SummaryView() {
   const summaryId = params?.id;
 
   // Fetch summary details
-  const { data: summary, isLoading, error } = useQuery({
+  const { data: summaryData, isLoading, error } = useQuery({
     queryKey: ['summary', summaryId],
     queryFn: () => apiRequest(`/api/summaries/${summaryId}`, {
       headers: getAuthHeaders()
     }),
     enabled: !!summaryId,
-  }) as { data: Summary | undefined, isLoading: boolean, error: any };
+  }) as { data: { summary: Summary } | undefined, isLoading: boolean, error: any };
+
+  const summary = summaryData?.summary;
 
   // Fetch processing status if needed
   const { data: jobData } = useQuery({
@@ -168,8 +170,8 @@ export default function SummaryView() {
     );
   }
 
-  const isOwner = user?.id === summary.creator.id;
-  const canView = summary.isPublic || isOwner;
+  const isOwner = user?.id === summary?.creator?.id;
+  const canView = summary?.isPublic || isOwner;
 
   if (!canView) {
     return (
@@ -251,11 +253,11 @@ export default function SummaryView() {
                 <div className="flex items-center gap-4 text-sm text-gray-400">
                   <span className="flex items-center gap-1">
                     <User className="h-3 w-3" />
-                    {summary.creator.username}
+                    {summary?.creator?.username || 'Unknown'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {new Date(summary.createdAt).toLocaleDateString()}
+                    {summary?.createdAt ? new Date(summary.createdAt).toLocaleDateString() : 'Unknown'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" />

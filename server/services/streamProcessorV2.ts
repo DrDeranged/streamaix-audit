@@ -164,6 +164,10 @@ export class StreamProcessorV2 {
       const updateData = {
         transcript: aiResult.transcript,
         summary: aiResult.summary,
+        tldrSummary: aiResult.tldrSummary,
+        blogPost: aiResult.blogPost,
+        marketAnalysis: aiResult.marketAnalysis,
+        rawData: aiResult.rawData,
         keyInsights: aiResult.keyInsights,
         chapters: aiResult.chapters,
         tags: aiResult.tags || [],
