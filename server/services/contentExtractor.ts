@@ -67,12 +67,48 @@ export class ContentExtractor {
     const outputPath = join(this.tempDir, `youtube_${Date.now()}.mp3`);
     
     return new Promise((resolve, reject) => {
-      const command = `yt-dlp -x --audio-format mp3 --audio-quality 0 -o "${outputPath}" --print "title:%(title)s" --print "duration:%(duration)s" --print "description:%(description)s" "${url}"`;
+      // Try with anti-bot detection options
+      let command = `yt-dlp -x --audio-format mp3 --audio-quality 0 -o "${outputPath}" --print "title:%(title)s" --print "duration:%(duration)s" --print "description:%(description)s" --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" --referer "https://www.youtube.com/" "${url}"`;
       
       exec(command, { timeout: 300000 }, (error, stdout, stderr) => {
         if (error) {
           console.error('YouTube extraction failed:', error);
-          reject(new Error(`YouTube extraction failed: ${error.message}`));
+          
+          // Check if it's a bot detection error and provide helpful message
+          if (error.message.includes('Sign in to confirm') || error.message.includes('not a bot')) {
+            reject(new Error(`This YouTube video is currently protected by bot detection. Please try a different video URL. YouTube sometimes restricts access to certain videos to prevent automated downloads. Try using a video that's publicly available without restrictions.`));
+            return;
+          }
+          
+          // Try a fallback approach with different options
+          const fallbackCommand = `yt-dlp -x --audio-format mp3 --audio-quality 0 -o "${outputPath}" --print "title:%(title)s" --print "duration:%(duration)s" --print "description:%(description)s" --extractor-args "youtube:skip=dash" "${url}"`;
+          
+          exec(fallbackCommand, { timeout: 300000 }, (fallbackError, fallbackStdout, fallbackStderr) => {
+            if (fallbackError) {
+              reject(new Error(`YouTube extraction failed: ${error.message}`));
+              return;
+            }
+            
+            try {
+              const lines = fallbackStdout.trim().split('\n');
+              const titleLine = lines.find(line => line.startsWith('title:'));
+              const durationLine = lines.find(line => line.startsWith('duration:'));
+              const descriptionLine = lines.find(line => line.startsWith('description:'));
+              
+              const title = titleLine?.replace('title:', '') || 'Unknown Title';
+              const duration = parseFloat(durationLine?.replace('duration:', '') || '0');
+              const description = descriptionLine?.replace('description:', '') || '';
+
+              resolve({
+                audioPath: outputPath,
+                title,
+                duration,
+                description
+              });
+            } catch (parseError) {
+              reject(new Error(`Failed to parse YouTube metadata: ${parseError}`));
+            }
+          });
           return;
         }
 
