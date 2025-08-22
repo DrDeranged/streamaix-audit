@@ -441,7 +441,7 @@ export function RealAIDemo() {
                         variant="outline"
                         size="sm"
                         className="ml-auto"
-                        onClick={() => window.open(`/summaries/${result.id}`, '_blank')}
+                        onClick={() => window.open(`/summary/${result.id}`, '_blank')}
                       >
                         <ExternalLink className="w-4 h-4 mr-1" />
                         View Full
