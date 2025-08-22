@@ -941,14 +941,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(`Starting real processing test for URL: ${url}`);
       
-      // Create a test summary (public demo)
+      // Use a fixed existing user ID from database
+      const demoUserId = 'b57e2c1e-c053-4bff-8bff-d3cee93a3f0a';
+
+      // Create a test summary with the demo user
       const summary = await storage.createSummary({
         title: 'StreamProcessorV2 Demo',
         originalUrl: url,
         contentType: 'video',
         platform: 'demo',
         tags: ['v2-processor', 'demo'],
-        creatorId: 'demo-user-v2',
+        creatorId: 'demo-v2-user',
         isPublic: true,
         processingStatus: 'pending'
       });

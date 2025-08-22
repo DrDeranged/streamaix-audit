@@ -132,6 +132,18 @@ export class DatabaseStorage implements IStorage {
     return summary;
   }
 
+  async createSummaryDirect(summaryData: any): Promise<Summary> {
+    console.log('API: Creating summary directly with data:', summaryData);
+    const [summary] = await db
+      .insert(summaries)
+      .values({
+        ...summaryData,
+        creatorId: null // Bypass foreign key for demo
+      })
+      .returning();
+    return summary;
+  }
+
   async updateSummary(id: string, updates: any): Promise<Summary | undefined> {
     const [summary] = await db
       .update(summaries)
