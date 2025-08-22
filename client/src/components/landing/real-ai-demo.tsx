@@ -117,11 +117,13 @@ export function RealAIDemo() {
         });
       }, 2000);
 
-      // Check for results with retry mechanism
-      const checkResults = async (attempt = 1, maxAttempts = 8) => {
+      // Check for results with retry mechanism  
+      const checkResults = async (attempt = 1, maxAttempts = 12) => {
         try {
-          console.log(`Checking results attempt ${attempt}/${maxAttempts}`);
+          console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${response.summary.id}`);
           const summaryResponse = await apiRequest(`/api/summaries/${response.summary.id}`);
+          
+          console.log('Summary status:', summaryResponse.summary?.processingStatus);
           
           if (summaryResponse.summary.processingStatus === 'completed') {
             setResult(summaryResponse.summary);
@@ -129,16 +131,36 @@ export function RealAIDemo() {
             setProcessingStatus("Processing completed successfully!");
             clearInterval(progressInterval);
             setIsProcessing(false);
+            toast({
+              title: "Success!",
+              description: "Content has been successfully processed and analyzed.",
+              variant: "default"
+            });
             return;
           } else if (summaryResponse.summary.processingStatus === 'failed') {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           
-          // Still processing, check again
+          // Still processing, check again with shorter intervals
           if (attempt < maxAttempts) {
-            setTimeout(() => checkResults(attempt + 1, maxAttempts), 3000);
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 2000);
           } else {
-            throw new Error("Processing timed out after multiple attempts");
+            // Final check before timing out
+            const finalResponse = await apiRequest(`/api/summaries/${response.summary.id}`);
+            if (finalResponse.summary.processingStatus === 'completed') {
+              setResult(finalResponse.summary);
+              setProgress(100);
+              setProcessingStatus("Processing completed successfully!");
+              clearInterval(progressInterval);
+              setIsProcessing(false);
+              toast({
+                title: "Success!",
+                description: "Content processing completed successfully.",
+                variant: "default"
+              });
+              return;
+            }
+            throw new Error("Processing is taking longer than expected. The system may still be working in the background.");
           }
         } catch (checkError: any) {
           console.error(`Check attempt ${attempt} failed:`, checkError);
@@ -152,8 +174,8 @@ export function RealAIDemo() {
         }
       };
 
-      // Start checking after 10 seconds
-      setTimeout(() => checkResults(), 10000);
+      // Start checking after 5 seconds (earlier to catch completion)
+      setTimeout(() => checkResults(), 5000);
 
     } catch (err: any) {
       setError(err.message || "Failed to start processing");
