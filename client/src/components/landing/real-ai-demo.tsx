@@ -118,13 +118,20 @@ export function RealAIDemo() {
       }, 2000);
 
       // Check for results with retry mechanism  
-      const checkResults = async (attempt = 1, maxAttempts = 12) => {
+      const checkResults = async (attempt = 1, maxAttempts = 20) => {
         try {
           console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${response.summary.id}`);
-          const summaryResponse = await apiRequest(`/api/summaries/${response.summary.id}`);
+          
+          // Force fresh data by adding cache-busting parameter
+          const timestamp = Date.now();
+          const summaryResponse = await fetch(`/api/summaries/${response.summary.id}?t=${timestamp}`, {
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-cache'
+          }).then(res => res.json());
           
           console.log('Summary status:', summaryResponse.summary?.processingStatus);
-          console.log('Summary object:', JSON.stringify(summaryResponse.summary, null, 2));
+          console.log('Summary has content:', !!summaryResponse.summary?.summary);
+          console.log('Summary title:', summaryResponse.summary?.title);
           
           if (summaryResponse.summary.processingStatus === 'completed') {
             console.log('🎉 Processing completed! Setting result...');
@@ -143,25 +150,10 @@ export function RealAIDemo() {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           
-          // Still processing, check again with shorter intervals
+          // Still processing, check again
           if (attempt < maxAttempts) {
-            setTimeout(() => checkResults(attempt + 1, maxAttempts), 2000);
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 1500);
           } else {
-            // Final check before timing out
-            const finalResponse = await apiRequest(`/api/summaries/${response.summary.id}`);
-            if (finalResponse.summary.processingStatus === 'completed') {
-              setResult(finalResponse.summary);
-              setProgress(100);
-              setProcessingStatus("Processing completed successfully!");
-              clearInterval(progressInterval);
-              setIsProcessing(false);
-              toast({
-                title: "Success!",
-                description: "Content processing completed successfully.",
-                variant: "default"
-              });
-              return;
-            }
             throw new Error("Processing is taking longer than expected. The system may still be working in the background.");
           }
         } catch (checkError: any) {
@@ -169,6 +161,37 @@ export function RealAIDemo() {
           if (attempt < maxAttempts) {
             setTimeout(() => checkResults(attempt + 1, maxAttempts), 3000);
           } else {
+            // Final diagnostic check before giving up
+            console.log('🔍 Final diagnostic check before timeout...');
+            try {
+              const debugResponse = await fetch(`/api/debug/summary/${response.summary.id}`, {
+                cache: 'no-cache'
+              }).then(res => res.json());
+              
+              console.log('Debug info:', debugResponse);
+              
+              if (debugResponse.summary?.processingStatus === 'completed') {
+                console.log('⚡ Debug check found completed status - processing actually finished!');
+                const finalResponse = await fetch(`/api/summaries/${response.summary.id}?t=${Date.now()}`, {
+                  cache: 'no-cache'
+                }).then(res => res.json());
+                
+                setResult(finalResponse.summary);
+                setProgress(100);
+                setProcessingStatus("Processing completed successfully!");
+                clearInterval(progressInterval);
+                setIsProcessing(false);
+                toast({
+                  title: "Success!",
+                  description: "Content processing completed (detected via debug check).",
+                  variant: "default"
+                });
+                return;
+              }
+            } catch (debugError) {
+              console.error('Debug check failed:', debugError);
+            }
+            
             setError(checkError.message || "Processing failed. Please try again.");
             clearInterval(progressInterval);
             setIsProcessing(false);
@@ -176,8 +199,8 @@ export function RealAIDemo() {
         }
       };
 
-      // Start checking after 5 seconds (earlier to catch completion)
-      setTimeout(() => checkResults(), 5000);
+      // Start checking after 3 seconds (earlier to catch completion)
+      setTimeout(() => checkResults(), 3000);
 
     } catch (err: any) {
       setError(err.message || "Failed to start processing");

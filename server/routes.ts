@@ -969,6 +969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         jobId,
         statusUrl: `/api/jobs/${jobId}`,
+        debugUrl: `/api/debug/summary/${summary.id}`,
         instructions: 'Check the summary endpoint for results after processing completes'
       });
     } catch (error) {
@@ -978,6 +979,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
+  }));
+
+  // Debug endpoint to check processing status and detect issues
+  app.get('/api/debug/summary/:id', asyncHandler(async (req: Request, res: Response) => {
+    const summary = await storage.getSummary(req.params.id);
+    if (!summary) {
+      return res.status(404).json({ error: 'Summary not found' });
+    }
+
+    // Get processing job status if possible
+    let processingInfo = 'No active processing info available';
+    try {
+      processingInfo = StreamProcessor.getQueueStatus();
+    } catch (e) {
+      processingInfo = 'Unable to retrieve processing status';
+    }
+    
+    res.json({
+      summary: {
+        id: summary.id,
+        processingStatus: summary.processingStatus,
+        title: summary.title,
+        hasContent: !!summary.summary,
+        hasTags: summary.tags?.length || 0,
+        hasTranscript: !!summary.transcript,
+        hasKeyInsights: summary.keyInsights?.length || 0,
+        hasChapters: summary.chapters?.length || 0,
+        accuracy: summary.accuracy,
+        ipfsHash: summary.ipfsHash,
+        arweaveId: summary.arweaveId,
+        contentLength: summary.summary?.length || 0,
+        transcriptLength: summary.transcript?.length || 0
+      },
+      processingInfo,
+      timestamp: new Date().toISOString(),
+      recommendation: summary.processingStatus === 'processing' ? 
+        'Check if backend processing completed but status update failed' : 
+        'Status appears correct'
+    });
   }));
 
   // Get job status endpoint
