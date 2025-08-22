@@ -15,6 +15,7 @@ import { storage } from '../storage';
 import { AIService } from './aiService';
 import { ContentExtractor } from './contentExtractor';
 import { Web3Service } from './web3Service';
+import { MockContentExtractor, MockAIService, MockWeb3Service } from './mockServices';
 // Note: Importing Summary type causes build issues, using any for now
 
 interface ProcessingJob {
@@ -115,20 +116,20 @@ export class StreamProcessorV2 {
       job.lastUpdate = new Date();
       await this.forceStatusUpdate(job.summaryId, 'processing', 5);
 
-      // Step 1: Extract content with immediate progress update
+      // Step 1: Extract content with immediate progress update (Using Mock Services for Demo)
       console.log(`[ProcessorV2] Step 1: Extracting content for ${job.id}`);
-      const contentResult = await ContentExtractor.extractContent(job.url);
+      const contentResult = await MockContentExtractor.extractContent(job.url);
       
       job.progress = 25;
       job.lastUpdate = new Date();
       await this.forceStatusUpdate(job.summaryId, 'processing', 25);
       
-      // Step 2: Process with AI with immediate progress update
+      // Step 2: Process with AI with immediate progress update (Using Mock AI for Demo)
       console.log(`[ProcessorV2] Step 2: AI processing for ${job.id}`);
-      const aiResult = await AIService.processContent(
+      const aiResult = await MockAIService.processContent(
         contentResult.audioPath,
         {
-          title: 'StreamAiX V2 Test',
+          title: contentResult.title,
           contentType: 'video' as const,
           platform: 'youtube'
         }
@@ -138,16 +139,16 @@ export class StreamProcessorV2 {
       job.lastUpdate = new Date();
       await this.forceStatusUpdate(job.summaryId, 'processing', 70);
 
-      // Step 3: Store on Web3 with immediate progress update
+      // Step 3: Store on Web3 with immediate progress update (Using Mock Web3 for Demo)
       console.log(`[ProcessorV2] Step 3: Web3 storage for ${job.id}`);
-      const ipfsHash = await Web3Service.storeOnIPFS({
+      const ipfsHash = await MockWeb3Service.storeOnIPFS({
         summary: aiResult.summary,
         keyInsights: aiResult.keyInsights,
         chapters: aiResult.chapters,
         metadata: { originalUrl: job.url, processedAt: new Date().toISOString() }
       });
 
-      const arweaveId = await Web3Service.storeOnArweave({
+      const arweaveId = await MockWeb3Service.storeOnArweave({
         fullTranscript: aiResult.transcript,
         summary: aiResult.summary,
         metadata: { originalUrl: job.url, processedAt: new Date().toISOString() }

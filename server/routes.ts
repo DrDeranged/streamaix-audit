@@ -931,7 +931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Test real processing endpoint
-  app.post('/api/test-processing', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/test-processing', asyncHandler(async (req: Request, res: Response) => {
     const { url } = req.body;
     
     if (!url) {
@@ -941,14 +941,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(`Starting real processing test for URL: ${url}`);
       
-      // Create a test summary
+      // Create a test summary (public demo)
       const summary = await storage.createSummary({
-        title: 'Real Processing Test',
+        title: 'StreamProcessorV2 Demo',
         originalUrl: url,
         contentType: 'video',
-        platform: 'test',
-        tags: ['test', 'real-processing'],
-        creatorId: req.user!.id,
+        platform: 'demo',
+        tags: ['v2-processor', 'demo'],
+        creatorId: 'demo-user-v2',
         isPublic: true,
         processingStatus: 'pending'
       });
