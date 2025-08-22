@@ -137,9 +137,26 @@ export function RealAIDemo() {
               cache: 'no-cache'
             }).then(res => res.json());
           
-          console.log('Summary status:', summaryResponse.summary?.processingStatus);
-          console.log('Summary has content:', !!summaryResponse.summary?.summary);
-          console.log('Summary title:', summaryResponse.summary?.title);
+          console.log('🚀 V2 Processing Result:', processingResult);
+          console.log('📊 Summary status:', summaryResponse.summary?.processingStatus);
+          console.log('📝 Summary has content:', !!summaryResponse.summary?.summary);
+          console.log('🎯 Summary title:', summaryResponse.summary?.title);
+          
+          // V2 PROCESSOR: Enhanced detection with dual endpoint strategy
+          if (processingResult.success && processingResult.status === 'completed') {
+            console.log('🎉 V2 Processor detected completion via processing-result endpoint!');
+            setResult(processingResult.content);
+            setProgress(100);
+            setProcessingStatus("Processing completed successfully!");
+            clearInterval(progressInterval);
+            setIsProcessing(false);
+            toast({
+              title: "Success!",
+              description: "Content processed with StreamProcessorV2 - Enhanced reliability!",
+              variant: "default"
+            });
+            return;
+          }
           
           // If we still see processing after 10 attempts, force a debug check
           if (attempt > 10 && summaryResponse.summary.processingStatus === 'processing') {

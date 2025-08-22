@@ -15,7 +15,7 @@ import { storage } from '../storage';
 import { AIService } from './aiService';
 import { ContentExtractor } from './contentExtractor';
 import { Web3Service } from './web3Service';
-import type { Summary } from '@shared/schema';
+// Note: Importing Summary type causes build issues, using any for now
 
 interface ProcessingJob {
   id: string;
@@ -127,7 +127,11 @@ export class StreamProcessorV2 {
       console.log(`[ProcessorV2] Step 2: AI processing for ${job.id}`);
       const aiResult = await AIService.processContent(
         contentResult.audioPath,
-        job.url
+        {
+          title: 'StreamAiX V2 Test',
+          contentType: 'video' as const,
+          platform: 'youtube'
+        }
       );
       
       job.progress = 70;
