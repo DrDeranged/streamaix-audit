@@ -133,6 +133,41 @@ export function RealAIDemo() {
           console.log('Summary has content:', !!summaryResponse.summary?.summary);
           console.log('Summary title:', summaryResponse.summary?.title);
           
+          // If we still see processing after 10 attempts, force a debug check
+          if (attempt > 10 && summaryResponse.summary.processingStatus === 'processing') {
+            console.log('🔍 Status still showing processing after 10 attempts - running debug check...');
+            try {
+              const debugResponse = await fetch(`/api/debug/summary/${response.summary.id}?t=${timestamp}`, {
+                cache: 'no-cache'
+              }).then(res => res.json());
+              
+              console.log('Debug check result:', debugResponse.summary?.processingStatus);
+              
+              if (debugResponse.summary?.processingStatus === 'completed') {
+                console.log('⚡ Debug check detected completion - backend finished but frontend missed it!');
+                // Force refresh the summary data
+                const correctedResponse = await fetch(`/api/summaries/${response.summary.id}?force=${timestamp}`, {
+                  cache: 'no-cache',
+                  headers: { 'Cache-Control': 'no-cache' }
+                }).then(res => res.json());
+                
+                setResult(correctedResponse.summary);
+                setProgress(100);
+                setProcessingStatus("Processing completed successfully!");
+                clearInterval(progressInterval);
+                setIsProcessing(false);
+                toast({
+                  title: "Success!",
+                  description: "Content processing completed (detected via diagnostic check).",
+                  variant: "default"
+                });
+                return;
+              }
+            } catch (debugError) {
+              console.error('Debug check failed:', debugError);
+            }
+          }
+          
           if (summaryResponse.summary.processingStatus === 'completed') {
             console.log('🎉 Processing completed! Setting result...');
             setResult(summaryResponse.summary);
@@ -199,8 +234,8 @@ export function RealAIDemo() {
         }
       };
 
-      // Start checking after 3 seconds (earlier to catch completion)
-      setTimeout(() => checkResults(), 3000);
+      // Start checking after 2 seconds (even earlier to catch completion)
+      setTimeout(() => checkResults(), 2000);
 
     } catch (err: any) {
       setError(err.message || "Failed to start processing");
