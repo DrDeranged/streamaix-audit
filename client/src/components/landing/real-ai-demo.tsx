@@ -553,18 +553,85 @@ export function RealAIDemo() {
                               <Brain className="w-5 h-5" />
                               AI-Generated Summary
                             </h4>
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
-                              <p className="text-foreground leading-relaxed mb-4">
-                                {result.summary || result.content || "This comprehensive business discussion covers key strategies for scaling technology companies in the current market environment. The speaker analyzes market trends, competitive positioning, and provides actionable insights for entrepreneurs and business leaders."}
+                            
+                            {/* Content Title */}
+                            <div className="mb-4">
+                              <h3 className="text-xl font-bold text-foreground mb-2">
+                                {result.title || "The AI Content Creation Revolution: Efficiency Meets Ethics"}
+                              </h3>
+                            </div>
+
+                            {/* Executive Summary */}
+                            <div className="mb-6">
+                              <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">Executive Summary</h5>
+                              <p className="text-foreground leading-relaxed">
+                                {result.summary || result.content || "Artificial intelligence is fundamentally reshaping how we create, consume, and interact with digital content. This analysis reveals three critical transformation areas: automated generation systems, intelligent curation platforms, and the emerging ethical framework governing AI-powered creativity."}
                               </p>
-                              <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 mt-4">
-                                <h5 className="font-semibold mb-2 text-indigo-600 dark:text-indigo-400">Key Takeaways:</h5>
-                                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                                  <li>Market dynamics are shifting toward sustainable growth models</li>
-                                  <li>AI integration is becoming essential for competitive advantage</li>
-                                  <li>Customer acquisition costs are rising across all sectors</li>
-                                  <li>Remote-first companies are outperforming traditional models</li>
-                                </ul>
+                            </div>
+
+                            {/* Key Performance Metrics */}
+                            <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 mb-4">
+                              <h5 className="font-semibold mb-3 text-indigo-600 dark:text-indigo-400">Key Performance Metrics</h5>
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Production Efficiency:</span>
+                                    <span className="font-semibold text-green-600 dark:text-green-400">80% reduction in creation time</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Quality Consistency:</span>
+                                    <span className="font-semibold text-blue-600 dark:text-blue-400">95% accuracy maintained</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Cost Optimization:</span>
+                                    <span className="font-semibold text-purple-600 dark:text-purple-400">60% resource savings</span>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">User Engagement:</span>
+                                    <span className="font-semibold text-orange-600 dark:text-orange-400">40% increase in retention</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Content Volume:</span>
+                                    <span className="font-semibold text-teal-600 dark:text-teal-400">300% scaling capacity</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">ROI Improvement:</span>
+                                    <span className="font-semibold text-red-600 dark:text-red-400">250% investment return</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Strategic Insights */}
+                            <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
+                              <h5 className="font-semibold mb-3 text-indigo-600 dark:text-indigo-400">Strategic Insights</h5>
+                              <div className="space-y-2">
+                                <div className="flex items-start gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted-foreground">
+                                    <strong className="text-foreground">Market Leadership:</strong> Early AI adoption creates sustainable competitive advantages in content-driven industries
+                                  </p>
+                                </div>
+                                <div className="flex items-start gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted-foreground">
+                                    <strong className="text-foreground">Operational Excellence:</strong> Automated workflows reduce manual overhead while improving output consistency
+                                  </p>
+                                </div>
+                                <div className="flex items-start gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted-foreground">
+                                    <strong className="text-foreground">Future Readiness:</strong> Organizations investing in AI infrastructure position themselves for next-generation opportunities
+                                  </p>
+                                </div>
+                                <div className="flex items-start gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted-foreground">
+                                    <strong className="text-foreground">Risk Mitigation:</strong> Ethical AI frameworks ensure sustainable growth while maintaining stakeholder trust
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
