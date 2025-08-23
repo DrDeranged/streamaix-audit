@@ -9,6 +9,11 @@ export interface ExtractedContent {
   duration: number;
   description?: string;
   thumbnail?: string;
+  // Enhanced metadata for better AI processing
+  contentType: 'educational' | 'business' | 'crypto' | 'podcast' | 'livestream' | 'general';
+  platform: 'youtube' | 'soundcloud' | 'twitch' | 'web';
+  detectedKeywords: string[];
+  originalUrl: string;
 }
 
 export interface AIResult {
@@ -41,64 +46,120 @@ export class MockContentExtractor {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Extract video ID for better context
-    let videoContext = 'general';
-    let title = "Content Analysis Video";
-    let description = "Professional content analysis and insights.";
-    let duration = 1245; // Default 20:45
-    
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      // Extract video ID from URL for more contextual content
-      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      const videoId = videoIdMatch ? videoIdMatch[1] : '';
-      
-      // Generate more contextual content based on URL patterns
-      if (url.includes('t=')) {
-        // Video has timestamp, likely educational/tutorial content
-        videoContext = 'educational';
-        title = "Advanced Business Strategy & Market Analysis Tutorial";
-        description = "In-depth analysis covering market dynamics, strategic positioning, and growth optimization techniques for modern businesses.";
-        duration = 847; // 14:07
-      } else {
-        // Regular video, analyze by common patterns - assume business/crypto content
-        videoContext = 'business';
-        title = "Cryptocurrency Market Analysis & DeFi Protocol Deep Dive";
-        description = "Comprehensive analysis of current crypto market trends, DeFi yield strategies, and blockchain technology developments.";
-        duration = 1156; // 19:16
-      }
-    } else if (url.includes('soundcloud.com')) {
-      videoContext = 'podcast';
-      title = "Tech Leadership Podcast: Scaling Startups in 2024";
-      description = "Discussion with industry leaders about startup challenges, funding strategies, and market positioning.";
-      duration = 2847; // 47:27
-    } else if (url.includes('twitch.tv')) {
-      videoContext = 'livestream';
-      title = "Live Trading Analysis & Market Commentary";
-      description = "Real-time market analysis with expert commentary on trading strategies and market movements.";
-      duration = 3600; // 1 hour
-    }
+    // ENHANCED URL ANALYSIS with multiple detection signals
+    const analysisResult = this.analyzeUrl(url);
+    console.log(`[MockExtractor] Detected content type: ${analysisResult.contentType}, platform: ${analysisResult.platform}`);
+    console.log(`[MockExtractor] Keywords: ${analysisResult.detectedKeywords.join(', ')}`);
     
     return {
       audioPath: `/tmp/mock-audio-${Date.now()}.mp3`,
-      title,
-      duration,
-      description
+      title: analysisResult.title,
+      duration: analysisResult.duration,
+      description: analysisResult.description,
+      contentType: analysisResult.contentType,
+      platform: analysisResult.platform,
+      detectedKeywords: analysisResult.detectedKeywords,
+      originalUrl: url
     };
+  }
+
+  private static analyzeUrl(url: string): {
+    title: string;
+    description: string;
+    duration: number;
+    contentType: 'educational' | 'business' | 'crypto' | 'podcast' | 'livestream' | 'general';
+    platform: 'youtube' | 'soundcloud' | 'twitch' | 'web';
+    detectedKeywords: string[];
+  } {
+    // Platform Detection
+    let platform: 'youtube' | 'soundcloud' | 'twitch' | 'web' = 'web';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) platform = 'youtube';
+    else if (url.includes('soundcloud.com')) platform = 'soundcloud';
+    else if (url.includes('twitch.tv')) platform = 'twitch';
+
+    // Content Type Detection with multiple signals
+    let contentType: 'educational' | 'business' | 'crypto' | 'podcast' | 'livestream' | 'general' = 'general';
+    let detectedKeywords: string[] = [];
+    let title = "Professional Content Analysis";
+    let description = "Comprehensive analysis and strategic insights.";
+    let duration = 1200;
+
+    // YOUTUBE SPECIFIC ANALYSIS
+    if (platform === 'youtube') {
+      // Check for educational indicators
+      if (url.includes('t=') || url.includes('tutorial') || url.includes('how-to') || url.includes('guide')) {
+        contentType = 'educational';
+        title = "Advanced Business Strategy & Market Analysis Tutorial";
+        description = "In-depth educational content covering strategic business frameworks, market positioning dynamics, and competitive analysis techniques for sustainable growth.";
+        detectedKeywords = ['business-strategy', 'market-analysis', 'tutorial', 'educational', 'competitive-analysis'];
+        duration = 847;
+      }
+      // Check for crypto/finance indicators
+      else if (url.includes('crypto') || url.includes('bitcoin') || url.includes('defi') || url.includes('trading')) {
+        contentType = 'crypto';
+        title = "Cryptocurrency Market Analysis & DeFi Protocol Deep Dive";
+        description = "Professional cryptocurrency market analysis covering Bitcoin technical patterns, DeFi yield strategies, and blockchain technology developments.";
+        detectedKeywords = ['cryptocurrency', 'bitcoin', 'defi', 'market-analysis', 'blockchain'];
+        duration = 1156;
+      }
+      // Check for business indicators
+      else if (url.includes('business') || url.includes('startup') || url.includes('strategy') || url.includes('growth')) {
+        contentType = 'business';
+        title = "Strategic Business Growth & Market Expansion Analysis";
+        description = "Strategic business analysis focusing on growth optimization, market expansion techniques, and competitive positioning frameworks.";
+        detectedKeywords = ['business-growth', 'market-expansion', 'strategy', 'competitive-analysis'];
+        duration = 980;
+      }
+      // Default to business for YouTube (most professional content)
+      else {
+        contentType = 'business';
+        title = "Professional Business Strategy & Market Analysis";
+        description = "Comprehensive business analysis covering market dynamics, strategic positioning, and growth optimization for competitive advantage.";
+        detectedKeywords = ['business-strategy', 'market-analysis', 'professional-development'];
+        duration = 1024;
+      }
+    }
+    // SOUNDCLOUD SPECIFIC ANALYSIS
+    else if (platform === 'soundcloud') {
+      contentType = 'podcast';
+      title = "Tech Leadership Podcast: Strategic Business Insights";
+      description = "Professional podcast discussion with industry leaders covering business strategy, market trends, and leadership insights.";
+      detectedKeywords = ['podcast', 'tech-leadership', 'business-strategy', 'industry-insights'];
+      duration = 2847;
+    }
+    // TWITCH SPECIFIC ANALYSIS
+    else if (platform === 'twitch') {
+      contentType = 'livestream';
+      title = "Live Market Analysis & Trading Strategy Session";
+      description = "Real-time market analysis with professional commentary on trading strategies, market movements, and investment insights.";
+      detectedKeywords = ['livestream', 'market-analysis', 'trading', 'real-time'];
+      duration = 3600;
+    }
+
+    return { title, description, duration, contentType, platform, detectedKeywords };
   }
 }
 
 export class MockAIService {
   static async processContent(audioPath: string, metadata: any): Promise<AIResult> {
     console.log(`[MockAI] Processing audio: ${audioPath}`);
+    console.log(`[MockAI] Metadata received:`, {
+      title: metadata?.title,
+      contentType: metadata?.contentType,
+      platform: metadata?.platform,
+      keywords: metadata?.detectedKeywords
+    });
     
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Determine content type based on title context
-    const isCryptoFinance = metadata?.title?.includes('Crypto') || metadata?.title?.includes('DeFi') || metadata?.title?.includes('Market') || metadata?.description?.includes('crypto');
-    const isBusiness = metadata?.title?.includes('Business') || metadata?.title?.includes('Strategy') || metadata?.title?.includes('Tutorial');
+    // ENHANCED CONTENT TYPE DETECTION using multiple signals
+    const contentAnalysis = this.analyzeContentType(metadata);
+    console.log(`[MockAI] Content analysis result:`, contentAnalysis);
     
-    const transcript = isCryptoFinance ? 
+    const { contentType } = contentAnalysis;
+    
+    const transcript = contentType === 'crypto' ? 
       `Welcome everyone to today's comprehensive cryptocurrency market analysis. I want to start by discussing the current market dynamics we're seeing across the DeFi ecosystem and what this means for both retail and institutional investors.
 
 Looking at the broader market trends, we're witnessing significant shifts in how traditional finance institutions are approaching digital assets. The regulatory clarity we've been waiting for is slowly emerging, and this is creating new opportunities for strategic positioning.
@@ -113,7 +174,7 @@ From a risk management perspective, it's crucial to understand that while we're 
 
 Looking at the regulatory landscape, recent developments suggest a more favorable environment for institutional adoption. This regulatory clarity is removing significant barriers that have prevented large-scale capital allocation into digital assets.` :
       
-      isBusiness ?
+      contentType === 'business' || contentType === 'educational' ?
       `Good morning everyone, and welcome to this advanced business strategy session. Today we're going to dive deep into market analysis techniques that successful companies use to maintain their competitive edge in rapidly evolving industries.
 
 The first principle we need to understand is market positioning dynamics. In today's business environment, companies that can quickly adapt to changing consumer behaviors and market conditions consistently outperform their competitors.
@@ -140,7 +201,7 @@ The key areas we'll cover include audience segmentation strategies, content opti
 
 Looking at current market trends, we see successful companies focusing on authentic engagement rather than volume-based metrics. This shift toward quality over quantity is creating new opportunities for businesses that understand their audience deeply.`;
 
-    const summary = isCryptoFinance ?
+    const summary = contentType === 'crypto' ?
       `# Cryptocurrency Market Analysis & DeFi Protocol Deep Dive
 
 ## Executive Summary
@@ -155,7 +216,7 @@ This comprehensive analysis examines current cryptocurrency market dynamics, DeF
 ## Strategic Investment Framework
 The analysis emphasizes portfolio diversification across crypto sectors while maintaining awareness of traditional market correlations. Successful investors focus on projects with strong fundamentals rather than speculative momentum plays.` :
 
-      isBusiness ?
+      contentType === 'business' || contentType === 'educational' ?
       `# Advanced Business Strategy & Market Analysis Tutorial
 
 ## Executive Summary
@@ -177,7 +238,7 @@ This analysis explores advanced content strategies and digital transformation ap
 - **Audience Engagement**: Quality-focused approaches outperform volume-based metrics
 - **Market Adaptation**: Digital-first organizations show superior resilience`;
 
-    const keyInsights = isCryptoFinance ? [
+    const keyInsights = contentType === 'crypto' ? [
       {
         insight: "Bitcoin consolidation pattern suggests potential breakout at $45K-$48K resistance levels",
         timestamp: "3:45",
@@ -193,7 +254,7 @@ This analysis explores advanced content strategies and digital transformation ap
         timestamp: "12:15",
         importance: 'high' as const
       }
-    ] : isBusiness ? [
+    ] : contentType === 'business' || contentType === 'educational' ? [
       {
         insight: "Companies focusing on long-term customer value see 40% higher retention rates",
         timestamp: "4:12",
@@ -227,7 +288,7 @@ This analysis explores advanced content strategies and digital transformation ap
       }
     ];
 
-    const chapters = isCryptoFinance ? [
+    const chapters = contentType === 'crypto' ? [
       {
         title: "Market Overview & Technical Analysis",
         startTime: "0:00",
@@ -258,7 +319,7 @@ This analysis explores advanced content strategies and digital transformation ap
         endTime: "19:16",
         summary: "Regulatory clarity impact on institutional capital allocation opportunities."
       }
-    ] : isBusiness ? [
+    ] : contentType === 'business' || contentType === 'educational' ? [
       {
         title: "Market Positioning Dynamics",
         startTime: "0:00", 
@@ -322,22 +383,25 @@ This analysis explores advanced content strategies and digital transformation ap
       }
     ];
 
-    const tags = isCryptoFinance ? 
-      ['cryptocurrency', 'defi', 'bitcoin', 'blockchain', 'market-analysis'] :
-      isBusiness ?
-      ['business-strategy', 'market-analysis', 'customer-acquisition', 'operational-excellence', 'competitive-analysis'] :
-      ['digital-strategy', 'content-marketing', 'brand-positioning', 'audience-engagement', 'digital-transformation'];
+    // Use detected keywords as primary tags, with smart fallbacks
+    const tags = metadata?.detectedKeywords?.length > 0 ? 
+      metadata.detectedKeywords : 
+      contentType === 'crypto' ? 
+        ['cryptocurrency', 'defi', 'bitcoin', 'blockchain', 'market-analysis'] :
+        contentType === 'business' || contentType === 'educational' ?
+        ['business-strategy', 'market-analysis', 'customer-acquisition', 'operational-excellence', 'competitive-analysis'] :
+        ['digital-strategy', 'content-marketing', 'brand-positioning', 'audience-engagement', 'digital-transformation'];
 
     // Generate additional comprehensive data for the tabbed interface
-    const tldrSummary = isCryptoFinance ?
+    const tldrSummary = contentType === 'crypto' ?
       "Comprehensive cryptocurrency market analysis covering Bitcoin's technical patterns, DeFi protocol growth (23% TVL increase), cross-chain interoperability trends, and regulatory developments creating institutional adoption opportunities. Key focus on risk management and portfolio diversification strategies." :
-      isBusiness ?
+      contentType === 'business' || contentType === 'educational' ?
       "Advanced business strategy tutorial covering market positioning dynamics, customer acquisition optimization (40% higher retention rates), competitive analysis frameworks, unit economics modeling, and technology integration for operational excellence and sustainable competitive advantages." :
       "Digital content strategy analysis focusing on audience engagement optimization, brand positioning techniques, and performance measurement frameworks. Market data shows 67% better performance for comprehensive digital strategy implementations.";
 
     const blogPost = summary; // Use the comprehensive summary as the blog post
     
-    const marketAnalysis = isCryptoFinance ?
+    const marketAnalysis = contentType === 'crypto' ?
       `## Market Intelligence: Cryptocurrency & DeFi Investment Outlook
 
 ### Current Market Positioning
@@ -352,7 +416,7 @@ The cryptocurrency market is experiencing a maturation phase with institutional 
 ### Market Recommendation
 **High Growth Potential**: Cryptocurrency sector transitioning from speculative to institutional asset class. Focus on fundamentally strong projects with regulatory compliance and proven utility.` :
       
-      isBusiness ?
+      contentType === 'business' || contentType === 'educational' ?
       `## Market Intelligence: Business Strategy & Competitive Analysis
 
 ### Strategic Market Assessment
@@ -376,9 +440,9 @@ Organizations investing in comprehensive digital strategies demonstrating 67% be
 **Digital Strategy Excellence**: Comprehensive digital transformation with focus on audience understanding, authentic engagement, and performance measurement positioned for superior market performance and sustainable growth.`;
 
     const rawData = {
-      title: isCryptoFinance ? "Cryptocurrency Market Analysis & DeFi Protocol Deep Dive" : 
-             isBusiness ? "Advanced Business Strategy & Market Analysis Tutorial" : 
-             "Digital Content Strategy & Market Positioning",
+      title: metadata?.title || (contentType === 'crypto' ? "Cryptocurrency Market Analysis & DeFi Protocol Deep Dive" : 
+             contentType === 'business' || contentType === 'educational' ? "Advanced Business Strategy & Market Analysis Tutorial" : 
+             "Digital Content Strategy & Market Positioning"),
       source: "YouTube Video Analysis",
       duration: metadata?.duration ? `${Math.floor(metadata.duration / 60)}:${(metadata.duration % 60).toString().padStart(2, '0')}` : "19:16",
       platform: "YouTube",
@@ -406,6 +470,55 @@ Organizations investing in comprehensive digital strategies demonstrating 67% be
       duration: metadata?.duration || 1156,
       accuracy: 98
     };
+  }
+
+  private static analyzeContentType(metadata: any): {
+    contentType: 'crypto' | 'business' | 'educational' | 'podcast' | 'livestream' | 'general';
+    primaryFocus: string;
+    confidence: number;
+  } {
+    // Use enhanced metadata if available
+    if (metadata?.contentType && metadata.contentType !== 'general') {
+      return {
+        contentType: metadata.contentType,
+        primaryFocus: metadata.contentType,
+        confidence: 0.95
+      };
+    }
+
+    // Fallback to keyword analysis
+    const keywords = metadata?.detectedKeywords || [];
+    const title = metadata?.title || '';
+    const description = metadata?.description || '';
+    const text = `${title} ${description}`.toLowerCase();
+
+    // Crypto/Finance Detection
+    const cryptoKeywords = ['crypto', 'bitcoin', 'defi', 'blockchain', 'trading', 'market'];
+    const cryptoScore = this.calculateKeywordScore(text, cryptoKeywords) + 
+                       this.calculateKeywordScore(keywords.join(' '), cryptoKeywords);
+
+    // Business/Educational Detection
+    const businessKeywords = ['business', 'strategy', 'tutorial', 'analysis', 'growth', 'competitive'];
+    const businessScore = this.calculateKeywordScore(text, businessKeywords) + 
+                         this.calculateKeywordScore(keywords.join(' '), businessKeywords);
+
+    // Determine content type based on highest score
+    if (cryptoScore > businessScore && cryptoScore > 0) {
+      return { contentType: 'crypto', primaryFocus: 'cryptocurrency-analysis', confidence: Math.min(0.9, cryptoScore) };
+    } else if (businessScore > 0) {
+      return { contentType: 'business', primaryFocus: 'business-strategy', confidence: Math.min(0.9, businessScore) };
+    }
+
+    // Default to business (safer than generic)
+    return { contentType: 'business', primaryFocus: 'professional-analysis', confidence: 0.6 };
+  }
+
+  private static calculateKeywordScore(text: string, keywords: string[]): number {
+    let score = 0;
+    keywords.forEach(keyword => {
+      if (text.includes(keyword)) score += 0.2;
+    });
+    return Math.min(score, 1.0);
   }
 }
 

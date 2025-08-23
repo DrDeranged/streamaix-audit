@@ -130,8 +130,12 @@ export class StreamProcessorV2 {
         contentResult.audioPath,
         {
           title: contentResult.title,
-          contentType: 'video' as const,
-          platform: 'youtube'
+          description: contentResult.description,
+          contentType: contentResult.contentType,
+          platform: contentResult.platform,
+          detectedKeywords: contentResult.detectedKeywords,
+          duration: contentResult.duration,
+          originalUrl: contentResult.originalUrl
         }
       );
       
