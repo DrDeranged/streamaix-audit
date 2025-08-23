@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
+import RealContentProcessor from "./services/realContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { 
@@ -943,39 +944,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      console.log(`Starting real processing test for URL: ${url}`);
+      console.log(`Starting REAL content processing for URL: ${url}`);
       
       // Use a fixed existing user ID from database
       const demoUserId = 'b57e2c1e-c053-4bff-8bff-d3cee93a3f0a';
 
-      // Create a test summary with the demo user
-      const summary = await storage.createSummary({
-        title: 'StreamProcessorV2 Demo',
-        originalUrl: url,
-        contentType: 'video',
-        platform: 'demo',
-        tags: ['v2-processor', 'demo'],
-        creatorId: 'demo-v2-user',
-        isPublic: true,
-        processingStatus: 'pending'
-      });
-
-      // Start real processing with V2 processor
-      console.log('🚀 Starting processing with StreamProcessorV2');
-      const jobId = await StreamProcessorV2.startProcessing(summary.id, url);
+      // Start real processing with RealContentProcessor
+      console.log('🚀 Starting processing with RealContentProcessor');
+      const processor = RealContentProcessor.getInstance();
+      const summaryId = await processor.startProcessing(url, demoUserId);
 
       res.status(201).json({
-        message: 'Real AI processing started successfully',
-        summary: {
-          id: summary.id,
-          title: summary.title,
-          originalUrl: summary.originalUrl,
-          processingStatus: summary.processingStatus
-        },
-        jobId,
-        statusUrl: `/api/jobs/${jobId}`,
-        debugUrl: `/api/debug/summary/${summary.id}`,
-        instructions: 'Check the summary endpoint for results after processing completes'
+        message: 'REAL AI processing started successfully',
+        summaryId,
+        statusUrl: `/api/processing-result/${summaryId}`,
+        debugUrl: `/api/summaries/${summaryId}`,
+        instructions: 'Check the processing result endpoint for real-time updates'
       });
     } catch (error) {
       console.error('Real processing failed to start:', error);
@@ -1035,9 +1019,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ job });
   }));
 
-  // Get processing result endpoint (V2)
+  // Get processing result endpoint (Real Processor)
   app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
-    const result = await StreamProcessorV2.getProcessingResult(req.params.summaryId);
+    const processor = RealContentProcessor.getInstance();
+    const result = await processor.getProcessingResult(req.params.summaryId);
     res.json(result);
   }));
 
