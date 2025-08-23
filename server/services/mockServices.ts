@@ -37,16 +37,48 @@ export class MockContentExtractor {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
-    const title = isYouTube ? 
-      "How AI is Revolutionizing Content Creation" : 
-      "The Future of Decentralized Applications";
+    // Extract video ID for better context
+    let videoContext = 'general';
+    let title = "Content Analysis Video";
+    let description = "Professional content analysis and insights.";
+    let duration = 1245; // Default 20:45
+    
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      // Extract video ID from URL for more contextual content
+      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      const videoId = videoIdMatch ? videoIdMatch[1] : '';
+      
+      // Generate more contextual content based on URL patterns
+      if (url.includes('t=')) {
+        // Video has timestamp, likely educational/tutorial content
+        videoContext = 'educational';
+        title = "Advanced Business Strategy & Market Analysis Tutorial";
+        description = "In-depth analysis covering market dynamics, strategic positioning, and growth optimization techniques for modern businesses.";
+        duration = 847; // 14:07
+      } else {
+        // Regular video, analyze by common patterns - assume business/crypto content
+        videoContext = 'business';
+        title = "Cryptocurrency Market Analysis & DeFi Protocol Deep Dive";
+        description = "Comprehensive analysis of current crypto market trends, DeFi yield strategies, and blockchain technology developments.";
+        duration = 1156; // 19:16
+      }
+    } else if (url.includes('soundcloud.com')) {
+      videoContext = 'podcast';
+      title = "Tech Leadership Podcast: Scaling Startups in 2024";
+      description = "Discussion with industry leaders about startup challenges, funding strategies, and market positioning.";
+      duration = 2847; // 47:27
+    } else if (url.includes('twitch.tv')) {
+      videoContext = 'livestream';
+      title = "Live Trading Analysis & Market Commentary";
+      description = "Real-time market analysis with expert commentary on trading strategies and market movements.";
+      duration = 3600; // 1 hour
+    }
     
     return {
       audioPath: `/tmp/mock-audio-${Date.now()}.mp3`,
       title,
-      duration: 1245, // 20:45
-      description: "A comprehensive discussion about emerging technologies and their impact on digital transformation."
+      duration,
+      description
     };
   }
 }
@@ -58,301 +90,247 @@ export class MockAIService {
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const isYouTube = metadata?.title?.includes('AI') || Math.random() > 0.5;
+    // Determine content type based on title context
+    const isCryptoFinance = metadata?.title?.includes('Crypto') || metadata?.title?.includes('DeFi') || metadata?.title?.includes('Market') || metadata?.description?.includes('crypto');
+    const isBusiness = metadata?.title?.includes('Business') || metadata?.title?.includes('Strategy') || metadata?.title?.includes('Tutorial');
     
-    const transcript = isYouTube ? 
-      `Welcome to today's discussion about artificial intelligence and its transformative impact on content creation. 
+    const transcript = isCryptoFinance ? 
+      `Welcome everyone to today's comprehensive cryptocurrency market analysis. I want to start by discussing the current market dynamics we're seeing across the DeFi ecosystem and what this means for both retail and institutional investors.
 
-      In this comprehensive analysis, we'll explore how AI is revolutionizing the way we produce, consume, and interact with digital content. From automated video generation to intelligent content curation, AI is reshaping every aspect of the creative process.
+Looking at the broader market trends, we're witnessing significant shifts in how traditional finance institutions are approaching digital assets. The regulatory clarity we've been waiting for is slowly emerging, and this is creating new opportunities for strategic positioning.
 
-      The key areas we'll cover include machine learning algorithms for content optimization, natural language processing for automated summarization, and the ethical considerations surrounding AI-generated content.
+Let's dive into the technical analysis first. Bitcoin's consolidation pattern over the past few weeks suggests we're setting up for a potential breakout. The key resistance levels we're watching are around the $45,000 and $48,000 marks, with support holding strong at $41,000.
 
-      As we move forward, it's important to understand that AI doesn't replace human creativity - it amplifies it. The tools we're seeing today represent just the beginning of a new era where human insight combines with machine intelligence to create unprecedented possibilities.
+Now, when we examine the DeFi protocols, we're seeing some fascinating developments in yield farming strategies. The total value locked across major protocols has increased by 23% this quarter, indicating growing institutional adoption and confidence in decentralized finance mechanisms.
 
-      Looking at current trends in content creation, we see AI being used for everything from social media scheduling to complex video editing workflows. The efficiency gains are remarkable - what once took hours can now be accomplished in minutes.
+One of the most significant trends we're tracking is the evolution of cross-chain interoperability. Projects that can seamlessly bridge different blockchain networks are positioning themselves for massive growth as the multi-chain future becomes reality.
 
-      However, with great power comes great responsibility. We must carefully consider the implications of AI-generated content on authenticity, copyright, and the future of creative professions.` :
-      `Today we're diving deep into the world of decentralized applications and blockchain technology.
+From a risk management perspective, it's crucial to understand that while we're seeing tremendous opportunities, portfolio diversification across different crypto sectors remains essential. The correlation between traditional markets and crypto assets is still higher than historical norms.
 
-      Decentralized applications, or DApps, represent a fundamental shift in how we think about software architecture. Unlike traditional applications that rely on centralized servers, DApps operate on blockchain networks, providing unprecedented transparency and security.
+Looking at the regulatory landscape, recent developments suggest a more favorable environment for institutional adoption. This regulatory clarity is removing significant barriers that have prevented large-scale capital allocation into digital assets.` :
+      
+      isBusiness ?
+      `Good morning everyone, and welcome to this advanced business strategy session. Today we're going to dive deep into market analysis techniques that successful companies use to maintain their competitive edge in rapidly evolving industries.
 
-      The key benefits of decentralized systems include resistance to censorship, elimination of single points of failure, and true data ownership for users. These advantages are driving adoption across industries from finance to social media.
+The first principle we need to understand is market positioning dynamics. In today's business environment, companies that can quickly adapt to changing consumer behaviors and market conditions consistently outperform their competitors.
 
-      Smart contracts form the backbone of most DApps, enabling automated execution of agreements without intermediaries. This programmable money concept is revolutionizing everything from lending protocols to prediction markets.
+Let's start with customer acquisition strategy. The data shows that businesses focusing on long-term customer value rather than short-term acquisition costs see 40% higher retention rates. This shift in thinking is fundamental to building sustainable growth models.
 
-      We're also seeing exciting developments in cross-chain interoperability, allowing different blockchain networks to communicate and share value. This is crucial for the future scalability of the decentralized ecosystem.
+When we analyze successful scaling strategies, we consistently see companies that invest heavily in their operational infrastructure before pursuing aggressive growth. This preparation phase is critical for maintaining quality standards during rapid expansion periods.
 
-      The challenges remain significant - user experience, scalability, and regulatory uncertainty are major hurdles that the industry continues to address through innovative solutions and thoughtful design patterns.`;
+The competitive analysis framework we'll discuss today helps identify market gaps that represent genuine opportunities rather than temporary market noise. Too many businesses chase trends instead of building sustainable competitive advantages.
 
-    // Generate structured content for each category
-    const rawData = {
-      title: isYouTube ? "How AI is Revolutionizing Content Creation" : "The Future of Decentralized Applications",
-      source: isYouTube ? "YouTube Video Analysis" : "Blockchain Podcast Analysis", 
-      duration: "20:45",
-      platform: isYouTube ? "YouTube" : "Podcast",
-      quality: "High-definition analysis",
-      fileSize: "245 MB",
-      resolution: isYouTube ? "1080p" : "320kbps",
-      metadata: {
-        uploadDate: "2024-01-15",
-        views: isYouTube ? "1.2M" : "45K downloads",
-        engagement: "8.5%",
-        language: "English"
-      }
-    };
+From a financial perspective, the companies showing the strongest performance metrics are those that optimize their unit economics before scaling. Understanding your true customer acquisition cost and lifetime value relationship is non-negotiable.
 
-    const tldrSummary = isYouTube ?
-      "AI is transforming content creation by reducing production time by 80% while maintaining quality. Machine learning optimizes content in real-time, and ethical considerations around authenticity are becoming critical as AI amplifies rather than replaces human creativity." :
-      "Decentralized applications are revolutionizing software architecture through smart contracts and blockchain technology. Cross-chain interoperability is crucial for scalability, but user experience complexity remains the primary adoption barrier.";
+Technology integration plays a crucial role in modern business strategy. Companies that can effectively leverage automation and data analytics to improve their decision-making processes gain significant operational advantages over competitors still relying on intuition-based approaches.
 
-    const blogPost = isYouTube ?
-      `# The AI Content Creation Revolution: Efficiency Meets Ethics
+The key insight here is that sustainable business growth requires a systematic approach to market analysis, customer understanding, and operational excellence. The businesses that master these fundamentals create lasting competitive advantages.` :
+      
+      `Today we're exploring advanced content strategies and digital transformation approaches that successful organizations use to stay ahead of market trends.
+
+The digital landscape is evolving rapidly, and companies need sophisticated approaches to content strategy, audience engagement, and brand positioning. We'll examine case studies from industry leaders and identify key patterns that drive success.
+
+Market analysis shows that organizations investing in comprehensive digital strategies see 67% better performance metrics compared to those taking traditional approaches. This performance gap is widening as consumer behavior continues shifting toward digital-first experiences.
+
+The key areas we'll cover include audience segmentation strategies, content optimization techniques, and measurement frameworks that provide actionable insights for strategic decision making.
+
+Looking at current market trends, we see successful companies focusing on authentic engagement rather than volume-based metrics. This shift toward quality over quantity is creating new opportunities for businesses that understand their audience deeply.`;
+
+    const summary = isCryptoFinance ?
+      `# Cryptocurrency Market Analysis & DeFi Protocol Deep Dive
 
 ## Executive Summary
-Artificial intelligence is fundamentally reshaping how we create, consume, and interact with digital content. This analysis reveals three critical transformation areas: automated generation systems, intelligent curation platforms, and the emerging ethical framework governing AI-powered creativity.
+This comprehensive analysis examines current cryptocurrency market dynamics, DeFi ecosystem developments, and institutional adoption trends. The discussion reveals critical opportunities in cross-chain interoperability, yield farming strategies, and regulatory-compliant digital asset allocation.
 
-## Key Performance Metrics
-- **Production Efficiency**: 80% reduction in content creation time
-- **Quality Maintenance**: Consistent output standards across automated workflows  
-- **Real-time Optimization**: Machine learning algorithms adapt content for specific audiences instantly
-- **Workflow Integration**: Seamless embedding in existing creative processes
+## Market Performance Metrics
+- **Bitcoin Consolidation**: Key resistance at $45K-$48K, strong support at $41K
+- **DeFi Growth**: 23% increase in total value locked across major protocols
+- **Institutional Adoption**: Accelerating capital allocation following regulatory clarity
+- **Cross-Chain Development**: Multi-chain interoperability driving next growth phase
 
-## Creative Amplification Strategy
-The evidence suggests AI functions as a creative amplifier rather than a replacement mechanism. Current implementations span from automated social media scheduling to complex video editing workflows, demonstrating measurable efficiency gains that convert hours of manual work into minutes of AI-assisted production.
+## Strategic Investment Framework
+The analysis emphasizes portfolio diversification across crypto sectors while maintaining awareness of traditional market correlations. Successful investors focus on projects with strong fundamentals rather than speculative momentum plays.` :
 
-## Industry Impact Analysis
-Real-world deployments showcase successful AI integration across diverse sectors:
-- **Personalized Recommendations**: Content curation systems learning user preferences
-- **Automated Video Generation**: AI-powered creation tools for marketing and education
-- **Content Adaptation**: Intelligent summarization and format optimization
-- **Creative Workflow Enhancement**: Tools that augment human insight with machine intelligence
+      isBusiness ?
+      `# Advanced Business Strategy & Market Analysis Tutorial
 
-## Ethical Framework Considerations
-The analysis addresses critical questions surrounding authenticity verification, copyright protection protocols, and the evolving professional landscape for creative workers. The emphasis on responsible development ensures technological advancement aligns with ethical content creation standards.
+## Executive Summary
+This comprehensive business strategy session covers advanced market positioning techniques, customer acquisition optimization, competitive analysis frameworks, and operational excellence strategies for sustainable growth in competitive markets.
 
-## Future Outlook
-This transformation represents the beginning of a new era where human creativity combines with machine intelligence to create unprecedented possibilities in content creation and distribution.` :
-      `# Decentralized Applications: The Blockchain Architecture Revolution
+## Strategic Performance Indicators
+- **Customer Retention**: 40% improvement through long-term value focus
+- **Market Positioning**: Adaptive companies outperform by significant margins
+- **Operational Excellence**: Infrastructure investment before scaling critical for success
+- **Technology Integration**: Automation and analytics provide measurable competitive advantages` :
 
-## Executive Summary  
-Decentralized applications represent a fundamental paradigm shift from centralized to distributed software architecture, offering unprecedented transparency, security, and user data ownership through blockchain technology integration.
+      `# Digital Content Strategy & Market Positioning Analysis
 
-## Core Technical Architecture
-DApps operate on blockchain networks, eliminating single points of failure while providing complete transaction transparency. Smart contracts serve as programmable foundations, enabling automated agreement execution without traditional intermediary dependencies.
+## Executive Summary
+This analysis explores advanced content strategies and digital transformation approaches that successful organizations use to maintain competitive advantages in rapidly evolving digital markets.
 
-## Revolutionary Benefits Analysis
-- **Censorship Resistance**: Distributed infrastructure prevents centralized control
-- **Data Sovereignty**: Users maintain complete ownership of their digital assets
-- **System Reliability**: No centralized vulnerabilities or scheduled downtime
-- **Programmable Finance**: Smart contracts enable innovative financial instruments
+## Digital Performance Metrics
+- **Strategy Investment ROI**: 67% better performance for comprehensive digital strategies
+- **Audience Engagement**: Quality-focused approaches outperform volume-based metrics
+- **Market Adaptation**: Digital-first organizations show superior resilience`;
 
-## Cross-Chain Innovation Framework
-Breakthrough developments in blockchain interoperability allow different networks to communicate and share value seamlessly. This technological advancement addresses critical scalability limitations and enables broader ecosystem adoption.
-
-## Implementation Challenge Matrix
-Current barriers include:
-- **User Experience Complexity**: Technical knowledge requirements limit mainstream adoption
-- **Network Scalability**: Transaction throughput limitations across blockchain networks  
-- **Regulatory Uncertainty**: Evolving legal frameworks impact development strategies
-- **Energy Consumption**: Environmental concerns around blockchain consensus mechanisms
-
-## Market Application Case Studies
-Successful DApp implementations demonstrate versatility across multiple industries:
-- **Decentralized Finance**: Lending protocols and automated market makers
-- **Social Platforms**: Censorship-resistant communication networks
-- **Prediction Markets**: Decentralized forecasting and betting systems
-- **Digital Asset Management**: NFT marketplaces and tokenized assets
-
-## Strategic Development Outlook
-Industry leaders are addressing current limitations through innovative design patterns, improved user interfaces, and regulatory compliance frameworks, positioning DApps for mainstream enterprise adoption.`;
-
-    const marketAnalysis = isYouTube ?
-      `## Market Intelligence: AI Content Creation Opportunities
-
-### Current Market Positioning
-The AI content creation sector is experiencing explosive growth with 80% efficiency improvements creating significant competitive advantages. Companies implementing AI-powered workflows are capturing market share through faster production cycles and reduced operational costs.
-
-### Investment Landscape
-- **Venture Capital Focus**: $2.3B invested in AI content tools in 2024
-- **Enterprise Adoption**: 67% of Fortune 500 companies integrating AI content systems
-- **Creator Economy Impact**: Individual creators seeing 300% productivity increases
-
-### Strategic Opportunities
-1. **Content Automation Services**: High-demand market for AI-powered content generation
-2. **Ethical AI Development**: Companies addressing authenticity concerns gaining trust
-3. **Workflow Integration Tools**: Solutions bridging human creativity and AI efficiency
-4. **Copyright Protection Systems**: Technology addressing intellectual property concerns
-
-### Competitive Advantage Indicators
-Organizations leading this transformation demonstrate measurable ROI through reduced production costs, increased content volume, and improved audience engagement metrics.
-
-### Risk Assessment
-Primary concerns include authenticity verification, creative job displacement, and regulatory compliance requirements that may impact rapid scaling strategies.
-
-### Market Recommendation
-**High Growth Potential**: AI content creation represents a transformative market opportunity with established demand, proven efficiency gains, and expanding enterprise adoption patterns.` :
-      `## Market Intelligence: Decentralized Application Investment Outlook
-
-### Sector Analysis
-The DApp ecosystem is transitioning from experimental technology to enterprise-ready solutions. Cross-chain interoperability developments are removing critical scalability barriers, creating new investment opportunities across multiple blockchain networks.
-
-### Market Penetration Metrics
-- **Total Value Locked**: $47B across DeFi protocols in 2024
-- **User Adoption**: 156% year-over-year growth in active DApp users
-- **Enterprise Integration**: 23% of financial institutions exploring DApp implementations
-
-### Investment Categories
-1. **Infrastructure Solutions**: Layer 2 scaling solutions showing 400% growth
-2. **User Experience Tools**: Simplified DApp interfaces capturing mainstream users
-3. **Cross-Chain Protocols**: Interoperability solutions commanding premium valuations
-4. **Regulatory Compliance**: Legal framework tools for enterprise DApp deployment
-
-### Competitive Landscape
-First-mover advantages exist in sectors addressing current limitations: user experience complexity, transaction costs, and regulatory uncertainty. Companies solving these challenges are attracting significant institutional investment.
-
-### Growth Catalysts
-- **Regulatory Clarity**: Government framework development increasing institutional confidence
-- **Technical Improvements**: Layer 2 solutions reducing transaction costs by 95%
-- **Enterprise Adoption**: Corporate blockchain strategies driving DApp demand
-
-### Market Recommendation  
-**Emerging High-Value Sector**: DApps represent a maturing technology with proven utility, growing institutional adoption, and significant infrastructure investment supporting long-term growth potential.`;
-
-    // Legacy summary field for backward compatibility
-    const summary = blogPost;
-      `This in-depth exploration of decentralized applications reveals how blockchain technology is reshaping software architecture and user relationships with digital platforms. The discussion covers fundamental shifts from centralized to distributed systems, emphasizing user sovereignty and data ownership.
-
-      **Core Technical Architecture:**
-      Decentralized applications operate on blockchain networks, eliminating single points of failure while providing unprecedented transparency. Smart contracts serve as the programmable backbone, enabling automated agreement execution without traditional intermediaries.
-
-      **Revolutionary Benefits:**
-      - Censorship resistance through distributed infrastructure
-      - True data ownership returning control to users  
-      - Elimination of centralized vulnerabilities and downtime risks
-      - Programmable money enabling innovative financial instruments
-
-      **Cross-Chain Innovation:**
-      The analysis highlights breakthrough developments in blockchain interoperability, allowing different networks to communicate and share value. This technological advancement is crucial for ecosystem scalability and broader adoption.
-
-      **Implementation Challenges:**
-      Current hurdles include user experience complexity, network scalability limitations, and evolving regulatory frameworks. The discussion outlines how industry leaders are addressing these challenges through innovative design patterns and thoughtful technical solutions.
-
-      **Market Applications:**
-      Real-world case studies demonstrate DApp success across finance, social media, and prediction markets, showcasing the technology's versatility and growing mainstream adoption potential.`;
-
-    const keyInsights = isYouTube ? [
+    const keyInsights = isCryptoFinance ? [
       {
-        insight: "AI reduces content production time by 80% while maintaining quality standards",
+        insight: "Bitcoin consolidation pattern suggests potential breakout at $45K-$48K resistance levels",
         timestamp: "3:45",
         importance: 'high' as const
       },
       {
-        insight: "Machine learning algorithms optimize content for specific audiences in real-time",
+        insight: "DeFi protocols showing 23% TVL growth indicating institutional adoption acceleration",
         timestamp: "7:22", 
         importance: 'high' as const
       },
       {
-        insight: "Ethical considerations around authenticity and copyright are becoming critical",
+        insight: "Cross-chain interoperability projects positioned for massive growth in multi-chain future",
         timestamp: "12:15",
         importance: 'high' as const
       }
-    ] : [
+    ] : isBusiness ? [
       {
-        insight: "Smart contracts eliminate intermediaries while enabling programmable money",
+        insight: "Companies focusing on long-term customer value see 40% higher retention rates",
         timestamp: "4:12",
         importance: 'high' as const
       },
       {
-        insight: "Cross-chain interoperability is crucial for decentralized ecosystem scalability",
+        insight: "Operational infrastructure investment before scaling critical for quality maintenance",
         timestamp: "8:34",
         importance: 'high' as const
       },
       {
-        insight: "User experience complexity remains the primary adoption barrier",
+        insight: "Unit economics optimization before scaling shows strongest performance metrics",
+        timestamp: "14:56",
+        importance: 'medium' as const
+      }
+    ] : [
+      {
+        insight: "Organizations with comprehensive digital strategies see 67% better performance",
+        timestamp: "4:12",
+        importance: 'high' as const
+      },
+      {
+        insight: "Quality-focused engagement strategies outperform volume-based metrics",
+        timestamp: "8:34",
+        importance: 'high' as const
+      },
+      {
+        insight: "Performance gap widening between digital-first and traditional approaches",
         timestamp: "14:56",
         importance: 'medium' as const
       }
     ];
 
-    const chapters = isYouTube ? [
+    const chapters = isCryptoFinance ? [
       {
-        title: "Introduction to AI Content Creation",
+        title: "Market Overview & Technical Analysis",
         startTime: "0:00",
-        endTime: "3:30",
-        summary: "Overview of AI's role in transforming digital content production and consumption patterns."
+        endTime: "4:30",
+        summary: "Bitcoin consolidation patterns and key resistance/support levels analysis."
       },
       {
-        title: "Machine Learning for Content Optimization", 
-        startTime: "3:30",
-        endTime: "8:15",
-        summary: "Deep dive into algorithms that automatically optimize content for target audiences."
+        title: "DeFi Protocol Developments", 
+        startTime: "4:30",
+        endTime: "9:15",
+        summary: "23% TVL growth analysis and institutional adoption trends in DeFi ecosystem."
       },
       {
-        title: "Natural Language Processing Applications",
-        startTime: "8:15", 
-        endTime: "13:45",
-        summary: "Exploration of NLP technologies enabling automated summarization and content adaptation."
+        title: "Cross-Chain Interoperability Trends",
+        startTime: "9:15", 
+        endTime: "14:45",
+        summary: "Multi-chain future developments and interoperability project opportunities."
       },
       {
-        title: "Creative Amplification vs Replacement",
-        startTime: "13:45",
+        title: "Risk Management & Portfolio Strategy",
+        startTime: "14:45",
         endTime: "18:20", 
-        summary: "Analysis of how AI enhances rather than replaces human creativity and insight."
+        summary: "Diversification strategies and correlation analysis with traditional markets."
       },
       {
-        title: "Ethical Considerations and Future Outlook",
+        title: "Regulatory Landscape & Institutional Adoption",
         startTime: "18:20",
-        endTime: "20:45",
-        summary: "Discussion of responsible AI development and implications for creative industries."
+        endTime: "19:16",
+        summary: "Regulatory clarity impact on institutional capital allocation opportunities."
+      }
+    ] : isBusiness ? [
+      {
+        title: "Market Positioning Dynamics",
+        startTime: "0:00", 
+        endTime: "4:00",
+        summary: "Adaptive strategies for changing consumer behaviors and market conditions."
+      },
+      {
+        title: "Customer Acquisition Optimization",
+        startTime: "4:00",
+        endTime: "8:30",
+        summary: "Long-term value focus strategies achieving 40% higher retention rates."
+      },
+      {
+        title: "Competitive Analysis Framework",
+        startTime: "8:30", 
+        endTime: "12:00",
+        summary: "Identifying genuine opportunities versus temporary market noise patterns."
+      },
+      {
+        title: "Operational Excellence & Scaling",
+        startTime: "12:00",
+        endTime: "16:30",
+        summary: "Infrastructure investment strategies for sustainable growth and quality maintenance."
+      },
+      {
+        title: "Technology Integration Benefits",
+        startTime: "16:30", 
+        endTime: "19:16",
+        summary: "Automation and analytics providing measurable competitive advantages."
       }
     ] : [
       {
-        title: "Decentralized Applications Overview",
+        title: "Digital Strategy Framework",
         startTime: "0:00", 
         endTime: "4:00",
-        summary: "Introduction to DApps and fundamental differences from centralized systems."
+        summary: "Comprehensive digital transformation approaches and performance metrics."
       },
       {
-        title: "Smart Contract Architecture",
+        title: "Audience Engagement Strategies",
         startTime: "4:00",
-        endTime: "9:30",
-        summary: "Technical exploration of smart contracts as the backbone of decentralized systems."
+        endTime: "8:30",
+        summary: "Quality-focused engagement approaches outperforming volume-based metrics."
       },
       {
-        title: "Cross-Chain Interoperability",
-        startTime: "9:30", 
-        endTime: "15:00",
-        summary: "Analysis of blockchain communication protocols and value sharing mechanisms."
+        title: "Brand Positioning Techniques",
+        startTime: "8:30", 
+        endTime: "12:00",
+        summary: "Authentic engagement strategies creating sustainable competitive advantages."
       },
       {
-        title: "Implementation Challenges",
-        startTime: "15:00",
-        endTime: "18:30",
-        summary: "Discussion of scalability, UX, and regulatory hurdles facing DApp adoption."
+        title: "Performance Measurement Frameworks",
+        startTime: "12:00",
+        endTime: "16:30",
+        summary: "Analytics and optimization tools for competitive advantage development."
       },
       {
-        title: "Real-World Applications",
-        startTime: "18:30", 
-        endTime: "20:45",
-        summary: "Case studies of successful DApp implementations across various industries."
+        title: "Implementation Strategy",
+        startTime: "16:30", 
+        endTime: "19:16",
+        summary: "Digital transformation success requiring comprehensive strategic approaches."
       }
     ];
 
-    const tags = isYouTube ? 
-      ['artificial-intelligence', 'content-creation', 'machine-learning', 'automation', 'digital-transformation'] :
-      ['blockchain', 'decentralization', 'smart-contracts', 'web3', 'cryptocurrency'];
+    const tags = isCryptoFinance ? 
+      ['cryptocurrency', 'defi', 'bitcoin', 'blockchain', 'market-analysis'] :
+      isBusiness ?
+      ['business-strategy', 'market-analysis', 'customer-acquisition', 'operational-excellence', 'competitive-analysis'] :
+      ['digital-strategy', 'content-marketing', 'brand-positioning', 'audience-engagement', 'digital-transformation'];
 
     return {
       transcript,
-      summary, 
-      tldrSummary,
-      blogPost,
-      marketAnalysis,
-      rawData,
+      summary,
       keyInsights,
       chapters,
       tags,
-      duration: 1245,
+      duration: metadata?.duration || 1156,
       accuracy: 98
     };
   }
