@@ -62,9 +62,8 @@ export class RealContentProcessor {
     // Create summary record
     const summary = await this.storage.createSummary({
       originalUrl: url,
-      userId,
-      status: 'processing' as const,
-      progress: 0,
+      creatorId: userId,
+      processingStatus: 'processing',
       title: 'Extracting content...',
       summary: 'Processing your content with real AI analysis...',
       contentType: 'video',
@@ -75,8 +74,7 @@ export class RealContentProcessor {
     this.processContent(url, summary.id, userId).catch(error => {
       console.error(`❌ Processing failed for ${summary.id}:`, error);
       this.storage.updateSummary(summary.id, {
-        status: 'failed',
-        progress: 0,
+        processingStatus: 'failed',
         error: error.message,
         updatedAt: new Date()
       });
@@ -100,8 +98,7 @@ export class RealContentProcessor {
       
       // Step 4: Complete processing (100%)
       await this.storage.updateSummary(summaryId, {
-        status: 'completed',
-        progress: 100,
+        processingStatus: 'completed',
         title: metadata.title,
         summary: processedContent.summary,
         tldrSummary: processedContent.tldrSummary,
@@ -111,7 +108,7 @@ export class RealContentProcessor {
         keyInsights: processedContent.keyInsights,
         chapters: processedContent.chapters,
         tags: processedContent.tags,
-        duration: processedContent.duration,
+        originalDuration: processedContent.duration,
         accuracy: processedContent.accuracy,
         ipfsHash: `ipfs://mock-${Date.now()}`,
         arweaveId: `ar://mock-${Date.now()}`,
@@ -355,8 +352,7 @@ Format as JSON with these fields:
 
   private async updateProgress(summaryId: string, progress: number, message: string): Promise<void> {
     await this.storage.updateSummary(summaryId, {
-      progress,
-      status: progress >= 100 ? 'completed' : 'processing'
+      processingStatus: progress >= 100 ? 'completed' : 'processing'
     });
     console.log(`📊 Progress ${progress}%: ${message}`);
   }
