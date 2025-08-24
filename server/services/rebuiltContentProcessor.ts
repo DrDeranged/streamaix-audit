@@ -107,6 +107,8 @@ export class RebuiltContentProcessor {
           bulletPoints: analysis.bulletPoints,
           trends: analysis.trends,
           financialTrends: analysis.financialTrends,
+          sectorAnalysis: analysis.sectorAnalysis,
+          riskAssessment: analysis.riskAssessment,
           marketSentiment: analysis.marketSentiment,
           sourceCredibility: analysis.sourceCredibility,
           keyQuotes: analysis.keyQuotes
@@ -255,17 +257,52 @@ Generate a detailed analysis in this exact JSON format:
       "company": "Apple Inc.",
       "relevance": "Direct relation to discussed technology trends",
       "impact": "bullish",
-      "reasoning": "Explanation of how content relates to this stock"
+      "reasoning": "Detailed analysis of how content directly impacts this stock",
+      "priceTarget": "$185-$195",
+      "timeframe": "3-6 months",
+      "riskLevel": "Medium",
+      "catalysts": ["Product launch", "Earnings beat"],
+      "sectorImpact": "Technology sector bullish rotation"
     },
     {
       "category": "Crypto",
       "symbol": "BTC",
       "company": "Bitcoin",
-      "relevance": "Mentioned in context of digital assets",
-      "impact": "neutral",
-      "reasoning": "Explanation of cryptocurrency relevance"
+      "relevance": "Regulatory developments discussed",
+      "impact": "bullish",
+      "reasoning": "Specific regulatory clarity driving institutional adoption",
+      "priceTarget": "$105,000-$120,000",
+      "timeframe": "6-12 months",
+      "riskLevel": "High",
+      "catalysts": ["ETF approvals", "Institutional adoption"],
+      "sectorImpact": "Crypto market leader positioning"
+    },
+    {
+      "category": "Stocks",
+      "symbol": "NVDA",
+      "company": "NVIDIA Corporation",
+      "relevance": "AI infrastructure demands mentioned",
+      "impact": "bullish",
+      "reasoning": "Growing AI computational requirements driving demand",
+      "priceTarget": "$150-$165",
+      "timeframe": "6-9 months",
+      "riskLevel": "Medium-High",
+      "catalysts": ["Data center growth", "AI adoption"],
+      "sectorImpact": "Semiconductor sector growth driver"
     }
   ],
+  "sectorAnalysis": {
+    "bullishSectors": ["Technology", "AI/ML", "Renewable Energy"],
+    "bearishSectors": ["Traditional Retail", "Legacy Media"],
+    "rotationSignals": "Tech rotation into AI infrastructure plays",
+    "marketTiming": "Early cycle expansion phase"
+  },
+  "riskAssessment": {
+    "marketRisk": "Medium",
+    "volatilityOutlook": "Elevated but declining",
+    "keyRisks": ["Regulatory changes", "Market sentiment shifts"],
+    "hedgingStrategy": "Diversified exposure with stop-losses"
+  },
   "marketSentiment": "BULLISH",
   "sourceCredibility": "High",
   "keyQuotes": [
@@ -307,11 +344,32 @@ Generate a detailed analysis in this exact JSON format:
   "accuracy": 95
 }
 
-Focus on extracting real insights and provide specific, actionable content. IMPORTANT: 
-- Generate 6-8 diverse market trends covering different sectors and timeframes
-- Include 2-4 financial trends with specific stock tickers (NYSE/NASDAQ) and cryptocurrency symbols related to the content
-- Provide exactly 3-5 impactful quotes that capture key insights
-- Ensure financial trends include both traditional stocks and crypto when relevant to the content
+Focus on extracting PRECISE ALPHA-GENERATING insights for sophisticated investors. CRITICAL REQUIREMENTS:
+
+FINANCIAL PRECISION:
+- Identify 3-5 specific tradeable assets (stocks/crypto) with EXACT tickers mentioned or directly relevant to content
+- Provide specific price targets with ranges (e.g., "$150-$165")
+- Include precise timeframes (e.g., "3-6 months", "Q2 2024")
+- Specify risk levels (Low/Medium/High) and position sizing implications
+- List specific catalysts that will drive price movements
+- Analyze sector rotation opportunities and timing
+
+MARKET ALPHA:
+- Identify asymmetric risk/reward opportunities mentioned in content
+- Highlight contrarian positions if content suggests market misunderstandings
+- Specify market timing signals and entry/exit strategies
+- Include volatility expectations and hedging considerations
+- Analyze supply/demand dynamics affecting asset prices
+- Identify regulatory or competitive moats mentioned
+
+ACTIONABLE INTELLIGENCE:
+- Convert content insights into specific trading theses
+- Identify early-stage trends before market recognition
+- Highlight information asymmetries that create opportunities
+- Specify risk management approaches for each position
+- Include correlation analysis between mentioned assets
+
+Provide 3-5 impactful quotes that reveal market-moving information or insights.
 `;
 
     try {
@@ -345,9 +403,52 @@ Focus on extracting real insights and provide specific, actionable content. IMPO
           { trend: "Real-time Analysis Adoption", strength: "strong", evidence: "Increasing need for instant content processing" }
         ],
         financialTrends: result.financialTrends || [
-          { category: "Stocks", symbol: "NVDA", company: "NVIDIA Corporation", relevance: "AI processing technology", impact: "bullish", reasoning: "Leading AI chip manufacturer benefits from content analysis trends" },
-          { category: "Crypto", symbol: "ETH", company: "Ethereum", relevance: "Decentralized content systems", impact: "neutral", reasoning: "Blockchain-based content verification and storage" }
+          { 
+            category: "Stocks", 
+            symbol: "NVDA", 
+            company: "NVIDIA Corporation", 
+            relevance: "AI infrastructure scaling", 
+            impact: "bullish", 
+            reasoning: "Data center GPU demand accelerating with AI adoption trends",
+            priceTarget: "$145-$160",
+            timeframe: "6-9 months",
+            riskLevel: "Medium"
+          },
+          { 
+            category: "Crypto", 
+            symbol: "ETH", 
+            company: "Ethereum", 
+            relevance: "Smart contract platform growth", 
+            impact: "bullish", 
+            reasoning: "Institutional DeFi adoption and Layer 2 scaling driving utility",
+            priceTarget: "$3,800-$4,200",
+            timeframe: "3-6 months",
+            riskLevel: "High"
+          },
+          { 
+            category: "Stocks", 
+            symbol: "TSLA", 
+            company: "Tesla Inc.", 
+            relevance: "Autonomous driving developments", 
+            impact: "bullish", 
+            reasoning: "FSD progress and energy business expansion driving multiple expansion",
+            priceTarget: "$280-$320",
+            timeframe: "9-12 months",
+            riskLevel: "High"
+          }
         ],
+        sectorAnalysis: result.sectorAnalysis || {
+          bullishSectors: ["Technology", "Clean Energy", "AI Infrastructure"],
+          bearishSectors: ["Traditional Retail", "Legacy Media"],
+          rotationSignals: "Growth to value rotation pausing, tech resuming leadership",
+          marketTiming: "Mid-cycle expansion with selective opportunities"
+        },
+        riskAssessment: result.riskAssessment || {
+          marketRisk: "Medium",
+          volatilityOutlook: "Elevated near-term, normalizing",
+          keyRisks: ["Federal Reserve policy shifts", "Geopolitical tensions"],
+          hedgingStrategy: "Covered calls on growth positions, portfolio insurance"
+        },
         marketSentiment: result.marketSentiment || "NEUTRAL",
         sourceCredibility: result.sourceCredibility || "Medium",
         keyQuotes: result.keyQuotes || [
