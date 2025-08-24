@@ -340,7 +340,10 @@ export function RebuiltAIDemo() {
 
                             {result.trends && result.trends.length > 0 && (
                               <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                                <h5 className="font-semibold mb-3 text-purple-400">Market Trends</h5>
+                                <h5 className="font-semibold mb-3 text-purple-400 flex items-center gap-2">
+                                  <TrendingUp className="w-4 h-4" />
+                                  Market Trends
+                                </h5>
                                 <div className="space-y-3">
                                   {result.trends.map((trend: any, idx: number) => (
                                     <div key={idx} className="p-3 bg-background/50 rounded-md">
@@ -355,6 +358,41 @@ export function RebuiltAIDemo() {
                                         </Badge>
                                       </div>
                                       <p className="text-xs text-muted-foreground">{trend.evidence}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {result.financialTrends && result.financialTrends.length > 0 && (
+                              <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                                <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
+                                  <BarChart3 className="w-4 h-4" />
+                                  Financial Impact Analysis
+                                </h5>
+                                <div className="space-y-3">
+                                  {result.financialTrends.map((financial: any, idx: number) => (
+                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-cyan-400">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="secondary" className="text-xs">
+                                            {financial.category}
+                                          </Badge>
+                                          <span className="font-mono text-sm font-semibold text-cyan-400">
+                                            ${financial.symbol}
+                                          </span>
+                                          <span className="text-sm font-medium">{financial.company}</span>
+                                        </div>
+                                        <Badge variant="outline" className={`text-xs ${
+                                          financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
+                                          financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
+                                          'text-gray-400 border-gray-500/30'
+                                        }`}>
+                                          {financial.impact}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground mb-1">{financial.relevance}</p>
+                                      <p className="text-xs text-muted-foreground italic">{financial.reasoning}</p>
                                     </div>
                                   ))}
                                 </div>
