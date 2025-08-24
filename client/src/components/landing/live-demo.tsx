@@ -42,7 +42,7 @@ export function LiveDemo() {
   };
 
   return (
-    <section id="demo" className="py-12 sm:py-20 bg-gray-100 dark:bg-gray-900 relative">
+    <section id="real-demo" className="py-12 sm:py-20 bg-gray-100 dark:bg-gray-900 relative">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
