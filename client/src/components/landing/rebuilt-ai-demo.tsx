@@ -72,13 +72,13 @@ export function RebuiltAIDemo() {
   const { toast } = useToast();
 
   // Query for processing result with real-time updates
-  const { data: result, isLoading: isResultLoading, error } = useQuery({
+  const { data: result, isLoading: isResultLoading, error } = useQuery<ProcessingResult>({
     queryKey: ['/api/processing-result', summaryId],
     enabled: !!summaryId,
-    refetchInterval: (data) => {
-      return data?.processingStatus === 'processing' ? 2000 : false;
+    refetchInterval: (query) => {
+      return query.state.data?.processingStatus === 'processing' ? 2000 : false;
     },
-  }) as { data: ProcessingResult, isLoading: boolean, error: any };
+  });
 
   const handleProcess = async () => {
     if (!url.trim()) {
