@@ -113,7 +113,10 @@ export function RebuiltAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      setSummaryId(response.summaryId);
+      console.log('API response:', response);
+      const summaryId = response.summaryId || response.summary?.id;
+      console.log('Setting summaryId to:', summaryId);
+      setSummaryId(summaryId);
       
       // Simulate progress updates
       const progressInterval = setInterval(() => {
@@ -152,6 +155,18 @@ export function RebuiltAIDemo() {
 
   const isCompleted = result?.processingStatus === 'completed';
   const isFailed = result?.processingStatus === 'failed';
+
+  // Debug processing completion
+  if (summaryId) {
+    console.log('Component state - summaryId:', summaryId, 'isCompleted:', isCompleted, 'hasResult:', !!result);
+    if (result) {
+      console.log('Result data:', { 
+        processingStatus: result.processingStatus, 
+        title: result.title,
+        hasSummary: !!result.summary 
+      });
+    }
+  }
 
 
   return (
