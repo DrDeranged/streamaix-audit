@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
-import CleanContentProcessor from "./services/cleanContentProcessor";
+import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { 
@@ -951,7 +951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Start real processing with RealContentProcessor
       console.log('🚀 Starting processing with RealContentProcessor');
-      const processor = CleanContentProcessor.getInstance();
+      const processor = RebuiltContentProcessor.getInstance();
       const result = await processor.processContent(url, demoUserId);
       const summaryId = result.summaryId;
 
@@ -1022,9 +1022,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ job });
   }));
 
-  // Get processing result endpoint (Clean Processor)
+  // Get processing result endpoint (Rebuilt Processor)
   app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
-    const processor = CleanContentProcessor.getInstance();
+    const processor = RebuiltContentProcessor.getInstance();
     const result = await processor.getProcessingResult(req.params.summaryId);
     res.json(result);
   }));
