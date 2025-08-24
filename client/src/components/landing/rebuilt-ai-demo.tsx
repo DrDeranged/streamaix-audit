@@ -78,7 +78,7 @@ interface ProcessingResult {
 export function RebuiltAIDemo() {
   const [url, setUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [summaryId, setSummaryId] = useState<string | null>('ac62600f-226c-4c27-8c6f-2e3ccb4aa68f'); // Temporary: using a completed processing result
+  const [summaryId, setSummaryId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState('');
   const { toast } = useToast();
@@ -113,8 +113,6 @@ export function RebuiltAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      console.log('Debug - API response:', response);
-      console.log('Debug - Setting summaryId to:', response.summaryId);
       setSummaryId(response.summaryId);
       
       // Simulate progress updates
@@ -155,13 +153,6 @@ export function RebuiltAIDemo() {
   const isCompleted = result?.processingStatus === 'completed';
   const isFailed = result?.processingStatus === 'failed';
 
-  // Debug logging
-  console.log('Debug - summaryId:', summaryId);
-  console.log('Debug - result:', result);
-  console.log('Debug - isResultLoading:', isResultLoading);
-  console.log('Debug - error:', error);
-  console.log('Debug - isCompleted:', isCompleted);
-  console.log('Debug - processingStatus:', result?.processingStatus);
 
   return (
     <section id="rebuilt-demo" className="py-16 bg-background">
@@ -174,10 +165,10 @@ export function RebuiltAIDemo() {
           viewport={{ once: true }}
         >
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            Live AI Content Intelligence
+            AI Content Intelligence
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            Paste any YouTube URL below and watch real AI extract insights, analyze market sentiment, and generate comprehensive intelligence reports
+            Transform any YouTube video into actionable market intelligence, financial analysis, and strategic insights powered by advanced AI
           </p>
         </motion.div>
 
