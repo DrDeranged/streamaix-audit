@@ -78,7 +78,7 @@ interface ProcessingResult {
 export function RebuiltAIDemo() {
   const [url, setUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [summaryId, setSummaryId] = useState<string | null>(null);
+  const [summaryId, setSummaryId] = useState<string | null>('ac62600f-226c-4c27-8c6f-2e3ccb4aa68f'); // Temporary: using a completed processing result
   const [progress, setProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState('');
   const { toast } = useToast();
@@ -113,6 +113,8 @@ export function RebuiltAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
+      console.log('Debug - API response:', response);
+      console.log('Debug - Setting summaryId to:', response.summaryId);
       setSummaryId(response.summaryId);
       
       // Simulate progress updates
@@ -152,6 +154,14 @@ export function RebuiltAIDemo() {
 
   const isCompleted = result?.processingStatus === 'completed';
   const isFailed = result?.processingStatus === 'failed';
+
+  // Debug logging
+  console.log('Debug - summaryId:', summaryId);
+  console.log('Debug - result:', result);
+  console.log('Debug - isResultLoading:', isResultLoading);
+  console.log('Debug - error:', error);
+  console.log('Debug - isCompleted:', isCompleted);
+  console.log('Debug - processingStatus:', result?.processingStatus);
 
   return (
     <section id="rebuilt-demo" className="py-16 bg-background">
