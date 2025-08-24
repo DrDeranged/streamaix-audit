@@ -2,7 +2,7 @@ import { Navigation } from "@/components/landing/navigation";
 import { AICapabilitiesBanner } from "@/components/landing/ai-capabilities-banner";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { RealAIDemo } from "@/components/landing/real-ai-demo";
+import CleanAIDemo from "@/components/landing/clean-ai-demo";
 
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
@@ -18,7 +18,7 @@ export default function Landing() {
       <AICapabilitiesBanner />
       <HeroSection />
       <HowItWorks />
-      <RealAIDemo />
+      <CleanAIDemo />
       <WhyBlockchain />
       <KnowledgeAvatars />
       <AISuggestions />

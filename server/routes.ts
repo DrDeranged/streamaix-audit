@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
-import RealContentProcessor from "./services/realContentProcessor";
+import CleanContentProcessor from "./services/cleanContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { 
@@ -951,8 +951,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Start real processing with RealContentProcessor
       console.log('🚀 Starting processing with RealContentProcessor');
-      const processor = RealContentProcessor.getInstance();
-      const summaryId = await processor.startProcessing(url, demoUserId);
+      const processor = CleanContentProcessor.getInstance();
+      const result = await processor.processContent(url, demoUserId);
+      const summaryId = result.summaryId;
 
       res.status(201).json({
         message: 'REAL AI processing started successfully',
@@ -1021,9 +1022,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ job });
   }));
 
-  // Get processing result endpoint (Real Processor)
+  // Get processing result endpoint (Clean Processor)
   app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
-    const processor = RealContentProcessor.getInstance();
+    const processor = CleanContentProcessor.getInstance();
     const result = await processor.getProcessingResult(req.params.summaryId);
     res.json(result);
   }));
