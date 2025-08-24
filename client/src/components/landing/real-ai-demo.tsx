@@ -100,6 +100,11 @@ export function RealAIDemo() {
 
       const actualSummaryId = response.summaryId || response.summary?.id;
       console.log('🔍 Setting summaryId:', actualSummaryId, 'from response:', response);
+      
+      if (!actualSummaryId) {
+        throw new Error('No summary ID received from server - cannot track processing');
+      }
+      
       setJobId(response.jobId || `job-${Date.now()}`);
       setSummaryId(actualSummaryId);
       setProgress(10);
@@ -122,18 +127,19 @@ export function RealAIDemo() {
         });
       }, 2000);
 
-      // Check for results with retry mechanism  
+      // Check for results with retry mechanism using captured summaryId
       const checkResults = async (attempt = 1, maxAttempts = 20) => {
+        const currentSummaryId = actualSummaryId; // Use the captured ID from closure
         try {
-          if (!summaryId) {
-            console.error('❌ summaryId is null/undefined, cannot check results');
+          if (!currentSummaryId) {
+            console.error('❌ currentSummaryId is null/undefined, cannot check results');
             throw new Error('Lost track of summary ID - processing cannot continue');
           }
-          console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${summaryId}`);
+          console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${currentSummaryId}`);
           
           // Use Real processor result endpoint for better reliability
           const timestamp = Date.now();
-          const processingResult = await fetch(`/api/processing-result/${summaryId}?t=${timestamp}`, {
+          const processingResult = await fetch(`/api/processing-result/${currentSummaryId}?t=${timestamp}`, {
             headers: { 'Content-Type': 'application/json' },
             cache: 'no-cache'
           }).then(res => {
@@ -151,7 +157,7 @@ export function RealAIDemo() {
             }
             try {
               return JSON.parse(text);
-            } catch (e) {
+            } catch (e: any) {
               console.error('JSON parse error. Response text:', text);
               throw new Error(`JSON parse failed: ${e.message}`);
             }
@@ -178,7 +184,7 @@ export function RealAIDemo() {
           // Fallback to regular summary endpoint
           const summaryResponse = processingResult && processingResult.id ? 
             { summary: processingResult } :
-            await fetch(`/api/summaries/${summaryId}?t=${timestamp}`, {
+            await fetch(`/api/summaries/${currentSummaryId}?t=${timestamp}`, {
               headers: { 'Content-Type': 'application/json' },
               cache: 'no-cache'
             }).then(res => res.json());
@@ -208,7 +214,7 @@ export function RealAIDemo() {
           if (attempt > 10 && summaryResponse.summary.processingStatus === 'processing') {
             console.log('🔍 Status still showing processing after 10 attempts - running debug check...');
             try {
-              const debugResponse = await fetch(`/api/debug/summary/${response.summary.id}?t=${timestamp}`, {
+              const debugResponse = await fetch(`/api/debug/summary/${currentSummaryId}?t=${timestamp}`, {
                 cache: 'no-cache'
               }).then(res => res.json());
               
@@ -217,7 +223,7 @@ export function RealAIDemo() {
               if (debugResponse.summary?.processingStatus === 'completed') {
                 console.log('⚡ Debug check detected completion - backend finished but frontend missed it!');
                 // Force refresh the summary data
-                const correctedResponse = await fetch(`/api/summaries/${response.summary.id}?force=${timestamp}`, {
+                const correctedResponse = await fetch(`/api/summaries/${currentSummaryId}?force=${timestamp}`, {
                   cache: 'no-cache',
                   headers: { 'Cache-Control': 'no-cache' }
                 }).then(res => res.json());
@@ -270,7 +276,7 @@ export function RealAIDemo() {
             // Final diagnostic check before giving up
             console.log('🔍 Final diagnostic check before timeout...');
             try {
-              const debugResponse = await fetch(`/api/debug/summary/${response.summary.id}`, {
+              const debugResponse = await fetch(`/api/debug/summary/${currentSummaryId}`, {
                 cache: 'no-cache'
               }).then(res => res.json());
               
@@ -278,7 +284,7 @@ export function RealAIDemo() {
               
               if (debugResponse.summary?.processingStatus === 'completed') {
                 console.log('⚡ Debug check found completed status - processing actually finished!');
-                const finalResponse = await fetch(`/api/summaries/${response.summary.id}?t=${Date.now()}`, {
+                const finalResponse = await fetch(`/api/summaries/${currentSummaryId}?t=${Date.now()}`, {
                   cache: 'no-cache'
                 }).then(res => res.json());
                 
