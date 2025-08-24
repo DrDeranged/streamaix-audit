@@ -98,8 +98,10 @@ export function RealAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      setJobId(response.jobId || response.summaryId);
-      setSummaryId(response.summaryId || response.summary?.id);
+      const actualSummaryId = response.summaryId || response.summary?.id;
+      console.log('🔍 Setting summaryId:', actualSummaryId, 'from response:', response);
+      setJobId(response.jobId || `job-${Date.now()}`);
+      setSummaryId(actualSummaryId);
       setProgress(10);
       setProcessingStatus("Audio extraction in progress...");
 
@@ -123,6 +125,10 @@ export function RealAIDemo() {
       // Check for results with retry mechanism  
       const checkResults = async (attempt = 1, maxAttempts = 20) => {
         try {
+          if (!summaryId) {
+            console.error('❌ summaryId is null/undefined, cannot check results');
+            throw new Error('Lost track of summary ID - processing cannot continue');
+          }
           console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${summaryId}`);
           
           // Use Real processor result endpoint for better reliability
@@ -130,7 +136,26 @@ export function RealAIDemo() {
           const processingResult = await fetch(`/api/processing-result/${summaryId}?t=${timestamp}`, {
             headers: { 'Content-Type': 'application/json' },
             cache: 'no-cache'
-          }).then(res => res.json());
+          }).then(res => {
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+              throw new Error(`Expected JSON, got ${contentType}`);
+            }
+            return res.text();
+          }).then(text => {
+            if (!text.trim()) {
+              throw new Error('Empty response body');
+            }
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              console.error('JSON parse error. Response text:', text);
+              throw new Error(`JSON parse failed: ${e.message}`);
+            }
+          });
           
           console.log('🚀 Real Processing Result:', processingResult);
           
