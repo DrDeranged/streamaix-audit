@@ -113,9 +113,7 @@ export function RebuiltAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      console.log('API response:', response);
       const summaryId = response.summaryId || response.summary?.id;
-      console.log('Setting summaryId to:', summaryId);
       setSummaryId(summaryId);
       
       // Simulate progress updates
@@ -156,17 +154,6 @@ export function RebuiltAIDemo() {
   const isCompleted = result?.processingStatus === 'completed';
   const isFailed = result?.processingStatus === 'failed';
 
-  // Debug processing completion
-  if (summaryId) {
-    console.log('Component state - summaryId:', summaryId, 'isCompleted:', isCompleted, 'hasResult:', !!result);
-    if (result) {
-      console.log('Result data:', { 
-        processingStatus: result.processingStatus, 
-        title: result.title,
-        hasSummary: !!result.summary 
-      });
-    }
-  }
 
 
   return (
@@ -270,11 +257,13 @@ export function RebuiltAIDemo() {
                     <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <img 
-                            src={result.rawData?.thumbnail}
-                            alt={result.title}
-                            className="w-32 h-24 object-cover rounded-lg"
-                          />
+                          {result.rawData?.thumbnail && (
+                            <img 
+                              src={result.rawData.thumbnail}
+                              alt={result.title}
+                              className="w-32 h-24 object-cover rounded-lg"
+                            />
+                          )}
                           <div className="flex-1">
                             <h3 className="text-xl font-semibold mb-2">{result.title}</h3>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
