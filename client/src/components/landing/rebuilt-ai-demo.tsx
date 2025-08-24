@@ -38,6 +38,14 @@ interface ProcessingResult {
     strength: 'strong' | 'moderate' | 'weak';
     evidence: string;
   }>;
+  financialTrends: Array<{
+    category: string;
+    symbol: string;
+    company: string;
+    relevance: string;
+    impact: string;
+    reasoning: string;
+  }>;
   marketSentiment: string;
   sourceCredibility: string;
   keyQuotes: Array<{
@@ -364,7 +372,7 @@ export function RebuiltAIDemo() {
                               </div>
                             )}
 
-                            {result.financialTrends && result.financialTrends.length > 0 && (
+                            {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
                               <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
                                 <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
                                   <BarChart3 className="w-4 h-4" />
