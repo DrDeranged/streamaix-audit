@@ -98,8 +98,8 @@ export function RealAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      setJobId(response.jobId);
-      setSummaryId(response.summary.id);
+      setJobId(response.jobId || response.summaryId);
+      setSummaryId(response.summaryId || response.summary?.id);
       setProgress(10);
       setProcessingStatus("Audio extraction in progress...");
 
@@ -123,19 +123,37 @@ export function RealAIDemo() {
       // Check for results with retry mechanism  
       const checkResults = async (attempt = 1, maxAttempts = 20) => {
         try {
-          console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${response.summary.id}`);
+          console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${summaryId}`);
           
-          // Use V2 processing result endpoint for better reliability
+          // Use Real processor result endpoint for better reliability
           const timestamp = Date.now();
-          const processingResult = await fetch(`/api/processing-result/${response.summary.id}?t=${timestamp}`, {
+          const processingResult = await fetch(`/api/processing-result/${summaryId}?t=${timestamp}`, {
             headers: { 'Content-Type': 'application/json' },
             cache: 'no-cache'
           }).then(res => res.json());
           
+          console.log('🚀 Real Processing Result:', processingResult);
+          
+          // Check if we got a direct summary response (RealContentProcessor format)
+          if (processingResult && processingResult.id && processingResult.status === 'completed') {
+            console.log('🎉 Real processor completed! Setting result...');
+            setResult(processingResult);
+            setProgress(100);
+            setProcessingStatus("Processing completed successfully!");
+            clearInterval(progressInterval);
+            setIsProcessing(false);
+            toast({
+              title: "Success!",
+              description: "Real AI analysis completed! Results displayed below.",
+              variant: "default"
+            });
+            return;
+          }
+          
           // Fallback to regular summary endpoint
-          const summaryResponse = processingResult.success && processingResult.content ? 
-            { summary: processingResult.content } :
-            await fetch(`/api/summaries/${response.summary.id}?t=${timestamp}`, {
+          const summaryResponse = processingResult && processingResult.id ? 
+            { summary: processingResult } :
+            await fetch(`/api/summaries/${summaryId}?t=${timestamp}`, {
               headers: { 'Content-Type': 'application/json' },
               cache: 'no-cache'
             }).then(res => res.json());
@@ -145,17 +163,17 @@ export function RealAIDemo() {
           console.log('📝 Summary has content:', !!summaryResponse.summary?.summary);
           console.log('🎯 Summary title:', summaryResponse.summary?.title);
           
-          // V2 PROCESSOR: Enhanced detection with dual endpoint strategy
-          if (processingResult.success && processingResult.status === 'completed') {
-            console.log('🎉 V2 Processor detected completion via processing-result endpoint!');
-            setResult(processingResult.content);
+          // REAL PROCESSOR: Check for completion
+          if (summaryResponse.summary && summaryResponse.summary.status === 'completed') {
+            console.log('🎉 Real processor completed via summary endpoint!');
+            setResult(summaryResponse.summary);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
             clearInterval(progressInterval);
             setIsProcessing(false);
             toast({
               title: "Success!",
-              description: "Content processed with StreamProcessorV2 - Enhanced reliability!",
+              description: "Real AI content analysis completed!",
               variant: "default"
             });
             return;
@@ -196,7 +214,7 @@ export function RealAIDemo() {
             }
           }
           
-          if (summaryResponse.summary.processingStatus === 'completed') {
+          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.processingStatus === 'completed')) {
             console.log('🎉 Processing completed! Setting result...');
             setResult(summaryResponse.summary);
             setProgress(100);
@@ -205,11 +223,11 @@ export function RealAIDemo() {
             setIsProcessing(false);
             toast({
               title: "Success!",
-              description: "AI processing completed! Results displayed below.",
+              description: "Real AI processing completed! Results displayed below.",
               variant: "default"
             });
             return;
-          } else if (summaryResponse.summary.processingStatus === 'failed') {
+          } else if (summaryResponse.summary && (summaryResponse.summary.status === 'failed' || summaryResponse.summary.processingStatus === 'failed')) {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           

@@ -957,6 +957,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json({
         message: 'REAL AI processing started successfully',
         summaryId,
+        jobId: `job-${Date.now()}`, // Compatibility with frontend
+        summary: { id: summaryId }, // Frontend expects this format
         statusUrl: `/api/processing-result/${summaryId}`,
         debugUrl: `/api/summaries/${summaryId}`,
         instructions: 'Check the processing result endpoint for real-time updates'
