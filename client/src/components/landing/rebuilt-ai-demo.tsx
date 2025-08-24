@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -77,6 +77,8 @@ export function RebuiltAIDemo() {
   const [summaryId, setSummaryId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState('');
+  const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
+  const [statusTimeouts, setStatusTimeouts] = useState<NodeJS.Timeout[]>([]);
   const { toast } = useToast();
 
   // Query for processing result with real-time updates
@@ -84,9 +86,32 @@ export function RebuiltAIDemo() {
     queryKey: ['/api/processing-result', summaryId],
     enabled: !!summaryId,
     refetchInterval: (query) => {
-      return query.state.data?.processingStatus === 'processing' ? 2000 : false;
+      return query.state.data?.processingStatus === 'processing' ? 1500 : false;
     },
   });
+
+  // Immediately clean up when processing completes
+  useEffect(() => {
+    if (result?.processingStatus === 'completed' || result?.processingStatus === 'failed') {
+      // Clear progress interval immediately
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        setProgressInterval(null);
+      }
+      
+      // Clear all status timeouts
+      statusTimeouts.forEach(timeout => clearTimeout(timeout));
+      setStatusTimeouts([]);
+      
+      // Set final progress and stop processing state
+      setProgress(100);
+      setIsProcessing(false);
+      
+      if (result.processingStatus === 'completed') {
+        setProcessingStatus('Analysis complete!');
+      }
+    }
+  }, [result?.processingStatus, progressInterval, statusTimeouts]);
 
   const handleProcess = async () => {
     if (!url.trim()) {
@@ -112,24 +137,22 @@ export function RebuiltAIDemo() {
       setSummaryId(response.summaryId);
       
       // Simulate progress updates
-      const progressInterval = setInterval(() => {
+      const newProgressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) return prev;
-          return prev + Math.random() * 15;
+          return prev + Math.random() * 12;
         });
-      }, 1000);
+      }, 800);
+      setProgressInterval(newProgressInterval);
 
-      // Update status messages
-      setTimeout(() => setProcessingStatus('Extracting video metadata...'), 1000);
-      setTimeout(() => setProcessingStatus('Analyzing content with AI...'), 3000);
-      setTimeout(() => setProcessingStatus('Generating insights...'), 6000);
-      setTimeout(() => setProcessingStatus('Finalizing results...'), 8000);
-
-      // Clean up progress after result comes in
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        setIsProcessing(false);
-      }, 10000);
+      // Update status messages with cleanup tracking
+      const timeouts = [
+        setTimeout(() => setProcessingStatus('Extracting video metadata...'), 1000),
+        setTimeout(() => setProcessingStatus('Analyzing content with AI...'), 3000),
+        setTimeout(() => setProcessingStatus('Generating market insights...'), 6000),
+        setTimeout(() => setProcessingStatus('Finalizing analysis...'), 8000)
+      ];
+      setStatusTimeouts(timeouts);
 
       toast({
         title: "Processing Started",
