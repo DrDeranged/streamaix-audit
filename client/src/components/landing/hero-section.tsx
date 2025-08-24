@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function HeroSection() {
   const scrollToDemo = () => {
-    document.getElementById('real-demo')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('rebuilt-demo')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
