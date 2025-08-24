@@ -160,7 +160,7 @@ export function RealAIDemo() {
           console.log('🚀 Real Processing Result:', processingResult);
           
           // Check if we got a direct summary response (RealContentProcessor format)
-          if (processingResult && processingResult.id && processingResult.status === 'completed') {
+          if (processingResult && processingResult.id && (processingResult.status === 'completed' || processingResult.processingStatus === 'completed' || processingResult.summary)) {
             console.log('🎉 Real processor completed! Setting result...');
             setResult(processingResult);
             setProgress(100);
@@ -188,8 +188,8 @@ export function RealAIDemo() {
           console.log('📝 Summary has content:', !!summaryResponse.summary?.summary);
           console.log('🎯 Summary title:', summaryResponse.summary?.title);
           
-          // REAL PROCESSOR: Check for completion
-          if (summaryResponse.summary && summaryResponse.summary.status === 'completed') {
+          // REAL PROCESSOR: Check for completion via any endpoint
+          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.summary)) {
             console.log('🎉 Real processor completed via summary endpoint!');
             setResult(summaryResponse.summary);
             setProgress(100);
@@ -305,8 +305,8 @@ export function RealAIDemo() {
         }
       };
 
-      // Start checking after 2 seconds (even earlier to catch completion)
-      setTimeout(() => checkResults(), 2000);
+      // Start checking after 3 seconds to allow processing to begin
+      setTimeout(() => checkResults(), 3000);
 
     } catch (err: any) {
       setError(err.message || "Failed to start processing");
