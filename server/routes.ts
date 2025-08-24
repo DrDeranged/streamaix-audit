@@ -116,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         token
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       if (error.code === '23505') {
         if (error.detail?.includes('username')) {
@@ -995,8 +995,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasContent: !!summary.summary,
         hasTags: summary.tags?.length || 0,
         hasTranscript: !!summary.transcript,
-        hasKeyInsights: summary.keyInsights?.length || 0,
-        hasChapters: summary.chapters?.length || 0,
+        hasKeyInsights: Array.isArray(summary.keyInsights) ? summary.keyInsights.length : 0,
+        hasChapters: Array.isArray(summary.chapters) ? summary.chapters.length : 0,
         accuracy: summary.accuracy,
         ipfsHash: summary.ipfsHash,
         arweaveId: summary.arweaveId,
