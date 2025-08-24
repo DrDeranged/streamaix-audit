@@ -299,17 +299,23 @@ export function RebuiltAIDemo() {
 
                           {/* Summary Tab */}
                           <TabsContent value="summary" className="space-y-4">
-                            <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                              <h5 className="text-lg font-semibold text-blue-400 mb-2">TLDR</h5>
-                              <p className="text-foreground">{result.tldrSummary}</p>
+                            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                              <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                                <Zap className="w-5 h-5" />
+                                Executive Takeaway
+                              </h5>
+                              <p className="text-foreground leading-relaxed text-base">{result.tldrSummary}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg">
-                              <h5 className="text-lg font-semibold mb-2">Executive Summary</h5>
-                              <p className="text-muted-foreground leading-relaxed">{result.executiveSummary}</p>
-                            </div>
-                            <div className="p-4 bg-muted/50 rounded-lg">
-                              <h5 className="text-lg font-semibold mb-2">Detailed Analysis</h5>
-                              <p className="text-muted-foreground leading-relaxed">{result.summary}</p>
+                              <h5 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                <BarChart3 className="w-5 h-5" />
+                                Market & Trend Analysis
+                              </h5>
+                              <div className="text-muted-foreground leading-relaxed space-y-3">
+                                {result.summary.split('\n\n').map((paragraph: string, idx: number) => (
+                                  <p key={idx} className="text-sm leading-relaxed">{paragraph}</p>
+                                ))}
+                              </div>
                             </div>
                           </TabsContent>
 

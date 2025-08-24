@@ -220,8 +220,8 @@ Duration: ${Math.floor(metadata.duration / 60)}:${(metadata.duration % 60).toStr
 
 Generate a detailed analysis in this exact JSON format:
 {
-  "summary": "2-3 paragraph detailed analysis of the content",
-  "tldrSummary": "1-2 sentence key takeaway",
+  "summary": "3-4 paragraph comprehensive analysis focusing heavily on market effects, trend implications, economic impact, and strategic business insights. Include specific market dynamics, competitive landscape effects, sector-wide implications, how emerging trends will reshape the industry, market sentiment analysis, investment flows, regulatory impacts, and long-term strategic considerations for businesses and investors. Provide detailed analysis of how these developments will affect different market segments and stakeholders.",
+  "tldrSummary": "2-3 sentence executive-level key takeaway that combines the most critical insights with immediate business implications for decision-makers and strategic overview",
   "executiveSummary": "Executive-level summary for business leaders",
   "bulletPoints": [
     "Key insight 1",
