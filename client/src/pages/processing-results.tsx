@@ -41,8 +41,8 @@ interface Summary {
 
 
 
-export default function ProcessingResults({ params }: { params: { id: string } }) {
-  const summaryId = params.id;
+export default function ProcessingResults({ params }: { params?: { id: string } }) {
+  const summaryId = params?.id;
   const [, setLocation] = useLocation();
   const [activeSection, setActiveSection] = useState('tldr');
   const [copySuccess, setCopySuccess] = useState('');
@@ -84,11 +84,27 @@ export default function ProcessingResults({ params }: { params: { id: string } }
     );
   }
 
+  if (!summaryId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">Invalid URL</h2>
+          <p className="text-gray-400 mb-4">No summary ID provided in URL</p>
+          <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (error || !summary) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Content Not Found</h2>
+          <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
           <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
