@@ -23,8 +23,7 @@ import {
   ExternalLink,
   BarChart3,
   FileText,
-  Target,
-  Shield
+  Target
 } from 'lucide-react';
 
 interface ProcessingResult {
@@ -38,17 +37,6 @@ interface ProcessingResult {
     trend: string;
     strength: 'strong' | 'moderate' | 'weak';
     evidence: string;
-  }>;
-  financialTrends: Array<{
-    category: string;
-    symbol: string;
-    company: string;
-    relevance: string;
-    impact: 'bullish' | 'bearish' | 'neutral';
-    reasoning: string;
-    priceTarget?: string;
-    timeframe?: string;
-    riskLevel?: string;
   }>;
   marketSentiment: string;
   sourceCredibility: string;
@@ -113,8 +101,7 @@ export function RebuiltAIDemo() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      const summaryId = response.summaryId || response.summary?.id;
-      setSummaryId(summaryId);
+      setSummaryId(response.summaryId);
       
       // Simulate progress updates
       const progressInterval = setInterval(() => {
@@ -154,8 +141,6 @@ export function RebuiltAIDemo() {
   const isCompleted = result?.processingStatus === 'completed';
   const isFailed = result?.processingStatus === 'failed';
 
-
-
   return (
     <section id="rebuilt-demo" className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
@@ -167,10 +152,10 @@ export function RebuiltAIDemo() {
           viewport={{ once: true }}
         >
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            AI Content Intelligence
+            Live AI Content Intelligence
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            Transform any YouTube video into actionable market intelligence, financial analysis, and strategic insights powered by advanced AI
+            Paste any YouTube URL below and watch real AI extract insights, analyze market sentiment, and generate comprehensive intelligence reports
           </p>
         </motion.div>
 
@@ -257,13 +242,11 @@ export function RebuiltAIDemo() {
                     <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          {result.rawData?.thumbnail && (
-                            <img 
-                              src={result.rawData.thumbnail}
-                              alt={result.title}
-                              className="w-32 h-24 object-cover rounded-lg"
-                            />
-                          )}
+                          <img 
+                            src={result.rawData?.thumbnail}
+                            alt={result.title}
+                            className="w-32 h-24 object-cover rounded-lg"
+                          />
                           <div className="flex-1">
                             <h3 className="text-xl font-semibold mb-2">{result.title}</h3>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
@@ -382,74 +365,34 @@ export function RebuiltAIDemo() {
                             )}
 
                             {result.financialTrends && result.financialTrends.length > 0 && (
-                              <div className="p-4 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-lg border border-cyan-500/20">
+                              <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
                                 <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
                                   <BarChart3 className="w-4 h-4" />
-                                  Alpha-Generating Opportunities
+                                  Financial Impact Analysis
                                 </h5>
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                   {result.financialTrends.map((financial: any, idx: number) => (
-                                    <div key={idx} className="p-4 bg-background/50 rounded-lg border border-cyan-500/20">
-                                      <div className="flex items-center justify-between mb-3">
+                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-cyan-400">
+                                      <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
-                                          <Badge variant="secondary" className="text-xs font-semibold">
+                                          <Badge variant="secondary" className="text-xs">
                                             {financial.category}
                                           </Badge>
-                                          <span className="font-mono text-lg font-bold text-cyan-400">
+                                          <span className="font-mono text-sm font-semibold text-cyan-400">
                                             ${financial.symbol}
                                           </span>
                                           <span className="text-sm font-medium">{financial.company}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                          <Badge variant="outline" className={`text-xs font-semibold ${
-                                            financial.impact === 'bullish' ? 'text-green-400 border-green-500/30 bg-green-500/10' :
-                                            financial.impact === 'bearish' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
-                                            'text-gray-400 border-gray-500/30 bg-gray-500/10'
-                                          }`}>
-                                            {financial.impact}
-                                          </Badge>
-                                          {financial.riskLevel && (
-                                            <Badge variant="outline" className={`text-xs ${
-                                              financial.riskLevel === 'Low' ? 'text-green-400 border-green-500/30' :
-                                              financial.riskLevel === 'Medium' ? 'text-yellow-400 border-yellow-500/30' :
-                                              'text-red-400 border-red-500/30'
-                                            }`}>
-                                              {financial.riskLevel} Risk
-                                            </Badge>
-                                          )}
-                                        </div>
+                                        <Badge variant="outline" className={`text-xs ${
+                                          financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
+                                          financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
+                                          'text-gray-400 border-gray-500/30'
+                                        }`}>
+                                          {financial.impact}
+                                        </Badge>
                                       </div>
-                                      
-                                      <div className="grid grid-cols-2 gap-3 mb-3">
-                                        {financial.priceTarget && (
-                                          <div className="p-2 bg-green-500/10 rounded-md border border-green-500/20">
-                                            <div className="text-xs text-green-400 font-semibold mb-1">Price Target</div>
-                                            <div className="text-sm font-mono font-bold text-green-300">{financial.priceTarget}</div>
-                                          </div>
-                                        )}
-                                        {financial.timeframe && (
-                                          <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
-                                            <div className="text-xs text-blue-400 font-semibold mb-1">Timeframe</div>
-                                            <div className="text-sm font-bold text-blue-300">{financial.timeframe}</div>
-                                          </div>
-                                        )}
-                                      </div>
-                                      
-                                      <p className="text-xs text-muted-foreground mb-2 italic">{financial.relevance}</p>
-                                      <p className="text-sm text-foreground leading-relaxed">{financial.reasoning}</p>
-                                      
-                                      {financial.catalysts && financial.catalysts.length > 0 && (
-                                        <div className="mt-3 pt-2 border-t border-muted-foreground/20">
-                                          <div className="text-xs text-muted-foreground mb-1">Key Catalysts:</div>
-                                          <div className="flex flex-wrap gap-1">
-                                            {financial.catalysts.map((catalyst: string, catIdx: number) => (
-                                              <Badge key={catIdx} variant="outline" className="text-xs">
-                                                {catalyst}
-                                              </Badge>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
+                                      <p className="text-xs text-muted-foreground mb-1">{financial.relevance}</p>
+                                      <p className="text-xs text-muted-foreground italic">{financial.reasoning}</p>
                                     </div>
                                   ))}
                                 </div>
@@ -493,79 +436,11 @@ export function RebuiltAIDemo() {
                                 <div className="text-xs text-muted-foreground">Source Credibility</div>
                               </div>
                             </div>
-                            
-                            {(result as any).sectorAnalysis && (
-                              <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
-                                <h5 className="font-semibold mb-3 text-indigo-400 flex items-center gap-2">
-                                  <TrendingUp className="w-4 h-4" />
-                                  Sector Rotation Analysis
-                                </h5>
-                                <div className="grid grid-cols-2 gap-4 mb-3">
-                                  <div>
-                                    <div className="text-xs text-green-400 font-semibold mb-2">Bullish Sectors</div>
-                                    <div className="space-y-1">
-                                      {(result as any).sectorAnalysis.bullishSectors?.map((sector: string, idx: number) => (
-                                        <Badge key={idx} variant="outline" className="text-xs text-green-400 border-green-500/30 mr-1">
-                                          {sector}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <div className="text-xs text-red-400 font-semibold mb-2">Bearish Sectors</div>
-                                    <div className="space-y-1">
-                                      {(result as any).sectorAnalysis.bearishSectors?.map((sector: string, idx: number) => (
-                                        <Badge key={idx} variant="outline" className="text-xs text-red-400 border-red-500/30 mr-1">
-                                          {sector}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="text-sm text-muted-foreground mb-2">
-                                  <span className="font-semibold">Rotation Signal:</span> {(result as any).sectorAnalysis.rotationSignals}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  <span className="font-semibold">Market Timing:</span> {(result as any).sectorAnalysis.marketTiming}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {(result as any).riskAssessment && (
-                              <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                                <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
-                                  <Shield className="w-4 h-4" />
-                                  Risk Assessment & Strategy
-                                </h5>
-                                <div className="grid grid-cols-3 gap-3 mb-3">
-                                  <div className="text-center p-2 bg-background/50 rounded-md">
-                                    <div className="text-xs text-muted-foreground mb-1">Market Risk</div>
-                                    <div className="text-sm font-semibold">{(result as any).riskAssessment.marketRisk}</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-background/50 rounded-md">
-                                    <div className="text-xs text-muted-foreground mb-1">Volatility</div>
-                                    <div className="text-sm font-semibold">{(result as any).riskAssessment.volatilityOutlook}</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-background/50 rounded-md">
-                                    <div className="text-xs text-muted-foreground mb-1">Hedging</div>
-                                    <div className="text-sm font-semibold">Active</div>
-                                  </div>
-                                </div>
-                                <div className="text-sm text-muted-foreground mb-2">
-                                  <span className="font-semibold">Key Risks:</span> {(result as any).riskAssessment.keyRisks?.join(', ')}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  <span className="font-semibold">Strategy:</span> {(result as any).riskAssessment.hedgingStrategy}
-                                </div>
-                              </div>
-                            )}
-                            
                             <div className="p-4 bg-muted/50 rounded-lg">
-                              <h5 className="font-semibold mb-2">Alpha Generation Summary</h5>
+                              <h5 className="font-semibold mb-2">Market Intelligence</h5>
                               <p className="text-sm text-muted-foreground">
-                                This analysis provides {result.marketSentiment.toLowerCase()} market signals with {result.sourceCredibility.toLowerCase()} source credibility. 
-                                The identified opportunities offer asymmetric risk/reward profiles suitable for sophisticated investors seeking alpha generation through 
-                                precise market timing and sector rotation strategies.
+                                Advanced analysis indicates {result.marketSentiment.toLowerCase()} market sentiment with {result.sourceCredibility.toLowerCase()} source credibility. 
+                                The content provides valuable market insights and strategic intelligence for decision-making.
                               </p>
                             </div>
                           </TabsContent>
