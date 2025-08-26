@@ -303,118 +303,113 @@ export class RebuiltContentProcessor {
     }
 
     const prompt = `
-Extract HIGH-ALPHA INVESTMENT INTELLIGENCE from this video content:
+Analyze this video content and provide comprehensive business intelligence:
 
 Title: ${metadata.title}
 Channel: ${metadata.channel}
 Description: ${metadata.description}
 Duration: ${Math.floor(metadata.duration / 60)}:${(metadata.duration % 60).toString().padStart(2, '0')}
 
-Generate ALPHA-RICH analysis in this exact JSON format:
+Generate a detailed analysis in this exact JSON format:
 {
-  "summary": "3-4 paragraph ALPHA-FOCUSED analysis highlighting specific investment opportunities, timing catalysts, risk-reward scenarios, and non-consensus views that could generate superior returns. Focus on actionable insights, price targets, entry/exit strategies, and quantitative metrics that professional investors can trade on.",
-  "tldrSummary": "Single highest-conviction ALPHA insight with specific investment action and timeframe",
-  "executiveSummary": "Executive summary with investment thesis, conviction level, and portfolio allocation recommendations",
+  "summary": "3-4 paragraph comprehensive analysis focusing heavily on market effects, trend implications, economic impact, and strategic business insights. Include specific market dynamics, competitive landscape effects, sector-wide implications, how emerging trends will reshape the industry, market sentiment analysis, investment flows, regulatory impacts, and long-term strategic considerations for businesses and investors. Provide detailed analysis of how these developments will affect different market segments and stakeholders.",
+  "tldrSummary": "2-3 sentence executive-level key takeaway that combines the most critical insights with immediate business implications for decision-makers and strategic overview",
+  "executiveSummary": "Executive-level summary for business leaders",
   "bulletPoints": [
-    "🎯 ALPHA OPPORTUNITY: Specific investment with entry criteria and target returns",
-    "⏰ TIMING CATALYST: Market window and key events to watch",
-    "⚠️ RISK MANAGEMENT: Hedging strategies and stop-loss levels", 
-    "🔄 SECTOR ROTATION: Which sectors to overweight/underweight",
-    "📊 QUANTITATIVE EDGE: Data points and metrics for advantage",
-    "🚀 CONTRARIAN PLAY: Counter-consensus opportunities with asymmetric upside"
+    "Key insight 1",
+    "Key insight 2", 
+    "Key insight 3",
+    "Key insight 4",
+    "Key insight 5"
   ],
   "trends": [
     {
-      "trend": "High-conviction trend with alpha potential",
-      "strength": "strong/emerging/accelerating",
-      "evidence": "Quantitative evidence and leading indicators",
-      "alphaScore": "high/medium/low",
-      "timeframe": "immediate/3-6months/12months+",
-      "investmentThesis": "How to profit from this trend",
-      "riskFactors": ["Key risk 1", "Risk 2"],
-      "catalysts": ["Catalyst 1", "Catalyst 2"]
+      "trend": "Trend name 1",
+      "strength": "strong",
+      "evidence": "Supporting evidence"
+    },
+    {
+      "trend": "Trend name 2", 
+      "strength": "moderate",
+      "evidence": "Supporting evidence"
+    },
+    {
+      "trend": "Trend name 3",
+      "strength": "strong", 
+      "evidence": "Supporting evidence"
     }
   ],
   "financialTrends": [
     {
-      "category": "Stocks/Crypto/Commodities/FX",
-      "symbol": "EXACT_TICKER",
-      "company": "Full Company Name",
-      "currentLevel": "Current price/level if mentioned",
-      "targetPrice": "Specific price target or range",
-      "relevance": "Direct alpha connection to content",
-      "impact": "strong_bullish/bullish/neutral/bearish/strong_bearish",
-      "reasoning": "Investment thesis with risk-reward analysis",
-      "timeframe": "short_term/medium_term/long_term",
-      "convictionLevel": "high/medium/low",
-      "positionSizing": "Suggested allocation percentage",
-      "entryStrategy": "Optimal entry approach",
-      "exitStrategy": "Profit-taking and stop-loss levels",
-      "riskFactors": ["Specific risk 1", "Risk 2"],
-      "catalysts": ["Positive catalyst 1", "Catalyst 2"]
-    }
-  ],
-  "investmentOpportunities": [
+      "category": "Stocks",
+      "symbol": "AAPL",
+      "company": "Apple Inc.",
+      "relevance": "Direct relation to discussed technology trends",
+      "impact": "bullish",
+      "reasoning": "Explanation of how content relates to this stock"
+    },
     {
-      "opportunity": "Specific alpha opportunity",
-      "asset": "Stock/Crypto/Commodity",
-      "ticker": "TICKER",
-      "thesis": "Investment thesis",
-      "targetReturn": "Expected return percentage",
-      "timeHorizon": "Investment timeframe",
-      "riskLevel": "low/medium/high",
-      "catalysts": ["Key catalysts"],
-      "entryPoint": "Optimal entry level",
-      "exitPoint": "Target exit level"
+      "category": "Crypto",
+      "symbol": "BTC",
+      "company": "Bitcoin",
+      "relevance": "Mentioned in context of digital assets",
+      "impact": "neutral",
+      "reasoning": "Explanation of cryptocurrency relevance"
     }
   ],
-  "marketSentiment": "EXTREMELY_BULLISH/BULLISH/CAUTIOUSLY_OPTIMISTIC/NEUTRAL/CAUTIOUS/BEARISH/EXTREMELY_BEARISH",
-  "sourceCredibility": "High/Medium/Low",
-  "alphaScore": 90,
-  "confidenceLevel": "high/medium/low",
+  "marketSentiment": "BULLISH",
+  "sourceCredibility": "High",
   "keyQuotes": [
     {
-      "quote": "Alpha-rich quote with investment insight",
+      "quote": "Important quote from content 1",
       "speaker": "Speaker name",
-      "timestamp": "MM:SS",
-      "alphaContext": "Why this quote contains actionable alpha",
-      "investmentImplication": "How to trade on this insight"
+      "timestamp": "1:23"
+    },
+    {
+      "quote": "Important quote from content 2",
+      "speaker": "Speaker name", 
+      "timestamp": "3:45"
+    },
+    {
+      "quote": "Important quote from content 3",
+      "speaker": "Speaker name",
+      "timestamp": "5:12"
+    },
+    {
+      "quote": "Important quote from content 4",
+      "speaker": "Speaker name",
+      "timestamp": "7:30"
+    },
+    {
+      "quote": "Important quote from content 5",
+      "speaker": "Speaker name",
+      "timestamp": "9:15"
     }
   ],
   "chapters": [
     {
-      "title": "Chapter focused on alpha content",
-      "startTime": "MM:SS",
-      "endTime": "MM:SS",
-      "summary": "Investment-focused summary",
-      "alphaLevel": "high/medium/low",
-      "keyInsights": ["Investment insight 1", "Insight 2"]
+      "title": "Chapter title",
+      "startTime": "0:00",
+      "endTime": "2:30", 
+      "summary": "What happens in this section"
     }
   ],
-  "tags": ["alpha", "investment", "opportunity", "specific-sector"],
+  "tags": ["relevant", "tags"],
   "accuracy": 95
 }
 
-🎯 CRITICAL ALPHA EXTRACTION REQUIREMENTS:
-- IDENTIFY specific stocks, crypto, commodities with exact tickers and price targets
-- EXTRACT timing catalysts, entry/exit points, and risk management strategies  
-- FOCUS on NON-CONSENSUS views and contrarian opportunities with asymmetric upside
-- INCLUDE quantitative metrics, valuations, and technical levels when mentioned
-- HIGHLIGHT sector rotation opportunities and macro trend implications
-- PROVIDE conviction levels and position sizing recommendations
-- EXTRACT hedge strategies and risk mitigation approaches
-- IDENTIFY arbitrage opportunities and relative value trades
-- FOCUS on actionable intelligence that professional investors can implement
-- GENERATE 8-15 diverse investment opportunities across all asset classes
-- PRIORITIZE high-conviction ideas with strong risk-adjusted return potential
-- EXTRACT specific timeframes, catalysts, and measurable outcomes
+Focus on extracting real insights and provide specific, actionable content. IMPORTANT: 
+- Generate 6-8 diverse market trends covering different sectors and timeframes
+- Include 2-4 financial trends with specific stock tickers (NYSE/NASDAQ) and cryptocurrency symbols related to the content
+- Provide exactly 3-5 impactful quotes that capture key insights
+- Ensure financial trends include both traditional stocks and crypto when relevant to the content
 `;
 
     try {
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are an elite hedge fund research analyst and alpha hunter. Your specialty is extracting high-conviction investment opportunities, timing catalysts, and non-consensus views from market intelligence. Focus on actionable insights that professional investors can immediately implement for superior risk-adjusted returns." },
+          { role: "system", content: "You are an expert business analyst. Provide detailed, accurate analysis based on the video content." },
           { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" },
