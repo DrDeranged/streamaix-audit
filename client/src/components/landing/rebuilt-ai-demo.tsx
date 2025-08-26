@@ -469,128 +469,114 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* Market Positioning Intelligence */}
+                            {/* Executive Intelligence Brief */}
                             <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
                               <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
                                 <TrendingUp className="w-4 h-4" />
-                                Market Positioning & Timing
-                              </h6>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                <div className="space-y-2">
-                                  <div className="text-blue-400 font-medium text-xs">MARKET CYCLE</div>
-                                  <div className="space-y-1 text-xs">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Phase:</span>
-                                      <span className="text-green-400">ACCUMULATION</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Duration:</span>
-                                      <span className="text-blue-400">6-18 MONTHS</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Confidence:</span>
-                                      <span className="text-purple-400">{result.accuracy}%</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <div className="text-blue-400 font-medium text-xs">INSTITUTIONAL FLOW</div>
-                                  <div className="space-y-1 text-xs">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Smart Money:</span>
-                                      <span className="text-green-400">ACCUMULATING</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Retail Sentiment:</span>
-                                      <span className="text-yellow-400">CAUTIOUS</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Divergence:</span>
-                                      <span className="text-green-400">BULLISH</span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <div className="text-blue-400 font-medium text-xs">STRATEGIC OUTLOOK</div>
-                                  <div className="space-y-1 text-xs">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Entry Window:</span>
-                                      <span className="text-green-400">OPEN</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Risk/Reward:</span>
-                                      <span className="text-blue-400">FAVORABLE</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Time Horizon:</span>
-                                      <span className="text-purple-400">MEDIUM-TERM</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Strategic Intelligence from Content */}
-                            <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
-                              <h6 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
-                                <Target className="w-4 h-4" />
-                                Strategic Intelligence Summary
+                                Executive Intelligence Brief
                               </h6>
                               <div className="space-y-3 text-sm">
                                 <div className="p-3 bg-background/30 rounded-md">
-                                  <div className="text-indigo-400 font-medium mb-2">Content Source Analysis</div>
-                                  <div className="grid grid-cols-2 gap-4 text-xs">
-                                    <div>
-                                      <span className="text-muted-foreground">Channel:</span>
-                                      <span className="ml-2 font-medium">{result.rawData?.channel || 'Unknown'}</span>
+                                  <div className="text-blue-400 font-medium mb-2 text-xs">CONTENT SIGNAL ANALYSIS</div>
+                                  <div className="text-muted-foreground text-xs leading-relaxed">
+                                    Intelligence derived from "{result.rawData?.title}" suggests institutional narrative positioning ahead of retail awareness. 
+                                    Source credibility ({result.sourceCredibility}) and market sentiment ({result.marketSentiment}) indicate {result.accuracy}% confidence in directional thesis.
+                                    Key institutional players discussed provide early-stage positioning signals for portfolio allocation decisions.
+                                  </div>
+                                </div>
+                                
+                                {result.trends && result.trends.length > 0 && (
+                                  <div className="p-3 bg-background/30 rounded-md">
+                                    <div className="text-blue-400 font-medium mb-2 text-xs">STRATEGIC MARKET IMPLICATIONS</div>
+                                    <div className="text-muted-foreground text-xs leading-relaxed">
+                                      Primary trends identified: {result.trends.slice(0, 2).map((t: any) => t.trend).join(", ")}. 
+                                      These represent investable themes with {result.trends.filter((t: any) => t.strength === 'strong').length} high-conviction opportunities.
+                                      Timing advantages exist for institutional positioning before mainstream adoption cycles.
                                     </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Market Sentiment:</span>
-                                      <span className="ml-2 font-medium text-green-400">{result.marketSentiment}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Investment Thesis & Asset Allocation */}
+                            {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
+                              <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
+                                <h6 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
+                                  <Target className="w-4 h-4" />
+                                  Investment Thesis & Asset Allocation
+                                </h6>
+                                <div className="space-y-3 text-sm">
+                                  {result.financialTrends.map((financial: any, idx: number) => (
+                                    <div key={idx} className="p-3 bg-background/30 rounded-md border-l-2 border-indigo-400">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-mono text-xs font-semibold text-indigo-400">${financial.symbol}</span>
+                                          <span className="text-xs font-medium">{financial.company}</span>
+                                          <Badge variant="outline" className={`text-xs ${
+                                            financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
+                                            financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
+                                            'text-gray-400 border-gray-500/30'
+                                          }`}>
+                                            {financial.impact.toUpperCase()}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="text-xs space-y-1 text-muted-foreground">
+                                        <div><span className="font-medium">Thesis:</span> {financial.reasoning}</div>
+                                        <div><span className="font-medium">Strategic Value:</span> {financial.relevance}</div>
+                                      </div>
                                     </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Source Credibility:</span>
-                                      <span className="ml-2 font-medium text-purple-400">{result.sourceCredibility}</span>
+                                  ))}
+                                  
+                                  <div className="p-3 bg-background/30 rounded-md">
+                                    <div className="text-indigo-400 font-medium mb-2 text-xs">PORTFOLIO IMPLICATIONS</div>
+                                    <div className="text-muted-foreground text-xs leading-relaxed">
+                                      Recommended allocation: {result.financialTrends.filter((f: any) => f.impact === 'bullish').length} bullish positions, 
+                                      {result.financialTrends.filter((f: any) => f.impact === 'bearish').length} hedge positions. 
+                                      Risk-adjusted sizing based on source credibility ({result.sourceCredibility}) and content accuracy ({result.accuracy}%).
+                                      Institutional-grade due diligence required for position sizing above $10M AUM.
                                     </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Analysis Accuracy:</span>
-                                      <span className="ml-2 font-medium text-blue-400">{result.accuracy}%</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Risk Assessment & Strategic Positioning */}
+                            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                              <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
+                                <Zap className="w-4 h-4" />
+                                Risk Assessment & Strategic Positioning
+                              </h6>
+                              <div className="space-y-3 text-sm">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="p-3 bg-background/30 rounded-md">
+                                    <div className="text-orange-400 font-medium mb-2 text-xs">MARKET INTELLIGENCE VALUE</div>
+                                    <div className="space-y-1 text-xs text-muted-foreground">
+                                      <div>• Content timing: Early-stage institutional narrative</div>
+                                      <div>• Information asymmetry: {result.accuracy}% analytical confidence</div>
+                                      <div>• Source authority: {result.sourceCredibility} credibility rating</div>
+                                      <div>• Signal strength: {result.marketSentiment} market directional bias</div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="p-3 bg-background/30 rounded-md">
+                                    <div className="text-red-400 font-medium mb-2 text-xs">EXECUTION CONSIDERATIONS</div>
+                                    <div className="space-y-1 text-xs text-muted-foreground">
+                                      <div>• Position sizing: Risk-adjusted to source credibility</div>
+                                      <div>• Entry strategy: Scale-in during market dislocations</div>
+                                      <div>• Exit criteria: Monitor for narrative completion</div>
+                                      <div>• Hedge ratio: Consider inverse correlation assets</div>
                                     </div>
                                   </div>
                                 </div>
                                 
-                                <div className="text-muted-foreground">
-                                  This analysis extracts specific market intelligence from "{result.rawData?.title || 'the content'}" published by {result.rawData?.channel || 'this source'}. 
-                                  The identified trends and financial implications are directly derived from the content discussion and represent actionable insights for portfolio positioning.
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Competitive Intelligence & Alpha */}
-                            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                              <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
-                                <Zap className="w-4 h-4" />
-                                Competitive Advantage & Alpha Signals
-                              </h6>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                <div>
-                                  <div className="text-orange-400 font-medium mb-2 text-xs">INFORMATION EDGE</div>
-                                  <div className="space-y-1 text-xs text-muted-foreground">
-                                    <div>• Early institutional positioning signals identified</div>
-                                    <div>• Narrative shift ahead of mainstream adoption</div>
-                                    <div>• Regulatory clarity timeline advantages</div>
-                                    <div>• Technical analysis confirms fundamental thesis</div>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="text-green-400 font-medium mb-2 text-xs">EXECUTION STRATEGY</div>
-                                  <div className="space-y-1 text-xs text-muted-foreground">
-                                    <div>• Scale positions during volatility windows</div>
-                                    <div>• Layer entries on institutional confirmation</div>
-                                    <div>• Monitor smart money flow divergences</div>
-                                    <div>• Exit on retail euphoria signals</div>
+                                <div className="p-3 bg-background/30 rounded-md">
+                                  <div className="text-green-400 font-medium mb-2 text-xs">INSTITUTIONAL ALPHA OPPORTUNITY</div>
+                                  <div className="text-muted-foreground text-xs leading-relaxed">
+                                    Content analysis reveals early-stage institutional thesis development before broad market recognition. 
+                                    Information edge window: 3-6 months before mainstream adoption. 
+                                    Recommended for sophisticated institutional portfolios seeking asymmetric risk/reward profiles.
+                                    Due diligence correlation required with fundamental research and technical analysis.
                                   </div>
                                 </div>
                               </div>
