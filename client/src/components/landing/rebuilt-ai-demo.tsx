@@ -469,154 +469,124 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* Advanced Market Intelligence */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {/* Market Timing */}
+                            {/* Content-Specific Market Trends */}
+                            {result.trends && result.trends.length > 0 && (
                               <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
                                 <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                                  <Clock className="w-4 h-4" />
-                                  Market Timing Analysis
-                                </h6>
-                                <div className="space-y-2 text-sm">
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Entry Signal:</span>
-                                    <span className="text-green-400 font-medium">STRONG BUY</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Risk Level:</span>
-                                    <span className="text-yellow-400 font-medium">MODERATE</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Time Horizon:</span>
-                                    <span className="text-blue-400 font-medium">6-12 MONTHS</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Sector Analysis */}
-                              <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                                <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
                                   <TrendingUp className="w-4 h-4" />
-                                  Sector Positioning
+                                  Market Trends from Content Analysis
                                 </h6>
-                                <div className="space-y-2 text-sm">
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Primary Sector:</span>
-                                    <span className="text-orange-400 font-medium">DeFi/Crypto</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Correlation:</span>
-                                    <span className="text-green-400 font-medium">HIGH</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Beta Factor:</span>
-                                    <span className="text-purple-400 font-medium">1.2-1.8</span>
-                                  </div>
+                                <div className="space-y-3">
+                                  {result.trends.map((trend: any, idx: number) => (
+                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="font-medium text-sm">{trend.trend}</span>
+                                        <Badge variant="outline" className={`text-xs ${
+                                          trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
+                                          trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
+                                          'text-gray-400 border-gray-500/30'
+                                        }`}>
+                                          {trend.strength}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">{trend.evidence}</p>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
-                            </div>
+                            )}
 
-                            {/* Trading Intelligence */}
-                            <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-500/20">
-                              <h6 className="font-semibold text-emerald-400 mb-3 flex items-center gap-2">
-                                <BarChart3 className="w-4 h-4" />
-                                Trading Intelligence & Alpha
-                              </h6>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="space-y-2">
-                                  <div className="text-xs text-emerald-400 font-medium">KEY LEVELS</div>
-                                  <div className="text-xs space-y-1">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Support:</span>
-                                      <span className="text-green-400">$42,000</span>
+                            {/* Financial Impact Analysis */}
+                            {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
+                              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-500/20">
+                                <h6 className="font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                                  <BarChart3 className="w-4 h-4" />
+                                  Investment Opportunities Identified
+                                </h6>
+                                <div className="grid gap-3">
+                                  {result.financialTrends.map((financial: any, idx: number) => (
+                                    <div key={idx} className="p-3 bg-background/50 rounded-md border border-emerald-500/20">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="secondary" className="text-xs">
+                                            {financial.category}
+                                          </Badge>
+                                          <span className="font-mono text-sm font-semibold text-emerald-400">
+                                            ${financial.symbol}
+                                          </span>
+                                          <span className="text-sm font-medium">{financial.company}</span>
+                                        </div>
+                                        <Badge variant="outline" className={`text-xs ${
+                                          financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
+                                          financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
+                                          'text-gray-400 border-gray-500/30'
+                                        }`}>
+                                          {financial.impact.toUpperCase()}
+                                        </Badge>
+                                      </div>
+                                      <div className="text-xs space-y-1">
+                                        <div><span className="text-muted-foreground">Relevance:</span> {financial.relevance}</div>
+                                        <div><span className="text-muted-foreground">Analysis:</span> {financial.reasoning}</div>
+                                      </div>
                                     </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Resistance:</span>
-                                      <span className="text-red-400">$48,500</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Target:</span>
-                                      <span className="text-blue-400">$52,000</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="text-xs text-emerald-400 font-medium">MOMENTUM</div>
-                                  <div className="text-xs space-y-1">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">RSI (14d):</span>
-                                      <span className="text-yellow-400">67.2</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">MACD:</span>
-                                      <span className="text-green-400">BULLISH</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Volume:</span>
-                                      <span className="text-blue-400">ABOVE AVG</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="text-xs text-emerald-400 font-medium">CATALYSTS</div>
-                                  <div className="text-xs space-y-1">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Institutional:</span>
-                                      <span className="text-green-400">INFLOWS</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Regulatory:</span>
-                                      <span className="text-blue-400">POSITIVE</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground">Adoption:</span>
-                                      <span className="text-green-400">GROWING</span>
-                                    </div>
-                                  </div>
+                                  ))}
                                 </div>
                               </div>
-                            </div>
+                            )}
 
-                            {/* Competitive Intelligence */}
+                            {/* Strategic Intelligence from Content */}
                             <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
                               <h6 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
                                 <Target className="w-4 h-4" />
-                                Competitive Landscape & Positioning
+                                Strategic Intelligence Summary
                               </h6>
-                              <div className="text-sm text-muted-foreground">
-                                Based on content analysis, institutional adoption cycles are accelerating with major players like BlackRock, Fidelity, and Grayscale driving narrative shifts. 
-                                Current market positioning suggests early-stage institutional accumulation phase with reduced retail participation - historically a bullish divergence signal.
-                                Regulatory clarity improvements and ETF approval momentum create favorable backdrop for sustained institutional inflows.
+                              <div className="space-y-3 text-sm">
+                                <div className="p-3 bg-background/30 rounded-md">
+                                  <div className="text-indigo-400 font-medium mb-2">Content Source Analysis</div>
+                                  <div className="grid grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                      <span className="text-muted-foreground">Channel:</span>
+                                      <span className="ml-2 font-medium">{result.rawData?.channel || 'Unknown'}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Market Sentiment:</span>
+                                      <span className="ml-2 font-medium text-green-400">{result.marketSentiment}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Source Credibility:</span>
+                                      <span className="ml-2 font-medium text-purple-400">{result.sourceCredibility}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Analysis Accuracy:</span>
+                                      <span className="ml-2 font-medium text-blue-400">{result.accuracy}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-muted-foreground">
+                                  This analysis extracts specific market intelligence from "{result.rawData?.title || 'the content'}" published by {result.rawData?.channel || 'this source'}. 
+                                  The identified trends and financial implications are directly derived from the content discussion and represent actionable insights for portfolio positioning.
+                                </div>
                               </div>
                             </div>
 
-                            {/* Risk Assessment */}
-                            <div className="p-4 bg-gradient-to-br from-red-500/10 to-pink-500/10 rounded-lg border border-red-500/20">
-                              <h6 className="font-semibold text-red-400 mb-3 flex items-center gap-2">
-                                <Zap className="w-4 h-4" />
-                                Risk Factors & Mitigation
-                              </h6>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                <div>
-                                  <div className="text-red-400 font-medium mb-2">KEY RISKS</div>
-                                  <ul className="space-y-1 text-muted-foreground">
-                                    <li>• Regulatory uncertainty in major markets</li>
-                                    <li>• Institutional selling pressure at resistance</li>
-                                    <li>• Macro headwinds affecting risk assets</li>
-                                    <li>• Technical breakdown below $40k support</li>
-                                  </ul>
-                                </div>
-                                <div>
-                                  <div className="text-green-400 font-medium mb-2">MITIGATION STRATEGIES</div>
-                                  <ul className="space-y-1 text-muted-foreground">
-                                    <li>• Dollar-cost averaging during volatility</li>
-                                    <li>• Position sizing at 2-3% portfolio allocation</li>
-                                    <li>• Stop-loss at $39,500 (-8% from entry)</li>
-                                    <li>• Hedge with traditional safe havens</li>
-                                  </ul>
+                            {/* Actionable Intelligence */}
+                            {result.bulletPoints && result.bulletPoints.length > 0 && (
+                              <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                                <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
+                                  <Zap className="w-4 h-4" />
+                                  Key Actionable Insights
+                                </h6>
+                                <div className="space-y-2">
+                                  {result.bulletPoints.map((point: string, idx: number) => (
+                                    <div key={idx} className="flex items-start gap-2 text-sm">
+                                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+                                      <span className="text-muted-foreground">{point}</span>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
-                            </div>
+                            )}
                           </TabsContent>
 
                           {/* Structure Tab */}
