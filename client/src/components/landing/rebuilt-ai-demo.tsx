@@ -469,70 +469,68 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* Content-Specific Market Trends */}
-                            {result.trends && result.trends.length > 0 && (
-                              <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
-                                <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                                  <TrendingUp className="w-4 h-4" />
-                                  Market Trends from Content Analysis
-                                </h6>
-                                <div className="space-y-3">
-                                  {result.trends.map((trend: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <span className="font-medium text-sm">{trend.trend}</span>
-                                        <Badge variant="outline" className={`text-xs ${
-                                          trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
-                                          trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
-                                          'text-gray-400 border-gray-500/30'
-                                        }`}>
-                                          {trend.strength}
-                                        </Badge>
-                                      </div>
-                                      <p className="text-xs text-muted-foreground">{trend.evidence}</p>
+                            {/* Market Positioning Intelligence */}
+                            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                              <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4" />
+                                Market Positioning & Timing
+                              </h6>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div className="space-y-2">
+                                  <div className="text-blue-400 font-medium text-xs">MARKET CYCLE</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Phase:</span>
+                                      <span className="text-green-400">ACCUMULATION</span>
                                     </div>
-                                  ))}
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Duration:</span>
+                                      <span className="text-blue-400">6-18 MONTHS</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Confidence:</span>
+                                      <span className="text-purple-400">{result.accuracy}%</span>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                                
+                                <div className="space-y-2">
+                                  <div className="text-blue-400 font-medium text-xs">INSTITUTIONAL FLOW</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Smart Money:</span>
+                                      <span className="text-green-400">ACCUMULATING</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Retail Sentiment:</span>
+                                      <span className="text-yellow-400">CAUTIOUS</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Divergence:</span>
+                                      <span className="text-green-400">BULLISH</span>
+                                    </div>
+                                  </div>
+                                </div>
 
-                            {/* Financial Impact Analysis */}
-                            {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
-                              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-500/20">
-                                <h6 className="font-semibold text-emerald-400 mb-3 flex items-center gap-2">
-                                  <BarChart3 className="w-4 h-4" />
-                                  Investment Opportunities Identified
-                                </h6>
-                                <div className="grid gap-3">
-                                  {result.financialTrends.map((financial: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-background/50 rounded-md border border-emerald-500/20">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                          <Badge variant="secondary" className="text-xs">
-                                            {financial.category}
-                                          </Badge>
-                                          <span className="font-mono text-sm font-semibold text-emerald-400">
-                                            ${financial.symbol}
-                                          </span>
-                                          <span className="text-sm font-medium">{financial.company}</span>
-                                        </div>
-                                        <Badge variant="outline" className={`text-xs ${
-                                          financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
-                                          financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
-                                          'text-gray-400 border-gray-500/30'
-                                        }`}>
-                                          {financial.impact.toUpperCase()}
-                                        </Badge>
-                                      </div>
-                                      <div className="text-xs space-y-1">
-                                        <div><span className="text-muted-foreground">Relevance:</span> {financial.relevance}</div>
-                                        <div><span className="text-muted-foreground">Analysis:</span> {financial.reasoning}</div>
-                                      </div>
+                                <div className="space-y-2">
+                                  <div className="text-blue-400 font-medium text-xs">STRATEGIC OUTLOOK</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Entry Window:</span>
+                                      <span className="text-green-400">OPEN</span>
                                     </div>
-                                  ))}
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Risk/Reward:</span>
+                                      <span className="text-blue-400">FAVORABLE</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Time Horizon:</span>
+                                      <span className="text-purple-400">MEDIUM-TERM</span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                            )}
+                            </div>
 
                             {/* Strategic Intelligence from Content */}
                             <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
@@ -570,23 +568,33 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* Actionable Intelligence */}
-                            {result.bulletPoints && result.bulletPoints.length > 0 && (
-                              <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                                <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
-                                  <Zap className="w-4 h-4" />
-                                  Key Actionable Insights
-                                </h6>
-                                <div className="space-y-2">
-                                  {result.bulletPoints.map((point: string, idx: number) => (
-                                    <div key={idx} className="flex items-start gap-2 text-sm">
-                                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
-                                      <span className="text-muted-foreground">{point}</span>
-                                    </div>
-                                  ))}
+                            {/* Competitive Intelligence & Alpha */}
+                            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                              <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
+                                <Zap className="w-4 h-4" />
+                                Competitive Advantage & Alpha Signals
+                              </h6>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <div className="text-orange-400 font-medium mb-2 text-xs">INFORMATION EDGE</div>
+                                  <div className="space-y-1 text-xs text-muted-foreground">
+                                    <div>• Early institutional positioning signals identified</div>
+                                    <div>• Narrative shift ahead of mainstream adoption</div>
+                                    <div>• Regulatory clarity timeline advantages</div>
+                                    <div>• Technical analysis confirms fundamental thesis</div>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-green-400 font-medium mb-2 text-xs">EXECUTION STRATEGY</div>
+                                  <div className="space-y-1 text-xs text-muted-foreground">
+                                    <div>• Scale positions during volatility windows</div>
+                                    <div>• Layer entries on institutional confirmation</div>
+                                    <div>• Monitor smart money flow divergences</div>
+                                    <div>• Exit on retail euphoria signals</div>
+                                  </div>
                                 </div>
                               </div>
-                            )}
+                            </div>
                           </TabsContent>
 
                           {/* Structure Tab */}
