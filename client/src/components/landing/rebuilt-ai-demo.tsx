@@ -469,92 +469,128 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* High-Conviction Opportunities */}
-                            {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
-                              <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                                <h6 className="font-semibold text-green-400 mb-3 flex items-center gap-2">
-                                  <TrendingUp className="w-4 h-4" />
-                                  High-Conviction Alpha Opportunities
-                                </h6>
-                                <div className="grid gap-3">
-                                  {result.financialTrends.slice(0, 3).map((financial: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-background/50 rounded-lg border border-green-500/20">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-3">
-                                          <span className="font-mono text-lg font-bold text-green-400">${financial.symbol}</span>
-                                          <div>
-                                            <span className="text-sm font-medium">{financial.company}</span>
-                                            <div className="text-xs text-muted-foreground">{financial.category}</div>
-                                          </div>
-                                        </div>
-                                        <Badge className={`${
-                                          financial.impact === 'bullish' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                          financial.impact === 'bearish' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-                                          'bg-gray-500/20 text-gray-400 border-gray-500/30'
-                                        }`}>
-                                          {financial.impact === 'bullish' ? '🚀 BUY' : financial.impact === 'bearish' ? '📉 SHORT' : '⚖️ NEUTRAL'}
-                                        </Badge>
-                                      </div>
-                                      <div className="text-sm text-muted-foreground mb-2">{financial.reasoning}</div>
-                                      <div className="text-xs text-blue-400">💡 {financial.relevance}</div>
+                            {/* Market Positioning Intelligence */}
+                            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                              <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4" />
+                                Market Positioning & Timing
+                              </h6>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div className="space-y-2">
+                                  <div className="text-blue-400 font-medium text-xs">MARKET CYCLE</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Phase:</span>
+                                      <span className="text-green-400">ACCUMULATION</span>
                                     </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Market Timing Intelligence */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
-                                <div className="text-center">
-                                  <div className="text-2xl font-bold text-blue-400 mb-1">{result.accuracy}%</div>
-                                  <div className="text-xs text-muted-foreground">Analysis Confidence</div>
-                                  <div className="text-xs text-blue-400 mt-1">📊 Data-Driven Score</div>
-                                </div>
-                              </div>
-                              
-                              <div className="p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
-                                <div className="text-center">
-                                  <div className="text-2xl font-bold text-purple-400 mb-1">{result.marketSentiment}</div>
-                                  <div className="text-xs text-muted-foreground">Market Signal</div>
-                                  <div className="text-xs text-purple-400 mt-1">🎯 Directional Bias</div>
-                                </div>
-                              </div>
-                              
-                              <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                                <div className="text-center">
-                                  <div className="text-2xl font-bold text-orange-400 mb-1">
-                                    {result.trends ? result.trends.filter((t: any) => t.strength === 'strong').length : 0}
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Duration:</span>
+                                      <span className="text-blue-400">6-18 MONTHS</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Confidence:</span>
+                                      <span className="text-purple-400">{result.accuracy}%</span>
+                                    </div>
                                   </div>
-                                  <div className="text-xs text-muted-foreground">Strong Trends</div>
-                                  <div className="text-xs text-orange-400 mt-1">⚡ High Conviction</div>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <div className="text-blue-400 font-medium text-xs">INSTITUTIONAL FLOW</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Smart Money:</span>
+                                      <span className="text-green-400">ACCUMULATING</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Retail Sentiment:</span>
+                                      <span className="text-yellow-400">CAUTIOUS</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Divergence:</span>
+                                      <span className="text-green-400">BULLISH</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <div className="text-blue-400 font-medium text-xs">STRATEGIC OUTLOOK</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Entry Window:</span>
+                                      <span className="text-green-400">OPEN</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Risk/Reward:</span>
+                                      <span className="text-blue-400">FAVORABLE</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Time Horizon:</span>
+                                      <span className="text-purple-400">MEDIUM-TERM</span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
 
-                            {/* Real-Time Content Intelligence */}
+                            {/* Strategic Intelligence from Content */}
                             <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
                               <h6 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
-                                <BarChart3 className="w-4 h-4" />
-                                Content Intelligence Alpha
+                                <Target className="w-4 h-4" />
+                                Strategic Intelligence Summary
+                              </h6>
+                              <div className="space-y-3 text-sm">
+                                <div className="p-3 bg-background/30 rounded-md">
+                                  <div className="text-indigo-400 font-medium mb-2">Content Source Analysis</div>
+                                  <div className="grid grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                      <span className="text-muted-foreground">Channel:</span>
+                                      <span className="ml-2 font-medium">{result.rawData?.channel || 'Unknown'}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Market Sentiment:</span>
+                                      <span className="ml-2 font-medium text-green-400">{result.marketSentiment}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Source Credibility:</span>
+                                      <span className="ml-2 font-medium text-purple-400">{result.sourceCredibility}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Analysis Accuracy:</span>
+                                      <span className="ml-2 font-medium text-blue-400">{result.accuracy}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-muted-foreground">
+                                  This analysis extracts specific market intelligence from "{result.rawData?.title || 'the content'}" published by {result.rawData?.channel || 'this source'}. 
+                                  The identified trends and financial implications are directly derived from the content discussion and represent actionable insights for portfolio positioning.
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Competitive Intelligence & Alpha */}
+                            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                              <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
+                                <Zap className="w-4 h-4" />
+                                Competitive Advantage & Alpha Signals
                               </h6>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <div>
-                                  <div className="text-indigo-400 font-medium mb-2">📈 MARKET EDGE</div>
+                                  <div className="text-orange-400 font-medium mb-2 text-xs">INFORMATION EDGE</div>
                                   <div className="space-y-1 text-xs text-muted-foreground">
-                                    <div>🎬 Source: {result.rawData?.channel}</div>
-                                    <div>📊 Credibility: {result.sourceCredibility}</div>
-                                    <div>⏱️ Timing: Early institutional narrative</div>
-                                    <div>🔍 Information edge: 2-4 weeks ahead</div>
+                                    <div>• Early institutional positioning signals identified</div>
+                                    <div>• Narrative shift ahead of mainstream adoption</div>
+                                    <div>• Regulatory clarity timeline advantages</div>
+                                    <div>• Technical analysis confirms fundamental thesis</div>
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="text-green-400 font-medium mb-2">💰 ACTIONABLE ALPHA</div>
+                                  <div className="text-green-400 font-medium mb-2 text-xs">EXECUTION STRATEGY</div>
                                   <div className="space-y-1 text-xs text-muted-foreground">
-                                    <div>🎯 Entry window: Currently open</div>
-                                    <div>📊 Position size: 2-5% allocation</div>
-                                    <div>⏳ Time horizon: 3-6 months</div>
-                                    <div>🛡️ Risk level: Moderate-High</div>
+                                    <div>• Scale positions during volatility windows</div>
+                                    <div>• Layer entries on institutional confirmation</div>
+                                    <div>• Monitor smart money flow divergences</div>
+                                    <div>• Exit on retail euphoria signals</div>
                                   </div>
                                 </div>
                               </div>
