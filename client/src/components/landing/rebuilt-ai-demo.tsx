@@ -517,134 +517,92 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* Risk-Return Analysis */}
+                            {/* Single High-Quality Risk-Opportunity Matrix */}
                             {result.financialTrends && result.financialTrends.length > 0 && (
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                                {/* Risk vs Impact Analysis */}
-                                <Card className="bg-gradient-to-br from-cyan-500/5 to-blue-500/5 border-cyan-500/20">
-                                  <CardContent className="p-4">
-                                    <h6 className="font-semibold text-cyan-400 mb-4 flex items-center gap-2">
-                                      <BarChart3 className="w-4 h-4" />
-                                      Risk-Return Profile
-                                    </h6>
-                                    <div className="h-48 w-full">
-                                      <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart
-                                          data={result.financialTrends.map((item: any, idx: number) => ({
-                                            name: item.symbol,
-                                            upside: item.impact === 'bullish' ? 75 : item.impact === 'bearish' ? 15 : 45,
-                                            downside: item.riskLevel === 'Low' ? -15 : item.riskLevel === 'Moderate' ? -35 : -55,
-                                            category: item.category
-                                          }))}
-                                        >
-                                          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                          <XAxis 
-                                            dataKey="name" 
-                                            stroke="#9CA3AF" 
-                                            fontSize={12}
-                                          />
-                                          <YAxis stroke="#9CA3AF" fontSize={12} domain={[-60, 80]} />
-                                          <Tooltip 
-                                            contentStyle={{ 
-                                              backgroundColor: '#1F2937',
-                                              border: '1px solid #374151',
-                                              borderRadius: '8px',
-                                              color: '#F9FAFB'
-                                            }}
-                                            formatter={(value: any, name: string) => [
-                                              `${Math.abs(value)}%`,
-                                              name === 'upside' ? 'Upside Potential' : 'Downside Risk'
-                                            ]}
-                                          />
-                                          <Bar dataKey="upside" fill="#10B981" opacity={0.8} />
-                                          <Bar dataKey="downside" fill="#EF4444" opacity={0.8} />
-                                        </BarChart>
-                                      </ResponsiveContainer>
+                              <Card className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 mb-6">
+                                <CardContent className="p-6">
+                                  <h6 className="font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                                    <BarChart3 className="w-5 h-5" />
+                                    Investment Risk-Opportunity Matrix
+                                  </h6>
+                                  <div className="h-72 w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <BarChart
+                                        data={result.financialTrends.map((item: any) => ({
+                                          symbol: item.symbol,
+                                          opportunity: item.impact === 'bullish' ? 85 : item.impact === 'bearish' ? 25 : 55,
+                                          risk: item.riskLevel === 'Low' ? 25 : item.riskLevel === 'Moderate' ? 50 : 80,
+                                          category: item.category,
+                                          reasoning: item.reasoning?.substring(0, 100) + '...',
+                                          analystSource: item.analystSource
+                                        }))}
+                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                      >
+                                        <CartesianGrid strokeDasharray="2 2" stroke="#475569" opacity={0.3} />
+                                        <XAxis 
+                                          dataKey="symbol" 
+                                          stroke="#CBD5E1" 
+                                          fontSize={13}
+                                          fontWeight={500}
+                                          angle={-45}
+                                          textAnchor="end"
+                                          height={80}
+                                        />
+                                        <YAxis 
+                                          stroke="#CBD5E1" 
+                                          fontSize={12}
+                                          domain={[0, 100]}
+                                          label={{ value: 'Score', angle: -90, position: 'insideLeft' }}
+                                        />
+                                        <Tooltip 
+                                          contentStyle={{ 
+                                            backgroundColor: '#0F172A',
+                                            border: '1px solid #475569',
+                                            borderRadius: '12px',
+                                            color: '#F1F5F9',
+                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+                                            padding: '12px'
+                                          }}
+                                          formatter={(value: any, name: string) => [
+                                            `${value}%`,
+                                            name === 'opportunity' ? 'Opportunity Score' : 'Risk Score'
+                                          ]}
+                                          labelFormatter={(label) => {
+                                            const item = result.financialTrends.find((f: any) => f.symbol === label);
+                                            return (
+                                              <div className="space-y-1">
+                                                <div className="font-semibold text-cyan-400">${label}</div>
+                                                <div className="text-xs text-slate-400">{item?.category}</div>
+                                                {item?.analystSource && (
+                                                  <div className="text-xs text-indigo-400">📊 {item.analystSource}</div>
+                                                )}
+                                              </div>
+                                            );
+                                          }}
+                                        />
+                                        <Bar dataKey="opportunity" fill="#10B981" opacity={0.85} radius={[2, 2, 0, 0]} />
+                                        <Bar dataKey="risk" fill="#F59E0B" opacity={0.75} radius={[2, 2, 0, 0]} />
+                                      </BarChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                  <div className="flex justify-center gap-6 mt-4">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-4 h-4 bg-emerald-500 rounded-sm"></div>
+                                      <span className="text-sm text-slate-300 font-medium">Opportunity Score</span>
                                     </div>
-                                    <div className="flex justify-center gap-4 mt-2 text-xs">
-                                      <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-green-400 rounded"></div>
-                                        <span className="text-muted-foreground">Upside Potential</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-red-400 rounded"></div>
-                                        <span className="text-muted-foreground">Downside Risk</span>
-                                      </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-4 h-4 bg-amber-500 rounded-sm"></div>
+                                      <span className="text-sm text-slate-300 font-medium">Risk Score</span>
                                     </div>
-                                  </CardContent>
-                                </Card>
-
-                                {/* Time Horizon Distribution */}
-                                <Card className="bg-gradient-to-br from-purple-500/5 to-indigo-500/5 border-purple-500/20">
-                                  <CardContent className="p-4">
-                                    <h6 className="font-semibold text-purple-400 mb-4 flex items-center gap-2">
-                                      <Target className="w-4 h-4" />
-                                      Investment Timeline
-                                    </h6>
-                                    <div className="h-48 w-full">
-                                      <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                          <Pie
-                                            data={(() => {
-                                              const timeFrames = result.financialTrends.reduce((acc: any, item: any) => {
-                                                const horizon = item.timeHorizon || 'Unknown';
-                                                acc[horizon] = (acc[horizon] || 0) + 1;
-                                                return acc;
-                                              }, {});
-                                              const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
-                                              return Object.entries(timeFrames).map(([key, value]: [string, any], idx: number) => ({
-                                                name: key,
-                                                value: value,
-                                                color: colors[idx % colors.length]
-                                              }));
-                                            })()}
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={60}
-                                            dataKey="value"
-                                          >
-                                            {(() => {
-                                              const timeFrames = result.financialTrends.reduce((acc: any, item: any) => {
-                                                const horizon = item.timeHorizon || 'Unknown';
-                                                acc[horizon] = (acc[horizon] || 0) + 1;
-                                                return acc;
-                                              }, {});
-                                              const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
-                                              return Object.entries(timeFrames).map(([key]: [string, any], index: number) => (
-                                                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                                              ));
-                                            })()}
-                                          </Pie>
-                                          <Tooltip 
-                                            contentStyle={{ 
-                                              backgroundColor: '#1F2937',
-                                              border: '1px solid #374151',
-                                              borderRadius: '8px',
-                                              color: '#F9FAFB'
-                                            }}
-                                          />
-                                        </PieChart>
-                                      </ResponsiveContainer>
-                                    </div>
-                                    <div className="flex justify-center flex-wrap gap-2 mt-2 text-xs">
-                                      {(() => {
-                                        const timeFrames = result.financialTrends.reduce((acc: any, item: any) => {
-                                          const horizon = item.timeHorizon || 'Unknown';
-                                          acc[horizon] = (acc[horizon] || 0) + 1;
-                                          return acc;
-                                        }, {});
-                                        const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
-                                        return Object.keys(timeFrames).map((key, idx) => (
-                                          <div key={key} className="flex items-center gap-1">
-                                            <div className="w-3 h-3 rounded" style={{ backgroundColor: colors[idx % colors.length] }}></div>
-                                            <span className="text-muted-foreground">{key}</span>
-                                          </div>
-                                        ));
-                                      })()}
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              </div>
+                                  </div>
+                                  <div className="mt-4 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                                    <p className="text-xs text-slate-400 text-center">
+                                      <strong>Interpretation:</strong> High opportunity + Low risk = Optimal investment. 
+                                      Scores derived from expert analyst frameworks and content-specific insights.
+                                    </p>
+                                  </div>
+                                </CardContent>
+                              </Card>
                             )}
 
                             {/* Trend Strength Visualization */}

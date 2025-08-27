@@ -351,7 +351,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "company": "Company Name Based on Content",
       "relevance": "Specific connection to video content themes and analyst consensus",
       "impact": "bullish/bearish/neutral based on content analysis",
-      "reasoning": "Expert analysis (120-150 words) citing methodologies from top analysts like Benjamin Cowen's logarithmic regression models, Willy Woo's on-chain metrics, or Raoul Pal's macro framework. Include specific technical levels, fundamental catalysts, institutional adoption metrics, and risk-adjusted positioning based on established analytical frameworks.",
+      "reasoning": "Content-specific expert analysis (150-200 words) directly citing themes, data points, or arguments from the video. Reference how the video's discussion of [specific topic mentioned] aligns with established analyst frameworks (Benjamin Cowen's cycle analysis, Willy Woo's on-chain metrics, Raoul Pal's macro thesis). Include exact quotes or data from the video that support this investment thesis, technical levels mentioned in the content, and how the video's timeline/predictions align with institutional positioning strategies.",
       "priceRange": "Price range based on analyst models (e.g., Plan B's S2F: $X - $Y, technical support/resistance levels)",
       "timeHorizon": "Short-term/Medium-term/Long-term based on analyst cycle models",
       "riskLevel": "Low/Moderate/High based on volatility metrics and institutional risk frameworks",
@@ -363,7 +363,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "company": "Content-Specific Company",
       "relevance": "Direct correlation to video discussion points and sector analysis",
       "impact": "Sentiment based on expert technical and fundamental analysis",
-      "reasoning": "Institutional-grade analysis (120-150 words) using frameworks from Messari research, Glassnode data, or Real Vision insights. Include specific metrics, competitive moats, regulatory positioning, and execution capabilities grounded in credible research methodologies.",
+      "reasoning": "Video-correlated institutional analysis (150-200 words) directly referencing specific points, data, or predictions mentioned in the video content. Explain how the video's discussion of [specific topic] validates or challenges established frameworks from Messari research or Real Vision insights. Include direct quotes from the video speakers, specific metrics or data points mentioned, and how the video's thesis impacts competitive positioning and regulatory outlook for this asset.",
       "priceRange": "Evidence-based price range using established valuation models (conservative to optimistic scenarios)",
       "timeHorizon": "Timeline based on cycle analysis and institutional adoption patterns", 
       "riskLevel": "Risk assessment using proven institutional risk management frameworks",
@@ -375,7 +375,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "company": "Bitcoin",
       "relevance": "Analysis based on content discussion and macro environment",
       "impact": "Directional bias based on on-chain data and macro analysis",
-      "reasoning": "Expert perspective (120-150 words) incorporating Plan B's Stock-to-Flow model, Willy Woo's network value metrics, Glassnode's institutional flow data, and Raoul Pal's macro positioning. Include specific on-chain metrics, ETF flow analysis, mining hash rate implications, and institutional custody adoption rates.",
+      "reasoning": "Video-grounded expert analysis (150-200 words) connecting specific Bitcoin discussions from the video to established models. Reference exact statements about Bitcoin's role, institutional adoption mentions, regulatory developments, or market cycle positioning discussed in the video. Correlate these video insights with Plan B's S2F model predictions, Willy Woo's network analysis, and institutional flow data from Glassnode. Include direct video quotes about Bitcoin and explain how the video's timeline aligns with halving cycle analysis.",
       "priceRange": "Price range based on established models (S2F conservative/optimistic, NVT bounds, network value ranges)",
       "timeHorizon": "Timeline based on halving cycles and institutional adoption phases",
       "riskLevel": "Risk level using VaR models and institutional volatility frameworks",
@@ -387,7 +387,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "company": "Ethereum",
       "relevance": "Platform utility analysis based on content themes and DeFi trends",
       "impact": "Sentiment based on network fundamentals and institutional DeFi adoption",
-      "reasoning": "Platform analysis (120-150 words) using Messari's network economics, Delphi Digital's DeFi research, and institutional staking yield analysis. Include Layer 2 scaling metrics, EIP-1559 deflationary mechanics, institutional staking participation, and enterprise blockchain adoption patterns.",
+      "reasoning": "Content-driven platform analysis (150-200 words) based on specific Ethereum discussions in the video. Reference exact mentions of Ethereum's role, DeFi developments, Layer 2 scaling, or institutional adoption discussed by the speakers. Connect these video insights to Messari's network economics and Delphi Digital's research. Include direct quotes about Ethereum from the video and explain how the content's predictions align with institutional DeFi adoption trends and staking participation growth.",
       "priceRange": "Valuation range using network utility models and institutional fair value bands (bear/base/bull scenarios)",
       "timeHorizon": "Timeline based on Ethereum roadmap milestones and institutional DeFi adoption",
       "riskLevel": "Risk assessment using network security metrics and regulatory clarity",
@@ -399,7 +399,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "company": "Asset Mentioned in Content",
       "relevance": "Direct reference from video content with expert validation",
       "impact": "Analysis based on content discussion and expert assessment",
-      "reasoning": "Expert evaluation (120-150 words) using established crypto analytical frameworks from Coin Bureau's fundamental analysis, Messari's tokenomics research, or Delphi Digital's sector reports. Include specific use case validation, competitive positioning, institutional adoption potential, and regulatory compliance assessment.",
+      "reasoning": "Video-specific expert evaluation (150-200 words) directly tied to mentions of this crypto asset in the video content. Reference specific discussions about the asset's use case, adoption potential, or market positioning mentioned by the speakers. Connect these video insights to established analytical frameworks from Coin Bureau or Messari research. Include exact quotes about this asset from the video, specific data points or predictions mentioned, and how the video's assessment aligns with institutional due diligence frameworks.",
       "priceRange": "Price range based on fundamental analysis and comparable asset valuation (downside/upside scenarios)",
       "timeHorizon": "Investment timeline based on project roadmap and market cycle analysis",
       "riskLevel": "Risk evaluation using institutional due diligence frameworks",
@@ -458,16 +458,25 @@ Generate expert-level institutional analysis in this exact JSON format:
   "accuracy": 95
 }
 
-CRITICAL REQUIREMENTS for expert-level crypto analysis:
-- ONLY reference established analytical frameworks from credible crypto analysts (Raoul Pal, Benjamin Cowen, Plan B, Willy Woo, Coin Bureau)
-- ALL financial recommendations must cite specific analytical methodologies (S2F model, on-chain metrics, macro frameworks)
-- Include 4-5 specific recommendations directly related to video content with expert validation
-- Each analysis must reference institutional research from Messari, Glassnode, Delphi Digital, or Real Vision
-- Price ranges must be based on established models with conservative/optimistic scenarios (logarithmic regression bands, network value ranges, fundamental analysis brackets)
-- Time horizons must align with proven cycle analysis and institutional adoption patterns
-- Risk assessments must use institutional volatility frameworks and proven risk management models
-- All analysis must be grounded in video content but validated against expert consensus
-- Include specific analyst source attribution for credibility and verification
+CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
+
+🎯 CONTENT CORRELATION MANDATE:
+- EVERY financial recommendation must directly reference specific topics, quotes, data points, or predictions mentioned in this exact video
+- Include exact timestamps and quotes from the video content when possible
+- Connect video discussions to analyst frameworks - do NOT generate generic analysis
+- If a stock/crypto isn't mentioned in the video, reference broader themes (e.g., if video discusses "institutional crypto adoption," relate to relevant crypto assets)
+
+📊 EXPERT VALIDATION:
+- Use ONLY established frameworks from credible analysts (Raoul Pal, Benjamin Cowen, Plan B, Willy Woo, Coin Bureau, Messari, Glassnode, Delphi Digital)
+- Each recommendation must include 150-200 word reasoning that starts with video content then validates with expert models
+- Price ranges must reference video predictions/timelines AND analyst models
+- Include specific analyst source attribution for every recommendation
+
+🔍 QUALITY REQUIREMENTS:
+- Generate 4-5 recommendations maximum, all directly tied to video themes
+- Each reasoning must include: 1) Specific video reference/quote, 2) Expert framework validation, 3) Institutional perspective
+- Avoid generic market analysis - make it video-specific and actionable
+- Time horizons must align with video timeline AND proven cycle analysis
 `;
 
     try {
