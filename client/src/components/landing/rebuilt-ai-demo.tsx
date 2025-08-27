@@ -64,6 +64,7 @@ interface ProcessingResult {
     targetPrice?: string;
     timeHorizon?: string;
     riskLevel?: string;
+    analystSource?: string;
   }>;
   marketSentiment: string;
   sourceCredibility: string;
@@ -462,6 +463,11 @@ export function RebuiltAIDemo() {
                                               'bg-red-500/10 text-red-400 border-red-500/20'
                                             }`}>
                                               Risk: {financial.riskLevel}
+                                            </div>
+                                          )}
+                                          {financial.analystSource && (
+                                            <div className="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20">
+                                              📊 {financial.analystSource}
                                             </div>
                                           )}
                                         </div>
