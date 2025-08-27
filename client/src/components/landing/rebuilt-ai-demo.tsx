@@ -61,7 +61,7 @@ interface ProcessingResult {
     relevance: string;
     impact: string;
     reasoning: string;
-    targetPrice?: string;
+    priceRange?: string;
     timeHorizon?: string;
     riskLevel?: string;
     analystSource?: string;
@@ -444,11 +444,11 @@ export function RebuiltAIDemo() {
                                       </div>
                                       <p className="text-xs text-muted-foreground mb-2">{financial.relevance}</p>
                                       <p className="text-xs text-muted-foreground italic mb-2">{financial.reasoning}</p>
-                                      {(financial.targetPrice || financial.timeHorizon || financial.riskLevel) && (
+                                      {(financial.priceRange || financial.timeHorizon || financial.riskLevel) && (
                                         <div className="flex flex-wrap gap-2 mt-2">
-                                          {financial.targetPrice && (
+                                          {financial.priceRange && (
                                             <div className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded border border-green-500/20">
-                                              Target: {financial.targetPrice}
+                                              Range: {financial.priceRange}
                                             </div>
                                           )}
                                           {financial.timeHorizon && (
@@ -517,23 +517,23 @@ export function RebuiltAIDemo() {
                               </div>
                             </div>
 
-                            {/* Financial Trends Visualization */}
+                            {/* Risk-Return Analysis */}
                             {result.financialTrends && result.financialTrends.length > 0 && (
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                                {/* Investment Recommendations Chart */}
+                                {/* Risk vs Impact Analysis */}
                                 <Card className="bg-gradient-to-br from-cyan-500/5 to-blue-500/5 border-cyan-500/20">
                                   <CardContent className="p-4">
                                     <h6 className="font-semibold text-cyan-400 mb-4 flex items-center gap-2">
                                       <BarChart3 className="w-4 h-4" />
-                                      Investment Recommendations
+                                      Risk-Return Profile
                                     </h6>
                                     <div className="h-48 w-full">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <BarChart
                                           data={result.financialTrends.map((item: any, idx: number) => ({
                                             name: item.symbol,
-                                            impact: item.impact === 'bullish' ? 80 : item.impact === 'bearish' ? 20 : 50,
-                                            risk: item.riskLevel === 'Low' ? 30 : item.riskLevel === 'Moderate' ? 60 : 90,
+                                            upside: item.impact === 'bullish' ? 75 : item.impact === 'bearish' ? 15 : 45,
+                                            downside: item.riskLevel === 'Low' ? -15 : item.riskLevel === 'Moderate' ? -35 : -55,
                                             category: item.category
                                           }))}
                                         >
@@ -543,7 +543,7 @@ export function RebuiltAIDemo() {
                                             stroke="#9CA3AF" 
                                             fontSize={12}
                                           />
-                                          <YAxis stroke="#9CA3AF" fontSize={12} />
+                                          <YAxis stroke="#9CA3AF" fontSize={12} domain={[-60, 80]} />
                                           <Tooltip 
                                             contentStyle={{ 
                                               backgroundColor: '#1F2937',
@@ -551,45 +551,51 @@ export function RebuiltAIDemo() {
                                               borderRadius: '8px',
                                               color: '#F9FAFB'
                                             }}
+                                            formatter={(value: any, name: string) => [
+                                              `${Math.abs(value)}%`,
+                                              name === 'upside' ? 'Upside Potential' : 'Downside Risk'
+                                            ]}
                                           />
-                                          <Bar dataKey="impact" fill="#06B6D4" opacity={0.8} />
-                                          <Bar dataKey="risk" fill="#F59E0B" opacity={0.6} />
+                                          <Bar dataKey="upside" fill="#10B981" opacity={0.8} />
+                                          <Bar dataKey="downside" fill="#EF4444" opacity={0.8} />
                                         </BarChart>
                                       </ResponsiveContainer>
                                     </div>
                                     <div className="flex justify-center gap-4 mt-2 text-xs">
                                       <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-cyan-400 rounded"></div>
-                                        <span className="text-muted-foreground">Impact Score</span>
+                                        <div className="w-3 h-3 bg-green-400 rounded"></div>
+                                        <span className="text-muted-foreground">Upside Potential</span>
                                       </div>
                                       <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-yellow-400 rounded"></div>
-                                        <span className="text-muted-foreground">Risk Level</span>
+                                        <div className="w-3 h-3 bg-red-400 rounded"></div>
+                                        <span className="text-muted-foreground">Downside Risk</span>
                                       </div>
                                     </div>
                                   </CardContent>
                                 </Card>
 
-                                {/* Asset Allocation Pie Chart */}
+                                {/* Time Horizon Distribution */}
                                 <Card className="bg-gradient-to-br from-purple-500/5 to-indigo-500/5 border-purple-500/20">
                                   <CardContent className="p-4">
                                     <h6 className="font-semibold text-purple-400 mb-4 flex items-center gap-2">
                                       <Target className="w-4 h-4" />
-                                      Asset Category Distribution
+                                      Investment Timeline
                                     </h6>
                                     <div className="h-48 w-full">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                           <Pie
                                             data={(() => {
-                                              const categories = result.financialTrends.reduce((acc: any, item: any) => {
-                                                acc[item.category] = (acc[item.category] || 0) + 1;
+                                              const timeFrames = result.financialTrends.reduce((acc: any, item: any) => {
+                                                const horizon = item.timeHorizon || 'Unknown';
+                                                acc[horizon] = (acc[horizon] || 0) + 1;
                                                 return acc;
                                               }, {});
-                                              return Object.entries(categories).map(([key, value]: [string, any]) => ({
+                                              const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
+                                              return Object.entries(timeFrames).map(([key, value]: [string, any], idx: number) => ({
                                                 name: key,
                                                 value: value,
-                                                color: key === 'Stocks' ? '#06B6D4' : '#8B5CF6'
+                                                color: colors[idx % colors.length]
                                               }));
                                             })()}
                                             cx="50%"
@@ -598,12 +604,14 @@ export function RebuiltAIDemo() {
                                             dataKey="value"
                                           >
                                             {(() => {
-                                              const categories = result.financialTrends.reduce((acc: any, item: any) => {
-                                                acc[item.category] = (acc[item.category] || 0) + 1;
+                                              const timeFrames = result.financialTrends.reduce((acc: any, item: any) => {
+                                                const horizon = item.timeHorizon || 'Unknown';
+                                                acc[horizon] = (acc[horizon] || 0) + 1;
                                                 return acc;
                                               }, {});
-                                              return Object.entries(categories).map(([key]: [string, any], index: number) => (
-                                                <Cell key={`cell-${index}`} fill={key === 'Stocks' ? '#06B6D4' : '#8B5CF6'} />
+                                              const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
+                                              return Object.entries(timeFrames).map(([key]: [string, any], index: number) => (
+                                                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                                               ));
                                             })()}
                                           </Pie>
@@ -618,15 +626,21 @@ export function RebuiltAIDemo() {
                                         </PieChart>
                                       </ResponsiveContainer>
                                     </div>
-                                    <div className="flex justify-center gap-4 mt-2 text-xs">
-                                      <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-cyan-400 rounded"></div>
-                                        <span className="text-muted-foreground">Stocks</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-purple-400 rounded"></div>
-                                        <span className="text-muted-foreground">Crypto</span>
-                                      </div>
+                                    <div className="flex justify-center flex-wrap gap-2 mt-2 text-xs">
+                                      {(() => {
+                                        const timeFrames = result.financialTrends.reduce((acc: any, item: any) => {
+                                          const horizon = item.timeHorizon || 'Unknown';
+                                          acc[horizon] = (acc[horizon] || 0) + 1;
+                                          return acc;
+                                        }, {});
+                                        const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
+                                        return Object.keys(timeFrames).map((key, idx) => (
+                                          <div key={key} className="flex items-center gap-1">
+                                            <div className="w-3 h-3 rounded" style={{ backgroundColor: colors[idx % colors.length] }}></div>
+                                            <span className="text-muted-foreground">{key}</span>
+                                          </div>
+                                        ));
+                                      })()}
                                     </div>
                                   </CardContent>
                                 </Card>

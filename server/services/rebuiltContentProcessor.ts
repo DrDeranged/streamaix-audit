@@ -352,7 +352,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "relevance": "Specific connection to video content themes and analyst consensus",
       "impact": "bullish/bearish/neutral based on content analysis",
       "reasoning": "Expert analysis (120-150 words) citing methodologies from top analysts like Benjamin Cowen's logarithmic regression models, Willy Woo's on-chain metrics, or Raoul Pal's macro framework. Include specific technical levels, fundamental catalysts, institutional adoption metrics, and risk-adjusted positioning based on established analytical frameworks.",
-      "targetPrice": "Price target based on analyst models (e.g., Plan B's S2F, on-chain support/resistance)",
+      "priceRange": "Price range based on analyst models (e.g., Plan B's S2F: $X - $Y, technical support/resistance levels)",
       "timeHorizon": "Short-term/Medium-term/Long-term based on analyst cycle models",
       "riskLevel": "Low/Moderate/High based on volatility metrics and institutional risk frameworks",
       "analystSource": "Reference to specific analyst methodology or institutional research"
@@ -364,7 +364,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "relevance": "Direct correlation to video discussion points and sector analysis",
       "impact": "Sentiment based on expert technical and fundamental analysis",
       "reasoning": "Institutional-grade analysis (120-150 words) using frameworks from Messari research, Glassnode data, or Real Vision insights. Include specific metrics, competitive moats, regulatory positioning, and execution capabilities grounded in credible research methodologies.",
-      "targetPrice": "Evidence-based price target using established valuation models",
+      "priceRange": "Evidence-based price range using established valuation models (conservative to optimistic scenarios)",
       "timeHorizon": "Timeline based on cycle analysis and institutional adoption patterns", 
       "riskLevel": "Risk assessment using proven institutional risk management frameworks",
       "analystSource": "Specific reference to analytical framework or institutional research"
@@ -376,7 +376,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "relevance": "Analysis based on content discussion and macro environment",
       "impact": "Directional bias based on on-chain data and macro analysis",
       "reasoning": "Expert perspective (120-150 words) incorporating Plan B's Stock-to-Flow model, Willy Woo's network value metrics, Glassnode's institutional flow data, and Raoul Pal's macro positioning. Include specific on-chain metrics, ETF flow analysis, mining hash rate implications, and institutional custody adoption rates.",
-      "targetPrice": "Price target based on established models (S2F, NVT, Metcalfe's Law applications)",
+      "priceRange": "Price range based on established models (S2F conservative/optimistic, NVT bounds, network value ranges)",
       "timeHorizon": "Timeline based on halving cycles and institutional adoption phases",
       "riskLevel": "Risk level using VaR models and institutional volatility frameworks",
       "analystSource": "Plan B S2F model, Willy Woo network analysis, or Glassnode metrics"
@@ -388,7 +388,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "relevance": "Platform utility analysis based on content themes and DeFi trends",
       "impact": "Sentiment based on network fundamentals and institutional DeFi adoption",
       "reasoning": "Platform analysis (120-150 words) using Messari's network economics, Delphi Digital's DeFi research, and institutional staking yield analysis. Include Layer 2 scaling metrics, EIP-1559 deflationary mechanics, institutional staking participation, and enterprise blockchain adoption patterns.",
-      "targetPrice": "Valuation using network utility models and institutional fair value assessments",
+      "priceRange": "Valuation range using network utility models and institutional fair value bands (bear/base/bull scenarios)",
       "timeHorizon": "Timeline based on Ethereum roadmap milestones and institutional DeFi adoption",
       "riskLevel": "Risk assessment using network security metrics and regulatory clarity",
       "analystSource": "Messari network economics or Delphi Digital institutional research"
@@ -400,7 +400,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "relevance": "Direct reference from video content with expert validation",
       "impact": "Analysis based on content discussion and expert assessment",
       "reasoning": "Expert evaluation (120-150 words) using established crypto analytical frameworks from Coin Bureau's fundamental analysis, Messari's tokenomics research, or Delphi Digital's sector reports. Include specific use case validation, competitive positioning, institutional adoption potential, and regulatory compliance assessment.",
-      "targetPrice": "Target based on fundamental analysis and comparable asset valuation",
+      "priceRange": "Price range based on fundamental analysis and comparable asset valuation (downside/upside scenarios)",
       "timeHorizon": "Investment timeline based on project roadmap and market cycle analysis",
       "riskLevel": "Risk evaluation using institutional due diligence frameworks",
       "analystSource": "Specific analyst framework or institutional research methodology"
@@ -463,7 +463,7 @@ CRITICAL REQUIREMENTS for expert-level crypto analysis:
 - ALL financial recommendations must cite specific analytical methodologies (S2F model, on-chain metrics, macro frameworks)
 - Include 4-5 specific recommendations directly related to video content with expert validation
 - Each analysis must reference institutional research from Messari, Glassnode, Delphi Digital, or Real Vision
-- Target prices must be based on established models (logarithmic regression, network value, fundamental analysis)
+- Price ranges must be based on established models with conservative/optimistic scenarios (logarithmic regression bands, network value ranges, fundamental analysis brackets)
 - Time horizons must align with proven cycle analysis and institutional adoption patterns
 - Risk assessments must use institutional volatility frameworks and proven risk management models
 - All analysis must be grounded in video content but validated against expert consensus
