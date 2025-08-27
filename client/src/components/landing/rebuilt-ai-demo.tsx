@@ -25,6 +25,22 @@ import {
   FileText,
   Target
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Area,
+  AreaChart
+} from 'recharts';
 
 interface ProcessingResult {
   id: string;
@@ -45,6 +61,9 @@ interface ProcessingResult {
     relevance: string;
     impact: string;
     reasoning: string;
+    targetPrice?: string;
+    timeHorizon?: string;
+    riskLevel?: string;
   }>;
   marketSentiment: string;
   sourceCredibility: string;
@@ -422,8 +441,31 @@ export function RebuiltAIDemo() {
                                           {financial.impact}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-muted-foreground mb-1">{financial.relevance}</p>
-                                      <p className="text-xs text-muted-foreground italic">{financial.reasoning}</p>
+                                      <p className="text-xs text-muted-foreground mb-2">{financial.relevance}</p>
+                                      <p className="text-xs text-muted-foreground italic mb-2">{financial.reasoning}</p>
+                                      {(financial.targetPrice || financial.timeHorizon || financial.riskLevel) && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                          {financial.targetPrice && (
+                                            <div className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded border border-green-500/20">
+                                              Target: {financial.targetPrice}
+                                            </div>
+                                          )}
+                                          {financial.timeHorizon && (
+                                            <div className="text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20">
+                                              {financial.timeHorizon}
+                                            </div>
+                                          )}
+                                          {financial.riskLevel && (
+                                            <div className={`text-xs px-2 py-1 rounded border ${
+                                              financial.riskLevel === 'Low' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                              financial.riskLevel === 'Moderate' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                              'bg-red-500/10 text-red-400 border-red-500/20'
+                                            }`}>
+                                              Risk: {financial.riskLevel}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -468,6 +510,181 @@ export function RebuiltAIDemo() {
                                 <div className="text-xs text-muted-foreground">Source Credibility</div>
                               </div>
                             </div>
+
+                            {/* Financial Trends Visualization */}
+                            {result.financialTrends && result.financialTrends.length > 0 && (
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                                {/* Investment Recommendations Chart */}
+                                <Card className="bg-gradient-to-br from-cyan-500/5 to-blue-500/5 border-cyan-500/20">
+                                  <CardContent className="p-4">
+                                    <h6 className="font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                                      <BarChart3 className="w-4 h-4" />
+                                      Investment Recommendations
+                                    </h6>
+                                    <div className="h-48 w-full">
+                                      <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart
+                                          data={result.financialTrends.map((item: any, idx: number) => ({
+                                            name: item.symbol,
+                                            impact: item.impact === 'bullish' ? 80 : item.impact === 'bearish' ? 20 : 50,
+                                            risk: item.riskLevel === 'Low' ? 30 : item.riskLevel === 'Moderate' ? 60 : 90,
+                                            category: item.category
+                                          }))}
+                                        >
+                                          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                          <XAxis 
+                                            dataKey="name" 
+                                            stroke="#9CA3AF" 
+                                            fontSize={12}
+                                          />
+                                          <YAxis stroke="#9CA3AF" fontSize={12} />
+                                          <Tooltip 
+                                            contentStyle={{ 
+                                              backgroundColor: '#1F2937',
+                                              border: '1px solid #374151',
+                                              borderRadius: '8px',
+                                              color: '#F9FAFB'
+                                            }}
+                                          />
+                                          <Bar dataKey="impact" fill="#06B6D4" opacity={0.8} />
+                                          <Bar dataKey="risk" fill="#F59E0B" opacity={0.6} />
+                                        </BarChart>
+                                      </ResponsiveContainer>
+                                    </div>
+                                    <div className="flex justify-center gap-4 mt-2 text-xs">
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 bg-cyan-400 rounded"></div>
+                                        <span className="text-muted-foreground">Impact Score</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 bg-yellow-400 rounded"></div>
+                                        <span className="text-muted-foreground">Risk Level</span>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                {/* Asset Allocation Pie Chart */}
+                                <Card className="bg-gradient-to-br from-purple-500/5 to-indigo-500/5 border-purple-500/20">
+                                  <CardContent className="p-4">
+                                    <h6 className="font-semibold text-purple-400 mb-4 flex items-center gap-2">
+                                      <Target className="w-4 h-4" />
+                                      Asset Category Distribution
+                                    </h6>
+                                    <div className="h-48 w-full">
+                                      <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                          <Pie
+                                            data={(() => {
+                                              const categories = result.financialTrends.reduce((acc: any, item: any) => {
+                                                acc[item.category] = (acc[item.category] || 0) + 1;
+                                                return acc;
+                                              }, {});
+                                              return Object.entries(categories).map(([key, value]: [string, any]) => ({
+                                                name: key,
+                                                value: value,
+                                                color: key === 'Stocks' ? '#06B6D4' : '#8B5CF6'
+                                              }));
+                                            })()}
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={60}
+                                            dataKey="value"
+                                          >
+                                            {(() => {
+                                              const categories = result.financialTrends.reduce((acc: any, item: any) => {
+                                                acc[item.category] = (acc[item.category] || 0) + 1;
+                                                return acc;
+                                              }, {});
+                                              return Object.entries(categories).map(([key]: [string, any], index: number) => (
+                                                <Cell key={`cell-${index}`} fill={key === 'Stocks' ? '#06B6D4' : '#8B5CF6'} />
+                                              ));
+                                            })()}
+                                          </Pie>
+                                          <Tooltip 
+                                            contentStyle={{ 
+                                              backgroundColor: '#1F2937',
+                                              border: '1px solid #374151',
+                                              borderRadius: '8px',
+                                              color: '#F9FAFB'
+                                            }}
+                                          />
+                                        </PieChart>
+                                      </ResponsiveContainer>
+                                    </div>
+                                    <div className="flex justify-center gap-4 mt-2 text-xs">
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 bg-cyan-400 rounded"></div>
+                                        <span className="text-muted-foreground">Stocks</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 bg-purple-400 rounded"></div>
+                                        <span className="text-muted-foreground">Crypto</span>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            )}
+
+                            {/* Trend Strength Visualization */}
+                            {result.trends && result.trends.length > 0 && (
+                              <Card className="bg-gradient-to-br from-emerald-500/5 to-green-500/5 border-emerald-500/20 mb-6">
+                                <CardContent className="p-4">
+                                  <h6 className="font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4" />
+                                    Market Trends Analysis
+                                  </h6>
+                                  <div className="h-48 w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <AreaChart
+                                        data={result.trends.map((trend: any, idx: number) => ({
+                                          name: trend.trend.length > 20 ? trend.trend.substring(0, 20) + '...' : trend.trend,
+                                          strength: trend.strength === 'strong' ? 85 : trend.strength === 'moderate' ? 60 : 35,
+                                          fullName: trend.trend
+                                        }))}
+                                      >
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                        <XAxis 
+                                          dataKey="name" 
+                                          stroke="#9CA3AF" 
+                                          fontSize={10}
+                                          angle={-45}
+                                          textAnchor="end"
+                                          height={60}
+                                        />
+                                        <YAxis stroke="#9CA3AF" fontSize={12} />
+                                        <Tooltip 
+                                          contentStyle={{ 
+                                            backgroundColor: '#1F2937',
+                                            border: '1px solid #374151',
+                                            borderRadius: '8px',
+                                            color: '#F9FAFB'
+                                          }}
+                                          labelFormatter={(value, payload: any) => {
+                                            const item = payload?.[0]?.payload;
+                                            return item?.fullName || value;
+                                          }}
+                                        />
+                                        <Area
+                                          type="monotone"
+                                          dataKey="strength"
+                                          stroke="#10B981"
+                                          fill="url(#trendGradient)"
+                                          strokeWidth={2}
+                                        />
+                                        <defs>
+                                          <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
+                                          </linearGradient>
+                                        </defs>
+                                      </AreaChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            )}
 
                             {/* Market Positioning Intelligence */}
                             <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
