@@ -303,106 +303,148 @@ export class RebuiltContentProcessor {
     }
 
     const prompt = `
-Analyze this video content and provide comprehensive business intelligence:
+Analyze this video content and provide comprehensive business intelligence for institutional investors and C-level executives:
 
 Title: ${metadata.title}
 Channel: ${metadata.channel}
 Description: ${metadata.description}
 Duration: ${Math.floor(metadata.duration / 60)}:${(metadata.duration % 60).toString().padStart(2, '0')}
 
-Generate a detailed analysis in this exact JSON format:
+Generate a detailed institutional-grade analysis in this exact JSON format:
 {
-  "summary": "3-4 paragraph comprehensive analysis focusing heavily on market effects, trend implications, economic impact, and strategic business insights. Include specific market dynamics, competitive landscape effects, sector-wide implications, how emerging trends will reshape the industry, market sentiment analysis, investment flows, regulatory impacts, and long-term strategic considerations for businesses and investors. Provide detailed analysis of how these developments will affect different market segments and stakeholders.",
-  "tldrSummary": "2-3 sentence executive-level key takeaway that combines the most critical insights with immediate business implications for decision-makers and strategic overview",
-  "executiveSummary": "Executive-level summary for business leaders",
+  "summary": "4-5 paragraph comprehensive executive analysis (450-500 words) focusing on market effects, strategic implications, competitive dynamics, regulatory environment, institutional adoption patterns, capital flows, and long-term structural changes. Include specific market timing, sector rotation implications, risk/reward profiles, portfolio positioning strategies, and how institutional investors should position for these developments. Analyze macroeconomic implications, policy impacts, and cross-asset correlations.",
+  "tldrSummary": "3 sentence executive summary highlighting the primary investment thesis, key catalyst timeline, and immediate actionable implications for institutional portfolio management",
+  "executiveSummary": "Strategic executive summary (300-350 words) for board-level decision making, focusing on competitive advantages, market positioning opportunities, regulatory arbitrage, institutional flows, and strategic execution pathways with specific timelines and risk mitigation strategies",
   "bulletPoints": [
-    "Key insight 1",
-    "Key insight 2", 
-    "Key insight 3",
-    "Key insight 4",
-    "Key insight 5"
+    "Strategic market positioning opportunity with specific institutional implications and timing",
+    "Competitive landscape shift with winners/losers identification and portfolio impact", 
+    "Regulatory or policy catalyst with timeline and institutional preparation requirements",
+    "Capital allocation strategy with risk-adjusted return expectations and hedging considerations",
+    "Operational execution framework with performance metrics and milestone tracking",
+    "Risk management protocol with downside protection and volatility mitigation strategies"
   ],
   "trends": [
     {
-      "trend": "Trend name 1",
+      "trend": "Specific institutional trend with sector focus and quantified impact",
       "strength": "strong",
-      "evidence": "Supporting evidence"
+      "evidence": "Detailed supporting evidence with data points, institutional activity, and market validation"
     },
     {
-      "trend": "Trend name 2", 
+      "trend": "Market structure evolution with timing and institutional implications", 
       "strength": "moderate",
-      "evidence": "Supporting evidence"
+      "evidence": "Supporting evidence with regulatory backdrop and adoption metrics"
     },
     {
-      "trend": "Trend name 3",
+      "trend": "Technology or innovation cycle with competitive moat implications",
       "strength": "strong", 
-      "evidence": "Supporting evidence"
+      "evidence": "Evidence with patent landscapes, R&D investments, and market share dynamics"
     }
   ],
   "financialTrends": [
     {
       "category": "Stocks",
-      "symbol": "AAPL",
-      "company": "Apple Inc.",
-      "relevance": "Direct relation to discussed technology trends",
+      "symbol": "TICKER1",
+      "company": "Company Name",
+      "relevance": "Detailed connection to video thesis with fundamental drivers",
       "impact": "bullish",
-      "reasoning": "Explanation of how content relates to this stock"
+      "reasoning": "Comprehensive investment thesis (120-150 words) including fundamentals, technicals, catalysts, competitive position, regulatory tailwinds, institutional ownership trends, earnings revisions, and market timing factors",
+      "targetPrice": "Specific price target or percentage move with timeframe",
+      "timeHorizon": "Medium-term",
+      "riskLevel": "Moderate"
+    },
+    {
+      "category": "Stocks", 
+      "symbol": "TICKER2",
+      "company": "Company Name",
+      "relevance": "Strategic importance to content theme with sector implications",
+      "impact": "bullish",
+      "reasoning": "Detailed institutional-grade analysis (120-150 words) with ESG considerations, regulatory compliance, market share expansion, technological moats, and execution capabilities",
+      "targetPrice": "Price objective with risk-adjusted scenarios",
+      "timeHorizon": "Long-term", 
+      "riskLevel": "Low"
     },
     {
       "category": "Crypto",
       "symbol": "BTC",
       "company": "Bitcoin",
-      "relevance": "Mentioned in context of digital assets",
-      "impact": "neutral",
-      "reasoning": "Explanation of cryptocurrency relevance"
+      "relevance": "Institutional adoption narrative alignment with content discussion",
+      "impact": "bullish",
+      "reasoning": "Institutional perspective (120-150 words) including custody solutions, regulatory clarity, corporate treasury adoption, ETF flows, mining economics, and macroeconomic positioning as digital gold",
+      "targetPrice": "Technical and fundamental price targets with institutional benchmarks",
+      "timeHorizon": "Medium-term",
+      "riskLevel": "High"
+    },
+    {
+      "category": "Crypto",
+      "symbol": "ETH", 
+      "company": "Ethereum",
+      "relevance": "Smart contract platform utility and institutional DeFi adoption",
+      "impact": "bullish",
+      "reasoning": "Enterprise adoption analysis (120-150 words) covering Layer 2 scaling, institutional DeFi protocols, tokenization of real-world assets, regulatory frameworks, and network effects driving institutional usage",
+      "targetPrice": "Valuation metrics based on network usage and institutional adoption",
+      "timeHorizon": "Long-term",
+      "riskLevel": "High"
     }
   ],
   "marketSentiment": "BULLISH",
-  "sourceCredibility": "High",
+  "sourceCredibility": "High", 
   "keyQuotes": [
     {
-      "quote": "Important quote from content 1",
+      "quote": "High-impact quote providing institutional alpha or strategic insight",
       "speaker": "Speaker name",
-      "timestamp": "1:23"
+      "timestamp": "1:23",
+      "significance": "Why this quote provides actionable intelligence for institutional investors"
     },
     {
-      "quote": "Important quote from content 2",
+      "quote": "Quote revealing market timing or competitive intelligence",
       "speaker": "Speaker name", 
-      "timestamp": "3:45"
+      "timestamp": "3:45",
+      "significance": "Strategic importance for portfolio positioning or risk management"
     },
     {
-      "quote": "Important quote from content 3",
+      "quote": "Quote indicating regulatory or policy direction with market implications",
       "speaker": "Speaker name",
-      "timestamp": "5:12"
+      "timestamp": "5:12",
+      "significance": "Regulatory timeline impact on institutional positioning and compliance strategies"
     },
     {
-      "quote": "Important quote from content 4",
+      "quote": "Quote revealing competitive moats or disruption signals",
       "speaker": "Speaker name",
-      "timestamp": "7:30"
-    },
-    {
-      "quote": "Important quote from content 5",
-      "speaker": "Speaker name",
-      "timestamp": "9:15"
+      "timestamp": "7:30",
+      "significance": "Competitive intelligence for sector rotation and stock selection decisions"
     }
   ],
   "chapters": [
     {
-      "title": "Chapter title",
+      "title": "Introduction and Market Context",
       "startTime": "0:00",
-      "endTime": "2:30", 
-      "summary": "What happens in this section"
+      "endTime": "5:00",
+      "summary": "Market setup, institutional backdrop, and key themes introduction"
+    },
+    {
+      "title": "Core Analysis and Strategic Implications", 
+      "startTime": "5:00",
+      "endTime": "15:00",
+      "summary": "Deep dive into main thesis with institutional implications and market dynamics"
+    },
+    {
+      "title": "Investment Opportunities and Execution",
+      "startTime": "15:00", 
+      "endTime": "25:00",
+      "summary": "Specific investment recommendations, timing considerations, and risk management"
     }
   ],
-  "tags": ["relevant", "tags"],
+  "tags": ["institutional-grade", "market-intelligence", "investment-strategy"],
   "accuracy": 95
 }
 
-Focus on extracting real insights and provide specific, actionable content. IMPORTANT: 
-- Generate 6-8 diverse market trends covering different sectors and timeframes
-- Include 2-4 financial trends with specific stock tickers (NYSE/NASDAQ) and cryptocurrency symbols related to the content
-- Provide exactly 3-5 impactful quotes that capture key insights
-- Ensure financial trends include both traditional stocks and crypto when relevant to the content
+CRITICAL REQUIREMENTS for institutional-grade analysis:
+- All financial trends MUST include 4-5 specific recommendations: 2-3 stocks (NYSE/NASDAQ) and 2-3 crypto assets
+- Each financial trend requires 120-150 word detailed reasoning with fundamentals, catalysts, and institutional perspectives
+- Include specific target prices, time horizons, and risk levels for each recommendation
+- Focus on actionable intelligence that institutional investors can immediately execute
+- Ensure all analysis directly correlates to the specific video content and provides genuine alpha
+- Quotes must provide strategic insight beyond generic commentary
 `;
 
     try {
