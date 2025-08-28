@@ -61,7 +61,6 @@ interface ProcessingResult {
     relevance: string;
     impact: string;
     reasoning: string;
-    priceRange?: string;
     timeHorizon?: string;
     riskLevel?: string;
     analystSource?: string;
@@ -444,13 +443,8 @@ export function RebuiltAIDemo() {
                                       </div>
                                       <p className="text-xs text-muted-foreground mb-2">{financial.relevance}</p>
                                       <p className="text-xs text-muted-foreground italic mb-2">{financial.reasoning}</p>
-                                      {(financial.priceRange || financial.timeHorizon || financial.riskLevel) && (
+                                      {(financial.timeHorizon || financial.riskLevel || financial.analystSource) && (
                                         <div className="flex flex-wrap gap-2 mt-2">
-                                          {financial.priceRange && (
-                                            <div className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded border border-green-500/20">
-                                              Range: {financial.priceRange}
-                                            </div>
-                                          )}
                                           {financial.timeHorizon && (
                                             <div className="text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20">
                                               {financial.timeHorizon}
@@ -518,63 +512,107 @@ export function RebuiltAIDemo() {
                             </div>
 
 
-                            {/* Trend Strength Visualization */}
+                            {/* Market Intelligence Dashboard */}
                             {result.trends && result.trends.length > 0 && (
-                              <Card className="bg-gradient-to-br from-emerald-500/5 to-green-500/5 border-emerald-500/20 mb-6">
-                                <CardContent className="p-4">
-                                  <h6 className="font-semibold text-emerald-400 mb-4 flex items-center gap-2">
-                                    <TrendingUp className="w-4 h-4" />
-                                    Market Trends Analysis
-                                  </h6>
-                                  <div className="h-48 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <AreaChart
-                                        data={result.trends.map((trend: any, idx: number) => ({
-                                          name: trend.trend.length > 20 ? trend.trend.substring(0, 20) + '...' : trend.trend,
-                                          strength: trend.strength === 'strong' ? 85 : trend.strength === 'moderate' ? 60 : 35,
-                                          fullName: trend.trend
-                                        }))}
-                                      >
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                        <XAxis 
-                                          dataKey="name" 
-                                          stroke="#9CA3AF" 
-                                          fontSize={10}
-                                          angle={-45}
-                                          textAnchor="end"
-                                          height={60}
-                                        />
-                                        <YAxis stroke="#9CA3AF" fontSize={12} />
-                                        <Tooltip 
-                                          contentStyle={{ 
-                                            backgroundColor: '#1F2937',
-                                            border: '1px solid #374151',
-                                            borderRadius: '8px',
-                                            color: '#F9FAFB'
-                                          }}
-                                          labelFormatter={(value, payload: any) => {
-                                            const item = payload?.[0]?.payload;
-                                            return item?.fullName || value;
-                                          }}
-                                        />
-                                        <Area
-                                          type="monotone"
-                                          dataKey="strength"
-                                          stroke="#10B981"
-                                          fill="url(#trendGradient)"
-                                          strokeWidth={2}
-                                        />
-                                        <defs>
-                                          <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
-                                          </linearGradient>
-                                        </defs>
-                                      </AreaChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </CardContent>
-                              </Card>
+                              <div className="space-y-4 mb-6">
+                                <h6 className="font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+                                  <TrendingUp className="w-5 h-5" />
+                                  Market Intelligence Dashboard
+                                </h6>
+                                
+                                {/* Emerging Trends Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {result.trends.slice(0, 4).map((trend: any, idx: number) => (
+                                    <Card key={idx} className="bg-gradient-to-br from-emerald-500/5 to-green-500/5 border-emerald-500/20">
+                                      <CardContent className="p-4">
+                                        <div className="flex items-start justify-between mb-3">
+                                          <h6 className="font-semibold text-emerald-400 text-sm">{trend.trend}</h6>
+                                          <Badge variant="outline" className={`text-xs border-emerald-500/30 ${
+                                            trend.strength === 'strong' ? 'text-green-400' :
+                                            trend.strength === 'moderate' ? 'text-yellow-400' : 'text-orange-400'
+                                          }`}>
+                                            {trend.strength}
+                                          </Badge>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mb-3">{trend.description}</p>
+                                        <div className="flex items-center justify-between">
+                                          <div className="text-xs text-emerald-400 font-medium">
+                                            Impact: {trend.impact || 'High'}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground">
+                                            Strength: {trend.strength}
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  ))}
+                                </div>
+
+                                {/* Strategic Insights Panel */}
+                                <Card className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50">
+                                  <CardContent className="p-6">
+                                    <h6 className="font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                                      <Brain className="w-5 h-5" />
+                                      Strategic Market Insights
+                                    </h6>
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                      <div className="space-y-3">
+                                        <h6 className="text-sm font-semibold text-cyan-400">Institutional Signals</h6>
+                                        <div className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">ETF inflow acceleration</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Corporate treasury adoption</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Regulatory clarity improving</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-3">
+                                        <h6 className="text-sm font-semibold text-purple-400">Technical Confluence</h6>
+                                        <div className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Multi-timeframe alignment</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Key support holding</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Volume confirmation needed</span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-3">
+                                        <h6 className="text-sm font-semibold text-orange-400">Risk Factors</h6>
+                                        <div className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Macro headwinds</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Regulatory uncertainty</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                            <span className="text-xs text-slate-300">Liquidity conditions</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
                             )}
 
                             {/* Market Positioning Intelligence */}
