@@ -47,18 +47,18 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
           <div className="flex items-center space-x-4">
             {showBackButton ? (
               <div className="flex items-center space-x-3">
-                <Link href="/dashboard">
+                <Link href="/">
                   <Button 
                     size="sm" 
                     variant="ghost" 
                     className="text-white hover:bg-white/10"
                     onClick={() => {
-                      console.log('Back to dashboard clicked');
-                      window.location.href = '/dashboard';
+                      console.log('Back to home clicked');
+                      window.location.href = '/';
                     }}
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Dashboard
+                    Back to Home
                   </Button>
                 </Link>
                 {title && (
