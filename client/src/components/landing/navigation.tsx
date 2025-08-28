@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { WalletSelectionModal } from '@/components/wallet/WalletSelectionModal';
 import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3, Wallet, Loader2, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,16 +21,15 @@ export function Navigation() {
   const { user, isAuthenticated } = useAuth();
   const logoutMutation = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   
   // Web3 integration
   const { 
     wallet, 
     isConnected, 
     isConnecting, 
-    connectMetaMask, 
     disconnect, 
-    formatAddress,
-    isMetaMaskAvailable 
+    formatAddress
   } = useWeb3();
 
   const toggleTheme = () => {
@@ -220,19 +220,14 @@ export function Navigation() {
                 </DropdownMenu>
               ) : (
                 <Button 
-                  onClick={connectMetaMask}
-                  disabled={isConnecting || !isMetaMaskAvailable()}
+                  onClick={() => setWalletModalOpen(true)}
+                  disabled={isConnecting}
                   className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                 >
                   {isConnecting ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Connecting...
-                    </>
-                  ) : !isMetaMaskAvailable() ? (
-                    <>
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Install MetaMask
                     </>
                   ) : (
                     <>
@@ -305,19 +300,14 @@ export function Navigation() {
                   </div>
                 ) : (
                   <Button 
-                    onClick={connectMetaMask}
-                    disabled={isConnecting || !isMetaMaskAvailable()}
+                    onClick={() => setWalletModalOpen(true)}
+                    disabled={isConnecting}
                     className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                   >
                     {isConnecting ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Connecting...
-                      </>
-                    ) : !isMetaMaskAvailable() ? (
-                      <>
-                        <Wallet className="w-4 h-4 mr-2" />
-                        Install MetaMask
                       </>
                     ) : (
                       <>
@@ -332,6 +322,13 @@ export function Navigation() {
           )}
         </AnimatePresence>
       </div>
+      
+      {/* Wallet Selection Modal */}
+      <WalletSelectionModal 
+        open={walletModalOpen} 
+        onOpenChange={setWalletModalOpen}
+        onWalletConnected={() => setMobileMenuOpen(false)}
+      />
     </nav>
   );
 }
