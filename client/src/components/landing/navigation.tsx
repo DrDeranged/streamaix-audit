@@ -60,24 +60,30 @@ export function Navigation() {
                   type="text" 
                   placeholder="Paste a video URL to summarize..." 
                   className="w-64 xl:w-80 glass-bg glass-border focus:ring-2 focus:ring-indigo-500 text-sm"
+                  id="landing-url-input"
                 />
                 <Sparkles className="absolute right-3 top-2.5 w-4 h-4 text-indigo-400" />
               </div>
-              <Button size="sm" className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                Summarize
-              </Button>
+              <Link href="/create-summary">
+                <Button 
+                  size="sm" 
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                  onClick={() => {
+                    const urlInput = document.getElementById('landing-url-input') as HTMLInputElement;
+                    if (urlInput?.value) {
+                      sessionStorage.setItem('pendingUrl', urlInput.value);
+                    }
+                  }}
+                >
+                  Summarize
+                </Button>
+              </Link>
             </div>
           </div>
           
           <div className="flex items-center space-x-3 sm:space-x-6">
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              <button 
-                onClick={() => scrollToSection("demo")}
-                className="text-muted-foreground hover:text-indigo-500 transition-colors"
-              >
-                Demo
-              </button>
               <button 
                 onClick={() => scrollToSection("features")}
                 className="text-muted-foreground hover:text-indigo-500 transition-colors"
@@ -261,12 +267,6 @@ export function Navigation() {
               className="md:hidden mt-4 py-4 border-t glass-border"
             >
               <div className="flex flex-col space-y-4">
-                <button 
-                  onClick={() => scrollToSection("demo")}
-                  className="text-left text-muted-foreground hover:text-indigo-500 transition-colors"
-                >
-                  Demo
-                </button>
                 <button 
                   onClick={() => scrollToSection("features")}
                   className="text-left text-muted-foreground hover:text-indigo-500 transition-colors"

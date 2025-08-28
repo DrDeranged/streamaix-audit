@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,15 @@ export default function CreateSummary() {
 
   const [currentTag, setCurrentTag] = useState('');
   const [mintAsNFT, setMintAsNFT] = useState(false);
+
+  // Check for pending URL from landing page
+  useEffect(() => {
+    const pendingUrl = sessionStorage.getItem('pendingUrl');
+    if (pendingUrl) {
+      setFormData(prev => ({ ...prev, url: pendingUrl }));
+      sessionStorage.removeItem('pendingUrl');
+    }
+  }, []);
 
   // Process content mutation
   const processContentMutation = useMutation({
