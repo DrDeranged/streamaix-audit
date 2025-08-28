@@ -77,8 +77,12 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
       id: 'injected',
       name: 'Browser Wallet',
       icon: '🌐',
-      description: 'Connect using injected wallet',
-      available: typeof window !== 'undefined' && !!(window as any).ethereum
+      description: 'Connect using any other injected wallet',
+      available: typeof window !== 'undefined' && !!(window as any).ethereum && (
+        // Show this option only if there are wallets other than just MetaMask and Coinbase
+        (window as any).ethereum.providers?.length > 2 ||
+        (!checkWalletAvailability('metamask') && !checkWalletAvailability('coinbase'))
+      )
     }
   ];
 
@@ -193,8 +197,21 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
       throw new Error('No wallet detected');
     }
 
-    // Request account access for any injected wallet
-    const accounts = await ethereum.request({
+    let targetProvider = ethereum;
+    
+    // If multiple providers exist, use the main one or find a non-MetaMask/Coinbase wallet
+    if (ethereum.providers && Array.isArray(ethereum.providers)) {
+      // Try to find a wallet that's not MetaMask or Coinbase
+      const otherProvider = ethereum.providers.find((provider: any) => 
+        !provider.isMetaMask && !provider.isCoinbaseWallet
+      );
+      
+      // If no other provider found, use the first available one
+      targetProvider = otherProvider || ethereum.providers[0];
+    }
+
+    // Request account access for the selected provider
+    const accounts = await targetProvider.request({
       method: 'eth_requestAccounts',
     });
 
@@ -202,8 +219,15 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
       throw new Error('No accounts found');
     }
 
+    // Determine wallet name based on provider properties
+    let walletName = 'Browser Wallet';
+    if (targetProvider.isMetaMask) walletName = 'MetaMask';
+    else if (targetProvider.isCoinbaseWallet) walletName = 'Coinbase Wallet';
+    else if (targetProvider.isRabby) walletName = 'Rabby Wallet';
+    else if (targetProvider.isTrust) walletName = 'Trust Wallet';
+
     toast({
-      title: 'Wallet Connected',
+      title: `${walletName} Connected`,
       description: `Connected to ${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`,
     });
   };
