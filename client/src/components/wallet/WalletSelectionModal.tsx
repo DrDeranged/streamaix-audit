@@ -21,9 +21,33 @@ interface WalletSelectionModalProps {
 }
 
 export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: WalletSelectionModalProps) {
-  const { connectMetaMask, isConnecting, isMetaMaskAvailable } = useWeb3();
+  const { connectMetaMask, isConnecting } = useWeb3();
   const { toast } = useToast();
   const [connectingWallet, setConnectingWallet] = useState<string | null>(null);
+
+  const checkWalletAvailability = (walletType: 'metamask' | 'coinbase') => {
+    if (typeof window === 'undefined') return false;
+    
+    const ethereum = (window as any).ethereum;
+    
+    if (ethereum?.providers && Array.isArray(ethereum.providers)) {
+      // Multiple wallets are installed
+      if (walletType === 'metamask') {
+        return ethereum.providers.some((provider: any) => provider.isMetaMask && !provider.isCoinbaseWallet);
+      } else if (walletType === 'coinbase') {
+        return ethereum.providers.some((provider: any) => provider.isCoinbaseWallet);
+      }
+    } else if (ethereum) {
+      // Single wallet or main provider
+      if (walletType === 'metamask') {
+        return ethereum.isMetaMask && !ethereum.isCoinbaseWallet;
+      } else if (walletType === 'coinbase') {
+        return ethereum.isCoinbaseWallet;
+      }
+    }
+    
+    return false;
+  };
 
   const walletOptions: WalletOption[] = [
     {
@@ -31,7 +55,7 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
       name: 'MetaMask',
       icon: '🦊',
       description: 'Connect using browser extension',
-      available: isMetaMaskAvailable(),
+      available: checkWalletAvailability('metamask'),
       installUrl: 'https://metamask.io/download/'
     },
     {
@@ -39,10 +63,7 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
       name: 'Coinbase Wallet',
       icon: '🔵',
       description: 'Connect using Coinbase Wallet',
-      available: typeof window !== 'undefined' && (
-        !!(window as any).ethereum?.isCoinbaseWallet || 
-        !!(window as any).ethereum?.providers?.some((p: any) => p.isCoinbaseWallet)
-      ),
+      available: checkWalletAvailability('coinbase'),
       installUrl: 'https://www.coinbase.com/wallet'
     },
     {
@@ -71,10 +92,10 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
     try {
       switch (walletId) {
         case 'metamask':
-          await connectMetaMask();
+          await connectSpecificWallet('metamask');
           break;
         case 'coinbase':
-          await connectCoinbaseWallet();
+          await connectSpecificWallet('coinbase');
           break;
         case 'walletconnect':
           await connectWalletConnect();
@@ -99,47 +120,59 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
     }
   };
 
-  const connectCoinbaseWallet = async () => {
+  const connectSpecificWallet = async (walletType: 'metamask' | 'coinbase') => {
     if (typeof window === 'undefined') throw new Error('Window not available');
     
     const ethereum = (window as any).ethereum;
+    let targetProvider = null;
     
-    // Check if Coinbase Wallet is available
-    if (ethereum?.isCoinbaseWallet) {
-      // Use Coinbase Wallet
-      const accounts = await ethereum.request({
-        method: 'eth_requestAccounts',
-      });
-
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found');
+    if (ethereum?.providers && Array.isArray(ethereum.providers)) {
+      // Multiple wallets are installed
+      if (walletType === 'metamask') {
+        targetProvider = ethereum.providers.find((provider: any) => provider.isMetaMask && !provider.isCoinbaseWallet);
+      } else if (walletType === 'coinbase') {
+        targetProvider = ethereum.providers.find((provider: any) => provider.isCoinbaseWallet);
       }
+    } else if (ethereum) {
+      // Single wallet or main provider
+      if (walletType === 'metamask' && ethereum.isMetaMask && !ethereum.isCoinbaseWallet) {
+        targetProvider = ethereum;
+      } else if (walletType === 'coinbase' && ethereum.isCoinbaseWallet) {
+        targetProvider = ethereum;
+      }
+    }
+    
+    if (!targetProvider) {
+      throw new Error(`${walletType === 'metamask' ? 'MetaMask' : 'Coinbase Wallet'} not detected`);
+    }
+    
+    // Use the specific provider
+    const accounts = await targetProvider.request({
+      method: 'eth_requestAccounts',
+    });
 
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No accounts found');
+    }
+
+    // If MetaMask, use the existing connectMetaMask method for full integration
+    if (walletType === 'metamask') {
+      // Temporarily set the provider and call connectMetaMask
+      const originalEthereum = (window as any).ethereum;
+      (window as any).ethereum = targetProvider;
+      
+      try {
+        await connectMetaMask();
+      } finally {
+        // Restore original ethereum object
+        (window as any).ethereum = originalEthereum;
+      }
+    } else {
+      // For Coinbase, just show success message
       toast({
         title: 'Coinbase Wallet Connected',
         description: `Connected to ${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`,
       });
-    } else if (ethereum?.providers) {
-      // Multiple wallets detected, find Coinbase Wallet
-      const coinbaseProvider = ethereum.providers.find((provider: any) => provider.isCoinbaseWallet);
-      if (coinbaseProvider) {
-        const accounts = await coinbaseProvider.request({
-          method: 'eth_requestAccounts',
-        });
-
-        if (!accounts || accounts.length === 0) {
-          throw new Error('No accounts found');
-        }
-
-        toast({
-          title: 'Coinbase Wallet Connected',
-          description: `Connected to ${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`,
-        });
-      } else {
-        throw new Error('Coinbase Wallet not detected');
-      }
-    } else {
-      throw new Error('Coinbase Wallet not detected');
     }
   };
 
