@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth, useLogout } from "@/hooks/useAuth";
+import { useWeb3 } from "@/hooks/useWeb3";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu,
@@ -9,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3, Wallet } from "lucide-react";
+import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3, Wallet, Loader2, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -19,6 +20,17 @@ export function Navigation() {
   const { user, isAuthenticated } = useAuth();
   const logoutMutation = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Web3 integration
+  const { 
+    wallet, 
+    isConnected, 
+    isConnecting, 
+    connectMetaMask, 
+    disconnect, 
+    formatAddress,
+    isMetaMaskAvailable 
+  } = useWeb3();
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -164,9 +176,73 @@ export function Navigation() {
               )}
             </Button>
             
-            <Button className="hidden md:block bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-              Connect Wallet
-            </Button>
+            {/* Web3 Wallet Connection */}
+            <div className="hidden md:block">
+              {isConnected && wallet ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="glass-bg glass-border hover:bg-muted">
+                      <Wallet className="w-4 h-4 mr-2" />
+                      <span className="font-mono text-sm">{formatAddress(wallet.address)}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64 glass-bg glass-border" align="end">
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Connected Wallet</span>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground font-mono">{wallet.address}</p>
+                        {wallet.ensName && (
+                          <p className="text-xs text-indigo-400 mt-1">{wallet.ensName}</p>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/wallet-dashboard" className="cursor-pointer">
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        Wallet Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View on Explorer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-red-600 dark:text-red-400"
+                      onClick={disconnect}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Disconnect
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button 
+                  onClick={connectMetaMask}
+                  disabled={isConnecting || !isMetaMaskAvailable()}
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : !isMetaMaskAvailable() ? (
+                    <>
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Install MetaMask
+                    </>
+                  ) : (
+                    <>
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Connect Wallet
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
 
             {/* Mobile Menu Button */}
             <Button
@@ -208,9 +284,49 @@ export function Navigation() {
                 >
                   Bounties
                 </button>
-                <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                  Connect Wallet
-                </Button>
+                {/* Mobile Wallet Connection */}
+                {isConnected && wallet ? (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Wallet Connected</span>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      </div>
+                      <p className="text-xs text-muted-foreground font-mono">{formatAddress(wallet.address)}</p>
+                    </div>
+                    <Button 
+                      onClick={disconnect}
+                      variant="outline" 
+                      className="w-full border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Disconnect Wallet
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={connectMetaMask}
+                    disabled={isConnecting || !isMetaMaskAvailable()}
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : !isMetaMaskAvailable() ? (
+                      <>
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Install MetaMask
+                      </>
+                    ) : (
+                      <>
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Connect Wallet
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </motion.div>
           )}
