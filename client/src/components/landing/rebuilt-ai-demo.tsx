@@ -512,106 +512,93 @@ export function RebuiltAIDemo() {
                             </div>
 
 
-                            {/* Market Intelligence Dashboard */}
+                            {/* Executive Market Brief */}
                             {result.trends && result.trends.length > 0 && (
-                              <div className="space-y-4 mb-6">
-                                <h6 className="font-semibold text-emerald-400 mb-4 flex items-center gap-2">
-                                  <TrendingUp className="w-5 h-5" />
-                                  Market Intelligence Dashboard
-                                </h6>
-                                
-                                {/* Emerging Trends Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  {result.trends.slice(0, 4).map((trend: any, idx: number) => (
-                                    <Card key={idx} className="bg-gradient-to-br from-emerald-500/5 to-green-500/5 border-emerald-500/20">
-                                      <CardContent className="p-4">
-                                        <div className="flex items-start justify-between mb-3">
-                                          <h6 className="font-semibold text-emerald-400 text-sm">{trend.trend}</h6>
-                                          <Badge variant="outline" className={`text-xs border-emerald-500/30 ${
-                                            trend.strength === 'strong' ? 'text-green-400' :
-                                            trend.strength === 'moderate' ? 'text-yellow-400' : 'text-orange-400'
+                              <div className="space-y-6 mb-6">
+                                {/* Key Themes Analysis */}
+                                <div className="bg-slate-900/30 border border-slate-700/30 rounded-lg p-6">
+                                  <h6 className="font-semibold text-slate-100 mb-4 flex items-center gap-2">
+                                    <Brain className="w-5 h-5" />
+                                    Key Market Themes
+                                  </h6>
+                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    {result.trends.slice(0, 4).map((trend: any, idx: number) => (
+                                      <div key={idx} className="border-l-2 border-slate-600 pl-4 py-2">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <h6 className="font-medium text-slate-200 text-sm leading-tight">{trend.trend}</h6>
+                                          <div className={`text-xs font-medium px-2 py-1 rounded ${
+                                            trend.strength === 'strong' ? 'bg-green-500/20 text-green-400' :
+                                            trend.strength === 'moderate' ? 'bg-yellow-500/20 text-yellow-400' : 
+                                            'bg-orange-500/20 text-orange-400'
                                           }`}>
-                                            {trend.strength}
-                                          </Badge>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mb-3">{trend.description}</p>
-                                        <div className="flex items-center justify-between">
-                                          <div className="text-xs text-emerald-400 font-medium">
-                                            Impact: {trend.impact || 'High'}
-                                          </div>
-                                          <div className="text-xs text-muted-foreground">
-                                            Strength: {trend.strength}
+                                            {trend.strength?.toUpperCase()}
                                           </div>
                                         </div>
-                                      </CardContent>
-                                    </Card>
-                                  ))}
+                                        <p className="text-xs text-slate-400 leading-relaxed">{trend.description}</p>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
 
-                                {/* Strategic Insights Panel */}
-                                <Card className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50">
-                                  <CardContent className="p-6">
-                                    <h6 className="font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                                      <Brain className="w-5 h-5" />
-                                      Strategic Market Insights
-                                    </h6>
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                      <div className="space-y-3">
-                                        <h6 className="text-sm font-semibold text-cyan-400">Institutional Signals</h6>
-                                        <div className="space-y-2">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">ETF inflow acceleration</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Corporate treasury adoption</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Regulatory clarity improving</span>
-                                          </div>
-                                        </div>
+                                {/* Executive Summary Grid */}
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                  {/* Market Position */}
+                                  <div className="bg-slate-900/30 border border-slate-700/30 rounded-lg p-5">
+                                    <h6 className="font-semibold text-blue-400 mb-3 text-sm">MARKET POSITION</h6>
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Cycle Phase</span>
+                                        <span className="text-sm font-medium text-slate-200">ACCUMULATION</span>
                                       </div>
-                                      
-                                      <div className="space-y-3">
-                                        <h6 className="text-sm font-semibold text-purple-400">Technical Confluence</h6>
-                                        <div className="space-y-2">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Multi-timeframe alignment</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Key support holding</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Volume confirmation needed</span>
-                                          </div>
-                                        </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Sentiment</span>
+                                        <span className="text-sm font-medium text-green-400">{result.marketSentiment}</span>
                                       </div>
-
-                                      <div className="space-y-3">
-                                        <h6 className="text-sm font-semibold text-orange-400">Risk Factors</h6>
-                                        <div className="space-y-2">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Macro headwinds</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Regulatory uncertainty</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                            <span className="text-xs text-slate-300">Liquidity conditions</span>
-                                          </div>
-                                        </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Timeframe</span>
+                                        <span className="text-sm font-medium text-cyan-400">6-18M</span>
                                       </div>
                                     </div>
-                                  </CardContent>
-                                </Card>
+                                  </div>
+
+                                  {/* Risk Assessment */}
+                                  <div className="bg-slate-900/30 border border-slate-700/30 rounded-lg p-5">
+                                    <h6 className="font-semibold text-orange-400 mb-3 text-sm">RISK ASSESSMENT</h6>
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Macro Risk</span>
+                                        <span className="text-sm font-medium text-yellow-400">MODERATE</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Regulatory</span>
+                                        <span className="text-sm font-medium text-green-400">IMPROVING</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Liquidity</span>
+                                        <span className="text-sm font-medium text-blue-400">ADEQUATE</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Institutional Flow */}
+                                  <div className="bg-slate-900/30 border border-slate-700/30 rounded-lg p-5">
+                                    <h6 className="font-semibold text-purple-400 mb-3 text-sm">INSTITUTIONAL FLOW</h6>
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">ETF Inflows</span>
+                                        <span className="text-sm font-medium text-green-400">POSITIVE</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Corporate</span>
+                                        <span className="text-sm font-medium text-cyan-400">GROWING</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wide">Source Quality</span>
+                                        <span className="text-sm font-medium text-indigo-400">{result.sourceCredibility}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             )}
 
