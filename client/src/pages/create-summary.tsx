@@ -171,12 +171,17 @@ export default function CreateSummary() {
       return;
     }
 
-    // Ensure platform is set
+    // Ensure platform is set and filter out empty optional fields
     const submitData = {
-      ...formData,
-      platform: formData.platform || 'Unknown'
+      url: formData.url,
+      contentType: formData.contentType,
+      platform: formData.platform || 'Unknown',
+      isPublic: formData.isPublic ?? true,
+      ...(formData.title && formData.title.trim() && { title: formData.title.trim() }),
+      ...(formData.tags && formData.tags.length > 0 && { tags: formData.tags })
     };
 
+    console.log('Submitting data:', submitData); // Debug log
     processContentMutation.mutate(submitData);
   };
 

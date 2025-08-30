@@ -98,7 +98,7 @@ export const processContentSchema = z.object({
   url: z.string().url('Invalid URL'),
   contentType: z.enum(['podcast', 'video', 'livestream']),
   platform: z.string().min(1).max(50),
-  title: z.string().min(1).max(200).optional(),
+  title: z.string().min(1).max(200).optional().or(z.literal('').transform(() => undefined)),
   isPublic: z.boolean().default(true),
   tags: z.array(z.string().max(30)).max(10).optional(),
 });
