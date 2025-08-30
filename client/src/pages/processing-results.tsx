@@ -168,9 +168,9 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const isFailed = summary.processingStatus === 'failed';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Navigation Header - Landing Page Style */}
-      <div className="border-b border-white/10 backdrop-blur-sm bg-white/5 sticky top-0 z-50">
+      <div className="border-b border-white/10 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -270,11 +270,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-card/50 backdrop-blur-sm border border-muted-foreground/20 shadow-2xl">
+              <Card className="bg-card/50 backdrop-blur-sm border border-muted-foreground/20 shadow-2xl glass-bg">
                 <CardContent className="p-6">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/20">
+                    <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/20 glass-bg">
                       <TabsTrigger value="analysis" className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
                         Analysis
@@ -295,7 +295,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Executive Summary Tab */}
                     <TabsContent value="analysis" className="space-y-4">
-                      <div className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                      <div className="p-6 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl border border-indigo-500/20 glass-bg">
                         <h5 className="font-semibold mb-3 text-indigo-400 flex items-center gap-2 justify-between">
                           <div className="flex items-center gap-2">
                             <Brain className="w-4 h-4" />
@@ -335,16 +335,24 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     {/* Key Insights Tab */}
                     <TabsContent value="insights" className="space-y-4">
                       {summary.keyInsights && summary.keyInsights.length > 0 && (
-                        <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 glass-bg">
                           <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Key Insights
                           </h5>
                           <div className="space-y-2">
-                            {summary.keyInsights.map((insight: string, idx: number) => (
+                            {summary.keyInsights.map((insight: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm">{insight}</span>
+                                <div className="flex-1">
+                                  <span className="text-sm">{typeof insight === 'object' ? insight.insight : insight}</span>
+                                  {typeof insight === 'object' && insight.timestamp && (
+                                    <div className="text-xs text-muted-foreground mt-1">{insight.timestamp}</div>
+                                  )}
+                                  {typeof insight === 'object' && insight.importance && (
+                                    <Badge variant="outline" className="text-xs mt-1 mr-2">{insight.importance}</Badge>
+                                  )}
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -352,16 +360,16 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.bulletPoints && summary.bulletPoints.length > 0 && (
-                        <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div className="p-6 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl border border-green-500/20 glass-bg">
                           <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Key Points
                           </h5>
                           <div className="space-y-2">
-                            {summary.bulletPoints.map((point: string, idx: number) => (
+                            {summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm">{point}</span>
+                                <span className="text-sm">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
                               </div>
                             ))}
                           </div>
@@ -369,7 +377,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.trends && summary.trends.length > 0 && (
-                        <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                        <div className="p-6 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-xl border border-purple-500/20 glass-bg">
                           <h5 className="font-semibold mb-3 text-purple-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Market Trends
@@ -395,7 +403,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                        <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl border border-orange-500/20 glass-bg">
                           <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
                             <MessageSquare className="w-4 h-4" />
                             Key Quotes
