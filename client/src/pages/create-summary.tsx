@@ -237,7 +237,9 @@ export default function CreateSummary() {
                processingResult.processingStatus === 'completed' || 
                processingResult.summary || 
                processingResult.blogPost ||
-               processingResult.executiveSummary)) {
+               processingResult.executiveSummary ||
+               processingResult.tldrSummary ||
+               processingResult.content)) {
             console.log('🎉 Real processor completed! Setting result...');
             console.log('✅ Detected completion with data:', {
               hasId: !!processingResult.id,
@@ -274,8 +276,17 @@ export default function CreateSummary() {
           console.log('🎯 Summary title:', summaryResponse.summary?.title);
           
           // REAL PROCESSOR: Check for completion via any endpoint
-          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.summary)) {
+          if (summaryResponse.summary && (
+            summaryResponse.summary.status === 'completed' || 
+            summaryResponse.summary.processingStatus === 'completed' ||
+            summaryResponse.summary.summary || 
+            summaryResponse.summary.blogPost ||
+            summaryResponse.summary.executiveSummary ||
+            summaryResponse.summary.content ||
+            summaryResponse.summary.tldrSummary
+          )) {
             console.log('🎉 Real processor completed via summary endpoint!');
+            console.log('📊 Summary data keys:', Object.keys(summaryResponse.summary));
             setResult(summaryResponse.summary);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
@@ -632,45 +643,25 @@ export default function CreateSummary() {
           </CardContent>
         </Card>
 
-        {/* Results Display - EXACT copy from working demo */}
+        {/* Results Display - Glass morphism theme */}
         {result && (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 300, 
-              damping: 25,
-              duration: 0.7 
-            }}
-            className="mt-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mt-8"
           >
-            {/* Success Banner */}
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-center mb-6"
-            >
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-full">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <span className="font-semibold text-green-700 dark:text-green-300">
-                  ✨ AI Processing Complete!
-                </span>
-              </div>
-            </motion.div>
-
-            <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-2 border-indigo-200 dark:border-indigo-800 shadow-2xl shadow-indigo-500/10">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-center">
-                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent text-2xl font-orbitron font-bold mb-2">
-                    🧠 AI Intelligence Report
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                    <CheckCircle2 className="h-6 w-6 text-green-400" />
                   </div>
-                  <p className="text-sm text-muted-foreground font-normal">
-                    Advanced content analysis powered by GPT-4 and Whisper AI
-                  </p>
+                  AI Analysis Complete!
                 </CardTitle>
+                <p className="text-gray-300">
+                  {result.title || 'Content processed successfully'}
+                </p>
               </CardHeader>
               <CardContent className="p-0">
                 {/* Title and URL Header */}
