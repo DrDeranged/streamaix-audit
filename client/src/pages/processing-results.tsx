@@ -282,8 +282,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       />
                     )}
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{summary.title}</h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                      <h3 className="text-xl font-semibold mb-2 text-white">{summary.title}</h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
                         {summary.rawData?.channel && <span>📺 {summary.rawData.channel}</span>}
                         {summary.originalDuration && (
                           <span>⏱️ {Math.floor(summary.originalDuration / 60)}:{(summary.originalDuration % 60).toString().padStart(2, '0')}</span>
@@ -357,7 +357,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </h5>
                         <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                           <div 
-                            className="text-sm"
+                            className="text-sm text-white"
                             dangerouslySetInnerHTML={{
                               __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
                                 .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
@@ -386,7 +386,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
                                 <div className="flex-1">
-                                  <span className="text-sm">{typeof insight === 'object' ? insight.insight : insight}</span>
+                                  <span className="text-sm text-white">{typeof insight === 'object' ? insight.insight : insight}</span>
                                   {typeof insight === 'object' && insight.timestamp && (
                                     <div className="text-xs text-muted-foreground mt-1">{insight.timestamp}</div>
                                   )}
@@ -410,7 +410,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
+                                <span className="text-sm text-white">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
                               </div>
                             ))}
                           </div>
@@ -489,9 +489,9 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <BarChart3 className="w-4 h-4" />
                             Market Analysis
                           </h6>
-                          <div className="prose prose-sm max-w-none text-foreground leading-relaxed">
+                          <div className="prose prose-sm max-w-none leading-relaxed">
                             <div 
-                              className="text-sm"
+                              className="text-sm text-white"
                               dangerouslySetInnerHTML={{
                                 __html: summary.marketAnalysis
                                   .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
