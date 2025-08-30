@@ -23,7 +23,9 @@ import {
   Zap,
   BarChart3,
   Users,
-  Target
+  Target,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 
 interface Summary {
@@ -136,17 +138,29 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-8">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Welcome back, {user?.username}! 👋
-            </h1>
-            <p className="text-gray-300 text-lg">
-              Manage your AI summaries and track your progress
-            </p>
+          <div className="flex items-center gap-4 mb-4 sm:mb-0">
+            <Button
+              onClick={() => setLocation('/')}
+              variant="outline"
+              size="sm"
+              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              data-testid="button-back-home"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">
+                Welcome back, {user?.username}! 👋
+              </h1>
+              <p className="text-gray-300 text-lg">
+                Manage your AI summaries and track your progress
+              </p>
+            </div>
           </div>
           <Button
             onClick={() => setLocation('/create-summary')}
-            className="mt-4 sm:mt-0 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="mt-4 sm:mt-0 bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20"
             data-testid="button-create-summary"
           >
             <Plus className="mr-2 h-4 w-4" />

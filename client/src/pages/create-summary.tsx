@@ -322,7 +322,7 @@ export default function CreateSummary() {
                     onClick={addTag}
                     size="sm"
                     variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10"
+                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
                     data-testid="button-add-tag"
                   >
                     <Plus className="h-4 w-4" />
@@ -417,7 +417,7 @@ export default function CreateSummary() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3"
+                className="w-full bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white font-semibold py-3"
                 disabled={processContentMutation.isPending}
                 data-testid="button-start-processing"
               >

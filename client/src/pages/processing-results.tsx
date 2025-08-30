@@ -47,9 +47,13 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const [activeSection, setActiveSection] = useState('tldr');
   const [copySuccess, setCopySuccess] = useState('');
 
+  // Query for processing result with real-time updates (same as demo)
   const { data: summary, isLoading, error } = useQuery({
-    queryKey: ['/api/summaries', summaryId],
+    queryKey: ['/api/processing-result', summaryId],
     enabled: !!summaryId,
+    refetchInterval: (query) => {
+      return query.state.data?.processingStatus === 'processing' ? 1500 : false;
+    },
   }) as { data: Summary, isLoading: boolean, error: any };
 
   const handleCopy = async (content: string, type: string) => {
