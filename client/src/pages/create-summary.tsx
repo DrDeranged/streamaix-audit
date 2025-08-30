@@ -221,10 +221,32 @@ export default function CreateSummary() {
           });
           
           console.log('🚀 Real Processing Result:', processingResult);
+          console.log('🔍 Result Analysis:');
+          console.log('- Has ID:', !!processingResult?.id);
+          console.log('- Status:', processingResult?.status);
+          console.log('- Processing Status:', processingResult?.processingStatus);
+          console.log('- Has Summary:', !!processingResult?.summary);
+          console.log('- Has Content:', !!processingResult?.content);
+          console.log('- Has Title:', !!processingResult?.title);
+          console.log('- Full keys:', processingResult ? Object.keys(processingResult) : 'none');
           
           // Check if we got a direct summary response (RealContentProcessor format)
-          if (processingResult && processingResult.id && (processingResult.status === 'completed' || processingResult.processingStatus === 'completed' || processingResult.summary)) {
+          // The rebuilt processor returns summary data directly at the top level
+          if (processingResult && processingResult.id && 
+              (processingResult.status === 'completed' || 
+               processingResult.processingStatus === 'completed' || 
+               processingResult.summary || 
+               processingResult.blogPost ||
+               processingResult.executiveSummary)) {
             console.log('🎉 Real processor completed! Setting result...');
+            console.log('✅ Detected completion with data:', {
+              hasId: !!processingResult.id,
+              status: processingResult.status,
+              processingStatus: processingResult.processingStatus,
+              hasSummary: !!processingResult.summary,
+              hasBlogPost: !!processingResult.blogPost,
+              hasExecutiveSummary: !!processingResult.executiveSummary
+            });
             setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
@@ -690,7 +712,7 @@ export default function CreateSummary() {
                     <div className="mb-6">
                       <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">Executive Summary</h5>
                       <p className="text-foreground leading-relaxed">
-                        {result.summary || result.content || "AI analysis completed successfully with comprehensive insights extracted from the provided content."}
+                        {result.executiveSummary || result.summary || result.blogPost || result.content || "AI analysis completed successfully with comprehensive insights extracted from the provided content."}
                       </p>
                     </div>
 
