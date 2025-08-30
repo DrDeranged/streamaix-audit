@@ -90,7 +90,7 @@ export default function CreateSummary() {
       }
       
       queryClient.invalidateQueries({ queryKey: ['summaries'] });
-      setLocation(`/processing-results/${data.summaryId}`);
+      setLocation(`/results/${data.summaryId}`);
     },
     onError: (error: any) => {
       toast({
