@@ -52,8 +52,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
     queryKey: ['/api/processing-result', summaryId],
     enabled: !!summaryId,
     refetchInterval: (query) => {
-      const data = query.state.data as Summary | undefined;
-      return data?.processingStatus === 'processing' ? 1500 : false;
+      return query.state.data?.processingStatus === 'processing' ? 1500 : false;
     },
   }) as { data: Summary, isLoading: boolean, error: any };
 

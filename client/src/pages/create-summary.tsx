@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useContracts } from '@/hooks/useContracts';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield, Home } from 'lucide-react';
+import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield } from 'lucide-react';
 
 interface ProcessContentRequest {
   url: string;
@@ -67,45 +67,30 @@ export default function CreateSummary() {
     }
   }, []);
 
-  // Process content mutation - FIXED to use same reliable processor as demo
+  // Process content mutation (same as demo)
   const processContentMutation = useMutation({
     mutationFn: async (data: ProcessContentRequest) => {
-      // Use the same reliable endpoint as the demo for consistent processing
       return apiRequest('/api/test-processing', {
         method: 'POST',
         body: JSON.stringify({ url: data.url }),
-        headers: { 'Content-Type': 'application/json' }
       });
     },
-    onSuccess: (data: any) => {
-      // NFT minting will be available after processing completes
-      if (mintAsNFT && isConnected) {
-        toast({
-          title: 'NFT Minting',
-          description: 'NFT minting will be available once processing completes on the results page.',
-          variant: 'default',
-        });
-      }
-
+    onSuccess: async (data) => {
       toast({
-        title: 'AI Processing Started',
-        description: 'Your content is being analyzed. You will be redirected to view real-time progress.',
-        variant: 'default',
+        title: 'Processing Started!',
+        description: 'Your content is being processed with real AI analysis.',
       });
       
-      // Use the summary ID to redirect to results page
-      const summaryId = data.summaryId || data.summary?.id;
-      if (summaryId) {
-        queryClient.invalidateQueries({ queryKey: ['summaries'] });
-        setLocation(`/results/${summaryId}`);
-      } else {
-        console.error('No summary ID received:', data);
+      // If NFT minting is enabled and wallet is connected, mint NFT after processing
+      if (mintAsNFT && isConnected && data.summary) {
         toast({
-          title: 'Processing Issue',
-          description: 'Processing started but unable to track progress. Check your dashboard.',
-          variant: 'destructive',
+          title: 'Creating NFT',
+          description: 'Your summary will be minted as an NFT when processing is complete.',
         });
       }
+      
+      queryClient.invalidateQueries({ queryKey: ['summaries'] });
+      setLocation(`/processing-results/${data.summaryId}`);
     },
     onError: (error: any) => {
       toast({
@@ -183,145 +168,158 @@ export default function CreateSummary() {
       return;
     }
 
-    // Process with the same reliable processor as demo
-    processContentMutation.mutate(formData);
+    // Ensure platform is set and filter out empty optional fields
+    const submitData = {
+      url: formData.url,
+      contentType: formData.contentType,
+      platform: formData.platform || 'Unknown',
+      isPublic: formData.isPublic ?? true,
+      ...(formData.title && formData.title.trim() && { title: formData.title.trim() }),
+      ...(formData.tags && formData.tags.length > 0 && { tags: formData.tags })
+    };
+
+    console.log('Submitting data:', submitData); // Debug log
+    processContentMutation.mutate(submitData);
   };
 
-  // Redirect if not authenticated
   if (!isAuthenticated) {
-    setLocation('/auth');
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold text-white mb-4">Authentication Required</h2>
+            <p className="text-gray-300 mb-4">Please log in to create summaries</p>
+            <Button onClick={() => setLocation('/auth')} className="w-full">
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
+
+  const contentTypeIcons = {
+    video: Video,
+    podcast: Headphones,
+    livestream: Radio,
+  };
+
+  const ContentIcon = contentTypeIcons[formData.contentType];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto pt-20">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            onClick={() => setLocation('/')}
-            variant="outline"
-            size="sm"
-            className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
-            data-testid="button-back-home"
-          >
-            <Home className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Create AI Summary
-            </h1>
-            <p className="text-gray-300 text-lg">
-              Transform content into shareable, monetizable AI analysis
-            </p>
-          </div>
+        <div className="text-center mb-8 pt-8">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Create AI Summary
+          </h1>
+          <p className="text-gray-300 text-lg">
+            Transform any podcast, video, or livestream into an insightful summary
+          </p>
         </div>
 
-        {/* Main Form */}
-        <Card className="glass-bg glass-border">
+        <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Sparkles className="h-5 w-5 text-purple-400" />
-              Content Processing Configuration
+            <CardTitle className="text-white flex items-center gap-2">
+              <ContentIcon className="h-6 w-6" />
+              Content Processing
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* URL Input */}
               <div className="space-y-2">
-                <Label htmlFor="url" className="text-white font-medium">
+                <Label htmlFor="url" className="text-white">
                   Content URL *
                 </Label>
                 <div className="relative">
-                  <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="url"
                     type="url"
-                    placeholder="https://youtube.com/watch?v=... or https://soundcloud.com/..."
+                    placeholder="https://youtube.com/watch?v=..."
                     value={formData.url}
                     onChange={(e) => handleUrlChange(e.target.value)}
-                    className="pl-10 h-12 bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-500 transition-colors"
+                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
                     required
                     data-testid="input-content-url"
                   />
                 </div>
-                {formData.platform && (
-                  <Badge className="bg-blue-500/20 text-blue-200 border-blue-500/30">
-                    Platform: {formData.platform}
-                  </Badge>
-                )}
               </div>
 
               {/* Content Type */}
               <div className="space-y-2">
-                <Label htmlFor="contentType" className="text-white font-medium">
-                  Content Type *
-                </Label>
+                <Label className="text-white">Content Type *</Label>
                 <Select
                   value={formData.contentType}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, contentType: value as any }))}
+                  onValueChange={(value: 'podcast' | 'video' | 'livestream') =>
+                    setFormData(prev => ({ ...prev, contentType: value }))
+                  }
                 >
-                  <SelectTrigger className="h-12 bg-white/5 border-white/20 text-white focus:border-purple-500" data-testid="select-content-type">
-                    <SelectValue placeholder="Select content type" />
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-content-type">
+                    <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="video" className="text-white hover:bg-slate-700">
-                      <div className="flex items-center gap-2">
-                        <Video className="h-4 w-4" />
-                        Video
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="podcast" className="text-white hover:bg-slate-700">
-                      <div className="flex items-center gap-2">
-                        <Headphones className="h-4 w-4" />
-                        Podcast
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="livestream" className="text-white hover:bg-slate-700">
-                      <div className="flex items-center gap-2">
-                        <Radio className="h-4 w-4" />
-                        Livestream
-                      </div>
-                    </SelectItem>
+                  <SelectContent>
+                    <SelectItem value="video">📹 Video</SelectItem>
+                    <SelectItem value="podcast">🎧 Podcast</SelectItem>
+                    <SelectItem value="livestream">📻 Livestream</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Title (Optional) */}
+              {/* Platform */}
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-white font-medium">
-                  Custom Title (Optional)
+                <Label htmlFor="platform" className="text-white">
+                  Platform *
+                </Label>
+                <Input
+                  id="platform"
+                  placeholder="Auto-detected from URL (e.g., YouTube, Spotify)"
+                  value={formData.platform}
+                  onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                  data-testid="input-platform"
+                  required
+                />
+                {formData.url && !formData.platform && (
+                  <p className="text-amber-400 text-sm">⚠️ Platform will be auto-detected when you enter a valid URL</p>
+                )}
+              </div>
+
+              {/* Title */}
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-white">
+                  Custom Title
                 </Label>
                 <Input
                   id="title"
-                  placeholder="Leave blank to use original title"
+                  placeholder="Leave blank to auto-extract from content"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="h-12 bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-500 transition-colors"
-                  data-testid="input-title"
+                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                  data-testid="input-custom-title"
                 />
               </div>
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label className="text-white font-medium">
-                  Tags (Optional)
-                </Label>
+                <Label className="text-white">Tags</Label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Add relevant tags..."
+                    placeholder="Add a tag..."
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-500 transition-colors"
-                    data-testid="input-tag"
+                    className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                    data-testid="input-add-tag"
                   />
                   <Button
                     type="button"
                     onClick={addTag}
-                    disabled={!currentTag.trim()}
-                    className="h-10 px-4 bg-white/10 border border-white/20 text-white hover:bg-white/20 backdrop-blur-lg"
+                    size="sm"
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
                     data-testid="button-add-tag"
                   >
                     <Plus className="h-4 w-4" />
@@ -330,159 +328,117 @@ export default function CreateSummary() {
                 {formData.tags && formData.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.tags.map((tag, index) => (
-                      <Badge key={index} className="bg-purple-500/20 text-purple-200 border-purple-500/30">
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="bg-purple-500/20 text-purple-200 border-purple-500/30"
+                        data-testid={`tag-${tag}`}
+                      >
                         {tag}
-                        <Button
+                        <button
                           type="button"
                           onClick={() => removeTag(tag)}
-                          className="ml-1 h-auto p-0 bg-transparent hover:bg-transparent text-purple-200 hover:text-white"
-                          data-testid={`button-remove-tag-${index}`}
+                          className="ml-1 hover:text-white"
+                          data-testid={`button-remove-tag-${tag}`}
                         >
                           <X className="h-3 w-3" />
-                        </Button>
+                        </button>
                       </Badge>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Privacy Settings */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isPublic"
-                    checked={formData.isPublic}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isPublic: !!checked }))}
-                    className="border-white/20 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
-                    data-testid="checkbox-public"
-                  />
-                  <Label htmlFor="isPublic" className="text-white font-medium">
-                    Make this summary public
-                  </Label>
-                </div>
-                <p className="text-gray-400 text-sm ml-6">
-                  Public summaries can be discovered by other users and earn more rewards
-                </p>
-
-                {isConnected && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="mintAsNFT"
-                      checked={mintAsNFT}
-                      onCheckedChange={(checked) => setMintAsNFT(!!checked)}
-                      className="border-white/20 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
-                      data-testid="checkbox-mint-nft"
-                    />
-                    <Label htmlFor="mintAsNFT" className="text-white font-medium flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-purple-400" />
-                      Mint as NFT (Web3 Ownership)
-                    </Label>
-                  </div>
-                )}
+              {/* Privacy Setting */}
+              <div className="space-y-2">
+                <Label className="text-white">Visibility</Label>
+                <Select
+                  value={formData.isPublic ? 'public' : 'private'}
+                  onValueChange={(value) =>
+                    setFormData(prev => ({ ...prev, isPublic: value === 'public' }))
+                  }
+                >
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-visibility">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">🌍 Public - Anyone can view</SelectItem>
+                    <SelectItem value="private">🔒 Private - Only you can view</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Web3 Features */}
+              {isConnected && (
+                <div className="space-y-4 p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="h-5 w-5 text-purple-400" />
+                    <Label className="text-white font-semibold">Web3 Options</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id="mint-nft"
+                      checked={mintAsNFT}
+                      onCheckedChange={(checked) => setMintAsNFT(checked as boolean)}
+                      className="border-white/30 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="mint-nft" className="text-white font-medium flex items-center gap-2 cursor-pointer">
+                        <Sparkles className="h-4 w-4 text-purple-400" />
+                        Mint as NFT
+                      </label>
+                      <p className="text-gray-400 text-sm">
+                        Create an NFT of your summary stored on IPFS & Arweave
+                      </p>
+                    </div>
+                  </div>
+
+                  {mintAsNFT && (
+                    <div className="mt-3 p-3 bg-white/5 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="h-4 w-4 text-yellow-400" />
+                        <span className="text-yellow-400 text-sm font-medium">NFT Features Enabled</span>
+                      </div>
+                      <ul className="text-gray-300 text-sm space-y-1">
+                        <li>• Permanent storage on IPFS and Arweave</li>
+                        <li>• Ownership proof on blockchain</li>
+                        <li>• Tradeable on NFT marketplaces</li>
+                        <li>• Metadata with AI processing details</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Submit Button */}
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  disabled={processContentMutation.isPending || !formData.url || !formData.contentType}
-                  className="w-full h-12 bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white font-medium"
-                  data-testid="button-start-processing"
-                >
-                  {processContentMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Starting AI Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Start AI Processing
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white font-semibold py-3"
+                disabled={processContentMutation.isPending}
+                data-testid="button-start-processing"
+              >
+                {processContentMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Starting AI Processing...
+                  </>
+                ) : (
+                  'Start AI Processing'
+                )}
+              </Button>
             </form>
-          </CardContent>
-        </Card>
 
-        {/* Web3 Minting Status */}
-        {mintAsNFT && isConnected && (
-          <Card className="glass-bg glass-border mt-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-blue-200">
-                <Shield className="h-4 w-4" />
-                <span className="text-sm">
-                  {isMintingNFT ? 'Minting NFT ownership...' : 'Ready to mint as NFT after processing'}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Processing Tips */}
-        <Card className="glass-bg glass-border mt-6">
-          <CardContent className="p-6">
-            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-400" />
-              What Our AI Will Extract
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  Complete transcription with timestamps
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  Key insights and main topics
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  Chapter breakdowns with navigation
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  Market trends and financial insights
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  Strategic business intelligence
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
-                  Decentralized storage on IPFS/Arweave
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Earnings Potential */}
-        <Card className="glass-bg glass-border mt-6">
-          <CardContent className="p-6">
-            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-green-400" />
-              Monetization Potential
-            </h3>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                <div className="text-2xl font-bold text-green-400 mb-1">5-50</div>
-                <div className="text-gray-300">STREAM Tokens</div>
-                <div className="text-xs text-gray-400 mt-1">Per quality summary</div>
-              </div>
-              <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                <div className="text-2xl font-bold text-blue-400 mb-1">10-200</div>
-                <div className="text-gray-300">Tips & Shares</div>
-                <div className="text-xs text-gray-400 mt-1">Community rewards</div>
-              </div>
-              <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                <div className="text-2xl font-bold text-purple-400 mb-1">100+</div>
-                <div className="text-gray-300">NFT Value</div>
-                <div className="text-xs text-gray-400 mt-1">Ownership rights</div>
-              </div>
+            {/* Info */}
+            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <h3 className="text-blue-200 font-medium mb-2">What happens next?</h3>
+              <ul className="text-blue-100/80 text-sm space-y-1">
+                <li>• AI extracts and transcribes the content</li>
+                <li>• Generate comprehensive summary and key insights</li>
+                <li>• Create chapter breakdowns and timestamps</li>
+                <li>• Store on decentralized networks (IPFS/Arweave)</li>
+                <li>• Earn STREAM tokens for quality content</li>
+              </ul>
             </div>
           </CardContent>
         </Card>
