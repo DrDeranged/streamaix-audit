@@ -30,8 +30,8 @@
   --neon-orange: hsl(43, 89%, 48%);
   --dark-bg: hsl(240, 10%, 3.9%);
   --dark-card: hsl(240, 3.7%, 15.9%);
-  --glass-bg: hsla(0, 0%, 100%, 0.1);
-  --glass-border: hsla(0, 0%, 100%, 0.2);
+  --glass-bg: hsla(0, 0%, 100%, 0.05);
+  --glass-border: hsla(0, 0%, 100%, 0.15);
 }
 
 .dark {
@@ -57,8 +57,8 @@
   --radius: 0.5rem;
   
   /* Dark theme custom colors */
-  --glass-bg: hsla(240, 10%, 3.9%, 0.1);
-  --glass-border: hsla(240, 3.7%, 15.9%, 0.3);
+  --glass-bg: hsla(240, 10%, 15%, 0.4);
+  --glass-border: hsla(240, 3.7%, 50%, 0.2);
 }
 
 @layer base {
@@ -80,8 +80,10 @@
   
   .glass-bg {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
   
   .glass-border {

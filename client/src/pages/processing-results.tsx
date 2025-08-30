@@ -168,9 +168,9 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const isFailed = summary.processingStatus === 'failed';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
       {/* Navigation Header - Landing Page Style */}
-      <div className="border-b border-white/10 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+      <div className="border-b border-white/10 backdrop-blur-sm bg-slate-900/80 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -270,11 +270,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-card/50 backdrop-blur-sm border border-muted-foreground/20 shadow-2xl glass-bg">
+              <Card className="bg-slate-900/60 backdrop-blur-xl border border-white/20 shadow-2xl glass-bg">
                 <CardContent className="p-6">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/20 glass-bg">
+                    <TabsList className="grid w-full grid-cols-4 mb-6 bg-slate-800/50 backdrop-blur-lg border border-white/10">
                       <TabsTrigger value="analysis" className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
                         Analysis
@@ -345,7 +345,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
                                 <div className="flex-1">
-                                  <span className="text-sm">{typeof insight === 'object' ? insight.insight : insight}</span>
+                                  <span className="text-sm text-white font-medium">{typeof insight === 'object' ? insight.insight : insight}</span>
                                   {typeof insight === 'object' && insight.timestamp && (
                                     <div className="text-xs text-muted-foreground mt-1">{insight.timestamp}</div>
                                   )}
@@ -369,7 +369,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
+                                <span className="text-sm text-white font-medium">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
                               </div>
                             ))}
                           </div>
@@ -448,7 +448,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <BarChart3 className="w-4 h-4" />
                             Market Analysis
                           </h6>
-                          <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
+                          <div className="prose prose-invert max-w-none text-white leading-relaxed">
                             <div 
                               className="text-sm"
                               dangerouslySetInnerHTML={{
