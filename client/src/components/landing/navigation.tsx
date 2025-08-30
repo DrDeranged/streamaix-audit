@@ -67,7 +67,7 @@ export function Navigation() {
               <Link href="/create-summary">
                 <Button 
                   size="sm" 
-                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                  className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 hover:from-indigo-600/90 hover:to-purple-700/90 backdrop-blur-lg border border-white/20"
                   onClick={() => {
                     const urlInput = document.getElementById('landing-url-input') as HTMLInputElement;
                     if (urlInput?.value) {
