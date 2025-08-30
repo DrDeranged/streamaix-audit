@@ -110,8 +110,12 @@ export default function CreateSummary() {
         const platform = detectPlatform(url);
         setFormData(prev => ({ ...prev, platform }));
       } catch {
-        // Invalid URL, ignore
+        // Invalid URL, set default platform
+        setFormData(prev => ({ ...prev, platform: 'Unknown' }));
       }
+    } else {
+      // Clear platform when URL is empty
+      setFormData(prev => ({ ...prev, platform: '' }));
     }
   };
 
@@ -154,7 +158,13 @@ export default function CreateSummary() {
       return;
     }
 
-    processContentMutation.mutate(formData);
+    // Ensure platform is set
+    const submitData = {
+      ...formData,
+      platform: formData.platform || 'Unknown'
+    };
+
+    processContentMutation.mutate(submitData);
   };
 
   if (!isAuthenticated) {
@@ -246,16 +256,20 @@ export default function CreateSummary() {
               {/* Platform */}
               <div className="space-y-2">
                 <Label htmlFor="platform" className="text-white">
-                  Platform
+                  Platform *
                 </Label>
                 <Input
                   id="platform"
-                  placeholder="YouTube, Spotify, etc."
+                  placeholder="Auto-detected from URL (e.g., YouTube, Spotify)"
                   value={formData.platform}
                   onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
                   className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
                   data-testid="input-platform"
+                  required
                 />
+                {formData.url && !formData.platform && (
+                  <p className="text-amber-400 text-sm">⚠️ Platform will be auto-detected when you enter a valid URL</p>
+                )}
               </div>
 
               {/* Title */}
