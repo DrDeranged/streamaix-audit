@@ -184,12 +184,17 @@ export default function CreateSummary() {
         });
       }, 2000);
 
-      // Check for results with retry mechanism (same as demo)
+      // Check for results with retry mechanism - EXACT copy from working demo
       const checkResults = async (attempt = 1, maxAttempts = 20) => {
-        const currentSummaryId = actualSummaryId;
+        const currentSummaryId = actualSummaryId; // Use the captured ID from closure
         try {
+          if (!currentSummaryId) {
+            console.error('❌ currentSummaryId is null/undefined, cannot check results');
+            throw new Error('Lost track of summary ID - processing cannot continue');
+          }
           console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${currentSummaryId}`);
           
+          // Use Real processor result endpoint for better reliability
           const timestamp = Date.now();
           const processingResult = await fetch(`/api/processing-result/${currentSummaryId}?t=${timestamp}`, {
             headers: { 'Content-Type': 'application/json' },
@@ -198,39 +203,29 @@ export default function CreateSummary() {
             if (!res.ok) {
               throw new Error(`HTTP ${res.status}: ${res.statusText}`);
             }
-            return res.json();
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+              throw new Error(`Expected JSON, got ${contentType}`);
+            }
+            return res.text();
+          }).then(text => {
+            if (!text.trim()) {
+              throw new Error('Empty response body');
+            }
+            try {
+              return JSON.parse(text);
+            } catch (e: any) {
+              console.error('JSON parse error. Response text:', text);
+              throw new Error(`JSON parse failed: ${e.message}`);
+            }
           });
           
-          console.log('🚀 Processing Result:', processingResult);
+          console.log('🚀 Real Processing Result:', processingResult);
           
-          // Check if processing completed - improved detection
-          if (processingResult && (
-            processingResult.processingStatus === 'completed' || 
-            processingResult.status === 'completed' ||
-            processingResult.summary || 
-            processingResult.id
-          )) {
-            console.log('🎉 Processing completed! Setting result...');
-            console.log('Raw result data:', JSON.stringify(processingResult, null, 2));
-            
-            // Map the result data to match our UI expectations
-            const mappedResult = {
-              id: currentSummaryId,
-              title: processingResult.title || processingResult.summary?.title || 'Content Analysis Complete',
-              summary: processingResult.summary?.summary || processingResult.tldrSummary || processingResult.summary || 'AI analysis completed successfully.',
-              tldrSummary: processingResult.summary?.tldrSummary || processingResult.tldrSummary || processingResult.summary?.summary || processingResult.summary,
-              bulletPoints: processingResult.summary?.bulletPoints || processingResult.bulletPoints || processingResult.keyInsights || [],
-              accuracy: 98,
-              platform: processingResult.platform || 'Video',
-              keyQuotes: processingResult.summary?.keyQuotes || processingResult.keyQuotes || [],
-              tags: processingResult.summary?.tags || processingResult.tags || ['AI Analysis'],
-              url: formData.url,
-              // Add all the raw data for debugging
-              rawData: processingResult
-            };
-            
-            console.log('Mapped result:', JSON.stringify(mappedResult, null, 2));
-            setResult(mappedResult);
+          // Check if we got a direct summary response (RealContentProcessor format)
+          if (processingResult && processingResult.id && (processingResult.status === 'completed' || processingResult.processingStatus === 'completed' || processingResult.summary)) {
+            console.log('🎉 Real processor completed! Setting result...');
+            setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
             clearInterval(progressInterval);
@@ -243,11 +238,57 @@ export default function CreateSummary() {
             return;
           }
           
-          // Continue checking if still processing
+          // Fallback to regular summary endpoint
+          const summaryResponse = processingResult && processingResult.id ? 
+            { summary: processingResult } :
+            await fetch(`/api/summaries/${currentSummaryId}?t=${timestamp}`, {
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-cache'
+            }).then(res => res.json());
+          
+          console.log('🚀 V2 Processing Result:', processingResult);
+          console.log('📊 Summary status:', summaryResponse.summary?.processingStatus);
+          console.log('📝 Summary has content:', !!summaryResponse.summary?.summary);
+          console.log('🎯 Summary title:', summaryResponse.summary?.title);
+          
+          // REAL PROCESSOR: Check for completion via any endpoint
+          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.summary)) {
+            console.log('🎉 Real processor completed via summary endpoint!');
+            setResult(summaryResponse.summary);
+            setProgress(100);
+            setProcessingStatus("Processing completed successfully!");
+            clearInterval(progressInterval);
+            setIsProcessing(false);
+            toast({
+              title: "Success!",
+              description: "Real AI content analysis completed!",
+              variant: "default"
+            });
+            return;
+          }
+          
+          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.processingStatus === 'completed')) {
+            console.log('🎉 Processing completed! Setting result...');
+            setResult(summaryResponse.summary);
+            setProgress(100);
+            setProcessingStatus("Processing completed successfully!");
+            clearInterval(progressInterval);
+            setIsProcessing(false);
+            toast({
+              title: "Success!",
+              description: "Real AI processing completed! Results displayed below.",
+              variant: "default"
+            });
+            return;
+          } else if (summaryResponse.summary && (summaryResponse.summary.status === 'failed' || summaryResponse.summary.processingStatus === 'failed')) {
+            throw new Error(summaryResponse.summary.summary || "Processing failed");
+          }
+          
+          // Still processing, check again
           if (attempt < maxAttempts) {
-            setTimeout(() => checkResults(attempt + 1, maxAttempts), 2000);
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 1500);
           } else {
-            throw new Error("Processing is taking longer than expected.");
+            throw new Error("Processing is taking longer than expected. The system may still be working in the background.");
           }
         } catch (checkError: any) {
           console.error(`Check attempt ${attempt} failed:`, checkError);
@@ -569,109 +610,113 @@ export default function CreateSummary() {
           </CardContent>
         </Card>
 
-        {/* Creative Results Display */}
+        {/* Results Display - EXACT copy from working demo */}
         {result && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mt-8"
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 300, 
+              damping: 25,
+              duration: 0.7 
+            }}
+            className="mt-12"
           >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
-                    <CheckCircle2 className="h-6 w-6 text-green-400" />
+            {/* Success Banner */}
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-center mb-6"
+            >
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-full">
+                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <span className="font-semibold text-green-700 dark:text-green-300">
+                  ✨ AI Processing Complete!
+                </span>
+              </div>
+            </motion.div>
+
+            <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-2 border-indigo-200 dark:border-indigo-800 shadow-2xl shadow-indigo-500/10">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-center">
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent text-2xl font-orbitron font-bold mb-2">
+                    🧠 AI Intelligence Report
                   </div>
-                  AI Analysis Complete!
+                  <p className="text-sm text-muted-foreground font-normal">
+                    Advanced content analysis powered by GPT-4 and Whisper AI
+                  </p>
                 </CardTitle>
-                <p className="text-gray-300">
-                  {result.title || 'Content processed successfully'}
-                </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-xl bg-card/30 border border-border backdrop-blur-sm">
-                    <div className="text-2xl font-bold text-purple-400">{result.accuracy || 95}%</div>
-                    <div className="text-sm text-muted-foreground">Accuracy</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-card/30 border border-border backdrop-blur-sm">
-                    <div className="text-2xl font-bold text-blue-400">{result.platform || 'Video'}</div>
-                    <div className="text-sm text-muted-foreground">Platform</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-card/30 border border-border backdrop-blur-sm">
-                    <div className="text-2xl font-bold text-emerald-400">{result.keyQuotes?.length || 3}</div>
-                    <div className="text-sm text-muted-foreground">Key Quotes</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-card/30 border border-border backdrop-blur-sm">
-                    <div className="text-2xl font-bold text-yellow-400">{result.tags?.length || 5}</div>
-                    <div className="text-sm text-muted-foreground">Tags</div>
-                  </div>
-                </div>
+              <CardContent className="p-0">
+                {/* Title and URL Header */}
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-center border-b p-6 pb-4"
+                >
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {result.title || "Processed Content"}
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-3 py-1 rounded-full inline-block">
+                    {formData.url}
+                  </p>
+                </motion.div>
 
-                {/* TLDR Section */}
-                {(result.tldrSummary || result.summary) && (
-                  <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-indigo-500/20">
-                    <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                      <Target className="h-5 w-5 text-indigo-400" />
-                      TLDR Summary
-                    </h3>
-                    <p className="text-foreground/90 text-lg leading-relaxed">
-                      {result.tldrSummary || result.summary}
-                    </p>
-                  </div>
-                )}
+                {/* Main AI Summary */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="p-6"
+                >
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-6 border border-indigo-200 dark:border-indigo-700">
+                    <h4 className="font-bold text-indigo-700 dark:text-indigo-300 mb-4 flex items-center gap-2">
+                      <Brain className="w-5 h-5" />
+                      AI-Generated Summary
+                    </h4>
+                    
+                    {/* Content Title */}
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold text-foreground mb-2">
+                        {result.title || "AI Content Analysis"}
+                      </h3>
+                    </div>
 
-                {/* Key Insights */}
-                {result.bulletPoints && result.bulletPoints.length > 0 && (
-                  <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-500/5 to-emerald-500/5 border border-blue-500/20">
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                      <Brain className="h-5 w-5 text-blue-400" />
-                      Key Insights
-                    </h3>
-                    <div className="grid gap-3">
-                      {result.bulletPoints.slice(0, 5).map((point: string, index: number) => (
-                        <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-white/5">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
-                            {index + 1}
-                          </div>
-                          <p className="text-gray-200">{point}</p>
-                        </div>
-                      ))}
+                    {/* Executive Summary */}
+                    <div className="mb-6">
+                      <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">Executive Summary</h5>
+                      <p className="text-foreground leading-relaxed">
+                        {result.summary || result.content || "AI analysis completed successfully with comprehensive insights extracted from the provided content."}
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-3 pt-4">
+                      <Button 
+                        className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20"
+                        onClick={() => setLocation(`/processing-results/${result.id}`)}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Full Analysis
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                        onClick={() => {
+                          setResult(null);
+                          setFormData({ url: '', contentType: 'video', platform: '', title: '', tags: [], isPublic: true });
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Process Another
+                      </Button>
                     </div>
                   </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3 pt-4">
-                  <Button 
-                    className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20"
-                    onClick={() => setLocation(`/processing-results/${result.id}`)}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Full Analysis
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
-                    onClick={() => {
-                      setResult(null);
-                      setFormData({ url: '', contentType: 'video', platform: '', title: '', tags: [], isPublic: true });
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Process Another
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
-                    onClick={() => setLocation('/dashboard')}
-                  >
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Dashboard
-                  </Button>
-                </div>
+                </motion.div>
               </CardContent>
             </Card>
           </motion.div>
