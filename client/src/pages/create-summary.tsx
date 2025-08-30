@@ -67,18 +67,18 @@ export default function CreateSummary() {
     }
   }, []);
 
-  // Process content mutation
+  // Process content mutation (same as demo)
   const processContentMutation = useMutation({
     mutationFn: async (data: ProcessContentRequest) => {
-      return apiRequest('/api/process-content', {
+      return apiRequest('/api/test-processing', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ url: data.url }),
       });
     },
     onSuccess: async (data) => {
       toast({
         title: 'Processing Started!',
-        description: 'Your content is being processed. You can monitor progress in your dashboard.',
+        description: 'Your content is being processed with real AI analysis.',
       });
       
       // If NFT minting is enabled and wallet is connected, mint NFT after processing
@@ -87,13 +87,10 @@ export default function CreateSummary() {
           title: 'Creating NFT',
           description: 'Your summary will be minted as an NFT when processing is complete.',
         });
-        
-        // In a real implementation, you'd wait for processing to complete
-        // and then mint the NFT with the actual summary data
       }
       
       queryClient.invalidateQueries({ queryKey: ['summaries'] });
-      setLocation(`/summary/${data.summary.id}`);
+      setLocation(`/processing-results/${data.summaryId}`);
     },
     onError: (error: any) => {
       toast({
