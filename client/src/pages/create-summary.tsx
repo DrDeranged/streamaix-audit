@@ -49,7 +49,20 @@ export default function CreateSummary() {
   useEffect(() => {
     const pendingUrl = sessionStorage.getItem('pendingUrl');
     if (pendingUrl) {
-      setFormData(prev => ({ ...prev, url: pendingUrl }));
+      try {
+        const detectedPlatform = detectPlatform(pendingUrl);
+        setFormData(prev => ({ 
+          ...prev, 
+          url: pendingUrl,
+          platform: detectedPlatform
+        }));
+      } catch {
+        setFormData(prev => ({ 
+          ...prev, 
+          url: pendingUrl,
+          platform: 'Unknown'
+        }));
+      }
       sessionStorage.removeItem('pendingUrl');
     }
   }, []);

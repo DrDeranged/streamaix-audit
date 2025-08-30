@@ -724,37 +724,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const { url, contentType, platform, title, isPublic, tags } = validation.data as any;
 
-    // Create summary entry
-    const summary = await storage.createSummary({
-      title: title || 'Untitled Content',
-      originalUrl: url,
-      contentType,
-      platform,
-      tags: tags || [],
-      creatorId: req.user!.id,
-      isPublic: isPublic ?? true,
-      processingStatus: 'pending'
-    });
+    try {
+      console.log(`Starting REAL content processing for URL: ${url}`);
+      
+      // Use RebuiltContentProcessor for faster processing
+      console.log('🚀 Starting processing with RebuiltContentProcessor');
+      const processor = RebuiltContentProcessor.getInstance();
+      const result = await processor.processContent(url, req.user!.id);
+      const summaryId = result.summaryId;
 
-    // Start processing
-    const jobId = await StreamProcessor.queueProcessing(summary.id, url, {
-      contentType,
-      platform,
-      title
-    });
-
-    res.status(201).json({
-      message: 'Content processing started',
-      summary: {
-        id: summary.id,
-        title: summary.title,
-        originalUrl: summary.originalUrl,
-        contentType: summary.contentType,
-        platform: summary.platform,
-        processingStatus: summary.processingStatus
-      },
-      jobId
-    });
+      res.status(201).json({
+        message: 'Content processing started successfully',
+        summary: { 
+          id: summaryId,
+          title: title || 'Processing...',
+          originalUrl: url,
+          contentType,
+          platform,
+          processingStatus: 'processing'
+        },
+        jobId: `job-${Date.now()}`, // Compatibility with frontend
+        statusUrl: `/api/processing-result/${summaryId}`
+      });
+    } catch (error) {
+      console.error('Content processing failed to start:', error);
+      res.status(500).json({ 
+        error: 'Failed to start content processing',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   }));
 
   // =============================================================================
