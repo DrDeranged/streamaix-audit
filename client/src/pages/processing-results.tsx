@@ -30,13 +30,20 @@ interface Summary {
   originalUrl: string;
   platform: string;
   originalDuration?: number;
-  accuracy: number;
-  tldrSummary: string;
-  blogPost: string;
-  marketAnalysis: string;
-  rawData: any;
+  accuracy?: number;
+  tldrSummary?: string;
+  blogPost?: string;
+  marketAnalysis?: string;
+  summary?: string;
+  executiveSummary?: string;
+  bulletPoints?: string[];
+  trends?: string[];
+  keyQuotes?: string[];
+  chapters?: any[];
+  tags?: string[];
   processingStatus: string;
   createdAt: string;
+  rawData?: any;
 }
 
 
@@ -120,10 +127,10 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   }
 
   const sections = [
-    { id: 'tldr', label: 'TLDR', icon: Target, content: summary.tldrSummary },
-    { id: 'analysis', label: 'Analysis', icon: BookOpen, content: summary.blogPost },
-    { id: 'market', label: 'Market Intel', icon: TrendingUp, content: summary.marketAnalysis },
-    { id: 'metadata', label: 'Metadata', icon: Database, content: JSON.stringify(summary.rawData, null, 2) }
+    { id: 'tldr', label: 'TLDR', icon: Target, content: summary.tldrSummary || summary.summary },
+    { id: 'analysis', label: 'Analysis', icon: BookOpen, content: summary.executiveSummary || summary.blogPost || summary.summary },
+    { id: 'market', label: 'Market Intel', icon: TrendingUp, content: summary.marketAnalysis || 'Market analysis data not available' },
+    { id: 'metadata', label: 'Metadata', icon: Database, content: JSON.stringify(summary, null, 2) }
   ];
 
   return (
@@ -156,11 +163,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="border-white/20 text-white">
+              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" className="border-white/20 text-white">
+              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5">
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -286,7 +293,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleCopy(section.content, section.id)}
+                        onClick={() => handleCopy(section.content || '', section.id)}
                         className="text-gray-400 hover:text-white"
                       >
                         {copySuccess === section.id ? (
@@ -302,14 +309,14 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                           <div 
                             dangerouslySetInnerHTML={{
-                              __html: section.content
-                                ?.replace(/# (.*)/g, '<h3 class="text-2xl font-bold text-white mt-8 mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
-                                ?.replace(/## (.*)/g, '<h4 class="text-xl font-semibold text-blue-200 mt-6 mb-3">$1</h4>')
-                                ?.replace(/### (.*)/g, '<h5 class="text-lg font-medium text-purple-200 mt-4 mb-2">$1</h5>')
-                                ?.replace(/- \*\*(.*?)\*\*: (.*)/g, '<li class="mb-3"><strong class="text-blue-300">$1:</strong> <span class="text-gray-200">$2</span></li>')
-                                ?.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                                ?.replace(/\n\n/g, '<br><br>')
-                                ?.replace(/\n/g, '<br>')
+                              __html: (section.content || '')
+                                .replace(/# (.*)/g, '<h3 class="text-2xl font-bold text-white mt-8 mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
+                                .replace(/## (.*)/g, '<h4 class="text-xl font-semibold text-blue-200 mt-6 mb-3">$1</h4>')
+                                .replace(/### (.*)/g, '<h5 class="text-lg font-medium text-purple-200 mt-4 mb-2">$1</h5>')
+                                .replace(/- \*\*(.*?)\*\*: (.*)/g, '<li class="mb-3"><strong class="text-blue-300">$1:</strong> <span class="text-gray-200">$2</span></li>')
+                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+                                .replace(/\n\n/g, '<br><br>')
+                                .replace(/\n/g, '<br>')
                             }}
                           />
                         </div>
@@ -347,7 +354,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </p>
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 px-8"
+                className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white px-8"
                 onClick={() => setLocation('/')}
               >
                 <Brain className="h-5 w-5 mr-2" />
