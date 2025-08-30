@@ -91,6 +91,20 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('analysis');
   const [copySuccess, setCopySuccess] = useState('');
+  
+  // Force dark theme and visible text
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('light');
+    root.classList.add('dark');
+    root.style.backgroundColor = '#0f172a';
+    root.style.color = '#ffffff';
+    
+    return () => {
+      root.style.backgroundColor = '';
+      root.style.color = '';
+    };
+  }, []);
 
   // Query for processing result with real-time updates
   const { data: summary, isLoading, error } = useQuery({
@@ -168,7 +182,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const isFailed = summary.processingStatus === 'failed';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-900 text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
       {/* Navigation Header - Landing Page Style */}
       <div className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -271,7 +285,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               {/* Header Card */}
-              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+              <Card className="mb-6 bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     {summary.rawData?.thumbnail && (
@@ -282,7 +296,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       />
                     )}
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2 text-white">{summary.title}</h3>
+                      <h3 className="text-xl font-semibold mb-2 text-white" style={{color: '#ffffff'}}>{summary.title}</h3>
                       <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
                         {summary.rawData?.channel && <span>📺 {summary.rawData.channel}</span>}
                         {summary.originalDuration && (
@@ -311,7 +325,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </Card>
 
               {/* Content Tabs */}
-              <Card className="bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+              <Card className="bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
                 <CardContent className="p-6">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -358,6 +372,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                           <div 
                             className="text-sm text-white"
+                            style={{color: '#ffffff !important'}}
                             dangerouslySetInnerHTML={{
                               __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
                                 .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
@@ -386,7 +401,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
                                 <div className="flex-1">
-                                  <span className="text-sm text-white">{typeof insight === 'object' ? insight.insight : insight}</span>
+                                  <span className="text-sm text-white" style={{color: '#ffffff'}}>{typeof insight === 'object' ? insight.insight : insight}</span>
                                   {typeof insight === 'object' && insight.timestamp && (
                                     <div className="text-xs text-muted-foreground mt-1">{insight.timestamp}</div>
                                   )}
@@ -410,7 +425,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm text-white">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
+                                <span className="text-sm text-white" style={{color: '#ffffff'}}>{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
                               </div>
                             ))}
                           </div>
@@ -492,6 +507,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           <div className="prose prose-sm max-w-none leading-relaxed">
                             <div 
                               className="text-sm text-white"
+                              style={{color: '#ffffff !important'}}
                               dangerouslySetInnerHTML={{
                                 __html: summary.marketAnalysis
                                   .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
