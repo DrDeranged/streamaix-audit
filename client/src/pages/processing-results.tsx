@@ -168,9 +168,9 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const isFailed = summary.processingStatus === 'failed';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Navigation Header - Landing Page Style */}
-      <div className="border-b border-white/10 backdrop-blur-sm bg-slate-900/80 sticky top-0 z-50">
+      <div className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -270,11 +270,52 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-slate-900/60 backdrop-blur-xl border border-white/20 shadow-2xl glass-bg">
+              {/* Header Card */}
+              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    {summary.rawData?.thumbnail && (
+                      <img 
+                        src={summary.rawData.thumbnail}
+                        alt={summary.title}
+                        className="w-32 h-24 object-cover rounded-lg"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-2">{summary.title}</h3>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                        {summary.rawData?.channel && <span>📺 {summary.rawData.channel}</span>}
+                        {summary.originalDuration && (
+                          <span>⏱️ {Math.floor(summary.originalDuration / 60)}:{(summary.originalDuration % 60).toString().padStart(2, '0')}</span>
+                        )}
+                        {summary.rawData?.views && <span>👁️ {summary.rawData.views} views</span>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Completed
+                        </Badge>
+                        <Badge variant="outline">
+                          {summary.accuracy || 95}% Accuracy
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Source
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Content Tabs */}
+              <Card className="bg-card/50 backdrop-blur-sm border-muted-foreground/20">
                 <CardContent className="p-6">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-6 bg-slate-800/50 backdrop-blur-lg border border-white/10">
+                    <TabsList className="grid w-full grid-cols-4 mb-6">
                       <TabsTrigger value="analysis" className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
                         Analysis
@@ -295,11 +336,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Executive Summary Tab */}
                     <TabsContent value="analysis" className="space-y-4">
-                      <div className="p-6 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl border border-indigo-500/20 glass-bg">
-                        <h5 className="font-semibold mb-3 text-indigo-400 flex items-center gap-2 justify-between">
+                      <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                        <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
                           <div className="flex items-center gap-2">
                             <Brain className="w-4 h-4" />
-                            Executive Summary
+                            Executive Takeaway
                           </div>
                           <Button
                             variant="ghost"
@@ -335,7 +376,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     {/* Key Insights Tab */}
                     <TabsContent value="insights" className="space-y-4">
                       {summary.keyInsights && summary.keyInsights.length > 0 && (
-                        <div className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 glass-bg">
+                        <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                           <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Key Insights
@@ -345,7 +386,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
                                 <div className="flex-1">
-                                  <span className="text-sm text-white font-medium">{typeof insight === 'object' ? insight.insight : insight}</span>
+                                  <span className="text-sm">{typeof insight === 'object' ? insight.insight : insight}</span>
                                   {typeof insight === 'object' && insight.timestamp && (
                                     <div className="text-xs text-muted-foreground mt-1">{insight.timestamp}</div>
                                   )}
@@ -360,16 +401,16 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.bulletPoints && summary.bulletPoints.length > 0 && (
-                        <div className="p-6 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl border border-green-500/20 glass-bg">
+                        <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                           <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
-                            Key Points
+                            Key Insights
                           </h5>
                           <div className="space-y-2">
                             {summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                 <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm text-white font-medium">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
+                                <span className="text-sm">{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
                               </div>
                             ))}
                           </div>
@@ -377,7 +418,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.trends && summary.trends.length > 0 && (
-                        <div className="p-6 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-xl border border-purple-500/20 glass-bg">
+                        <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
                           <h5 className="font-semibold mb-3 text-purple-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Market Trends
@@ -403,7 +444,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl border border-orange-500/20 glass-bg">
+                        <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
                           <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
                             <MessageSquare className="w-4 h-4" />
                             Key Quotes
@@ -448,7 +489,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <BarChart3 className="w-4 h-4" />
                             Market Analysis
                           </h6>
-                          <div className="prose prose-invert max-w-none text-white leading-relaxed">
+                          <div className="prose prose-sm max-w-none text-foreground leading-relaxed">
                             <div 
                               className="text-sm"
                               dangerouslySetInnerHTML={{
