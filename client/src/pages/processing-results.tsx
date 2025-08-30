@@ -213,7 +213,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
             </div>
             <Button 
               variant="outline" 
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
               asChild
             >
               <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">

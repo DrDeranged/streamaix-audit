@@ -233,8 +233,8 @@ export default function CreateSummary() {
           // Check if we got a direct summary response (RealContentProcessor format)
           // The rebuilt processor returns summary data directly at the top level
           if (processingResult && processingResult.id && 
-              (processingResult.status === 'completed' || 
-               processingResult.processingStatus === 'completed' || 
+              (processingResult.processingStatus === 'completed' || 
+               processingResult.status === 'completed' || 
                processingResult.summary || 
                processingResult.blogPost ||
                processingResult.executiveSummary ||
@@ -277,8 +277,8 @@ export default function CreateSummary() {
           
           // REAL PROCESSOR: Check for completion via any endpoint
           if (summaryResponse.summary && (
-            summaryResponse.summary.status === 'completed' || 
             summaryResponse.summary.processingStatus === 'completed' ||
+            summaryResponse.summary.status === 'completed' || 
             summaryResponse.summary.summary || 
             summaryResponse.summary.blogPost ||
             summaryResponse.summary.executiveSummary ||
@@ -671,10 +671,10 @@ export default function CreateSummary() {
                   transition={{ delay: 0.4 }}
                   className="text-center border-b p-6 pb-4"
                 >
-                  <h3 className="text-lg font-bold text-foreground mb-2">
+                  <h3 className="text-lg font-bold text-white mb-2">
                     {result.title || "Processed Content"}
                   </h3>
-                  <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-3 py-1 rounded-full inline-block">
+                  <p className="text-xs text-gray-400 font-mono bg-white/10 px-3 py-1 rounded-full inline-block">
                     {formData.url}
                   </p>
                 </motion.div>
@@ -686,23 +686,23 @@ export default function CreateSummary() {
                   transition={{ delay: 0.5 }}
                   className="p-6"
                 >
-                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-6 border border-indigo-200 dark:border-indigo-700">
-                    <h4 className="font-bold text-indigo-700 dark:text-indigo-300 mb-4 flex items-center gap-2">
+                  <div className="bg-white/5 border-white/10 backdrop-blur-lg rounded-xl p-6 border">
+                    <h4 className="font-bold text-white mb-4 flex items-center gap-2">
                       <Brain className="w-5 h-5" />
                       AI-Generated Summary
                     </h4>
                     
                     {/* Content Title */}
                     <div className="mb-4">
-                      <h3 className="text-xl font-bold text-foreground mb-2">
+                      <h3 className="text-xl font-bold text-white mb-2">
                         {result.title || "AI Content Analysis"}
                       </h3>
                     </div>
 
                     {/* Executive Summary */}
                     <div className="mb-6">
-                      <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">Executive Summary</h5>
-                      <p className="text-foreground leading-relaxed">
+                      <h5 className="text-lg font-semibold text-purple-300 mb-3">Executive Summary</h5>
+                      <p className="text-gray-200 leading-relaxed">
                         {result.executiveSummary || result.summary || result.blogPost || result.content || "AI analysis completed successfully with comprehensive insights extracted from the provided content."}
                       </p>
                     </div>
