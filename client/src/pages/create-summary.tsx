@@ -203,24 +203,33 @@ export default function CreateSummary() {
           
           console.log('🚀 Processing Result:', processingResult);
           
-          // Check if processing completed
-          if (processingResult && (processingResult.processingStatus === 'completed' || processingResult.summary)) {
+          // Check if processing completed - improved detection
+          if (processingResult && (
+            processingResult.processingStatus === 'completed' || 
+            processingResult.status === 'completed' ||
+            processingResult.summary || 
+            processingResult.id
+          )) {
             console.log('🎉 Processing completed! Setting result...');
+            console.log('Raw result data:', JSON.stringify(processingResult, null, 2));
             
             // Map the result data to match our UI expectations
             const mappedResult = {
               id: currentSummaryId,
               title: processingResult.title || processingResult.summary?.title || 'Content Analysis Complete',
-              summary: processingResult.summary?.summary || processingResult.tldrSummary || 'AI analysis completed successfully.',
-              tldrSummary: processingResult.summary?.tldrSummary || processingResult.tldrSummary || processingResult.summary?.summary,
-              bulletPoints: processingResult.summary?.bulletPoints || processingResult.bulletPoints || [],
+              summary: processingResult.summary?.summary || processingResult.tldrSummary || processingResult.summary || 'AI analysis completed successfully.',
+              tldrSummary: processingResult.summary?.tldrSummary || processingResult.tldrSummary || processingResult.summary?.summary || processingResult.summary,
+              bulletPoints: processingResult.summary?.bulletPoints || processingResult.bulletPoints || processingResult.keyInsights || [],
               accuracy: 98,
               platform: processingResult.platform || 'Video',
               keyQuotes: processingResult.summary?.keyQuotes || processingResult.keyQuotes || [],
               tags: processingResult.summary?.tags || processingResult.tags || ['AI Analysis'],
-              url: formData.url
+              url: formData.url,
+              // Add all the raw data for debugging
+              rawData: processingResult
             };
             
+            console.log('Mapped result:', JSON.stringify(mappedResult, null, 2));
             setResult(mappedResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
@@ -292,44 +301,22 @@ export default function CreateSummary() {
   const ContentIcon = contentTypeIcons[formData.contentType];
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      {/* Animated Background (same as landing page) */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-30">
-        <motion.div 
-          className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full blur-xl"
-          animate={{ y: [-20, 20, -20] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full blur-lg"
-          animate={{ y: [-15, 25, -15] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        />
-        <motion.div 
-          className="absolute bottom-40 left-1/4 w-40 h-40 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full blur-2xl"
-          animate={{ y: [-25, 15, -25] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
-      </div>
-      
-      <div className="relative z-10 p-4">
-        <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 pt-8">
-          <h1 className="text-4xl md:text-5xl font-orbitron font-light mb-6 tracking-tight">
-            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
-              Create AI Summary
-            </span>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Create AI Summary
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-            Transform any podcast, video, or livestream into comprehensive insights with real AI analysis
+          <p className="text-gray-300 text-lg">
+            Transform any podcast, video, or livestream into an insightful summary
           </p>
         </div>
 
-        <Card className="bg-card/50 border-border backdrop-blur-xl shadow-2xl">
+        <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
           <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2 text-xl">
-              <ContentIcon className="h-6 w-6 text-primary" />
+            <CardTitle className="text-white flex items-center gap-2">
+              <ContentIcon className="h-6 w-6" />
               Content Processing
             </CardTitle>
           </CardHeader>
@@ -337,7 +324,7 @@ export default function CreateSummary() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* URL Input */}
               <div className="space-y-2">
-                <Label htmlFor="url" className="text-foreground font-medium">
+                <Label htmlFor="url" className="text-white">
                   Content URL *
                 </Label>
                 <div className="relative">
@@ -348,7 +335,7 @@ export default function CreateSummary() {
                     placeholder="https://youtube.com/watch?v=..."
                     value={formData.url}
                     onChange={(e) => handleUrlChange(e.target.value)}
-                    className="pl-10 bg-input/50 border-border text-foreground placeholder:text-muted-foreground"
+                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
                     required
                     data-testid="input-content-url"
                   />
@@ -357,14 +344,14 @@ export default function CreateSummary() {
 
               {/* Content Type */}
               <div className="space-y-2">
-                <Label className="text-foreground font-medium">Content Type *</Label>
+                <Label className="text-white">Content Type *</Label>
                 <Select
                   value={formData.contentType}
                   onValueChange={(value: 'podcast' | 'video' | 'livestream') =>
                     setFormData(prev => ({ ...prev, contentType: value }))
                   }
                 >
-                  <SelectTrigger className="bg-input/50 border-border text-foreground" data-testid="select-content-type">
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-content-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -590,17 +577,15 @@ export default function CreateSummary() {
             transition={{ duration: 0.6 }}
             className="mt-8"
           >
-            <Card className="bg-card/50 border-border backdrop-blur-xl shadow-2xl">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader>
-                <CardTitle className="text-2xl font-orbitron font-light flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-emerald-500/20 to-green-500/20 border border-emerald-500/30">
-                    <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                    <CheckCircle2 className="h-6 w-6 text-green-400" />
                   </div>
-                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    AI Analysis Complete!
-                  </span>
+                  AI Analysis Complete!
                 </CardTitle>
-                <p className="text-muted-foreground">
+                <p className="text-gray-300">
                   {result.title || 'Content processed successfully'}
                 </p>
               </CardHeader>
@@ -691,7 +676,6 @@ export default function CreateSummary() {
             </Card>
           </motion.div>
         )}
-        </div>
       </div>
     </div>
   );
