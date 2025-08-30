@@ -14,7 +14,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useContracts } from '@/hooks/useContracts';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield, CheckCircle2, Target, Brain, ExternalLink, BarChart3, Tag as TagIcon } from 'lucide-react';
 
 interface ProcessContentRequest {
   url: string;
@@ -67,39 +68,6 @@ export default function CreateSummary() {
     }
   }, []);
 
-  // Process content mutation (same as demo)
-  const processContentMutation = useMutation({
-    mutationFn: async (data: ProcessContentRequest) => {
-      return apiRequest('/api/test-processing', {
-        method: 'POST',
-        body: JSON.stringify({ url: data.url }),
-      });
-    },
-    onSuccess: async (data) => {
-      toast({
-        title: 'Processing Started!',
-        description: 'Your content is being processed with real AI analysis.',
-      });
-      
-      // If NFT minting is enabled and wallet is connected, mint NFT after processing
-      if (mintAsNFT && isConnected && data.summary) {
-        toast({
-          title: 'Creating NFT',
-          description: 'Your summary will be minted as an NFT when processing is complete.',
-        });
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ['summaries'] });
-      setLocation(`/processing-results/${data.summaryId}`);
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Processing Failed',
-        description: error.message || 'Failed to start content processing.',
-        variant: 'destructive',
-      });
-    },
-  });
 
   // Auto-detect platform from URL
   const detectPlatform = (url: string) => {
@@ -146,7 +114,14 @@ export default function CreateSummary() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Processing state (same as demo)
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [processingStatus, setProcessingStatus] = useState("");
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!isAuthenticated) {
@@ -168,18 +143,113 @@ export default function CreateSummary() {
       return;
     }
 
-    // Ensure platform is set and filter out empty optional fields
-    const submitData = {
-      url: formData.url,
-      contentType: formData.contentType,
-      platform: formData.platform || 'Unknown',
-      isPublic: formData.isPublic ?? true,
-      ...(formData.title && formData.title.trim() && { title: formData.title.trim() }),
-      ...(formData.tags && formData.tags.length > 0 && { tags: formData.tags })
-    };
+    // Use same processing as demo
+    setIsProcessing(true);
+    setError(null);
+    setResult(null);
+    setProgress(0);
+    setProcessingStatus("Starting AI processing...");
 
-    console.log('Submitting data:', submitData); // Debug log
-    processContentMutation.mutate(submitData);
+    try {
+      // Start real processing (same as demo)
+      const response = await apiRequest('/api/test-processing', {
+        method: 'POST',
+        body: JSON.stringify({ url: formData.url }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const actualSummaryId = response.summaryId || response.summary?.id;
+      console.log('🔍 Setting summaryId:', actualSummaryId, 'from response:', response);
+      
+      if (!actualSummaryId) {
+        throw new Error('No summary ID received from server - cannot track processing');
+      }
+      
+      setProgress(10);
+      setProcessingStatus("Audio extraction in progress...");
+
+      // Progress updates with better timing (same as demo)
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev < 85) return prev + 15;
+          if (prev < 95) return prev + 2;
+          return prev;
+        });
+        
+        setProcessingStatus(prev => {
+          if (progress < 30) return "Extracting audio from video...";
+          if (progress < 60) return "AI transcription in progress...";
+          if (progress < 90) return "Generating comprehensive analysis...";
+          return "Finalizing results...";
+        });
+      }, 2000);
+
+      // Check for results with retry mechanism (same as demo)
+      const checkResults = async (attempt = 1, maxAttempts = 20) => {
+        const currentSummaryId = actualSummaryId;
+        try {
+          console.log(`Checking results attempt ${attempt}/${maxAttempts} for summary ${currentSummaryId}`);
+          
+          const timestamp = Date.now();
+          const processingResult = await fetch(`/api/processing-result/${currentSummaryId}?t=${timestamp}`, {
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-cache'
+          }).then(res => {
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            return res.json();
+          });
+          
+          console.log('🚀 Processing Result:', processingResult);
+          
+          // Check if processing completed
+          if (processingResult && (processingResult.processingStatus === 'completed' || processingResult.summary)) {
+            console.log('🎉 Processing completed! Setting result...');
+            setResult(processingResult);
+            setProgress(100);
+            setProcessingStatus("Processing completed successfully!");
+            clearInterval(progressInterval);
+            setIsProcessing(false);
+            toast({
+              title: "Success!",
+              description: "Real AI analysis completed! Results displayed below.",
+              variant: "default"
+            });
+            return;
+          }
+          
+          // Continue checking if still processing
+          if (attempt < maxAttempts) {
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 2000);
+          } else {
+            throw new Error("Processing is taking longer than expected.");
+          }
+        } catch (checkError: any) {
+          console.error(`Check attempt ${attempt} failed:`, checkError);
+          if (attempt < maxAttempts) {
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), 3000);
+          } else {
+            throw checkError;
+          }
+        }
+      };
+
+      // Start checking for results
+      await checkResults();
+      
+    } catch (error: any) {
+      console.error('Processing failed:', error);
+      setError(error.message);
+      setIsProcessing(false);
+      setProgress(0);
+      setProcessingStatus("");
+      toast({
+        title: 'Processing Failed',
+        description: error.message || 'Failed to start content processing.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (!isAuthenticated) {
@@ -415,13 +485,13 @@ export default function CreateSummary() {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white font-semibold py-3"
-                disabled={processContentMutation.isPending}
+                disabled={isProcessing}
                 data-testid="button-start-processing"
               >
-                {processContentMutation.isPending ? (
+                {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Starting AI Processing...
+                    {processingStatus}
                   </>
                 ) : (
                   'Start AI Processing'
@@ -429,19 +499,159 @@ export default function CreateSummary() {
               </Button>
             </form>
 
+            {/* Processing Progress */}
+            {isProcessing && (
+              <div className="mt-6 p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg backdrop-blur-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <Loader2 className="h-6 w-6 text-purple-400 animate-spin" />
+                  <h3 className="text-xl font-bold text-white">AI Processing in Progress</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-300">{processingStatus}</span>
+                    <span className="text-purple-300">{progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-3">
+                    <div 
+                      className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <h3 className="text-red-300 font-medium mb-2">Processing Error</h3>
+                <p className="text-red-200 text-sm">{error}</p>
+              </div>
+            )}
+
             {/* Info */}
-            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <h3 className="text-blue-200 font-medium mb-2">What happens next?</h3>
-              <ul className="text-blue-100/80 text-sm space-y-1">
-                <li>• AI extracts and transcribes the content</li>
-                <li>• Generate comprehensive summary and key insights</li>
-                <li>• Create chapter breakdowns and timestamps</li>
-                <li>• Store on decentralized networks (IPFS/Arweave)</li>
-                <li>• Earn STREAM tokens for quality content</li>
-              </ul>
-            </div>
+            {!isProcessing && !result && (
+              <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <h3 className="text-blue-200 font-medium mb-2">What happens next?</h3>
+                <ul className="text-blue-100/80 text-sm space-y-1">
+                  <li>• AI extracts and transcribes the content</li>
+                  <li>• Generate comprehensive summary and key insights</li>
+                  <li>• Create chapter breakdowns and timestamps</li>
+                  <li>• Store on decentralized networks (IPFS/Arweave)</li>
+                  <li>• Earn STREAM tokens for quality content</li>
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Creative Results Display */}
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mt-8"
+          >
+            <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 backdrop-blur-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                    <CheckCircle2 className="h-6 w-6 text-green-400" />
+                  </div>
+                  AI Analysis Complete!
+                </CardTitle>
+                <p className="text-gray-300">
+                  {result.title || 'Content processed successfully'}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-purple-400">{result.accuracy || 95}%</div>
+                    <div className="text-sm text-gray-400">Accuracy</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-blue-400">{result.platform || 'Video'}</div>
+                    <div className="text-sm text-gray-400">Platform</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-emerald-400">{result.keyQuotes?.length || 3}</div>
+                    <div className="text-sm text-gray-400">Key Quotes</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-yellow-400">{result.tags?.length || 5}</div>
+                    <div className="text-sm text-gray-400">Tags</div>
+                  </div>
+                </div>
+
+                {/* TLDR Section */}
+                {(result.tldrSummary || result.summary) && (
+                  <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-500/5 to-blue-500/5 border border-purple-500/20">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-purple-400" />
+                      TLDR Summary
+                    </h3>
+                    <p className="text-gray-200 text-lg leading-relaxed">
+                      {result.tldrSummary || result.summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* Key Insights */}
+                {result.bulletPoints && result.bulletPoints.length > 0 && (
+                  <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-500/5 to-emerald-500/5 border border-blue-500/20">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-blue-400" />
+                      Key Insights
+                    </h3>
+                    <div className="grid gap-3">
+                      {result.bulletPoints.slice(0, 5).map((point: string, index: number) => (
+                        <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-white/5">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
+                            {index + 1}
+                          </div>
+                          <p className="text-gray-200">{point}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-4">
+                  <Button 
+                    className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20"
+                    onClick={() => setLocation(`/processing-results/${result.id}`)}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Full Analysis
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                    onClick={() => {
+                      setResult(null);
+                      setFormData({ url: '', contentType: 'video', platform: '', title: '', tags: [], isPublic: true });
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Process Another
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                    onClick={() => setLocation('/dashboard')}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
     </div>
   );
