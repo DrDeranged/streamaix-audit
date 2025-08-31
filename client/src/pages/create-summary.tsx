@@ -15,7 +15,7 @@ import { useContracts } from '@/hooks/useContracts';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { apiRequest } from '@/lib/queryClient';
 import { motion } from 'framer-motion';
-import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield, CheckCircle2, Target, Brain, ExternalLink, BarChart3, Tag as TagIcon } from 'lucide-react';
+import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield, CheckCircle2, Target, Brain, ExternalLink, BarChart3, Tag as TagIcon, Bell } from 'lucide-react';
 
 interface ProcessContentRequest {
   url: string;
@@ -45,6 +45,8 @@ export default function CreateSummary() {
 
   const [currentTag, setCurrentTag] = useState('');
   const [mintAsNFT, setMintAsNFT] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [showCompletionNotification, setShowCompletionNotification] = useState(false);
 
   // Check for pending URL from landing page
   useEffect(() => {
@@ -148,6 +150,8 @@ export default function CreateSummary() {
     setError(null);
     setResult(null);
     setProgress(0);
+    setIsCompleted(false);
+    setShowCompletionNotification(false);
     setProcessingStatus("Starting AI processing...");
 
     try {
@@ -252,8 +256,22 @@ export default function CreateSummary() {
             setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
+            setIsCompleted(true);
+            setShowCompletionNotification(true);
             clearInterval(progressInterval);
             setIsProcessing(false);
+            
+            // Show completion notification
+            toast({
+              title: '🎉 AI Analysis Complete!',
+              description: 'Your content has been successfully processed and analyzed.',
+              duration: 5000,
+            });
+            
+            // Auto-hide notification after 3 seconds
+            setTimeout(() => {
+              setShowCompletionNotification(false);
+            }, 3000);
             toast({
               title: "Success!",
               description: "Real AI analysis completed! Results displayed below.",
@@ -712,9 +730,11 @@ export default function CreateSummary() {
                       <Button 
                         className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20"
                         onClick={() => setLocation(`/processing-results/${result.id}`)}
+                        disabled={!isCompleted}
+                        data-testid="button-view-full-analysis"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
-                        View Full Analysis
+                        {isCompleted ? 'View Full Analysis' : 'Processing...'}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -735,6 +755,55 @@ export default function CreateSummary() {
           </motion.div>
         )}
       </div>
+      
+      {/* Fixed Bottom Loading Bar */}
+      {isProcessing && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-lg border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                <span className="text-white text-sm font-medium">{processingStatus}</span>
+              </div>
+              <div className="flex-1">
+                <div className="w-full bg-gray-700/50 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+              <span className="text-purple-300 text-sm font-medium">{progress}%</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Completion Notification */}
+      {showCompletionNotification && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-green-600/90 to-emerald-600/90 backdrop-blur-lg border border-green-500/30 rounded-lg p-4 shadow-2xl"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-green-500/20">
+              <Bell className="h-5 w-5 text-green-300" />
+            </div>
+            <div>
+              <h4 className="text-white font-semibold">Processing Complete!</h4>
+              <p className="text-green-100 text-sm">Your AI analysis is ready to view</p>
+            </div>
+            <button
+              onClick={() => setShowCompletionNotification(false)}
+              className="ml-2 text-green-200 hover:text-white transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
