@@ -256,10 +256,14 @@ export default function CreateSummary() {
             setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
-            setIsCompleted(true);
-            setShowCompletionNotification(true);
-            clearInterval(progressInterval);
-            setIsProcessing(false);
+            
+            // Small delay to ensure UI state is proper
+            setTimeout(() => {
+              setIsCompleted(true);
+              setShowCompletionNotification(true);
+              clearInterval(progressInterval);
+              setIsProcessing(false);
+            }, 500);
             
             // Show completion notification
             toast({
@@ -617,22 +621,25 @@ export default function CreateSummary() {
 
             {/* Processing Progress */}
             {isProcessing && (
-              <div className="mt-6 p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg backdrop-blur-lg">
+              <div className="mt-6 p-6 bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/40 rounded-lg backdrop-blur-lg shadow-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <Loader2 className="h-6 w-6 text-purple-400 animate-spin" />
-                  <h3 className="text-xl font-bold text-white">AI Processing in Progress</h3>
+                  <h3 className="text-xl font-bold text-white">🤖 AI Processing in Progress</h3>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">{processingStatus}</span>
-                    <span className="text-purple-300">{progress}%</span>
+                    <span className="text-white font-medium">{processingStatus}</span>
+                    <span className="text-purple-300 font-bold">{progress}%</span>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-3">
+                  <div className="w-full bg-gray-700/60 rounded-full h-4 border border-gray-600">
                     <div 
-                      className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-purple-500 to-blue-500 h-4 rounded-full transition-all duration-500 shadow-lg"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
+                  <p className="text-center text-purple-200 text-sm">
+                    Please wait while we analyze your content...
+                  </p>
                 </div>
               </div>
             )}
@@ -662,7 +669,7 @@ export default function CreateSummary() {
         </Card>
 
         {/* Results Display - Glass morphism theme */}
-        {result && (
+        {result && isCompleted && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -758,7 +765,7 @@ export default function CreateSummary() {
       
       {/* Fixed Bottom Loading Bar */}
       {isProcessing && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-lg border-t border-white/10">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/98 via-purple-900/98 to-slate-900/98 backdrop-blur-xl border-t-2 border-purple-500/50 shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
