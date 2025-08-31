@@ -276,28 +276,32 @@ export default function Dashboard() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
-                    onClick={() => setLocation('/create-summary')}>
+                    onClick={() => setLocation('/create-summary')}
+                    data-testid="card-create-summary">
                 <CardContent className="p-6 text-center">
                   <Plus className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2">Create Summary</h3>
-                  <p className="text-gray-300 text-sm">Transform content into AI summaries</p>
+                  <h3 className="text-white font-semibold mb-2" data-testid="text-create-summary-title">Create Summary</h3>
+                  <p className="text-gray-300 text-sm" data-testid="text-create-summary-desc">Transform content into AI summaries</p>
                 </CardContent>
               </Card>
 
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
-                    onClick={() => setLocation('/wallet-dashboard')}>
+                    onClick={() => setLocation('/wallet-dashboard')}
+                    data-testid="card-wallet-dashboard">
                 <CardContent className="p-6 text-center">
                   <Wallet className="h-12 w-12 text-green-400 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2">Wallet Dashboard</h3>
-                  <p className="text-gray-300 text-sm">Manage tokens and rewards</p>
+                  <h3 className="text-white font-semibold mb-2" data-testid="text-wallet-title">Wallet Dashboard</h3>
+                  <p className="text-gray-300 text-sm" data-testid="text-wallet-desc">Manage tokens and rewards</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors">
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+                    onClick={() => setActiveTab('bounties')}
+                    data-testid="card-browse-bounties">
                 <CardContent className="p-6 text-center">
                   <Target className="h-12 w-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2">Browse Bounties</h3>
-                  <p className="text-gray-300 text-sm">Find content to summarize</p>
+                  <h3 className="text-white font-semibold mb-2" data-testid="text-bounties-title">Browse Bounties</h3>
+                  <p className="text-gray-300 text-sm" data-testid="text-bounties-desc">Find content to summarize</p>
                 </CardContent>
               </Card>
             </div>
@@ -455,15 +459,30 @@ export default function Dashboard() {
                   <Button 
                     className="w-full bg-green-600 hover:bg-green-700"
                     onClick={() => setLocation('/wallet-dashboard')}
+                    data-testid="button-wallet-dashboard-sidebar"
                   >
                     <Wallet className="h-4 w-4 mr-2" />
                     Wallet Dashboard
                   </Button>
-                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    onClick={() => navigator.share ? navigator.share({
+                      title: 'StreamAiX Profile',
+                      text: `Check out ${user?.username}'s AI summaries on StreamAiX`,
+                      url: window.location.origin + '/dashboard'
+                    }) : navigator.clipboard.writeText(window.location.origin + '/dashboard')}
+                    data-testid="button-share-profile"
+                  >
                     <Share className="h-4 w-4 mr-2" />
                     Share Profile
                   </Button>
-                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    onClick={() => alert('Referral program coming soon! Invite friends to earn bonus STREAM tokens.')}
+                    data-testid="button-referral-program"
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Referral Program
                   </Button>
