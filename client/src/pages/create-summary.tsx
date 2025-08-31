@@ -257,13 +257,15 @@ export default function CreateSummary() {
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
             
-            // Small delay to ensure UI state is proper
+            // Show completion notification and enable button
+            setIsCompleted(true);
+            setShowCompletionNotification(true);
+            clearInterval(progressInterval);
+            
+            // Hide loading bar after a brief moment
             setTimeout(() => {
-              setIsCompleted(true);
-              setShowCompletionNotification(true);
-              clearInterval(progressInterval);
               setIsProcessing(false);
-            }, 500);
+            }, 1000);
             
             // Show completion notification
             toast({
