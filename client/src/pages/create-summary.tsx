@@ -251,15 +251,11 @@ export default function CreateSummary() {
             (processingResult.financialTrends && Array.isArray(processingResult.financialTrends) && processingResult.financialTrends.length > 0)
           );
           
-          console.log('🔍 Content Detection Result:', hasRealContent);
-          console.log('📝 Summary length:', processingResult?.summary?.length || 0);
-          console.log('📋 BulletPoints count:', processingResult?.bulletPoints?.length || 0);
-          console.log('📊 Trends count:', processingResult?.trends?.length || 0);
-          console.log('🚨 FORCED COMPLETION TEST - Setting as complete regardless of detection');
+          console.log('🔍 Checking for completion - Summary length:', processingResult?.summary?.length || 0);
           
-          // TEMPORARY: Force completion if we have ANY content at all
+          // Force completion if we have ANY content at all
           if (processingResult && processingResult.id && processingResult.summary) {
-            console.log('🎯 FORCING COMPLETION - Found summary content');
+            console.log('🎯 COMPLETION DETECTED - Found summary content');
             setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Analysis complete!");
@@ -764,8 +760,8 @@ export default function CreateSummary() {
           </CardContent>
         </Card>
 
-        {/* Results Display - Glass morphism theme */}
-        {result && isCompleted && (
+        {/* Results Display - Only show when NOT processing and completed */}
+        {result && isCompleted && !isProcessing && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -837,7 +833,7 @@ export default function CreateSummary() {
                         data-testid="button-view-full-analysis"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
-                        {isCompleted ? 'View Full Analysis' : 'Processing...'}
+                        View Full Analysis
                       </Button>
                       <Button 
                         variant="outline" 
