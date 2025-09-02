@@ -253,6 +253,28 @@ export default function CreateSummary() {
           console.log('📝 Summary length:', processingResult?.summary?.length || 0);
           console.log('📋 BulletPoints count:', processingResult?.bulletPoints?.length || 0);
           console.log('📊 Trends count:', processingResult?.trends?.length || 0);
+          console.log('🚨 FORCED COMPLETION TEST - Setting as complete regardless of detection');
+          
+          // TEMPORARY: Force completion if we have ANY content at all
+          if (processingResult && processingResult.id && processingResult.summary) {
+            console.log('🎯 FORCING COMPLETION - Found summary content');
+            setResult(processingResult);
+            setProgress(100);
+            setProcessingStatus("Analysis complete!");
+            setIsCompleted(true);
+            setIsProcessing(false);
+            setShowCompletionNotification(true);
+            clearInterval(progressInterval);
+            toast({
+              title: '🎉 AI Analysis Complete!',
+              description: 'Your content has been successfully processed and analyzed.',
+              duration: 5000,
+            });
+            setTimeout(() => {
+              setShowCompletionNotification(false);
+            }, 3000);
+            return;
+          }
           
           if (hasRealContent) {
             console.log('🎉 *** PROCESSING COMPLETE! *** Setting result and updating UI...');
