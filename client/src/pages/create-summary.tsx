@@ -238,40 +238,34 @@ export default function CreateSummary() {
           console.log('- Has Title:', !!processingResult?.title);
           console.log('- Full keys:', processingResult ? Object.keys(processingResult) : 'none');
           
-          // Check if we got a direct summary response (RealContentProcessor format)
-          // The rebuilt processor returns summary data directly at the top level
-          if (processingResult && processingResult.id && 
-              (processingResult.processingStatus === 'completed' || 
-               processingResult.status === 'completed' || 
-               (processingResult.summary && processingResult.summary.trim()) || 
-               (processingResult.blogPost && processingResult.blogPost.trim()) ||
-               (processingResult.executiveSummary && processingResult.executiveSummary.trim()) ||
-               (processingResult.tldrSummary && processingResult.tldrSummary.trim()) ||
-               (processingResult.content && processingResult.content.trim()) ||
-               (processingResult.bulletPoints && processingResult.bulletPoints.length > 0) ||
-               (processingResult.trends && processingResult.trends.length > 0))) {
-            console.log('🎉 Real processor completed! Setting result...');
-            console.log('✅ Detected completion with data:', {
-              hasId: !!processingResult.id,
-              status: processingResult.status,
-              processingStatus: processingResult.processingStatus,
-              hasSummary: !!processingResult.summary,
-              hasBlogPost: !!processingResult.blogPost,
-              hasExecutiveSummary: !!processingResult.executiveSummary
-            });
+          // Check if processing is actually complete - look for ANY real content
+          const hasRealContent = processingResult && processingResult.id && (
+            (processingResult.summary && processingResult.summary.length > 50) ||
+            (processingResult.blogPost && processingResult.blogPost.length > 50) ||
+            (processingResult.executiveSummary && processingResult.executiveSummary.length > 50) ||
+            (processingResult.tldrSummary && processingResult.tldrSummary.length > 20) ||
+            (processingResult.bulletPoints && Array.isArray(processingResult.bulletPoints) && processingResult.bulletPoints.length > 0) ||
+            (processingResult.trends && Array.isArray(processingResult.trends) && processingResult.trends.length > 0) ||
+            (processingResult.financialTrends && Array.isArray(processingResult.financialTrends) && processingResult.financialTrends.length > 0)
+          );
+          
+          console.log('🔍 Content Detection Result:', hasRealContent);
+          console.log('📝 Summary length:', processingResult?.summary?.length || 0);
+          console.log('📋 BulletPoints count:', processingResult?.bulletPoints?.length || 0);
+          console.log('📊 Trends count:', processingResult?.trends?.length || 0);
+          
+          if (hasRealContent) {
+            console.log('🎉 *** PROCESSING COMPLETE! *** Setting result and updating UI...');
+            console.log('✅ Content detected - switching to completed state');
             setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
             
-            // Show completion notification and enable button
+            // IMMEDIATE completion - no delays
             setIsCompleted(true);
+            setIsProcessing(false);
             setShowCompletionNotification(true);
             clearInterval(progressInterval);
-            
-            // Hide loading bar immediately when complete
-            setTimeout(() => {
-              setIsProcessing(false);
-            }, 500);
             
             // Show completion notification
             toast({
