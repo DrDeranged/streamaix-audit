@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useContracts } from '@/hooks/useContracts';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { apiRequest } from '@/lib/queryClient';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Link as LinkIcon, Video, Headphones, Radio, Plus, X, Sparkles, Shield, CheckCircle2, Target, Brain, ExternalLink, BarChart3, Tag as TagIcon, Bell } from 'lucide-react';
 
 interface ProcessContentRequest {
@@ -122,6 +122,7 @@ export default function CreateSummary() {
   const [processingStatus, setProcessingStatus] = useState("");
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [summaryId, setSummaryId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,6 +165,7 @@ export default function CreateSummary() {
 
       const actualSummaryId = response.summaryId || response.summary?.id;
       console.log('🔍 Setting summaryId:', actualSummaryId, 'from response:', response);
+      setSummaryId(actualSummaryId);
       
       if (!actualSummaryId) {
         throw new Error('No summary ID received from server - cannot track processing');
@@ -645,30 +647,98 @@ export default function CreateSummary() {
               </Button>
             </form>
 
-            {/* Processing Progress */}
-            {isProcessing && (
-              <div className="mt-6 p-6 bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/40 rounded-lg backdrop-blur-lg shadow-2xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <Loader2 className="h-6 w-6 text-purple-400 animate-spin" />
-                  <h3 className="text-xl font-bold text-white">🤖 AI Processing in Progress</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white font-medium">{processingStatus}</span>
-                    <span className="text-purple-300 font-bold">{progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700/60 rounded-full h-4 border border-gray-600">
-                    <div 
-                      className="bg-gradient-to-r from-purple-500 to-blue-500 h-4 rounded-full transition-all duration-500 shadow-lg"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <p className="text-center text-purple-200 text-sm">
-                    Please wait while we analyze your content...
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* Processing Status - Landing Page Design */}
+            <AnimatePresence>
+              {(isProcessing || result) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="mt-6"
+                >
+                  {/* Progress Card - Same design as landing page */}
+                  {isProcessing && (
+                    <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                                <Brain className="h-5 w-5 text-indigo-400 animate-pulse" />
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">AI Processing Active</h3>
+                              <p className="text-sm text-muted-foreground">{processingStatus || "Starting AI analysis..."}</p>
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className="font-mono">
+                            {Math.round(progress)}%
+                          </Badge>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Completion State */}
+                  {isCompleted && result && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                        <CardContent className="p-6">
+                          <div className="text-center space-y-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Analysis Complete
+                              </Badge>
+                            </div>
+                            
+                            <h3 className="text-xl font-semibold">{result.title || "Content Analysis Ready"}</h3>
+                            
+                            {/* View Results Button */}
+                            <Button 
+                              onClick={() => {
+                                if (result?.id) {
+                                  setLocation(`/processing-results/${result.id}`);
+                                }
+                              }}
+                              className="w-full max-w-md bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                              data-testid="button-view-analysis"
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              View Full Analysis
+                            </Button>
+                            
+                            {showCompletionNotification && (
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center"
+                              >
+                                <div className="flex items-center justify-center gap-2 text-green-700 dark:text-green-400">
+                                  <CheckCircle2 className="h-5 w-5" />
+                                  <span className="font-medium">Your content has been successfully processed!</span>
+                                </div>
+                              </motion.div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Error Display */}
             {error && (
