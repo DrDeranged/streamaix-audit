@@ -231,10 +231,12 @@ export default function CreateSummary() {
           // Update progress based on actual processing status
           if (processingResult) {
             const status = processingResult.processingStatus;
-            // Complete when we have completed status OR substantial content (more flexible)
-            const hasContent = processingResult.summary || processingResult.blogPost || processingResult.executiveSummary || processingResult.content;
-            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!hasContent}`);
-            if ((status === 'completed' || hasContent) && processingResult.id) {
+            // Only complete when backend explicitly says 'completed' - don't rely on content presence alone
+            const hasRealContent = (processingResult.summary && processingResult.summary.length > 100) || 
+                                   (processingResult.blogPost && processingResult.blogPost.length > 100) || 
+                                   (processingResult.executiveSummary && processingResult.executiveSummary.length > 100);
+            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has real content: ${!!hasRealContent}`);
+            if (status === 'completed' && processingResult.id) {
               console.log('🎉 Backend completed with content! Finishing loading bar...');
               console.log('🎉 Setting final state: progress=100, isCompleted=true, isProcessing=false');
               setProgress(100);
@@ -259,7 +261,7 @@ export default function CreateSummary() {
             } else if (status === 'failed') {
               setProcessingStatus("Processing failed");
               throw new Error(processingResult.error || "Processing failed");
-            } else if (status === 'processing' || status === 'analyzing' || !hasContent) {
+            } else if (status === 'processing' || status === 'analyzing' || status !== 'completed') {
               // Keep processing - gradual progress that reflects real processing time
               const timeBasedProgress = Math.min(50, attempt * 1.5); // More gradual progress
               const currentProgress = Math.min(85, 5 + timeBasedProgress); // Start at 5%, cap at 85%

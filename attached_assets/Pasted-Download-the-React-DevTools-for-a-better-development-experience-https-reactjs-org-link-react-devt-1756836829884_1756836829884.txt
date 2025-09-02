@@ -1,0 +1,16 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+create-summary.tsx:150 🎬 Starting form submission - setting isProcessing to true
+create-summary.tsx:160 📡 Making API request to start processing...
+create-summary.tsx:167 ✅ API request successful: {message: 'REAL AI processing started successfully', summaryId: 'b9234851-4537-4085-ac30-30c6b567507a', jobId: 'job-1756836762038', summary: {…}, statusUrl: '/api/processing-result/b9234851-4537-4085-ac30-30c6b567507a', …}
+create-summary.tsx:170 🔍 Setting summaryId: b9234851-4537-4085-ac30-30c6b567507a from response: {message: 'REAL AI processing started successfully', summaryId: 'b9234851-4537-4085-ac30-30c6b567507a', jobId: 'job-1756836762038', summary: {…}, statusUrl: '/api/processing-result/b9234851-4537-4085-ac30-30c6b567507a', …}
+create-summary.tsx:196 Checking results attempt 1/80 for summary b9234851-4537-4085-ac30-30c6b567507a
+create-summary.tsx:224 🚀 Real Processing Result: {id: 'b9234851-4537-4085-ac30-30c6b567507a', title: 'Processing...', description: null, originalUrl: 'https://www.youtube.com/watch?v=8DwL3-e4uwQ&t=4s', originalDuration: null, …}
+create-summary.tsx:225 🔍 Processing Result Keys: (39) ['id', 'title', 'description', 'originalUrl', 'originalDuration', 'contentType', 'platform', 'transcript', 'summary', 'tldrSummary', 'blogPost', 'marketAnalysis', 'rawData', 'keyInsights', 'chapters', 'tags', 'creatorId', 'isPublic', 'processingStatus', 'accuracy', 'trends', 'narratives', 'executiveSummary', 'bulletPoints', 'timeline', 'keyQuotes', 'actionItems', 'entities', 'themes', 'marketSentiment', 'expertCredibility', 'conflictingViews', 'sourceCredibility', 'confidenceLevel', 'marketOutlook', 'arweaveId', 'ipfsHash', 'createdAt', 'updatedAt']
+create-summary.tsx:226 🔍 Has summary field: true
+create-summary.tsx:227 🔍 Has blogPost field: false
+create-summary.tsx:228 🔍 Has executiveSummary field: true
+create-summary.tsx:229 🔍 Has content field: false
+create-summary.tsx:236 📊 Backend status: processing, Frontend progress: 0%, Has content: true
+create-summary.tsx:238 🎉 Backend completed with content! Finishing loading bar...
+create-summary.tsx:239 🎉 Setting final state: progress=100, isCompleted=true, isProcessing=false
+create-summary.tsx:248 🛑 Completion detected - stopping all further polling
