@@ -217,10 +217,10 @@ export default function CreateSummary() {
           // Update progress based on actual processing status
           if (processingResult) {
             const status = processingResult.processingStatus;
-            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!processingResult.summary}`);
-            
             // Complete when we have completed status OR substantial content (more flexible)
-            if ((status === 'completed' || processingResult.summary) && processingResult.id) {
+            const hasContent = processingResult.summary || processingResult.blogPost || processingResult.executiveSummary || processingResult.content;
+            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!hasContent}`);
+            if ((status === 'completed' || hasContent) && processingResult.id) {
               console.log('🎉 Backend completed with content! Finishing loading bar...');
               setProgress(100);
               setProcessingStatus("Processing completed successfully!");
@@ -240,7 +240,7 @@ export default function CreateSummary() {
             } else if (status === 'failed') {
               setProcessingStatus("Processing failed");
               throw new Error(processingResult.error || "Processing failed");
-            } else if (status === 'processing' || status === 'analyzing' || !processingResult.summary) {
+            } else if (status === 'processing' || status === 'analyzing' || !hasContent) {
               // Keep processing - gradual progress that reflects real processing time
               const timeBasedProgress = Math.min(50, attempt * 1.5); // More gradual progress
               const currentProgress = Math.min(85, 5 + timeBasedProgress); // Start at 5%, cap at 85%
