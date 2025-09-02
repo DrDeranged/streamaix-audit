@@ -188,8 +188,8 @@ export default function CreateSummary() {
         });
       }, 2000);
 
-      // Check for results with retry mechanism - EXACT copy from working demo
-      const checkResults = async (attempt = 1, maxAttempts = 20) => {
+      // Check for results with faster polling for immediate completion detection
+      const checkResults = async (attempt = 1, maxAttempts = 30) => {
         const currentSummaryId = actualSummaryId; // Use the captured ID from closure
         try {
           if (!currentSummaryId) {
@@ -262,10 +262,10 @@ export default function CreateSummary() {
             setShowCompletionNotification(true);
             clearInterval(progressInterval);
             
-            // Hide loading bar after a brief moment
+            // Hide loading bar immediately when complete
             setTimeout(() => {
               setIsProcessing(false);
-            }, 1000);
+            }, 500);
             
             // Show completion notification
             toast({
@@ -341,16 +341,18 @@ export default function CreateSummary() {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           
-          // Still processing, check again
+          // Still processing, check again with faster polling
           if (attempt < maxAttempts) {
-            setTimeout(() => checkResults(attempt + 1, maxAttempts), 1500);
+            const retryDelay = attempt < 15 ? 800 : 1500; // Faster polling initially
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), retryDelay);
           } else {
             throw new Error("Processing is taking longer than expected. The system may still be working in the background.");
           }
         } catch (checkError: any) {
           console.error(`Check attempt ${attempt} failed:`, checkError);
           if (attempt < maxAttempts) {
-            setTimeout(() => checkResults(attempt + 1, maxAttempts), 3000);
+            const errorRetryDelay = attempt < 10 ? 1000 : 2000; // Faster error recovery
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), errorRetryDelay);
           } else {
             throw checkError;
           }
