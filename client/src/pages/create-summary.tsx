@@ -171,26 +171,12 @@ export default function CreateSummary() {
         throw new Error('No summary ID received from server - cannot track processing');
       }
       
-      setProgress(10);
-      setProcessingStatus("Audio extraction in progress...");
+      setProgress(1);
+      setProcessingStatus("Initializing AI processing...");
 
-      // Progress updates with better timing (same as demo)
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev < 85) return prev + 15;
-          if (prev < 95) return prev + 2;
-          return prev;
-        });
-        
-        setProcessingStatus(prev => {
-          if (progress < 30) return "Extracting audio from video...";
-          if (progress < 60) return "AI transcription in progress...";
-          if (progress < 90) return "Generating comprehensive analysis...";
-          return "Finalizing results...";
-        });
-      }, 2000);
+      // Remove fake progress - use real-time updates based on backend status
 
-      // Check for results with faster polling for immediate completion detection
+      // Check for results with real-time progress updates
       const checkResults = async (attempt = 1, maxAttempts = 30) => {
         const currentSummaryId = actualSummaryId; // Use the captured ID from closure
         try {
@@ -227,83 +213,50 @@ export default function CreateSummary() {
           });
           
           console.log('🚀 Real Processing Result:', processingResult);
-          console.log('🔍 Result Analysis:');
-          console.log('- Has ID:', !!processingResult?.id);
-          console.log('- Status:', processingResult?.status);
-          console.log('- Processing Status:', processingResult?.processingStatus);
-          console.log('- Has Summary:', !!processingResult?.summary, processingResult?.summary?.length || 0, 'chars');
-          console.log('- Has BlogPost:', !!processingResult?.blogPost, processingResult?.blogPost?.length || 0, 'chars');
-          console.log('- Has ExecutiveSummary:', !!processingResult?.executiveSummary, processingResult?.executiveSummary?.length || 0, 'chars');
-          console.log('- Has BulletPoints:', !!processingResult?.bulletPoints, processingResult?.bulletPoints?.length || 0, 'items');
-          console.log('- Has Trends:', !!processingResult?.trends, processingResult?.trends?.length || 0, 'items');
-          console.log('- Has Content:', !!processingResult?.content);
-          console.log('- Has Title:', !!processingResult?.title);
-          console.log('- Full keys:', processingResult ? Object.keys(processingResult) : 'none');
           
-          // Check if processing is actually complete - look for ANY real content
-          const hasRealContent = processingResult && processingResult.id && (
-            (processingResult.summary && processingResult.summary.length > 50) ||
-            (processingResult.blogPost && processingResult.blogPost.length > 50) ||
-            (processingResult.executiveSummary && processingResult.executiveSummary.length > 50) ||
-            (processingResult.tldrSummary && processingResult.tldrSummary.length > 20) ||
-            (processingResult.bulletPoints && Array.isArray(processingResult.bulletPoints) && processingResult.bulletPoints.length > 0) ||
-            (processingResult.trends && Array.isArray(processingResult.trends) && processingResult.trends.length > 0) ||
-            (processingResult.financialTrends && Array.isArray(processingResult.financialTrends) && processingResult.financialTrends.length > 0)
-          );
-          
-          console.log('🔍 Checking for completion - Summary length:', processingResult?.summary?.length || 0);
-          
-          // Force completion if we have ANY content at all
-          if (processingResult && processingResult.id && processingResult.summary) {
-            console.log('🎯 COMPLETION DETECTED - Found summary content');
-            setResult(processingResult);
-            setProgress(100);
-            setProcessingStatus("Analysis complete!");
-            setIsCompleted(true);
-            setIsProcessing(false);
-            setShowCompletionNotification(true);
-            clearInterval(progressInterval);
-            toast({
-              title: '🎉 AI Analysis Complete!',
-              description: 'Your content has been successfully processed and analyzed.',
-              duration: 5000,
-            });
-            setTimeout(() => {
-              setShowCompletionNotification(false);
-            }, 3000);
-            return;
-          }
-          
-          if (hasRealContent) {
-            console.log('🎉 *** PROCESSING COMPLETE! *** Setting result and updating UI...');
-            console.log('✅ Content detected - switching to completed state');
-            setResult(processingResult);
-            setProgress(100);
-            setProcessingStatus("Processing completed successfully!");
+          // Update progress based on actual processing status
+          if (processingResult) {
+            const status = processingResult.processingStatus;
+            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!processingResult.summary}`);
             
-            // IMMEDIATE completion - no delays
-            setIsCompleted(true);
-            setIsProcessing(false);
-            setShowCompletionNotification(true);
-            clearInterval(progressInterval);
-            
-            // Show completion notification
-            toast({
-              title: '🎉 AI Analysis Complete!',
-              description: 'Your content has been successfully processed and analyzed.',
-              duration: 5000,
-            });
-            
-            // Auto-hide notification after 3 seconds
-            setTimeout(() => {
-              setShowCompletionNotification(false);
-            }, 3000);
-            toast({
-              title: "Success!",
-              description: "Real AI analysis completed! Results displayed below.",
-              variant: "default"
-            });
-            return;
+            // Only complete when we have BOTH completed status AND actual content
+            if (status === 'completed' && processingResult.summary && processingResult.id) {
+              console.log('🎉 Backend completed with content! Finishing loading bar...');
+              setProgress(100);
+              setProcessingStatus("Processing completed successfully!");
+              setResult(processingResult);
+              setIsCompleted(true);
+              setIsProcessing(false);
+              setShowCompletionNotification(true);
+              toast({
+                title: '🎉 AI Analysis Complete!',
+                description: 'Your content has been successfully processed and analyzed.',
+                duration: 5000,
+              });
+              setTimeout(() => {
+                setShowCompletionNotification(false);
+              }, 3000);
+              return;
+            } else if (status === 'failed') {
+              setProcessingStatus("Processing failed");
+              throw new Error(processingResult.error || "Processing failed");
+            } else if (status === 'processing' || !processingResult.summary) {
+              // Keep processing - gradual progress that reflects real processing time
+              const timeBasedProgress = Math.min(40, attempt * 2); // Slow initial progress
+              const currentProgress = Math.min(85, 5 + timeBasedProgress); // Start at 5%, cap at 85%
+              setProgress(currentProgress);
+              
+              // Update status message based on actual processing phase and progress
+              if (currentProgress < 20) {
+                setProcessingStatus("Extracting audio from video...");
+              } else if (currentProgress < 50) {
+                setProcessingStatus("AI transcription in progress...");
+              } else if (currentProgress < 80) {
+                setProcessingStatus("Generating comprehensive analysis...");
+              } else {
+                setProcessingStatus("Finalizing AI report...");
+              }
+            }
           }
           
           // Fallback to regular summary endpoint
@@ -319,45 +272,10 @@ export default function CreateSummary() {
           console.log('📝 Summary has content:', !!summaryResponse.summary?.summary);
           console.log('🎯 Summary title:', summaryResponse.summary?.title);
           
-          // REAL PROCESSOR: Check for completion via any endpoint
-          if (summaryResponse.summary && (
-            summaryResponse.summary.processingStatus === 'completed' ||
-            summaryResponse.summary.status === 'completed' || 
-            summaryResponse.summary.summary || 
-            summaryResponse.summary.blogPost ||
-            summaryResponse.summary.executiveSummary ||
-            summaryResponse.summary.content ||
-            summaryResponse.summary.tldrSummary
-          )) {
-            console.log('🎉 Real processor completed via summary endpoint!');
-            console.log('📊 Summary data keys:', Object.keys(summaryResponse.summary));
-            setResult(summaryResponse.summary);
-            setProgress(100);
-            setProcessingStatus("Processing completed successfully!");
-            clearInterval(progressInterval);
-            setIsProcessing(false);
-            toast({
-              title: "Success!",
-              description: "Real AI content analysis completed!",
-              variant: "default"
-            });
-            return;
-          }
+          // Skip old completion checks - main logic above handles completion
           
-          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.processingStatus === 'completed')) {
-            console.log('🎉 Processing completed! Setting result...');
-            setResult(summaryResponse.summary);
-            setProgress(100);
-            setProcessingStatus("Processing completed successfully!");
-            clearInterval(progressInterval);
-            setIsProcessing(false);
-            toast({
-              title: "Success!",
-              description: "Real AI processing completed! Results displayed below.",
-              variant: "default"
-            });
-            return;
-          } else if (summaryResponse.summary && (summaryResponse.summary.status === 'failed' || summaryResponse.summary.processingStatus === 'failed')) {
+          // All completion logic is now handled in the main processing result check above
+          if (summaryResponse.summary && (summaryResponse.summary.status === 'failed' || summaryResponse.summary.processingStatus === 'failed')) {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           
