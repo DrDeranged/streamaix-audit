@@ -107,8 +107,8 @@ export function RealAIDemo() {
       
       setJobId(response.jobId || `job-${Date.now()}`);
       setSummaryId(actualSummaryId);
-      setProgress(10);
-      setProcessingStatus("Audio extraction in progress...");
+      setProgress(1);
+      setProcessingStatus("Initializing AI processing...");
 
       // Progress updates based on actual backend status
       let progressInterval: NodeJS.Timeout;
@@ -173,18 +173,20 @@ export function RealAIDemo() {
               setProcessingStatus("Processing failed");
               throw new Error(processingResult.error || "Processing failed");
             } else if (status === 'processing' || !processingResult.summary) {
-              // Keep processing - don't complete until we have actual content
-              const baseProgress = 20 + (attempt * 2); // Slower, more realistic progress
-              const currentProgress = Math.min(85, baseProgress); // Cap at 85% until truly complete
+              // Keep processing - gradual progress that reflects real processing time
+              const timeBasedProgress = Math.min(40, attempt * 2); // Slow initial progress
+              const currentProgress = Math.min(85, 5 + timeBasedProgress); // Start at 5%, cap at 85%
               setProgress(currentProgress);
               
-              // Update status message based on processing phase
-              if (currentProgress < 30) {
+              // Update status message based on actual processing phase and progress
+              if (currentProgress < 20) {
                 setProcessingStatus("Extracting audio from video...");
-              } else if (currentProgress < 60) {
+              } else if (currentProgress < 50) {
                 setProcessingStatus("AI transcription in progress...");
-              } else {
+              } else if (currentProgress < 80) {
                 setProcessingStatus("Generating comprehensive analysis...");
+              } else {
+                setProcessingStatus("Finalizing AI report...");
               }
             }
           }
@@ -245,9 +247,10 @@ export function RealAIDemo() {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           
-          // Still processing, check again
+          // Still processing, check again with faster polling for better real-time feedback
           if (attempt < maxAttempts) {
-            setTimeout(() => checkResults(attempt + 1, maxAttempts), 1500);
+            const pollInterval = attempt < 5 ? 1000 : 1500; // Faster polling initially
+            setTimeout(() => checkResults(attempt + 1, maxAttempts), pollInterval);
           } else {
             throw new Error("Processing is taking longer than expected. The system may still be working in the background.");
           }
@@ -285,8 +288,8 @@ export function RealAIDemo() {
         }
       };
 
-      // Start checking after 3 seconds to allow processing to begin
-      setTimeout(() => checkResults(), 3000);
+      // Start checking immediately for real-time feedback
+      checkResults();
 
     } catch (err: any) {
       setError(err.message || "Failed to start processing");
