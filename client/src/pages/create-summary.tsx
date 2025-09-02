@@ -177,7 +177,7 @@ export default function CreateSummary() {
       // Remove fake progress - use real-time updates based on backend status
 
       // Check for results with real-time progress updates
-      const checkResults = async (attempt = 1, maxAttempts = 30) => {
+      const checkResults = async (attempt = 1, maxAttempts = 80) => { // Increased for longer AI processing
         const currentSummaryId = actualSummaryId; // Use the captured ID from closure
         try {
           if (!currentSummaryId) {
@@ -219,8 +219,8 @@ export default function CreateSummary() {
             const status = processingResult.processingStatus;
             console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!processingResult.summary}`);
             
-            // Only complete when we have BOTH completed status AND actual content
-            if (status === 'completed' && processingResult.summary && processingResult.id) {
+            // Complete when we have completed status OR substantial content (more flexible)
+            if ((status === 'completed' || processingResult.summary) && processingResult.id) {
               console.log('🎉 Backend completed with content! Finishing loading bar...');
               setProgress(100);
               setProcessingStatus("Processing completed successfully!");
@@ -240,9 +240,9 @@ export default function CreateSummary() {
             } else if (status === 'failed') {
               setProcessingStatus("Processing failed");
               throw new Error(processingResult.error || "Processing failed");
-            } else if (status === 'processing' || !processingResult.summary) {
+            } else if (status === 'processing' || status === 'analyzing' || !processingResult.summary) {
               // Keep processing - gradual progress that reflects real processing time
-              const timeBasedProgress = Math.min(40, attempt * 2); // Slow initial progress
+              const timeBasedProgress = Math.min(50, attempt * 1.5); // More gradual progress
               const currentProgress = Math.min(85, 5 + timeBasedProgress); // Start at 5%, cap at 85%
               setProgress(currentProgress);
               
@@ -284,7 +284,7 @@ export default function CreateSummary() {
             const retryDelay = attempt < 15 ? 800 : 1500; // Faster polling initially
             setTimeout(() => checkResults(attempt + 1, maxAttempts), retryDelay);
           } else {
-            throw new Error("Processing is taking longer than expected. The system may still be working in the background.");
+            throw new Error("AI processing is taking longer than usual. This can happen with longer videos. Please try refreshing the page in a moment to check if processing completed.");
           }
         } catch (checkError: any) {
           console.error(`Check attempt ${attempt} failed:`, checkError);
