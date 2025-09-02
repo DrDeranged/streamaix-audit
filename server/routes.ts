@@ -1022,6 +1022,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get processing result endpoint (Rebuilt Processor)
   app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
+    // Set headers to prevent caching for real-time updates
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
     const processor = RebuiltContentProcessor.getInstance();
     const result = await processor.getProcessingResult(req.params.summaryId);
     res.json(result);

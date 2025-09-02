@@ -154,9 +154,27 @@ export function RealAIDemo() {
           // Update progress based on actual processing status
           if (processingResult && processingResult.processingStatus) {
             const status = processingResult.processingStatus;
-            if (status === 'processing') {
-              // Update progress based on backend processing phase
-              const currentProgress = Math.min(85, 20 + (attempt * 3)); // Gradual increase but cap at 85%
+            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%`);
+            
+            if (status === 'completed') {
+              // IMMEDIATE completion detection - set progress to 100% and finish
+              console.log('🎉 Backend completed! Finishing loading bar...');
+              setProgress(100);
+              setProcessingStatus("Processing completed successfully!");
+              setResult(processingResult);
+              setIsProcessing(false);
+              toast({
+                title: "Success!",
+                description: "Real AI analysis completed! Results displayed below.",
+                variant: "default"
+              });
+              return;
+            } else if (status === 'failed') {
+              setProcessingStatus("Processing failed");
+              throw new Error(processingResult.error || "Processing failed");
+            } else if (status === 'processing') {
+              // Update progress based on backend processing phase, but cap at 90% until completion
+              const currentProgress = Math.min(90, 20 + (attempt * 3)); 
               setProgress(currentProgress);
               
               // Update status message based on processing phase
@@ -167,11 +185,6 @@ export function RealAIDemo() {
               } else {
                 setProcessingStatus("Generating comprehensive analysis...");
               }
-            } else if (status === 'completed') {
-              setProgress(100);
-              setProcessingStatus("Processing completed successfully!");
-            } else if (status === 'failed') {
-              setProcessingStatus("Processing failed");
             }
           }
           
