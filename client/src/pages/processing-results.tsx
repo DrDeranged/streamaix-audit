@@ -390,42 +390,42 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Key Insights Tab */}
                     <TabsContent value="insights" className="space-y-4">
-                      {summary.keyInsights && summary.keyInsights.length > 0 && (
-                        <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                      {/* Combine keyInsights and bulletPoints into single section */}
+                      {((summary.keyInsights && summary.keyInsights.length > 0) || (summary.bulletPoints && summary.bulletPoints.length > 0)) && (
+                        <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
                           <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
+                            <Zap className="w-4 h-4" />
                             Key Insights
                           </h5>
-                          <div className="space-y-2">
-                            {summary.keyInsights.map((insight: any, idx: number) => (
-                              <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
-                                <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <div className="flex-1">
-                                  <span className="text-sm text-white" style={{color: '#ffffff'}}>{typeof insight === 'object' ? insight.insight : insight}</span>
-                                  {typeof insight === 'object' && insight.timestamp && (
-                                    <div className="text-xs text-muted-foreground mt-1">{insight.timestamp}</div>
-                                  )}
+                          <div className="space-y-3">
+                            {/* Display keyInsights first */}
+                            {summary.keyInsights && summary.keyInsights.map((insight: any, idx: number) => (
+                              <div key={`insight-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
+                                <div className="flex items-start justify-between mb-2">
+                                  <span className="font-medium text-sm text-white">
+                                    {typeof insight === 'object' ? (insight.insight || insight.text || insight.content) : insight}
+                                  </span>
                                   {typeof insight === 'object' && insight.importance && (
-                                    <Badge variant="outline" className="text-xs mt-1 mr-2">{insight.importance}</Badge>
+                                    <Badge variant="outline" className={`text-xs ml-2 ${
+                                      insight.importance === 'high' ? 'text-red-400 border-red-500/30' :
+                                      insight.importance === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
+                                      'text-gray-400 border-gray-500/30'
+                                    }`}>
+                                      {insight.importance}
+                                    </Badge>
                                   )}
                                 </div>
+                                {typeof insight === 'object' && insight.timestamp && (
+                                  <div className="text-xs text-muted-foreground">{insight.timestamp}</div>
+                                )}
                               </div>
                             ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {summary.bulletPoints && summary.bulletPoints.length > 0 && (
-                        <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                          <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
-                            Key Insights
-                          </h5>
-                          <div className="space-y-2">
-                            {summary.bulletPoints.map((point: any, idx: number) => (
-                              <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
-                                <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                <span className="text-sm text-white" style={{color: '#ffffff'}}>{typeof point === 'object' ? point.point || point.insight || JSON.stringify(point) : point}</span>
+                            {/* Display bulletPoints if no keyInsights */}
+                            {(!summary.keyInsights || summary.keyInsights.length === 0) && summary.bulletPoints && summary.bulletPoints.map((point: any, idx: number) => (
+                              <div key={`bullet-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
+                                <span className="text-sm text-white">
+                                  {typeof point === 'object' ? (point.point || point.insight || point.text || JSON.stringify(point)) : point}
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -433,16 +433,16 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.trends && summary.trends.length > 0 && (
-                        <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                        <div className="p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
                           <h5 className="font-semibold mb-3 text-purple-400 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Market Trends
                           </h5>
                           <div className="space-y-3">
                             {summary.trends.map((trend: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="font-medium text-sm">{trend.trend || `Trend ${idx + 1}`}</span>
+                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-purple-400">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium text-sm text-white">{trend.trend || `Trend ${idx + 1}`}</span>
                                   <Badge variant="outline" className={`text-xs ${
                                     trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
                                     trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
@@ -451,7 +451,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                     {trend.strength || 'moderate'}
                                   </Badge>
                                 </div>
-                                <p className="text-xs text-muted-foreground">{trend.evidence || trend}</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">{trend.evidence || trend}</p>
                               </div>
                             ))}
                           </div>
@@ -459,18 +459,20 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       )}
 
                       {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                        <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                        <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
                           <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
                             <MessageSquare className="w-4 h-4" />
                             Key Quotes
                           </h5>
                           <div className="space-y-3">
                             {summary.keyQuotes.map((quote: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-orange-400">
-                                <p className="text-sm italic mb-2">"{quote.quote}"</p>
-                                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                  <span>{quote.speaker}</span>
-                                  <span>{quote.timestamp}</span>
+                              <div key={idx} className="p-4 bg-background/50 rounded-md border-l-4 border-orange-400">
+                                <blockquote className="text-sm italic mb-3 text-white leading-relaxed">
+                                  "{quote.quote || quote.text || quote}"
+                                </blockquote>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-medium text-orange-300">{quote.speaker || 'Speaker'}</span>
+                                  <span className="text-muted-foreground">{quote.timestamp}</span>
                                 </div>
                               </div>
                             ))}
@@ -481,45 +483,29 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Market Intel Tab */}
                     <TabsContent value="market" className="space-y-4">
-                      {/* Market Overview Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
+                      {/* Market Overview Grid - Single Clean Version */}
+                      <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
                           <div className="text-2xl font-bold mb-1 text-green-400">
-                            {summary.marketSentiment || 'Bullish'}
+                            {(() => {
+                              try {
+                                const analysis = JSON.parse(summary.marketAnalysis || '{}');
+                                return analysis.marketSentiment || summary.marketSentiment || 'BULLISH';
+                              } catch {
+                                return summary.marketSentiment || 'BULLISH';
+                              }
+                            })()}
                           </div>
                           <div className="text-xs text-muted-foreground">Market Sentiment</div>
                         </div>
                         <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
                           <div className="text-2xl font-bold text-purple-400 mb-1">
-                            {summary.sourceCredibility || 'High'}
-                          </div>
-                          <div className="text-xs text-muted-foreground">Source Credibility</div>
-                        </div>
-                      </div>
-
-                      {/* Market Overview Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                          <div className="text-2xl font-bold mb-1 text-green-400" style={{color: '#4ade80'}}>
                             {(() => {
                               try {
                                 const analysis = JSON.parse(summary.marketAnalysis || '{}');
-                                return analysis.marketSentiment || 'BULLISH';
+                                return analysis.sourceCredibility || summary.sourceCredibility || summary.accuracy + '%' || 'High';
                               } catch {
-                                return 'BULLISH';
-                              }
-                            })()}
-                          </div>
-                          <div className="text-xs text-gray-300" style={{color: '#d1d5db'}}>Market Sentiment</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
-                          <div className="text-2xl font-bold text-purple-400 mb-1" style={{color: '#a855f7'}}>
-                            {(() => {
-                              try {
-                                const analysis = JSON.parse(summary.marketAnalysis || '{}');
-                                return analysis.sourceCredibility || 'High';
-                              } catch {
-                                return 'High';
+                                return summary.sourceCredibility || (summary.accuracy ? summary.accuracy + '%' : 'High');
                               }
                             })()}
                           </div>
