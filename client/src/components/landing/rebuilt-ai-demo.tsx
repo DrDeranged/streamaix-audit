@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'wouter';
 import { 
   Brain, 
   Zap, 
@@ -23,7 +25,9 @@ import {
   ExternalLink,
   BarChart3,
   FileText,
-  Target
+  Target,
+  Sparkles,
+  TrendingUp as TrendingUpIcon
 } from 'lucide-react';
 import {
   BarChart,
@@ -99,6 +103,7 @@ export function AIProcessor() {
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
   const [statusTimeouts, setStatusTimeouts] = useState<NodeJS.Timeout[]>([]);
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
 
   // Query for processing result with real-time updates
   const { data: result, isLoading: isResultLoading, error } = useQuery<ProcessingResult>({
@@ -680,6 +685,95 @@ export function AIProcessor() {
                         </Tabs>
                       </CardContent>
                     </Card>
+
+                    {/* Dashboard Call-to-Action */}
+                    {isAuthenticated && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="mt-6"
+                      >
+                        <Card className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 animate-pulse"></div>
+                          <CardContent className="p-6 relative">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                                  <BarChart3 className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-1">
+                                    Continue Your Analysis Journey
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    Track, organize, and explore all your AI-processed content in your personal dashboard
+                                  </p>
+                                </div>
+                              </div>
+                              <Link href="/dashboard" data-testid="button-view-dashboard">
+                                <Button 
+                                  size="lg" 
+                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                >
+                                  <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
+                                  View Dashboard
+                                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </Button>
+                              </Link>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
+
+                    {/* For Non-Authenticated Users */}
+                    {!isAuthenticated && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="mt-6"
+                      >
+                        <Card className="bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 border border-emerald-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-blue-500/5 animate-pulse"></div>
+                          <CardContent className="p-6 relative">
+                            <div className="text-center">
+                              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-emerald-500 to-blue-600 flex items-center justify-center mb-4">
+                                <TrendingUpIcon className="h-8 w-8 text-white" />
+                              </div>
+                              <h3 className="text-xl font-semibold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent mb-2">
+                                Ready to Unlock Your Full Potential?
+                              </h3>
+                              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                Create your account to save analyses, track trends, and access powerful AI-driven insights across all your content
+                              </p>
+                              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <Link href="/auth" data-testid="button-sign-up">
+                                  <Button 
+                                    size="lg" 
+                                    className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group min-w-[140px]"
+                                  >
+                                    <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
+                                    Get Started
+                                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                  </Button>
+                                </Link>
+                                <Link href="/auth" data-testid="button-sign-in">
+                                  <Button 
+                                    variant="outline" 
+                                    size="lg" 
+                                    className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 transition-all duration-300 min-w-[140px]"
+                                  >
+                                    Sign In
+                                  </Button>
+                                </Link>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
                   </motion.div>
                 )}
 
