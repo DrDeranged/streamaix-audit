@@ -704,10 +704,10 @@ export function AIProcessor() {
                                 </div>
                                 <div>
                                   <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-1">
-                                    Continue Your Analysis Journey
+                                    Turn Insights Into Income
                                   </h3>
                                   <p className="text-sm text-muted-foreground">
-                                    Track, organize, and explore all your AI-processed content in your personal dashboard
+                                    Monetize your analyses, build your reputation, and earn rewards for sharing valuable market intelligence
                                   </p>
                                 </div>
                               </div>
@@ -717,7 +717,7 @@ export function AIProcessor() {
                                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
                                 >
                                   <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
-                                  View Dashboard
+                                  Start Earning
                                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                               </Link>
