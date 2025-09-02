@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
+import UserNotesModal from '@/components/UserNotesModal';
 import { 
   Brain, 
   Zap, 
@@ -27,7 +29,9 @@ import {
   FileText,
   Target,
   Sparkles,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  Edit3,
+  Plus
 } from 'lucide-react';
 import {
   BarChart,
@@ -104,6 +108,7 @@ export function AIProcessor() {
   const [statusTimeouts, setStatusTimeouts] = useState<NodeJS.Timeout[]>([]);
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
+  const [showNotesModal, setShowNotesModal] = useState(false);
 
   // Query for processing result with real-time updates
   const { data: result, isLoading: isResultLoading, error } = useQuery<ProcessingResult>({
@@ -195,6 +200,7 @@ export function AIProcessor() {
 
   const isCompleted = result?.processingStatus === 'completed';
   const isFailed = result?.processingStatus === 'failed';
+
 
   return (
     <section id="ai-analysis" className="py-16 bg-background">
@@ -686,6 +692,47 @@ export function AIProcessor() {
                       </CardContent>
                     </Card>
 
+                    {/* User Notes Section */}
+                    {isAuthenticated && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-6"
+                      >
+                        <Card className="bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                          <CardContent className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <Edit3 className="h-5 w-5 text-indigo-400" />
+                                <h4 className="text-lg font-semibold">Your Analysis Notes</h4>
+                                <Badge variant="secondary" className="text-xs">Private</Badge>
+                              </div>
+                              <Button
+                                onClick={() => setShowNotesModal(true)}
+                                variant="outline"
+                                size="sm"
+                                className="text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
+                                data-testid="button-add-note"
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Note
+                              </Button>
+                            </div>
+
+                            <div className="text-center py-8 text-muted-foreground">
+                              <Edit3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                              <p className="text-sm">
+                                Capture your insights and analysis for future reference.
+                                <br />
+                                <span className="text-xs">Notes are private and accessible from your dashboard.</span>
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
+
                     {/* Dashboard Call-to-Action */}
                     {isAuthenticated && (
                       <motion.div
@@ -704,7 +751,7 @@ export function AIProcessor() {
                                 </div>
                                 <div>
                                   <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-1">
-                                    Amplify Your Impact
+                                    Maximize Your Insights
                                   </h3>
                                   <p className="text-sm text-muted-foreground">
                                     Share insights, collaborate with experts, build your reputation, and earn rewards along the way
@@ -791,6 +838,16 @@ export function AIProcessor() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* User Notes Modal */}
+      {summaryId && result?.title && (
+        <UserNotesModal
+          isOpen={showNotesModal}
+          onClose={() => setShowNotesModal(false)}
+          summaryId={summaryId}
+          summaryTitle={result.title}
+        />
+      )}
     </section>
   );
 }

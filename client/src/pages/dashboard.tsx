@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
+import UserNotesList from '@/components/UserNotesList';
 import { 
   Plus, 
   Play, 
@@ -25,7 +26,8 @@ import {
   Users,
   Target,
   ArrowLeft,
-  Home
+  Home,
+  BookmarkPlus
 } from 'lucide-react';
 
 interface Summary {
@@ -229,12 +231,15 @@ export default function Dashboard() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
+          <TabsList className="grid w-full grid-cols-5 bg-white/10 border-white/20">
             <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600">
               Overview
             </TabsTrigger>
             <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-600">
               My Summaries
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600">
+              My Notes
             </TabsTrigger>
             <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-600">
               Bounties
@@ -489,6 +494,23 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="notes" className="space-y-6">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <BookmarkPlus className="h-5 w-5" />
+                  My Personal Notes
+                </CardTitle>
+                <p className="text-gray-300 text-sm mt-2">
+                  All your personal insights, analysis, and footnotes from AI-processed content
+                </p>
+              </CardHeader>
+              <CardContent>
+                <UserNotesList title="" />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

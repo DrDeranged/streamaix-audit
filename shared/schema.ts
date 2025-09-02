@@ -98,12 +98,24 @@ export const knowledgeStacks = pgTable("knowledge_stacks", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const userNotes = pgTable("user_notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  summaryId: varchar("summary_id").references(() => summaries.id).notNull(),
+  noteText: text("note_text").notNull(),
+  noteType: text("note_type").notNull().default("footnote"), // footnote, analysis, insight
+  isPrivate: boolean("is_private").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
   bounties: many(bounties),
   knowledgeStacks: many(knowledgeStacks),
   interactions: many(userInteractions),
+  notes: many(userNotes),
 }));
 
 export const summariesRelations = relations(summaries, ({ one, many }) => ({
@@ -116,6 +128,7 @@ export const summariesRelations = relations(summaries, ({ one, many }) => ({
     references: [bounties.summaryId],
   }),
   interactions: many(userInteractions),
+  notes: many(userNotes),
 }));
 
 export const bountiesRelations = relations(bounties, ({ one }) => ({
@@ -148,6 +161,17 @@ export const knowledgeStacksRelations = relations(knowledgeStacks, ({ one }) => 
   creator: one(users, {
     fields: [knowledgeStacks.creatorId],
     references: [users.id],
+  }),
+}));
+
+export const userNotesRelations = relations(userNotes, ({ one }) => ({
+  user: one(users, {
+    fields: [userNotes.userId],
+    references: [users.id],
+  }),
+  summary: one(summaries, {
+    fields: [userNotes.summaryId],
+    references: [summaries.id],
   }),
 }));
 
@@ -208,6 +232,14 @@ export const insertKnowledgeStackSchema = createInsertSchema(knowledgeStacks).pi
   tags: true,
 });
 
+export const insertUserNoteSchema = createInsertSchema(userNotes).pick({
+  userId: true,
+  summaryId: true,
+  noteText: true,
+  noteType: true,
+  isPrivate: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -223,3 +255,6 @@ export type UserInteraction = typeof userInteractions.$inferSelect;
 
 export type InsertKnowledgeStack = z.infer<typeof insertKnowledgeStackSchema>;
 export type KnowledgeStack = typeof knowledgeStacks.$inferSelect;
+
+export type InsertUserNote = z.infer<typeof insertUserNoteSchema>;
+export type UserNote = typeof userNotes.$inferSelect;

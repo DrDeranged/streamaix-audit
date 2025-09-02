@@ -9,11 +9,14 @@ import {
   type InsertUserInteraction,
   type KnowledgeStack,
   type InsertKnowledgeStack,
+  type UserNote,
+  type InsertUserNote,
   users,
   summaries,
   bounties,
   userInteractions,
-  knowledgeStacks
+  knowledgeStacks,
+  userNotes
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray } from "drizzle-orm";
@@ -55,6 +58,14 @@ export interface IStorage {
   createKnowledgeStack(stack: InsertKnowledgeStack): Promise<KnowledgeStack>;
   updateKnowledgeStack(id: string, updates: Partial<InsertKnowledgeStack>): Promise<KnowledgeStack | undefined>;
   deleteKnowledgeStack(id: string): Promise<boolean>;
+
+  // User notes operations
+  getUserNote(id: string): Promise<UserNote | undefined>;
+  getUserNotes(userId: string, summaryId?: string): Promise<UserNote[]>;
+  getUserNotesBySummary(summaryId: string): Promise<UserNote[]>;
+  createUserNote(note: InsertUserNote): Promise<UserNote>;
+  updateUserNote(id: string, updates: Partial<InsertUserNote>): Promise<UserNote | undefined>;
+  deleteUserNote(id: string): Promise<boolean>;
 
   // Analytics and search
   getTrendingSummaries(limit?: number): Promise<Summary[]>;
@@ -364,6 +375,55 @@ export class DatabaseStorage implements IStorage {
       interactionsCount: stats?.interactionsCount || 0,
       stacksCount: stats?.stacksCount || 0,
     };
+  }
+
+  // User notes operations
+  async getUserNote(id: string): Promise<UserNote | undefined> {
+    const [note] = await db.select().from(userNotes).where(eq(userNotes.id, id));
+    return note || undefined;
+  }
+
+  async getUserNotes(userId: string, summaryId?: string): Promise<UserNote[]> {
+    const conditions = [eq(userNotes.userId, userId)];
+    if (summaryId) {
+      conditions.push(eq(userNotes.summaryId, summaryId));
+    }
+
+    return await db
+      .select()
+      .from(userNotes)
+      .where(and(...conditions))
+      .orderBy(desc(userNotes.createdAt));
+  }
+
+  async getUserNotesBySummary(summaryId: string): Promise<UserNote[]> {
+    return await db
+      .select()
+      .from(userNotes)
+      .where(eq(userNotes.summaryId, summaryId))
+      .orderBy(desc(userNotes.createdAt));
+  }
+
+  async createUserNote(note: InsertUserNote): Promise<UserNote> {
+    const [userNote] = await db
+      .insert(userNotes)
+      .values(note)
+      .returning();
+    return userNote;
+  }
+
+  async updateUserNote(id: string, updates: Partial<InsertUserNote>): Promise<UserNote | undefined> {
+    const [note] = await db
+      .update(userNotes)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userNotes.id, id))
+      .returning();
+    return note || undefined;
+  }
+
+  async deleteUserNote(id: string): Promise<boolean> {
+    const result = await db.delete(userNotes).where(eq(userNotes.id, id));
+    return result.rowCount > 0;
   }
 }
 

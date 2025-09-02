@@ -19,6 +19,8 @@ import {
   createInteractionSchema,
   createKnowledgeStackSchema,
   updateKnowledgeStackSchema,
+  createUserNoteSchema,
+  updateUserNoteSchema,
   paginationSchema,
   searchSchema,
   processContentSchema,
@@ -643,6 +645,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/:id/stacks', asyncHandler(async (req: Request, res: Response) => {
     const stacks = await storage.getKnowledgeStacksByUser(req.params.id);
     res.json({ stacks });
+  }));
+
+  // =============================================================================
+  // USER NOTES ROUTES
+  // =============================================================================
+
+  // Get user's notes (optionally filtered by summary)
+  app.get('/api/notes', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { summaryId } = req.query;
+    const notes = await storage.getUserNotes(req.user!.id, summaryId as string);
+    res.json({ notes });
+  }));
+
+  // Get notes for a specific summary (public notes only)
+  app.get('/api/summaries/:summaryId/notes', asyncHandler(async (req: Request, res: Response) => {
+    const notes = await storage.getUserNotesBySummary(req.params.summaryId);
+    // Filter to only public notes
+    const publicNotes = notes.filter(note => !note.isPrivate);
+    res.json({ notes: publicNotes });
+  }));
+
+  // Get specific note by ID
+  app.get('/api/notes/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const note = await storage.getUserNote(req.params.id);
+    if (!note) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
+    // Check if user owns the note or if it's public
+    if (note.userId !== req.user!.id && note.isPrivate) {
+      return res.status(403).json({ error: 'Access denied - private note' });
+    }
+
+    res.json({ note });
+  }));
+
+  // Create new user note
+  app.post('/api/notes', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const validation = validateRequest(createUserNoteSchema, {
+      ...req.body,
+      userId: req.user!.id
+    });
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    // Verify the summary exists
+    const validatedData = validation.data as any;
+    const summary = await storage.getSummary(validatedData.summaryId);
+    if (!summary) {
+      return res.status(404).json({ error: 'Summary not found' });
+    }
+
+    const note = await storage.createUserNote(validation.data as any);
+    res.status(201).json({
+      message: 'Note created successfully',
+      note
+    });
+  }));
+
+  // Update user note
+  app.patch('/api/notes/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const existingNote = await storage.getUserNote(req.params.id);
+    if (!existingNote) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
+    if (existingNote.userId !== req.user!.id) {
+      return res.status(403).json({ error: 'You can only edit your own notes' });
+    }
+
+    const validation = validateRequest(updateUserNoteSchema, req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    const note = await storage.updateUserNote(req.params.id, validation.data as any);
+    res.json({
+      message: 'Note updated successfully',
+      note
+    });
+  }));
+
+  // Delete user note
+  app.delete('/api/notes/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const existingNote = await storage.getUserNote(req.params.id);
+    if (!existingNote) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
+    if (existingNote.userId !== req.user!.id) {
+      return res.status(403).json({ error: 'You can only delete your own notes' });
+    }
+
+    const deleted = await storage.deleteUserNote(req.params.id);
+    if (!deleted) {
+      return res.status(500).json({ error: 'Failed to delete note' });
+    }
+
+    res.json({ message: 'Note deleted successfully' });
   }));
 
   // =============================================================================

@@ -93,6 +93,21 @@ export const updateKnowledgeStackSchema = z.object({
   tags: z.array(z.string().max(30)).max(10).optional(),
 });
 
+// User notes schemas
+export const createUserNoteSchema = z.object({
+  userId: z.string().uuid('Invalid user ID'),
+  summaryId: z.string().uuid('Invalid summary ID'),
+  noteText: z.string().min(1).max(5000, 'Note text must be between 1 and 5000 characters'),
+  noteType: z.enum(['footnote', 'analysis', 'insight']).default('footnote'),
+  isPrivate: z.boolean().default(true),
+});
+
+export const updateUserNoteSchema = z.object({
+  noteText: z.string().min(1).max(5000, 'Note text must be between 1 and 5000 characters').optional(),
+  noteType: z.enum(['footnote', 'analysis', 'insight']).optional(),
+  isPrivate: z.boolean().optional(),
+});
+
 // Processing schemas
 export const processContentSchema = z.object({
   url: z.string().url('Invalid URL'),
@@ -149,6 +164,9 @@ export type CreateInteractionRequest = z.infer<typeof createInteractionSchema>;
 
 export type CreateKnowledgeStackRequest = z.infer<typeof createKnowledgeStackSchema>;
 export type UpdateKnowledgeStackRequest = z.infer<typeof updateKnowledgeStackSchema>;
+
+export type CreateUserNoteRequest = z.infer<typeof createUserNoteSchema>;
+export type UpdateUserNoteRequest = z.infer<typeof updateUserNoteSchema>;
 
 export type ProcessContentRequest = z.infer<typeof processContentSchema>;
 export type SocialShareRequest = z.infer<typeof socialShareSchema>;
