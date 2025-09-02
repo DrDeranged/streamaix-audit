@@ -704,7 +704,7 @@ export function AIProcessor() {
                                 </div>
                                 <div>
                                   <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-1">
-                                    Join the Knowledge Community
+                                    Amplify Your Impact
                                   </h3>
                                   <p className="text-sm text-muted-foreground">
                                     Share insights, collaborate with experts, build your reputation, and earn rewards along the way
