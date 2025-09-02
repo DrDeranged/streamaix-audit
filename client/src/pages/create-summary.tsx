@@ -183,6 +183,12 @@ export default function CreateSummary() {
       const checkResults = async (attempt = 1, maxAttempts = 80) => { // Increased for longer AI processing
         const currentSummaryId = actualSummaryId; // Use the captured ID from closure
         try {
+          // Don't continue polling if we're already completed
+          if (isCompleted) {
+            console.log('🛑 Already completed, stopping polling');
+            return;
+          }
+          
           if (!currentSummaryId) {
             console.error('❌ currentSummaryId is null/undefined, cannot check results');
             throw new Error('Lost track of summary ID - processing cannot continue');
@@ -216,6 +222,11 @@ export default function CreateSummary() {
           });
           
           console.log('🚀 Real Processing Result:', processingResult);
+          console.log('🔍 Processing Result Keys:', processingResult ? Object.keys(processingResult) : 'null');
+          console.log('🔍 Has summary field:', !!processingResult?.summary);
+          console.log('🔍 Has blogPost field:', !!processingResult?.blogPost);
+          console.log('🔍 Has executiveSummary field:', !!processingResult?.executiveSummary);
+          console.log('🔍 Has content field:', !!processingResult?.content);
           
           // Update progress based on actual processing status
           if (processingResult) {
@@ -225,12 +236,17 @@ export default function CreateSummary() {
             console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!hasContent}`);
             if ((status === 'completed' || hasContent) && processingResult.id) {
               console.log('🎉 Backend completed with content! Finishing loading bar...');
+              console.log('🎉 Setting final state: progress=100, isCompleted=true, isProcessing=false');
               setProgress(100);
-              setProcessingStatus("Processing completed successfully!");
+              setProcessingStatus("Analysis complete!");
               setResult(processingResult);
               setIsCompleted(true);
-              setIsProcessing(false);
+              setIsProcessing(false);  // CRITICAL: Stop all processing UI
               setShowCompletionNotification(true);
+              
+              // Stop further polling attempts
+              console.log('🛑 Completion detected - stopping all further polling');
+              
               toast({
                 title: '🎉 AI Analysis Complete!',
                 description: 'Your content has been successfully processed and analyzed.',
@@ -239,7 +255,7 @@ export default function CreateSummary() {
               setTimeout(() => {
                 setShowCompletionNotification(false);
               }, 3000);
-              return;
+              return; // Exit immediately to prevent further polling
             } else if (status === 'failed') {
               setProcessingStatus("Processing failed");
               throw new Error(processingResult.error || "Processing failed");
