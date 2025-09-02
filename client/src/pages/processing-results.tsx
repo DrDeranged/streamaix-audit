@@ -350,12 +350,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Executive Summary Tab */}
                     <TabsContent value="analysis" className="space-y-4">
+                      {/* Executive Summary */}
                       <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
                         <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                          <div className="flex items-center gap-2">
-                            <Brain className="w-4 h-4" />
-                            Executive Takeaway
-                          </div>
+                          <Brain className="w-4 h-4" />
+                          Executive Takeaway
                           <Button
                             variant="ghost"
                             size="sm"
@@ -371,8 +370,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </h5>
                         <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                           <div 
-                            className="text-sm text-white"
-                            style={{color: '#ffffff !important'}}
+                            className="text-sm text-white leading-relaxed"
                             dangerouslySetInnerHTML={{
                               __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
                                 .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
@@ -386,6 +384,70 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           />
                         </div>
                       </div>
+                      
+                      {/* Additional Insights */}
+                      {summary.blogPost && summary.blogPost !== summary.executiveSummary && summary.blogPost !== summary.summary && (
+                        <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                          <h5 className="text-lg font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Comprehensive Analysis
+                          </h5>
+                          <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
+                            <div 
+                              className="text-sm text-white leading-relaxed"
+                              dangerouslySetInnerHTML={{
+                                __html: summary.blogPost
+                                  .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">$1</h3>')
+                                  .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-purple-200 mt-3 mb-2">$1</h4>')
+                                  .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-pink-200 mt-2 mb-1">$1</h5>')
+                                  .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-2"><strong class="text-purple-300">$1:</strong> <span class="text-gray-200">$2</span></div>')
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+                                  .replace(/\n\n/g, '<br><br>')
+                                  .replace(/\n/g, '<br>')
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Financial Analysis if available */}
+                      {summary.financialTrends && summary.financialTrends.length > 0 && (
+                        <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-lg border border-emerald-500/20">
+                          <h5 className="font-semibold mb-3 text-emerald-400 flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4" />
+                            Financial Impact Analysis
+                          </h5>
+                          <div className="space-y-3">
+                            {summary.financialTrends.slice(0, 5).map((financial: any, idx: number) => (
+                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {financial.category || 'Investment'}
+                                    </Badge>
+                                    <span className="font-medium text-sm text-white">
+                                      {financial.symbol || financial.company}
+                                    </span>
+                                  </div>
+                                  {financial.riskLevel && (
+                                    <Badge variant="outline" className={`text-xs ${
+                                      financial.riskLevel === 'high' ? 'text-red-400 border-red-500/30' :
+                                      financial.riskLevel === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
+                                      'text-green-400 border-green-500/30'
+                                    }`}>
+                                      {financial.riskLevel} risk
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-1">{financial.reasoning}</p>
+                                {financial.timeHorizon && (
+                                  <div className="text-xs text-emerald-300">Timeline: {financial.timeHorizon}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </TabsContent>
 
                     {/* Key Insights Tab */}
@@ -684,15 +746,6 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </div>
                       )}
 
-                      <div className="p-4 bg-muted/50 rounded-lg">
-                        <h5 className="font-semibold mb-3 flex items-center gap-2">
-                          <Database className="w-4 w-4" />
-                          Raw Metadata
-                        </h5>
-                        <pre className="text-gray-300 text-xs font-mono whitespace-pre-wrap overflow-x-auto bg-background/50 p-3 rounded">
-                          {JSON.stringify(summary, null, 2)}
-                        </pre>
-                      </div>
                     </TabsContent>
                   </Tabs>
                 </CardContent>
