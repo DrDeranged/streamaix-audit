@@ -410,44 +410,6 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </div>
                       )}
                       
-                      {/* Financial Analysis if available */}
-                      {summary.financialTrends && summary.financialTrends.length > 0 && (
-                        <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-lg border border-emerald-500/20">
-                          <h5 className="font-semibold mb-3 text-emerald-400 flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4" />
-                            Financial Impact Analysis
-                          </h5>
-                          <div className="space-y-3">
-                            {summary.financialTrends.slice(0, 5).map((financial: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {financial.category || 'Investment'}
-                                    </Badge>
-                                    <span className="font-medium text-sm text-white">
-                                      {financial.symbol || financial.company}
-                                    </span>
-                                  </div>
-                                  {financial.riskLevel && (
-                                    <Badge variant="outline" className={`text-xs ${
-                                      financial.riskLevel === 'high' ? 'text-red-400 border-red-500/30' :
-                                      financial.riskLevel === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
-                                      'text-green-400 border-green-500/30'
-                                    }`}>
-                                      {financial.riskLevel} risk
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-muted-foreground mb-1">{financial.reasoning}</p>
-                                {financial.timeHorizon && (
-                                  <div className="text-xs text-emerald-300">Timeline: {financial.timeHorizon}</div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </TabsContent>
 
                     {/* Key Insights Tab */}
@@ -571,9 +533,54 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               }
                             })()}
                           </div>
-                          <div className="text-xs text-gray-300" style={{color: '#d1d5db'}}>Source Credibility</div>
+                          <div className="text-xs text-muted-foreground">Source Credibility</div>
                         </div>
                       </div>
+
+                      {/* Financial Impact Analysis - Moved from Analysis tab */}
+                      {summary.financialTrends && summary.financialTrends.length > 0 && (
+                        <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-lg border border-emerald-500/20">
+                          <h5 className="font-semibold mb-3 text-emerald-400 flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4" />
+                            Financial Impact Analysis
+                          </h5>
+                          <div className="space-y-3">
+                            {/* Remove duplicates by filtering unique symbols/companies */}
+                            {summary.financialTrends
+                              .filter((financial: any, idx: number, arr: any[]) => 
+                                arr.findIndex(f => (f.symbol || f.company) === (financial.symbol || financial.company)) === idx
+                              )
+                              .slice(0, 5)
+                              .map((financial: any, idx: number) => (
+                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {financial.category || 'Investment'}
+                                    </Badge>
+                                    <span className="font-medium text-sm text-white">
+                                      {financial.symbol || financial.company}
+                                    </span>
+                                  </div>
+                                  {financial.riskLevel && (
+                                    <Badge variant="outline" className={`text-xs ${
+                                      financial.riskLevel === 'high' ? 'text-red-400 border-red-500/30' :
+                                      financial.riskLevel === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
+                                      'text-green-400 border-green-500/30'
+                                    }`}>
+                                      {financial.riskLevel} risk
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-1">{financial.reasoning}</p>
+                                {financial.timeHorizon && (
+                                  <div className="text-xs text-emerald-300">Timeline: {financial.timeHorizon}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Market Positioning Intelligence */}
                       <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20 mb-4">
