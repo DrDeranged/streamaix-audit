@@ -152,13 +152,13 @@ export function RealAIDemo() {
           console.log('🚀 Real Processing Result:', processingResult);
           
           // Update progress based on actual processing status
-          if (processingResult && processingResult.processingStatus) {
+          if (processingResult) {
             const status = processingResult.processingStatus;
-            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%`);
+            console.log(`📊 Backend status: ${status}, Frontend progress: ${progress}%, Has content: ${!!processingResult.summary}`);
             
-            if (status === 'completed') {
-              // IMMEDIATE completion detection - set progress to 100% and finish
-              console.log('🎉 Backend completed! Finishing loading bar...');
+            // Only complete when we have BOTH completed status AND actual content
+            if (status === 'completed' && processingResult.summary && processingResult.id) {
+              console.log('🎉 Backend completed with content! Finishing loading bar...');
               setProgress(100);
               setProcessingStatus("Processing completed successfully!");
               setResult(processingResult);
@@ -172,9 +172,10 @@ export function RealAIDemo() {
             } else if (status === 'failed') {
               setProcessingStatus("Processing failed");
               throw new Error(processingResult.error || "Processing failed");
-            } else if (status === 'processing') {
-              // Update progress based on backend processing phase, but cap at 90% until completion
-              const currentProgress = Math.min(90, 20 + (attempt * 3)); 
+            } else if (status === 'processing' || !processingResult.summary) {
+              // Keep processing - don't complete until we have actual content
+              const baseProgress = 20 + (attempt * 2); // Slower, more realistic progress
+              const currentProgress = Math.min(85, baseProgress); // Cap at 85% until truly complete
               setProgress(currentProgress);
               
               // Update status message based on processing phase
@@ -188,20 +189,7 @@ export function RealAIDemo() {
             }
           }
           
-          // Check if we got a direct summary response (RealContentProcessor format)
-          if (processingResult && processingResult.id && (processingResult.status === 'completed' || processingResult.processingStatus === 'completed' || processingResult.summary)) {
-            console.log('🎉 Real processor completed! Setting result...');
-            setResult(processingResult);
-            setProgress(100);
-            setProcessingStatus("Processing completed successfully!");
-            setIsProcessing(false);
-            toast({
-              title: "Success!",
-              description: "Real AI analysis completed! Results displayed below.",
-              variant: "default"
-            });
-            return;
-          }
+          // Skip the old duplicate completion checks - we handle completion above
           
           // Fallback to regular summary endpoint
           const summaryResponse = processingResult && processingResult.id ? 
@@ -216,20 +204,7 @@ export function RealAIDemo() {
           console.log('📝 Summary has content:', !!summaryResponse.summary?.summary);
           console.log('🎯 Summary title:', summaryResponse.summary?.title);
           
-          // REAL PROCESSOR: Check for completion via any endpoint
-          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.summary)) {
-            console.log('🎉 Real processor completed via summary endpoint!');
-            setResult(summaryResponse.summary);
-            setProgress(100);
-            setProcessingStatus("Processing completed successfully!");
-            setIsProcessing(false);
-            toast({
-              title: "Success!",
-              description: "Real AI content analysis completed!",
-              variant: "default"
-            });
-            return;
-          }
+          // Skip fallback completion checks - main logic above handles completion properly
           
           // If we still see processing after 10 attempts, force a debug check
           if (attempt > 10 && summaryResponse.summary.processingStatus === 'processing') {
@@ -265,19 +240,8 @@ export function RealAIDemo() {
             }
           }
           
-          if (summaryResponse.summary && (summaryResponse.summary.status === 'completed' || summaryResponse.summary.processingStatus === 'completed')) {
-            console.log('🎉 Processing completed! Setting result...');
-            setResult(summaryResponse.summary);
-            setProgress(100);
-            setProcessingStatus("Processing completed successfully!");
-            setIsProcessing(false);
-            toast({
-              title: "Success!",
-              description: "Real AI processing completed! Results displayed below.",
-              variant: "default"
-            });
-            return;
-          } else if (summaryResponse.summary && (summaryResponse.summary.status === 'failed' || summaryResponse.summary.processingStatus === 'failed')) {
+          // All completion logic is now handled in the main processing result check above
+          if (summaryResponse.summary && (summaryResponse.summary.status === 'failed' || summaryResponse.summary.processingStatus === 'failed')) {
             throw new Error(summaryResponse.summary.summary || "Processing failed");
           }
           
@@ -307,15 +271,8 @@ export function RealAIDemo() {
                   cache: 'no-cache'
                 }).then(res => res.json());
                 
-                setResult(finalResponse.summary);
-                setProgress(100);
-                setProcessingStatus("Processing completed successfully!");
-                setIsProcessing(false);
-                toast({
-                  title: "Success!",
-                  description: "AI processing completed! Results displayed below.",
-                  variant: "default"
-                });
+                // Debug found completion - let main logic handle it on next iteration
+                console.log('⚡ Debug found completion - will be handled by main logic on next check');
                 return;
               }
             } catch (debugError) {
