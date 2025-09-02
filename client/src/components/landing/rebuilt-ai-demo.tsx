@@ -31,7 +31,8 @@ import {
   Sparkles,
   TrendingUp as TrendingUpIcon,
   Edit3,
-  Plus
+  Plus,
+  BookmarkPlus
 } from 'lucide-react';
 import {
   BarChart,
@@ -700,33 +701,47 @@ export function AIProcessor() {
                         transition={{ delay: 0.3 }}
                         className="mt-6"
                       >
-                        <Card className="bg-card/50 backdrop-blur-sm border-muted-foreground/20">
-                          <CardContent className="p-6">
+                        <Card className="bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 animate-pulse"></div>
+                          <CardContent className="p-6 relative">
                             <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-2">
-                                <Edit3 className="h-5 w-5 text-indigo-400" />
-                                <h4 className="text-lg font-semibold">Your Analysis Notes</h4>
-                                <Badge variant="secondary" className="text-xs">Private</Badge>
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                                  <Edit3 className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                  <h4 className="text-lg font-semibold text-white">Add Your Analysis</h4>
+                                  <p className="text-sm text-blue-200">Capture insights • Private notes • Dashboard access</p>
+                                </div>
                               </div>
                               <Button
                                 onClick={() => setShowNotesModal(true)}
-                                variant="outline"
-                                size="sm"
-                                className="text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
-                                data-testid="button-add-note"
+                                size="lg"
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                data-testid="button-add-analysis-note"
                               >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Note
+                                <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                                Add Analysis Note
+                                <Edit3 className="h-4 w-4 ml-2 group-hover:animate-pulse" />
                               </Button>
                             </div>
 
-                            <div className="text-center py-8 text-muted-foreground">
-                              <Edit3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                              <p className="text-sm">
-                                Capture your insights and analysis for future reference.
-                                <br />
-                                <span className="text-xs">Notes are private and accessible from your dashboard.</span>
-                              </p>
+                            <div className="grid grid-cols-3 gap-4 mt-4">
+                              <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
+                                <BookmarkPlus className="h-6 w-6 mx-auto mb-2 text-blue-300" />
+                                <p className="text-xs font-medium text-white">Footnotes</p>
+                                <p className="text-xs text-blue-200">Quick references</p>
+                              </div>
+                              <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
+                                <FileText className="h-6 w-6 mx-auto mb-2 text-indigo-300" />
+                                <p className="text-xs font-medium text-white">Analysis</p>
+                                <p className="text-xs text-indigo-200">Detailed insights</p>
+                              </div>
+                              <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
+                                <Sparkles className="h-6 w-6 mx-auto mb-2 text-purple-300" />
+                                <p className="text-xs font-medium text-white">Key Insights</p>
+                                <p className="text-xs text-purple-200">Important learnings</p>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>

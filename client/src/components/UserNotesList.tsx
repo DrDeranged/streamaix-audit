@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookmarkPlus, FileText, Lightbulb, Clock, ExternalLink, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserNote {
   id: string;
@@ -28,10 +29,27 @@ const noteTypeConfig = {
 };
 
 export default function UserNotesList({ summaryId, title }: UserNotesListProps) {
+  const { isAuthenticated, user } = useAuth();
+  
   const { data: notesData, isLoading, error } = useQuery({
     queryKey: summaryId ? ["/api/notes", { summaryId }] : ["/api/notes"],
+    enabled: isAuthenticated,
     retry: false,
   });
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="border-dashed border-gray-300">
+        <CardContent className="pt-6">
+          <div className="text-center text-gray-500">
+            <BookmarkPlus className="w-8 h-8 mx-auto mb-2" />
+            <p className="font-medium">Sign in to view your notes</p>
+            <p className="text-sm">Your personal notes and insights will appear here</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (
