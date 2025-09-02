@@ -229,7 +229,11 @@ export default function CreateSummary() {
           console.log('- Has ID:', !!processingResult?.id);
           console.log('- Status:', processingResult?.status);
           console.log('- Processing Status:', processingResult?.processingStatus);
-          console.log('- Has Summary:', !!processingResult?.summary);
+          console.log('- Has Summary:', !!processingResult?.summary, processingResult?.summary?.length || 0, 'chars');
+          console.log('- Has BlogPost:', !!processingResult?.blogPost, processingResult?.blogPost?.length || 0, 'chars');
+          console.log('- Has ExecutiveSummary:', !!processingResult?.executiveSummary, processingResult?.executiveSummary?.length || 0, 'chars');
+          console.log('- Has BulletPoints:', !!processingResult?.bulletPoints, processingResult?.bulletPoints?.length || 0, 'items');
+          console.log('- Has Trends:', !!processingResult?.trends, processingResult?.trends?.length || 0, 'items');
           console.log('- Has Content:', !!processingResult?.content);
           console.log('- Has Title:', !!processingResult?.title);
           console.log('- Full keys:', processingResult ? Object.keys(processingResult) : 'none');
@@ -239,11 +243,13 @@ export default function CreateSummary() {
           if (processingResult && processingResult.id && 
               (processingResult.processingStatus === 'completed' || 
                processingResult.status === 'completed' || 
-               processingResult.summary || 
-               processingResult.blogPost ||
-               processingResult.executiveSummary ||
-               processingResult.tldrSummary ||
-               processingResult.content)) {
+               (processingResult.summary && processingResult.summary.trim()) || 
+               (processingResult.blogPost && processingResult.blogPost.trim()) ||
+               (processingResult.executiveSummary && processingResult.executiveSummary.trim()) ||
+               (processingResult.tldrSummary && processingResult.tldrSummary.trim()) ||
+               (processingResult.content && processingResult.content.trim()) ||
+               (processingResult.bulletPoints && processingResult.bulletPoints.length > 0) ||
+               (processingResult.trends && processingResult.trends.length > 0))) {
             console.log('🎉 Real processor completed! Setting result...');
             console.log('✅ Detected completion with data:', {
               hasId: !!processingResult.id,
