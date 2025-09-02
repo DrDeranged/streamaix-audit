@@ -147,6 +147,7 @@ export default function CreateSummary() {
     }
 
     // Use same processing as demo
+    console.log('🎬 Starting form submission - setting isProcessing to true');
     setIsProcessing(true);
     setError(null);
     setResult(null);
@@ -156,12 +157,14 @@ export default function CreateSummary() {
     setProcessingStatus("Starting AI processing...");
 
     try {
+      console.log('📡 Making API request to start processing...');
       // Start real processing (same as demo)
       const response = await apiRequest('/api/test-processing', {
         method: 'POST',
         body: JSON.stringify({ url: formData.url }),
         headers: { 'Content-Type': 'application/json' }
       });
+      console.log('✅ API request successful:', response);
 
       const actualSummaryId = response.summaryId || response.summary?.id;
       console.log('🔍 Setting summaryId:', actualSummaryId, 'from response:', response);
@@ -301,7 +304,8 @@ export default function CreateSummary() {
       await checkResults();
       
     } catch (error: any) {
-      console.error('Processing failed:', error);
+      console.error('❌ Processing failed with error:', error);
+      console.error('❌ Error details:', error.message, error.stack);
       setError(error.message);
       setIsProcessing(false);
       setProgress(0);
