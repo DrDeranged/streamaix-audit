@@ -53,12 +53,12 @@ export function Navigation() {
               StreamAiX
             </div>
             
-            {/* Demo summarize input - hidden on mobile */}
+            {/* Quick summarize input - hidden on mobile */}
             <div className="hidden lg:flex items-center space-x-2 ml-4 xl:ml-8">
               <div className="relative">
                 <Input 
                   type="text" 
-                  placeholder="Paste a video URL to summarize..." 
+                  placeholder="Paste any video or podcast URL to analyze..." 
                   className="w-64 xl:w-80 glass-bg glass-border focus:ring-2 focus:ring-indigo-500 text-sm"
                   id="landing-url-input"
                 />

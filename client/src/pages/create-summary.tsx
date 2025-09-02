@@ -116,7 +116,7 @@ export default function CreateSummary() {
     }));
   };
 
-  // Processing state (same as demo)
+  // Processing state
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState("");
@@ -146,7 +146,7 @@ export default function CreateSummary() {
       return;
     }
 
-    // Use same processing as demo
+    // Start AI processing
     console.log('🎬 Starting form submission - setting isProcessing to true');
     setIsProcessing(true);
     setError(null);
@@ -158,8 +158,8 @@ export default function CreateSummary() {
 
     try {
       console.log('📡 Making API request to start processing...');
-      // Start real processing (same as demo)
-      const response = await apiRequest('/api/test-processing', {
+      // Start AI processing
+      const response = await apiRequest('/api/analyze-content', {
         method: 'POST',
         body: JSON.stringify({ url: formData.url }),
         headers: { 'Content-Type': 'application/json' }

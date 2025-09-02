@@ -725,7 +725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { url, contentType, platform, title, isPublic, tags } = validation.data as any;
 
     try {
-      console.log(`Starting REAL content processing for URL: ${url}`);
+      console.log(`Starting AI content analysis for URL: ${url}`);
       
       // Use RebuiltContentProcessor for faster processing
       console.log('🚀 Starting processing with RebuiltContentProcessor');
@@ -934,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Test real processing endpoint
-  app.post('/api/test-processing', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/analyze-content', asyncHandler(async (req: Request, res: Response) => {
     const { url } = req.body;
     
     if (!url) {
@@ -942,7 +942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      console.log(`Starting REAL content processing for URL: ${url}`);
+      console.log(`Starting AI content analysis for URL: ${url}`);
       
       // Use a fixed existing user ID from database
       const demoUserId = 'b57e2c1e-c053-4bff-8bff-d3cee93a3f0a';
@@ -954,7 +954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const summaryId = result.summaryId;
 
       res.status(201).json({
-        message: 'REAL AI processing started successfully',
+        message: 'AI content analysis started successfully',
         summaryId,
         jobId: `job-${Date.now()}`, // Compatibility with frontend
         summary: { id: summaryId }, // Frontend expects this format

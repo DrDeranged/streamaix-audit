@@ -12,7 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 
-export function RealAIDemo() {
+export function RealAIProcessor() {
   const [url, setUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -92,7 +92,7 @@ export function RealAIDemo() {
 
     try {
       // Start real processing
-      const response = await apiRequest('/api/test-processing', {
+      const response = await apiRequest('/api/analyze-content', {
         method: 'POST',
         body: JSON.stringify({ url }),
         headers: { 'Content-Type': 'application/json' }
@@ -311,7 +311,7 @@ export function RealAIDemo() {
   };
 
   return (
-    <section id="real-demo" className="py-16 bg-background">
+    <section id="ai-processor" className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"

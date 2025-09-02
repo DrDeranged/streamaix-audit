@@ -194,7 +194,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                 className="text-gray-300 hover:text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Demo
+                Back to Home
               </Button>
               <div className="h-8 w-px bg-white/20" />
               <div>
@@ -276,7 +276,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
           </div>
         </motion.div>
 
-        {/* Main Content - Exact Demo Style */}
+        {/* Main Content */}
         <div className="max-w-4xl mx-auto">
           {isCompleted && summary && (
             <motion.div
@@ -789,7 +789,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white px-8"
-                onClick={() => setLocation('/#rebuilt-demo')}
+                onClick={() => setLocation('/')}
               >
                 <Brain className="h-5 w-5 mr-2" />
                 Process New Content

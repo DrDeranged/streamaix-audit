@@ -81,7 +81,7 @@ export function RecentAIResults() {
         <div className="container mx-auto max-w-7xl text-center">
           <Badge className="mb-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
             <Brain className="h-3 w-3 mr-1" />
-            AI Processing Demo
+            AI Content Analysis
           </Badge>
           <h2 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent mb-4">
             See AI Content Intelligence in Action
@@ -93,7 +93,7 @@ export function RecentAIResults() {
             size="lg" 
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
             onClick={() => {
-              document.querySelector('#ai-demo')?.scrollIntoView({ behavior: 'smooth' });
+              document.querySelector('#ai-analysis')?.scrollIntoView({ behavior: 'smooth' });
             }}
           >
             <Sparkles className="h-4 w-4 mr-2" />
@@ -445,7 +445,7 @@ export function RecentAIResults() {
                 size="lg" 
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 px-8"
                 onClick={() => {
-                  document.querySelector('#ai-demo')?.scrollIntoView({ behavior: 'smooth' });
+                  document.querySelector('#ai-analysis')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
                 <Zap className="h-4 w-4 mr-2" />

@@ -90,7 +90,7 @@ interface ProcessingResult {
   };
 }
 
-export function RebuiltAIDemo() {
+export function AIProcessor() {
   const [url, setUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [summaryId, setSummaryId] = useState<string | null>(null);
@@ -147,7 +147,7 @@ export function RebuiltAIDemo() {
     setProcessingStatus('Starting AI analysis...');
     
     try {
-      const response = await apiRequest('/api/test-processing', {
+      const response = await apiRequest('/api/analyze-content', {
         method: 'POST',
         body: JSON.stringify({ url: url.trim() }),
         headers: { 'Content-Type': 'application/json' }
@@ -192,7 +192,7 @@ export function RebuiltAIDemo() {
   const isFailed = result?.processingStatus === 'failed';
 
   return (
-    <section id="rebuilt-demo" className="py-16 bg-background">
+    <section id="ai-analysis" className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
