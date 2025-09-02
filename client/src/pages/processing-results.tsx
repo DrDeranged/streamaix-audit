@@ -27,7 +27,10 @@ import {
   Eye,
   AlertCircle,
   FileText,
-  TrendingUp
+  TrendingUp,
+  User,
+  Wallet,
+  Trophy
 } from 'lucide-react';
 
 interface Summary {
@@ -770,6 +773,53 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
             </Card>
           )}
         </div>
+
+        {/* Creator Dashboard Invitation - Shows when processing is complete */}
+        {isCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8"
+          >
+            <Card className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/30 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-gradient-to-r from-emerald-400 to-teal-400 p-3 rounded-full">
+                      <Trophy className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Great Analysis! Ready to Build Your Creator Profile?
+                  </h3>
+                  <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+                    Take your content intelligence to the next level. Save your analysis, track your content portfolio, and unlock creator rewards in your personal dashboard.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8"
+                      onClick={() => setLocation('/dashboard')}
+                    >
+                      <User className="h-5 w-5 mr-2" />
+                      Open Creator Dashboard
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="border-white/30 text-white hover:bg-white/10 px-8"
+                      onClick={() => setLocation('/wallet')}
+                    >
+                      <Wallet className="h-5 w-5 mr-2" />
+                      View Wallet
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Action Bar - Landing Page Style */}
         <motion.div
