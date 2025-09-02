@@ -110,22 +110,8 @@ export function RealAIDemo() {
       setProgress(10);
       setProcessingStatus("Audio extraction in progress...");
 
-      // Progress updates with better timing
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev < 85) return prev + 15; // Faster initial progress
-          if (prev < 95) return prev + 2;  // Slower final progress to avoid getting stuck at 90%
-          return prev;
-        });
-        
-        // Update status messages
-        setProcessingStatus(prev => {
-          if (progress < 30) return "Extracting audio from video...";
-          if (progress < 60) return "AI transcription in progress...";
-          if (progress < 90) return "Generating comprehensive analysis...";
-          return "Finalizing results...";
-        });
-      }, 2000);
+      // Progress updates based on actual backend status
+      let progressInterval: NodeJS.Timeout;
 
       // Check for results with retry mechanism using captured summaryId
       const checkResults = async (attempt = 1, maxAttempts = 20) => {
@@ -165,13 +151,36 @@ export function RealAIDemo() {
           
           console.log('🚀 Real Processing Result:', processingResult);
           
+          // Update progress based on actual processing status
+          if (processingResult && processingResult.processingStatus) {
+            const status = processingResult.processingStatus;
+            if (status === 'processing') {
+              // Update progress based on backend processing phase
+              const currentProgress = Math.min(85, 20 + (attempt * 3)); // Gradual increase but cap at 85%
+              setProgress(currentProgress);
+              
+              // Update status message based on processing phase
+              if (currentProgress < 30) {
+                setProcessingStatus("Extracting audio from video...");
+              } else if (currentProgress < 60) {
+                setProcessingStatus("AI transcription in progress...");
+              } else {
+                setProcessingStatus("Generating comprehensive analysis...");
+              }
+            } else if (status === 'completed') {
+              setProgress(100);
+              setProcessingStatus("Processing completed successfully!");
+            } else if (status === 'failed') {
+              setProcessingStatus("Processing failed");
+            }
+          }
+          
           // Check if we got a direct summary response (RealContentProcessor format)
           if (processingResult && processingResult.id && (processingResult.status === 'completed' || processingResult.processingStatus === 'completed' || processingResult.summary)) {
             console.log('🎉 Real processor completed! Setting result...');
             setResult(processingResult);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
-            clearInterval(progressInterval);
             setIsProcessing(false);
             toast({
               title: "Success!",
@@ -200,7 +209,6 @@ export function RealAIDemo() {
             setResult(summaryResponse.summary);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
-            clearInterval(progressInterval);
             setIsProcessing(false);
             toast({
               title: "Success!",
@@ -231,7 +239,6 @@ export function RealAIDemo() {
                 setResult(correctedResponse.summary);
                 setProgress(100);
                 setProcessingStatus("Processing completed successfully!");
-                clearInterval(progressInterval);
                 setIsProcessing(false);
                 toast({
                   title: "Success!",
@@ -250,7 +257,6 @@ export function RealAIDemo() {
             setResult(summaryResponse.summary);
             setProgress(100);
             setProcessingStatus("Processing completed successfully!");
-            clearInterval(progressInterval);
             setIsProcessing(false);
             toast({
               title: "Success!",
@@ -291,7 +297,6 @@ export function RealAIDemo() {
                 setResult(finalResponse.summary);
                 setProgress(100);
                 setProcessingStatus("Processing completed successfully!");
-                clearInterval(progressInterval);
                 setIsProcessing(false);
                 toast({
                   title: "Success!",
@@ -305,7 +310,6 @@ export function RealAIDemo() {
             }
             
             setError(checkError.message || "Processing failed. Please try again.");
-            clearInterval(progressInterval);
             setIsProcessing(false);
           }
         }
