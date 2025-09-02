@@ -604,8 +604,8 @@ export default function CreateSummary() {
                               </div>
                             </div>
                             <div>
-                              <h3 className="font-semibold">AI Processing Active</h3>
-                              <p className="text-sm text-muted-foreground">{processingStatus || "Starting AI analysis..."}</p>
+                              <h3 className="font-semibold text-white">AI Processing Active</h3>
+                              <p className="text-sm text-white/90 font-medium">{processingStatus || "Starting AI analysis..."}</p>
                             </div>
                           </div>
                           <Badge variant="secondary" className="font-mono">
