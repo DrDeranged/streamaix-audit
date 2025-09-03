@@ -96,6 +96,16 @@ export class RebuiltContentProcessor {
       console.log(`🤖 Generating comprehensive AI analysis for: ${metadata.title}`);
       const analysis = await this.generateComprehensiveAnalysis(metadata);
       
+      console.log(`✅ AI analysis generated successfully:`, {
+        hasSummary: !!analysis.summary,
+        hasTldr: !!analysis.tldrSummary,
+        hasExecutive: !!analysis.executiveSummary,
+        bulletPointsCount: analysis.bulletPoints?.length || 0,
+        trendsCount: analysis.trends?.length || 0,
+        financialTrendsCount: analysis.financialTrends?.length || 0,
+        chaptersCount: analysis.chapters?.length || 0
+      });
+      
       console.log(`💾 Saving complete results for: ${summaryId}`);
       await this.storage.updateSummary(summaryId, {
         processingStatus: 'completed',
@@ -497,7 +507,7 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 - Each reasoning must include: 1) Specific video reference/quote, 2) Expert framework validation, 3) Institutional perspective
 - Avoid generic market analysis - make it video-specific and actionable
 - Time horizons must align with video timeline AND proven cycle analysis
-`.replace('[DYNAMIC_CHAPTERS_PLACEHOLDER]', dynamicChapters);
+`.replace('DYNAMIC_CHAPTERS_PLACEHOLDER', dynamicChapters);
 
     try {
       const response = await this.openai.chat.completions.create({
