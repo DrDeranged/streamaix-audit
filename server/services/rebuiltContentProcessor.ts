@@ -398,7 +398,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "evidence": "Evidence with patent landscapes, R&D investments, and market share dynamics"
     }
   ],
-  "financialTrends": [
+  "financialTrends": "ANALYZE CONTENT FOR RELEVANT FINANCIAL INSTRUMENTS - Generate 3-5 specific stocks, cryptos, or assets that are directly mentioned, discussed, or highly relevant to the video content. Do NOT use template data. Base recommendations ONLY on what is actually discussed in the video. Format as array with each entry: {category: 'Stocks'|'Crypto'|'Commodities'|'Bonds', symbol: 'ACTUAL_SYMBOL_FROM_VIDEO', company: 'Company Name', relevance: 'Why this asset relates to video content', impact: 'bullish|bearish|neutral with reasoning', reasoning: 'Content-specific analysis citing video themes', timeHorizon: 'Short|Medium|Long-term based on video discussion', riskLevel: 'Low|Moderate|High with justification', analystSource: 'Relevant analyst or framework mentioned'}", "financialTrendsOriginal": [
     {
       "category": "Stocks",
       "symbol": "NVDA",
@@ -454,7 +454,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "riskLevel": "Moderate considering network stability and competitive landscape",
       "analystSource": "Messari Layer 1 analysis and institutional adoption metrics"
     }
-  ],
+  ], // END OF REMOVED TEMPLATE DATA
   "marketSentiment": "BULLISH",
   "sourceCredibility": "High", 
   "keyQuotes": [
