@@ -358,16 +358,28 @@ export class RebuiltContentProcessor {
     const dynamicChapters = this.generateDynamicChaptersForPrompt(metadata.duration);
 
     const prompt = `
-You are a senior crypto analyst with access to insights from top-tier crypto analysts including Raoul Pal (Real Vision), Lyn Alden, Benjamin Cowen, Coin Bureau (Guy), Plan B, Willy Woo, and institutional research from Messari, Glassnode, and Delphi Digital. 
+You are a senior investment analyst with specialized expertise across multiple asset classes including crypto, equities, commodities, bonds, and emerging technologies. You have access to insights from top analysts: 
 
-Analyze this video content and provide expert-level institutional analysis that references these credible sources:
+**Crypto**: Raoul Pal (Real Vision), Lyn Alden, Benjamin Cowen, Coin Bureau (Guy), Plan B, Willy Woo, Messari, Glassnode, Delphi Digital
+**Equities**: Cathie Wood (ARK), Jim Cramer, Bill Ackman, Warren Buffett, Ray Dalio, Goldman Sachs Research, Morgan Stanley
+**Tech**: Mary Meeker, Benedict Evans, a16z, Sequoia Capital, First Round Capital, CB Insights
+**Macro**: Ray Dalio, Howard Marks, Jeffrey Gundlach, Mohamed El-Erian, Federal Reserve Research, IMF Analysis
+
+Analyze this video content and provide expert-level institutional analysis that adapts to the video's specific theme and references the most relevant credible sources for that domain:
 
 Title: ${metadata.title}
 Channel: ${metadata.channel}
 Description: ${metadata.description}
 Duration: ${Math.floor(metadata.duration / 60)}:${(metadata.duration % 60).toString().padStart(2, '0')}
 
-CRITICAL: Base all analysis on established crypto analyst methodologies and institutional frameworks. Reference on-chain data patterns, macroeconomic cycles, and proven analytical models used by top crypto analysts.
+CRITICAL: Adapt analysis methodology to the video's primary theme:
+- **Crypto videos**: Use on-chain analysis, DeFi metrics, institutional flows, regulatory developments  
+- **Stock/Equity videos**: Focus on fundamentals, earnings, sector rotation, institutional positioning
+- **Tech videos**: Emphasize growth metrics, competitive moats, innovation cycles, venture trends
+- **Macro videos**: Analyze monetary policy, inflation trends, currency movements, bond markets
+- **General business**: Incorporate industry analysis, competitive positioning, market dynamics
+
+Reference established analytical frameworks and credible sources most relevant to the video's specific domain.
 
 Generate expert-level institutional analysis in this exact JSON format:
 {
@@ -399,7 +411,22 @@ Generate expert-level institutional analysis in this exact JSON format:
       "evidence": "Evidence with patent landscapes, R&D investments, and market share dynamics"
     }
   ],
-  "financialTrends": "🎯 GENERATE HIGH-QUALITY INVESTMENT OPPORTUNITIES - Analyze the video content and identify 3-5 EXCELLENT POTENTIAL INVESTMENT OPPORTUNITIES (stocks, cryptos, commodities, bonds) that are DIRECTLY mentioned, discussed, or highly relevant to the actual video content. ALL recommendations must be GENUINELY GOOD POTENTIAL BUYS that would help investors, traders, and learners make profitable decisions based on the podcast insights and real-time market sentiment. Base ALL recommendations ONLY on what is specifically covered in this video - no template data. Format as array with each entry: {category: 'Stocks'|'Crypto'|'Commodities'|'Bonds', symbol: 'ACTUAL_SYMBOL_FROM_VIDEO', company: 'Actual Company Name', relevance: 'Specific connection to video content explaining why this is a good investment opportunity', impact: 'bullish|bearish|neutral with content-based reasoning focusing on investment potential', reasoning: '150-200 words explaining why this is a good investment opportunity based on video content, market trends, and growth potential', timeHorizon: 'Short|Medium|Long-term based on timeline discussed in video and optimal entry timing', riskLevel: 'Low|Moderate|High with justification from video content and market analysis', analystSource: 'Specific analyst or framework referenced in the video'}",
+  "financialTrends": [
+    {
+      "category": "Investment opportunity category based on video theme (Stocks|Crypto|Commodities|Bonds|ETFs)", 
+      "symbol": "SPECIFIC symbol directly mentioned or highly relevant to video content",
+      "company": "Full company/asset name from video discussion",
+      "relevance": "Direct connection to video content explaining investment opportunity",
+      "impact": "bullish|bearish|neutral with specific content-based reasoning",
+      "reasoning": "200-250 words explaining why this is a good investment based on video insights, market positioning, competitive advantages, growth catalysts, technical setup, and institutional sentiment",
+      "timeHorizon": "Short-term (1-3 months)|Medium-term (3-12 months)|Long-term (1-3 years) based on video timeline and optimal market entry",
+      "riskLevel": "Low|Moderate|High with specific justification from video analysis",
+      "analystSource": "Specific analyst, research firm, or framework referenced in video",
+      "marketAlpha": "Unique insight or edge from video that provides competitive advantage",
+      "priceTargets": "Specific target levels or percentage moves discussed in video",
+      "catalysts": "Upcoming events, announcements, or market drivers mentioned in video"
+    }
+  ],
   "marketSentiment": "BULLISH",
   "sourceCredibility": "High", 
   "keyQuotes": [

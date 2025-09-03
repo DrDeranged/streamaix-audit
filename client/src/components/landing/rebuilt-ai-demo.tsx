@@ -573,20 +573,20 @@ export function AIProcessor() {
                                   <div className="text-indigo-400 font-medium mb-2">Source Information</div>
                                   <div className="grid grid-cols-2 gap-4 text-xs">
                                     <div>
-                                      <span className="text-muted-foreground">Channel:</span>
-                                      <span className="ml-2 font-medium">{result.rawData?.channel || 'Content Creator'}</span>
+                                      <span className="text-gray-600 dark:text-gray-300">Channel:</span>
+                                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{result.rawData?.channel || 'Content Creator'}</span>
                                     </div>
                                     <div>
-                                      <span className="text-muted-foreground">Market Sentiment:</span>
-                                      <span className="ml-2 font-medium text-green-400">{result.marketSentiment || 'NEUTRAL'}</span>
+                                      <span className="text-gray-600 dark:text-gray-300">Market Sentiment:</span>
+                                      <span className="ml-2 font-medium text-green-600 dark:text-green-400">{result.marketSentiment || 'NEUTRAL'}</span>
                                     </div>
                                     <div>
-                                      <span className="text-muted-foreground">Source Credibility:</span>
-                                      <span className="ml-2 font-medium text-purple-400">{result.sourceCredibility || 'Medium'}</span>
+                                      <span className="text-gray-600 dark:text-gray-300">Source Credibility:</span>
+                                      <span className="ml-2 font-medium text-purple-600 dark:text-purple-400">{result.sourceCredibility || 'Medium'}</span>
                                     </div>
                                     <div>
-                                      <span className="text-muted-foreground">Analysis Accuracy:</span>
-                                      <span className="ml-2 font-medium text-blue-400">{result.accuracy || 85}%</span>
+                                      <span className="text-gray-600 dark:text-gray-300">Analysis Accuracy:</span>
+                                      <span className="ml-2 font-medium text-blue-600 dark:text-blue-400">{result.accuracy || 85}%</span>
                                     </div>
                                   </div>
                                 </div>
@@ -606,7 +606,12 @@ export function AIProcessor() {
                                   Investment Opportunities from Content Analysis
                                 </h6>
                                 <div className="space-y-3">
-                                  {result.financialTrends.map((financial: any, idx: number) => (
+                                  {result.financialTrends
+                                    .filter((financial: any, index: number, array: any[]) => 
+                                      // Remove duplicates by symbol
+                                      array.findIndex(item => item.symbol === financial.symbol) === index
+                                    )
+                                    .map((financial: any, idx: number) => (
                                     <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
                                       <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
@@ -642,8 +647,30 @@ export function AIProcessor() {
                                           {financial.impact}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{financial.relevance}</p>
-                                      <p className="text-xs text-gray-700 dark:text-gray-200 italic mb-2">{financial.reasoning}</p>
+                                      
+                                      {/* Market Alpha - Unique Insights */}
+                                      {financial.marketAlpha && (
+                                        <div className="text-xs text-amber-600 dark:text-amber-400 mb-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded border-l-2 border-amber-400">
+                                          <strong>🎯 Market Alpha:</strong> {financial.marketAlpha}
+                                        </div>
+                                      )}
+                                      
+                                      {/* Price Targets & Catalysts */}
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                        {financial.priceTargets && (
+                                          <div className="text-xs text-green-600 dark:text-green-400 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                                            <strong>🎯 Targets:</strong> {financial.priceTargets}
+                                          </div>
+                                        )}
+                                        {financial.catalysts && (
+                                          <div className="text-xs text-blue-600 dark:text-blue-400 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                                            <strong>⚡ Catalysts:</strong> {financial.catalysts}
+                                          </div>
+                                        )}
+                                      </div>
+                                      
+                                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2"><strong>Relevance:</strong> {financial.relevance}</p>
+                                      <p className="text-xs text-gray-700 dark:text-gray-200 italic mb-2"><strong>Investment Thesis:</strong> {financial.reasoning}</p>
                                       {(financial.timeHorizon || financial.riskLevel || financial.analystSource) && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                           {financial.timeHorizon && (
@@ -705,7 +732,7 @@ export function AIProcessor() {
                               </h5>
                               <div className="flex flex-wrap gap-2">
                                 {result.tags?.map((tag: string, idx: number) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                  <Badge key={idx} variant="secondary" className="text-xs text-gray-700 dark:text-gray-200">
                                     {tag}
                                   </Badge>
                                 ))}
