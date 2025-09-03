@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { duneAnalyticsService } from './duneAnalyticsService';
 
 export interface CryptoQuote {
   symbol: string;
@@ -254,6 +255,53 @@ export class MarketDataService {
       }
     });
 
+    // Add Dune Analytics on-chain alpha for crypto trends
+    try {
+      const cryptoTrends = enhancedTrends.filter(t => t.category === 'Crypto');
+      if (cryptoTrends.length > 0) {
+        const cryptoSymbols = cryptoTrends.map(t => t.symbol.replace('$', ''));
+        const onChainAlpha = await duneAnalyticsService.getOnChainAlpha(cryptoSymbols);
+        
+        // Add on-chain alpha insights to crypto trends
+        enhancedTrends.forEach(trend => {
+          if (trend.category === 'Crypto') {
+            const symbol = trend.symbol.replace('$', '');
+            const whaleActivity = onChainAlpha.whaleActivity?.filter((w: any) => 
+              w.token_symbol.toLowerCase() === symbol.toLowerCase()
+            ) || [];
+            
+            if (whaleActivity.length > 0) {
+              const totalWhaleVolume = whaleActivity.reduce((sum: number, w: any) => sum + w.amount_usd, 0);
+              const buyVolume = whaleActivity.filter((w: any) => w.transaction_type === 'buy')
+                .reduce((sum: number, w: any) => sum + w.amount_usd, 0);
+              
+              const whaleRatio = totalWhaleVolume > 0 ? (buyVolume / totalWhaleVolume) : 0;
+              
+              if (whaleRatio > 0.7) {
+                trend.marketAlpha = `Strong whale accumulation detected: $${Math.round(buyVolume/1000)}K in recent large purchases. Smart money is positioning ahead of potential breakout.`;
+              } else if (whaleRatio < 0.3) {
+                trend.marketAlpha = `Whale distribution pattern: $${Math.round((totalWhaleVolume - buyVolume)/1000)}K in large sells. Exercise caution on entries.`;
+              }
+            }
+            
+            // Add alpha signals from Dune
+            const signals = onChainAlpha.signals?.filter((s: any) => s.confidence > 0.75) || [];
+            if (signals.length > 0) {
+              const topSignal = signals[0];
+              if (!trend.marketAlpha) {
+                trend.marketAlpha = `${topSignal.description} (${Math.round(topSignal.confidence * 100)}% confidence)`;
+              }
+            }
+          }
+        });
+        
+        console.log(`🎯 Enhanced crypto trends with on-chain alpha from Dune Analytics`);
+      }
+    } catch (error) {
+      console.error('⚠️ Failed to fetch Dune Analytics data:', error);
+    }
+
+    console.log(`📊 Enhanced ${enhancedTrends.length} financial trends with live market data`);
     return enhancedTrends;
   }
 
