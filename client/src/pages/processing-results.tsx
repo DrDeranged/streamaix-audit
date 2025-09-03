@@ -459,31 +459,6 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </div>
                       )}
 
-                      {summary.trends && summary.trends.length > 0 && (
-                        <div className="p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
-                          <h5 className="font-semibold mb-3 text-purple-400 flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
-                            Market Trends
-                          </h5>
-                          <div className="space-y-3">
-                            {summary.trends.map((trend: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-purple-400">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="font-medium text-sm text-white">{trend.trend || `Trend ${idx + 1}`}</span>
-                                  <Badge variant="outline" className={`text-xs ${
-                                    trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
-                                    trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
-                                    'text-gray-400 border-gray-500/30'
-                                  }`}>
-                                    {trend.strength || 'moderate'}
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">{trend.evidence || trend}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
 
                       {summary.keyQuotes && summary.keyQuotes.length > 0 && (
                         <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
