@@ -96,7 +96,7 @@ export class AIService {
           },
           {
             role: 'user',
-            content: `Extract key insights from: ${transcript.slice(0, 3000)}...`
+            content: `Extract key insights from: ${transcript.slice(0, 12000)}...`
           }
         ],
         temperature: 0.2,
@@ -109,15 +109,15 @@ export class AIService {
         messages: [
           {
             role: 'system',
-            content: 'Break this content into logical chapters with timestamps. Return as JSON array with title, startTime, endTime, and summary for each chapter.'
+            content: 'Break this ENTIRE content into comprehensive logical chapters with accurate timestamps covering the FULL duration. Create detailed chapters for the complete content, not just the beginning. Return as JSON array with title, startTime, endTime, and summary for each chapter. Include all sections and ensure timestamps span the entire content length.'
           },
           {
             role: 'user',
-            content: `Create chapters for: ${transcript.slice(0, 2000)}...`
+            content: `Create chapters for: ${transcript.slice(0, 15000)}...`
           }
         ],
         temperature: 0.2,
-        max_tokens: 1000
+        max_tokens: 2000
       });
 
       // Generate relevant tags
@@ -130,7 +130,7 @@ export class AIService {
           },
           {
             role: 'user',
-            content: `Generate tags for "${options.title}": ${transcript.slice(0, 1000)}...`
+            content: `Generate tags for "${options.title}": ${transcript.slice(0, 8000)}...`
           }
         ],
         temperature: 0.3,
@@ -499,12 +499,12 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
           },
           {
             role: 'user',
-            content: `Title: "${title}"\nContent: ${transcript.substring(0, 3500)}` // Reduced from 4000 to save tokens
+            content: `Title: "${title}"\nContent: ${transcript.substring(0, 20000)}` // Increased to process full content length
           }
         ],
         response_format: { type: "json_object" },
         temperature: 0.1,
-        max_tokens: 2000 // Reduced from 2500 to save costs while maintaining quality
+        max_tokens: 3000 // Increased to handle comprehensive full-length content analysis
       });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
