@@ -476,13 +476,16 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 - Include specific analyst source attribution for every recommendation
 
 🔍 INVESTMENT QUALITY REQUIREMENTS:
-- Generate 3-5 GENUINELY GOOD INVESTMENT OPPORTUNITIES maximum, all directly tied to video themes
+- Generate EXACTLY 4-6 GENUINELY GOOD INVESTMENT OPPORTUNITIES maximum, all directly tied to video themes
+- MANDATORY: Include at least 2 stocks, 2 crypto assets, and 1-2 from other categories (bonds/commodities/ETFs) based on video content
 - ALL recommendations must be HIGH-QUALITY POTENTIAL BUYS that investors and traders would benefit from
+- Each recommendation must have UNIQUE symbols - NO DUPLICATES allowed (e.g., if you mention BTC, don't mention BTCUSD)
 - Each reasoning must explain: 1) Specific video reference/quote, 2) Why this is a good investment opportunity, 3) Growth potential and market positioning, 4) Expert framework validation
 - Focus on investment opportunities with strong fundamentals, growth catalysts, and positive risk/reward profiles
 - Avoid generic market analysis - make it video-specific, actionable, and investor-focused
 - Time horizons must align with video timeline AND optimal investment entry/exit strategies
 - CRITICAL: Help investors, traders, and learners identify profitable opportunities based on authentic podcast insights
+- FINANCIAL IMPACT ANALYSIS: All financial trends will be displayed in Market Intel category ONLY - not in insights
 `.replace('DYNAMIC_CHAPTERS_PLACEHOLDER', dynamicChapters);
 
     try {
@@ -592,9 +595,11 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
   private async enhanceWithComprehensiveData(trends: any[]): Promise<any[]> {
     if (!trends || trends.length === 0) return trends;
 
+    // Remove duplicates based on symbol (case-insensitive and normalized)
+    const uniqueTrends = this.removeDuplicateTrends(trends);
     const enhancedTrends = [];
 
-    for (const trend of trends) {
+    for (const trend of uniqueTrends) {
       try {
         const symbol = trend.symbol?.replace('$', '') || '';
         const category = trend.category || 'Stocks';
@@ -636,27 +641,81 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
             }
           }
 
-          // Add asset-specific intelligence
+          // Add comprehensive asset-specific alpha intelligence
           if (marketData.category === 'Stocks' && marketData.fundamentals) {
+            const alphaInsights = [];
+            
             if (marketData.fundamentals.pe_ratio && marketData.fundamentals.pe_ratio < 15) {
-              enhancedTrend.priceTargets = `P/E ratio of ${marketData.fundamentals.pe_ratio} suggests potential undervaluation`;
+              alphaInsights.push(`Undervalued: P/E ${marketData.fundamentals.pe_ratio} vs sector avg`);
             }
             if (marketData.fundamentals.earnings_growth && marketData.fundamentals.earnings_growth > 15) {
-              enhancedTrend.catalysts = `Strong earnings growth of ${marketData.fundamentals.earnings_growth}% driving momentum`;
+              alphaInsights.push(`High growth: ${marketData.fundamentals.earnings_growth}% earnings expansion`);
             }
+            if (marketData.fundamentals.debt_to_equity && marketData.fundamentals.debt_to_equity < 0.5) {
+              alphaInsights.push(`Strong balance sheet: D/E ratio ${marketData.fundamentals.debt_to_equity}`);
+            }
+            if (marketData.fundamentals.dividend_yield && marketData.fundamentals.dividend_yield > 3) {
+              alphaInsights.push(`Income play: ${marketData.fundamentals.dividend_yield}% dividend yield`);
+            }
+            
+            enhancedTrend.priceTargets = alphaInsights.join(' | ');
+            enhancedTrend.catalysts = `Fundamental strength: ${alphaInsights.slice(0, 2).join(', ')}`;
+          }
+
+          if (marketData.category === 'Crypto' && marketData.onChainMetrics) {
+            const cryptoAlpha = [];
+            
+            if (marketData.onChainMetrics.whaleActivity?.includes('accumulation')) {
+              cryptoAlpha.push('Whale accumulation detected');
+            }
+            if (marketData.onChainMetrics.dexVolume && marketData.onChainMetrics.dexVolume > 1000000) {
+              cryptoAlpha.push(`High DEX volume: $${(marketData.onChainMetrics.dexVolume / 1000000).toFixed(1)}M`);
+            }
+            if (marketData.percentChange24h > 5) {
+              cryptoAlpha.push(`Strong momentum: +${marketData.percentChange24h.toFixed(1)}%`);
+            }
+            
+            enhancedTrend.priceTargets = cryptoAlpha.join(' | ');
+            enhancedTrend.catalysts = `On-chain signals: ${cryptoAlpha.slice(0, 2).join(', ')}`;
           }
 
           if (marketData.category === 'Bonds' && marketData.yield) {
-            enhancedTrend.priceTargets = `Current yield: ${marketData.yield}%`;
+            const bondAlpha = [];
+            
+            bondAlpha.push(`Current yield: ${marketData.yield}%`);
             if (marketData.yield > 4.5) {
-              enhancedTrend.catalysts = 'Attractive yield levels for income-focused investors';
+              bondAlpha.push('Attractive income opportunity');
             }
+            if (marketData.yield > 5.0) {
+              bondAlpha.push('High-yield territory');
+            }
+            
+            enhancedTrend.priceTargets = bondAlpha.join(' | ');
+            enhancedTrend.catalysts = 'Fixed income opportunity in rising rate environment';
           }
 
           if (marketData.category === 'Commodities') {
+            const commodityAlpha = [];
+            
             if (Math.abs(marketData.percentChange24h) > 3) {
-              enhancedTrend.catalysts = `Supply/demand imbalance indicated by ${marketData.percentChange24h.toFixed(1)}% price movement`;
+              commodityAlpha.push(`Strong price action: ${marketData.percentChange24h.toFixed(1)}%`);
             }
+            if (marketData.percentChange7d && Math.abs(marketData.percentChange7d) > 5) {
+              commodityAlpha.push(`Weekly momentum: ${marketData.percentChange7d.toFixed(1)}%`);
+            }
+            
+            enhancedTrend.priceTargets = commodityAlpha.join(' | ');
+            enhancedTrend.catalysts = 'Supply/demand dynamics creating trading opportunity';
+          }
+
+          if (marketData.category === 'ETFs') {
+            enhancedTrend.priceTargets = `Diversified exposure with ${marketData.percentChange24h > 0 ? 'positive' : 'negative'} momentum`;
+            enhancedTrend.catalysts = 'Sector rotation opportunity through ETF positioning';
+          }
+
+          if (marketData.category === 'Forex') {
+            enhancedTrend.priceTargets = `Currency pair momentum: ${marketData.percentChange24h.toFixed(2)}%`;
+            enhancedTrend.catalysts = 'Central bank policy divergence creating forex opportunity';
           }
 
           enhancedTrends.push(enhancedTrend);
@@ -671,8 +730,45 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       }
     }
 
-    console.log(`🚀 Enhanced ${enhancedTrends.length} trends with comprehensive multi-asset market intelligence`);
+    console.log(`🚀 Enhanced ${enhancedTrends.length} unique trends with comprehensive multi-asset market intelligence`);
     return enhancedTrends;
+  }
+
+  /**
+   * Remove duplicate financial trends based on normalized symbols
+   */
+  private removeDuplicateTrends(trends: any[]): any[] {
+    const seen = new Set<string>();
+    const uniqueTrends = [];
+
+    for (const trend of trends) {
+      // Normalize symbol for duplicate detection
+      const normalizedSymbol = this.normalizeSymbol(trend.symbol);
+      
+      if (!seen.has(normalizedSymbol)) {
+        seen.add(normalizedSymbol);
+        uniqueTrends.push(trend);
+      } else {
+        console.log(`🔄 Removed duplicate trend: ${trend.symbol} (normalized: ${normalizedSymbol})`);
+      }
+    }
+
+    console.log(`✅ Removed ${trends.length - uniqueTrends.length} duplicate trends, keeping ${uniqueTrends.length} unique`);
+    return uniqueTrends;
+  }
+
+  /**
+   * Normalize symbol to prevent duplicates (BTC, BTCUSD, $BTC, etc.)
+   */
+  private normalizeSymbol(symbol: string): string {
+    if (!symbol) return '';
+    
+    return symbol
+      .replace(/^\$/, '') // Remove leading $
+      .replace(/USD$|USDT$|USDC$/, '') // Remove common USD suffixes
+      .replace(/[-_]/g, '') // Remove hyphens and underscores
+      .toUpperCase()
+      .trim();
   }
 }
 
