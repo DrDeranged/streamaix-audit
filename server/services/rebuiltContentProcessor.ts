@@ -391,25 +391,25 @@ Generate expert-level institutional analysis in this exact JSON format:
   "financialTrends": [
     {
       "category": "Stocks",
-      "symbol": "RELEVANT_TICKER_1",
-      "company": "Company Name Based on Content",
-      "relevance": "Specific connection to video content themes and analyst consensus",
-      "impact": "bullish/bearish/neutral based on content analysis",
-      "reasoning": "Content-specific expert analysis (150-200 words) directly citing themes, data points, or arguments from the video. Reference how the video's discussion of [specific topic mentioned] aligns with established analyst frameworks (Benjamin Cowen's cycle analysis, Willy Woo's on-chain metrics, Raoul Pal's macro thesis). Include exact quotes or data from the video that support this investment thesis, technical levels mentioned in the content, and how the video's timeline/predictions align with institutional positioning strategies.",
-      "timeHorizon": "Short-term/Medium-term/Long-term based on analyst cycle models",
-      "riskLevel": "Low/Moderate/High based on volatility metrics and institutional risk frameworks",
-      "analystSource": "Reference to specific analyst methodology or institutional research"
+      "symbol": "NVDA",
+      "company": "NVIDIA Corporation",
+      "relevance": "AI infrastructure and blockchain technology enablement",
+      "impact": "bullish based on content analysis and technology trends",
+      "reasoning": "Content-specific expert analysis (150-200 words) directly citing themes, data points, or arguments from the video related to AI and technology infrastructure that enables blockchain networks. Reference how the video's discussion of computational requirements, network security, or technological advancement aligns with NVIDIA's market position. Include exact quotes or data from the video that support the thesis around technology infrastructure needs, and explain how the video's timeline and predictions align with institutional positioning in AI and blockchain infrastructure.",
+      "timeHorizon": "Long-term based on technology adoption cycles and institutional investment",
+      "riskLevel": "Moderate based on market volatility and technology sector dynamics",
+      "analystSource": "Technology sector analysis and institutional research frameworks"
     },
     {
       "category": "Stocks", 
-      "symbol": "RELEVANT_TICKER_2",
-      "company": "Content-Specific Company",
-      "relevance": "Direct correlation to video discussion points and sector analysis",
-      "impact": "Sentiment based on expert technical and fundamental analysis",
-      "reasoning": "Video-correlated institutional analysis (150-200 words) directly referencing specific points, data, or predictions mentioned in the video content. Explain how the video's discussion of [specific topic] validates or challenges established frameworks from Messari research or Real Vision insights. Include direct quotes from the video speakers, specific metrics or data points mentioned, and how the video's thesis impacts competitive positioning and regulatory outlook for this asset.",
-      "timeHorizon": "Timeline based on cycle analysis and institutional adoption patterns", 
-      "riskLevel": "Risk assessment using proven institutional risk management frameworks",
-      "analystSource": "Specific reference to analytical framework or institutional research"
+      "symbol": "MSTR",
+      "company": "MicroStrategy Incorporated",
+      "relevance": "Direct Bitcoin treasury exposure and corporate crypto adoption",
+      "impact": "bullish based on crypto market correlation and institutional trends",
+      "reasoning": "Video-correlated institutional analysis (150-200 words) directly referencing corporate Bitcoin adoption trends and treasury strategies discussed in the video content. Explain how the video's discussion of institutional crypto adoption validates MicroStrategy's Bitcoin strategy and corporate treasury approach. Include direct quotes from the video speakers about corporate adoption, specific metrics or institutional trends mentioned, and how the video's thesis on crypto institutionalization impacts MicroStrategy's business model and stock performance.",
+      "timeHorizon": "Medium-term based on crypto cycle analysis and corporate adoption patterns", 
+      "riskLevel": "High based on Bitcoin correlation and market volatility dynamics",
+      "analystSource": "Corporate crypto adoption research and institutional Bitcoin analysis"
     },
     {
       "category": "Crypto",
@@ -435,14 +435,14 @@ Generate expert-level institutional analysis in this exact JSON format:
     },
     {
       "category": "Crypto",
-      "symbol": "CONTENT_SPECIFIC_CRYPTO",
-      "company": "Asset Mentioned in Content",
-      "relevance": "Direct reference from video content with expert validation",
-      "impact": "Analysis based on content discussion and expert assessment",
-      "reasoning": "Video-specific expert evaluation (150-200 words) directly tied to mentions of this crypto asset in the video content. Reference specific discussions about the asset's use case, adoption potential, or market positioning mentioned by the speakers. Connect these video insights to established analytical frameworks from Coin Bureau or Messari research. Include exact quotes about this asset from the video, specific data points or predictions mentioned, and how the video's assessment aligns with institutional due diligence frameworks.",
-      "timeHorizon": "Investment timeline based on project roadmap and market cycle analysis",
-      "riskLevel": "Risk evaluation using institutional due diligence frameworks",
-      "analystSource": "Specific analyst framework or institutional research methodology"
+      "symbol": "SOL",
+      "company": "Solana",
+      "relevance": "High-performance blockchain alternative with institutional adoption",
+      "impact": "Analysis based on content discussion and competitive positioning",
+      "reasoning": "Video-specific expert evaluation (150-200 words) examining Solana's role in the broader blockchain ecosystem discussed in the video. Reference specific mentions of Layer 1 competition, scalability solutions, or institutional blockchain adoption that relates to Solana's positioning. Connect these video insights to established analytical frameworks from Messari research on Layer 1 performance metrics. Include relevant context about network growth, developer activity, or institutional partnerships mentioned in the video, and explain how the video's assessment of blockchain infrastructure trends impacts Solana's competitive advantages.",
+      "timeHorizon": "Medium-term based on network development and institutional adoption cycles", 
+      "riskLevel": "Moderate considering network stability and competitive landscape",
+      "analystSource": "Messari Layer 1 analysis and institutional adoption metrics"
     }
   ],
   "marketSentiment": "BULLISH",
