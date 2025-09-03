@@ -475,7 +475,7 @@ export default function Dashboard() {
                                     {summary.bulletPoints.map((point, index) => (
                                       <li key={index} className="flex items-start gap-2">
                                         <span className="text-yellow-400 mt-1">•</span>
-                                        <span>{point}</span>
+                                        <span className="text-gray-800 dark:text-gray-200">{point}</span>
                                       </li>
                                     ))}
                                   </ul>
@@ -490,8 +490,8 @@ export default function Dashboard() {
                                   <div className="space-y-3">
                                     {summary.keyQuotes.slice(0, 3).map((quote, index) => (
                                       <div key={index} className="border-l-2 border-purple-400/50 pl-3">
-                                        <p className="text-gray-200 text-sm italic mb-1">"{quote.quote}"</p>
-                                        <p className="text-xs text-gray-300">— {quote.speaker} at {quote.timestamp}</p>
+                                        <p className="text-gray-800 dark:text-gray-200 text-sm italic mb-1">"{quote.quote}"</p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">— {quote.speaker} at {quote.timestamp}</p>
                                       </div>
                                     ))}
                                   </div>
@@ -505,11 +505,11 @@ export default function Dashboard() {
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                   <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
                                     <div className="text-2xl font-bold text-green-400 mb-1">{summary.marketSentiment}</div>
-                                    <div className="text-xs text-gray-300">Market Sentiment</div>
+                                    <div className="text-xs text-gray-600 dark:text-gray-300">Market Sentiment</div>
                                   </div>
                                   <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
                                     <div className="text-2xl font-bold text-purple-400 mb-1">{summary.sourceCredibility}</div>
-                                    <div className="text-xs text-gray-300">Source Credibility</div>
+                                    <div className="text-xs text-gray-600 dark:text-gray-300">Source Credibility</div>
                                   </div>
                                 </div>
                               )}
@@ -526,7 +526,7 @@ export default function Dashboard() {
                                           <div className="flex items-center gap-2">
                                             <Badge variant="outline" className="text-xs">{trend.category}</Badge>
                                             <span className="font-mono text-cyan-400">{trend.symbol}</span>
-                                            <span className="text-white font-medium">{trend.company}</span>
+                                            <span className="text-gray-900 dark:text-white font-medium">{trend.company}</span>
                                             {trend.liveData && (
                                               <div className="flex items-center gap-2 ml-2">
                                                 <span className="font-mono text-sm font-bold text-white">
@@ -552,8 +552,8 @@ export default function Dashboard() {
                                             {trend.impact}
                                           </Badge>
                                         </div>
-                                        <p className="text-xs text-gray-300 mb-2">{trend.relevance}</p>
-                                        <div className="flex items-center gap-4 text-xs text-gray-400 mb-2">
+                                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{trend.relevance}</p>
+                                        <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-2">
                                           <span>Risk: {trend.riskLevel}</span>
                                           <span>Horizon: {trend.timeHorizon}</span>
                                         </div>
@@ -598,8 +598,8 @@ export default function Dashboard() {
                                           {chapter.startTime}
                                         </Badge>
                                         <div className="flex-1">
-                                          <p className="text-white text-sm font-medium">{chapter.title}</p>
-                                          <p className="text-xs text-gray-300">{chapter.summary}</p>
+                                          <p className="text-gray-900 dark:text-white text-sm font-medium">{chapter.title}</p>
+                                          <p className="text-xs text-gray-600 dark:text-gray-300">{chapter.summary}</p>
                                         </div>
                                       </div>
                                     ))}

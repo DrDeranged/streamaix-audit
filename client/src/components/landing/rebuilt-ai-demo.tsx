@@ -369,13 +369,13 @@ export function AIProcessor() {
                               <p className="text-foreground leading-relaxed text-base">{result.tldrSummary}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg">
-                              <h5 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                              <h5 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
                                 <BarChart3 className="w-5 h-5" />
                                 Market & Trend Analysis
                               </h5>
-                              <div className="text-gray-200 leading-relaxed space-y-3">
+                              <div className="text-gray-800 dark:text-gray-200 leading-relaxed space-y-3">
                                 {result.summary.split('\n\n').map((paragraph: string, idx: number) => (
-                                  <p key={idx} className="text-sm leading-relaxed">{paragraph}</p>
+                                  <p key={idx} className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">{paragraph}</p>
                                 ))}
                               </div>
                             </div>
@@ -393,7 +393,7 @@ export function AIProcessor() {
                                   {result.bulletPoints.map((point: string, idx: number) => (
                                     <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                       <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                      <span className="text-sm">{point}</span>
+                                      <span className="text-sm text-gray-800 dark:text-gray-200">{point}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -410,7 +410,7 @@ export function AIProcessor() {
                                   {result.trends.map((trend: any, idx: number) => (
                                     <div key={idx} className="p-3 bg-background/50 rounded-md">
                                       <div className="flex items-center justify-between mb-1">
-                                        <span className="font-medium text-sm">{trend.trend}</span>
+                                        <span className="font-medium text-sm text-gray-900 dark:text-white">{trend.trend}</span>
                                         <Badge variant="outline" className={`text-xs ${
                                           trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
                                           trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
@@ -419,7 +419,7 @@ export function AIProcessor() {
                                           {trend.strength}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-gray-300">{trend.evidence}</p>
+                                      <p className="text-xs text-gray-600 dark:text-gray-300">{trend.evidence}</p>
                                     </div>
                                   ))}
                                 </div>
@@ -443,7 +443,7 @@ export function AIProcessor() {
                                           <span className="font-mono text-sm font-semibold text-cyan-400">
                                             ${financial.symbol}
                                           </span>
-                                          <span className="text-sm font-medium">{financial.company}</span>
+                                          <span className="text-sm font-medium text-gray-900 dark:text-white">{financial.company}</span>
                                           {financial.liveData && (
                                             <div className="flex items-center gap-2 ml-2">
                                               <span className="font-mono text-sm font-bold text-white">
@@ -469,8 +469,8 @@ export function AIProcessor() {
                                           {financial.impact}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-gray-300 mb-2">{financial.relevance}</p>
-                                      <p className="text-xs text-gray-200 italic mb-2">{financial.reasoning}</p>
+                                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{financial.relevance}</p>
+                                      <p className="text-xs text-gray-700 dark:text-gray-200 italic mb-2">{financial.reasoning}</p>
                                       {(financial.timeHorizon || financial.riskLevel || financial.analystSource) && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                           {financial.timeHorizon && (
