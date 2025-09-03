@@ -452,7 +452,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's summaries
   app.get('/api/users/:id/summaries', asyncHandler(async (req: Request, res: Response) => {
     const summaries = await storage.getSummariesByUser(req.params.id);
-    res.json({ summaries });
+    
+    // Parse marketAnalysis JSON for each summary to include comprehensive data
+    const enrichedSummaries = summaries.map(summary => {
+      let marketData = {};
+      try {
+        if (summary.marketAnalysis) {
+          marketData = JSON.parse(summary.marketAnalysis);
+        }
+      } catch (e) {
+        console.log('Could not parse market analysis data for summary:', summary.id);
+      }
+      
+      return {
+        ...summary,
+        ...marketData, // Spread the parsed fields (bulletPoints, trends, financialTrends, etc.)
+        executiveSummary: summary.blogPost || summary.summary
+      };
+    });
+    
+    res.json({ summaries: enrichedSummaries });
   }));
 
 

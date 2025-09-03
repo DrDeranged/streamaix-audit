@@ -27,7 +27,13 @@ import {
   Target,
   ArrowLeft,
   Home,
-  BookmarkPlus
+  BookmarkPlus,
+  Activity,
+  Calendar,
+  MessageSquare,
+  FileText,
+  Hash,
+  Code2
 } from 'lucide-react';
 
 interface Summary {
@@ -42,6 +48,47 @@ interface Summary {
   createdAt: string;
   viewCount: number;
   likes: number;
+  summary?: string;
+  tldrSummary?: string;
+  blogPost?: string;
+  bulletPoints?: string[];
+  trends?: Array<{
+    trend: string;
+    strength: 'strong' | 'moderate' | 'weak';
+    evidence: string;
+  }>;
+  financialTrends?: Array<{
+    category: string;
+    symbol: string;
+    company: string;
+    relevance: string;
+    impact: string;
+    reasoning: string;
+    timeHorizon: string;
+    riskLevel: string;
+    analystSource: string;
+  }>;
+  chapters?: Array<{
+    title: string;
+    startTime: string;
+    endTime: string;
+    summary: string;
+  }>;
+  keyQuotes?: Array<{
+    quote: string;
+    speaker: string;
+    timestamp: string;
+    significance?: string;
+  }>;
+  marketSentiment?: string;
+  sourceCredibility?: string;
+  rawData?: {
+    title: string;
+    channel: string;
+    duration: string;
+    views: string;
+    thumbnail: string;
+  };
 }
 
 interface Bounty {
@@ -322,48 +369,229 @@ export default function Dashboard() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {summaries.map((summary) => (
-                    <div key={summary.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-white font-semibold mb-1">{summary.title}</h3>
-                          <p className="text-gray-300 text-sm mb-2">
-                            {summary.platform} • {summary.contentType} • {new Date(summary.createdAt).toLocaleDateString()}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {summary.viewCount || 0}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Star className="h-3 w-3" />
-                              {summary.likes || 0}
-                            </span>
-                            {summary.accuracy && (
+                    <Card key={summary.id} className="bg-white/5 border-white/10 backdrop-blur-lg">
+                      {/* Header */}
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge className={getStatusColor(summary.processingStatus)}>
+                                {summary.processingStatus}
+                              </Badge>
+                              {summary.accuracy && (
+                                <Badge variant="secondary" className="bg-green-500/20 text-green-200 border-green-500/30">
+                                  {summary.accuracy}% accuracy
+                                </Badge>
+                              )}
+                            </div>
+                            <h3 className="text-white font-bold text-xl mb-2">{summary.title}</h3>
+                            <p className="text-gray-300 text-sm mb-3">
+                              {summary.platform} • {summary.contentType} • {new Date(summary.createdAt).toLocaleDateString()}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
                               <span className="flex items-center gap-1">
-                                <Zap className="h-3 w-3" />
-                                {summary.accuracy}% accuracy
+                                <Eye className="h-3 w-3" />
+                                {summary.viewCount || 0} views
                               </span>
-                            )}
+                              <span className="flex items-center gap-1">
+                                <Star className="h-3 w-3" />
+                                {summary.likes || 0} likes
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                              View Full
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(summary.processingStatus)}>
-                            {summary.processingStatus}
-                          </Badge>
-                          <Link href={`/summary/${summary.id}`}>
-                            <Button size="sm" variant="outline">View</Button>
-                          </Link>
-                        </div>
-                      </div>
-                      {summary.processingStatus === 'processing' && (
-                        <div className="mt-3">
-                          <Progress value={65} className="h-2" />
-                          <p className="text-xs text-gray-400 mt-1">Processing... AI analysis in progress</p>
-                        </div>
+                      </CardHeader>
+
+                      {/* Content Analysis Tabs */}
+                      {summary.processingStatus === 'completed' && summary.summary && (
+                        <CardContent>
+                          <Tabs defaultValue="summary" className="w-full">
+                            <TabsList className="grid w-full grid-cols-4 bg-white/10">
+                              <TabsTrigger value="summary" className="text-white data-[state=active]:bg-white/20">
+                                <FileText className="w-4 h-4 mr-1" />
+                                Summary
+                              </TabsTrigger>
+                              <TabsTrigger value="insights" className="text-white data-[state=active]:bg-white/20">
+                                <Activity className="w-4 h-4 mr-1" />
+                                Insights
+                              </TabsTrigger>
+                              <TabsTrigger value="market" className="text-white data-[state=active]:bg-white/20">
+                                <TrendingUp className="w-4 h-4 mr-1" />
+                                Market
+                              </TabsTrigger>
+                              <TabsTrigger value="structure" className="text-white data-[state=active]:bg-white/20">
+                                <BarChart3 className="w-4 h-4 mr-1" />
+                                Structure
+                              </TabsTrigger>
+                            </TabsList>
+
+                            {/* Summary Tab */}
+                            <TabsContent value="summary" className="mt-4 space-y-4">
+                              {summary.tldrSummary && (
+                                <div className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                                  <h4 className="font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                                    <Zap className="w-4 h-4" />
+                                    TLDR Summary
+                                  </h4>
+                                  <p className="text-gray-300 text-sm leading-relaxed">{summary.tldrSummary}</p>
+                                </div>
+                              )}
+                              {summary.blogPost && (
+                                <div className="p-4 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
+                                  <h4 className="font-semibold text-green-400 mb-2 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Executive Summary
+                                  </h4>
+                                  <p className="text-gray-300 text-sm leading-relaxed">{summary.blogPost}</p>
+                                </div>
+                              )}
+                            </TabsContent>
+
+                            {/* Insights Tab */}
+                            <TabsContent value="insights" className="mt-4 space-y-4">
+                              {summary.bulletPoints && summary.bulletPoints.length > 0 && (
+                                <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/20">
+                                  <h4 className="font-semibold text-yellow-400 mb-3 flex items-center gap-2">
+                                    <Activity className="w-4 h-4" />
+                                    Key Insights
+                                  </h4>
+                                  <ul className="space-y-2 text-sm text-gray-300">
+                                    {summary.bulletPoints.map((point, index) => (
+                                      <li key={index} className="flex items-start gap-2">
+                                        <span className="text-yellow-400 mt-1">•</span>
+                                        <span>{point}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {summary.keyQuotes && summary.keyQuotes.length > 0 && (
+                                <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                                  <h4 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4" />
+                                    Notable Quotes
+                                  </h4>
+                                  <div className="space-y-3">
+                                    {summary.keyQuotes.slice(0, 3).map((quote, index) => (
+                                      <div key={index} className="border-l-2 border-purple-400/50 pl-3">
+                                        <p className="text-gray-300 text-sm italic mb-1">"{quote.quote}"</p>
+                                        <p className="text-xs text-gray-400">— {quote.speaker} at {quote.timestamp}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </TabsContent>
+
+                            {/* Market Tab */}
+                            <TabsContent value="market" className="mt-4 space-y-4">
+                              {summary.marketSentiment && summary.sourceCredibility && (
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                  <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
+                                    <div className="text-2xl font-bold text-green-400 mb-1">{summary.marketSentiment}</div>
+                                    <div className="text-xs text-gray-400">Market Sentiment</div>
+                                  </div>
+                                  <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
+                                    <div className="text-2xl font-bold text-purple-400 mb-1">{summary.sourceCredibility}</div>
+                                    <div className="text-xs text-gray-400">Source Credibility</div>
+                                  </div>
+                                </div>
+                              )}
+                              {summary.financialTrends && summary.financialTrends.length > 0 && (
+                                <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                                  <h4 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4" />
+                                    Financial Impact Analysis
+                                  </h4>
+                                  <div className="grid gap-3">
+                                    {summary.financialTrends.slice(0, 3).map((trend, index) => (
+                                      <div key={index} className="p-3 bg-white/5 rounded border border-white/10">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="text-xs">{trend.category}</Badge>
+                                            <span className="font-mono text-cyan-400">{trend.symbol}</span>
+                                            <span className="text-white font-medium">{trend.company}</span>
+                                          </div>
+                                          <Badge className={`text-xs ${
+                                            trend.impact.toLowerCase().includes('bullish') ? 'bg-green-500/20 text-green-200' :
+                                            trend.impact.toLowerCase().includes('bearish') ? 'bg-red-500/20 text-red-200' :
+                                            'bg-yellow-500/20 text-yellow-200'
+                                          }`}>
+                                            {trend.impact}
+                                          </Badge>
+                                        </div>
+                                        <p className="text-xs text-gray-400 mb-2">{trend.relevance}</p>
+                                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                                          <span>Risk: {trend.riskLevel}</span>
+                                          <span>Horizon: {trend.timeHorizon}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </TabsContent>
+
+                            {/* Structure Tab */}
+                            <TabsContent value="structure" className="mt-4 space-y-4">
+                              {summary.chapters && summary.chapters.length > 0 && (
+                                <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 rounded-lg border border-indigo-500/20">
+                                  <h4 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4" />
+                                    Content Structure
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {summary.chapters.map((chapter, index) => (
+                                      <div key={index} className="flex items-center gap-3 p-2 bg-white/5 rounded border border-white/10">
+                                        <Badge variant="outline" className="text-xs font-mono">
+                                          {chapter.startTime}
+                                        </Badge>
+                                        <div className="flex-1">
+                                          <p className="text-white text-sm font-medium">{chapter.title}</p>
+                                          <p className="text-xs text-gray-400">{chapter.summary}</p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {summary.tags && summary.tags.length > 0 && (
+                                <div className="p-4 bg-gradient-to-br from-gray-500/10 to-slate-500/10 rounded-lg border border-gray-500/20">
+                                  <h4 className="font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                                    <Hash className="w-4 h-4" />
+                                    Tags
+                                  </h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {summary.tags.map((tag, index) => (
+                                      <Badge key={index} variant="outline" className="text-xs">
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </TabsContent>
+                          </Tabs>
+                        </CardContent>
                       )}
-                    </div>
+
+                      {/* Processing State */}
+                      {summary.processingStatus === 'processing' && (
+                        <CardContent>
+                          <div className="text-center py-6">
+                            <Progress value={65} className="h-2 mb-4" />
+                            <p className="text-gray-400 text-sm">AI analysis in progress...</p>
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
                   ))}
                   {summaries.length === 0 && (
                     <div className="text-center py-12">
