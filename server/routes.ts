@@ -1046,13 +1046,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(`Starting AI content analysis for URL: ${url}`);
       
-      // Use a fixed existing user ID from database
-      const demoUserId = 'b57e2c1e-c053-4bff-8bff-d3cee93a3f0a';
+      // Get current user ID from session/request
+      // For now, use a consistent demo user until auth is fully implemented
+      let userId = 'b57e2c1e-c053-4bff-8bff-d3cee93a3f0a'; // Default demo user
+      
+      // Try to get actual user from query param or use the main demo user we see in logs
+      if (req.query.userId) {
+        userId = req.query.userId as string;
+      } else {
+        // Use the actual user ID we see in the dashboard logs
+        userId = '22e98fd8-e107-4f6d-bc84-e99f5b4c73e9';
+      }
+
+      console.log(`📝 Processing content for user: ${userId}`);
 
       // Start real processing with RealContentProcessor
       console.log('🚀 Starting processing with RealContentProcessor');
       const processor = RebuiltContentProcessor.getInstance();
-      const result = await processor.processContent(url, demoUserId);
+      const result = await processor.processContent(url, userId);
       const summaryId = result.summaryId;
 
       res.status(201).json({
