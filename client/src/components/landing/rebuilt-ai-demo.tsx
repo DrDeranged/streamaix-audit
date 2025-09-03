@@ -373,7 +373,7 @@ export function AIProcessor() {
                                 <BarChart3 className="w-5 h-5" />
                                 Market & Trend Analysis
                               </h5>
-                              <div className="text-muted-foreground leading-relaxed space-y-3">
+                              <div className="text-gray-200 leading-relaxed space-y-3">
                                 {result.summary.split('\n\n').map((paragraph: string, idx: number) => (
                                   <p key={idx} className="text-sm leading-relaxed">{paragraph}</p>
                                 ))}
@@ -419,7 +419,7 @@ export function AIProcessor() {
                                           {trend.strength}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-muted-foreground">{trend.evidence}</p>
+                                      <p className="text-xs text-gray-300">{trend.evidence}</p>
                                     </div>
                                   ))}
                                 </div>
@@ -469,8 +469,8 @@ export function AIProcessor() {
                                           {financial.impact}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-muted-foreground mb-2">{financial.relevance}</p>
-                                      <p className="text-xs text-muted-foreground italic mb-2">{financial.reasoning}</p>
+                                      <p className="text-xs text-gray-300 mb-2">{financial.relevance}</p>
+                                      <p className="text-xs text-gray-200 italic mb-2">{financial.reasoning}</p>
                                       {(financial.timeHorizon || financial.riskLevel || financial.analystSource) && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                           {financial.timeHorizon && (
@@ -496,7 +496,7 @@ export function AIProcessor() {
                                             <div className="flex gap-2 mt-1">
                                               {financial.liveData.marketCap && (
                                                 <div className="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded border border-purple-500/20">
-                                                  Cap: ${(financial.liveData.marketCap / 1e9).toFixed(1)}B
+                                                  Cap: ${financial.liveData.marketCap >= 1e12 ? (financial.liveData.marketCap / 1e12).toFixed(2) + 'T' : (financial.liveData.marketCap / 1e9).toFixed(1) + 'B'}
                                                 </div>
                                               )}
                                               {financial.liveData.volume24h && (

@@ -490,8 +490,8 @@ export default function Dashboard() {
                                   <div className="space-y-3">
                                     {summary.keyQuotes.slice(0, 3).map((quote, index) => (
                                       <div key={index} className="border-l-2 border-purple-400/50 pl-3">
-                                        <p className="text-gray-300 text-sm italic mb-1">"{quote.quote}"</p>
-                                        <p className="text-xs text-gray-400">— {quote.speaker} at {quote.timestamp}</p>
+                                        <p className="text-gray-200 text-sm italic mb-1">"{quote.quote}"</p>
+                                        <p className="text-xs text-gray-300">— {quote.speaker} at {quote.timestamp}</p>
                                       </div>
                                     ))}
                                   </div>
@@ -505,11 +505,11 @@ export default function Dashboard() {
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                   <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
                                     <div className="text-2xl font-bold text-green-400 mb-1">{summary.marketSentiment}</div>
-                                    <div className="text-xs text-gray-400">Market Sentiment</div>
+                                    <div className="text-xs text-gray-300">Market Sentiment</div>
                                   </div>
                                   <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
                                     <div className="text-2xl font-bold text-purple-400 mb-1">{summary.sourceCredibility}</div>
-                                    <div className="text-xs text-gray-400">Source Credibility</div>
+                                    <div className="text-xs text-gray-300">Source Credibility</div>
                                   </div>
                                 </div>
                               )}
@@ -552,11 +552,30 @@ export default function Dashboard() {
                                             {trend.impact}
                                           </Badge>
                                         </div>
-                                        <p className="text-xs text-gray-400 mb-2">{trend.relevance}</p>
-                                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                                        <p className="text-xs text-gray-300 mb-2">{trend.relevance}</p>
+                                        <div className="flex items-center gap-4 text-xs text-gray-400 mb-2">
                                           <span>Risk: {trend.riskLevel}</span>
                                           <span>Horizon: {trend.timeHorizon}</span>
                                         </div>
+                                        {trend.liveData && (trend.liveData.marketCap || trend.liveData.volume24h) && (
+                                          <div className="flex gap-2 flex-wrap">
+                                            {trend.liveData.marketCap && (
+                                              <div className="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded border border-purple-500/20">
+                                                Cap: ${trend.liveData.marketCap >= 1e12 ? (trend.liveData.marketCap / 1e12).toFixed(2) + 'T' : (trend.liveData.marketCap / 1e9).toFixed(1) + 'B'}
+                                              </div>
+                                            )}
+                                            {trend.liveData.volume24h && (
+                                              <div className="text-xs bg-orange-500/10 text-orange-400 px-2 py-1 rounded border border-orange-500/20">
+                                                Vol: ${(trend.liveData.volume24h / 1e6).toFixed(0)}M
+                                              </div>
+                                            )}
+                                            {trend.liveData.rank && (
+                                              <div className="text-xs bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded border border-yellow-500/20">
+                                                Rank #{trend.liveData.rank}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
                                       </div>
                                     ))}
                                   </div>
@@ -580,7 +599,7 @@ export default function Dashboard() {
                                         </Badge>
                                         <div className="flex-1">
                                           <p className="text-white text-sm font-medium">{chapter.title}</p>
-                                          <p className="text-xs text-gray-400">{chapter.summary}</p>
+                                          <p className="text-xs text-gray-300">{chapter.summary}</p>
                                         </div>
                                       </div>
                                     ))}
