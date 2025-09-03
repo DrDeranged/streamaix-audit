@@ -242,10 +242,15 @@ export class MarketDataService {
       }
     }
 
-    // For stocks, we'll use mock data for now (can integrate with stock API later)
+    // For stocks, we'll skip live data if no real API is available
+    // This prevents mock/template data from showing up
     enhancedTrends.forEach(trend => {
       if (trend.category === 'Stocks' && !trend.liveData) {
-        trend.liveData = this.getMockStockData(trend.symbol.replace('$', ''));
+        const stockData = this.getMockStockData(trend.symbol.replace('$', ''));
+        if (stockData) {
+          trend.liveData = stockData;
+        }
+        // If stockData is null, trend will not have liveData property
       }
     });
 
@@ -299,30 +304,10 @@ export class MarketDataService {
   }
 
   private getMockStockData(symbol: string): any {
-    const mockStocks: Record<string, any> = {
-      'NVDA': {
-        price: 875.30,
-        percentChange24h: 1.8,
-        marketCap: 2150000000000,
-        volume: 45000000,
-        lastUpdated: new Date().toISOString()
-      },
-      'MSTR': {
-        price: 425.60,
-        percentChange24h: 4.2,
-        marketCap: 8500000000,
-        volume: 2800000,
-        lastUpdated: new Date().toISOString()
-      }
-    };
-
-    return mockStocks[symbol.toUpperCase()] || {
-      price: 100.0,
-      percentChange24h: 0.0,
-      marketCap: 1000000000,
-      volume: 1000000,
-      lastUpdated: new Date().toISOString()
-    };
+    // Return null instead of mock data to avoid showing fake prices
+    // This forces the system to show only real data or no pricing info
+    console.log(`⚠️ No real stock data available for ${symbol} - API key required`);
+    return null;
   }
 
   private getMockCryptoInfo(symbol: string): any {
