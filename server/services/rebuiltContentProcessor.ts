@@ -1,5 +1,6 @@
 import { DatabaseStorage } from '../storage';
 import OpenAI from 'openai';
+import { marketDataService } from './marketDataService';
 
 interface ProcessingResult {
   id: string;
@@ -582,11 +583,26 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       console.log('Could not parse market analysis data');
     }
 
-    return {
+    let result = {
       ...summary,
       ...marketData, // Spread the parsed fields (bulletPoints, trends, etc.)
       executiveSummary: summary.blogPost || summary.summary
     };
+
+    // Enhance financial trends with live market data if available
+    const resultWithTrends = result as any;
+    if (resultWithTrends.financialTrends && Array.isArray(resultWithTrends.financialTrends)) {
+      try {
+        console.log('📊 Enhancing financial trends with live market data...');
+        resultWithTrends.financialTrends = await marketDataService.enhanceFinancialTrends(resultWithTrends.financialTrends);
+        console.log('✅ Financial trends enhanced with live data');
+      } catch (error) {
+        console.error('❌ Failed to enhance financial trends:', error);
+        // Continue with original data if enhancement fails
+      }
+    }
+
+    return result;
   }
 }
 

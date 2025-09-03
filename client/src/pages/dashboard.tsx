@@ -67,6 +67,15 @@ interface Summary {
     timeHorizon: string;
     riskLevel: string;
     analystSource: string;
+    liveData?: {
+      price: number;
+      percentChange24h: number;
+      percentChange7d?: number;
+      marketCap?: number;
+      volume24h?: number;
+      rank?: number;
+      lastUpdated: string;
+    };
   }>;
   chapters?: Array<{
     title: string;
@@ -518,6 +527,22 @@ export default function Dashboard() {
                                             <Badge variant="outline" className="text-xs">{trend.category}</Badge>
                                             <span className="font-mono text-cyan-400">{trend.symbol}</span>
                                             <span className="text-white font-medium">{trend.company}</span>
+                                            {trend.liveData && (
+                                              <div className="flex items-center gap-2 ml-2">
+                                                <span className="font-mono text-sm font-bold text-white">
+                                                  ${trend.liveData.price?.toLocaleString('en-US', { 
+                                                    minimumFractionDigits: 2, 
+                                                    maximumFractionDigits: 2 
+                                                  })}
+                                                </span>
+                                                <span className={`text-xs font-medium ${
+                                                  trend.liveData.percentChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                                                }`}>
+                                                  {trend.liveData.percentChange24h >= 0 ? '+' : ''}
+                                                  {trend.liveData.percentChange24h?.toFixed(2)}%
+                                                </span>
+                                              </div>
+                                            )}
                                           </div>
                                           <Badge className={`text-xs ${
                                             trend.impact.toLowerCase().includes('bullish') ? 'bg-green-500/20 text-green-200' :

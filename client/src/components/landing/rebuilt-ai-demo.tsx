@@ -444,6 +444,22 @@ export function AIProcessor() {
                                             ${financial.symbol}
                                           </span>
                                           <span className="text-sm font-medium">{financial.company}</span>
+                                          {financial.liveData && (
+                                            <div className="flex items-center gap-2 ml-2">
+                                              <span className="font-mono text-sm font-bold text-white">
+                                                ${financial.liveData.price?.toLocaleString('en-US', { 
+                                                  minimumFractionDigits: 2, 
+                                                  maximumFractionDigits: 2 
+                                                })}
+                                              </span>
+                                              <span className={`text-xs font-medium ${
+                                                financial.liveData.percentChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                                              }`}>
+                                                {financial.liveData.percentChange24h >= 0 ? '+' : ''}
+                                                {financial.liveData.percentChange24h?.toFixed(2)}%
+                                              </span>
+                                            </div>
+                                          )}
                                         </div>
                                         <Badge variant="outline" className={`text-xs ${
                                           financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
@@ -474,6 +490,25 @@ export function AIProcessor() {
                                           {financial.analystSource && (
                                             <div className="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20">
                                               📊 {financial.analystSource}
+                                            </div>
+                                          )}
+                                          {financial.liveData && (financial.liveData.marketCap || financial.liveData.volume24h) && (
+                                            <div className="flex gap-2 mt-1">
+                                              {financial.liveData.marketCap && (
+                                                <div className="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded border border-purple-500/20">
+                                                  Cap: ${(financial.liveData.marketCap / 1e9).toFixed(1)}B
+                                                </div>
+                                              )}
+                                              {financial.liveData.volume24h && (
+                                                <div className="text-xs bg-orange-500/10 text-orange-400 px-2 py-1 rounded border border-orange-500/20">
+                                                  Vol: ${(financial.liveData.volume24h / 1e6).toFixed(0)}M
+                                                </div>
+                                              )}
+                                              {financial.liveData.rank && (
+                                                <div className="text-xs bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded border border-yellow-500/20">
+                                                  Rank #{financial.liveData.rank}
+                                                </div>
+                                              )}
                                             </div>
                                           )}
                                         </div>

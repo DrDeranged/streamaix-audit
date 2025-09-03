@@ -7,6 +7,7 @@ import { StreamProcessorV2 } from "./services/streamProcessorV2";
 import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
+import { marketDataService } from "./services/marketDataService";
 import { 
   loginSchema, 
   registerSchema, 
@@ -1164,6 +1165,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const processor = RebuiltContentProcessor.getInstance();
     const result = await processor.getProcessingResult(req.params.summaryId);
     res.json(result);
+  }));
+
+  // =============================================================================
+  // MARKET DATA API ROUTES
+  // =============================================================================
+
+  // Get live cryptocurrency quotes
+  app.get('/api/market/crypto/quotes', asyncHandler(async (req: Request, res: Response) => {
+    const symbols = req.query.symbols as string;
+    if (!symbols) {
+      return res.status(400).json({ error: 'Symbols parameter is required' });
+    }
+
+    const symbolArray = symbols.split(',').map(s => s.trim());
+    const quotes = await marketDataService.getCryptoQuotes(symbolArray);
+    res.json({ quotes });
+  }));
+
+  // Get cryptocurrency information
+  app.get('/api/market/crypto/info/:symbol', asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.params.symbol;
+    const info = await marketDataService.getCryptoInfo(symbol);
+    res.json({ info });
+  }));
+
+  // Get top cryptocurrencies
+  app.get('/api/market/crypto/top', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const cryptos = await marketDataService.getTopCryptos(limit);
+    res.json({ cryptos });
+  }));
+
+  // Enhance financial trends with live market data
+  app.post('/api/market/enhance-trends', asyncHandler(async (req: Request, res: Response) => {
+    const { trends } = req.body;
+    if (!trends || !Array.isArray(trends)) {
+      return res.status(400).json({ error: 'Trends array is required' });
+    }
+
+    const enhancedTrends = await marketDataService.enhanceFinancialTrends(trends);
+    res.json({ enhancedTrends });
   }));
 
   const httpServer = createServer(app);
