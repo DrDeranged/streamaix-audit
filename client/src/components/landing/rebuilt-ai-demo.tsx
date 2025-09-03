@@ -659,6 +659,81 @@ export function AIProcessor() {
                               </div>
                             </div>
 
+                            {/* REAL FINANCIAL INVESTMENT OPPORTUNITIES */}
+                            {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
+                              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-500/20">
+                                <h6 className="font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                                  <TrendingUp className="w-4 h-4" />
+                                  Investment Opportunities from Content Analysis
+                                </h6>
+                                <div className="space-y-3">
+                                  {result.financialTrends.map((financial: any, idx: number) => (
+                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="secondary" className="text-xs">
+                                            {financial.category}
+                                          </Badge>
+                                          <span className="font-mono text-sm font-semibold text-emerald-400">
+                                            ${financial.symbol}
+                                          </span>
+                                          <span className="text-sm font-medium text-gray-900 dark:text-white">{financial.company}</span>
+                                          {financial.liveData && (
+                                            <div className="flex items-center gap-2 ml-2">
+                                              <span className="font-mono text-sm font-bold text-white">
+                                                ${financial.liveData.price?.toLocaleString('en-US', { 
+                                                  minimumFractionDigits: 2, 
+                                                  maximumFractionDigits: 2 
+                                                })}
+                                              </span>
+                                              <span className={`text-xs font-medium ${
+                                                financial.liveData.percentChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                                              }`}>
+                                                {financial.liveData.percentChange24h >= 0 ? '+' : ''}
+                                                {financial.liveData.percentChange24h?.toFixed(2)}%
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <Badge variant="outline" className={`text-xs ${
+                                          financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
+                                          financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
+                                          'text-gray-400 border-gray-500/30'
+                                        }`}>
+                                          {financial.impact}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{financial.relevance}</p>
+                                      <p className="text-xs text-gray-700 dark:text-gray-200 italic mb-2">{financial.reasoning}</p>
+                                      {(financial.timeHorizon || financial.riskLevel || financial.analystSource) && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                          {financial.timeHorizon && (
+                                            <div className="text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20">
+                                              {financial.timeHorizon}
+                                            </div>
+                                          )}
+                                          {financial.riskLevel && (
+                                            <div className={`text-xs px-2 py-1 rounded border ${
+                                              financial.riskLevel === 'Low' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                              financial.riskLevel === 'Moderate' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                              'bg-red-500/10 text-red-400 border-red-500/20'
+                                            }`}>
+                                              Risk: {financial.riskLevel}
+                                            </div>
+                                          )}
+                                          {financial.analystSource && (
+                                            <div className="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20">
+                                              📊 {financial.analystSource}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                             {/* Competitive Intelligence & Alpha */}
                             <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
                               <h6 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">

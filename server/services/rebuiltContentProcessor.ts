@@ -399,7 +399,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "evidence": "Evidence with patent landscapes, R&D investments, and market share dynamics"
     }
   ],
-  "financialTrends": "GENERATE CONTENT-SPECIFIC FINANCIAL ANALYSIS - Analyze the video content and identify 3-5 financial instruments (stocks, cryptos, commodities, bonds) that are DIRECTLY mentioned, discussed, or highly relevant to the actual video content. Base ALL recommendations ONLY on what is specifically covered in this video - no template data. Format as array with each entry: {category: 'Stocks'|'Crypto'|'Commodities'|'Bonds', symbol: 'ACTUAL_SYMBOL_FROM_VIDEO', company: 'Actual Company Name', relevance: 'Specific connection to video content', impact: 'bullish|bearish|neutral with content-based reasoning', reasoning: '150-200 words citing specific video themes, quotes, data points, or expert opinions mentioned', timeHorizon: 'Short|Medium|Long-term based on timeline discussed in video', riskLevel: 'Low|Moderate|High with justification from video content', analystSource: 'Specific analyst or framework referenced in the video'}",
+  "financialTrends": "🎯 GENERATE HIGH-QUALITY INVESTMENT OPPORTUNITIES - Analyze the video content and identify 3-5 EXCELLENT POTENTIAL INVESTMENT OPPORTUNITIES (stocks, cryptos, commodities, bonds) that are DIRECTLY mentioned, discussed, or highly relevant to the actual video content. ALL recommendations must be GENUINELY GOOD POTENTIAL BUYS that would help investors, traders, and learners make profitable decisions based on the podcast insights and real-time market sentiment. Base ALL recommendations ONLY on what is specifically covered in this video - no template data. Format as array with each entry: {category: 'Stocks'|'Crypto'|'Commodities'|'Bonds', symbol: 'ACTUAL_SYMBOL_FROM_VIDEO', company: 'Actual Company Name', relevance: 'Specific connection to video content explaining why this is a good investment opportunity', impact: 'bullish|bearish|neutral with content-based reasoning focusing on investment potential', reasoning: '150-200 words explaining why this is a good investment opportunity based on video content, market trends, and growth potential', timeHorizon: 'Short|Medium|Long-term based on timeline discussed in video and optimal entry timing', riskLevel: 'Low|Moderate|High with justification from video content and market analysis', analystSource: 'Specific analyst or framework referenced in the video'}",
   "marketSentiment": "BULLISH",
   "sourceCredibility": "High", 
   "keyQuotes": [
@@ -447,11 +447,14 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 - Analysis must reference video predictions/timelines AND analyst models
 - Include specific analyst source attribution for every recommendation
 
-🔍 QUALITY REQUIREMENTS:
-- Generate 4-5 recommendations maximum, all directly tied to video themes
-- Each reasoning must include: 1) Specific video reference/quote, 2) Expert framework validation, 3) Institutional perspective
-- Avoid generic market analysis - make it video-specific and actionable
-- Time horizons must align with video timeline AND proven cycle analysis
+🔍 INVESTMENT QUALITY REQUIREMENTS:
+- Generate 3-5 GENUINELY GOOD INVESTMENT OPPORTUNITIES maximum, all directly tied to video themes
+- ALL recommendations must be HIGH-QUALITY POTENTIAL BUYS that investors and traders would benefit from
+- Each reasoning must explain: 1) Specific video reference/quote, 2) Why this is a good investment opportunity, 3) Growth potential and market positioning, 4) Expert framework validation
+- Focus on investment opportunities with strong fundamentals, growth catalysts, and positive risk/reward profiles
+- Avoid generic market analysis - make it video-specific, actionable, and investor-focused
+- Time horizons must align with video timeline AND optimal investment entry/exit strategies
+- CRITICAL: Help investors, traders, and learners identify profitable opportunities based on authentic podcast insights
 `.replace('DYNAMIC_CHAPTERS_PLACEHOLDER', dynamicChapters);
 
     try {
