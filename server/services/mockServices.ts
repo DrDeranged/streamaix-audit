@@ -141,13 +141,117 @@ export class MockContentExtractor {
 }
 
 export class MockAIService {
+  private static generateDynamicChapters(contentType: string, totalDuration: number): Array<{title: string, startTime: string, endTime: string, summary: string}> {
+    const formatTime = (seconds: number) => {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+    
+    // Generate chapters dynamically based on total duration
+    if (contentType === 'crypto') {
+      const chapterCount = Math.max(5, Math.ceil(totalDuration / 900)); // At least 5 chapters, roughly 15-min segments
+      const segmentDuration = totalDuration / chapterCount;
+      
+      const cryptoTopics = [
+        { title: "Market Overview & Technical Analysis", summary: "Bitcoin consolidation patterns and key resistance/support levels analysis." },
+        { title: "DeFi Protocol Developments", summary: "23% TVL growth analysis and institutional adoption trends in DeFi ecosystem." },
+        { title: "Cross-Chain Interoperability Trends", summary: "Multi-chain future developments and interoperability project opportunities." },
+        { title: "Risk Management & Portfolio Strategy", summary: "Diversification strategies and correlation analysis with traditional markets." },
+        { title: "Regulatory Landscape & Institutional Adoption", summary: "Regulatory clarity impact on institutional capital allocation opportunities." },
+        { title: "Layer 2 Solutions & Scaling", summary: "Ethereum scaling solutions and their impact on DeFi ecosystem performance." },
+        { title: "Yield Farming & Staking Strategies", summary: "Advanced yield optimization techniques and risk-adjusted return analysis." },
+        { title: "NFT Market Analysis", summary: "Non-fungible token trends and utility-based asset evaluation frameworks." },
+        { title: "Central Bank Digital Currencies", summary: "CBDC developments and their impact on traditional cryptocurrency markets." },
+        { title: "Market Outlook & Investment Thesis", summary: "Long-term market predictions and strategic positioning recommendations." }
+      ];
+      
+      const chapters = [];
+      for (let i = 0; i < chapterCount; i++) {
+        const startTime = Math.floor(i * segmentDuration);
+        const endTime = Math.floor((i + 1) * segmentDuration);
+        const topic = cryptoTopics[i % cryptoTopics.length];
+        
+        chapters.push({
+          title: topic.title,
+          startTime: formatTime(startTime),
+          endTime: formatTime(Math.min(endTime, totalDuration)),
+          summary: topic.summary
+        });
+      }
+      return chapters;
+      
+    } else if (contentType === 'business' || contentType === 'educational') {
+      const chapterCount = Math.max(5, Math.ceil(totalDuration / 1000)); // Roughly 16-17 min segments
+      const segmentDuration = totalDuration / chapterCount;
+      
+      const businessTopics = [
+        { title: "Market Positioning Dynamics", summary: "Adaptive strategies for changing consumer behaviors and market conditions." },
+        { title: "Customer Acquisition Optimization", summary: "Long-term value focus strategies achieving 40% higher retention rates." },
+        { title: "Competitive Analysis Framework", summary: "Identifying genuine opportunities versus temporary market noise patterns." },
+        { title: "Operational Excellence & Scaling", summary: "Infrastructure investment strategies for sustainable growth and quality maintenance." },
+        { title: "Technology Integration Benefits", summary: "Automation and analytics providing measurable competitive advantages." },
+        { title: "Financial Planning & Unit Economics", summary: "Revenue optimization and cost structure analysis for sustainable growth." },
+        { title: "Team Building & Leadership", summary: "Organizational development strategies for high-performance culture creation." },
+        { title: "Strategic Partnerships & Alliances", summary: "Partnership evaluation frameworks and strategic alliance development." },
+        { title: "Innovation & Product Development", summary: "Product-market fit optimization and innovation pipeline management." },
+        { title: "Future Growth & Market Expansion", summary: "Long-term strategic planning and market expansion opportunity analysis." }
+      ];
+      
+      const chapters = [];
+      for (let i = 0; i < chapterCount; i++) {
+        const startTime = Math.floor(i * segmentDuration);
+        const endTime = Math.floor((i + 1) * segmentDuration);
+        const topic = businessTopics[i % businessTopics.length];
+        
+        chapters.push({
+          title: topic.title,
+          startTime: formatTime(startTime),
+          endTime: formatTime(Math.min(endTime, totalDuration)),
+          summary: topic.summary
+        });
+      }
+      return chapters;
+      
+    } else {
+      // General content
+      const chapterCount = Math.max(4, Math.ceil(totalDuration / 1200)); // Roughly 20 min segments
+      const segmentDuration = totalDuration / chapterCount;
+      
+      const generalTopics = [
+        { title: "Introduction & Context", summary: "Setting the foundation and providing essential background information." },
+        { title: "Core Concepts & Analysis", summary: "Deep dive into primary topics and analytical frameworks." },
+        { title: "Practical Applications", summary: "Real-world implementation strategies and case studies." },
+        { title: "Advanced Insights & Trends", summary: "Expert-level analysis and future trend predictions." },
+        { title: "Strategic Recommendations", summary: "Actionable recommendations and strategic implementation guidance." },
+        { title: "Q&A and Discussion", summary: "Community questions, expert responses, and detailed clarifications." }
+      ];
+      
+      const chapters = [];
+      for (let i = 0; i < chapterCount; i++) {
+        const startTime = Math.floor(i * segmentDuration);
+        const endTime = Math.floor((i + 1) * segmentDuration);
+        const topic = generalTopics[i % generalTopics.length];
+        
+        chapters.push({
+          title: topic.title,
+          startTime: formatTime(startTime),
+          endTime: formatTime(Math.min(endTime, totalDuration)),
+          summary: topic.summary
+        });
+      }
+      return chapters;
+    }
+  }
+
   static async processContent(audioPath: string, metadata: any): Promise<AIResult> {
     console.log(`[MockAI] Processing audio: ${audioPath}`);
     console.log(`[MockAI] Metadata received:`, {
       title: metadata?.title,
       contentType: metadata?.contentType,
       platform: metadata?.platform,
-      keywords: metadata?.detectedKeywords
+      keywords: metadata?.detectedKeywords,
+      duration: metadata?.duration
     });
     
     // Simulate AI processing delay
@@ -288,100 +392,9 @@ This analysis explores advanced content strategies and digital transformation ap
       }
     ];
 
-    const chapters = contentType === 'crypto' ? [
-      {
-        title: "Market Overview & Technical Analysis",
-        startTime: "0:00",
-        endTime: "4:30",
-        summary: "Bitcoin consolidation patterns and key resistance/support levels analysis."
-      },
-      {
-        title: "DeFi Protocol Developments", 
-        startTime: "4:30",
-        endTime: "9:15",
-        summary: "23% TVL growth analysis and institutional adoption trends in DeFi ecosystem."
-      },
-      {
-        title: "Cross-Chain Interoperability Trends",
-        startTime: "9:15", 
-        endTime: "14:45",
-        summary: "Multi-chain future developments and interoperability project opportunities."
-      },
-      {
-        title: "Risk Management & Portfolio Strategy",
-        startTime: "14:45",
-        endTime: "18:20", 
-        summary: "Diversification strategies and correlation analysis with traditional markets."
-      },
-      {
-        title: "Regulatory Landscape & Institutional Adoption",
-        startTime: "18:20",
-        endTime: "19:16",
-        summary: "Regulatory clarity impact on institutional capital allocation opportunities."
-      }
-    ] : contentType === 'business' || contentType === 'educational' ? [
-      {
-        title: "Market Positioning Dynamics",
-        startTime: "0:00", 
-        endTime: "4:00",
-        summary: "Adaptive strategies for changing consumer behaviors and market conditions."
-      },
-      {
-        title: "Customer Acquisition Optimization",
-        startTime: "4:00",
-        endTime: "8:30",
-        summary: "Long-term value focus strategies achieving 40% higher retention rates."
-      },
-      {
-        title: "Competitive Analysis Framework",
-        startTime: "8:30", 
-        endTime: "12:00",
-        summary: "Identifying genuine opportunities versus temporary market noise patterns."
-      },
-      {
-        title: "Operational Excellence & Scaling",
-        startTime: "12:00",
-        endTime: "16:30",
-        summary: "Infrastructure investment strategies for sustainable growth and quality maintenance."
-      },
-      {
-        title: "Technology Integration Benefits",
-        startTime: "16:30", 
-        endTime: "19:16",
-        summary: "Automation and analytics providing measurable competitive advantages."
-      }
-    ] : [
-      {
-        title: "Digital Strategy Framework",
-        startTime: "0:00", 
-        endTime: "4:00",
-        summary: "Comprehensive digital transformation approaches and performance metrics."
-      },
-      {
-        title: "Audience Engagement Strategies",
-        startTime: "4:00",
-        endTime: "8:30",
-        summary: "Quality-focused engagement approaches outperforming volume-based metrics."
-      },
-      {
-        title: "Brand Positioning Techniques",
-        startTime: "8:30", 
-        endTime: "12:00",
-        summary: "Authentic engagement strategies creating sustainable competitive advantages."
-      },
-      {
-        title: "Performance Measurement Frameworks",
-        startTime: "12:00",
-        endTime: "16:30",
-        summary: "Analytics and optimization tools for competitive advantage development."
-      },
-      {
-        title: "Implementation Strategy",
-        startTime: "16:30", 
-        endTime: "19:16",
-        summary: "Digital transformation success requiring comprehensive strategic approaches."
-      }
-    ];
+    // Generate dynamic chapters based on actual content duration
+    const actualDuration = metadata?.duration || 1200; // Use metadata duration or fallback
+    const chapters = this.generateDynamicChapters(contentType, actualDuration);
 
     // Use detected keywords as primary tags, with smart fallbacks
     const tags = metadata?.detectedKeywords?.length > 0 ? 

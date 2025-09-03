@@ -297,10 +297,54 @@ export class RebuiltContentProcessor {
     }
   }
 
+  private generateDynamicChaptersForPrompt(duration: number): string {
+    const formatTime = (seconds: number) => {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+    
+    // Create chapters that span the entire video duration
+    const chapterCount = Math.max(5, Math.ceil(duration / 900)); // At least 5 chapters, roughly 15-min segments
+    const segmentDuration = duration / chapterCount;
+    
+    const chapterTemplates = [
+      { title: "Introduction and Market Context", summary: "Market setup, institutional backdrop, and key themes introduction" },
+      { title: "Core Analysis and Strategic Implications", summary: "Deep dive into main thesis with institutional implications and market dynamics" },
+      { title: "Investment Opportunities and Execution", summary: "Specific investment recommendations, timing considerations, and risk management" },
+      { title: "Advanced Technical Analysis", summary: "Detailed technical patterns, support/resistance levels, and timing analysis" },
+      { title: "Regulatory and Institutional Landscape", summary: "Policy developments, regulatory implications, and institutional adoption trends" },
+      { title: "Risk Management and Portfolio Strategy", summary: "Risk assessment frameworks, diversification strategies, and defensive positioning" },
+      { title: "Market Outlook and Future Implications", summary: "Long-term predictions, emerging trends, and strategic positioning recommendations" },
+      { title: "Implementation and Action Items", summary: "Practical execution steps, timeline considerations, and performance monitoring" },
+      { title: "Q&A and Community Discussion", summary: "Audience questions, expert responses, and additional insights clarification" },
+      { title: "Summary and Key Takeaways", summary: "Consolidated insights, final recommendations, and strategic action plan recap" }
+    ];
+    
+    const chapters = [];
+    for (let i = 0; i < chapterCount; i++) {
+      const startTime = Math.floor(i * segmentDuration);
+      const endTime = Math.floor((i + 1) * segmentDuration);
+      const template = chapterTemplates[i % chapterTemplates.length];
+      
+      chapters.push({
+        title: template.title,
+        startTime: formatTime(startTime),
+        endTime: formatTime(Math.min(endTime, duration)),
+        summary: template.summary
+      });
+    }
+    
+    return JSON.stringify(chapters, null, 2);
+  }
+
   private async generateComprehensiveAnalysis(metadata: any): Promise<any> {
     if (!this.openai) {
       throw new Error('OpenAI not configured');
     }
+
+    // Generate dynamic chapters based on actual video duration
+    const dynamicChapters = this.generateDynamicChaptersForPrompt(metadata.duration);
 
     const prompt = `
 You are a senior crypto analyst with access to insights from top-tier crypto analysts including Raoul Pal (Real Vision), Lyn Alden, Benjamin Cowen, Coin Bureau (Guy), Plan B, Willy Woo, and institutional research from Messari, Glassnode, and Delphi Digital. 
@@ -429,26 +473,7 @@ Generate expert-level institutional analysis in this exact JSON format:
       "significance": "Competitive intelligence for sector rotation and stock selection decisions"
     }
   ],
-  "chapters": [
-    {
-      "title": "Introduction and Market Context",
-      "startTime": "0:00",
-      "endTime": "5:00",
-      "summary": "Market setup, institutional backdrop, and key themes introduction"
-    },
-    {
-      "title": "Core Analysis and Strategic Implications", 
-      "startTime": "5:00",
-      "endTime": "15:00",
-      "summary": "Deep dive into main thesis with institutional implications and market dynamics"
-    },
-    {
-      "title": "Investment Opportunities and Execution",
-      "startTime": "15:00", 
-      "endTime": "25:00",
-      "summary": "Specific investment recommendations, timing considerations, and risk management"
-    }
-  ],
+  "chapters": [DYNAMIC_CHAPTERS_PLACEHOLDER],
   "tags": ["institutional-grade", "market-intelligence", "investment-strategy"],
   "accuracy": 95
 }
@@ -472,7 +497,7 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 - Each reasoning must include: 1) Specific video reference/quote, 2) Expert framework validation, 3) Institutional perspective
 - Avoid generic market analysis - make it video-specific and actionable
 - Time horizons must align with video timeline AND proven cycle analysis
-`;
+`.replace('[DYNAMIC_CHAPTERS_PLACEHOLDER]', dynamicChapters);
 
     try {
       const response = await this.openai.chat.completions.create({
