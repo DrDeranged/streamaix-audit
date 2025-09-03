@@ -1,6 +1,7 @@
 import { DatabaseStorage } from '../storage';
 import OpenAI from 'openai';
 import { marketDataService } from './marketDataService';
+import { comprehensiveMarketService } from './comprehensiveMarketService';
 
 interface ProcessingResult {
   id: string;
@@ -563,13 +564,19 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       executiveSummary: summary.blogPost || summary.summary
     };
 
-    // Enhance financial trends with live market data if available
+    // Enhance financial trends with comprehensive multi-asset market data
     const resultWithTrends = result as any;
     if (resultWithTrends.financialTrends && Array.isArray(resultWithTrends.financialTrends)) {
       try {
-        console.log('📊 Enhancing financial trends with live market data...');
+        console.log('📊 Enhancing financial trends with comprehensive multi-asset market intelligence...');
+        
+        // First pass: comprehensive market data across all asset classes
+        resultWithTrends.financialTrends = await this.enhanceWithComprehensiveData(resultWithTrends.financialTrends);
+        
+        // Second pass: specialized crypto enhancement with on-chain data
         resultWithTrends.financialTrends = await marketDataService.enhanceFinancialTrends(resultWithTrends.financialTrends);
-        console.log('✅ Financial trends enhanced with live data');
+        
+        console.log('✅ Financial trends enhanced with comprehensive multi-asset intelligence');
       } catch (error) {
         console.error('❌ Failed to enhance financial trends:', error);
         // Continue with original data if enhancement fails
@@ -577,6 +584,95 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
     }
 
     return result;
+  }
+
+  /**
+   * Enhance financial trends with comprehensive market data across all asset classes
+   */
+  private async enhanceWithComprehensiveData(trends: any[]): Promise<any[]> {
+    if (!trends || trends.length === 0) return trends;
+
+    const enhancedTrends = [];
+
+    for (const trend of trends) {
+      try {
+        const symbol = trend.symbol?.replace('$', '') || '';
+        const category = trend.category || 'Stocks';
+
+        // Get comprehensive market data for this asset
+        const marketData = await comprehensiveMarketService.getUnifiedMarketData(symbol, category);
+
+        if (marketData) {
+          // Enhance the trend with comprehensive market intelligence
+          const enhancedTrend = {
+            ...trend,
+            liveData: {
+              price: marketData.price,
+              percentChange24h: marketData.percentChange24h,
+              percentChange7d: marketData.percentChange7d,
+              percentChange30d: marketData.percentChange30d,
+              volume24h: marketData.volume24h,
+              marketCap: marketData.marketCap,
+              lastUpdated: marketData.lastUpdated
+            },
+            fundamentals: marketData.fundamentals,
+            onChainMetrics: marketData.onChainMetrics,
+            yield: marketData.yield,
+            sentiment: marketData.sentiment,
+            socialMentions: marketData.socialMentions,
+            institutionalFlow: marketData.institutionalFlow
+          };
+
+          // Add comprehensive alpha signals
+          if (marketData.alphaSignals && marketData.alphaSignals.length > 0) {
+            const topSignal = marketData.alphaSignals
+              .filter(signal => signal.confidence > 0.7)
+              .sort((a, b) => b.confidence - a.confidence)[0];
+
+            if (topSignal) {
+              enhancedTrend.marketAlpha = enhancedTrend.marketAlpha 
+                ? `${enhancedTrend.marketAlpha} | ${topSignal.description}` 
+                : topSignal.description;
+            }
+          }
+
+          // Add asset-specific intelligence
+          if (marketData.category === 'Stocks' && marketData.fundamentals) {
+            if (marketData.fundamentals.pe_ratio && marketData.fundamentals.pe_ratio < 15) {
+              enhancedTrend.priceTargets = `P/E ratio of ${marketData.fundamentals.pe_ratio} suggests potential undervaluation`;
+            }
+            if (marketData.fundamentals.earnings_growth && marketData.fundamentals.earnings_growth > 15) {
+              enhancedTrend.catalysts = `Strong earnings growth of ${marketData.fundamentals.earnings_growth}% driving momentum`;
+            }
+          }
+
+          if (marketData.category === 'Bonds' && marketData.yield) {
+            enhancedTrend.priceTargets = `Current yield: ${marketData.yield}%`;
+            if (marketData.yield > 4.5) {
+              enhancedTrend.catalysts = 'Attractive yield levels for income-focused investors';
+            }
+          }
+
+          if (marketData.category === 'Commodities') {
+            if (Math.abs(marketData.percentChange24h) > 3) {
+              enhancedTrend.catalysts = `Supply/demand imbalance indicated by ${marketData.percentChange24h.toFixed(1)}% price movement`;
+            }
+          }
+
+          enhancedTrends.push(enhancedTrend);
+        } else {
+          // Keep original trend if no market data available
+          enhancedTrends.push(trend);
+        }
+
+      } catch (error) {
+        console.error(`⚠️ Failed to enhance trend for ${trend.symbol}:`, error);
+        enhancedTrends.push(trend);
+      }
+    }
+
+    console.log(`🚀 Enhanced ${enhancedTrends.length} trends with comprehensive multi-asset market intelligence`);
+    return enhancedTrends;
   }
 }
 
