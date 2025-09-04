@@ -155,10 +155,10 @@ export default function Dashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-gray-800 border border-gray-700 shadow-xl">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
           <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">Access Restricted</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Access Restricted</h2>
             <p className="text-gray-300 mb-4">Please log in to view your dashboard</p>
             <Button onClick={() => setLocation('/auth')} className="w-full">
               Go to Login
@@ -192,145 +192,126 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-800">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Enhanced Header with Original Flow */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 via-blue-900/20 to-indigo-900/30 rounded-3xl blur-2xl"></div>
-          <div className="relative bg-gradient-to-br from-white/10 via-blue-500/10 to-purple-500/10 border border-white/20 backdrop-blur-xl rounded-3xl p-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-              <div className="flex items-center gap-6 mb-4 sm:mb-0">
-                <Button
-                  onClick={() => setLocation('/')}
-                  variant="outline"
-                  size="sm"
-                  className="border-white/30 text-white/90 hover:bg-white/10 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
-                  data-testid="button-back-home"
-                >
-                  <Home className="h-4 w-4 mr-2" />
-                  Back to Home
-                </Button>
-                <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent mb-2">
-                    Welcome back, {user?.username}! 👋
-                  </h1>
-                  <p className="text-white/80 text-lg">
-                    Manage your AI summaries and track your progress
-                  </p>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-8">
+          <div className="flex items-center gap-4 mb-4 sm:mb-0">
+            <Button
+              onClick={() => setLocation('/')}
+              variant="outline"
+              size="sm"
+              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              data-testid="button-back-home"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                Welcome back, {user?.username}! 👋
+              </h1>
+              <p className="text-gray-300 text-lg">
+                Manage your AI summaries and track your progress
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Beautiful Flowing Stats Cards */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="group bg-gradient-to-br from-white/10 via-purple-500/10 to-blue-500/10 border border-purple-500/20 backdrop-blur-xl hover:border-purple-400/40 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 rounded-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500"></div>
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/70 text-sm uppercase tracking-wider font-medium mb-2">Total Summaries</p>
-                  <p className="text-3xl font-bold text-white group-hover:text-purple-200 transition-colors" data-testid="stat-total-summaries">
+                  <p className="text-gray-300 text-sm">Total Summaries</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-total-summaries">
                     {stats.totalSummaries}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 p-3 rounded-xl group-hover:scale-110 transition-all duration-300">
-                  <BarChart3 className="h-8 w-8 text-purple-300" />
-                </div>
+                <BarChart3 className="h-8 w-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="group bg-gradient-to-br from-white/10 via-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-xl hover:border-blue-400/40 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 rounded-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500"></div>
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/70 text-sm uppercase tracking-wider font-medium mb-2">Total Views</p>
-                  <p className="text-3xl font-bold text-white group-hover:text-blue-200 transition-colors" data-testid="stat-total-views">
+                  <p className="text-gray-300 text-sm">Total Views</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-total-views">
                     {stats.totalViews.toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-3 rounded-xl group-hover:scale-110 transition-all duration-300">
-                  <Eye className="h-8 w-8 text-blue-300" />
-                </div>
+                <Eye className="h-8 w-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="group bg-gradient-to-br from-white/10 via-emerald-500/10 to-green-500/10 border border-emerald-500/20 backdrop-blur-xl hover:border-emerald-400/40 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/20 rounded-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-500"></div>
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/70 text-sm uppercase tracking-wider font-medium mb-2">STREAM Tokens</p>
-                  <p className="text-3xl font-bold text-white group-hover:text-emerald-200 transition-colors" data-testid="stat-stream-tokens">
+                  <p className="text-gray-300 text-sm">STREAM Tokens</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-stream-tokens">
                     {balance?.streamTokens?.toFixed(2) || '0.00'}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 p-3 rounded-xl group-hover:scale-110 transition-all duration-300">
-                  <Wallet className="h-8 w-8 text-emerald-300" />
-                </div>
+                <Wallet className="h-8 w-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="group bg-gradient-to-br from-white/10 via-amber-500/10 to-yellow-500/10 border border-amber-500/20 backdrop-blur-xl hover:border-amber-400/40 transition-all duration-500 hover:shadow-2xl hover:shadow-amber-500/20 rounded-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500"></div>
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/70 text-sm uppercase tracking-wider font-medium mb-2">Creator Rank</p>
-                  <p className="text-3xl font-bold text-white group-hover:text-amber-200 transition-colors" data-testid="stat-creator-rank">
+                  <p className="text-gray-300 text-sm">Creator Rank</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white" data-testid="stat-creator-rank">
                     {stats.rank}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 p-3 rounded-xl group-hover:scale-110 transition-all duration-300">
-                  <Award className="h-8 w-8 text-amber-300" />
-                </div>
+                <Award className="h-8 w-8 text-yellow-400" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Beautiful Flowing Navigation */}
+        {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-white/10 via-purple-500/10 to-blue-500/10 backdrop-blur-xl border border-white/20 rounded-2xl p-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/30 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-xl py-2 font-medium">
+          <TabsList className="grid w-full grid-cols-5 bg-white/10 border-white/20">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="summaries" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/30 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-xl py-2 font-medium">
+            <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-600">
               My Summaries
             </TabsTrigger>
-            <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/30 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-xl py-2 font-medium">
+            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600">
               My Notes
             </TabsTrigger>
-            <TabsTrigger value="bounties" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/30 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-xl py-2 font-medium">
+            <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-600">
               Bounties
             </TabsTrigger>
-            <TabsTrigger value="wallet" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/30 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-xl py-2 font-medium">
+            <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-600">
               Wallet
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Recent Activity with Beautiful Design */}
-            <Card className="bg-gradient-to-br from-white/10 via-purple-500/5 to-blue-500/10 border border-white/20 backdrop-blur-xl shadow-xl">
+            {/* Recent Activity */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader>
-                <CardTitle className="text-xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent flex items-center gap-3">
-                  <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 p-2 rounded-xl">
-                    <TrendingUp className="h-5 w-5 text-purple-300" />
-                  </div>
+                <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
                   Recent Activity
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {summaries.slice(0, 3).map((summary) => (
-                  <div key={summary.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-white/5 via-purple-500/5 to-blue-500/5 rounded-xl border border-white/10 hover:border-purple-400/30 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                  <div key={summary.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                     <div className="flex-1">
-                      <h4 className="text-white font-medium text-base mb-1">{summary.title}</h4>
-                      <p className="text-white/60 text-sm">{summary.platform} • {summary.contentType}</p>
+                      <h4 className="text-gray-900 dark:text-white font-medium">{summary.title}</h4>
+                      <p className="text-gray-300 text-sm">{summary.platform} • {summary.contentType}</p>
                     </div>
                     <Badge className={getStatusColor(summary.processingStatus)}>
                       {summary.processingStatus}
@@ -338,66 +319,47 @@ export default function Dashboard() {
                   </div>
                 ))}
                 {summaries.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <BarChart3 className="h-8 w-8 text-purple-300" />
-                    </div>
-                    <p className="text-white/90 text-base font-medium mb-1">
-                      No summaries yet. Create your first one!
-                    </p>
-                    <p className="text-white/60 text-sm">
-                      Start analyzing content to see your activity here
-                    </p>
-                  </div>
+                  <p className="text-gray-400 text-center py-8">
+                    No summaries yet. Create your first one!
+                  </p>
                 )}
               </CardContent>
             </Card>
 
-            {/* Beautiful Quick Actions - Enhanced Design */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-blue-500/10 rounded-3xl blur-2xl"></div>
-              
-              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="group hover:scale-105 transition-all duration-500 bg-gradient-to-br from-white/10 via-green-500/10 to-blue-500/10 border border-green-500/20 backdrop-blur-xl cursor-pointer shadow-2xl hover:shadow-green-500/20 rounded-3xl overflow-hidden"
-                      onClick={() => setLocation('/wallet-dashboard')}
-                      data-testid="card-wallet-dashboard">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 via-blue-500 to-green-500"></div>
-                  
-                  <CardContent className="p-8 text-center">
-                    <div className="bg-gradient-to-br from-green-500/20 to-blue-500/20 p-6 rounded-2xl mx-auto mb-6 w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
-                      <Wallet className="h-10 w-10 text-green-300" />
-                    </div>
-                    <h3 className="text-2xl font-bold bg-gradient-to-r from-green-200 via-blue-200 to-white bg-clip-text text-transparent mb-3" data-testid="text-wallet-title">Wallet Dashboard</h3>
-                    <p className="text-white/70 text-lg" data-testid="text-wallet-desc">Manage tokens and rewards</p>
-                  </CardContent>
-                </Card>
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <Card className="group hover:scale-105 transition-all duration-500 bg-gradient-to-br from-white/10 via-blue-500/10 to-purple-500/10 border border-blue-500/20 backdrop-blur-xl cursor-pointer shadow-2xl hover:shadow-blue-500/20 rounded-3xl overflow-hidden"
-                      onClick={() => setActiveTab('bounties')}
-                      data-testid="card-browse-bounties">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500"></div>
-                  
-                  <CardContent className="p-8 text-center">
-                    <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-6 rounded-2xl mx-auto mb-6 w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
-                      <Target className="h-10 w-10 text-blue-300" />
-                    </div>
-                    <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-200 via-purple-200 to-white bg-clip-text text-transparent mb-3" data-testid="text-bounties-title">Browse Bounties</h3>
-                    <p className="text-white/70 text-lg" data-testid="text-bounties-desc">Find content to summarize</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+                    onClick={() => setLocation('/wallet-dashboard')}
+                    data-testid="card-wallet-dashboard">
+                <CardContent className="p-6 text-center">
+                  <Wallet className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                  <h3 className="text-gray-900 dark:text-white font-semibold mb-2" data-testid="text-wallet-title">Wallet Dashboard</h3>
+                  <p className="text-gray-300 text-sm" data-testid="text-wallet-desc">Manage tokens and rewards</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+                    onClick={() => setActiveTab('bounties')}
+                    data-testid="card-browse-bounties">
+                <CardContent className="p-6 text-center">
+                  <Target className="h-12 w-12 text-blue-400 mx-auto mb-4" />
+                  <h3 className="text-gray-900 dark:text-white font-semibold mb-2" data-testid="text-bounties-title">Browse Bounties</h3>
+                  <p className="text-gray-300 text-sm" data-testid="text-bounties-desc">Find content to summarize</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           <TabsContent value="summaries" className="space-y-6">
-            <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20 backdrop-blur-lg">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent">My Summaries ({summaries.length})</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">My Summaries ({summaries.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {summaries.map((summary) => (
-                    <Card key={summary.id} className="bg-gradient-to-br from-slate-50/80 via-blue-50/40 to-indigo-50/40 dark:from-slate-800/30 dark:via-blue-900/10 dark:to-indigo-900/10 border border-blue-100/30 dark:border-blue-800/20 backdrop-blur-lg">
+                    <Card key={summary.id} className="bg-white/5 border-white/10 backdrop-blur-lg">
                       {/* Header */}
                       <CardHeader className="pb-4">
                         <div className="flex items-start justify-between">
@@ -412,11 +374,11 @@ export default function Dashboard() {
                                 </Badge>
                               )}
                             </div>
-                            <h3 className="text-slate-800 dark:text-slate-200 font-bold text-xl mb-2">{summary.title}</h3>
-                            <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
+                            <h3 className="text-gray-900 dark:text-white font-bold text-xl mb-2">{summary.title}</h3>
+                            <p className="text-gray-300 text-sm mb-3">
                               {summary.platform} • {summary.contentType} • {new Date(summary.createdAt).toLocaleDateString()}
                             </p>
-                            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
                               <span className="flex items-center gap-1">
                                 <Eye className="h-3 w-3" />
                                 {summary.viewCount || 0} views
@@ -428,7 +390,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="border-blue-200/30 dark:border-blue-500/20 text-slate-700 dark:text-slate-200 hover:bg-blue-50/50 dark:hover:bg-blue-900/20">
+                            <Button size="sm" variant="outline" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10">
                               View Full
                             </Button>
                           </div>
@@ -439,20 +401,20 @@ export default function Dashboard() {
                       {summary.processingStatus === 'completed' && summary.summary && (
                         <CardContent>
                           <Tabs defaultValue="summary" className="w-full">
-                            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20">
-                              <TabsTrigger value="summary" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                            <TabsList className="grid w-full grid-cols-4 bg-white/10">
+                              <TabsTrigger value="summary" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <FileText className="w-4 h-4 mr-1" />
                                 Summary
                               </TabsTrigger>
-                              <TabsTrigger value="insights" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                              <TabsTrigger value="insights" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <Activity className="w-4 h-4 mr-1" />
                                 Insights
                               </TabsTrigger>
-                              <TabsTrigger value="market" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                              <TabsTrigger value="market" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <TrendingUp className="w-4 h-4 mr-1" />
                                 Market
                               </TabsTrigger>
-                              <TabsTrigger value="structure" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                              <TabsTrigger value="structure" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <BarChart3 className="w-4 h-4 mr-1" />
                                 Structure
                               </TabsTrigger>
@@ -461,21 +423,21 @@ export default function Dashboard() {
                             {/* Summary Tab */}
                             <TabsContent value="summary" className="mt-4 space-y-4">
                               {summary.tldrSummary && (
-                                <div className="p-4 bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-blue-500/15 dark:via-indigo-500/15 dark:to-purple-500/15 rounded-lg border border-blue-200/30 dark:border-blue-500/20">
-                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-300 dark:via-indigo-300 dark:to-blue-200 bg-clip-text text-transparent mb-2 flex items-center gap-2">
-                                    <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                <div className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                                  <h4 className="font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                                    <Zap className="w-4 h-4" />
                                     TLDR Summary
                                   </h4>
-                                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{summary.tldrSummary}</p>
+                                  <p className="text-gray-300 text-sm leading-relaxed">{summary.tldrSummary}</p>
                                 </div>
                               )}
                               {summary.blogPost && (
-                                <div className="p-4 bg-gradient-to-br from-slate-50 via-emerald-50/60 to-teal-50/60 dark:from-emerald-500/15 dark:via-teal-500/15 dark:to-green-500/15 rounded-lg border border-emerald-200/30 dark:border-emerald-500/20">
-                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-emerald-700/90 to-slate-800 dark:from-emerald-300 dark:via-teal-300 dark:to-emerald-200 bg-clip-text text-transparent mb-2 flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                <div className="p-4 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
+                                  <h4 className="font-semibold text-green-400 mb-2 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
                                     Executive Summary
                                   </h4>
-                                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{summary.blogPost}</p>
+                                  <p className="text-gray-300 text-sm leading-relaxed">{summary.blogPost}</p>
                                 </div>
                               )}
                             </TabsContent>
@@ -483,25 +445,25 @@ export default function Dashboard() {
                             {/* Insights Tab */}
                             <TabsContent value="insights" className="mt-4 space-y-4">
                               {summary.bulletPoints && summary.bulletPoints.length > 0 && (
-                                <div className="p-4 bg-gradient-to-br from-slate-50 via-amber-50/60 to-yellow-50/60 dark:from-amber-500/15 dark:via-yellow-500/15 dark:to-orange-500/15 rounded-lg border border-amber-200/30 dark:border-amber-500/20">
-                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-amber-700/90 to-slate-800 dark:from-amber-300 dark:via-yellow-300 dark:to-amber-200 bg-clip-text text-transparent mb-3 flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/20">
+                                  <h4 className="font-semibold text-yellow-400 mb-3 flex items-center gap-2">
+                                    <Activity className="w-4 h-4" />
                                     Key Insights
                                   </h4>
-                                  <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                  <ul className="space-y-2 text-sm text-gray-300">
                                     {summary.bulletPoints.map((point, index) => (
                                       <li key={index} className="flex items-start gap-2">
-                                        <span className="text-amber-600 dark:text-amber-400 mt-1">•</span>
-                                        <span className="text-slate-700 dark:text-slate-300">{point}</span>
+                                        <span className="text-yellow-400 mt-1">•</span>
+                                        <span className="text-gray-800 dark:text-gray-200">{point}</span>
                                       </li>
                                     ))}
                                   </ul>
                                 </div>
                               )}
                               {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                                <div className="p-4 bg-gradient-to-br from-slate-50 via-purple-50/60 to-pink-50/60 dark:from-purple-500/15 dark:via-pink-500/15 dark:to-purple-500/15 rounded-lg border border-purple-200/30 dark:border-purple-500/20">
-                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-purple-700/90 to-slate-800 dark:from-purple-300 dark:via-pink-300 dark:to-purple-200 bg-clip-text text-transparent mb-3 flex items-center gap-2">
-                                    <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                                  <h4 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4" />
                                     Notable Quotes
                                   </h4>
                                   <div className="space-y-3">
