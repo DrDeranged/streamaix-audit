@@ -155,11 +155,11 @@ export default function Dashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/90 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20 backdrop-blur-lg">
           <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Access Restricted</h2>
-            <p className="text-gray-300 mb-4">Please log in to view your dashboard</p>
+            <h2 className="text-xl font-semibold bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent mb-4">Access Restricted</h2>
+            <p className="text-slate-600 dark:text-slate-300 mb-4">Please log in to view your dashboard</p>
             <Button onClick={() => setLocation('/auth')} className="w-full">
               Go to Login
             </Button>
@@ -192,7 +192,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-8">
@@ -201,17 +201,17 @@ export default function Dashboard() {
               onClick={() => setLocation('/')}
               variant="outline"
               size="sm"
-              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              className="border-blue-200/30 dark:border-blue-500/20 text-slate-700 dark:text-slate-200 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 backdrop-blur-lg bg-gradient-to-r from-slate-50 to-blue-50/60 dark:from-slate-800/50 dark:to-blue-900/20"
               data-testid="button-back-home"
             >
               <Home className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-800/90 to-slate-900 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent mb-2">
                 Welcome back, {user?.username}! 👋
               </h1>
-              <p className="text-gray-300 text-lg">
+              <p className="text-slate-600 dark:text-slate-300 text-lg">
                 Manage your AI summaries and track your progress
               </p>
             </div>
@@ -220,58 +220,58 @@ export default function Dashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">Total Summaries</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-total-summaries">
+                  <p className="text-slate-600 dark:text-slate-300 text-sm">Total Summaries</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent" data-testid="stat-total-summaries">
                     {stats.totalSummaries}
                   </p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-purple-400" />
+                <BarChart3 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-slate-50 via-indigo-50/40 to-purple-50/40 dark:from-slate-800/50 dark:via-indigo-900/20 dark:to-purple-900/20 border border-indigo-200/30 dark:border-indigo-500/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">Total Views</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-total-views">
+                  <p className="text-slate-600 dark:text-slate-300 text-sm">Total Views</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-slate-700 via-indigo-700/90 to-slate-800 dark:from-indigo-200 dark:via-purple-200 dark:to-indigo-100 bg-clip-text text-transparent" data-testid="stat-total-views">
                     {stats.totalViews.toLocaleString()}
                   </p>
                 </div>
-                <Eye className="h-8 w-8 text-blue-400" />
+                <Eye className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-slate-50 via-emerald-50/40 to-teal-50/40 dark:from-slate-800/50 dark:via-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/30 dark:border-emerald-500/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">STREAM Tokens</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-stream-tokens">
+                  <p className="text-slate-600 dark:text-slate-300 text-sm">STREAM Tokens</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-slate-700 via-emerald-700/90 to-slate-800 dark:from-emerald-200 dark:via-teal-200 dark:to-emerald-100 bg-clip-text text-transparent" data-testid="stat-stream-tokens">
                     {balance?.streamTokens?.toFixed(2) || '0.00'}
                   </p>
                 </div>
-                <Wallet className="h-8 w-8 text-green-400" />
+                <Wallet className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-slate-50 via-amber-50/40 to-yellow-50/40 dark:from-slate-800/50 dark:via-amber-900/20 dark:to-yellow-900/20 border border-amber-200/30 dark:border-amber-500/20 backdrop-blur-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">Creator Rank</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white" data-testid="stat-creator-rank">
+                  <p className="text-slate-600 dark:text-slate-300 text-sm">Creator Rank</p>
+                  <p className="text-lg font-bold bg-gradient-to-r from-slate-700 via-amber-700/90 to-slate-800 dark:from-amber-200 dark:via-yellow-200 dark:to-amber-100 bg-clip-text text-transparent" data-testid="stat-creator-rank">
                     {stats.rank}
                   </p>
                 </div>
-                <Award className="h-8 w-8 text-yellow-400" />
+                <Award className="h-8 w-8 text-amber-600 dark:text-amber-400" />
               </div>
             </CardContent>
           </Card>
@@ -279,39 +279,39 @@ export default function Dashboard() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white/10 border-white/20">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600">
+          <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white text-slate-700 dark:text-slate-200">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-600">
+            <TabsTrigger value="summaries" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white text-slate-700 dark:text-slate-200">
               My Summaries
             </TabsTrigger>
-            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600">
+            <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white text-slate-700 dark:text-slate-200">
               My Notes
             </TabsTrigger>
-            <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-600">
+            <TabsTrigger value="bounties" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white text-slate-700 dark:text-slate-200">
               Bounties
             </TabsTrigger>
-            <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-600">
+            <TabsTrigger value="wallet" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white text-slate-700 dark:text-slate-200">
               Wallet
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Recent Activity */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20 backdrop-blur-lg">
               <CardHeader>
-                <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
+                <CardTitle className="bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Recent Activity
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {summaries.slice(0, 3).map((summary) => (
-                  <div key={summary.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                  <div key={summary.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/80 via-blue-50/40 to-indigo-50/40 dark:from-slate-800/30 dark:via-blue-900/10 dark:to-indigo-900/10 rounded-lg border border-blue-100/30 dark:border-blue-800/20">
                     <div className="flex-1">
-                      <h4 className="text-gray-900 dark:text-white font-medium">{summary.title}</h4>
-                      <p className="text-gray-300 text-sm">{summary.platform} • {summary.contentType}</p>
+                      <h4 className="text-slate-800 dark:text-slate-200 font-medium">{summary.title}</h4>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm">{summary.platform} • {summary.contentType}</p>
                     </div>
                     <Badge className={getStatusColor(summary.processingStatus)}>
                       {summary.processingStatus}
@@ -319,7 +319,7 @@ export default function Dashboard() {
                   </div>
                 ))}
                 {summaries.length === 0 && (
-                  <p className="text-gray-400 text-center py-8">
+                  <p className="text-slate-500 dark:text-slate-400 text-center py-8">
                     No summaries yet. Create your first one!
                   </p>
                 )}
@@ -329,37 +329,37 @@ export default function Dashboard() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+              <Card className="bg-gradient-to-br from-slate-50 via-emerald-50/60 to-teal-50/60 dark:from-slate-800/50 dark:via-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/30 dark:border-emerald-500/20 backdrop-blur-lg cursor-pointer hover:from-emerald-50/80 hover:via-emerald-50/80 hover:to-teal-50/80 dark:hover:from-emerald-900/30 dark:hover:via-emerald-900/30 dark:hover:to-teal-900/30 transition-all duration-300"
                     onClick={() => setLocation('/wallet-dashboard')}
                     data-testid="card-wallet-dashboard">
                 <CardContent className="p-6 text-center">
-                  <Wallet className="h-12 w-12 text-green-400 mx-auto mb-4" />
-                  <h3 className="text-gray-900 dark:text-white font-semibold mb-2" data-testid="text-wallet-title">Wallet Dashboard</h3>
-                  <p className="text-gray-300 text-sm" data-testid="text-wallet-desc">Manage tokens and rewards</p>
+                  <Wallet className="h-12 w-12 text-emerald-600 dark:text-emerald-400 mx-auto mb-4" />
+                  <h3 className="bg-gradient-to-r from-slate-700 via-emerald-700/90 to-slate-800 dark:from-emerald-200 dark:via-teal-200 dark:to-emerald-100 bg-clip-text text-transparent font-semibold mb-2" data-testid="text-wallet-title">Wallet Dashboard</h3>
+                  <p className="text-slate-600 dark:text-slate-300 text-sm" data-testid="text-wallet-desc">Manage tokens and rewards</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
+              <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20 backdrop-blur-lg cursor-pointer hover:from-blue-50/80 hover:via-blue-50/80 hover:to-indigo-50/80 dark:hover:from-blue-900/30 dark:hover:via-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-300"
                     onClick={() => setActiveTab('bounties')}
                     data-testid="card-browse-bounties">
                 <CardContent className="p-6 text-center">
-                  <Target className="h-12 w-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-gray-900 dark:text-white font-semibold mb-2" data-testid="text-bounties-title">Browse Bounties</h3>
-                  <p className="text-gray-300 text-sm" data-testid="text-bounties-desc">Find content to summarize</p>
+                  <Target className="h-12 w-12 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+                  <h3 className="bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent font-semibold mb-2" data-testid="text-bounties-title">Browse Bounties</h3>
+                  <p className="text-slate-600 dark:text-slate-300 text-sm" data-testid="text-bounties-desc">Find content to summarize</p>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
           <TabsContent value="summaries" className="space-y-6">
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20 backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-gray-900 dark:text-white">My Summaries ({summaries.length})</CardTitle>
+                <CardTitle className="bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent">My Summaries ({summaries.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {summaries.map((summary) => (
-                    <Card key={summary.id} className="bg-white/5 border-white/10 backdrop-blur-lg">
+                    <Card key={summary.id} className="bg-gradient-to-br from-slate-50/80 via-blue-50/40 to-indigo-50/40 dark:from-slate-800/30 dark:via-blue-900/10 dark:to-indigo-900/10 border border-blue-100/30 dark:border-blue-800/20 backdrop-blur-lg">
                       {/* Header */}
                       <CardHeader className="pb-4">
                         <div className="flex items-start justify-between">
@@ -374,11 +374,11 @@ export default function Dashboard() {
                                 </Badge>
                               )}
                             </div>
-                            <h3 className="text-gray-900 dark:text-white font-bold text-xl mb-2">{summary.title}</h3>
-                            <p className="text-gray-300 text-sm mb-3">
+                            <h3 className="text-slate-800 dark:text-slate-200 font-bold text-xl mb-2">{summary.title}</h3>
+                            <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
                               {summary.platform} • {summary.contentType} • {new Date(summary.createdAt).toLocaleDateString()}
                             </p>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                               <span className="flex items-center gap-1">
                                 <Eye className="h-3 w-3" />
                                 {summary.viewCount || 0} views
@@ -390,7 +390,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10">
+                            <Button size="sm" variant="outline" className="border-blue-200/30 dark:border-blue-500/20 text-slate-700 dark:text-slate-200 hover:bg-blue-50/50 dark:hover:bg-blue-900/20">
                               View Full
                             </Button>
                           </div>
@@ -401,20 +401,20 @@ export default function Dashboard() {
                       {summary.processingStatus === 'completed' && summary.summary && (
                         <CardContent>
                           <Tabs defaultValue="summary" className="w-full">
-                            <TabsList className="grid w-full grid-cols-4 bg-white/10">
-                              <TabsTrigger value="summary" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
+                            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-slate-800/50 dark:via-blue-900/20 dark:to-indigo-900/20 border border-blue-200/30 dark:border-blue-500/20">
+                              <TabsTrigger value="summary" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                                 <FileText className="w-4 h-4 mr-1" />
                                 Summary
                               </TabsTrigger>
-                              <TabsTrigger value="insights" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="insights" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                                 <Activity className="w-4 h-4 mr-1" />
                                 Insights
                               </TabsTrigger>
-                              <TabsTrigger value="market" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="market" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                                 <TrendingUp className="w-4 h-4 mr-1" />
                                 Market
                               </TabsTrigger>
-                              <TabsTrigger value="structure" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="structure" className="text-slate-700 dark:text-slate-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                                 <BarChart3 className="w-4 h-4 mr-1" />
                                 Structure
                               </TabsTrigger>
@@ -423,21 +423,21 @@ export default function Dashboard() {
                             {/* Summary Tab */}
                             <TabsContent value="summary" className="mt-4 space-y-4">
                               {summary.tldrSummary && (
-                                <div className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
-                                  <h4 className="font-semibold text-blue-400 mb-2 flex items-center gap-2">
-                                    <Zap className="w-4 h-4" />
+                                <div className="p-4 bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-blue-500/15 dark:via-indigo-500/15 dark:to-purple-500/15 rounded-lg border border-blue-200/30 dark:border-blue-500/20">
+                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-300 dark:via-indigo-300 dark:to-blue-200 bg-clip-text text-transparent mb-2 flex items-center gap-2">
+                                    <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                     TLDR Summary
                                   </h4>
-                                  <p className="text-gray-300 text-sm leading-relaxed">{summary.tldrSummary}</p>
+                                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{summary.tldrSummary}</p>
                                 </div>
                               )}
                               {summary.blogPost && (
-                                <div className="p-4 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
-                                  <h4 className="font-semibold text-green-400 mb-2 flex items-center gap-2">
-                                    <FileText className="w-4 h-4" />
+                                <div className="p-4 bg-gradient-to-br from-slate-50 via-emerald-50/60 to-teal-50/60 dark:from-emerald-500/15 dark:via-teal-500/15 dark:to-green-500/15 rounded-lg border border-emerald-200/30 dark:border-emerald-500/20">
+                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-emerald-700/90 to-slate-800 dark:from-emerald-300 dark:via-teal-300 dark:to-emerald-200 bg-clip-text text-transparent mb-2 flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                     Executive Summary
                                   </h4>
-                                  <p className="text-gray-300 text-sm leading-relaxed">{summary.blogPost}</p>
+                                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{summary.blogPost}</p>
                                 </div>
                               )}
                             </TabsContent>
@@ -445,25 +445,25 @@ export default function Dashboard() {
                             {/* Insights Tab */}
                             <TabsContent value="insights" className="mt-4 space-y-4">
                               {summary.bulletPoints && summary.bulletPoints.length > 0 && (
-                                <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/20">
-                                  <h4 className="font-semibold text-yellow-400 mb-3 flex items-center gap-2">
-                                    <Activity className="w-4 h-4" />
+                                <div className="p-4 bg-gradient-to-br from-slate-50 via-amber-50/60 to-yellow-50/60 dark:from-amber-500/15 dark:via-yellow-500/15 dark:to-orange-500/15 rounded-lg border border-amber-200/30 dark:border-amber-500/20">
+                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-amber-700/90 to-slate-800 dark:from-amber-300 dark:via-yellow-300 dark:to-amber-200 bg-clip-text text-transparent mb-3 flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                                     Key Insights
                                   </h4>
-                                  <ul className="space-y-2 text-sm text-gray-300">
+                                  <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
                                     {summary.bulletPoints.map((point, index) => (
                                       <li key={index} className="flex items-start gap-2">
-                                        <span className="text-yellow-400 mt-1">•</span>
-                                        <span className="text-gray-800 dark:text-gray-200">{point}</span>
+                                        <span className="text-amber-600 dark:text-amber-400 mt-1">•</span>
+                                        <span className="text-slate-700 dark:text-slate-300">{point}</span>
                                       </li>
                                     ))}
                                   </ul>
                                 </div>
                               )}
                               {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                                <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
-                                  <h4 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">
-                                    <MessageSquare className="w-4 h-4" />
+                                <div className="p-4 bg-gradient-to-br from-slate-50 via-purple-50/60 to-pink-50/60 dark:from-purple-500/15 dark:via-pink-500/15 dark:to-purple-500/15 rounded-lg border border-purple-200/30 dark:border-purple-500/20">
+                                  <h4 className="font-semibold bg-gradient-to-r from-slate-700 via-purple-700/90 to-slate-800 dark:from-purple-300 dark:via-pink-300 dark:to-purple-200 bg-clip-text text-transparent mb-3 flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                                     Notable Quotes
                                   </h4>
                                   <div className="space-y-3">
