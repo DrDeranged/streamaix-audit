@@ -430,7 +430,7 @@ export function AIProcessor() {
                               <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
                                 <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
                                   <BarChart3 className="w-4 h-4" />
-                                  Financial Impact Analysis
+                                  Investment Opportunities
                                 </h5>
                                 <div className="space-y-3">
                                   {result.financialTrends.map((financial: any, idx: number) => (
