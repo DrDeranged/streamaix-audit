@@ -210,10 +210,37 @@ export class RebuiltContentProcessor {
           if (pageResponse.ok) {
             const html = await pageResponse.text();
             
-            // Try to extract duration
-            const durationMatch = html.match(/"lengthSeconds":"(\d+)"/);
-            if (durationMatch) {
-              duration = parseInt(durationMatch[1]);
+            // Try to extract duration with multiple patterns
+            const durationPatterns = [
+              /"lengthSeconds":"(\d+)"/,
+              /"length_seconds":"(\d+)"/,
+              /"lengthSeconds":(\d+)/,
+              /"duration":"PT(\d+)S"/,
+              /"duration":"PT(\d+)M(\d+)S"/,
+              /"PT(\d+)M(\d+)S"/,
+              /"approxDurationMs":"(\d+)"/
+            ];
+            
+            for (const pattern of durationPatterns) {
+              const match = html.match(pattern);
+              if (match) {
+                if (pattern.toString().includes('PT') && match[2]) {
+                  // Handle PT format (e.g., PT48M3S)
+                  const minutes = parseInt(match[1]) || 0;
+                  const seconds = parseInt(match[2]) || 0;
+                  duration = minutes * 60 + seconds;
+                  console.log(`📏 Extracted duration via PT format: ${duration}s (${minutes}m ${seconds}s)`);
+                } else if (pattern.toString().includes('approxDurationMs')) {
+                  // Handle milliseconds
+                  duration = Math.floor(parseInt(match[1]) / 1000);
+                  console.log(`📏 Extracted duration via approxDurationMs: ${duration}s`);
+                } else {
+                  // Handle direct seconds
+                  duration = parseInt(match[1]);
+                  console.log(`📏 Extracted duration via lengthSeconds: ${duration}s`);
+                }
+                break;
+              }
             }
             
             // Try to extract view count
@@ -232,7 +259,7 @@ export class RebuiltContentProcessor {
           console.log('⚠️ Could not extract additional metadata from page, using oEmbed data only');
         }
 
-        console.log(`📊 Successfully extracted: "${oembedData.title}" by ${oembedData.author_name} (${duration}s)`);
+        console.log(`📊 Successfully extracted: "${oembedData.title}" by ${oembedData.author_name} (${duration}s = ${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')})`);
 
         return {
           title: oembedData.title,
@@ -272,15 +299,45 @@ export class RebuiltContentProcessor {
                           html.match(/<link itemprop="url" href="[^"]*\/channel\/[^"]*"><meta itemprop="name" content="([^"]+)">/);
       const channel = channelMatch ? channelMatch[1] : 'Content Creator';
 
-      // Extract duration
-      const durationMatch = html.match(/"lengthSeconds":"(\d+)"/);
-      const duration = durationMatch ? parseInt(durationMatch[1]) : 600;
+      // Extract duration with multiple patterns
+      let duration = 600; // Default fallback
+      const durationPatterns = [
+        /"lengthSeconds":"(\d+)"/,
+        /"length_seconds":"(\d+)"/,
+        /"lengthSeconds":(\d+)/,
+        /"duration":"PT(\d+)S"/,
+        /"duration":"PT(\d+)M(\d+)S"/,
+        /"PT(\d+)M(\d+)S"/,
+        /"approxDurationMs":"(\d+)"/
+      ];
+      
+      for (const pattern of durationPatterns) {
+        const match = html.match(pattern);
+        if (match) {
+          if (pattern.toString().includes('PT') && match[2]) {
+            // Handle PT format (e.g., PT48M3S)
+            const minutes = parseInt(match[1]) || 0;
+            const seconds = parseInt(match[2]) || 0;
+            duration = minutes * 60 + seconds;
+            console.log(`📏 Fallback extracted duration via PT format: ${duration}s (${minutes}m ${seconds}s)`);
+          } else if (pattern.toString().includes('approxDurationMs')) {
+            // Handle milliseconds
+            duration = Math.floor(parseInt(match[1]) / 1000);
+            console.log(`📏 Fallback extracted duration via approxDurationMs: ${duration}s`);
+          } else {
+            // Handle direct seconds
+            duration = parseInt(match[1]);
+            console.log(`📏 Fallback extracted duration via lengthSeconds: ${duration}s`);
+          }
+          break;
+        }
+      }
 
       // Extract view count
       const viewMatch = html.match(/"viewCount":"(\d+)"/);
       const viewCount = viewMatch ? parseInt(viewMatch[1]).toLocaleString() : '0';
 
-      console.log(`📊 Extracted via fallback: "${title}" by ${channel} (${duration}s)`);
+      console.log(`📊 Extracted via fallback: "${title}" by ${channel} (${duration}s = ${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')})`);
 
       return {
         title,
@@ -321,6 +378,8 @@ export class RebuiltContentProcessor {
     // For shorter videos, use 5-6 chapters
     const chapterCount = duration > 1800 ? Math.min(10, Math.max(8, Math.ceil(duration / 360))) : Math.max(5, Math.ceil(duration / 300));
     const segmentDuration = duration / chapterCount;
+    
+    console.log(`📖 Generating ${chapterCount} chapters for ${duration}s video (${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')}) with ${Math.floor(segmentDuration/60)}:${Math.floor(segmentDuration%60).toString().padStart(2,'0')} per chapter`);
     
     const chapterTemplates = [
       { title: "Introduction and Market Context", summary: "Market setup, institutional backdrop, and key themes introduction" },
