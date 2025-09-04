@@ -471,6 +471,7 @@ export class RebuiltContentProcessor {
 
     // Generate dynamic chapters based on actual video duration
     const dynamicChapters = this.generateDynamicChaptersForPrompt(metadata.duration);
+    console.log(`📖 Generated dynamic chapters for prompt: ${dynamicChapters.substring(0, 200)}...`);
 
     const prompt = `
 You are a senior investment analyst with specialized expertise across multiple asset classes including crypto, equities, commodities, bonds, and emerging technologies. You have access to insights from top analysts: 
@@ -622,6 +623,14 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         throw new Error('AI analysis failed to generate required content');
       }
 
+      // CRITICAL FIX: If AI didn't return proper chapters, use our generated ones
+      let chapters = result.chapters || [];
+      if (!chapters || chapters.length <= 1) {
+        console.log(`⚠️ AI returned ${chapters.length} chapters, using generated chapters instead`);
+        chapters = JSON.parse(dynamicChapters);
+        console.log(`✅ Using ${chapters.length} generated chapters spanning full video duration`);
+      }
+
       return {
         summary: result.summary,
         tldrSummary: result.tldrSummary,
@@ -632,7 +641,7 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         marketSentiment: result.marketSentiment || "NEUTRAL",
         sourceCredibility: result.sourceCredibility || "Medium",
         keyQuotes: result.keyQuotes || [],
-        chapters: result.chapters || [],
+        chapters: chapters,
         tags: result.tags || [],
         accuracy: result.accuracy || 85
       };
