@@ -53,33 +53,31 @@ export function Navigation() {
               StreamAiX
             </div>
             
-            {/* Conversion-focused CTA - hidden on mobile */}
-            <div className="hidden lg:flex items-center space-x-3 ml-4 xl:ml-8">
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 rounded-full border border-indigo-500/20">
-                <Sparkles className="w-4 h-4 text-indigo-400" />
-                <span className="text-sm text-indigo-300 font-medium">
-                  Transform Any Content to Insights
-                </span>
+            {/* Quick summarize input - hidden on mobile */}
+            <div className="hidden lg:flex items-center space-x-2 ml-4 xl:ml-8">
+              <div className="relative">
+                <Input 
+                  type="text" 
+                  placeholder="Paste any video or podcast URL to analyze..." 
+                  className="w-64 xl:w-80 glass-bg glass-border focus:ring-2 focus:ring-indigo-500 text-sm"
+                  id="landing-url-input"
+                />
+                <Sparkles className="absolute right-3 top-2.5 w-4 h-4 text-indigo-400" />
               </div>
-              {!isAuthenticated ? (
-                <Link href="/auth">
-                  <Button 
-                    size="sm" 
-                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg"
-                  >
-                    Start Free Analysis
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/create-summary">
-                  <Button 
-                    size="sm" 
-                    className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 hover:from-indigo-600/90 hover:to-purple-700/90 backdrop-blur-lg border border-white/20"
-                  >
-                    Create Summary
-                  </Button>
-                </Link>
-              )}
+              <Link href="/create-summary">
+                <Button 
+                  size="sm" 
+                  className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 hover:from-indigo-600/90 hover:to-purple-700/90 backdrop-blur-lg border border-white/20"
+                  onClick={() => {
+                    const urlInput = document.getElementById('landing-url-input') as HTMLInputElement;
+                    if (urlInput?.value) {
+                      sessionStorage.setItem('pendingUrl', urlInput.value);
+                    }
+                  }}
+                >
+                  Summarize
+                </Button>
+              </Link>
             </div>
           </div>
           
