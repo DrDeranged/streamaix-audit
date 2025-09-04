@@ -216,14 +216,6 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => setLocation('/create-summary')}
-            className="mt-4 sm:mt-0 bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20"
-            data-testid="button-create-summary"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Summary
-          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -336,15 +328,6 @@ export default function Dashboard() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
-                    onClick={() => setLocation('/create-summary')}
-                    data-testid="card-create-summary">
-                <CardContent className="p-6 text-center">
-                  <Plus className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2" data-testid="text-create-summary-title">Create Summary</h3>
-                  <p className="text-gray-300 text-sm" data-testid="text-create-summary-desc">Transform content into AI summaries</p>
-                </CardContent>
-              </Card>
 
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg cursor-pointer hover:bg-white/15 transition-colors"
                     onClick={() => setLocation('/wallet-dashboard')}
@@ -372,10 +355,6 @@ export default function Dashboard() {
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-white">My Summaries ({summaries.length})</CardTitle>
-                <Button onClick={() => setLocation('/create-summary')} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Summary
-                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">

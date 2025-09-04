@@ -53,32 +53,6 @@ export function Navigation() {
               StreamAiX
             </div>
             
-            {/* Quick summarize input - hidden on mobile */}
-            <div className="hidden lg:flex items-center space-x-2 ml-4 xl:ml-8">
-              <div className="relative">
-                <Input 
-                  type="text" 
-                  placeholder="Paste any video or podcast URL to analyze..." 
-                  className="w-64 xl:w-80 glass-bg glass-border focus:ring-2 focus:ring-indigo-500 text-sm"
-                  id="landing-url-input"
-                />
-                <Sparkles className="absolute right-3 top-2.5 w-4 h-4 text-indigo-400" />
-              </div>
-              <Link href="/create-summary">
-                <Button 
-                  size="sm" 
-                  className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 hover:from-indigo-600/90 hover:to-purple-700/90 backdrop-blur-lg border border-white/20"
-                  onClick={() => {
-                    const urlInput = document.getElementById('landing-url-input') as HTMLInputElement;
-                    if (urlInput?.value) {
-                      sessionStorage.setItem('pendingUrl', urlInput.value);
-                    }
-                  }}
-                >
-                  Summarize
-                </Button>
-              </Link>
-            </div>
           </div>
           
           <div className="flex items-center space-x-3 sm:space-x-6">
@@ -125,12 +99,6 @@ export function Navigation() {
                       <Link href="/dashboard" className="cursor-pointer">
                         <BarChart3 className="mr-2 h-4 w-4" />
                         Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/create-summary" className="cursor-pointer">
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Create Summary
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
