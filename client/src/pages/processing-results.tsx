@@ -678,31 +678,31 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           <div className="space-y-2">
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Introduction & BlackRock's Ethereum Thesis</span>
+                                <span className="text-sm font-medium text-white">Introduction & Key Themes</span>
                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">0:00 - 2:30</span>
                               </div>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Joseph Chalom introduces BlackRock's institutional perspective on Ethereum and the strategic rationale for institutional adoption</p>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Video introduction covering main topics and speaker background</p>
                             </div>
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Institutional Infrastructure & ETF Strategy</span>
-                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">2:30 - 5:00</span>
+                                <span className="text-sm font-medium text-white">Core Analysis & Insights</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">2:30 - 6:00</span>
                               </div>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Discussion of BlackRock's ETF product development, regulatory approach, and institutional custody solutions for Ethereum exposure</p>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Deep dive into primary analysis, market conditions, and strategic insights</p>
                             </div>
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Market Analysis & Investment Timeline</span>
-                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">5:00 - 7:30</span>
+                                <span className="text-sm font-medium text-white">Investment Implications & Strategy</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">6:00 - 8:30</span>
                               </div>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Chalom shares BlackRock's market analysis, price expectations, and timeline for institutional adoption phases</p>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Discussion of investment opportunities, market timing, and strategic positioning</p>
                             </div>
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Risk Management & Portfolio Integration</span>
-                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">7:30 - 10:00</span>
+                                <span className="text-sm font-medium text-white">Key Takeaways & Action Items</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">8:30 - 10:00</span>
                               </div>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Strategic discussion of risk management frameworks and how institutional portfolios should integrate Ethereum exposure</p>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Summary of main points and actionable insights for investors</p>
                             </div>
                           </div>
                         </div>
