@@ -496,7 +496,7 @@ export default function Dashboard() {
                                 <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
                                   <h4 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4" />
-                                    Financial Impact Analysis
+                                    Investment Opportunities
                                   </h4>
                                   <div className="grid gap-3">
                                     {summary.financialTrends.slice(0, 3).map((trend, index) => (

@@ -579,41 +579,6 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </div>
                       </div>
 
-                      {/* Financial Trends */}
-                      {summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0 && (
-                        <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-                          <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4" />
-                            Financial Impact Analysis
-                          </h5>
-                          <div className="space-y-3">
-                            {summary.financialTrends.map((financial: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-cyan-400">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {financial.category}
-                                    </Badge>
-                                    <span className="font-mono text-sm font-semibold text-cyan-400">
-                                      ${financial.symbol}
-                                    </span>
-                                    <span className="text-sm font-medium">{financial.company}</span>
-                                  </div>
-                                  <Badge variant="outline" className={`text-xs ${
-                                    financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
-                                    financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
-                                    'text-gray-600 dark:text-gray-400 border-gray-500/30'
-                                  }`}>
-                                    {financial.impact}
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{financial.relevance}</p>
-                                <p className="text-xs text-gray-600 dark:text-gray-300 italic">{financial.reasoning}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
 
                       {/* Strategic Intelligence Summary */}
                       <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
