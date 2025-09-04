@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,8 @@ import {
   TrendingUp,
   User,
   Wallet,
-  Trophy
+  Trophy,
+  BookmarkPlus
 } from 'lucide-react';
 
 interface Summary {
@@ -94,6 +96,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('analysis');
   const [copySuccess, setCopySuccess] = useState('');
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   
   // Force dark theme and visible text
   useEffect(() => {
@@ -317,19 +320,64 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </Badge>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View Source
-                      </a>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {isAuthenticated ? (
+                        <Button variant="outline" size="sm" className="bg-indigo-500/10 border-indigo-400/30 hover:bg-indigo-500/20">
+                          <BookmarkPlus className="h-4 w-4 mr-2" />
+                          Save Summary
+                        </Button>
+                      ) : (
+                        <Link href="/auth">
+                          <Button variant="outline" size="sm" className="bg-indigo-500/10 border-indigo-400/30 hover:bg-indigo-500/20 text-indigo-300">
+                            <User className="h-4 w-4 mr-2" />
+                            Sign Up to Save
+                          </Button>
+                        </Link>
+                      )}
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Source
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Conversion Banner for Anonymous Users */}
+              {!isAuthenticated && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-6 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 rounded-xl border border-indigo-400/30 backdrop-blur-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full">
+                        <Sparkles className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">🎯 Unlock Full AI Intelligence</h3>
+                        <p className="text-indigo-200 text-sm">
+                          Save summaries • Add personal notes • Access Market Intel • Earn rewards
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Link href="/auth">
+                        <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold px-6 shadow-lg">
+                          Sign Up Free
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Content Tabs */}
               <Card className="bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
-                <CardContent className="p-6">
+                <CardContent className="p-6 relative">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-4 mb-6">
@@ -484,7 +532,47 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     </TabsContent>
 
                     {/* Market Intel Tab */}
-                    <TabsContent value="market" className="space-y-4">
+                    <TabsContent value="market" className="space-y-4 relative">
+                      {/* Anonymous User Overlay for Market Intel */}
+                      {!isAuthenticated && (
+                        <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-slate-900/60 to-slate-900/90 backdrop-blur-sm rounded-lg flex items-end justify-center pb-8">
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center p-6 bg-slate-800/90 rounded-xl border border-indigo-400/30 max-w-md mx-4"
+                          >
+                            <div className="flex items-center justify-center mb-4">
+                              <div className="p-3 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full mr-3">
+                                <BarChart3 className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="text-left">
+                                <h3 className="text-lg font-bold text-white">💰 Premium Market Intel</h3>
+                                <p className="text-cyan-200 text-sm">Live data • AI analysis • Investment signals</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3 mb-6">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-300">📈 Live Market Prices</span>
+                                <Badge className="bg-emerald-500/20 text-emerald-400">Premium</Badge>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-300">🎯 AI Investment Signals</span>
+                                <Badge className="bg-emerald-500/20 text-emerald-400">Premium</Badge>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-300">⚡ Cross-Asset Analysis</span>
+                                <Badge className="bg-emerald-500/20 text-emerald-400">Premium</Badge>
+                              </div>
+                            </div>
+                            <Link href="/auth">
+                              <Button className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold">
+                                Unlock Market Intel
+                              </Button>
+                            </Link>
+                          </motion.div>
+                        </div>
+                      )}
+                      
                       {/* Market Overview Grid - Single Clean Version */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
