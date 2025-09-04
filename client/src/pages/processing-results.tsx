@@ -145,7 +145,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
             <Brain className="h-16 w-16 text-purple-400 mx-auto" />
           </motion.div>
           <h2 className="text-2xl font-bold text-white mb-2">Loading AI Results</h2>
-          <p className="text-gray-400">Processing your content intelligence...</p>
+          <p className="text-gray-600 dark:text-gray-400">Processing your content intelligence...</p>
         </motion.div>
       </div>
     );
@@ -156,7 +156,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Invalid URL</h2>
-          <p className="text-gray-400 mb-4">No summary ID provided in URL</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">No summary ID provided in URL</p>
           <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
@@ -171,7 +171,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Content Not Found</h2>
-          <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Summary ID: {summaryId}</p>
           <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
@@ -241,7 +241,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
             {summary.title}
           </h2>
           {summary.description && (
-            <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4 mb-6">
+            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 mb-6">
               {summary.description}
             </p>
           )}
@@ -362,7 +362,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             variant="ghost"
                             size="sm"
                             onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
-                            className="text-gray-400 hover:text-white"
+                            className="text-gray-600 dark:text-gray-400 hover:text-white"
                           >
                             {copySuccess === 'executive' ? (
                               <CheckCircle2 className="h-4 w-4" />
@@ -436,14 +436,14 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                     <Badge variant="outline" className={`text-xs ml-2 ${
                                       insight.importance === 'high' ? 'text-red-400 border-red-500/30' :
                                       insight.importance === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
-                                      'text-gray-400 border-gray-500/30'
+                                      'text-gray-600 dark:text-gray-400 border-gray-500/30'
                                     }`}>
                                       {insight.importance}
                                     </Badge>
                                   )}
                                 </div>
                                 {typeof insight === 'object' && insight.timestamp && (
-                                  <div className="text-xs text-muted-foreground">{insight.timestamp}</div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-300">{insight.timestamp}</div>
                                 )}
                               </div>
                             ))}
@@ -474,7 +474,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                 </blockquote>
                                 <div className="flex items-center justify-between text-xs">
                                   <span className="font-medium text-orange-300">{quote.speaker || 'Speaker'}</span>
-                                  <span className="text-muted-foreground">{quote.timestamp}</span>
+                                  <span className="text-gray-600 dark:text-gray-300">{quote.timestamp}</span>
                                 </div>
                               </div>
                             ))}
@@ -498,7 +498,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               }
                             })()}
                           </div>
-                          <div className="text-xs text-muted-foreground">Market Sentiment</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">Market Sentiment</div>
                         </div>
                         <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
                           <div className="text-2xl font-bold text-purple-400 mb-1">
@@ -511,7 +511,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               }
                             })()}
                           </div>
-                          <div className="text-xs text-muted-foreground">Source Credibility</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">Source Credibility</div>
                         </div>
                       </div>
 
@@ -550,7 +550,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground mb-1">{financial.reasoning}</p>
+                                <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">{financial.reasoning}</p>
                                 {financial.timeHorizon && (
                                   <div className="text-xs text-emerald-300">Timeline: {financial.timeHorizon}</div>
                                 )}
@@ -571,15 +571,15 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <div className="text-blue-400 font-medium text-xs" style={{color: '#3b82f6'}}>MARKET CYCLE</div>
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Phase:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Phase:</span>
                                 <span className="text-green-400" style={{color: '#4ade80'}}>ACCUMULATION</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Duration:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Duration:</span>
                                 <span className="text-blue-400" style={{color: '#3b82f6'}}>6-18 MONTHS</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Confidence:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Confidence:</span>
                                 <span className="text-purple-400" style={{color: '#a855f7'}}>{summary.accuracy || 95}%</span>
                               </div>
                             </div>
@@ -589,15 +589,15 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <div className="text-blue-400 font-medium text-xs" style={{color: '#3b82f6'}}>INSTITUTIONAL FLOW</div>
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Smart Money:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Smart Money:</span>
                                 <span className="text-green-400" style={{color: '#4ade80'}}>ACCUMULATING</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Retail Sentiment:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Retail Sentiment:</span>
                                 <span className="text-yellow-400" style={{color: '#facc15'}}>CAUTIOUS</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Divergence:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Divergence:</span>
                                 <span className="text-green-400" style={{color: '#4ade80'}}>BULLISH</span>
                               </div>
                             </div>
@@ -607,15 +607,15 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <div className="text-blue-400 font-medium text-xs" style={{color: '#3b82f6'}}>STRATEGIC OUTLOOK</div>
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Entry Window:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Entry Window:</span>
                                 <span className="text-green-400" style={{color: '#4ade80'}}>OPEN</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Risk/Reward:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Risk/Reward:</span>
                                 <span className="text-blue-400" style={{color: '#3b82f6'}}>FAVORABLE</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400" style={{color: '#9ca3af'}}>Time Horizon:</span>
+                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Time Horizon:</span>
                                 <span className="text-purple-400" style={{color: '#a855f7'}}>MEDIUM-TERM</span>
                               </div>
                             </div>
@@ -646,13 +646,13 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                   <Badge variant="outline" className={`text-xs ${
                                     financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
                                     financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
-                                    'text-gray-400 border-gray-500/30'
+                                    'text-gray-600 dark:text-gray-400 border-gray-500/30'
                                   }`}>
                                     {financial.impact}
                                   </Badge>
                                 </div>
-                                <p className="text-xs text-muted-foreground mb-2">{financial.relevance}</p>
-                                <p className="text-xs text-muted-foreground italic">{financial.reasoning}</p>
+                                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{financial.relevance}</p>
+                                <p className="text-xs text-gray-600 dark:text-gray-300 italic">{financial.reasoning}</p>
                               </div>
                             ))}
                           </div>
@@ -670,19 +670,19 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             <div className="text-indigo-400 font-medium mb-2">Content Source Analysis</div>
                             <div className="grid grid-cols-2 gap-4 text-xs">
                               <div>
-                                <span className="text-muted-foreground">Channel:</span>
+                                <span className="text-gray-600 dark:text-gray-300">Channel:</span>
                                 <span className="ml-2 font-medium">{summary.rawData?.channel || summary.platform}</span>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Market Sentiment:</span>
+                                <span className="text-gray-600 dark:text-gray-300">Market Sentiment:</span>
                                 <span className="ml-2 font-medium text-green-400">{summary.marketSentiment || 'Bullish'}</span>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Source Credibility:</span>
+                                <span className="text-gray-600 dark:text-gray-300">Source Credibility:</span>
                                 <span className="ml-2 font-medium text-purple-400">{summary.sourceCredibility || 'High'}</span>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Analysis Accuracy:</span>
+                                <span className="text-gray-600 dark:text-gray-300">Analysis Accuracy:</span>
                                 <span className="ml-2 font-medium text-blue-400">{summary.accuracy || 95}%</span>
                               </div>
                             </div>
@@ -704,9 +704,9 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               <div key={idx} className="p-3 bg-background/50 rounded-md flex justify-between items-start">
                                 <div>
                                   <span className="text-sm font-medium">{chapter.title}</span>
-                                  <p className="text-xs text-muted-foreground mt-1">{chapter.summary}</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{chapter.summary}</p>
                                 </div>
-                                <span className="text-xs text-muted-foreground font-mono">
+                                <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">
                                   {chapter.startTime} - {chapter.endTime}
                                 </span>
                               </div>
@@ -743,7 +743,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               <CardContent className="p-6 text-center">
                 <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-red-300 mb-2">Processing Failed</h3>
-                <p className="text-muted-foreground">{summary?.summary || 'An error occurred while processing your content.'}</p>
+                <p className="text-gray-600 dark:text-gray-300">{summary?.summary || 'An error occurred while processing your content.'}</p>
               </CardContent>
             </Card>
           )}
