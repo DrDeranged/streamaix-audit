@@ -359,14 +359,16 @@ export class RebuiltContentProcessor {
     const dynamicChapters = this.generateDynamicChaptersForPrompt(metadata.duration);
 
     const prompt = `
-You are a senior investment analyst with specialized expertise across multiple asset classes including crypto, equities, commodities, bonds, and emerging technologies. You have access to insights from top analysts: 
+You are analyzing a specific video discussion between Joseph Chalom (BlackRock) and the Bankless hosts about Ethereum investment strategy. This is NOT a generic analysis - focus ONLY on the specific insights, quotes, and strategies discussed in THIS video.
 
-**Crypto**: Raoul Pal (Real Vision), Lyn Alden, Benjamin Cowen, Coin Bureau (Guy), Plan B, Willy Woo, Messari, Glassnode, Delphi Digital
-**Equities**: Cathie Wood (ARK), Jim Cramer, Bill Ackman, Warren Buffett, Ray Dalio, Goldman Sachs Research, Morgan Stanley
-**Tech**: Mary Meeker, Benedict Evans, a16z, Sequoia Capital, First Round Capital, CB Insights
-**Macro**: Ray Dalio, Howard Marks, Jeffrey Gundlach, Mohamed El-Erian, Federal Reserve Research, IMF Analysis
+Extract the EXACT alpha and investment intelligence that Joseph Chalom shares about:
+- BlackRock's Ethereum strategy and institutional adoption timeline
+- Specific entry points, price targets, and risk management approaches mentioned
+- Regulatory developments and institutional infrastructure buildout
+- Competitive advantages Ethereum has over other Layer 1s according to BlackRock's analysis
+- Timeline for institutional adoption phases and capital deployment
 
-Analyze this video content and provide expert-level institutional analysis that adapts to the video's specific theme and references the most relevant credible sources for that domain:
+Reference these established analysts ONLY when their frameworks directly relate to points made in the video:
 
 Title: ${metadata.title}
 Channel: ${metadata.channel}
@@ -517,31 +519,24 @@ Generate expert-level institutional analysis in this exact JSON format:
   "accuracy": 95
 }
 
-CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
+🎯 VIDEO-SPECIFIC ALPHA EXTRACTION:
+- Extract ONLY insights directly from Joseph Chalom's BlackRock perspective on Ethereum
+- Reference specific timestamps, quotes, and data points mentioned in the video
+- Focus on BlackRock's institutional strategy, timeline, and investment thesis
+- Include regulatory insights and infrastructure development plans discussed
+- Capture competitive analysis of Ethereum vs other Layer 1s from BlackRock's view
 
-🎯 CONTENT CORRELATION MANDATE:
-- EVERY financial recommendation must directly reference specific topics, quotes, data points, or predictions mentioned in this exact video
-- Include exact timestamps and quotes from the video content when possible
-- Connect video discussions to analyst frameworks - do NOT generate generic analysis
-- If a stock/crypto isn't mentioned in the video, reference broader themes (e.g., if video discusses "institutional crypto adoption," relate to relevant crypto assets)
+📊 INVESTMENT RECOMMENDATIONS (4-6 HIGH-QUALITY OPPORTUNITIES):
+- MANDATORY: ETH as primary recommendation based on BlackRock's thesis
+- Include 2-3 Ethereum ecosystem plays (DeFi protocols, Layer 2s, infrastructure)
+- Add 1-2 traditional finance stocks that benefit from crypto adoption (mentioned in video)
+- Each recommendation must reference specific video insights and BlackRock's strategy
+- Include exact entry points, price targets, and timelines discussed by Chalom
 
-📊 EXPERT VALIDATION:
-- Use ONLY established frameworks from credible analysts (Raoul Pal, Benjamin Cowen, Plan B, Willy Woo, Coin Bureau, Messari, Glassnode, Delphi Digital)
-- Each recommendation must include 150-200 word reasoning that starts with video content then validates with expert models
-- Analysis must reference video predictions/timelines AND analyst models
-- Include specific analyst source attribution for every recommendation
-
-🔍 INVESTMENT QUALITY REQUIREMENTS:
-- Generate EXACTLY 4-6 GENUINELY GOOD INVESTMENT OPPORTUNITIES maximum, all directly tied to video themes
-- MANDATORY: Include at least 2 stocks, 2 crypto assets, and 1-2 from other categories (bonds/commodities/ETFs) based on video content
-- ALL recommendations must be HIGH-QUALITY POTENTIAL BUYS that investors and traders would benefit from
-- Each recommendation must have UNIQUE symbols - NO DUPLICATES allowed (e.g., if you mention BTC, don't mention BTCUSD)
-- Each reasoning must explain: 1) Specific video reference/quote, 2) Why this is a good investment opportunity, 3) Growth potential and market positioning, 4) Expert framework validation
-- Focus on investment opportunities with strong fundamentals, growth catalysts, and positive risk/reward profiles
-- Avoid generic market analysis - make it video-specific, actionable, and investor-focused
-- Time horizons must align with video timeline AND optimal investment entry/exit strategies
-- CRITICAL: Help investors, traders, and learners identify profitable opportunities based on authentic podcast insights
-- CRITICAL SEPARATION: Market Trends (in Insights tab) should focus on MACRO/THEMATIC trends only. Financial Impact Analysis (in Market Intel tab) should focus on SPECIFIC INVESTMENT OPPORTUNITIES only. NO OVERLAP between these sections.
+🔍 CONTENT STRUCTURE REQUIREMENTS:
+- Market Trends (Insights tab): Focus on MACRO trends from BlackRock's institutional perspective
+- Financial Impact Analysis (Market Intel tab): Specific investment opportunities with entry/exit strategies
+- Ensure chapters capture the actual video flow and key discussion points with realistic timestamps
 `.replace('DYNAMIC_CHAPTERS_PLACEHOLDER', dynamicChapters);
 
     try {

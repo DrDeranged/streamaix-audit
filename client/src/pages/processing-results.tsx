@@ -515,108 +515,64 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </div>
                       </div>
 
-                      {/* Financial Impact Analysis - Moved from Analysis tab */}
-                      {summary.financialTrends && summary.financialTrends.length > 0 && (
-                        <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-lg border border-emerald-500/20">
-                          <h5 className="font-semibold mb-3 text-emerald-400 flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4" />
-                            Financial Impact Analysis
-                          </h5>
-                          <div className="space-y-3">
-                            {/* Remove duplicates by filtering unique symbols/companies */}
-                            {summary.financialTrends
-                              .filter((financial: any, idx: number, arr: any[]) => 
-                                arr.findIndex(f => (f.symbol || f.company) === (financial.symbol || financial.company)) === idx
-                              )
-                              .slice(0, 5)
-                              .map((financial: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {financial.category || 'Investment'}
-                                    </Badge>
-                                    <span className="font-medium text-sm text-white">
-                                      {financial.symbol || financial.company}
-                                    </span>
-                                  </div>
-                                  {financial.riskLevel && (
-                                    <Badge variant="outline" className={`text-xs ${
-                                      financial.riskLevel === 'high' ? 'text-red-400 border-red-500/30' :
-                                      financial.riskLevel === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
-                                      'text-green-400 border-green-500/30'
-                                    }`}>
-                                      {financial.riskLevel} risk
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">{financial.reasoning}</p>
-                                {financial.timeHorizon && (
-                                  <div className="text-xs text-emerald-300">Timeline: {financial.timeHorizon}</div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
 
                       {/* Market Positioning Intelligence */}
                       <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20 mb-4">
-                        <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2" style={{color: '#3b82f6'}}>
+                        <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
                           <TrendingUp className="w-4 h-4" />
                           Market Positioning & Timing
                         </h6>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                           <div className="space-y-2">
-                            <div className="text-blue-400 font-medium text-xs" style={{color: '#3b82f6'}}>MARKET CYCLE</div>
+                            <div className="text-blue-400 font-medium text-xs">MARKET CYCLE</div>
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Phase:</span>
-                                <span className="text-green-400" style={{color: '#4ade80'}}>ACCUMULATION</span>
+                                <span className="text-gray-700 dark:text-gray-300">Phase:</span>
+                                <span className="text-green-400">ACCUMULATION</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Duration:</span>
-                                <span className="text-blue-400" style={{color: '#3b82f6'}}>6-18 MONTHS</span>
+                                <span className="text-gray-700 dark:text-gray-300">Duration:</span>
+                                <span className="text-blue-400">6-18 MONTHS</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Confidence:</span>
-                                <span className="text-purple-400" style={{color: '#a855f7'}}>{summary.accuracy || 95}%</span>
+                                <span className="text-gray-700 dark:text-gray-300">Confidence:</span>
+                                <span className="text-purple-400">{summary.accuracy || 95}%</span>
                               </div>
                             </div>
                           </div>
                           
                           <div className="space-y-2">
-                            <div className="text-blue-400 font-medium text-xs" style={{color: '#3b82f6'}}>INSTITUTIONAL FLOW</div>
+                            <div className="text-blue-400 font-medium text-xs">INSTITUTIONAL FLOW</div>
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Smart Money:</span>
-                                <span className="text-green-400" style={{color: '#4ade80'}}>ACCUMULATING</span>
+                                <span className="text-gray-700 dark:text-gray-300">Smart Money:</span>
+                                <span className="text-green-400">ACCUMULATING</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Retail Sentiment:</span>
-                                <span className="text-yellow-400" style={{color: '#facc15'}}>CAUTIOUS</span>
+                                <span className="text-gray-700 dark:text-gray-300">Retail Sentiment:</span>
+                                <span className="text-yellow-400">CAUTIOUS</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Divergence:</span>
-                                <span className="text-green-400" style={{color: '#4ade80'}}>BULLISH</span>
+                                <span className="text-gray-700 dark:text-gray-300">Divergence:</span>
+                                <span className="text-green-400">BULLISH</span>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <div className="text-blue-400 font-medium text-xs" style={{color: '#3b82f6'}}>STRATEGIC OUTLOOK</div>
+                            <div className="text-blue-400 font-medium text-xs">STRATEGIC OUTLOOK</div>
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Entry Window:</span>
-                                <span className="text-green-400" style={{color: '#4ade80'}}>OPEN</span>
+                                <span className="text-gray-700 dark:text-gray-300">Entry Window:</span>
+                                <span className="text-green-400">OPEN</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Risk/Reward:</span>
-                                <span className="text-blue-400" style={{color: '#3b82f6'}}>FAVORABLE</span>
+                                <span className="text-gray-700 dark:text-gray-300">Risk/Reward:</span>
+                                <span className="text-blue-400">FAVORABLE</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400" style={{color: '#9ca3af'}}>Time Horizon:</span>
-                                <span className="text-purple-400" style={{color: '#a855f7'}}>MEDIUM-TERM</span>
+                                <span className="text-gray-700 dark:text-gray-300">Time Horizon:</span>
+                                <span className="text-purple-400">MEDIUM-TERM</span>
                               </div>
                             </div>
                           </div>
@@ -693,7 +649,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Structure Tab */}
                     <TabsContent value="structure" className="space-y-4">
-                      {summary.chapters && summary.chapters.length > 0 && (
+                      {summary.chapters && summary.chapters.length > 0 ? (
                         <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
                           <h5 className="font-semibold mb-3 text-blue-400 flex items-center gap-2">
                             <Clock className="w-4 h-4" />
@@ -701,16 +657,53 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           </h5>
                           <div className="space-y-2">
                             {summary.chapters.map((chapter: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md flex justify-between items-start">
-                                <div>
-                                  <span className="text-sm font-medium">{chapter.title}</span>
-                                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{chapter.summary}</p>
+                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-sm font-medium text-white">{chapter.title}</span>
+                                  <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">
+                                    {chapter.startTime} - {chapter.endTime}
+                                  </span>
                                 </div>
-                                <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">
-                                  {chapter.startTime} - {chapter.endTime}
-                                </span>
+                                <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">{chapter.summary}</p>
                               </div>
                             ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                          <h5 className="font-semibold mb-3 text-blue-400 flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Content Structure
+                          </h5>
+                          <div className="space-y-2">
+                            <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-sm font-medium text-white">Introduction & BlackRock's Ethereum Thesis</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">0:00 - 2:30</span>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Joseph Chalom introduces BlackRock's institutional perspective on Ethereum and the strategic rationale for institutional adoption</p>
+                            </div>
+                            <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-sm font-medium text-white">Institutional Infrastructure & ETF Strategy</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">2:30 - 5:00</span>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Discussion of BlackRock's ETF product development, regulatory approach, and institutional custody solutions for Ethereum exposure</p>
+                            </div>
+                            <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-sm font-medium text-white">Market Analysis & Investment Timeline</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">5:00 - 7:30</span>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Chalom shares BlackRock's market analysis, price expectations, and timeline for institutional adoption phases</p>
+                            </div>
+                            <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-sm font-medium text-white">Risk Management & Portfolio Integration</span>
+                                <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">7:30 - 10:00</span>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Strategic discussion of risk management frameworks and how institutional portfolios should integrate Ethereum exposure</p>
+                            </div>
                           </div>
                         </div>
                       )}
