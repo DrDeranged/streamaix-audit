@@ -331,7 +331,7 @@ export default function SummaryView() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="blog" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 bg-white/5 border-white/10">
+              <TabsList className="grid w-full grid-cols-6 bg-white/5 border-white/10">
                 <TabsTrigger value="raw" className="data-[state=active]:bg-purple-500/20">
                   <Database className="h-4 w-4 mr-2" />
                   Raw
@@ -339,6 +339,10 @@ export default function SummaryView() {
                 <TabsTrigger value="transcript" className="data-[state=active]:bg-purple-500/20">
                   <FileText className="h-4 w-4 mr-2" />
                   Transcript
+                </TabsTrigger>
+                <TabsTrigger value="structure" className="data-[state=active]:bg-purple-500/20">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Structure
                 </TabsTrigger>
                 <TabsTrigger value="tldr" className="data-[state=active]:bg-purple-500/20">
                   <MessageSquare className="h-4 w-4 mr-2" />
@@ -386,6 +390,49 @@ export default function SummaryView() {
                       </div>
                     ) : (
                       <div className="text-gray-400 italic">Transcript not available</div>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="structure" className="mt-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="h-5 w-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Content Structure ({((summary as any).chapters?.length || 0)} chapters)
+                    </h3>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                    {(summary as any).chapters && (summary as any).chapters.length > 0 ? (
+                      <div className="space-y-4">
+                        {(summary as any).chapters.map((chapter: any, index: number) => (
+                          <div key={index} className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-semibold text-blue-300 flex items-center gap-2">
+                                <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-xs">
+                                  {index + 1}
+                                </span>
+                                {chapter.title}
+                              </h4>
+                              <span className="text-xs text-gray-400 font-mono bg-black/20 px-2 py-1 rounded">
+                                {chapter.startTime || '0:00'} - {chapter.endTime || '0:00'}
+                              </span>
+                            </div>
+                            <p className="text-gray-300 text-sm leading-relaxed pl-8">
+                              {chapter.summary || chapter.content || 'Chapter summary not available'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h4 className="text-lg font-semibold text-gray-400 mb-2">No Chapter Structure Available</h4>
+                        <p className="text-gray-500 text-sm">
+                          This content hasn't been broken down into chapters yet. Chapter detection is processed automatically during AI analysis.
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
