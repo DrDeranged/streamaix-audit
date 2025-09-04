@@ -415,7 +415,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       
                     </TabsContent>
 
-                    {/* Key Insights Tab */}
+                    {/* Key Insights Tab - MACRO TRENDS ONLY */}
                     <TabsContent value="insights" className="space-y-4">
                       {/* Combine keyInsights and bulletPoints into single section */}
                       {((summary.keyInsights && summary.keyInsights.length > 0) || (summary.bulletPoints && summary.bulletPoints.length > 0)) && (
