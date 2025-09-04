@@ -317,7 +317,9 @@ export class RebuiltContentProcessor {
     };
     
     // Create chapters that span the entire video duration
-    const chapterCount = Math.max(5, Math.ceil(duration / 900)); // At least 5 chapters, roughly 15-min segments
+    // For videos longer than 30 minutes, use 8-10 chapters (roughly 5-6 minute segments)
+    // For shorter videos, use 5-6 chapters
+    const chapterCount = duration > 1800 ? Math.min(10, Math.max(8, Math.ceil(duration / 360))) : Math.max(5, Math.ceil(duration / 300));
     const segmentDuration = duration / chapterCount;
     
     const chapterTemplates = [
