@@ -51,7 +51,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="text-white hover:bg-white/10"
+                    className="text-gray-900 dark:text-white hover:bg-white/10"
                     onClick={() => {
                       console.log('Back to home clicked');
                       window.location.href = '/';
@@ -62,7 +62,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
                   </Button>
                 </Link>
                 {title && (
-                  <h1 className="text-lg font-semibold text-white">{title}</h1>
+                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h1>
                 )}
               </div>
             ) : (
@@ -72,7 +72,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
                     <Button
                       size="sm"
                       variant={location === item.path ? "secondary" : "ghost"}
-                      className={`text-white ${
+                      className={`text-gray-900 dark:text-white ${
                         location === item.path 
                           ? "bg-white/20 hover:bg-white/30" 
                           : "hover:bg-white/10"
@@ -96,12 +96,12 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
             <div className="flex items-center space-x-2">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={user?.avatar} alt={user?.username} />
-                <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm">
+                <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600 text-gray-900 dark:text-white text-sm">
                   {user?.username?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
-                <p className="text-sm font-medium text-white">{user?.username}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.username}</p>
                 <p className="text-xs text-slate-300">{user?.email}</p>
               </div>
             </div>
@@ -109,7 +109,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
               size="sm"
               variant="ghost"
               onClick={handleLogout}
-              className="text-white hover:bg-white/10"
+              className="text-gray-900 dark:text-white hover:bg-white/10"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline ml-2">Logout</span>

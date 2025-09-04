@@ -64,7 +64,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle className="h-6 w-6 text-red-400" />
               </div>
-              <CardTitle className="text-white">Something went wrong</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white">Something went wrong</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-300 text-center text-sm">
@@ -92,7 +92,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 <Button 
                   onClick={() => window.location.reload()}
                   variant="outline"
-                  className="border-white/20 text-white hover:bg-white/5"
+                  className="border-white/20 text-gray-900 dark:text-white hover:bg-white/5"
                 >
                   Reload Page
                 </Button>
@@ -135,7 +135,7 @@ export function Web3ErrorBoundary({ children }: { children: React.ReactNode }) {
               onClick={() => window.location.reload()}
               variant="outline" 
               size="sm"
-              className="border-white/20 text-white hover:bg-white/5"
+              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/5"
             >
               Refresh
             </Button>

@@ -103,7 +103,7 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
     <div className={className}>
       <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
         <CardHeader>
-          <CardTitle className="text-white flex items-center justify-between">
+          <CardTitle className="text-gray-900 dark:text-white flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Fuel className="h-5 w-5" />
               Gas Optimizer
@@ -145,7 +145,7 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {getSpeedIcon(speed)}
-                        <span className="text-white font-medium capitalize">
+                        <span className="text-gray-900 dark:text-white font-medium capitalize">
                           {speed}
                         </span>
                       </div>
@@ -165,7 +165,7 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
           {/* Optimization Controls */}
           <div className="flex items-center justify-between pt-4 border-t border-white/10">
             <div className="flex items-center gap-2">
-              <span className="text-white text-sm">Selected: </span>
+              <span className="text-gray-900 dark:text-white text-sm">Selected: </span>
               <Badge className={getSpeedColor(selectedSpeed)}>
                 {gasData[selectedSpeed].price} gwei
               </Badge>

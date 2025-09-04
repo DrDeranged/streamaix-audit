@@ -472,6 +472,8 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 📊 EXPERT VALIDATION:
 - Use ONLY established frameworks from credible analysts (Raoul Pal, Benjamin Cowen, Plan B, Willy Woo, Coin Bureau, Messari, Glassnode, Delphi Digital)
 - Each recommendation must include 150-200 word reasoning that starts with video content then validates with expert models
+- Extract specific financial entities mentioned in video: companies, tickers, crypto assets, sectors
+- Generate investments ONLY from extracted entities - no generic recommendations
 - Analysis must reference video predictions/timelines AND analyst models
 - Include specific analyst source attribution for every recommendation
 

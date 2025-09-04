@@ -341,7 +341,7 @@ export default function CreateSummary() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
           <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">Authentication Required</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Authentication Required</h2>
             <p className="text-gray-300 mb-4">Please log in to create summaries</p>
             <Button onClick={() => setLocation('/auth')} className="w-full">
               Go to Login
@@ -365,7 +365,7 @@ export default function CreateSummary() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 pt-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Create AI Summary
           </h1>
           <p className="text-gray-300 text-lg">
@@ -375,7 +375,7 @@ export default function CreateSummary() {
 
         <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
               <ContentIcon className="h-6 w-6" />
               Content Processing
             </CardTitle>
@@ -384,7 +384,7 @@ export default function CreateSummary() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* URL Input */}
               <div className="space-y-2">
-                <Label htmlFor="url" className="text-white">
+                <Label htmlFor="url" className="text-gray-900 dark:text-white">
                   Content URL *
                 </Label>
                 <div className="relative">
@@ -395,7 +395,7 @@ export default function CreateSummary() {
                     placeholder="https://youtube.com/watch?v=..."
                     value={formData.url}
                     onChange={(e) => handleUrlChange(e.target.value)}
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                    className="pl-10 bg-white/5 border-white/20 text-gray-900 dark:text-white placeholder:text-gray-400"
                     required
                     data-testid="input-content-url"
                   />
@@ -404,14 +404,14 @@ export default function CreateSummary() {
 
               {/* Content Type */}
               <div className="space-y-2">
-                <Label className="text-white">Content Type *</Label>
+                <Label className="text-gray-900 dark:text-white">Content Type *</Label>
                 <Select
                   value={formData.contentType}
                   onValueChange={(value: 'podcast' | 'video' | 'livestream') =>
                     setFormData(prev => ({ ...prev, contentType: value }))
                   }
                 >
-                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-content-type">
+                  <SelectTrigger className="bg-white/5 border-white/20 text-gray-900 dark:text-white" data-testid="select-content-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -424,7 +424,7 @@ export default function CreateSummary() {
 
               {/* Platform */}
               <div className="space-y-2">
-                <Label htmlFor="platform" className="text-white">
+                <Label htmlFor="platform" className="text-gray-900 dark:text-white">
                   Platform *
                 </Label>
                 <Input
@@ -432,7 +432,7 @@ export default function CreateSummary() {
                   placeholder="Auto-detected from URL (e.g., YouTube, Spotify)"
                   value={formData.platform}
                   onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                  className="bg-white/5 border-white/20 text-gray-900 dark:text-white placeholder:text-gray-400"
                   data-testid="input-platform"
                   required
                 />
@@ -443,7 +443,7 @@ export default function CreateSummary() {
 
               {/* Title */}
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-white">
+                <Label htmlFor="title" className="text-gray-900 dark:text-white">
                   Custom Title
                 </Label>
                 <Input
@@ -451,21 +451,21 @@ export default function CreateSummary() {
                   placeholder="Leave blank to auto-extract from content"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                  className="bg-white/5 border-white/20 text-gray-900 dark:text-white placeholder:text-gray-400"
                   data-testid="input-custom-title"
                 />
               </div>
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label className="text-white">Tags</Label>
+                <Label className="text-gray-900 dark:text-white">Tags</Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Add a tag..."
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                    className="flex-1 bg-white/5 border-white/20 text-gray-900 dark:text-white placeholder:text-gray-400"
                     data-testid="input-add-tag"
                   />
                   <Button
@@ -473,7 +473,7 @@ export default function CreateSummary() {
                     onClick={addTag}
                     size="sm"
                     variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                    className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
                     data-testid="button-add-tag"
                   >
                     <Plus className="h-4 w-4" />
@@ -492,7 +492,7 @@ export default function CreateSummary() {
                         <button
                           type="button"
                           onClick={() => removeTag(tag)}
-                          className="ml-1 hover:text-white"
+                          className="ml-1 hover:text-gray-900 dark:text-white"
                           data-testid={`button-remove-tag-${tag}`}
                         >
                           <X className="h-3 w-3" />
@@ -505,14 +505,14 @@ export default function CreateSummary() {
 
               {/* Privacy Setting */}
               <div className="space-y-2">
-                <Label className="text-white">Visibility</Label>
+                <Label className="text-gray-900 dark:text-white">Visibility</Label>
                 <Select
                   value={formData.isPublic ? 'public' : 'private'}
                   onValueChange={(value) =>
                     setFormData(prev => ({ ...prev, isPublic: value === 'public' }))
                   }
                 >
-                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-visibility">
+                  <SelectTrigger className="bg-white/5 border-white/20 text-gray-900 dark:text-white" data-testid="select-visibility">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -527,7 +527,7 @@ export default function CreateSummary() {
                 <div className="space-y-4 p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Shield className="h-5 w-5 text-purple-400" />
-                    <Label className="text-white font-semibold">Web3 Options</Label>
+                    <Label className="text-gray-900 dark:text-white font-semibold">Web3 Options</Label>
                   </div>
                   
                   <div className="flex items-center space-x-3">
@@ -538,7 +538,7 @@ export default function CreateSummary() {
                       className="border-white/30 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                     />
                     <div className="flex-1">
-                      <label htmlFor="mint-nft" className="text-white font-medium flex items-center gap-2 cursor-pointer">
+                      <label htmlFor="mint-nft" className="text-gray-900 dark:text-white font-medium flex items-center gap-2 cursor-pointer">
                         <Sparkles className="h-4 w-4 text-purple-400" />
                         Mint as NFT
                       </label>
@@ -568,7 +568,7 @@ export default function CreateSummary() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white font-semibold py-3"
+                className="w-full bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-gray-900 dark:text-white font-semibold py-3"
                 disabled={isProcessing}
                 data-testid="button-start-processing"
               >
@@ -604,8 +604,8 @@ export default function CreateSummary() {
                               </div>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-white">AI Processing Active</h3>
-                              <p className="text-sm text-white/90 font-medium">{processingStatus || "Starting AI analysis..."}</p>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">AI Processing Active</h3>
+                              <p className="text-sm text-gray-900 dark:text-white/90 font-medium">{processingStatus || "Starting AI analysis..."}</p>
                             </div>
                           </div>
                           <Badge variant="secondary" className="font-mono">
@@ -648,7 +648,7 @@ export default function CreateSummary() {
                                   setLocation(`/processing-results/${result.id}`);
                                 }
                               }}
-                              className="w-full max-w-md bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                              className="w-full max-w-md bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-lg"
                               data-testid="button-view-analysis"
                             >
                               <ExternalLink className="h-4 w-4 mr-2" />

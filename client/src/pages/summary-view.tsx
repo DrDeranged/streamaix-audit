@@ -145,7 +145,7 @@ export default function SummaryView() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white text-lg">Loading summary...</p>
+          <p className="text-gray-900 dark:text-white text-lg">Loading summary...</p>
         </div>
       </div>
     );
@@ -157,7 +157,7 @@ export default function SummaryView() {
         <Card className="max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Summary Not Found</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Summary Not Found</h2>
             <p className="text-gray-300 mb-4">
               The summary you're looking for doesn't exist or has been removed.
             </p>
@@ -179,7 +179,7 @@ export default function SummaryView() {
         <Card className="max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
           <CardContent className="p-6 text-center">
             <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Private Summary</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Private Summary</h2>
             <p className="text-gray-300 mb-4">
               This summary is private and can only be viewed by its creator.
             </p>
@@ -220,7 +220,7 @@ export default function SummaryView() {
         {/* Back Navigation */}
         <div className="pt-8 mb-6">
           <Link href="/dashboard">
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+            <Button variant="outline" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
@@ -244,7 +244,7 @@ export default function SummaryView() {
                     </Badge>
                   )}
                 </div>
-                <h1 className="text-3xl font-bold text-white mb-2" data-testid="summary-title">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2" data-testid="summary-title">
                   {summary.title}
                 </h1>
                 {summary.description && (
@@ -273,7 +273,7 @@ export default function SummaryView() {
               {/* Action Buttons */}
               <div className="flex items-center gap-2 ml-4">
                 <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" size="sm" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Original
                   </Button>
@@ -283,7 +283,7 @@ export default function SummaryView() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="border-white/20 text-white hover:bg-white/10"
+                      className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                       onClick={() => likeMutation.mutate()}
                       disabled={likeMutation.isPending}
                     >
@@ -293,7 +293,7 @@ export default function SummaryView() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="border-white/20 text-white hover:bg-white/10"
+                      className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                       onClick={() => shareMutation.mutate('lens')}
                       disabled={shareMutation.isPending}
                     >
@@ -314,7 +314,7 @@ export default function SummaryView() {
               <div className="flex items-center gap-3 mb-4">
                 <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
                 <div>
-                  <h3 className="text-white font-semibold">Processing in Progress</h3>
+                  <h3 className="text-gray-900 dark:text-white font-semibold">Processing in Progress</h3>
                   <p className="text-gray-300 text-sm">AI is analyzing and summarizing your content</p>
                 </div>
               </div>
@@ -327,7 +327,7 @@ export default function SummaryView() {
         {/* Main Content - Tabbed Interface */}
         <Card className="bg-white/10 border-white/20 backdrop-blur-lg mb-6">
           <CardHeader>
-            <CardTitle className="text-white">Content Analysis - Maximum Value in Minimum Time</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">Content Analysis - Maximum Value in Minimum Time</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="blog" className="w-full">
@@ -356,7 +356,7 @@ export default function SummaryView() {
 
               <TabsContent value="raw" className="mt-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Raw Data Analysis</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Raw Data Analysis</h3>
                   <div className="bg-black/20 rounded-lg p-4 border border-white/10">
                     <pre className="text-sm text-gray-300 overflow-x-auto">
                       {JSON.stringify(summary.rawData || {
@@ -378,7 +378,7 @@ export default function SummaryView() {
 
               <TabsContent value="transcript" className="mt-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Full Transcript</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Full Transcript</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                     {summary.transcript ? (
                       <div className="text-gray-300 leading-relaxed whitespace-pre-line">
@@ -393,7 +393,7 @@ export default function SummaryView() {
 
               <TabsContent value="tldr" className="mt-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">TL;DR - Quick Summary</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">TL;DR - Quick Summary</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                     <div className="text-gray-300 leading-relaxed">
                       {(summary as any).tldrSummary || (summary.summary && summary.summary.includes('AI') ? 
@@ -407,7 +407,7 @@ export default function SummaryView() {
 
               <TabsContent value="blog" className="mt-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Comprehensive Analysis</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Comprehensive Analysis</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                     {((summary as any).blogPost || summary.summary) ? (
                       <div className="text-gray-300 leading-relaxed prose prose-invert max-w-none">
@@ -427,7 +427,7 @@ export default function SummaryView() {
 
               <TabsContent value="market" className="mt-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Market Intelligence Assessment</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Market Intelligence Assessment</h3>
                   <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                     <div className="text-gray-300 leading-relaxed prose prose-invert max-w-none">
                       {(summary as any).marketAnalysis ? (
@@ -442,12 +442,12 @@ export default function SummaryView() {
                           <h4 className="text-purple-300 text-lg font-semibold mb-3">AI Content Creation Market Analysis</h4>
                           
                           <div className="mb-4">
-                            <h5 className="text-white font-medium mb-2">Current Market Positioning</h5>
+                            <h5 className="text-gray-900 dark:text-white font-medium mb-2">Current Market Positioning</h5>
                             <p>The AI content creation sector is experiencing explosive growth with 80% efficiency improvements creating significant competitive advantages. Companies implementing AI-powered workflows are capturing market share through faster production cycles and reduced operational costs.</p>
                           </div>
 
                           <div className="mb-4">
-                            <h5 className="text-white font-medium mb-2">Investment Landscape</h5>
+                            <h5 className="text-gray-900 dark:text-white font-medium mb-2">Investment Landscape</h5>
                             <ul className="list-disc list-inside space-y-1">
                               <li><strong>Venture Capital Focus</strong>: $2.3B invested in AI content tools in 2024</li>
                               <li><strong>Enterprise Adoption</strong>: 67% of Fortune 500 companies integrating AI content systems</li>
@@ -456,7 +456,7 @@ export default function SummaryView() {
                           </div>
 
                           <div className="mb-4">
-                            <h5 className="text-white font-medium mb-2">Strategic Opportunities</h5>
+                            <h5 className="text-gray-900 dark:text-white font-medium mb-2">Strategic Opportunities</h5>
                             <ol className="list-decimal list-inside space-y-1">
                               <li><strong>Content Automation Services</strong>: High-demand market for AI-powered content generation</li>
                               <li><strong>Ethical AI Development</strong>: Companies addressing authenticity concerns gaining trust</li>
@@ -475,12 +475,12 @@ export default function SummaryView() {
                           <h4 className="text-purple-300 text-lg font-semibold mb-3">Decentralized Application Investment Outlook</h4>
                           
                           <div className="mb-4">
-                            <h5 className="text-white font-medium mb-2">Sector Analysis</h5>
+                            <h5 className="text-gray-900 dark:text-white font-medium mb-2">Sector Analysis</h5>
                             <p>The DApp ecosystem is transitioning from experimental technology to enterprise-ready solutions. Cross-chain interoperability developments are removing critical scalability barriers, creating new investment opportunities across multiple blockchain networks.</p>
                           </div>
 
                           <div className="mb-4">
-                            <h5 className="text-white font-medium mb-2">Market Penetration Metrics</h5>
+                            <h5 className="text-gray-900 dark:text-white font-medium mb-2">Market Penetration Metrics</h5>
                             <ul className="list-disc list-inside space-y-1">
                               <li><strong>Total Value Locked</strong>: $47B across DeFi protocols in 2024</li>
                               <li><strong>User Adoption</strong>: 156% year-over-year growth in active DApp users</li>
@@ -489,7 +489,7 @@ export default function SummaryView() {
                           </div>
 
                           <div className="mb-4">
-                            <h5 className="text-white font-medium mb-2">Investment Categories</h5>
+                            <h5 className="text-gray-900 dark:text-white font-medium mb-2">Investment Categories</h5>
                             <ol className="list-decimal list-inside space-y-1">
                               <li><strong>Infrastructure Solutions</strong>: Layer 2 scaling solutions showing 400% growth</li>
                               <li><strong>User Experience Tools</strong>: Simplified DApp interfaces capturing mainstream users</li>
@@ -516,7 +516,7 @@ export default function SummaryView() {
         {summary.keyInsights && summary.keyInsights.length > 0 && (
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg mb-6">
             <CardHeader>
-              <CardTitle className="text-white">Key Insights</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white">Key Insights</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -546,14 +546,14 @@ export default function SummaryView() {
         {summary.chapters && summary.chapters.length > 0 && (
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg mb-6">
             <CardHeader>
-              <CardTitle className="text-white">Chapters</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white">Chapters</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {summary.chapters.map((chapter, index) => (
                   <div key={index} className="p-4 bg-white/5 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-white font-semibold">{chapter.title}</h3>
+                      <h3 className="text-gray-900 dark:text-white font-semibold">{chapter.title}</h3>
                       <span className="text-sm text-gray-400">
                         {chapter.startTime} - {chapter.endTime}
                       </span>
@@ -569,27 +569,27 @@ export default function SummaryView() {
         {/* Metadata */}
         <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
           <CardHeader>
-            <CardTitle className="text-white">Details</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">Details</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-400 text-sm">Content Type</p>
-                <p className="text-white">{summary.contentType}</p>
+                <p className="text-gray-900 dark:text-white">{summary.contentType}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Platform</p>
-                <p className="text-white">{summary.platform}</p>
+                <p className="text-gray-900 dark:text-white">{summary.platform}</p>
               </div>
               {summary.originalDuration && (
                 <div>
                   <p className="text-gray-400 text-sm">Duration</p>
-                  <p className="text-white">{Math.round(summary.originalDuration / 60)} minutes</p>
+                  <p className="text-gray-900 dark:text-white">{Math.round(summary.originalDuration / 60)} minutes</p>
                 </div>
               )}
               <div>
                 <p className="text-gray-400 text-sm">Visibility</p>
-                <p className="text-white">{summary.isPublic ? 'Public' : 'Private'}</p>
+                <p className="text-gray-900 dark:text-white">{summary.isPublic ? 'Public' : 'Private'}</p>
               </div>
             </div>
             

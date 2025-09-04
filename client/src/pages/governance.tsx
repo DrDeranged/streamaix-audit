@@ -134,7 +134,7 @@ export default function GovernancePage() {
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
               <Users className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Governance Access Required</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Governance Access Required</h2>
               <p className="text-gray-300 mb-6">Please sign in to participate in DAO governance.</p>
               <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
                 Sign In
@@ -159,7 +159,7 @@ export default function GovernancePage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">DAO Governance</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">DAO Governance</h1>
               <p className="text-gray-400">Participate in community-driven decisions</p>
             </div>
             <Button
@@ -182,12 +182,12 @@ export default function GovernancePage() {
           >
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-sm font-medium">Active Proposals</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Active Proposals</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-white">{stats.activeProposals}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.activeProposals}</p>
                     <p className="text-gray-400 text-sm">of {stats.totalProposals} total</p>
                   </div>
                   <Activity className="h-8 w-8 text-blue-400" />
@@ -197,12 +197,12 @@ export default function GovernancePage() {
 
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-sm font-medium">Participation Rate</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Participation Rate</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-white">{(stats.participationRate * 100).toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.participationRate * 100).toFixed(1)}%</p>
                     <p className="text-green-400 text-sm">+5.2% vs last month</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-green-400" />
@@ -212,12 +212,12 @@ export default function GovernancePage() {
 
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-sm font-medium">Success Rate</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Success Rate</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-white">{(stats.successRate * 100).toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.successRate * 100).toFixed(1)}%</p>
                     <p className="text-purple-400 text-sm">9 of 12 passed</p>
                   </div>
                   <Target className="h-8 w-8 text-purple-400" />
@@ -227,12 +227,12 @@ export default function GovernancePage() {
 
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-sm font-medium">Total Voters</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Total Voters</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-white">{stats.totalVoters.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalVoters.toLocaleString()}</p>
                     <p className="text-yellow-400 text-sm">Community members</p>
                   </div>
                   <Users className="h-8 w-8 text-yellow-400" />
@@ -244,11 +244,11 @@ export default function GovernancePage() {
 
         <Tabs defaultValue="proposals" className="space-y-6">
           <TabsList className="bg-white/10 border border-white/20">
-            <TabsTrigger value="proposals" className="text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="proposals" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
               <VoteIcon className="h-4 w-4 mr-2" />
               Proposals
             </TabsTrigger>
-            <TabsTrigger value="history" className="text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="history" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
               <Clock className="h-4 w-4 mr-2" />
               My Votes
             </TabsTrigger>
@@ -286,7 +286,7 @@ export default function GovernancePage() {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-white text-lg font-semibold">{proposal.title}</h3>
+                                <h3 className="text-gray-900 dark:text-white text-lg font-semibold">{proposal.title}</h3>
                                 <Badge className={getStatusColor(proposal.status)}>
                                   {proposal.status}
                                 </Badge>
@@ -315,7 +315,7 @@ export default function GovernancePage() {
                           <div className="space-y-3">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-400">Voting Progress</span>
-                              <span className="text-white">
+                              <span className="text-gray-900 dark:text-white">
                                 Quorum: {progress.quorumProgress.toFixed(1)}%
                               </span>
                             </div>
@@ -376,7 +376,7 @@ export default function GovernancePage() {
                                     Vote For
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="bg-slate-900 border-white/20 text-white">
+                                <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
                                   <DialogHeader>
                                     <DialogTitle>Vote For Proposal</DialogTitle>
                                   </DialogHeader>
@@ -385,7 +385,7 @@ export default function GovernancePage() {
                                       You are voting <strong className="text-green-400">FOR</strong> this proposal.
                                     </p>
                                     <div>
-                                      <Label htmlFor="reason" className="text-white">
+                                      <Label htmlFor="reason" className="text-gray-900 dark:text-white">
                                         Reason (Optional)
                                       </Label>
                                       <Textarea
@@ -393,7 +393,7 @@ export default function GovernancePage() {
                                         placeholder="Explain why you support this proposal..."
                                         value={voteReason}
                                         onChange={(e) => setVoteReason(e.target.value)}
-                                        className="bg-white/5 border-white/20 text-white mt-2"
+                                        className="bg-white/5 border-white/20 text-gray-900 dark:text-white mt-2"
                                       />
                                     </div>
                                     <Button
@@ -419,7 +419,7 @@ export default function GovernancePage() {
                                     Vote Against
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="bg-slate-900 border-white/20 text-white">
+                                <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
                                   <DialogHeader>
                                     <DialogTitle>Vote Against Proposal</DialogTitle>
                                   </DialogHeader>
@@ -428,7 +428,7 @@ export default function GovernancePage() {
                                       You are voting <strong className="text-red-400">AGAINST</strong> this proposal.
                                     </p>
                                     <div>
-                                      <Label htmlFor="reason-against" className="text-white">
+                                      <Label htmlFor="reason-against" className="text-gray-900 dark:text-white">
                                         Reason (Optional)
                                       </Label>
                                       <Textarea
@@ -436,7 +436,7 @@ export default function GovernancePage() {
                                         placeholder="Explain why you oppose this proposal..."
                                         value={voteReason}
                                         onChange={(e) => setVoteReason(e.target.value)}
-                                        className="bg-white/5 border-white/20 text-white mt-2"
+                                        className="bg-white/5 border-white/20 text-gray-900 dark:text-white mt-2"
                                       />
                                     </div>
                                     <Button
@@ -477,7 +477,7 @@ export default function GovernancePage() {
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
                 <CardContent className="p-8 text-center">
                   <Clock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-white text-lg font-semibold mb-2">No Voting History</h3>
+                  <h3 className="text-gray-900 dark:text-white text-lg font-semibold mb-2">No Voting History</h3>
                   <p className="text-gray-400">
                     You haven't participated in any governance votes yet.
                   </p>
@@ -512,7 +512,7 @@ export default function GovernancePage() {
                               )}
                             </div>
                             <div>
-                              <div className="text-white font-medium">
+                              <div className="text-gray-900 dark:text-white font-medium">
                                 Proposal #{vote.proposalId} - Voted {vote.support}
                               </div>
                               <div className="text-gray-400 text-sm">
@@ -521,7 +521,7 @@ export default function GovernancePage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-white font-medium">
+                            <div className="text-gray-900 dark:text-white font-medium">
                               {parseFloat(vote.votingPower).toLocaleString()} votes
                             </div>
                             <div className="text-gray-400 text-sm">

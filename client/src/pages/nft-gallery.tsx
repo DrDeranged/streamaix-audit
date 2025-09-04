@@ -136,7 +136,7 @@ export default function NFTGallery() {
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
               <Image className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Authentication Required</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h2>
               <p className="text-gray-300 mb-6">Please sign in to view and manage your NFT collection.</p>
               <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
                 Sign In
@@ -161,7 +161,7 @@ export default function NFTGallery() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">NFT Gallery</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">NFT Gallery</h1>
               <p className="text-gray-400">Your AI-generated summary NFTs and marketplace</p>
             </div>
             <Button
@@ -193,12 +193,12 @@ export default function NFTGallery() {
         >
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">Your NFTs</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Your NFTs</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-white">{userNFTs.length}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{userNFTs.length}</p>
                   <p className="text-gray-400 text-sm">Owned</p>
                 </div>
                 <Award className="h-8 w-8 text-purple-400" />
@@ -208,12 +208,12 @@ export default function NFTGallery() {
 
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">Total Collection</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Total Collection</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-white">1,247</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">1,247</p>
                   <p className="text-green-400 text-sm">+15 today</p>
                 </div>
                 <Image className="h-8 w-8 text-green-400" />
@@ -223,12 +223,12 @@ export default function NFTGallery() {
 
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">Floor Price</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Floor Price</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-white">0.15 ETH</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">0.15 ETH</p>
                   <p className="text-blue-400 text-sm">~$387</p>
                 </div>
                 <Globe className="h-8 w-8 text-blue-400" />
@@ -238,12 +238,12 @@ export default function NFTGallery() {
 
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">Volume (24h)</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Volume (24h)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-white">45.8 ETH</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">45.8 ETH</p>
                   <p className="text-yellow-400 text-sm">142 sales</p>
                 </div>
                 <Zap className="h-8 w-8 text-yellow-400" />
@@ -260,7 +260,7 @@ export default function NFTGallery() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-8"
           >
-            <h2 className="text-2xl font-bold text-white mb-4">Your Collection</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Your Collection</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userNFTs.map((nft, index) => (
                 <motion.div
@@ -279,12 +279,12 @@ export default function NFTGallery() {
                             className="w-full h-full object-cover rounded-t-lg"
                           />
                         ) : (
-                          <Image className="h-16 w-16 text-white/50" />
+                          <Image className="h-16 w-16 text-gray-900 dark:text-white/50" />
                         )}
                       </div>
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-white font-semibold truncate">
+                          <h3 className="text-gray-900 dark:text-white font-semibold truncate">
                             {nft.metadata?.name || `Summary NFT #${nft.tokenId}`}
                           </h3>
                           <Badge variant="outline" className="border-purple-500/30 text-purple-300">
@@ -324,7 +324,7 @@ export default function NFTGallery() {
                                 View
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="bg-slate-900 border-white/20 text-white max-w-2xl">
+                            <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white max-w-2xl">
                               <DialogHeader>
                                 <DialogTitle>
                                   {nft.metadata?.name || `NFT #${nft.tokenId}`}
@@ -341,7 +341,7 @@ export default function NFTGallery() {
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <p className="text-gray-400 text-sm">Token ID</p>
-                                    <p className="text-white">{nft.tokenId}</p>
+                                    <p className="text-gray-900 dark:text-white">{nft.tokenId}</p>
                                   </div>
                                   <div>
                                     <p className="text-gray-400 text-sm">Storage</p>
@@ -353,7 +353,7 @@ export default function NFTGallery() {
                                 </div>
                                 <div>
                                   <p className="text-gray-400 text-sm mb-2">Description</p>
-                                  <p className="text-white">{nft.metadata?.description}</p>
+                                  <p className="text-gray-900 dark:text-white">{nft.metadata?.description}</p>
                                 </div>
                                 {nft.metadata?.attributes && (
                                   <div>
@@ -362,7 +362,7 @@ export default function NFTGallery() {
                                       {nft.metadata.attributes.map((attr: any, i: number) => (
                                         <div key={i} className="p-2 bg-white/5 rounded">
                                           <p className="text-gray-400 text-xs">{attr.trait_type}</p>
-                                          <p className="text-white text-sm">{attr.value}</p>
+                                          <p className="text-gray-900 dark:text-white text-sm">{attr.value}</p>
                                         </div>
                                       ))}
                                     </div>
@@ -387,7 +387,7 @@ export default function NFTGallery() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <h2 className="text-2xl font-bold text-white mb-4">Featured Collection</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Featured Collection</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredNFTs.map((nft, index) => (
               <motion.div
@@ -407,7 +407,7 @@ export default function NFTGallery() {
                     </div>
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-white font-semibold truncate">{nft.name}</h3>
+                        <h3 className="text-gray-900 dark:text-white font-semibold truncate">{nft.name}</h3>
                         <Badge className={getRarityColor(nft.rarity)}>
                           {nft.rarity}
                         </Badge>
@@ -433,7 +433,7 @@ export default function NFTGallery() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 border-white/20 text-white hover:bg-white/10"
+                          className="flex-1 border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                         >
                           <Eye className="h-3 w-3 mr-1" />
                           View
@@ -464,7 +464,7 @@ export default function NFTGallery() {
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg max-w-md mx-auto">
               <CardContent className="p-8">
                 <Image className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No NFTs Yet</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No NFTs Yet</h3>
                 <p className="text-gray-400 mb-6">
                   Create your first AI-generated summary NFT by processing content through our platform.
                 </p>

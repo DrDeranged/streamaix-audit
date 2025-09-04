@@ -137,7 +137,7 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
       <Card className={`bg-white/10 border-white/20 backdrop-blur-lg ${className}`}>
         <CardContent className="p-8 text-center">
           <PieChart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-white text-lg font-semibold mb-2">Portfolio Tracker</h3>
+          <h3 className="text-gray-900 dark:text-white text-lg font-semibold mb-2">Portfolio Tracker</h3>
           <p className="text-gray-400">Connect your wallet to view portfolio analytics</p>
         </CardContent>
       </Card>
@@ -148,7 +148,7 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
     <div className={className}>
       <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
         <CardHeader>
-          <CardTitle className="text-white flex items-center justify-between">
+          <CardTitle className="text-gray-900 dark:text-white flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PieChart className="h-5 w-5" />
               Portfolio Overview
@@ -177,7 +177,7 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
             <>
               {/* Total Portfolio Value */}
               <div className="text-center space-y-2">
-                <div className="text-3xl font-bold text-white">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">
                   ${portfolioData.totalValue}
                 </div>
                 <div className="flex items-center justify-center gap-2">
@@ -199,24 +199,24 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-white/5 rounded-lg">
                   <Activity className="h-6 w-6 text-purple-400 mx-auto mb-2" />
-                  <div className="text-white font-semibold">${portfolioData.stakingValue}</div>
+                  <div className="text-gray-900 dark:text-white font-semibold">${portfolioData.stakingValue}</div>
                   <div className="text-gray-400 text-sm">Staking</div>
                 </div>
                 <div className="text-center p-3 bg-white/5 rounded-lg">
                   <DollarSign className="h-6 w-6 text-blue-400 mx-auto mb-2" />
-                  <div className="text-white font-semibold">${portfolioData.lpValue}</div>
+                  <div className="text-gray-900 dark:text-white font-semibold">${portfolioData.lpValue}</div>
                   <div className="text-gray-400 text-sm">Liquidity</div>
                 </div>
                 <div className="text-center p-3 bg-white/5 rounded-lg">
                   <Target className="h-6 w-6 text-yellow-400 mx-auto mb-2" />
-                  <div className="text-white font-semibold">${portfolioData.nftValue}</div>
+                  <div className="text-gray-900 dark:text-white font-semibold">${portfolioData.nftValue}</div>
                   <div className="text-gray-400 text-sm">NFTs</div>
                 </div>
               </div>
 
               {/* Token Holdings */}
               <div className="space-y-3">
-                <h4 className="text-white font-semibold">Holdings</h4>
+                <h4 className="text-gray-900 dark:text-white font-semibold">Holdings</h4>
                 {portfolioData.holdings.map((holding, index) => (
                   <motion.div
                     key={holding.symbol}
@@ -227,18 +227,18 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">
+                        <span className="text-gray-900 dark:text-white text-xs font-bold">
                           {holding.symbol.slice(0, 2)}
                         </span>
                       </div>
                       <div>
-                        <div className="text-white font-medium">{holding.symbol}</div>
+                        <div className="text-gray-900 dark:text-white font-medium">{holding.symbol}</div>
                         <div className="text-gray-400 text-sm">{holding.balance}</div>
                       </div>
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-white font-semibold">${holding.value}</div>
+                      <div className="text-gray-900 dark:text-white font-semibold">${holding.value}</div>
                       <div className="flex items-center gap-2">
                         <span className={holding.change24h >= 0 ? 'text-green-400' : 'text-red-400'}>
                           {holding.change24h >= 0 ? '+' : ''}{holding.change24h.toFixed(2)}%
@@ -257,7 +257,7 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                    <span className="text-white font-medium">Risk Assessment</span>
+                    <span className="text-gray-900 dark:text-white font-medium">Risk Assessment</span>
                   </div>
                   <span className={`font-bold ${getRiskColor(portfolioData.riskScore)}`}>
                     {portfolioData.riskScore.toFixed(1)}/10

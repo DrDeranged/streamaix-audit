@@ -83,7 +83,7 @@ export default function AuthPage() {
 
         <Card className="backdrop-blur-lg bg-white/10 border-white/20 shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-white">Get Started</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">Get Started</CardTitle>
             <CardDescription className="text-slate-300">
               Sign in to your account or create a new one
             </CardDescription>
@@ -102,7 +102,7 @@ export default function AuthPage() {
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-username" className="text-white">
+                    <Label htmlFor="login-username" className="text-gray-900 dark:text-white">
                       <User className="w-4 h-4 inline mr-2" />
                       Username
                     </Label>
@@ -113,11 +113,11 @@ export default function AuthPage() {
                       value={loginData.username}
                       onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
                       required
-                      className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-white">
+                    <Label htmlFor="login-password" className="text-gray-900 dark:text-white">
                       <Lock className="w-4 h-4 inline mr-2" />
                       Password
                     </Label>
@@ -128,7 +128,7 @@ export default function AuthPage() {
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
-                      className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                     />
                   </div>
                   <Button
@@ -170,7 +170,7 @@ export default function AuthPage() {
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-username" className="text-white">
+                      <Label htmlFor="register-username" className="text-gray-900 dark:text-white">
                         <User className="w-4 h-4 inline mr-2" />
                         Username
                       </Label>
@@ -181,11 +181,11 @@ export default function AuthPage() {
                         value={registerData.username}
                         onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
                         required
-                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-email" className="text-white">
+                      <Label htmlFor="register-email" className="text-gray-900 dark:text-white">
                         <Mail className="w-4 h-4 inline mr-2" />
                         Email
                       </Label>
@@ -195,14 +195,14 @@ export default function AuthPage() {
                         placeholder="your@email.com"
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-password" className="text-white">
+                      <Label htmlFor="register-password" className="text-gray-900 dark:text-white">
                         <Lock className="w-4 h-4 inline mr-2" />
                         Password
                       </Label>
@@ -213,11 +213,11 @@ export default function AuthPage() {
                         value={registerData.password}
                         onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                         required
-                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-confirm-password" className="text-white">
+                      <Label htmlFor="register-confirm-password" className="text-gray-900 dark:text-white">
                         <Lock className="w-4 h-4 inline mr-2" />
                         Confirm
                       </Label>
@@ -228,13 +228,13 @@ export default function AuthPage() {
                         value={registerData.confirmPassword}
                         onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                         required
-                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-bio" className="text-white">
+                    <Label htmlFor="register-bio" className="text-gray-900 dark:text-white">
                       Bio (Optional)
                     </Label>
                     <Textarea
@@ -242,14 +242,14 @@ export default function AuthPage() {
                       placeholder="Tell us about yourself..."
                       value={registerData.bio}
                       onChange={(e) => setRegisterData({ ...registerData, bio: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 resize-none"
+                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400 resize-none"
                       rows={3}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-wallet" className="text-white">
+                      <Label htmlFor="register-wallet" className="text-gray-900 dark:text-white">
                         <Wallet className="w-4 h-4 inline mr-2" />
                         Wallet (Optional)
                       </Label>
@@ -259,11 +259,11 @@ export default function AuthPage() {
                         placeholder="0x..."
                         value={registerData.walletAddress}
                         onChange={(e) => setRegisterData({ ...registerData, walletAddress: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-ens" className="text-white">
+                      <Label htmlFor="register-ens" className="text-gray-900 dark:text-white">
                         ENS Name (Optional)
                       </Label>
                       <Input
@@ -272,7 +272,7 @@ export default function AuthPage() {
                         placeholder="yourname.eth"
                         value={registerData.ensName}
                         onChange={(e) => setRegisterData({ ...registerData, ensName: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                   </div>

@@ -158,7 +158,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-lg">
           <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">Access Restricted</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Access Restricted</h2>
             <p className="text-gray-300 mb-4">Please log in to view your dashboard</p>
             <Button onClick={() => setLocation('/auth')} className="w-full">
               Go to Login
@@ -201,14 +201,14 @@ export default function Dashboard() {
               onClick={() => setLocation('/')}
               variant="outline"
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
               data-testid="button-back-home"
             >
               <Home className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
                 Welcome back, {user?.username}! 👋
               </h1>
               <p className="text-gray-300 text-lg">
@@ -225,7 +225,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">Total Summaries</p>
-                  <p className="text-3xl font-bold text-white" data-testid="stat-total-summaries">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-total-summaries">
                     {stats.totalSummaries}
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">Total Views</p>
-                  <p className="text-3xl font-bold text-white" data-testid="stat-total-views">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-total-views">
                     {stats.totalViews.toLocaleString()}
                   </p>
                 </div>
@@ -253,7 +253,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">STREAM Tokens</p>
-                  <p className="text-3xl font-bold text-white" data-testid="stat-stream-tokens">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="stat-stream-tokens">
                     {balance?.streamTokens?.toFixed(2) || '0.00'}
                   </p>
                 </div>
@@ -267,7 +267,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">Creator Rank</p>
-                  <p className="text-lg font-bold text-white" data-testid="stat-creator-rank">
+                  <p className="text-lg font-bold text-gray-900 dark:text-white" data-testid="stat-creator-rank">
                     {stats.rank}
                   </p>
                 </div>
@@ -301,7 +301,7 @@ export default function Dashboard() {
             {/* Recent Activity */}
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
                   Recent Activity
                 </CardTitle>
@@ -310,7 +310,7 @@ export default function Dashboard() {
                 {summaries.slice(0, 3).map((summary) => (
                   <div key={summary.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                     <div className="flex-1">
-                      <h4 className="text-white font-medium">{summary.title}</h4>
+                      <h4 className="text-gray-900 dark:text-white font-medium">{summary.title}</h4>
                       <p className="text-gray-300 text-sm">{summary.platform} • {summary.contentType}</p>
                     </div>
                     <Badge className={getStatusColor(summary.processingStatus)}>
@@ -334,7 +334,7 @@ export default function Dashboard() {
                     data-testid="card-wallet-dashboard">
                 <CardContent className="p-6 text-center">
                   <Wallet className="h-12 w-12 text-green-400 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2" data-testid="text-wallet-title">Wallet Dashboard</h3>
+                  <h3 className="text-gray-900 dark:text-white font-semibold mb-2" data-testid="text-wallet-title">Wallet Dashboard</h3>
                   <p className="text-gray-300 text-sm" data-testid="text-wallet-desc">Manage tokens and rewards</p>
                 </CardContent>
               </Card>
@@ -344,7 +344,7 @@ export default function Dashboard() {
                     data-testid="card-browse-bounties">
                 <CardContent className="p-6 text-center">
                   <Target className="h-12 w-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2" data-testid="text-bounties-title">Browse Bounties</h3>
+                  <h3 className="text-gray-900 dark:text-white font-semibold mb-2" data-testid="text-bounties-title">Browse Bounties</h3>
                   <p className="text-gray-300 text-sm" data-testid="text-bounties-desc">Find content to summarize</p>
                 </CardContent>
               </Card>
@@ -354,7 +354,7 @@ export default function Dashboard() {
           <TabsContent value="summaries" className="space-y-6">
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-white">My Summaries ({summaries.length})</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">My Summaries ({summaries.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
@@ -374,7 +374,7 @@ export default function Dashboard() {
                                 </Badge>
                               )}
                             </div>
-                            <h3 className="text-white font-bold text-xl mb-2">{summary.title}</h3>
+                            <h3 className="text-gray-900 dark:text-white font-bold text-xl mb-2">{summary.title}</h3>
                             <p className="text-gray-300 text-sm mb-3">
                               {summary.platform} • {summary.contentType} • {new Date(summary.createdAt).toLocaleDateString()}
                             </p>
@@ -390,7 +390,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                            <Button size="sm" variant="outline" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10">
                               View Full
                             </Button>
                           </div>
@@ -402,19 +402,19 @@ export default function Dashboard() {
                         <CardContent>
                           <Tabs defaultValue="summary" className="w-full">
                             <TabsList className="grid w-full grid-cols-4 bg-white/10">
-                              <TabsTrigger value="summary" className="text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="summary" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <FileText className="w-4 h-4 mr-1" />
                                 Summary
                               </TabsTrigger>
-                              <TabsTrigger value="insights" className="text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="insights" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <Activity className="w-4 h-4 mr-1" />
                                 Insights
                               </TabsTrigger>
-                              <TabsTrigger value="market" className="text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="market" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <TrendingUp className="w-4 h-4 mr-1" />
                                 Market
                               </TabsTrigger>
-                              <TabsTrigger value="structure" className="text-white data-[state=active]:bg-white/20">
+                              <TabsTrigger value="structure" className="text-gray-900 dark:text-white data-[state=active]:bg-white/20">
                                 <BarChart3 className="w-4 h-4 mr-1" />
                                 Structure
                               </TabsTrigger>
@@ -505,10 +505,10 @@ export default function Dashboard() {
                                           <div className="flex items-center gap-2">
                                             <Badge variant="outline" className="text-xs">{trend.category}</Badge>
                                             <span className="font-mono text-cyan-400">{trend.symbol}</span>
-                                            <span className="text-gray-900 dark:text-white font-medium">{trend.company}</span>
+                                            <span className="text-gray-900 dark:text-gray-900 dark:text-white font-medium">{trend.company}</span>
                                             {trend.liveData && (
                                               <div className="flex items-center gap-2 ml-2">
-                                                <span className="font-mono text-sm font-bold text-white">
+                                                <span className="font-mono text-sm font-bold text-gray-900 dark:text-white">
                                                   ${trend.liveData.price?.toLocaleString('en-US', { 
                                                     minimumFractionDigits: 2, 
                                                     maximumFractionDigits: 2 
@@ -577,7 +577,7 @@ export default function Dashboard() {
                                           {chapter.startTime}
                                         </Badge>
                                         <div className="flex-1">
-                                          <p className="text-gray-900 dark:text-white text-sm font-medium">{chapter.title}</p>
+                                          <p className="text-gray-900 dark:text-gray-900 dark:text-white text-sm font-medium">{chapter.title}</p>
                                           <p className="text-xs text-gray-600 dark:text-gray-300">{chapter.summary}</p>
                                         </div>
                                       </div>
@@ -619,7 +619,7 @@ export default function Dashboard() {
                   {summaries.length === 0 && (
                     <div className="text-center py-12">
                       <Play className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-                      <h3 className="text-white font-semibold mb-2">No summaries yet</h3>
+                      <h3 className="text-gray-900 dark:text-white font-semibold mb-2">No summaries yet</h3>
                       <p className="text-gray-400 mb-4">Create your first AI-powered summary</p>
                       <Button onClick={() => setLocation('/create-summary')}>
                         Get Started
@@ -634,7 +634,7 @@ export default function Dashboard() {
           <TabsContent value="bounties" className="space-y-6">
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader>
-                <CardTitle className="text-white">My Bounties ({bounties.length})</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">My Bounties ({bounties.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -642,7 +642,7 @@ export default function Dashboard() {
                     <div key={bounty.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="text-white font-semibold mb-1">{bounty.title}</h3>
+                          <h3 className="text-gray-900 dark:text-white font-semibold mb-1">{bounty.title}</h3>
                           <p className="text-gray-300 text-sm mb-2 line-clamp-2">{bounty.description}</p>
                           <div className="flex items-center gap-4 text-sm text-gray-400">
                             <span className="flex items-center gap-1">
@@ -664,7 +664,7 @@ export default function Dashboard() {
                   {bounties.length === 0 && (
                     <div className="text-center py-12">
                       <Target className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-                      <h3 className="text-white font-semibold mb-2">No bounties created</h3>
+                      <h3 className="text-gray-900 dark:text-white font-semibold mb-2">No bounties created</h3>
                       <p className="text-gray-400 mb-4">Create bounties to reward content creators</p>
                     </div>
                   )}
@@ -678,14 +678,14 @@ export default function Dashboard() {
               {/* Balance Card */}
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
                     <Wallet className="h-5 w-5" />
                     Wallet Balance
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-center py-6">
-                    <p className="text-4xl font-bold text-white mb-2">
+                    <p className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
                       {balance?.streamTokens?.toFixed(2) || '0.00'}
                     </p>
                     <p className="text-gray-300">STREAM Tokens</p>
@@ -709,7 +709,7 @@ export default function Dashboard() {
               {/* Quick Actions */}
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
                 <CardHeader>
-                  <CardTitle className="text-white">Quick Actions</CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-white">Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
@@ -722,7 +722,7 @@ export default function Dashboard() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                     onClick={() => navigator.share ? navigator.share({
                       title: 'StreamAiX Profile',
                       text: `Check out ${user?.username}'s AI summaries on StreamAiX`,
@@ -735,7 +735,7 @@ export default function Dashboard() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                     onClick={() => alert('Referral program coming soon! Invite friends to earn bonus STREAM tokens.')}
                     data-testid="button-referral-program"
                   >
@@ -750,7 +750,7 @@ export default function Dashboard() {
           <TabsContent value="notes" className="space-y-6">
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
                   <BookmarkPlus className="h-5 w-5" />
                   My Personal Notes
                 </CardTitle>

@@ -135,7 +135,7 @@ export function WalletConnector({
         <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
           <CardHeader className="text-center">
             <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-2" />
-            <CardTitle className="text-white">Connect Your Wallet</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">Connect Your Wallet</CardTitle>
             <p className="text-gray-300 text-sm">
               Connect with MetaMask to access Web3 features
             </p>
@@ -144,7 +144,7 @@ export function WalletConnector({
             <Button
               onClick={handleConnect}
               disabled={isConnecting}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-gray-900 dark:text-white font-semibold"
               data-testid="button-connect-metamask"
             >
               {isConnecting ? (
@@ -177,12 +177,12 @@ export function WalletConnector({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              <Wallet className="h-5 w-5 text-white" />
+              <Wallet className="h-5 w-5 text-gray-900 dark:text-white" />
             </div>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-white font-medium" data-testid="wallet-address">
+                <p className="text-gray-900 dark:text-white font-medium" data-testid="wallet-address">
                   {wallet ? formatAddress(wallet.address) : ''}
                 </p>
                 <Button
@@ -230,13 +230,13 @@ export function WalletConnector({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                   data-testid="button-wallet-details"
                 >
                   Details
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-slate-900 border-white/20 text-white">
+              <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Wallet className="h-5 w-5" />
@@ -296,7 +296,7 @@ export function WalletConnector({
                         variant="outline"
                         size="sm"
                         onClick={() => switchNetwork(1)} // Switch to Ethereum
-                        className="border-white/20 text-white hover:bg-white/10"
+                        className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                       >
                         Switch Network
                       </Button>
@@ -306,7 +306,7 @@ export function WalletConnector({
                       variant="outline"
                       size="sm"
                       onClick={handleDisconnect}
-                      className="border-white/20 text-white hover:bg-white/10"
+                      className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
                       data-testid="button-disconnect-wallet"
                     >
                       Disconnect

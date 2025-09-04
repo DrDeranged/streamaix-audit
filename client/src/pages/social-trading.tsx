@@ -121,7 +121,7 @@ export default function SocialTradingPage() {
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
               <Users className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Social Trading Access</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Social Trading Access</h2>
               <p className="text-gray-300 mb-6">Please sign in to access social trading features.</p>
               <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
                 Sign In
@@ -144,21 +144,21 @@ export default function SocialTradingPage() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">Social Trading</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Social Trading</h1>
           <p className="text-gray-400">Follow top traders and copy their strategies</p>
         </motion.div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white/10 border border-white/20">
-            <TabsTrigger value="traders" className="text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="traders" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
               <Trophy className="h-4 w-4 mr-2" />
               Top Traders
             </TabsTrigger>
-            <TabsTrigger value="signals" className="text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="signals" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
               <Signal className="h-4 w-4 mr-2" />
               Trade Signals
             </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="leaderboard" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
               <BarChart3 className="h-4 w-4 mr-2" />
               Leaderboard
             </TabsTrigger>
@@ -194,7 +194,7 @@ export default function SocialTradingPage() {
                         <div className="flex items-center justify-center mb-4">
                           <Avatar className="h-16 w-16">
                             <AvatarImage src={trader.avatar} />
-                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-lg font-bold">
+                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-gray-900 dark:text-white text-lg font-bold">
                               {trader.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -205,7 +205,7 @@ export default function SocialTradingPage() {
                             </Badge>
                           )}
                         </div>
-                        <CardTitle className="text-white">{trader.displayName}</CardTitle>
+                        <CardTitle className="text-gray-900 dark:text-white">{trader.displayName}</CardTitle>
                         {trader.ensName && (
                           <p className="text-gray-400 text-sm">{trader.ensName}</p>
                         )}
@@ -223,7 +223,7 @@ export default function SocialTradingPage() {
                             <div className="text-gray-400 text-sm">Total Return</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-white">
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
                               {trader.sharpeRatio.toFixed(2)}
                             </div>
                             <div className="text-gray-400 text-sm">Sharpe Ratio</div>
@@ -232,7 +232,7 @@ export default function SocialTradingPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="text-center">
-                            <div className="text-lg font-semibold text-white">
+                            <div className="text-lg font-semibold text-gray-900 dark:text-white">
                               {trader.winRate.toFixed(1)}%
                             </div>
                             <div className="text-gray-400 text-sm">Win Rate</div>
@@ -259,7 +259,7 @@ export default function SocialTradingPage() {
 
                         {/* Top Assets */}
                         <div>
-                          <h4 className="text-white text-sm font-medium mb-2">Top Holdings</h4>
+                          <h4 className="text-gray-900 dark:text-white text-sm font-medium mb-2">Top Holdings</h4>
                           <div className="flex flex-wrap gap-1">
                             {trader.topAssets.slice(0, 3).map((asset, i) => (
                               <Badge key={i} variant="outline" className="text-xs">
@@ -281,7 +281,7 @@ export default function SocialTradingPage() {
                                 Copy Trade
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="bg-slate-900 border-white/20 text-white">
+                            <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
                               <DialogHeader>
                                 <DialogTitle>Copy Trade {trader.displayName}</DialogTitle>
                               </DialogHeader>
@@ -293,7 +293,7 @@ export default function SocialTradingPage() {
                                     type="number"
                                     value={copyTradeAmount}
                                     onChange={(e) => setCopyTradeAmount(Number(e.target.value))}
-                                    className="bg-white/5 border-white/20 text-white mt-2"
+                                    className="bg-white/5 border-white/20 text-gray-900 dark:text-white mt-2"
                                     placeholder="1000"
                                   />
                                   <p className="text-gray-400 text-sm mt-1">
@@ -322,7 +322,7 @@ export default function SocialTradingPage() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="border-white/20 text-white hover:bg-white/5"
+                            className="border-white/20 text-gray-900 dark:text-white hover:bg-white/5"
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             Follow
@@ -351,14 +351,14 @@ export default function SocialTradingPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
                           <Avatar className="h-12 w-12">
-                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold">
+                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-gray-900 dark:text-white font-bold">
                               {signal.traderName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-white font-semibold">{signal.traderName}</h3>
+                              <h3 className="text-gray-900 dark:text-white font-semibold">{signal.traderName}</h3>
                               <Badge className={`${getSignalColor(signal.action) === 'text-green-400' ? 'bg-green-500/20 text-green-300' :
                                 getSignalColor(signal.action) === 'text-red-400' ? 'bg-red-500/20 text-red-300' :
                                 'bg-yellow-500/20 text-yellow-300'}`}>
@@ -369,7 +369,7 @@ export default function SocialTradingPage() {
                               </Badge>
                             </div>
                             
-                            <div className="text-white mb-2">
+                            <div className="text-gray-900 dark:text-white mb-2">
                               <span className="font-medium">{signal.asset}</span> at{' '}
                               <span className="font-mono">${signal.price}</span>
                             </div>
@@ -420,7 +420,7 @@ export default function SocialTradingPage() {
                 <Card key={trader.address} className="bg-white/10 border-white/20 backdrop-blur-lg">
                   <CardContent className="p-6 text-center">
                     <div className="flex items-center justify-center mb-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-gray-900 dark:text-white ${
                         index === 0 ? 'bg-yellow-500' :
                         index === 1 ? 'bg-gray-400' :
                         index === 2 ? 'bg-amber-600' :
@@ -431,12 +431,12 @@ export default function SocialTradingPage() {
                     </div>
                     
                     <Avatar className="h-16 w-16 mx-auto mb-4">
-                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-lg font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-gray-900 dark:text-white text-lg font-bold">
                         {trader.displayName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     
-                    <h3 className="text-white font-semibold mb-2">{trader.displayName}</h3>
+                    <h3 className="text-gray-900 dark:text-white font-semibold mb-2">{trader.displayName}</h3>
                     
                     <div className="text-2xl font-bold text-green-400 mb-1">
                       +{trader.totalReturn.toFixed(1)}%

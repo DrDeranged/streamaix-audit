@@ -144,7 +144,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
           >
             <Brain className="h-16 w-16 text-purple-400 mx-auto" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-white mb-2">Loading AI Results</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading AI Results</h2>
           <p className="text-gray-600 dark:text-gray-400">Processing your content intelligence...</p>
         </motion.div>
       </div>
@@ -155,7 +155,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Invalid URL</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid URL</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">No summary ID provided in URL</p>
           <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -170,7 +170,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Content Not Found</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Content Not Found</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">Summary ID: {summaryId}</p>
           <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -185,7 +185,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   const isFailed = summary.processingStatus === 'failed';
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
+    <div className="min-h-screen bg-slate-900 text-gray-900 dark:text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
       {/* Navigation Header - Landing Page Style */}
       <div className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -194,7 +194,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               <Button 
                 variant="ghost" 
                 onClick={() => setLocation('/')}
-                className="text-gray-300 hover:text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10"
+                className="text-gray-300 hover:text-gray-900 dark:text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home
@@ -216,11 +216,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5">
+              <Button variant="outline" size="sm" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5">
+              <Button variant="outline" size="sm" className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5">
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -268,7 +268,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
             <Button 
               variant="outline" 
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
               asChild
             >
               <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
@@ -299,7 +299,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       />
                     )}
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2 text-white" style={{color: '#ffffff'}}>{summary.title}</h3>
+                      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white" style={{color: '#ffffff'}}>{summary.title}</h3>
                       <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
                         {summary.rawData?.channel && <span>📺 {summary.rawData.channel}</span>}
                         {summary.originalDuration && (
@@ -362,7 +362,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             variant="ghost"
                             size="sm"
                             onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
-                            className="text-gray-600 dark:text-gray-400 hover:text-white"
+                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white"
                           >
                             {copySuccess === 'executive' ? (
                               <CheckCircle2 className="h-4 w-4" />
@@ -373,14 +373,14 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </h5>
                         <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                           <div 
-                            className="text-sm text-white leading-relaxed"
+                            className="text-sm text-gray-900 dark:text-white leading-relaxed"
                             dangerouslySetInnerHTML={{
                               __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
-                                .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
+                                .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
                                 .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-blue-200 mt-3 mb-2">$1</h4>')
                                 .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-purple-200 mt-2 mb-1">$1</h5>')
                                 .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-2"><strong class="text-blue-300">$1:</strong> <span class="text-gray-200">$2</span></div>')
-                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white">$1</strong>')
                                 .replace(/\n\n/g, '<br><br>')
                                 .replace(/\n/g, '<br>')
                             }}
@@ -397,14 +397,14 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           </h5>
                           <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                             <div 
-                              className="text-sm text-white leading-relaxed"
+                              className="text-sm text-gray-900 dark:text-white leading-relaxed"
                               dangerouslySetInnerHTML={{
                                 __html: summary.blogPost
-                                  .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">$1</h3>')
+                                  .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">$1</h3>')
                                   .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-purple-200 mt-3 mb-2">$1</h4>')
                                   .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-pink-200 mt-2 mb-1">$1</h5>')
                                   .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-2"><strong class="text-purple-300">$1:</strong> <span class="text-gray-200">$2</span></div>')
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white">$1</strong>')
                                   .replace(/\n\n/g, '<br><br>')
                                   .replace(/\n/g, '<br>')
                               }}
@@ -429,7 +429,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {summary.keyInsights && summary.keyInsights.map((insight: any, idx: number) => (
                               <div key={`insight-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
                                 <div className="flex items-start justify-between mb-2">
-                                  <span className="font-medium text-sm text-white">
+                                  <span className="font-medium text-sm text-gray-900 dark:text-white">
                                     {typeof insight === 'object' ? (insight.insight || insight.text || insight.content) : insight}
                                   </span>
                                   {typeof insight === 'object' && insight.importance && (
@@ -450,7 +450,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {/* Display bulletPoints if no keyInsights */}
                             {(!summary.keyInsights || summary.keyInsights.length === 0) && summary.bulletPoints && summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={`bullet-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
-                                <span className="text-sm text-white">
+                                <span className="text-sm text-gray-900 dark:text-white">
                                   {typeof point === 'object' ? (point.point || point.insight || point.text || JSON.stringify(point)) : point}
                                 </span>
                               </div>
@@ -469,7 +469,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           <div className="space-y-3">
                             {summary.keyQuotes.map((quote: any, idx: number) => (
                               <div key={idx} className="p-4 bg-background/50 rounded-md border-l-4 border-orange-400">
-                                <blockquote className="text-sm italic mb-3 text-white leading-relaxed">
+                                <blockquote className="text-sm italic mb-3 text-gray-900 dark:text-white leading-relaxed">
                                   "{quote.quote || quote.text || quote}"
                                 </blockquote>
                                 <div className="flex items-center justify-between text-xs">
@@ -601,7 +601,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                     <span className="text-sm font-medium">{financial.company}</span>
                                     {financial.liveData && (
                                       <div className="flex items-center gap-2 ml-2">
-                                        <span className="font-mono text-sm font-bold text-white">
+                                        <span className="font-mono text-sm font-bold text-gray-900 dark:text-white">
                                           ${financial.liveData.price?.toLocaleString('en-US', { 
                                             minimumFractionDigits: 2, 
                                             maximumFractionDigits: 2 
@@ -718,7 +718,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {summary.chapters.map((chapter: any, idx: number) => (
                               <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                                 <div className="flex justify-between items-start mb-2">
-                                  <span className="text-sm font-medium text-white">{chapter.title}</span>
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">{chapter.title}</span>
                                   <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">
                                     {chapter.startTime} - {chapter.endTime}
                                   </span>
@@ -737,28 +737,28 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           <div className="space-y-2">
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Introduction & Key Themes</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">Introduction & Key Themes</span>
                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">0:00 - 2:30</span>
                               </div>
                               <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Video introduction covering main topics and speaker background</p>
                             </div>
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Core Analysis & Insights</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">Core Analysis & Insights</span>
                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">2:30 - 6:00</span>
                               </div>
                               <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Deep dive into primary analysis, market conditions, and strategic insights</p>
                             </div>
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Investment Implications & Strategy</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">Investment Implications & Strategy</span>
                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">6:00 - 8:30</span>
                               </div>
                               <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Discussion of investment opportunities, market timing, and strategic positioning</p>
                             </div>
                             <div className="p-3 bg-background/50 rounded-md border-l-2 border-blue-400">
                               <div className="flex justify-between items-start mb-2">
-                                <span className="text-sm font-medium text-white">Key Takeaways & Action Items</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">Key Takeaways & Action Items</span>
                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-mono bg-background/30 px-2 py-1 rounded">8:30 - 10:00</span>
                               </div>
                               <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">Summary of main points and actionable insights for investors</p>
@@ -814,10 +814,10 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                 <div className="text-center">
                   <div className="flex justify-center mb-4">
                     <div className="bg-gradient-to-r from-emerald-400 to-teal-400 p-3 rounded-full">
-                      <Trophy className="h-6 w-6 text-white" />
+                      <Trophy className="h-6 w-6 text-gray-900 dark:text-white" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                     Great Analysis! Ready to Build Your Creator Profile?
                   </h3>
                   <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
@@ -826,7 +826,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Button 
                       size="lg" 
-                      className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8"
+                      className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-gray-900 dark:text-white px-8"
                       onClick={() => setLocation('/dashboard')}
                     >
                       <User className="h-5 w-5 mr-2" />
@@ -835,7 +835,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     <Button 
                       size="lg" 
                       variant="outline"
-                      className="border-white/30 text-white hover:bg-white/10 px-8"
+                      className="border-white/30 text-gray-900 dark:text-white hover:bg-white/10 px-8"
                       onClick={() => setLocation('/wallet')}
                     >
                       <Wallet className="h-5 w-5 mr-2" />
@@ -857,7 +857,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
         >
           <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20 backdrop-blur-sm">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-white mb-3">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 Ready for Your Next Content?
               </h3>
               <p className="text-gray-300 mb-6">
@@ -865,7 +865,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </p>
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white px-8"
+                className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-gray-900 dark:text-white px-8"
                 onClick={() => setLocation('/')}
               >
                 <Brain className="h-5 w-5 mr-2" />

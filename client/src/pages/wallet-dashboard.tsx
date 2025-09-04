@@ -202,7 +202,7 @@ export default function WalletDashboard() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center text-white">
+        <div className="text-center text-gray-900 dark:text-white">
           <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
           <p className="mb-4">Please sign in to view your wallet</p>
         </div>
@@ -215,7 +215,7 @@ export default function WalletDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <Navigation showBackButton title="Wallet Dashboard" />
         <div className="container mx-auto px-4 sm:px-6 py-8 flex items-center justify-center min-h-[80vh]">
-          <div className="text-center text-white max-w-md">
+          <div className="text-center text-gray-900 dark:text-white max-w-md">
             <div className="mb-6">
               <Wallet className="w-16 h-16 mx-auto text-gray-400 mb-4" />
               <h1 className="text-2xl font-bold mb-2">Connect Your Wallet</h1>
@@ -259,10 +259,10 @@ export default function WalletDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="p-2 sm:p-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500">
-              <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Wallet Dashboard</h1>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Wallet Dashboard</h1>
               <div className="flex flex-col space-y-1">
                 <p className="text-slate-300 text-sm sm:text-base">
                   {walletBalance?.ensName || formatAddress(wallet?.address || '')}
@@ -283,7 +283,7 @@ export default function WalletDashboard() {
             <Button 
               size="sm" 
               variant="outline" 
-              className="border-blue-400/50 bg-blue-500/20 text-white hover:bg-blue-500/30 hover:border-blue-400 text-xs sm:text-sm"
+              className="border-blue-400/50 bg-blue-500/20 text-gray-900 dark:text-white hover:bg-blue-500/30 hover:border-blue-400 text-xs sm:text-sm"
               onClick={() => window.open(`https://etherscan.io/address/${wallet?.address}`, '_blank')}
             >
               <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -292,7 +292,7 @@ export default function WalletDashboard() {
             <Button 
               size="sm" 
               variant="outline" 
-              className="border-gray-400/50 bg-gray-500/20 text-white hover:bg-gray-500/30 hover:border-gray-400 text-xs sm:text-sm"
+              className="border-gray-400/50 bg-gray-500/20 text-gray-900 dark:text-white hover:bg-gray-500/30 hover:border-gray-400 text-xs sm:text-sm"
               onClick={() => {
                 if (wallet?.address) {
                   navigator.clipboard.writeText(wallet.address);
@@ -306,7 +306,7 @@ export default function WalletDashboard() {
               <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Deposit</span>
             </Button>
-            <Button size="sm" variant="outline" className="border-red-400/50 bg-red-500/20 text-white hover:bg-red-500/30 hover:border-red-400 text-xs sm:text-sm">
+            <Button size="sm" variant="outline" className="border-red-400/50 bg-red-500/20 text-gray-900 dark:text-white hover:bg-red-500/30 hover:border-red-400 text-xs sm:text-sm">
               <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Withdraw</span>
             </Button>
@@ -327,7 +327,7 @@ export default function WalletDashboard() {
                   <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold text-white">
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                     {walletBalance?.ethBalance?.toFixed(4) || '0.0000'} ETH
                   </p>
                   <p className="text-slate-300 text-xs sm:text-sm">
@@ -354,7 +354,7 @@ export default function WalletDashboard() {
                   <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold text-white">
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                     {walletBalance?.streamTokens?.toFixed(2) || '0.00'} STREAM
                   </p>
                   <p className="text-slate-300 text-xs sm:text-sm">
@@ -437,7 +437,7 @@ export default function WalletDashboard() {
         {/* Main Content */}
         <Card className="backdrop-blur-lg bg-white/10 border-white/20">
           <CardHeader>
-            <CardTitle className="text-white">Wallet Activity</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">Wallet Activity</CardTitle>
             <CardDescription className="text-slate-300">
               Track your transactions, rewards, and distributions
             </CardDescription>
@@ -461,7 +461,7 @@ export default function WalletDashboard() {
                   {/* Recent Transactions */}
                   <Card className="bg-white/5 border-white/10">
                     <CardHeader>
-                      <CardTitle className="text-white text-lg">Recent Transactions</CardTitle>
+                      <CardTitle className="text-gray-900 dark:text-white text-lg">Recent Transactions</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -470,7 +470,7 @@ export default function WalletDashboard() {
                             <div className="flex items-center space-x-3">
                               {getTransactionIcon(tx.type)}
                               <div>
-                                <p className="text-white text-sm font-medium">{tx.description}</p>
+                                <p className="text-gray-900 dark:text-white text-sm font-medium">{tx.description}</p>
                                 <p className="text-slate-400 text-xs">
                                   {new Date(tx.timestamp).toLocaleString()}
                                 </p>
@@ -497,14 +497,14 @@ export default function WalletDashboard() {
                   {/* Top Reward Distributions */}
                   <Card className="bg-white/5 border-white/10">
                     <CardHeader>
-                      <CardTitle className="text-white text-lg">Top Reward Distributions</CardTitle>
+                      <CardTitle className="text-gray-900 dark:text-white text-lg">Top Reward Distributions</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {rewardDistributions.slice(0, 3).map((distribution) => (
                           <div key={distribution.summaryId} className="p-3 rounded-lg bg-white/5">
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="text-white font-medium text-sm">{distribution.summaryTitle}</h4>
+                              <h4 className="text-gray-900 dark:text-white font-medium text-sm">{distribution.summaryTitle}</h4>
                               <Badge className="bg-purple-500/20 text-purple-400 text-xs">
                                 {distribution.accuracy}% accuracy
                               </Badge>
@@ -536,8 +536,8 @@ export default function WalletDashboard() {
               <TabsContent value="transactions" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-white text-lg font-semibold">Transaction History</h3>
-                    <Button variant="outline" className="border-white/20 text-white">
+                    <h3 className="text-gray-900 dark:text-white text-lg font-semibold">Transaction History</h3>
+                    <Button variant="outline" className="border-white/20 text-gray-900 dark:text-white">
                       Export CSV
                     </Button>
                   </div>
@@ -552,7 +552,7 @@ export default function WalletDashboard() {
                                 {getTransactionIcon(tx.type)}
                               </div>
                               <div>
-                                <p className="text-white font-medium">{tx.description}</p>
+                                <p className="text-gray-900 dark:text-white font-medium">{tx.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <p className="text-slate-400 text-sm">
                                     {new Date(tx.timestamp).toLocaleString()}
@@ -598,7 +598,7 @@ export default function WalletDashboard() {
               <TabsContent value="rewards" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-white text-lg font-semibold">Reward Distributions</h3>
+                    <h3 className="text-gray-900 dark:text-white text-lg font-semibold">Reward Distributions</h3>
                     <Badge className="bg-yellow-500/20 text-yellow-400">
                       Total Distributed: {rewardDistributions.reduce((sum, r) => sum + r.distributedAmount, 0).toFixed(2)} STREAM
                     </Badge>
@@ -610,7 +610,7 @@ export default function WalletDashboard() {
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <h4 className="text-white font-semibold text-lg mb-2">{distribution.summaryTitle}</h4>
+                              <h4 className="text-gray-900 dark:text-white font-semibold text-lg mb-2">{distribution.summaryTitle}</h4>
                               <div className="flex items-center space-x-4 text-sm text-slate-400">
                                 <span className="flex items-center">
                                   <Users className="w-4 h-4 mr-1" />
@@ -639,7 +639,7 @@ export default function WalletDashboard() {
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-slate-400">Distribution Progress</span>
-                              <span className="text-white">
+                              <span className="text-gray-900 dark:text-white">
                                 {((distribution.distributedAmount / distribution.totalRewards) * 100).toFixed(1)}%
                               </span>
                             </div>
@@ -650,7 +650,7 @@ export default function WalletDashboard() {
                           </div>
                           
                           <div className="flex justify-end mt-4">
-                            <Button size="sm" variant="outline" className="border-blue-400/50 bg-blue-500/20 text-white hover:bg-blue-500/30 hover:border-blue-400">
+                            <Button size="sm" variant="outline" className="border-blue-400/50 bg-blue-500/20 text-gray-900 dark:text-white hover:bg-blue-500/30 hover:border-blue-400">
                               View Details
                             </Button>
                           </div>
