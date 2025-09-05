@@ -1093,6 +1093,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get crypto-related stocks
+  app.get('/api/market/stocks/crypto', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const stocks = await marketData.getCryptoStocks();
+      res.json({ 
+        stocks, 
+        count: stocks.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Crypto stocks error:', error);
+      res.json({ 
+        stocks: [], 
+        error: 'Stock data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Get financial news from CoinDesk
   app.get('/api/market/news', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;

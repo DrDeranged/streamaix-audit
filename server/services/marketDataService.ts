@@ -42,6 +42,13 @@ export class MarketDataService {
   private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
   private cache = new Map<string, { data: any; timestamp: number }>();
   private cacheTimeout = 60000; // 1 minute cache
+  
+  // Crypto-related stocks list
+  private cryptoStocks = [
+    'MSTR', 'TSLA', 'SQ', 'PYPL', 'NVDA', 'AMD', 'INTC', 'COIN',
+    'HOOD', 'RIOT', 'MARA', 'CAN', 'BTBT', 'EBON', 'SOS', 'NCTY',
+    'ARBK', 'DGHI', 'GBTC', 'ETHE', 'BITF', 'HUT', 'HIVE', 'CLSK'
+  ];
 
   constructor() {
     this.cmcApiKey = process.env.COINMARKETCAP_API_KEY || '';
@@ -496,6 +503,69 @@ export class MarketDataService {
       rank: index + 1,
       lastUpdated: new Date().toISOString()
     }));
+  }
+
+  /**
+   * Get crypto-related stocks data
+   */
+  async getCryptoStocks(): Promise<StockQuote[]> {
+    const cacheKey = 'crypto_stocks';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Mock data for crypto stocks since we don't have stock API keys
+      const mockStocks: StockQuote[] = this.cryptoStocks.map((symbol, index) => {
+        const basePrice = Math.random() * 500 + 50;
+        const change = (Math.random() - 0.5) * 10;
+        return {
+          symbol: symbol,
+          name: this.getStockName(symbol),
+          price: basePrice,
+          percentChange24h: change,
+          marketCap: basePrice * 1000000000 * Math.random(),
+          volume: Math.random() * 10000000,
+          lastUpdated: new Date().toISOString()
+        };
+      });
+
+      this.setCache(cacheKey, mockStocks);
+      console.log(`📈 Generated crypto stock data for ${this.cryptoStocks.length} symbols`);
+      return mockStocks;
+    } catch (error) {
+      console.error('❌ Failed to fetch crypto stocks:', error);
+      return [];
+    }
+  }
+
+  private getStockName(symbol: string): string {
+    const names: { [key: string]: string } = {
+      'MSTR': 'MicroStrategy Inc',
+      'TSLA': 'Tesla Inc',
+      'SQ': 'Block Inc',
+      'PYPL': 'PayPal Holdings',
+      'NVDA': 'NVIDIA Corporation',
+      'AMD': 'Advanced Micro Devices',
+      'INTC': 'Intel Corporation',
+      'COIN': 'Coinbase Global Inc',
+      'HOOD': 'Robinhood Markets',
+      'RIOT': 'Riot Platforms Inc',
+      'MARA': 'Marathon Digital',
+      'CAN': 'Canaan Inc',
+      'BTBT': 'Bit Digital Inc',
+      'EBON': 'Ebang International',
+      'SOS': 'SOS Limited',
+      'NCTY': '9th City Ltd',
+      'ARBK': 'Argo Blockchain',
+      'DGHI': 'Digihost Technology',
+      'GBTC': 'Grayscale Bitcoin Trust',
+      'ETHE': 'Grayscale Ethereum Trust',
+      'BITF': 'Bitfarms Ltd',
+      'HUT': 'Hut 8 Mining Corp',
+      'HIVE': 'HIVE Blockchain',
+      'CLSK': 'CleanSpark Inc'
+    };
+    return names[symbol] || `${symbol} Corp`;
   }
 
   /**
