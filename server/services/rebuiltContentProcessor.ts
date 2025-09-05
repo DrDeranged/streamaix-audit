@@ -704,11 +704,9 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         // Second pass: specialized crypto enhancement with on-chain data
         resultWithTrends.financialTrends = await marketDataService.enhanceFinancialTrends(resultWithTrends.financialTrends);
         
-        // Third pass: ensure we have 4-6 high-quality recommendations
-        if (!resultWithTrends.financialTrends || resultWithTrends.financialTrends.length < 4) {
-          console.log('⚠️ Insufficient financial trends, generating additional recommendations...');
-          resultWithTrends.financialTrends = await this.ensureMinimumRecommendations(resultWithTrends.financialTrends || [], result.summary || '');
-        }
+        // CRITICAL: NO GENERIC RECOMMENDATIONS - Only show video-specific content
+        console.log(`📊 Using ${resultWithTrends.financialTrends?.length || 0} authentic financial trends from video content only`);
+        // Removed generic recommendation fallback to ensure all content is video-specific
         
         console.log('✅ Financial trends enhanced with comprehensive multi-asset intelligence');
       } catch (error) {
@@ -720,99 +718,8 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
     return result;
   }
 
-  /**
-   * Ensure minimum of 4-6 high-quality investment recommendations based on video themes
-   */
-  private async ensureMinimumRecommendations(existingTrends: any[], summaryContent: string): Promise<any[]> {
-    if (existingTrends.length >= 4) return existingTrends;
-    
-    // Generate additional high-quality recommendations based on detected video themes
-    const additionalRecommendations = [];
-    const usedSymbols = new Set(existingTrends.map(t => t.symbol?.toUpperCase()));
-    const content = summaryContent.toLowerCase();
-    
-    // Crypto theme detection and recommendations
-    if (content.includes('crypto') || content.includes('bitcoin') || content.includes('ethereum') || content.includes('defi')) {
-      if (!usedSymbols.has('BTC') && additionalRecommendations.length < 3) {
-        additionalRecommendations.push({
-          category: 'Crypto',
-          symbol: 'BTC',
-          company: 'Bitcoin',
-          relevance: 'Digital gold narrative and institutional adoption themes referenced in video discussion',
-          impact: 'bullish',
-          reasoning: 'Based on video insights about institutional crypto adoption trends, Bitcoin maintains position as primary digital store of value with growing ETF accessibility. Structural supply scarcity combined with increasing institutional acceptance creates favorable long-term outlook.',
-          timeHorizon: 'Long-term (1-3 years)',
-          riskLevel: 'Moderate',
-          analystSource: 'Plan B Stock-to-Flow institutional adoption framework',
-          marketAlpha: 'First-mover advantage in digital store of value category',
-          priceTargets: 'Video-referenced cycle targets of $80,000-$120,000',
-          catalysts: 'ETF adoption acceleration, corporate treasury adoption, regulatory clarity'
-        });
-      }
-    }
-    
-    // AI/Tech theme detection
-    if (content.includes('ai') || content.includes('tech') || content.includes('nvidia') || content.includes('innovation')) {
-      if (!usedSymbols.has('NVDA') && additionalRecommendations.length < 3) {
-        additionalRecommendations.push({
-          category: 'Stocks',
-          symbol: 'NVDA',
-          company: 'NVIDIA Corporation',
-          relevance: 'AI infrastructure leader referenced in video technological transformation themes',
-          impact: 'bullish',
-          reasoning: 'Video discussion of AI adoption trends supports NVIDIA\'s position as critical infrastructure provider. 80%+ market share in AI chips with expanding data center revenue creates sustained growth opportunity backed by enterprise AI deployment cycles.',
-          timeHorizon: 'Medium-term (3-12 months)',
-          riskLevel: 'Moderate',
-          analystSource: 'Goldman Sachs AI infrastructure analysis',
-          marketAlpha: 'Bottleneck position in AI compute infrastructure stack',
-          priceTargets: 'Technical targets of $600-$800 based on sector expansion',
-          catalysts: 'Data center deployments, new chip architectures, enterprise AI adoption'
-        });
-      }
-    }
-    
-    // Finance/Banking themes
-    if (content.includes('bank') || content.includes('finance') || content.includes('fed') || content.includes('interest')) {
-      if (!usedSymbols.has('JPM') && additionalRecommendations.length < 3) {
-        additionalRecommendations.push({
-          category: 'Stocks',
-          symbol: 'JPM',
-          company: 'JPMorgan Chase & Co.',
-          relevance: 'Leading financial institution positioned for themes discussed in video',
-          impact: 'bullish',
-          reasoning: 'Video insights about financial sector dynamics support JPM\'s position as dominant banking franchise with diversified revenue streams. Interest rate environment and financial innovation trends create favorable operating conditions.',
-          timeHorizon: 'Medium-term (3-12 months)',
-          riskLevel: 'Low',
-          analystSource: 'Warren Buffett banking sector framework',
-          marketAlpha: 'Market leadership with defensive characteristics in uncertain environment',
-          priceTargets: 'Fundamental targets based on book value multiples',
-          catalysts: 'Interest rate stability, credit cycle normalization, digital banking expansion'
-        });
-      }
-    }
-    
-    // Energy/Commodities themes
-    if (content.includes('energy') || content.includes('oil') || content.includes('commodities')) {
-      if (!usedSymbols.has('XLE') && additionalRecommendations.length < 3) {
-        additionalRecommendations.push({
-          category: 'ETFs',
-          symbol: 'XLE',
-          company: 'Energy Select Sector SPDR Fund',
-          relevance: 'Energy sector exposure aligned with commodity themes from video',
-          impact: 'bullish',
-          reasoning: 'Video discussion of energy market dynamics supports sector positioning through diversified energy ETF exposure. Structural supply constraints and geopolitical factors create favorable environment for energy investments.',
-          timeHorizon: 'Medium-term (3-12 months)',
-          riskLevel: 'Moderate',
-          analystSource: 'Energy sector rotation analysis framework',
-          marketAlpha: 'Sector diversification with commodity cycle positioning',
-          priceTargets: 'Sector relative strength targets',
-          catalysts: 'Supply/demand rebalancing, geopolitical developments, seasonal demand'
-        });
-      }
-    }
-    
-    return [...existingTrends, ...additionalRecommendations].slice(0, 6); // Cap at 6 recommendations
-  }
+  // REMOVED: Generic recommendation fallback system
+  // All financial trends must come directly from video content analysis only
 
   /**
    * Enhance financial trends with comprehensive market data across all asset classes
