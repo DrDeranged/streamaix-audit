@@ -102,6 +102,15 @@ interface NewsArticle {
   source: string;
 }
 
+interface StockQuote {
+  symbol: string;
+  name: string;
+  price: number;
+  percentChange24h: number;
+  marketCap?: number;
+  volume?: number;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -130,20 +139,25 @@ export default function Dashboard() {
     enabled: !!user?.id,
   });
 
-  // Supplemental market data (minimal)
+  // Supplemental market data (expanded for scrollable sections)
   const { data: cryptoData } = useQuery({
-    queryKey: ['/api/market/crypto/BTC,ETH,SOL'],
+    queryKey: ['/api/market/crypto/BTC,ETH,SOL,BNB,XRP,ADA,AVAX,DOT,MATIC,LINK'],
     refetchInterval: 300000, // Every 5 minutes
   });
 
   const { data: newsData } = useQuery({
-    queryKey: ['/api/market/news?limit=3'],
+    queryKey: ['/api/market/news'],
     refetchInterval: 300000, // Every 5 minutes
   });
 
-  const summaries = summariesData?.summaries || [];
-  const bounties = bountiesData?.bounties || [];
-  const stats: UserStats = statsData || {
+  const { data: stocksData } = useQuery({
+    queryKey: ['/api/market/stocks/crypto'],
+    refetchInterval: 300000, // Every 5 minutes
+  });
+
+  const summaries = (summariesData as any)?.summaries || [];
+  const bounties = (bountiesData as any)?.bounties || [];
+  const stats: UserStats = (statsData as any) || {
     totalSummaries: 0,
     totalViews: 0,
     totalEarnings: 0,
@@ -152,9 +166,10 @@ export default function Dashboard() {
     accuracy: 0,
     streak: 0
   };
-  const balance = balanceData?.balance || { streamTokens: 0, usdValue: 0 };
-  const cryptoQuotes = cryptoData?.quotes?.slice(0, 3) || [];
-  const newsArticles = newsData?.articles?.slice(0, 3) || [];
+  const balance = (balanceData as any)?.balance || { streamTokens: 0, usdValue: 0 };
+  const cryptoQuotes = (cryptoData as any)?.quotes || [];
+  const newsArticles = (newsData as any)?.articles || [];
+  const cryptoStocks = (stocksData as any)?.stocks || [];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -198,21 +213,21 @@ export default function Dashboard() {
         opacity: 0.5
       }}></div>
       
-      {/* SUBTLE CRYPTO TICKER - Supplemental */}
-      {cryptoQuotes.length > 0 && (
-        <div className="relative z-20 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-purple-900/20 backdrop-blur-sm border-b border-white/5">
-          <div className="overflow-hidden py-2">
-            <motion.div 
-              className="flex space-x-8 text-xs opacity-60"
-              animate={{ x: "-100%" }}
-              transition={{ 
-                repeat: Infinity, 
-                duration: 45, 
-                ease: "linear" 
-              }}
-              style={{ width: "200%" }}
-            >
-              {[...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
+      {/* CRYPTO TICKER - Always visible with fallback */}
+      <div className="relative z-20 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-purple-900/20 backdrop-blur-sm border-b border-white/5">
+        <div className="overflow-hidden py-2">
+          <motion.div 
+            className="flex space-x-8 text-xs opacity-70"
+            animate={{ x: "-100%" }}
+            transition={{ 
+              repeat: Infinity, 
+              duration: 60, 
+              ease: "linear" 
+            }}
+            style={{ width: "200%" }}
+          >
+            {cryptoQuotes.length > 0 ? (
+              [...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
                 const ChangeIcon = getChangeIcon(quote.percentChange24h);
                 return (
                   <div key={index} className="flex items-center space-x-2 text-white whitespace-nowrap">
@@ -224,11 +239,98 @@ export default function Dashboard() {
                     </span>
                   </div>
                 );
-              })}
-            </motion.div>
+              })
+            ) : (
+              // Fallback placeholder while loading
+              [...Array(10)].map((_, index) => (
+                <div key={index} className="flex items-center space-x-2 text-white whitespace-nowrap">
+                  <span className="font-bold text-orange-400/60">Loading...</span>
+                  <span className="font-medium text-gray-400">Market data</span>
+                </div>
+              ))
+            )}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* SCROLLABLE NEWS SECTION */}
+      <div className="relative z-10 bg-gradient-to-r from-slate-900/50 via-purple-900/30 to-slate-900/50 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Newspaper className="h-4 w-4 text-blue-400" />
+            <h3 className="text-white text-sm font-medium">Financial News</h3>
+            <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-300 border-blue-400/30">
+              {newsArticles.length} stories
+            </Badge>
+          </div>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex space-x-4 pb-2" style={{ width: 'max-content' }}>
+              {newsArticles.slice(0, 10).map((article: NewsArticle, index: number) => (
+                <div
+                  key={index}
+                  className="min-w-[300px] bg-white/10 rounded-lg p-3 border border-white/20 backdrop-blur-sm hover:bg-white/15 cursor-pointer transition-colors"
+                  onClick={() => window.open(article.url, '_blank')}
+                  data-testid={`news-article-${index}`}
+                >
+                  <h4 className="text-white text-sm font-medium line-clamp-2 mb-2">
+                    {article.title}
+                  </h4>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-300 border-blue-400/30">
+                      {article.source}
+                    </Badge>
+                    <span className="text-gray-400 text-xs">
+                      {new Date(article.published).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* SCROLLABLE CRYPTO STOCKS SECTION */}
+      <div className="relative z-10 bg-gradient-to-r from-slate-900/30 via-orange-900/20 to-slate-900/30 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="h-4 w-4 text-orange-400" />
+            <h3 className="text-white text-sm font-medium">Crypto Stocks</h3>
+            <Badge variant="outline" className="text-xs bg-orange-500/20 text-orange-300 border-orange-400/30">
+              {cryptoStocks.length} stocks
+            </Badge>
+          </div>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex space-x-3 pb-2" style={{ width: 'max-content' }}>
+              {cryptoStocks.slice(0, 20).map((stock: StockQuote, index: number) => {
+                const ChangeIcon = getChangeIcon(stock.percentChange24h);
+                return (
+                  <div
+                    key={stock.symbol}
+                    className="min-w-[140px] bg-white/10 rounded-lg p-3 border border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors text-center"
+                    data-testid={`stock-${stock.symbol}`}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white text-xs font-bold mx-auto mb-2">
+                      {stock.symbol.slice(0, 2)}
+                    </div>
+                    <div className="text-white font-bold text-sm">{stock.symbol}</div>
+                    <div className="text-gray-400 text-xs truncate">
+                      {stock.name.length > 12 ? stock.name.slice(0, 12) + '...' : stock.name}
+                    </div>
+                    <div className="text-white font-semibold text-sm mt-1">
+                      {formatPrice(stock.price)}
+                    </div>
+                    <div className={`flex items-center justify-center text-xs ${getChangeColor(stock.percentChange24h)}`}>
+                      {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
+                      {stock.percentChange24h.toFixed(1)}%
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
       
       <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-6">
         {/* Header */}
