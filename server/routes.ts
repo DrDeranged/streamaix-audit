@@ -7,7 +7,7 @@ import { StreamProcessorV2 } from "./services/streamProcessorV2";
 import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
-import { marketDataService } from "./services/marketDataService";
+import { MarketDataService } from "./services/marketDataService";
 import passport from "passport";
 import session from "express-session";
 import { 
@@ -1073,6 +1073,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const transactions: any[] = [];
     
     res.json({ transactions });
+  }));
+
+  // =============================================================================
+  // MARKET DATA ROUTES 
+  // =============================================================================
+
+  // Get live crypto prices (CoinGecko + CoinMarketCap)
+  app.get('/api/market/crypto/:symbols', asyncHandler(async (req: Request, res: Response) => {
+    const symbols = req.params.symbols.split(',');
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const quotes = await marketData.getCryptoQuotes(symbols);
+      res.json({ quotes, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Market data error:', error);
+      res.json({ quotes: [], error: 'Market data unavailable', timestamp: new Date().toISOString() });
+    }
   }));
 
   // =============================================================================

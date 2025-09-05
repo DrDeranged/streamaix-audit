@@ -26,15 +26,23 @@ export interface StockQuote {
 
 export class MarketDataService {
   private static instance: MarketDataService;
-  private apiKey: string;
-  private baseUrl = 'https://pro-api.coinmarketcap.com/v1';
+  private cmcApiKey: string;
+  private coingeckoApiKey: string;
+  private cmcBaseUrl = 'https://pro-api.coinmarketcap.com/v1';
+  private coingeckoBaseUrl = 'https://api.coingecko.com/api/v3';
   private cache = new Map<string, { data: any; timestamp: number }>();
   private cacheTimeout = 60000; // 1 minute cache
 
   constructor() {
-    this.apiKey = process.env.COINMARKETCAP_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn('⚠️ COINMARKETCAP_API_KEY not found - market data will be unavailable');
+    this.cmcApiKey = process.env.COINMARKETCAP_API_KEY || '';
+    this.coingeckoApiKey = process.env.COINGECKO_API_KEY || '';
+    
+    console.log('🔑 Market Data Service initialized:');
+    console.log(`  - CoinMarketCap: ${this.cmcApiKey ? '✅ Available' : '❌ Missing'}`);
+    console.log(`  - CoinGecko: ${this.coingeckoApiKey ? '✅ Available' : '❌ Missing'}`);
+    
+    if (!this.cmcApiKey && !this.coingeckoApiKey) {
+      console.warn('⚠️ No market data API keys found - using fallback data');
     }
   }
 
@@ -63,22 +71,116 @@ export class MarketDataService {
   }
 
   /**
-   * Get live cryptocurrency data by symbols
+   * Get live cryptocurrency data by symbols using CoinGecko (with CoinMarketCap fallback)
    */
   async getCryptoQuotes(symbols: string[]): Promise<CryptoQuote[]> {
-    if (!this.apiKey) {
-      return this.getMockCryptoData(symbols);
-    }
-
     const cacheKey = `crypto_${symbols.join(',').toUpperCase()}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
+    // Try CoinGecko first (better free tier)
+    if (this.coingeckoApiKey) {
+      try {
+        return await this.getCryptoQuotesFromCoinGecko(symbols);
+      } catch (error) {
+        console.warn('⚠️ CoinGecko failed, trying CoinMarketCap fallback');
+      }
+    }
+
+    // Fallback to CoinMarketCap
+    if (this.cmcApiKey) {
+      try {
+        return await this.getCryptoQuotesFromCMC(symbols);
+      } catch (error) {
+        console.error('❌ Both APIs failed, using empty data');
+      }
+    }
+
+    // No APIs available
+    console.warn('⚠️ No market data APIs available');
+    return [];
+  }
+
+  /**
+   * Get cryptocurrency data from CoinGecko API
+   */
+  private async getCryptoQuotesFromCoinGecko(symbols: string[]): Promise<CryptoQuote[]> {
+    const cacheKey = `coingecko_${symbols.join(',').toUpperCase()}`;
+    
+    // Convert symbols to CoinGecko IDs (simplified mapping)
+    const coinIds = symbols.map(symbol => {
+      const mapping: { [key: string]: string } = {
+        'BTC': 'bitcoin',
+        'ETH': 'ethereum',
+        'BNB': 'binancecoin',
+        'XRP': 'ripple',
+        'SOL': 'solana',
+        'ADA': 'cardano',
+        'AVAX': 'avalanche-2',
+        'DOT': 'polkadot',
+        'MATIC': 'matic-network',
+        'LINK': 'chainlink'
+      };
+      return mapping[symbol.toUpperCase()] || symbol.toLowerCase();
+    });
+
+    try {
+      const response = await axios.get(`${this.coingeckoBaseUrl}/simple/price`, {
+        headers: this.coingeckoApiKey ? { 'x-cg-demo-api-key': this.coingeckoApiKey } : {},
+        params: {
+          ids: coinIds.join(','),
+          vs_currencies: 'usd',
+          include_market_cap: true,
+          include_24hr_vol: true,
+          include_24hr_change: true,
+          include_7d_change: true,
+          include_30d_change: true
+        }
+      });
+
+      const quotes: CryptoQuote[] = [];
+      
+      symbols.forEach((symbol, index) => {
+        const coinId = coinIds[index];
+        const data = response.data[coinId];
+        
+        if (data) {
+          quotes.push({
+            symbol: symbol.toUpperCase(),
+            name: symbol, // We'd need another call for full names
+            price: data.usd || 0,
+            percentChange24h: data.usd_24h_change || 0,
+            percentChange7d: data.usd_7d_change || 0,
+            percentChange30d: data.usd_30d_change || 0,
+            marketCap: data.usd_market_cap || 0,
+            volume24h: data.usd_24h_vol || 0,
+            rank: 0, // Would need coins/markets endpoint for rank
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      });
+
+      this.setCache(cacheKey, quotes);
+      console.log(`📊 [CoinGecko] Fetched live crypto data for: ${symbols.join(', ')}`);
+      return quotes;
+      
+    } catch (error: any) {
+      console.error('❌ CoinGecko API error:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Get cryptocurrency data from CoinMarketCap API (fallback)
+   */
+  private async getCryptoQuotesFromCMC(symbols: string[]): Promise<CryptoQuote[]> {
+    const cacheKey = `cmc_${symbols.join(',').toUpperCase()}`;
+    
     try {
       const symbolsStr = symbols.map(s => s.toUpperCase()).join(',');
-      const response = await axios.get(`${this.baseUrl}/cryptocurrency/quotes/latest`, {
+      const response = await axios.get(`${this.cmcBaseUrl}/cryptocurrency/quotes/latest`, {
         headers: {
-          'X-CMC_PRO_API_KEY': this.apiKey,
+          'X-CMC_PRO_API_KEY': this.cmcApiKey,
           'Accept': 'application/json'
         },
         params: {
@@ -113,8 +215,8 @@ export class MarketDataService {
       return quotes;
 
     } catch (error: any) {
-      console.error('❌ Failed to fetch crypto data:', error.response?.data || error.message);
-      return this.getMockCryptoData(symbols);
+      console.error('❌ [CoinMarketCap] API error:', error.response?.data || error.message);
+      throw error;
     }
   }
 
@@ -122,8 +224,8 @@ export class MarketDataService {
    * Get cryptocurrency market information by symbol
    */
   async getCryptoInfo(symbol: string): Promise<any> {
-    if (!this.apiKey) {
-      return this.getMockCryptoInfo(symbol);
+    if (!this.coingeckoApiKey && !this.cmcApiKey) {
+      return null;
     }
 
     const cacheKey = `crypto_info_${symbol.toUpperCase()}`;
