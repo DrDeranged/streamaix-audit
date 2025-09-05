@@ -24,12 +24,22 @@ export interface StockQuote {
   lastUpdated: string;
 }
 
+export interface NewsArticle {
+  title: string;
+  url: string;
+  published: string;
+  source: string;
+  summary?: string;
+  category?: string;
+}
+
 export class MarketDataService {
   private static instance: MarketDataService;
   private cmcApiKey: string;
   private coingeckoApiKey: string;
   private cmcBaseUrl = 'https://pro-api.coinmarketcap.com/v1';
   private coingeckoBaseUrl = 'https://api.coingecko.com/api/v3';
+  private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
   private cache = new Map<string, { data: any; timestamp: number }>();
   private cacheTimeout = 60000; // 1 minute cache
 
@@ -56,7 +66,9 @@ export class MarketDataService {
   private isValidCache(key: string): boolean {
     const cached = this.cache.get(key);
     if (!cached) return false;
-    return Date.now() - cached.timestamp < this.cacheTimeout;
+    
+    const timeout = (cached as any).customTimeout || this.cacheTimeout;
+    return Date.now() - cached.timestamp < timeout;
   }
 
   private getFromCache(key: string): any | null {
@@ -484,6 +496,156 @@ export class MarketDataService {
       rank: index + 1,
       lastUpdated: new Date().toISOString()
     }));
+  }
+
+  /**
+   * Get financial news from CoinDesk RSS feed
+   */
+  async getFinancialNews(limit: number = 10): Promise<NewsArticle[]> {
+    const cacheKey = `coindesk_news_${limit}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) {
+      console.log('📰 Returning cached CoinDesk news');
+      return cached;
+    }
+
+    try {
+      const response = await axios.get(this.coindeskNewsUrl, {
+        headers: {
+          'User-Agent': 'StreamAiX/1.0 (News Aggregator)'
+        },
+        timeout: 10000
+      });
+
+      const news = this.parseRSSFeed(response.data, limit);
+      this.setCache(cacheKey, news, 300000); // Cache for 5 minutes
+      console.log(`📰 Fetched ${news.length} news articles from CoinDesk`);
+      return news;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch CoinDesk news:', error.message);
+      return this.getMockNews(limit);
+    }
+  }
+
+  /**
+   * Parse RSS feed XML and extract news articles
+   */
+  private parseRSSFeed(xmlData: string, limit: number): NewsArticle[] {
+    const articles: NewsArticle[] = [];
+    
+    try {
+      // More robust RSS parsing
+      const itemMatches = xmlData.match(/<item\b[^>]*>([\s\S]*?)<\/item>/g) || [];
+      
+      for (const item of itemMatches.slice(0, limit)) {
+        // Extract title (handle CDATA)
+        let title = '';
+        const titleMatch = item.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        if (titleMatch) {
+          title = titleMatch[1];
+          // Remove CDATA wrapper if present
+          const cdataMatch = title.match(/^<!\[CDATA\[(.*?)\]\]>$/s);
+          if (cdataMatch) {
+            title = cdataMatch[1];
+          }
+          title = this.cleanHtml(title.trim());
+        }
+        
+        // Extract link
+        let link = '';
+        const linkMatch = item.match(/<link[^>]*>([\s\S]*?)<\/link>/i);
+        if (linkMatch) {
+          link = linkMatch[1].trim();
+        }
+        
+        // Extract publication date
+        let pubDate = '';
+        const pubDateMatch = item.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i);
+        if (pubDateMatch) {
+          pubDate = pubDateMatch[1].trim();
+        }
+        
+        // Extract description
+        let description = '';
+        const descMatch = item.match(/<description[^>]*>([\s\S]*?)<\/description>/i);
+        if (descMatch) {
+          description = descMatch[1];
+          const cdataMatch = description.match(/^<!\[CDATA\[(.*?)\]\]>$/s);
+          if (cdataMatch) {
+            description = cdataMatch[1];
+          }
+          description = this.cleanHtml(description.trim());
+        }
+        
+        
+        if (title && link) {
+          articles.push({
+            title: title,
+            url: link,
+            published: pubDate || new Date().toISOString(),
+            source: 'CoinDesk',
+            summary: description ? description.substring(0, 200) + '...' : undefined,
+            category: 'Finance'
+          });
+        }
+      }
+      
+      return articles;
+    } catch (error) {
+      console.error('❌ Error parsing RSS feed:', error);
+      return this.getMockNews(limit);
+    }
+  }
+
+  /**
+   * Extract value from XML element
+   */
+  private extractXMLValue(xml: string, tag: string): string {
+    const regex = new RegExp(`<${tag}[^>]*>([\s\S]*?)<\/${tag}>`, 'i');
+    const match = xml.match(regex);
+    if (!match) return '';
+    
+    let content = match[1].trim();
+    // Handle CDATA sections
+    const cdataRegex = /^<!\[CDATA\[(.*?)\]\]>$/s;
+    const cdataMatch = content.match(cdataRegex);
+    return cdataMatch ? cdataMatch[1].trim() : content;
+  }
+
+  /**
+   * Clean HTML tags from text
+   */
+  private cleanHtml(text: string): string {
+    return text.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
+  }
+
+  /**
+   * Enhanced cache method with custom timeout
+   */
+  private setCache(key: string, data: any, timeout?: number): void {
+    this.cache.set(key, { 
+      data, 
+      timestamp: Date.now(),
+      customTimeout: timeout
+    });
+  }
+
+  /**
+   * Mock news data for fallback
+   */
+  private getMockNews(limit: number): NewsArticle[] {
+    const mockArticles = [
+      {
+        title: "CoinDesk News Service Unavailable",
+        url: "https://coindesk.com",
+        published: new Date().toISOString(),
+        source: "System",
+        summary: "Real-time financial news requires active internet connection and CoinDesk service availability.",
+        category: "System"
+      }
+    ];
+    
+    return mockArticles.slice(0, limit);
   }
 }
 

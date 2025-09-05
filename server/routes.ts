@@ -1093,6 +1093,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get financial news from CoinDesk
+  app.get('/api/market/news', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const articles = await marketData.getFinancialNews(limit);
+      res.json({ 
+        articles, 
+        count: articles.length,
+        source: 'CoinDesk',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('News data error:', error);
+      res.json({ 
+        articles: [], 
+        error: 'News data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // =============================================================================
   // ADMIN ROUTES (Protected)
   // =============================================================================
