@@ -134,7 +134,8 @@ export class AuthService {
       passport.use(new TwitterStrategy({
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
         consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        callbackURL: process.env.TWITTER_CALLBACK_URL || '/api/auth/twitter/callback'
+        callbackURL: process.env.TWITTER_CALLBACK_URL || 'oob',
+        includeEmail: true
       },
     async (token: string, tokenSecret: string, profile: any, done: any) => {
       try {

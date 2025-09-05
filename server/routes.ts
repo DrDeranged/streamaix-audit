@@ -245,10 +245,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Twitter OAuth routes (only if enabled)
   if (twitterEnabled) {
-    app.get('/api/auth/twitter', passport.authenticate('twitter'));
+    app.get('/api/auth/twitter', (req: Request, res: Response, next: Function) => {
+      passport.authenticate('twitter', {
+        scope: ['email']
+      })(req, res, next);
+    });
 
     app.get('/api/auth/twitter/callback', 
-      passport.authenticate('twitter', { failureRedirect: '/auth?error=twitter' }),
+      passport.authenticate('twitter', { 
+        failureRedirect: '/auth?error=twitter',
+        session: true
+      }),
       async (req: Request, res: Response) => {
         try {
           const user = req.user as any;
@@ -273,6 +280,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
     );
+
+    // Handle manual OAuth PIN verification for desktop apps
+    app.post('/api/auth/twitter/verify', asyncHandler(async (req: Request, res: Response) => {
+      const { oauth_token, oauth_verifier } = req.body;
+      
+      if (!oauth_token || !oauth_verifier) {
+        return res.status(400).json({ error: 'Missing OAuth token or verifier' });
+      }
+
+      // This would require additional implementation for desktop app flow
+      res.status(501).json({ 
+        error: 'Desktop app flow not fully implemented. Please configure your Twitter app as a Web App.' 
+      });
+    }));
   } else {
     // Fallback routes when Twitter OAuth is not configured
     app.get('/api/auth/twitter', (req: Request, res: Response) => {
