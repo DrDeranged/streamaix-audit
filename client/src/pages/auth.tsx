@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { useAuth, useLogin, useRegister, useWalletLogin, useTwitterLogin } from '@/hooks/useAuth';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
-import { Loader2, Wallet, Mail, User, Lock, Shield } from 'lucide-react';
+import { Loader2, Wallet, Mail, User, Lock, Shield, ArrowLeft } from 'lucide-react';
 import { FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
@@ -76,6 +76,16 @@ export default function AuthPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
+        {/* Back to Home Button */}
+        <Button
+          variant="outline"
+          className="mb-6 bg-white/10 border-white/20 hover:bg-white/20 text-white"
+          onClick={() => setLocation('/')}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             StreamAiX
