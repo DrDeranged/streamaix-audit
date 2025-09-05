@@ -8,6 +8,12 @@ export interface User {
   ensName?: string;
   avatar?: string;
   bio?: string;
+  // Twitter OAuth fields
+  twitterId?: string;
+  twitterUsername?: string;
+  twitterDisplayName?: string;
+  twitterVerified?: boolean;
+  authProvider?: string;
   createdAt?: string;
 }
 

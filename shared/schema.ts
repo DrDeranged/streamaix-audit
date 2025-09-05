@@ -191,6 +191,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   ensName: true,
   avatar: true,
   bio: true,
+  twitterId: true,
+  twitterUsername: true,
+  twitterDisplayName: true,
+  twitterVerified: true,
+  authProvider: true,
 });
 
 export const insertSummarySchema = createInsertSchema(summaries).pick({
