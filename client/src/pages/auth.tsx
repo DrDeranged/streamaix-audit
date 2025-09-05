@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { useAuth, useLogin, useRegister, useWalletLogin } from '@/hooks/useAuth';
+import { useAuth, useLogin, useRegister, useWalletLogin, useTwitterLogin } from '@/hooks/useAuth';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
 import { Loader2, Wallet, Mail, User, Lock, Shield } from 'lucide-react';
+import { FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 export default function AuthPage() {
@@ -29,6 +30,7 @@ export default function AuthPage() {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const walletLoginMutation = useWalletLogin();
+  const { initiateTwitterLogin } = useTwitterLogin();
 
   // Redirect to home page if user becomes authenticated
   useEffect(() => {
@@ -152,18 +154,30 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <WalletConnector
-                  onWalletConnected={handleWalletConnect}
-                  showBalance={false}
-                  showNetwork={false}
-                >
-                  <div className="text-center">
-                    <Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-300">
-                      Connect your Web3 wallet to access premium features and earn rewards
-                    </p>
-                  </div>
-                </WalletConnector>
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-[#1da1f2]/10 border-[#1da1f2]/20 hover:bg-[#1da1f2]/20 text-white"
+                    onClick={initiateTwitterLogin}
+                  >
+                    <FaTwitter className="w-4 h-4 mr-2" />
+                    Continue with Twitter
+                  </Button>
+
+                  <WalletConnector
+                    onWalletConnected={handleWalletConnect}
+                    showBalance={false}
+                    showNetwork={false}
+                  >
+                    <div className="text-center">
+                      <Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-300">
+                        Connect your Web3 wallet to access premium features and earn rewards
+                      </p>
+                    </div>
+                  </WalletConnector>
+                </div>
               </TabsContent>
 
               <TabsContent value="register" className="space-y-4">
@@ -288,6 +302,40 @@ export default function AuthPage() {
                     Create Account
                   </Button>
                 </form>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-slate-900 px-2 text-slate-400">Or continue with</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-[#1da1f2]/10 border-[#1da1f2]/20 hover:bg-[#1da1f2]/20 text-white"
+                    onClick={initiateTwitterLogin}
+                  >
+                    <FaTwitter className="w-4 h-4 mr-2" />
+                    Continue with Twitter
+                  </Button>
+
+                  <WalletConnector
+                    onWalletConnected={handleWalletConnect}
+                    showBalance={false}
+                    showNetwork={false}
+                  >
+                    <div className="text-center">
+                      <Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-300">
+                        Connect your Web3 wallet to access premium features and earn rewards
+                      </p>
+                    </div>
+                  </WalletConnector>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>

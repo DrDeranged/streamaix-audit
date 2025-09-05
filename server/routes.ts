@@ -8,10 +8,13 @@ import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { marketDataService } from "./services/marketDataService";
+import passport from "passport";
+import session from "express-session";
 import { 
   loginSchema, 
   registerSchema, 
   walletLoginSchema,
+  twitterAuthSchema,
   updateUserSchema,
   createSummarySchema,
   updateSummarySchema,
@@ -27,7 +30,8 @@ import {
   processContentSchema,
   type LoginRequest,
   type RegisterRequest,
-  type WalletLoginRequest
+  type WalletLoginRequest,
+  type TwitterAuthRequest
 } from "./validators";
 import { Request, Response } from "express";
 import cors from "cors";
@@ -55,6 +59,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : true,
     credentials: true
   }));
+
+  // Configure session for passport
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-session-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // Set to true in production with HTTPS
+  }));
+
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // Setup Twitter OAuth (optional)
+  const twitterEnabled = AuthService.setupTwitterAuth();
 
   // =============================================================================
   // AUTH ROUTES
@@ -223,6 +242,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       token
     });
   }));
+
+  // Twitter OAuth routes (only if enabled)
+  if (twitterEnabled) {
+    app.get('/api/auth/twitter', passport.authenticate('twitter'));
+
+    app.get('/api/auth/twitter/callback', 
+      passport.authenticate('twitter', { failureRedirect: '/auth?error=twitter' }),
+      async (req: Request, res: Response) => {
+        try {
+          const user = req.user as any;
+          if (!user) {
+            return res.redirect('/auth?error=twitter-failed');
+          }
+
+          // Generate JWT token for the Twitter user
+          const token = AuthService.generateToken({
+            id: user.id,
+            username: user.username,
+            email: user.email || undefined,
+            authProvider: 'twitter'
+          });
+
+          // Redirect to frontend with token in URL parameters
+          // Frontend will extract token and store it
+          res.redirect(`/auth-success?token=${token}`);
+        } catch (error) {
+          console.error('Twitter callback error:', error);
+          res.redirect('/auth?error=twitter-callback');
+        }
+      }
+    );
+  } else {
+    // Fallback routes when Twitter OAuth is not configured
+    app.get('/api/auth/twitter', (req: Request, res: Response) => {
+      res.status(503).json({ error: 'Twitter OAuth is not configured' });
+    });
+    
+    app.get('/api/auth/twitter/callback', (req: Request, res: Response) => {
+      res.redirect('/auth?error=twitter-not-configured');
+    });
+  }
 
   // Get current user profile
   app.get('/api/users/me', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {

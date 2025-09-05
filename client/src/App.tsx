@@ -11,6 +11,7 @@ import { DashboardSkeleton, TradingSkeleton } from "@/components/LazyWrapper";
 // Immediate load for critical pages
 import Landing from "@/pages/landing";
 import Auth from "@/pages/auth";
+import AuthSuccess from "@/pages/auth-success";
 import NotFound from "@/pages/not-found";
 
 // Lazy load heavy pages for better performance
@@ -30,6 +31,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
+      <Route path="/auth-success" component={AuthSuccess} />
       
       <Route path="/dashboard">
         <Suspense fallback={<DashboardSkeleton />}>

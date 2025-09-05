@@ -1,12 +1,25 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import passport from 'passport';
+import { Strategy as TwitterStrategy } from 'passport-twitter';
 import { Request, Response, NextFunction } from 'express';
+import { storage } from './storage';
 
 export interface JWTPayload {
   id: string;
   username: string;
   email?: string;
   walletAddress?: string;
+  authProvider?: string;
+}
+
+export interface TwitterProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  photos?: Array<{ value: string }>;
+  emails?: Array<{ value: string; verified?: boolean }>;
+  verified?: boolean;
 }
 
 export interface AuthRequest extends Request {
@@ -106,6 +119,88 @@ export class AuthService {
     }
 
     return { valid: true };
+  }
+
+  /**
+   * Setup Twitter OAuth strategy
+   */
+  static setupTwitterAuth(): boolean {
+    if (!process.env.TWITTER_CONSUMER_KEY || !process.env.TWITTER_CONSUMER_SECRET) {
+      console.warn('Twitter OAuth credentials not found. Twitter login will not be available.');
+      return false;
+    }
+
+    try {
+      passport.use(new TwitterStrategy({
+        consumerKey: process.env.TWITTER_CONSUMER_KEY,
+        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+        callbackURL: process.env.TWITTER_CALLBACK_URL || '/api/auth/twitter/callback'
+      },
+    async (token: string, tokenSecret: string, profile: any, done: any) => {
+      try {
+        const twitterProfile: TwitterProfile = {
+          id: profile.id,
+          username: profile.username,
+          displayName: profile.displayName,
+          photos: profile.photos,
+          emails: profile.emails,
+          verified: profile.verified
+        };
+
+        // Check if user already exists with this Twitter ID
+        let user = await storage.getUserByTwitterId(twitterProfile.id);
+        
+        if (user) {
+          // Update existing user with latest Twitter data
+          user = await storage.updateUser(user.id, {
+            twitterUsername: twitterProfile.username,
+            twitterDisplayName: twitterProfile.displayName,
+            twitterVerified: twitterProfile.verified || false,
+            avatar: user.avatar || twitterProfile.photos?.[0]?.value,
+          });
+        } else {
+          // Create new user from Twitter profile
+          const newUser = await storage.createUser({
+            username: twitterProfile.username,
+            twitterId: twitterProfile.id,
+            twitterUsername: twitterProfile.username,
+            twitterDisplayName: twitterProfile.displayName,
+            twitterVerified: twitterProfile.verified || false,
+            email: twitterProfile.emails?.[0]?.value,
+            avatar: twitterProfile.photos?.[0]?.value,
+            authProvider: 'twitter',
+          });
+          user = newUser;
+        }
+
+        return done(null, user);
+      } catch (error) {
+        console.error('Twitter OAuth error:', error);
+        return done(error, null);
+      }
+    }));
+
+      // Serialize user for session
+      passport.serializeUser((user: any, done: any) => {
+        done(null, user.id);
+      });
+
+      // Deserialize user from session
+      passport.deserializeUser(async (id: string, done: any) => {
+        try {
+          const user = await storage.getUser(id);
+          done(null, user);
+        } catch (error) {
+          done(error, null);
+        }
+      });
+
+      console.log('Twitter OAuth configured successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to setup Twitter OAuth:', error);
+      return false;
+    }
   }
 }
 

@@ -108,6 +108,28 @@ export function useWalletLogin() {
   });
 }
 
+export function useTwitterLogin() {
+  const { toast } = useToast();
+
+  const initiateTwitterLogin = () => {
+    // Redirect to Twitter OAuth URL
+    window.location.href = '/api/auth/twitter';
+  };
+
+  const handleTwitterCallback = (token: string) => {
+    setAuthToken(token);
+    toast({
+      title: 'Twitter login successful!',
+      description: 'Welcome to StreamAiX!',
+    });
+  };
+
+  return {
+    initiateTwitterLogin,
+    handleTwitterCallback,
+  };
+}
+
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const { toast } = useToast();

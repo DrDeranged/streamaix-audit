@@ -3,12 +3,18 @@ import { z } from 'zod';
 // Authentication schemas
 export const registerSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
-  password: z.string().min(6).max(100),
+  password: z.string().min(6).max(100).optional(), // Make password optional for social logins
   email: z.string().email().optional().or(z.literal('').transform(() => undefined)),
   walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address').optional().or(z.literal('').transform(() => undefined)),
   ensName: z.string().optional().or(z.literal('').transform(() => undefined)),
   avatar: z.string().url().optional().or(z.literal('').transform(() => undefined)),
   bio: z.string().max(500).optional().or(z.literal('').transform(() => undefined)),
+  // Twitter fields
+  twitterId: z.string().optional(),
+  twitterUsername: z.string().optional(),
+  twitterDisplayName: z.string().optional(),
+  twitterVerified: z.boolean().optional(),
+  authProvider: z.string().optional(),
 });
 
 export const loginSchema = z.object({
@@ -20,6 +26,15 @@ export const walletLoginSchema = z.object({
   walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address'),
   signature: z.string().min(1, 'Signature is required'),
   message: z.string().min(1, 'Message is required'),
+});
+
+export const twitterAuthSchema = z.object({
+  twitterId: z.string().min(1, 'Twitter ID is required'),
+  username: z.string().min(1, 'Twitter username is required'),
+  displayName: z.string().min(1, 'Twitter display name is required'),
+  avatar: z.string().url().optional(),
+  email: z.string().email().optional(),
+  verified: z.boolean().optional(),
 });
 
 export const updateUserSchema = z.object({
@@ -152,6 +167,7 @@ export const adminUserUpdateSchema = z.object({
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type WalletLoginRequest = z.infer<typeof walletLoginSchema>;
+export type TwitterAuthRequest = z.infer<typeof twitterAuthSchema>;
 export type UpdateUserRequest = z.infer<typeof updateUserSchema>;
 
 export type CreateSummaryRequest = z.infer<typeof createSummarySchema>;

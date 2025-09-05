@@ -7,12 +7,19 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"), // Make password optional for social logins
   email: text("email"),
   walletAddress: text("wallet_address"),
   ensName: text("ens_name"),
   avatar: text("avatar"),
   bio: text("bio"),
+  // Twitter OAuth fields
+  twitterId: text("twitter_id").unique(),
+  twitterUsername: text("twitter_username"),
+  twitterDisplayName: text("twitter_display_name"),
+  twitterVerified: boolean("twitter_verified").default(false),
+  // Auth provider tracking
+  authProvider: text("auth_provider").default("local"), // local, twitter, wallet
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
