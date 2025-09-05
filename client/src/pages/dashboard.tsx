@@ -46,22 +46,53 @@ import {
   TrendingDown
 } from 'lucide-react';
 
+interface Summary {
+  id: string;
+  title: string;
+  originalUrl: string;
+  contentType: string;
+  platform: string;
+  processingStatus: 'pending' | 'processing' | 'completed' | 'failed';
+  accuracy?: number;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+  summary?: string;
+  keyInsights?: string[];
+  marketInsights?: string[];
+  structure?: any;
+}
+
+interface Bounty {
+  id: string;
+  title: string;
+  description: string;
+  reward: number;
+  status: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  creator: string;
+  assignee?: string;
+  tags?: string[];
+  tipPool: number;
+  submissions: number;
+  createdAt: string;
+  dueDate?: string;
+}
+
+interface UserStats {
+  totalSummaries: number;
+  totalViews: number;
+  totalEarnings: number;
+  rank: number;
+  level: string;
+  accuracy: number;
+  streak: number;
+}
+
 interface CryptoQuote {
   symbol: string;
   name: string;
   price: number;
   percentChange24h: number;
-  marketCap: number;
-  volume24h: number;
-}
-
-interface StockQuote {
-  symbol: string;
-  name: string;
-  price: number;
-  percentChange24h: number;
-  marketCap?: number;
-  volume?: number;
 }
 
 interface NewsArticle {
@@ -69,77 +100,61 @@ interface NewsArticle {
   url: string;
   published: string;
   source: string;
-  summary?: string;
-}
-
-interface PodcastShow {
-  title: string;
-  host: string;
-  latestEpisode: string;
-  thumbnail: string;
-  videoUrl: string;
 }
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Update time every second for live feeling
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Fetch live crypto data for ticker
-  const { data: cryptoData, isLoading: cryptoLoading } = useQuery({
-    queryKey: ['/api/market/crypto/BTC,ETH,SOL,BNB,XRP,ADA,AVAX,DOT,MATIC,LINK,LTC,BCH,UNI,ATOM,FTT'],
-    refetchInterval: 60000, // Refresh every minute
+  // Fetch user summaries
+  const { data: summariesData, isLoading: summariesLoading } = useQuery({
+    queryKey: [`/api/users/${user?.id}/summaries`],
+    enabled: !!user?.id,
   });
 
-  // Fetch financial news
-  const { data: newsData, isLoading: newsLoading } = useQuery({
-    queryKey: ['/api/market/news?limit=10'],
-    refetchInterval: 300000, // Refresh every 5 minutes
+  // Fetch user bounties
+  const { data: bountiesData, isLoading: bountiesLoading } = useQuery({
+    queryKey: [`/api/users/${user?.id}/bounties`],
+    enabled: !!user?.id,
   });
 
-  // Fetch crypto-related stocks
-  const { data: stocksData, isLoading: stocksLoading } = useQuery({
-    queryKey: ['/api/market/stocks/crypto'],
-    refetchInterval: 60000, // Refresh every minute
+  // Fetch user stats
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: [`/api/users/${user?.id}/stats`],
+    enabled: !!user?.id,
   });
 
-  // Mock crypto podcasts data
-  const cryptoPodcasts: PodcastShow[] = [
-    {
-      title: "Unchained",
-      host: "Laura Shin",
-      latestEpisode: "The Future of DeFi with Uniswap's Hayden Adams",
-      thumbnail: "/api/placeholder/60/60",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    },
-    {
-      title: "The Pomp Podcast",
-      host: "Anthony Pompliano",
-      latestEpisode: "Michael Saylor on Bitcoin as Digital Gold",
-      thumbnail: "/api/placeholder/60/60",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    },
-    {
-      title: "Bankless",
-      host: "Ryan Sean Adams",
-      latestEpisode: "Ethereum's Path to $10K",
-      thumbnail: "/api/placeholder/60/60",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    },
-    {
-      title: "What Bitcoin Did",
-      host: "Peter McCormack",
-      latestEpisode: "The Lightning Network Revolution",
-      thumbnail: "/api/placeholder/60/60",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    }
-  ];
+  // Fetch wallet balance
+  const { data: balanceData, isLoading: balanceLoading } = useQuery({
+    queryKey: ['/api/wallet/balance'],
+    enabled: !!user?.id,
+  });
+
+  // Supplemental market data (minimal)
+  const { data: cryptoData } = useQuery({
+    queryKey: ['/api/market/crypto/BTC,ETH,SOL'],
+    refetchInterval: 300000, // Every 5 minutes
+  });
+
+  const { data: newsData } = useQuery({
+    queryKey: ['/api/market/news?limit=3'],
+    refetchInterval: 300000, // Every 5 minutes
+  });
+
+  const summaries = summariesData?.summaries || [];
+  const bounties = bountiesData?.bounties || [];
+  const stats: UserStats = statsData || {
+    totalSummaries: 0,
+    totalViews: 0,
+    totalEarnings: 0,
+    rank: 0,
+    level: 'Rising Creator',
+    accuracy: 0,
+    streak: 0
+  };
+  const balance = balanceData?.balance || { streamTokens: 0, usdValue: 0 };
+  const cryptoQuotes = cryptoData?.quotes?.slice(0, 3) || [];
+  const newsArticles = newsData?.articles?.slice(0, 3) || [];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -148,13 +163,6 @@ export default function Dashboard() {
       minimumFractionDigits: 2,
       maximumFractionDigits: price < 1 ? 6 : 2,
     }).format(price);
-  };
-
-  const formatMarketCap = (marketCap: number) => {
-    if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
-    if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
-    if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
-    return `$${marketCap.toFixed(0)}`;
   };
 
   const getChangeColor = (change: number) => {
@@ -167,335 +175,462 @@ export default function Dashboard() {
     return change > 0 ? ArrowUp : change < 0 ? ArrowDown : null;
   };
 
-  const cryptoQuotes = cryptoData?.quotes || [];
-  const newsArticles = newsData?.articles || [];
-  const cryptoStocks = stocksData?.stocks || [];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500/20 text-green-300 border-green-400/30';
+      case 'processing':
+        return 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30';
+      case 'pending':
+        return 'bg-blue-500/20 text-blue-300 border-blue-400/30';
+      case 'failed':
+        return 'bg-red-500/20 text-red-300 border-red-400/30';
+      default:
+        return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Futuristic Grid Background */}
+      {/* Subtle Grid Background */}
       <div className="fixed inset-0" style={{
         backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"1\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
         opacity: 0.5
       }}></div>
       
-      {/* MOBILE-OPTIMIZED MOVING CRYPTO TICKER BANNER */}
-      <div className="relative z-20 bg-gradient-to-r from-purple-900/40 via-blue-900/40 to-purple-900/40 backdrop-blur-lg border-b border-white/10">
-        <div className="overflow-hidden py-4">
-          <motion.div 
-            className="flex space-x-6 md:space-x-8 text-xs md:text-sm"
-            animate={{ x: "-100%" }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 40, // Slower on mobile for better readability
-              ease: "linear" 
-            }}
-            style={{ width: "200%" }}
-          >
-            {/* First set of crypto data - Mobile optimized */}
-            {cryptoQuotes.map((quote: CryptoQuote, index: number) => {
-              const ChangeIcon = getChangeIcon(quote.percentChange24h);
-              return (
-                <div key={`first-${index}`} className="flex items-center space-x-1.5 md:space-x-2 text-white whitespace-nowrap">
-                  <span className="font-bold text-orange-400 text-sm md:text-base">{quote.symbol}</span>
-                  <span className="font-semibold text-sm md:text-base">{formatPrice(quote.price)}</span>
-                  <span className={`flex items-center text-xs md:text-sm ${getChangeColor(quote.percentChange24h)}`}>
-                    {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 md:h-3 md:w-3 mr-0.5 md:mr-1" />}
-                    {quote.percentChange24h.toFixed(2)}%
-                  </span>
-                  <span className="text-gray-400 text-xs hidden sm:inline">{formatMarketCap(quote.marketCap)}</span>
-                </div>
-              );
-            })}
-            
-            {/* Duplicate for seamless scroll */}
-            {cryptoQuotes.map((quote: CryptoQuote, index: number) => {
-              const ChangeIcon = getChangeIcon(quote.percentChange24h);
-              return (
-                <div key={`second-${index}`} className="flex items-center space-x-1.5 md:space-x-2 text-white whitespace-nowrap">
-                  <span className="font-bold text-orange-400 text-sm md:text-base">{quote.symbol}</span>
-                  <span className="font-semibold text-sm md:text-base">{formatPrice(quote.price)}</span>
-                  <span className={`flex items-center text-xs md:text-sm ${getChangeColor(quote.percentChange24h)}`}>
-                    {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 md:h-3 md:w-3 mr-0.5 md:mr-1" />}
-                    {quote.percentChange24h.toFixed(2)}%
-                  </span>
-                  <span className="text-gray-400 text-xs hidden sm:inline">{formatMarketCap(quote.marketCap)}</span>
-                </div>
-              );
-            })}
-          </motion.div>
+      {/* SUBTLE CRYPTO TICKER - Supplemental */}
+      {cryptoQuotes.length > 0 && (
+        <div className="relative z-20 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-purple-900/20 backdrop-blur-sm border-b border-white/5">
+          <div className="overflow-hidden py-2">
+            <motion.div 
+              className="flex space-x-8 text-xs opacity-60"
+              animate={{ x: "-100%" }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 45, 
+                ease: "linear" 
+              }}
+              style={{ width: "200%" }}
+            >
+              {[...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
+                const ChangeIcon = getChangeIcon(quote.percentChange24h);
+                return (
+                  <div key={index} className="flex items-center space-x-2 text-white whitespace-nowrap">
+                    <span className="font-bold text-orange-400/80">{quote.symbol}</span>
+                    <span className="font-medium">{formatPrice(quote.price)}</span>
+                    <span className={`flex items-center ${getChangeColor(quote.percentChange24h)}`}>
+                      {ChangeIcon && <ChangeIcon className="h-2 w-2 mr-1" />}
+                      {quote.percentChange24h.toFixed(1)}%
+                    </span>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </div>
         </div>
-      </div>
+      )}
       
-      <div className="relative z-10 max-w-7xl mx-auto p-3 md:p-6">
-        {/* Mobile-Optimized Header */}
+      <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-6">
+        {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-4 mb-6 pt-2"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-4"
         >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-6 mb-4 sm:mb-0">
             <Button
               onClick={() => setLocation('/')}
               variant="outline"
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 hover:scale-105 transition-transform w-full sm:w-auto"
+              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
               data-testid="button-back-home"
             >
               <Home className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
-            <div className="w-full sm:w-auto text-center sm:text-left">
-              <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-1">
-                StreamAiX Command
+            <div>
+              <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-3">
+                Welcome back, {user?.username}! 👋
               </h1>
-              <p className="text-gray-300 text-sm md:text-lg flex items-center justify-center sm:justify-start gap-2">
-                <span className="text-green-400 animate-pulse">●</span>
-                {currentTime.toLocaleTimeString()} - Live Data
+              <p className="text-gray-300 text-lg">
+                Manage your AI summaries and track your progress
               </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Mobile-First Dashboard Grid */}
-        <div className="grid grid-cols-1 gap-4 md:gap-6">
-          {/* MOBILE-OPTIMIZED FINANCIAL NEWS SECTION */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2 text-lg">
-                  <Newspaper className="h-5 w-5 text-blue-400" />
-                  Live Financial News
-                  <Badge variant="outline" className="ml-auto text-xs bg-blue-500/20 text-blue-300 border-blue-400/30">
-                    {newsArticles.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {newsLoading ? (
-                  <div className="flex items-center justify-center h-20">
-                    <RefreshCw className="h-6 w-6 animate-spin text-purple-400" />
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {newsArticles.slice(0, 8).map((article: NewsArticle, index: number) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
-                        onClick={() => window.open(article.url, '_blank')}
-                        data-testid={`news-article-${index}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Newspaper className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-white text-sm font-medium line-clamp-2 group-hover:text-blue-300 transition-colors leading-tight">
-                              {article.title}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-300 border-blue-400/30">
-                                {article.source}
-                              </Badge>
-                              <span className="text-gray-400 text-xs">
-                                {new Date(article.published).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                              </span>
-                            </div>
-                          </div>
-                          <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors flex-shrink-0" />
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* MOBILE-OPTIMIZED CRYPTO PODCASTS SECTION */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2 text-lg">
-                  <Headphones className="h-5 w-5 text-green-400" />
-                  Crypto Podcasts & Videos
-                  <Badge variant="outline" className="ml-auto text-xs bg-green-500/20 text-green-300 border-green-400/30">
-                    Latest
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {cryptoPodcasts.map((podcast, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
-                      onClick={() => window.open(podcast.videoUrl, '_blank')}
-                      data-testid={`podcast-${index}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Video className="h-6 w-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-white font-medium group-hover:text-green-300 transition-colors text-sm">
-                            {podcast.title}
-                          </h4>
-                          <p className="text-gray-400 text-xs">by {podcast.host}</p>
-                          <p className="text-gray-300 text-xs mt-1 line-clamp-2 leading-tight">
-                            {podcast.latestEpisode}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Play className="h-3 w-3 text-green-400" />
-                            <span className="text-green-400 text-xs">Watch</span>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* MOBILE-OPTIMIZED CRYPTO STOCKS SECTION */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2 text-lg">
-                  <TrendingUp className="h-5 w-5 text-orange-400" />
-                  Crypto Stocks
-                  <Badge variant="outline" className="ml-auto text-xs bg-orange-500/20 text-orange-300 border-orange-400/30">
-                    {cryptoStocks.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {stocksLoading ? (
-                  <div className="flex items-center justify-center h-20">
-                    <RefreshCw className="h-6 w-6 animate-spin text-orange-400" />
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {cryptoStocks.slice(0, 20).map((stock: StockQuote, index: number) => {
-                      const ChangeIcon = getChangeIcon(stock.percentChange24h);
-                      return (
-                        <motion.div
-                          key={stock.symbol}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.02 }}
-                          className="p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 active:scale-95 transition-all text-center"
-                          data-testid={`stock-${stock.symbol}`}
-                        >
-                          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white text-xs font-bold mx-auto mb-2">
-                            {stock.symbol.slice(0, 2)}
-                          </div>
-                          <div className="text-white font-bold text-sm">{stock.symbol}</div>
-                          <div className="text-gray-400 text-xs truncate">
-                            {stock.name.length > 15 ? stock.name.slice(0, 15) + '...' : stock.name}
-                          </div>
-                          <div className="text-white font-semibold text-sm mt-1">
-                            {formatPrice(stock.price)}
-                          </div>
-                          <div className={`flex items-center justify-center text-xs mt-1 ${getChangeColor(stock.percentChange24h)}`}>
-                            {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
-                            {stock.percentChange24h.toFixed(1)}%
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-                
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg border border-orange-400/30 text-center mt-4"
-                >
-                  <BarChart3 className="h-6 w-6 text-orange-400 mx-auto mb-2" />
-                  <p className="text-white font-medium text-sm">Live Market Data</p>
-                  <p className="text-gray-300 text-xs">Real-time crypto-related stock prices</p>
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-
-        {/* Mobile-Optimized Stats Row */}
+        {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-4 md:mt-6"
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
         >
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 md:p-4 text-center">
-              <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-green-400 mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-xl">{cryptoQuotes.length}</div>
-              <div className="text-gray-400 text-xs md:text-sm">Live Cryptos</div>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Total Summaries</p>
+                  <p className="text-white text-2xl font-bold">{stats.totalSummaries}</p>
+                </div>
+                <BarChart3 className="h-8 w-8 text-purple-400" />
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 md:p-4 text-center">
-              <Newspaper className="h-6 w-6 md:h-8 md:w-8 text-blue-400 mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-xl">{newsArticles.length}</div>
-              <div className="text-gray-400 text-xs md:text-sm">News Stories</div>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Total Views</p>
+                  <p className="text-white text-2xl font-bold">{stats.totalViews}</p>
+                </div>
+                <Eye className="h-8 w-8 text-blue-400" />
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 md:p-4 text-center">
-              <Headphones className="h-6 w-6 md:h-8 md:w-8 text-green-400 mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-xl">{cryptoPodcasts.length}</div>
-              <div className="text-gray-400 text-xs md:text-sm">Podcasts</div>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">STREAM Tokens</p>
+                  <p className="text-white text-2xl font-bold">{balance.streamTokens.toFixed(2)}</p>
+                </div>
+                <Wallet className="h-8 w-8 text-green-400" />
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 md:p-4 text-center">
-              <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-orange-400 mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-xl">{cryptoStocks.length}</div>
-              <div className="text-gray-400 text-xs md:text-sm">Crypto Stocks</div>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Creator Rank</p>
+                  <p className="text-white text-lg font-bold">{stats.level}</p>
+                </div>
+                <Award className="h-8 w-8 text-yellow-400" />
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Mobile Quick Actions Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 p-4 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-green-500/10 rounded-lg border border-white/10 text-center"
-        >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Activity className="h-5 w-5 text-purple-400 animate-pulse" />
-            <span className="text-white font-medium">Live Data Dashboard</span>
+        {/* Main Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* MAIN CONTENT AREA - 3/4 width */}
+          <div className="lg:col-span-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Tabs defaultValue="summaries" className="w-full">
+                <TabsList className="grid w-full grid-cols-5 bg-white/5 border border-white/20">
+                  <TabsTrigger value="overview" className="data-[state=active]:bg-purple-500/30">
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30">
+                    My Summaries
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30">
+                    My Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-500/30">
+                    Bounties
+                  </TabsTrigger>
+                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30">
+                    Wallet
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-6 mt-6">
+                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                    <CardHeader>
+                      <CardTitle className="text-white">Recent Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {summaries.slice(0, 5).map((summary: Summary, index: number) => (
+                          <div key={summary.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-white" />
+                              </div>
+                              <div>
+                                <h4 className="text-white font-medium">{summary.title}</h4>
+                                <p className="text-gray-400 text-sm">{summary.platform}</p>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className={getStatusColor(summary.processingStatus)}>
+                              {summary.processingStatus}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="summaries" className="space-y-6 mt-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-white text-xl font-bold">My Summaries ({summaries.length})</h2>
+                    <Button className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30">
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Summary
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {summariesLoading ? (
+                      <div className="text-center py-8">
+                        <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
+                      </div>
+                    ) : summaries.length > 0 ? (
+                      summaries.map((summary: Summary) => (
+                        <motion.div
+                          key={summary.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          whileHover={{ scale: 1.02 }}
+                          className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-6 cursor-pointer"
+                          data-testid={`summary-${summary.id}`}
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-white text-lg font-semibold mb-2">{summary.title}</h3>
+                              <div className="flex items-center gap-4 text-sm text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Globe className="h-4 w-4" />
+                                  {summary.platform}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {new Date(summary.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className={getStatusColor(summary.processingStatus)}>
+                                {summary.processingStatus}
+                              </Badge>
+                              <Button variant="outline" size="sm" className="text-white border-white/20">
+                                View Full
+                              </Button>
+                            </div>
+                          </div>
+
+                          {summary.accuracy && (
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between text-sm mb-1">
+                                <span className="text-gray-300">AI Accuracy</span>
+                                <span className="text-white">{summary.accuracy}%</span>
+                              </div>
+                              <Progress value={summary.accuracy} className="h-2" />
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-2">
+                              {summary.tags?.slice(0, 3).map((tag, index) => (
+                                <Badge key={index} variant="outline" className="text-xs bg-gray-500/20 text-gray-300">
+                                  #{tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                              <button className="hover:text-white transition-colors">
+                                <Bookmark className="h-4 w-4" />
+                              </button>
+                              <button className="hover:text-white transition-colors">
+                                <Share className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <Card className="bg-white/5 border-white/10">
+                        <CardContent className="p-8 text-center">
+                          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-300">No summaries yet. Create your first AI-powered summary!</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="notes" className="space-y-6 mt-6">
+                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <BookmarkPlus className="h-5 w-5" />
+                        My Personal Notes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <UserNotesList title="" />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="bounties" className="space-y-6 mt-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-white text-xl font-bold">Active Bounties</h2>
+                    <Button className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30">
+                      <Target className="h-4 w-4 mr-2" />
+                      Create Bounty
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {bountiesLoading ? (
+                      <div className="text-center py-8">
+                        <RefreshCw className="h-8 w-8 animate-spin text-green-400 mx-auto" />
+                      </div>
+                    ) : bounties.length > 0 ? (
+                      bounties.map((bounty: Bounty) => (
+                        <Card key={bounty.id} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div>
+                                <h3 className="text-white text-lg font-semibold mb-2">{bounty.title}</h3>
+                                <p className="text-gray-300 text-sm mb-3">{bounty.description}</p>
+                                <div className="flex items-center gap-4 text-sm text-gray-400">
+                                  <span className="flex items-center gap-1">
+                                    <DollarSign className="h-4 w-4" />
+                                    {bounty.reward} STREAM
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Users className="h-4 w-4" />
+                                    {bounty.submissions} submissions
+                                  </span>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className={getStatusColor(bounty.status)}>
+                                {bounty.status}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <Card className="bg-white/5 border-white/10">
+                        <CardContent className="p-8 text-center">
+                          <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-300">No active bounties. Create one to incentivize content creation!</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="wallet" className="space-y-6 mt-6">
+                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Wallet className="h-5 w-5" />
+                        Wallet Overview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="text-center">
+                        <p className="text-gray-400 text-sm">Current Balance</p>
+                        <p className="text-white text-4xl font-bold">{balance.streamTokens.toFixed(2)} STREAM</p>
+                        <p className="text-gray-400 text-lg">≈ ${balance.usdValue.toFixed(2)} USD</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <Button className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Deposit
+                        </Button>
+                        <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                          <ArrowUp className="h-4 w-4 mr-2" />
+                          Withdraw
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </motion.div>
           </div>
-          <p className="text-gray-300 text-sm">
-            Tap any item to explore • Auto-refreshes every minute
-          </p>
-        </motion.div>
+
+          {/* SUPPLEMENTAL SIDEBAR - 1/4 width */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Market Intelligence - Minimal */}
+            {newsArticles.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                      <Newspaper className="h-4 w-4 text-blue-400" />
+                      Market Intel
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {newsArticles.map((article: NewsArticle, index: number) => (
+                      <div
+                        key={index}
+                        className="p-3 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-colors"
+                        onClick={() => window.open(article.url, '_blank')}
+                      >
+                        <h5 className="text-white text-xs font-medium line-clamp-2 mb-1">
+                          {article.title}
+                        </h5>
+                        <p className="text-gray-400 text-xs">
+                          {new Date(article.published).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Quick Actions */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-sm">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Process Content
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    size="sm"
+                  >
+                    <BookmarkPlus className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    size="sm"
+                  >
+                    <Share className="h-4 w-4 mr-2" />
+                    Share Profile
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
