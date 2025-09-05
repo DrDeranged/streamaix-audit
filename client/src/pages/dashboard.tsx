@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import UserNotesList from '@/components/UserNotesList';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
   Play, 
@@ -33,7 +34,13 @@ import {
   MessageSquare,
   FileText,
   Hash,
-  Code2
+  Code2,
+  ArrowUp,
+  ArrowDown,
+  Newspaper,
+  Globe,
+  RefreshCw,
+  ExternalLink
 } from 'lucide-react';
 
 interface Summary {
@@ -119,6 +126,28 @@ interface UserStats {
   rank: string;
 }
 
+interface CryptoQuote {
+  symbol: string;
+  name: string;
+  price: number;
+  percentChange24h: number;
+  percentChange7d: number;
+  percentChange30d: number;
+  marketCap: number;
+  volume24h: number;
+  rank: number;
+  lastUpdated: string;
+}
+
+interface NewsArticle {
+  title: string;
+  url: string;
+  published: string;
+  source: string;
+  summary?: string;
+  category?: string;
+}
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, user } = useAuth();
@@ -153,6 +182,22 @@ export default function Dashboard() {
     enabled: !!user?.id,
   });
 
+  // Fetch live crypto market data
+  const { data: marketData, isLoading: isLoadingMarket } = useQuery({
+    queryKey: ['market', 'crypto'],
+    queryFn: () => apiRequest('/api/market/crypto/BTC,ETH,SOL,BNB,XRP,ADA'),
+    refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000, // Data is fresh for 30 seconds
+  });
+
+  // Fetch financial news
+  const { data: newsData, isLoading: isLoadingNews } = useQuery({
+    queryKey: ['news', 'financial'],
+    queryFn: () => apiRequest('/api/market/news?limit=6'),
+    refetchInterval: 300000, // Refresh every 5 minutes
+    staleTime: 120000, // Data is fresh for 2 minutes
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -172,6 +217,9 @@ export default function Dashboard() {
   const summaries: Summary[] = summariesData?.summaries || [];
   const bounties: Bounty[] = bountiesData?.bounties || [];
   const balance = walletData?.balance;
+  const cryptoQuotes: CryptoQuote[] = marketData?.quotes || [];
+  const newsArticles: NewsArticle[] = newsData?.articles || [];
+  
   const stats: UserStats = statsData?.stats || {
     totalSummaries: summaries.length,
     totalViews: summaries.reduce((acc, s) => acc + (s.viewCount || 0), 0),
@@ -191,32 +239,96 @@ export default function Dashboard() {
     }
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: price < 1 ? 6 : 2,
+    }).format(price);
+  };
+
+  const formatMarketCap = (marketCap: number) => {
+    if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
+    if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
+    if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
+    return `$${marketCap.toFixed(0)}`;
+  };
+
+  const formatVolume = (volume: number) => {
+    if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
+    if (volume >= 1e6) return `$${(volume / 1e6).toFixed(2)}M`;
+    if (volume >= 1e3) return `$${(volume / 1e3).toFixed(2)}K`;
+    return `$${volume.toFixed(0)}`;
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return 'text-green-400';
+    if (change < 0) return 'text-red-400';
+    return 'text-gray-400';
+  };
+
+  const getChangeIcon = (change: number) => {
+    return change > 0 ? ArrowUp : change < 0 ? ArrowDown : null;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-8">
-          <div className="flex items-center gap-4 mb-4 sm:mb-0">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Futuristic Grid Background */}
+      <div className="fixed inset-0" style={{
+        backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"1\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
+        opacity: 0.5
+      }}></div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto p-6">
+        {/* Futuristic Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-8"
+        >
+          <div className="flex items-center gap-6 mb-4 sm:mb-0">
             <Button
               onClick={() => setLocation('/')}
               variant="outline"
               size="sm"
-              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 hover:scale-105 transition-transform"
               data-testid="button-back-home"
             >
               <Home className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                Welcome back, {user?.username}! 👋
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-3">
+                StreamAiX Command Center
               </h1>
-              <p className="text-gray-300 text-lg">
-                Manage your AI summaries and track your progress
+              <p className="text-gray-300 text-xl flex items-center gap-2">
+                <span className="text-green-400">●</span>
+                Welcome back, {user?.username}! 
+                <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full ml-2">
+                  LIVE DATA
+                </span>
               </p>
             </div>
           </div>
-        </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right text-sm">
+              <p className="text-gray-300">Market Status</p>
+              <p className="text-green-400 font-semibold flex items-center">
+                <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                ACTIVE
+              </p>
+            </div>
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 border-0"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+          </div>
+        </motion.div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -298,6 +410,112 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Live Market Data - Top Row */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"
+            >
+              {/* Crypto Market Overview */}
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border-b border-white/10">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-cyan-400" />
+                    Live Crypto Markets
+                    {isLoadingMarket && <RefreshCw className="h-4 w-4 animate-spin text-cyan-400" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {cryptoQuotes.slice(0, 4).map((crypto, index) => {
+                      const ChangeIcon = getChangeIcon(crypto.percentChange24h);
+                      return (
+                        <motion.div 
+                          key={crypto.symbol}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors border border-white/5"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                              {crypto.symbol.slice(0,2)}
+                            </div>
+                            <div>
+                              <p className="text-white font-semibold">{crypto.symbol}</p>
+                              <p className="text-gray-400 text-sm">{formatMarketCap(crypto.marketCap)}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-white font-bold text-lg">{formatPrice(crypto.price)}</p>
+                            <p className={`text-sm flex items-center gap-1 ${getChangeColor(crypto.percentChange24h)}`}>
+                              {ChangeIcon && <ChangeIcon className="h-3 w-3" />}
+                              {crypto.percentChange24h.toFixed(2)}%
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                    {cryptoQuotes.length === 0 && !isLoadingMarket && (
+                      <div className="text-center py-8 text-gray-400">
+                        <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>Market data loading...</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Financial News Feed */}
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border-b border-white/10">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Newspaper className="h-5 w-5 text-green-400" />
+                    Financial News
+                    {isLoadingNews && <RefreshCw className="h-4 w-4 animate-spin text-green-400" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {newsArticles.slice(0, 3).map((article, index) => (
+                      <motion.div 
+                        key={article.url}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors border border-white/5 cursor-pointer"
+                        onClick={() => window.open(article.url, '_blank')}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="flex-1">
+                            <h4 className="text-white font-medium text-sm leading-snug mb-2 hover:text-green-300 transition-colors">
+                              {article.title}
+                            </h4>
+                            <div className="flex items-center justify-between text-xs text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <span className="text-green-400">●</span>
+                                {article.source}
+                              </span>
+                              <span>{new Date(article.published).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        </div>
+                      </motion.div>
+                    ))}
+                    {newsArticles.length === 0 && !isLoadingNews && (
+                      <div className="text-center py-8 text-gray-400">
+                        <Newspaper className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>News feed loading...</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
             {/* Recent Activity */}
             <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
               <CardHeader>
