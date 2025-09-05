@@ -177,8 +177,8 @@ export default function Dashboard() {
     totalViews: summaries.reduce((acc, s) => acc + (s.viewCount || 0), 0),
     totalLikes: summaries.reduce((acc, s) => acc + (s.likes || 0), 0),
     totalEarned: balance?.totalEarned || 0,
-    streakDays: 5,
-    rank: 'Rising Creator'
+    streakDays: 0, // Real data will come from backend
+    rank: 'New User' // Real rank calculation will be implemented
   };
 
   const getStatusColor = (status: string) => {

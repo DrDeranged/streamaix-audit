@@ -1051,39 +1051,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WALLET & REWARDS ROUTES
   // =============================================================================
 
-  // Mock wallet endpoints for demo
+  // Real wallet balance endpoint 
   app.get('/api/wallet/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    // TODO: Implement real wallet integration
+    // For now, return zeros instead of fake data
     const balance = {
-      streamTokens: 1247.85 + Math.random() * 100,
-      usdValue: 3743.55 + Math.random() * 300,
-      change24h: (Math.random() - 0.5) * 20,
-      totalEarned: 2890.40,
-      totalSpent: 1642.55,
-      pendingRewards: 156.90,
+      streamTokens: 0,
+      usdValue: 0,
+      change24h: 0,
+      totalEarned: 0,
+      totalSpent: 0,
+      pendingRewards: 0,
     };
     
     res.json({ balance });
   }));
 
   app.get('/api/wallet/transactions', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const transactions = [
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        type: 'reward',
-        amount: 45.60,
-        description: 'Summary accuracy reward - "Web3 Fundamentals Explained"',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        status: 'completed',
-      },
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        type: 'bounty_payment',
-        amount: -100.00,
-        description: 'Bounty created - "AI Ethics Discussion Analysis"',
-        timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-        status: 'completed',
-      },
-    ];
+    // TODO: Implement real transaction history from database
+    // Return empty array instead of fake transactions
+    const transactions: any[] = [];
     
     res.json({ transactions });
   }));

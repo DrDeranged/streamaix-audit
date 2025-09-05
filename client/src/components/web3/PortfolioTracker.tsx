@@ -53,71 +53,26 @@ export function PortfolioTracker({ className = '' }: PortfolioTrackerProps) {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock portfolio data for demonstration
+  // Real portfolio data fetching (when wallet is connected)
   useEffect(() => {
-    if (!isConnected) return;
-
-    setIsLoading(true);
-    // Simulate API call delay
-    setTimeout(() => {
+    if (!isConnected) {
+      // Reset portfolio data when wallet disconnects
       setPortfolioData({
-        totalValue: '45,678.90',
-        dayChange: 5.67,
-        dayChangeValue: '2,456.78',
-        holdings: [
-          {
-            symbol: 'ETH',
-            name: 'Ethereum',
-            balance: '12.5',
-            value: '28,750.00',
-            percentage: 62.9,
-            change24h: 3.45,
-            logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png'
-          },
-          {
-            symbol: 'STREAM',
-            name: 'StreamAiX Token',
-            balance: '5,420',
-            value: '8,130.00',
-            percentage: 17.8,
-            change24h: 12.34,
-            logo: 'https://api.dicebear.com/7.x/shapes/svg?seed=stream&backgroundColor=6366f1&scale=80'
-          },
-          {
-            symbol: 'USDC',
-            name: 'USD Coin',
-            balance: '4,200',
-            value: '4,200.00',
-            percentage: 9.2,
-            change24h: 0.01,
-            logo: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'
-          },
-          {
-            symbol: 'MATIC',
-            name: 'Polygon',
-            balance: '3,800',
-            value: '3,230.00',
-            percentage: 7.1,
-            change24h: -2.15,
-            logo: 'https://cryptologos.cc/logos/polygon-matic-logo.png'
-          },
-          {
-            symbol: 'OP',
-            name: 'Optimism',
-            balance: '890',
-            value: '1,368.90',
-            percentage: 3.0,
-            change24h: 8.92,
-            logo: 'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png'
-          }
-        ],
-        stakingValue: '12,450.00',
-        lpValue: '8,900.00',
-        nftValue: '2,350.00',
-        riskScore: 6.8
+        totalValue: '0.00',
+        dayChange: 0,
+        dayChangeValue: '0.00',
+        holdings: [],
+        stakingValue: '0.00',
+        lpValue: '0.00',
+        nftValue: '0.00',
+        riskScore: 0
       });
-      setIsLoading(false);
-    }, 1500);
+      return;
+    }
+
+    // TODO: Implement real portfolio data fetching
+    // This will be replaced with actual wallet balance queries
+    console.log('Portfolio tracking requires real wallet integration');
   }, [isConnected]);
 
   const getRiskColor = (score: number) => {
