@@ -162,7 +162,7 @@ export default function AuthPage() {
                     onClick={initiateTwitterLogin}
                   >
                     <FaTwitter className="w-4 h-4 mr-2" />
-                    Continue with Twitter
+                    Continue with X
                   </Button>
 
                   <WalletConnector
@@ -320,7 +320,7 @@ export default function AuthPage() {
                     onClick={initiateTwitterLogin}
                   >
                     <FaTwitter className="w-4 h-4 mr-2" />
-                    Continue with Twitter
+                    Continue with X
                   </Button>
 
                   <WalletConnector
