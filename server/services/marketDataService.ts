@@ -498,38 +498,42 @@ export class MarketDataService {
     if (cached) return cached;
 
     try {
-      // Get real-time quotes for crypto-related stocks using Alpha Vantage bulk quotes
-      const symbols = this.cryptoStocks.slice(0, 10); // Alpha Vantage free tier limit
-      const symbolsParam = symbols.join(',');
-      
-      const response = await axios.get(this.alphaVantageBaseUrl, {
-        params: {
-          function: 'REALTIME_BULK_QUOTES',
-          symbols: symbolsParam,
-          apikey: this.alphaVantageApiKey
-        },
-        timeout: 10000
-      });
-
+      // Get real-time quotes for crypto-related stocks using Alpha Vantage individual calls
+      const symbols = this.cryptoStocks.slice(0, 5); // Limit to 5 to avoid rate limits
       const stockQuotes: StockQuote[] = [];
       
-      if (response.data && response.data['Real Time Bulk Quotes']) {
-        const quotes = response.data['Real Time Bulk Quotes'];
-        
-        for (const quote of quotes) {
-          const symbol = quote['1. symbol'];
-          const price = parseFloat(quote['2. price']);
-          const changePercent = parseFloat(quote['4. change percent'].replace('%', ''));
-          
-          stockQuotes.push({
-            symbol: symbol,
-            name: this.getStockName(symbol),
-            price: price,
-            percentChange24h: changePercent,
-            marketCap: 0, // Not available in bulk quotes
-            volume: 0, // Not available in bulk quotes
-            lastUpdated: new Date().toISOString()
+      for (const symbol of symbols) {
+        try {
+          const response = await axios.get(this.alphaVantageBaseUrl, {
+            params: {
+              function: 'GLOBAL_QUOTE',
+              symbol: symbol,
+              apikey: this.alphaVantageApiKey
+            },
+            timeout: 8000
           });
+
+          if (response.data && response.data['Global Quote']) {
+            const quote = response.data['Global Quote'];
+            const price = parseFloat(quote['05. price']);
+            const changePercent = parseFloat(quote['10. change percent'].replace('%', ''));
+            
+            stockQuotes.push({
+              symbol: symbol,
+              name: this.getStockName(symbol),
+              price: price,
+              percentChange24h: changePercent,
+              marketCap: 0,
+              volume: parseInt(quote['06. volume']) || 0,
+              lastUpdated: new Date().toISOString()
+            });
+          }
+          
+          // Small delay between requests to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          console.warn(`Failed to fetch ${symbol}:`, error.message);
+          continue;
         }
       }
 

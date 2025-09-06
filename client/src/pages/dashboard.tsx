@@ -43,7 +43,9 @@ import {
   ExternalLink,
   Headphones,
   Video,
-  TrendingDown
+  TrendingDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface Summary {
@@ -256,30 +258,57 @@ export default function Dashboard() {
       {/* ENHANCED FINANCIAL NEWS SECTION */}
       <div className="relative z-10 bg-gradient-to-r from-slate-900/40 via-blue-900/20 to-slate-900/40 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-2">
-          <div className="flex items-center gap-2 mb-2">
-            <Newspaper className="h-4 w-4 text-blue-400" />
-            <h3 className="text-white text-sm font-medium">Financial News</h3>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Newspaper className="h-4 w-4 text-blue-400" />
+              <h3 className="text-white text-sm font-medium">Financial News</h3>
+            </div>
+            <div className="flex gap-1">
+              <button 
+                className="text-white/50 hover:text-white p-1 rounded transition-colors"
+                onClick={() => {
+                  const container = document.querySelector('.news-scroll-container');
+                  container?.scrollBy({ left: -300, behavior: 'smooth' });
+                }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button 
+                className="text-white/50 hover:text-white p-1 rounded transition-colors"
+                onClick={() => {
+                  const container = document.querySelector('.news-scroll-container');
+                  container?.scrollBy({ left: 300, behavior: 'smooth' });
+                }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-          <div className="overflow-x-auto scrollbar-visible">
+          <div className="overflow-x-auto scrollbar-visible news-scroll-container">
             <div className="flex space-x-3 pb-2" style={{ width: 'max-content' }}>
-              {newsArticles.slice(0, 10).map((article: NewsArticle, index: number) => (
-                <div
-                  key={index}
-                  className="min-w-[280px] bg-white/5 rounded-lg p-3 border border-white/10 backdrop-blur-sm hover:bg-white/10 cursor-pointer transition-all hover:scale-[1.02]"
-                  onClick={() => window.open(article.url, '_blank')}
-                  data-testid={`news-article-${index}`}
-                >
-                  <h4 className="text-white text-xs font-medium line-clamp-2 mb-2 leading-tight">
-                    {article.title}
-                  </h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-blue-300 text-xs font-medium">
-                      {new Date(article.published).toLocaleDateString()}
-                    </span>
-                    <ExternalLink className="h-3 w-3 text-gray-400" />
+              {newsArticles.slice(0, 12).map((article: NewsArticle, index: number) => {
+                // Extract key headline info
+                const headline = article.title.length > 85 ? 
+                  article.title.substring(0, 82) + '...' : 
+                  article.title;
+                
+                return (
+                  <div
+                    key={index}
+                    className="min-w-[320px] bg-white/5 rounded-lg p-3 border border-white/10 backdrop-blur-sm hover:bg-white/10 cursor-pointer transition-all hover:scale-[1.02]"
+                    onClick={() => window.open(article.url, '_blank')}
+                    data-testid={`news-article-${index}`}
+                  >
+                    <h4 className="text-white text-sm font-semibold line-clamp-3 mb-2 leading-tight">
+                      {headline}
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <span className="text-blue-400 text-xs font-medium">{article.source}</span>
+                      <span className="text-gray-500 text-xs">{new Date(article.published).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
