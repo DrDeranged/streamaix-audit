@@ -505,70 +505,80 @@ export class MarketDataService {
     if (cached) return cached;
 
     try {
-      // Get real-time quotes for crypto-related stocks using Alpha Vantage individual calls
-      const symbols = this.cryptoStocks.slice(0, 10); // Reduced to 10 to avoid rate limits
+      // Use fewer stocks but ensure they work with real-time data
+      const symbols = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA']; // Core crypto stocks only
       const stockQuotes: StockQuote[] = [];
+      
+      console.log(`📈 Attempting to fetch real-time data for: ${symbols.join(', ')}`);
       
       for (const symbol of symbols) {
         try {
+          console.log(`📈 Fetching ${symbol}...`);
           const response = await axios.get(this.alphaVantageBaseUrl, {
             params: {
               function: 'GLOBAL_QUOTE',
               symbol: symbol,
               apikey: this.alphaVantageApiKey
             },
-            timeout: 8000
+            timeout: 5000
           });
+
+          console.log(`📈 Response for ${symbol}:`, response.data);
 
           if (response.data && response.data['Global Quote']) {
             const quote = response.data['Global Quote'];
             
-            // Add error handling for missing or invalid data
+            // Check if we have valid data
             const priceStr = quote['05. price'];
             const changeStr = quote['10. change percent'];
-            const volumeStr = quote['06. volume'];
             
-            if (!priceStr || !changeStr) {
-              console.warn(`Missing price/change data for ${symbol}`);
-              continue;
+            if (priceStr && changeStr) {
+              const price = parseFloat(priceStr);
+              const changePercent = parseFloat(changeStr.replace('%', ''));
+              
+              if (!isNaN(price) && !isNaN(changePercent)) {
+                stockQuotes.push({
+                  symbol: symbol,
+                  name: this.getStockName(symbol),
+                  price: price,
+                  percentChange24h: changePercent,
+                  marketCap: 0,
+                  volume: parseInt(quote['06. volume']) || 0,
+                  lastUpdated: new Date().toISOString()
+                });
+                console.log(`✅ Successfully fetched ${symbol}: $${price} (${changePercent}%)`);
+              } else {
+                console.warn(`❌ Invalid data for ${symbol}: price=${price}, change=${changePercent}`);
+              }
+            } else {
+              console.warn(`❌ Missing data fields for ${symbol}`);
             }
-            
-            const price = parseFloat(priceStr);
-            const changePercent = parseFloat(changeStr.replace('%', ''));
-            
-            if (isNaN(price) || isNaN(changePercent)) {
-              console.warn(`Invalid numeric data for ${symbol}`);
-              continue;
-            }
-            
-            stockQuotes.push({
-              symbol: symbol,
-              name: this.getStockName(symbol),
-              price: price,
-              percentChange24h: changePercent,
-              marketCap: 0,
-              volume: parseInt(volumeStr) || 0,
-              lastUpdated: new Date().toISOString()
-            });
+          } else {
+            console.warn(`❌ No Global Quote data for ${symbol}`);
           }
           
-          // Increased delay between requests to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 300));
+          // Delay between requests
+          await new Promise(resolve => setTimeout(resolve, 250));
         } catch (error: any) {
-          console.warn(`Failed to fetch ${symbol}:`, error.message || 'Unknown error');
+          console.error(`❌ API error for ${symbol}:`, error.message);
           continue;
         }
       }
 
-      // If we got some stocks, cache and return them
+      // Always try to return real data first, expand with fallback if needed
       if (stockQuotes.length > 0) {
-        this.setCache(cacheKey, stockQuotes);
-        console.log(`📈 Fetched real-time stock data for ${stockQuotes.length} crypto stocks from Alpha Vantage`);
-        return stockQuotes;
+        // Add fallback data to reach minimum 15 stocks
+        const additionalStocks = this.getFallbackStockData().slice(stockQuotes.length);
+        const combinedStocks = [...stockQuotes, ...additionalStocks.slice(0, 15 - stockQuotes.length)];
+        
+        this.setCache(cacheKey, combinedStocks);
+        console.log(`✅ Fetched ${stockQuotes.length} real-time stocks, ${combinedStocks.length - stockQuotes.length} fallback stocks`);
+        return combinedStocks;
       } else {
-        // Return fallback mock data if no real data available
-        console.log('📈 Using fallback stock data due to API issues');
-        return this.getFallbackStockData();
+        console.log('❌ No real-time data available, using all fallback data');
+        const fallbackData = this.getFallbackStockData();
+        this.setCache(cacheKey, fallbackData);
+        return fallbackData;
       }
       
     } catch (error: any) {
