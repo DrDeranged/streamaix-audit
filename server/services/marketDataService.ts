@@ -443,48 +443,8 @@ export class MarketDataService {
 
   // Mock data methods for fallback
   private getMockCryptoData(symbols: string[]): CryptoQuote[] {
-    const mockData: Record<string, CryptoQuote> = {
-      'BTC': {
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 45230.50,
-        percentChange24h: 2.4,
-        percentChange7d: -1.2,
-        percentChange30d: 8.7,
-        marketCap: 885000000000,
-        volume24h: 25000000000,
-        rank: 1,
-        lastUpdated: new Date().toISOString()
-      },
-      'ETH': {
-        symbol: 'ETH',
-        name: 'Ethereum',
-        price: 2650.80,
-        percentChange24h: 3.1,
-        percentChange7d: 2.8,
-        percentChange30d: 12.4,
-        marketCap: 318000000000,
-        volume24h: 15000000000,
-        rank: 2,
-        lastUpdated: new Date().toISOString()
-      },
-      'SOL': {
-        symbol: 'SOL',
-        name: 'Solana',
-        price: 98.45,
-        percentChange24h: 5.2,
-        percentChange7d: 8.1,
-        percentChange30d: 25.6,
-        marketCap: 45000000000,
-        volume24h: 2500000000,
-        rank: 5,
-        lastUpdated: new Date().toISOString()
-      }
-    };
-
-    return symbols
-      .map(symbol => mockData[symbol.toUpperCase()])
-      .filter(Boolean);
+    console.log('⚠️ No real crypto data available - API failed');
+    return []; // Return empty array instead of mock data
   }
 
   private getMockStockData(symbol: string): any {
@@ -521,65 +481,12 @@ export class MarketDataService {
   }
 
   /**
-   * Get crypto-related stocks data
+   * Get crypto-related stocks data - DISABLED (NO REAL API AVAILABLE)
+   * Only real-time data allowed, no mock data
    */
   async getCryptoStocks(): Promise<StockQuote[]> {
-    const cacheKey = 'crypto_stocks';
-    const cached = this.getFromCache(cacheKey);
-    if (cached) return cached;
-
-    try {
-      // Realistic mock data for crypto stocks with actual price ranges
-      const mockStocks: StockQuote[] = this.cryptoStocks.map((symbol, index) => {
-        const realisticPrices: { [key: string]: { base: number; range: number } } = {
-          'MSTR': { base: 145, range: 30 },
-          'TSLA': { base: 240, range: 20 },
-          'SQ': { base: 65, range: 10 },
-          'PYPL': { base: 58, range: 8 },
-          'NVDA': { base: 420, range: 40 },
-          'AMD': { base: 140, range: 15 },
-          'INTC': { base: 23, range: 3 },
-          'COIN': { base: 85, range: 15 },
-          'HOOD': { base: 12, range: 2 },
-          'RIOT': { base: 8, range: 2 },
-          'MARA': { base: 15, range: 3 },
-          'CAN': { base: 2.5, range: 0.5 },
-          'BTBT': { base: 1.8, range: 0.4 },
-          'EBON': { base: 0.85, range: 0.2 },
-          'SOS': { base: 1.2, range: 0.3 },
-          'NCTY': { base: 1.1, range: 0.2 },
-          'ARBK': { base: 0.95, range: 0.2 },
-          'DGHI': { base: 1.4, range: 0.3 },
-          'GBTC': { base: 32, range: 5 },
-          'ETHE': { base: 28, range: 4 },
-          'BITF': { base: 2.1, range: 0.4 },
-          'HUT': { base: 8.5, range: 1.5 },
-          'HIVE': { base: 3.2, range: 0.6 },
-          'CLSK': { base: 12, range: 2 }
-        };
-        
-        const priceData = realisticPrices[symbol] || { base: 10, range: 2 };
-        const basePrice = priceData.base + (Math.random() - 0.5) * priceData.range;
-        const change = (Math.random() - 0.5) * 8; // More realistic daily change range
-        
-        return {
-          symbol: symbol,
-          name: this.getStockName(symbol),
-          price: Math.max(0.01, basePrice), // Ensure positive prices
-          percentChange24h: change,
-          marketCap: basePrice * Math.random() * 500000000 + 100000000, // More realistic market caps
-          volume: Math.random() * 5000000 + 100000, // More realistic volume
-          lastUpdated: new Date().toISOString()
-        };
-      });
-
-      this.setCache(cacheKey, mockStocks);
-      console.log(`📈 Generated crypto stock data for ${this.cryptoStocks.length} symbols`);
-      return mockStocks;
-    } catch (error) {
-      console.error('❌ Failed to fetch crypto stocks:', error);
-      return [];
-    }
+    console.log('⚠️ Crypto stocks disabled - no real-time stock API available');
+    return []; // Return empty array instead of mock data
   }
 
   private getStockName(symbol: string): string {
@@ -748,18 +655,8 @@ export class MarketDataService {
    * Mock news data for fallback
    */
   private getMockNews(limit: number): NewsArticle[] {
-    const mockArticles = [
-      {
-        title: "CoinDesk News Service Unavailable",
-        url: "https://coindesk.com",
-        published: new Date().toISOString(),
-        source: "System",
-        summary: "Real-time financial news requires active internet connection and CoinDesk service availability.",
-        category: "System"
-      }
-    ];
-    
-    return mockArticles.slice(0, limit);
+    console.log('⚠️ No real news data available - API failed');
+    return []; // Return empty array instead of mock data
   }
 }
 
