@@ -616,18 +616,6 @@ export class MarketDataService {
       'MA': 'Mastercard',
       'JPM': 'JPMorgan',
       'BAC': 'Bank of America'
-      'BTBT': 'Bit Digital Inc',
-      'EBON': 'Ebang International',
-      'SOS': 'SOS Limited',
-      'NCTY': '9th City Ltd',
-      'ARBK': 'Argo Blockchain',
-      'DGHI': 'Digihost Technology',
-      'GBTC': 'Grayscale Bitcoin Trust',
-      'ETHE': 'Grayscale Ethereum Trust',
-      'BITF': 'Bitfarms Ltd',
-      'HUT': 'Hut 8 Mining Corp',
-      'HIVE': 'HIVE Blockchain',
-      'CLSK': 'CleanSpark Inc'
     };
     return names[symbol] || `${symbol} Corp`;
   }
