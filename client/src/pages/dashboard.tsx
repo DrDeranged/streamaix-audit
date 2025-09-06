@@ -739,7 +739,7 @@ export default function Dashboard() {
                       {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                  <CardContent className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
                     {displayStocks.slice(0, 10).map((stock: any, index: number) => {
                       // Handle both old format (percentChange24h) and new format (changePercent)
                       const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
