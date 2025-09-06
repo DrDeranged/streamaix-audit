@@ -286,24 +286,21 @@ export default function Dashboard() {
           </div>
           <div className="overflow-x-auto scrollbar-visible news-scroll-container">
             <div className="flex space-x-3 pb-2" style={{ width: 'max-content' }}>
-              {newsArticles.slice(0, 12).map((article: NewsArticle, index: number) => {
-                // Extract key headline info
-                const headline = article.title.length > 85 ? 
-                  article.title.substring(0, 82) + '...' : 
-                  article.title;
+              {newsArticles.slice(0, 15).map((article: NewsArticle, index: number) => {
+                // Use full headline text to maximize content
+                const headline = article.title;
                 
                 return (
                   <div
                     key={index}
-                    className="min-w-[320px] bg-white/5 rounded-lg p-3 border border-white/10 backdrop-blur-sm hover:bg-white/10 cursor-pointer transition-all hover:scale-[1.02]"
+                    className="min-w-[240px] max-w-[240px] bg-white/5 rounded-lg p-2.5 border border-white/10 backdrop-blur-sm hover:bg-white/10 cursor-pointer transition-all hover:scale-[1.02]"
                     onClick={() => window.open(article.url, '_blank')}
                     data-testid={`news-article-${index}`}
                   >
-                    <h4 className="text-white text-sm font-semibold line-clamp-3 mb-2 leading-tight">
+                    <h4 className="text-white text-xs font-semibold line-clamp-4 mb-1.5 leading-tight">
                       {headline}
                     </h4>
-                    <div className="flex items-center justify-between">
-                      <span className="text-blue-400 text-xs font-medium">{article.source}</span>
+                    <div className="flex justify-end">
                       <span className="text-gray-500 text-xs">{new Date(article.published).toLocaleDateString()}</span>
                     </div>
                   </div>
