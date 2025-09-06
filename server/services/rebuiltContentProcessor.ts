@@ -426,38 +426,22 @@ export class RebuiltContentProcessor {
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
     
-    // Create chapters that span the entire video duration
-    // For videos longer than 30 minutes, use 8-10 chapters (roughly 5-6 minute segments)
-    // For shorter videos, use 5-6 chapters
+    // Create chapter structure that will be filled by AI based on actual content
     const chapterCount = duration > 1800 ? Math.min(10, Math.max(8, Math.ceil(duration / 360))) : Math.max(5, Math.ceil(duration / 300));
     const segmentDuration = duration / chapterCount;
     
-    console.log(`📖 Generating ${chapterCount} chapters for ${duration}s video (${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')}) with ${Math.floor(segmentDuration/60)}:${Math.floor(segmentDuration%60).toString().padStart(2,'0')} per chapter`);
-    
-    const chapterTemplates = [
-      { title: "Introduction and Market Context", summary: "Market setup, institutional backdrop, and key themes introduction" },
-      { title: "Core Analysis and Strategic Implications", summary: "Deep dive into main thesis with institutional implications and market dynamics" },
-      { title: "Investment Opportunities and Execution", summary: "Specific investment recommendations, timing considerations, and risk management" },
-      { title: "Advanced Technical Analysis", summary: "Detailed technical patterns, support/resistance levels, and timing analysis" },
-      { title: "Regulatory and Institutional Landscape", summary: "Policy developments, regulatory implications, and institutional adoption trends" },
-      { title: "Risk Management and Portfolio Strategy", summary: "Risk assessment frameworks, diversification strategies, and defensive positioning" },
-      { title: "Market Outlook and Future Implications", summary: "Long-term predictions, emerging trends, and strategic positioning recommendations" },
-      { title: "Implementation and Action Items", summary: "Practical execution steps, timeline considerations, and performance monitoring" },
-      { title: "Q&A and Community Discussion", summary: "Audience questions, expert responses, and additional insights clarification" },
-      { title: "Summary and Key Takeaways", summary: "Consolidated insights, final recommendations, and strategic action plan recap" }
-    ];
+    console.log(`📖 Creating ${chapterCount} chapter time slots for ${duration}s video - AI will fill content based on actual video analysis`);
     
     const chapters = [];
     for (let i = 0; i < chapterCount; i++) {
       const startTime = Math.floor(i * segmentDuration);
       const endTime = Math.floor((i + 1) * segmentDuration);
-      const template = chapterTemplates[i % chapterTemplates.length];
       
       chapters.push({
-        title: template.title,
+        title: `Chapter ${i + 1}`,
         startTime: formatTime(startTime),
         endTime: formatTime(Math.min(endTime, duration)),
-        summary: template.summary
+        summary: "To be filled by AI based on actual video content"
       });
     }
     
@@ -481,14 +465,15 @@ You are a senior investment analyst with specialized expertise across multiple a
 **Tech**: Mary Meeker, Benedict Evans, a16z, Sequoia Capital, First Round Capital, CB Insights
 **Macro**: Ray Dalio, Howard Marks, Jeffrey Gundlach, Mohamed El-Erian, Federal Reserve Research, IMF Analysis
 
-Analyze this video content and provide expert-level institutional analysis that adapts to the video's specific theme and references the most relevant credible sources for that domain:
+IMPORTANT: This analysis is based on video metadata only (title, channel, description). Without the actual video transcript, provide intelligent inferences and analysis based on the video's topic and source credibility.
 
+Video Information:
 Title: ${metadata.title}
 Channel: ${metadata.channel}
 Description: ${metadata.description}
 Duration: ${Math.floor(metadata.duration / 60)}:${(metadata.duration % 60).toString().padStart(2, '0')}
 
-CRITICAL: Dynamically adapt analysis methodology to this video's primary theme:
+CRITICAL: Based on the video's title and channel, intelligently infer the content themes and provide relevant analysis:
 - **Crypto videos**: Use on-chain analysis, DeFi metrics, institutional flows, regulatory developments, leverage CoinMarketCap and Dune Analytics data
 - **Stock/Equity videos**: Focus on fundamentals, earnings, sector rotation, institutional positioning, leverage Alpha Vantage market data  
 - **Tech videos**: Emphasize growth metrics, competitive moats, innovation cycles, venture trends, startup ecosystem analysis
@@ -623,12 +608,17 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         throw new Error('AI analysis failed to generate required content');
       }
 
-      // CRITICAL FIX: If AI didn't return proper chapters, use our generated ones
+      // CRITICAL FIX: If AI didn't return proper chapters with real content, fail gracefully
       let chapters = result.chapters || [];
-      if (!chapters || chapters.length <= 1) {
-        console.log(`⚠️ AI returned ${chapters.length} chapters, using generated chapters instead`);
-        chapters = JSON.parse(dynamicChapters);
-        console.log(`✅ Using ${chapters.length} generated chapters spanning full video duration`);
+      if (!chapters || chapters.length <= 1 || chapters.some(ch => ch.title.includes('Chapter') || ch.summary.includes('To be filled'))) {
+        console.log(`⚠️ AI returned incomplete or generic chapters - this indicates the video content analysis failed`);
+        // For now, return the basic structure but flag that real content extraction is needed
+        chapters = [{
+          title: `Analysis of: ${metadata.title}`,
+          startTime: "0:00",
+          endTime: `${Math.floor(metadata.duration/60)}:${(metadata.duration%60).toString().padStart(2,'0')}`,
+          summary: "Real-time video content analysis requires audio transcription integration. This is metadata-based analysis only."
+        }];
       }
 
       return {
