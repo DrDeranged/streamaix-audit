@@ -261,7 +261,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Newspaper className="h-4 w-4 text-blue-400" />
-              <h3 className="text-white text-sm font-medium">Financial News</h3>
+              <h3 className="text-white text-sm font-medium">Today's Financial News</h3>
             </div>
             <div className="flex gap-1">
               <button 
@@ -297,12 +297,9 @@ export default function Dashboard() {
                     onClick={() => window.open(article.url, '_blank')}
                     data-testid={`news-article-${index}`}
                   >
-                    <h4 className="text-white text-xs font-semibold line-clamp-4 mb-1.5 leading-tight">
+                    <h4 className="text-white text-xs font-semibold line-clamp-4 leading-tight">
                       {headline}
                     </h4>
-                    <div className="flex justify-end">
-                      <span className="text-gray-500 text-xs">{new Date(article.published).toLocaleDateString()}</span>
-                    </div>
                   </div>
                 );
               })}
