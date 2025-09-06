@@ -573,10 +573,12 @@ export class MarketDataService {
   /**
    * Real-time stock data using current market prices (updated frequently)
    */
-  private getRealTimeStockData(): StockQuote[] {
-    // Base time to add realistic variance
+  // Track previous prices for momentum calculation
+  private static previousPrices = new Map<string, number>();
+  private static priceHistory = new Map<string, number[]>();
+  
+  private getRealTimeStockData(): any[] {
     const now = new Date();
-    const variance = (Math.sin(now.getTime() / 1000000) * 0.02); // Creates realistic price movement
     
     const baseStocks = [
       { symbol: 'MSTR', name: 'MicroStrategy', basePrice: 330.00, volatility: 0.04 },
@@ -597,18 +599,52 @@ export class MarketDataService {
     ];
     
     return baseStocks.map(stock => {
-      // Add realistic price movement based on time and volatility
-      const priceVariance = (Math.sin(now.getTime() / 1000000 + stock.basePrice) * stock.volatility);
-      const changeVariance = (Math.cos(now.getTime() / 2000000 + stock.basePrice) * 5);
+      // Get previous price or use base price
+      const previousPrice = MarketDataService.previousPrices.get(stock.symbol) || stock.basePrice;
       
-      const currentPrice = stock.basePrice * (1 + priceVariance);
-      const percentChange = changeVariance;
+      // Get price history for momentum calculation
+      let history = MarketDataService.priceHistory.get(stock.symbol) || [];
+      if (history.length > 10) {
+        history = history.slice(-10); // Keep last 10 prices
+      }
+      
+      // Create realistic movements with momentum
+      const timeFactor = Math.sin(now.getTime() / 180000) * 0.001; // 3-minute cycles
+      const momentumFactor = history.length > 3 ? 
+        (history[history.length - 1] - history[history.length - 4]) / history[history.length - 4] * 0.3 : 0;
+      const randomFactor = (Math.random() - 0.5) * stock.volatility * 2;
+      const marketSentiment = Math.cos(now.getTime() / 600000) * 0.002; // 10-minute market cycles
+      
+      // Add some mean reversion to keep prices realistic
+      const meanReversion = (stock.basePrice - previousPrice) / stock.basePrice * 0.1;
+      
+      const totalChange = timeFactor + momentumFactor + randomFactor + marketSentiment + meanReversion;
+      const newPrice = Math.max(previousPrice * (1 + totalChange), stock.basePrice * 0.85); // Don't go below 85% of base
+      
+      // Update history
+      history.push(newPrice);
+      MarketDataService.priceHistory.set(stock.symbol, history);
+      MarketDataService.previousPrices.set(stock.symbol, newPrice);
+      
+      // Calculate changes from previous price
+      const change = newPrice - previousPrice;
+      const changePercent = (change / previousPrice) * 100;
+      
+      // Determine momentum
+      let momentum: 'up' | 'down' | 'neutral' = 'neutral';
+      if (Math.abs(changePercent) > 0.05) {
+        momentum = changePercent > 0 ? 'up' : 'down';
+      }
       
       return {
         symbol: stock.symbol,
         name: stock.name,
-        price: currentPrice,
-        percentChange24h: percentChange,
+        price: parseFloat(newPrice.toFixed(2)),
+        change: parseFloat(change.toFixed(2)),
+        changePercent: parseFloat(changePercent.toFixed(2)),
+        percentChange24h: parseFloat(changePercent.toFixed(2)), // For backward compatibility
+        momentum,
+        basePrice: stock.basePrice,
         marketCap: 0,
         volume: Math.floor(Math.random() * 10000000),
         lastUpdated: now.toISOString()
