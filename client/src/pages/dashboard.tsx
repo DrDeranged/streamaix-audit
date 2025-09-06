@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,9 +113,26 @@ interface StockQuote {
   volume?: number;
 }
 
+interface RealTimeStockData {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  changePercent: number;
+  momentum?: 'up' | 'down' | 'neutral';
+  basePrice?: number;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  
+  // Real-time stock data state
+  const [realTimeStocks, setRealTimeStocks] = useState<RealTimeStockData[]>([]);
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch user summaries
   const { data: summariesData, isLoading: summariesLoading } = useQuery({
@@ -172,6 +189,76 @@ export default function Dashboard() {
   const cryptoQuotes = (cryptoData as any)?.quotes || [];
   const newsArticles = (newsData as any)?.articles || [];
   const cryptoStocks = (stocksData as any)?.stocks || [];
+
+  // WebSocket connection for real-time stock updates
+  const connectWebSocket = useCallback(() => {
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      
+      wsRef.current = new WebSocket(wsUrl);
+      
+      wsRef.current.onopen = () => {
+        console.log('📡 WebSocket connected for real-time stock updates');
+        setIsWebSocketConnected(true);
+        
+        // Clear any pending reconnection attempts
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = null;
+        }
+      };
+      
+      wsRef.current.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === 'stockUpdate' && message.data?.stocks) {
+            setRealTimeStocks(message.data.stocks);
+            // Also update the React Query cache
+            queryClient.setQueryData(['/api/market/stocks/crypto'], message.data);
+          }
+        } catch (error) {
+          console.error('📡 Error parsing WebSocket message:', error);
+        }
+      };
+      
+      wsRef.current.onclose = () => {
+        console.log('📡 WebSocket disconnected');
+        setIsWebSocketConnected(false);
+        
+        // Attempt to reconnect after 3 seconds
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log('📡 Attempting to reconnect WebSocket...');
+          connectWebSocket();
+        }, 3000);
+      };
+      
+      wsRef.current.onerror = (error) => {
+        console.error('📡 WebSocket error:', error);
+        setIsWebSocketConnected(false);
+      };
+    } catch (error) {
+      console.error('📡 Failed to establish WebSocket connection:', error);
+    }
+  }, [queryClient]);
+  
+  // Initialize WebSocket connection
+  useEffect(() => {
+    connectWebSocket();
+    
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, [connectWebSocket]);
+
+  // Use real-time stocks if available, otherwise fall back to cached data
+  const displayStocks = realTimeStocks.length > 0 ? realTimeStocks : cryptoStocks;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -340,24 +427,39 @@ export default function Dashboard() {
             </div>
             <div className="overflow-x-auto scrollbar-visible stocks-scroll-container">
               <div className="flex space-x-2 pb-2" style={{ width: 'max-content' }}>
-                {cryptoStocks.slice(0, 30).map((stock: StockQuote, index: number) => {
-                  const ChangeIcon = getChangeIcon(stock.percentChange24h);
+                {displayStocks.slice(0, 30).map((stock: any, index: number) => {
+                  // Handle both old format (percentChange24h) and new format (changePercent)
+                  const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
+                  const ChangeIcon = getChangeIcon(changePercent);
+                  
+                  // Add visual momentum indicators
+                  const getMomentumClass = (momentum?: string) => {
+                    switch (momentum) {
+                      case 'up': return 'animate-pulse ring-1 ring-green-400/50 bg-green-500/10';
+                      case 'down': return 'animate-pulse ring-1 ring-red-400/50 bg-red-500/10';
+                      default: return '';
+                    }
+                  };
+                  
                   return (
                     <div
                       key={stock.symbol}
-                      className="min-w-[110px] bg-white/5 rounded-lg p-2 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all hover:scale-[1.02] text-center"
+                      className={`min-w-[110px] bg-white/5 rounded-lg p-2 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all hover:scale-[1.02] text-center ${getMomentumClass(stock.momentum)}`}
                       data-testid={`stock-${stock.symbol}`}
                     >
-                      <div className="text-white font-bold text-sm mb-1">{stock.symbol}</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-white font-bold text-sm">{stock.symbol}</div>
+                        {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
+                      </div>
                       <div className="text-gray-300 text-xs truncate mb-1">
                         {stock.name.length > 10 ? stock.name.slice(0, 10) + '...' : stock.name}
                       </div>
                       <div className="text-white font-semibold text-xs">
                         {formatPrice(stock.price)}
                       </div>
-                      <div className={`flex items-center justify-center text-xs mt-1 ${getChangeColor(stock.percentChange24h)}`}>
+                      <div className={`flex items-center justify-center text-xs mt-1 ${getChangeColor(changePercent)}`}>
                         {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
-                        {stock.percentChange24h.toFixed(1)}%
+                        {changePercent.toFixed(2)}%
                       </div>
                     </div>
                   );
