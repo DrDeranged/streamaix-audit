@@ -579,21 +579,21 @@ export class MarketDataService {
     const variance = (Math.sin(now.getTime() / 1000000) * 0.02); // Creates realistic price movement
     
     const baseStocks = [
-      { symbol: 'MSTR', name: 'MicroStrategy', basePrice: 467.89, volatility: 0.04 },
-      { symbol: 'COIN', name: 'Coinbase', basePrice: 185.34, volatility: 0.03 },
-      { symbol: 'RIOT', name: 'Riot Platforms', basePrice: 8.67, volatility: 0.05 },
-      { symbol: 'MARA', name: 'Marathon Digital', basePrice: 15.89, volatility: 0.04 },
-      { symbol: 'NVDA', name: 'NVIDIA', basePrice: 467.23, volatility: 0.02 },
-      { symbol: 'AMD', name: 'AMD', basePrice: 145.78, volatility: 0.03 },
-      { symbol: 'TSLA', name: 'Tesla', basePrice: 250.45, volatility: 0.03 },
-      { symbol: 'PYPL', name: 'PayPal', basePrice: 68.34, volatility: 0.02 },
-      { symbol: 'CLSK', name: 'CleanSpark', basePrice: 9.56, volatility: 0.06 },
-      { symbol: 'HUT', name: 'Hut 8 Mining', basePrice: 7.89, volatility: 0.05 },
-      { symbol: 'BITF', name: 'Bitfarms', basePrice: 2.45, volatility: 0.07 },
-      { symbol: 'HOOD', name: 'Robinhood', basePrice: 23.67, volatility: 0.04 },
+      { symbol: 'MSTR', name: 'MicroStrategy', basePrice: 330.00, volatility: 0.04 },
+      { symbol: 'COIN', name: 'Coinbase', basePrice: 185.00, volatility: 0.03 },
+      { symbol: 'RIOT', name: 'Riot Platforms', basePrice: 10.99, volatility: 0.05 },
+      { symbol: 'MARA', name: 'Marathon Digital', basePrice: 18.50, volatility: 0.04 },
+      { symbol: 'NVDA', name: 'NVIDIA', basePrice: 167.02, volatility: 0.02 },
+      { symbol: 'AMD', name: 'AMD', basePrice: 142.50, volatility: 0.03 },
+      { symbol: 'TSLA', name: 'Tesla', basePrice: 248.50, volatility: 0.03 },
+      { symbol: 'PYPL', name: 'PayPal', basePrice: 64.20, volatility: 0.02 },
+      { symbol: 'CLSK', name: 'CleanSpark', basePrice: 9.24, volatility: 0.06 },
+      { symbol: 'HUT', name: 'Hut 8 Mining', basePrice: 7.59, volatility: 0.05 },
+      { symbol: 'BITF', name: 'Bitfarms', basePrice: 2.28, volatility: 0.07 },
+      { symbol: 'HOOD', name: 'Robinhood', basePrice: 24.44, volatility: 0.04 },
       { symbol: 'SQ', name: 'Block Inc', basePrice: 78.90, volatility: 0.03 },
-      { symbol: 'INTC', name: 'Intel', basePrice: 23.45, volatility: 0.02 },
-      { symbol: 'GBTC', name: 'Grayscale Bitcoin', basePrice: 45.78, volatility: 0.05 }
+      { symbol: 'INTC', name: 'Intel', basePrice: 22.67, volatility: 0.02 },
+      { symbol: 'GBTC', name: 'Grayscale Bitcoin', basePrice: 65.00, volatility: 0.05 }
     ];
     
     return baseStocks.map(stock => {
