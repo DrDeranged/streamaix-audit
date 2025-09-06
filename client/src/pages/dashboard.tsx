@@ -260,7 +260,7 @@ export default function Dashboard() {
             <Newspaper className="h-4 w-4 text-blue-400" />
             <h3 className="text-white text-sm font-medium">Financial News</h3>
           </div>
-          <div className="overflow-x-auto scrollbar-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.3) rgba(0,0,0,0.1)' }}>
+          <div className="overflow-x-auto scrollbar-visible">
             <div className="flex space-x-3 pb-2" style={{ width: 'max-content' }}>
               {newsArticles.slice(0, 10).map((article: NewsArticle, index: number) => (
                 <div
@@ -293,7 +293,7 @@ export default function Dashboard() {
               <TrendingUp className="h-4 w-4 text-indigo-400" />
               <h3 className="text-white text-sm font-medium">Crypto Stocks</h3>
             </div>
-            <div className="overflow-x-auto scrollbar-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.3) rgba(0,0,0,0.1)' }}>
+            <div className="overflow-x-auto scrollbar-visible">
               <div className="flex space-x-2 pb-2" style={{ width: 'max-content' }}>
                 {cryptoStocks.slice(0, 20).map((stock: StockQuote, index: number) => {
                   const ChangeIcon = getChangeIcon(stock.percentChange24h);

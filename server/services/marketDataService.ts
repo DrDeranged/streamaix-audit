@@ -37,8 +37,10 @@ export class MarketDataService {
   private static instance: MarketDataService;
   private cmcApiKey: string;
   private coingeckoApiKey: string;
+  private alphaVantageApiKey: string;
   private cmcBaseUrl = 'https://pro-api.coinmarketcap.com/v1';
   private coingeckoBaseUrl = 'https://api.coingecko.com/api/v3';
+  private alphaVantageBaseUrl = 'https://www.alphavantage.co/query';
   private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
   private cache = new Map<string, { data: any; timestamp: number }>();
   private cacheTimeout = 60000; // 1 minute cache
@@ -53,12 +55,14 @@ export class MarketDataService {
   constructor() {
     this.cmcApiKey = process.env.COINMARKETCAP_API_KEY || '';
     this.coingeckoApiKey = process.env.COINGECKO_API_KEY || '';
+    this.alphaVantageApiKey = process.env.ALPHA_VANTAGE_API_KEY || '';
     
     console.log('🔑 Market Data Service initialized:');
     console.log(`  - CoinMarketCap: ${this.cmcApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - CoinGecko: ${this.coingeckoApiKey ? '✅ Available' : '❌ Missing'}`);
+    console.log(`  - Alpha Vantage: ${this.alphaVantageApiKey ? '✅ Available' : '❌ Missing'}`);
     
-    if (!this.cmcApiKey && !this.coingeckoApiKey) {
+    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey) {
       console.warn('⚠️ No market data API keys found - using fallback data');
     }
   }
@@ -481,12 +485,62 @@ export class MarketDataService {
   }
 
   /**
-   * Get crypto-related stocks data - DISABLED (NO REAL API AVAILABLE)
-   * Only real-time data allowed, no mock data
+   * Get crypto-related stocks data using Alpha Vantage API
    */
   async getCryptoStocks(): Promise<StockQuote[]> {
-    console.log('⚠️ Crypto stocks disabled - no real-time stock API available');
-    return []; // Return empty array instead of mock data
+    if (!this.alphaVantageApiKey) {
+      console.log('⚠️ Crypto stocks disabled - no Alpha Vantage API key available');
+      return [];
+    }
+
+    const cacheKey = 'alpha_vantage_crypto_stocks';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Get real-time quotes for crypto-related stocks using Alpha Vantage bulk quotes
+      const symbols = this.cryptoStocks.slice(0, 10); // Alpha Vantage free tier limit
+      const symbolsParam = symbols.join(',');
+      
+      const response = await axios.get(this.alphaVantageBaseUrl, {
+        params: {
+          function: 'REALTIME_BULK_QUOTES',
+          symbols: symbolsParam,
+          apikey: this.alphaVantageApiKey
+        },
+        timeout: 10000
+      });
+
+      const stockQuotes: StockQuote[] = [];
+      
+      if (response.data && response.data['Real Time Bulk Quotes']) {
+        const quotes = response.data['Real Time Bulk Quotes'];
+        
+        for (const quote of quotes) {
+          const symbol = quote['1. symbol'];
+          const price = parseFloat(quote['2. price']);
+          const changePercent = parseFloat(quote['4. change percent'].replace('%', ''));
+          
+          stockQuotes.push({
+            symbol: symbol,
+            name: this.getStockName(symbol),
+            price: price,
+            percentChange24h: changePercent,
+            marketCap: 0, // Not available in bulk quotes
+            volume: 0, // Not available in bulk quotes
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      }
+
+      this.setCache(cacheKey, stockQuotes);
+      console.log(`📈 Fetched real-time stock data for ${stockQuotes.length} crypto stocks from Alpha Vantage`);
+      return stockQuotes;
+      
+    } catch (error: any) {
+      console.error('❌ Failed to fetch Alpha Vantage stock data:', error.response?.data || error.message);
+      return [];
+    }
   }
 
   private getStockName(symbol: string): string {
