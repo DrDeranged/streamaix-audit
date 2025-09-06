@@ -739,48 +739,24 @@ export default function Dashboard() {
                       {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-                    {displayStocks.slice(0, 12).map((stock: any, index: number) => {
+                  <CardContent className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                    {displayStocks.slice(0, 10).map((stock: any, index: number) => {
                       // Handle both old format (percentChange24h) and new format (changePercent)
                       const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
-                      const ChangeIcon = getChangeIcon(changePercent);
-                      
-                      // Add visual momentum indicators with better styling
-                      const getMomentumClass = (momentum?: string) => {
-                        switch (momentum) {
-                          case 'up': return 'animate-pulse ring-2 ring-green-400/30 bg-gradient-to-br from-green-500/20 to-green-600/10 border-green-400/40';
-                          case 'down': return 'animate-pulse ring-2 ring-red-400/30 bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-400/40';
-                          default: return 'bg-gradient-to-br from-white/8 to-white/4 border-white/15';
-                        }
-                      };
                       
                       return (
                         <div
                           key={stock.symbol}
-                          className={`p-3 rounded-lg cursor-pointer hover:scale-[1.02] transition-all duration-200 border backdrop-blur-sm ${getMomentumClass(stock.momentum)}`}
+                          className="flex items-center justify-between py-1 px-2 rounded text-xs hover:bg-white/5 transition-colors"
                           data-testid={`sidebar-stock-${stock.symbol}`}
                         >
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <div className="text-white font-bold text-sm mb-0.5">{stock.symbol}</div>
-                              <div className="text-gray-300 text-xs opacity-80 truncate" style={{maxWidth: '80px'}}>
-                                {stock.name?.split(' ')[0] || 'Stock'}
-                              </div>
-                            </div>
-                            <div className={`flex items-center text-sm font-semibold ${getChangeColor(changePercent)}`}>
-                              {ChangeIcon && <ChangeIcon className="h-3.5 w-3.5 mr-1" />}
-                              {changePercent.toFixed(1)}%
-                            </div>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-white font-medium">{stock.symbol}</span>
+                            <span className="text-gray-400 truncate">{formatPrice(stock.price)}</span>
                           </div>
-                          <div className="text-white font-bold text-lg leading-none">
-                            {formatPrice(stock.price)}
-                          </div>
-                          {isWebSocketConnected && (
-                            <div className="flex items-center gap-1 mt-2">
-                              <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                              <span className="text-green-400 text-xs font-medium">LIVE</span>
-                            </div>
-                          )}
+                          <span className={`font-medium whitespace-nowrap ${getChangeColor(changePercent)}`}>
+                            {changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%
+                          </span>
                         </div>
                       );
                     })}
