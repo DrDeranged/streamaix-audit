@@ -38,12 +38,14 @@ export class MarketDataService {
   private cmcApiKey: string;
   private coingeckoApiKey: string;
   private alphaVantageApiKey: string;
+  private finnhubApiKey: string;
   private cmcBaseUrl = 'https://pro-api.coinmarketcap.com/v1';
   private coingeckoBaseUrl = 'https://api.coingecko.com/api/v3';
   private alphaVantageBaseUrl = 'https://www.alphavantage.co/query';
+  private finnhubBaseUrl = 'https://finnhub.io/api/v1';
   private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
   private cache = new Map<string, { data: any; timestamp: number }>();
-  private cacheTimeout = 60000; // 1 minute cache
+  private cacheTimeout = 30000; // 30 second cache for real-time data
   
   // Crypto-related stocks list - expanded to 25+ symbols
   private cryptoStocks = [
@@ -63,13 +65,15 @@ export class MarketDataService {
     this.cmcApiKey = process.env.COINMARKETCAP_API_KEY || '';
     this.coingeckoApiKey = process.env.COINGECKO_API_KEY || '';
     this.alphaVantageApiKey = process.env.ALPHA_VANTAGE_API_KEY || '';
+    this.finnhubApiKey = process.env.FINNHUB_API_KEY || '';
     
     console.log('🔑 Market Data Service initialized:');
     console.log(`  - CoinMarketCap: ${this.cmcApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - CoinGecko: ${this.coingeckoApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Alpha Vantage: ${this.alphaVantageApiKey ? '✅ Available' : '❌ Missing'}`);
+    console.log(`  - Finnhub: ${this.finnhubApiKey ? '✅ Available' : '❌ Missing'}`);
     
-    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey) {
+    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey && !this.finnhubApiKey) {
       console.warn('⚠️ No market data API keys found - using fallback data');
     }
   }
@@ -494,29 +498,29 @@ export class MarketDataService {
   /**
    * Get crypto-related stocks data using Alpha Vantage API
    */
-  async getCryptoStocks(): Promise<StockQuote[]> {
-    if (!this.alphaVantageApiKey) {
-      console.log('⚠️ Crypto stocks disabled - no Alpha Vantage API key available');
-      return [];
+  async getCryptoStocks(): Promise<any[]> {
+    if (!this.finnhubApiKey) {
+      console.log('⚠️ Crypto stocks disabled - no Finnhub API key available');
+      return this.getFallbackStockData();
     }
 
-    const cacheKey = 'alpha_vantage_crypto_stocks';
+    const cacheKey = 'finnhub_crypto_stocks';
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     try {
-      // Use real-time calculated stock data instead of API calls
-      console.log(`📈 Generating real-time stock data with market-based calculations`);
-      const stockQuotes = this.getRealTimeStockData();
+      console.log(`📈 Fetching real-time stock data from Finnhub API`);
+      const stockQuotes = await this.getRealTimeStockDataFromFinnhub();
 
       // Cache and return the real-time stock data
       this.setCache(cacheKey, stockQuotes);
-      console.log(`✅ Generated ${stockQuotes.length} real-time stock prices with market calculations`);
+      console.log(`✅ Fetched ${stockQuotes.length} real-time stock prices from Finnhub`);
       return stockQuotes;
       
     } catch (error: any) {
-      console.error('❌ Failed to fetch Alpha Vantage stock data:', error.response?.data || error.message);
-      return [];
+      console.error('❌ Failed to fetch Finnhub stock data:', error.response?.data || error.message);
+      console.log('🔄 Falling back to market-based calculations');
+      return this.getFallbackStockData();
     }
   }
 
@@ -577,7 +581,59 @@ export class MarketDataService {
   private static previousPrices = new Map<string, number>();
   private static priceHistory = new Map<string, number[]>();
   
-  private getRealTimeStockData(): any[] {
+  // Real-time stock data from Finnhub API
+  private async getRealTimeStockDataFromFinnhub(): Promise<any[]> {
+    const symbols = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'AMD', 'TSLA', 'PYPL', 'CLSK', 'HUT', 'BITF', 'HOOD', 'SQ', 'INTC', 'GBTC'];
+    const stockData = [];
+
+    // Fetch real-time quotes for each symbol
+    for (const symbol of symbols) {
+      try {
+        const response = await axios.get(`${this.finnhubBaseUrl}/quote`, {
+          params: {
+            symbol: symbol,
+            token: this.finnhubApiKey
+          },
+          timeout: 5000
+        });
+
+        const quote = response.data;
+        if (quote && quote.c) { // c = current price
+          const currentPrice = quote.c;
+          const change = quote.d || 0; // d = change
+          const changePercent = quote.dp || 0; // dp = percent change
+          
+          // Determine momentum based on price change
+          let momentum: 'up' | 'down' | 'neutral' = 'neutral';
+          if (Math.abs(changePercent) > 0.5) {
+            momentum = changePercent > 0 ? 'up' : 'down';
+          }
+
+          stockData.push({
+            symbol: symbol,
+            name: this.getStockName(symbol),
+            price: parseFloat(currentPrice.toFixed(2)),
+            change: parseFloat(change.toFixed(2)),
+            changePercent: parseFloat(changePercent.toFixed(2)),
+            percentChange24h: parseFloat(changePercent.toFixed(2)), // For backward compatibility
+            momentum,
+            volume: quote.v || 0,
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      } catch (error) {
+        console.warn(`⚠️ Failed to fetch ${symbol} from Finnhub:`, error.message);
+      }
+      
+      // Add small delay to respect rate limits (60 calls/minute)
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    return stockData;
+  }
+  
+  // Fallback method with simulated data
+  private getFallbackStockData(): any[] {
     const now = new Date();
     
     const baseStocks = [

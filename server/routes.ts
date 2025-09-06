@@ -1396,7 +1396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
   
   // Start real-time updates
-  const stockUpdateInterval = setInterval(broadcastStockUpdates, 3000); // Every 3 seconds
+  const stockUpdateInterval = setInterval(broadcastStockUpdates, 30000); // Every 30 seconds for real API calls
   
   // Cleanup on server close
   httpServer.on('close', () => {
