@@ -141,7 +141,7 @@ export default function Dashboard() {
 
   // Supplemental market data (expanded for scrollable sections)
   const { data: cryptoData } = useQuery({
-    queryKey: ['/api/market/crypto/BTC,ETH,SOL,BNB,XRP,ADA,AVAX,DOT,MATIC,LINK'],
+    queryKey: ['/api/market/crypto/BTC,ETH,SOL,BNB,XRP,ADA,AVAX,DOT,MATIC,LINK,LTC,BCH,UNI,ATOM,FTT,ALGO,XLM,VET,ICP,FIL,HBAR,ETC,XMR,EOS,BSV'],
     refetchInterval: 300000, // Every 5 minutes
   });
 
@@ -213,28 +213,28 @@ export default function Dashboard() {
         opacity: 0.5
       }}></div>
       
-      {/* CRYPTO TICKER - Always visible with fallback */}
-      <div className="relative z-20 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-purple-900/20 backdrop-blur-sm border-b border-white/5">
-        <div className="overflow-hidden py-2">
+      {/* ENHANCED CRYPTO TICKER - Darker, more visible, continuous */}
+      <div className="relative z-20 bg-gradient-to-r from-slate-900/80 via-purple-900/60 to-slate-900/80 backdrop-blur-md border-b border-white/10">
+        <div className="overflow-hidden py-3">
           <motion.div 
-            className="flex space-x-8 text-xs opacity-70"
+            className="flex space-x-12 text-sm opacity-95"
             animate={{ x: "-100%" }}
             transition={{ 
               repeat: Infinity, 
-              duration: 60, 
+              duration: 120, 
               ease: "linear" 
             }}
-            style={{ width: "200%" }}
+            style={{ width: "400%" }}
           >
             {cryptoQuotes.length > 0 ? (
-              [...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
+              [...cryptoQuotes, ...cryptoQuotes, ...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
                 const ChangeIcon = getChangeIcon(quote.percentChange24h);
                 return (
-                  <div key={index} className="flex items-center space-x-2 text-white whitespace-nowrap">
-                    <span className="font-bold text-orange-400/80">{quote.symbol}</span>
-                    <span className="font-medium">{formatPrice(quote.price)}</span>
-                    <span className={`flex items-center ${getChangeColor(quote.percentChange24h)}`}>
-                      {ChangeIcon && <ChangeIcon className="h-2 w-2 mr-1" />}
+                  <div key={index} className="flex items-center space-x-3 text-white whitespace-nowrap">
+                    <span className="font-bold text-orange-300">{quote.symbol}</span>
+                    <span className="font-semibold">{formatPrice(quote.price)}</span>
+                    <span className={`flex items-center font-medium ${getChangeColor(quote.percentChange24h)}`}>
+                      {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
                       {quote.percentChange24h.toFixed(1)}%
                     </span>
                   </div>
@@ -242,10 +242,10 @@ export default function Dashboard() {
               })
             ) : (
               // Fallback placeholder while loading
-              [...Array(10)].map((_, index) => (
-                <div key={index} className="flex items-center space-x-2 text-white whitespace-nowrap">
-                  <span className="font-bold text-orange-400/60">Loading...</span>
-                  <span className="font-medium text-gray-400">Market data</span>
+              [...Array(25)].map((_, index) => (
+                <div key={index} className="flex items-center space-x-3 text-white whitespace-nowrap">
+                  <span className="font-bold text-orange-300/60">●●●</span>
+                  <span className="font-medium text-gray-300">Loading crypto data...</span>
                 </div>
               ))
             )}
@@ -253,35 +253,30 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* SCROLLABLE NEWS SECTION */}
-      <div className="relative z-10 bg-gradient-to-r from-slate-900/50 via-purple-900/30 to-slate-900/50 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      {/* ENHANCED FINANCIAL NEWS SECTION */}
+      <div className="relative z-10 bg-gradient-to-r from-slate-900/40 via-blue-900/20 to-slate-900/40 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center gap-2 mb-2">
             <Newspaper className="h-4 w-4 text-blue-400" />
             <h3 className="text-white text-sm font-medium">Financial News</h3>
-            <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-300 border-blue-400/30">
-              {newsArticles.length} stories
-            </Badge>
           </div>
           <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex space-x-4 pb-2" style={{ width: 'max-content' }}>
+            <div className="flex space-x-3 pb-2" style={{ width: 'max-content' }}>
               {newsArticles.slice(0, 10).map((article: NewsArticle, index: number) => (
                 <div
                   key={index}
-                  className="min-w-[300px] bg-white/10 rounded-lg p-3 border border-white/20 backdrop-blur-sm hover:bg-white/15 cursor-pointer transition-colors"
+                  className="min-w-[280px] bg-white/5 rounded-lg p-3 border border-white/10 backdrop-blur-sm hover:bg-white/10 cursor-pointer transition-all hover:scale-[1.02]"
                   onClick={() => window.open(article.url, '_blank')}
                   data-testid={`news-article-${index}`}
                 >
-                  <h4 className="text-white text-sm font-medium line-clamp-2 mb-2">
+                  <h4 className="text-white text-xs font-medium line-clamp-2 mb-2 leading-tight">
                     {article.title}
                   </h4>
                   <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-300 border-blue-400/30">
-                      {article.source}
-                    </Badge>
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-blue-300 text-xs font-medium">
                       {new Date(article.published).toLocaleDateString()}
                     </span>
+                    <ExternalLink className="h-3 w-3 text-gray-400" />
                   </div>
                 </div>
               ))}
@@ -290,37 +285,31 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* SCROLLABLE CRYPTO STOCKS SECTION */}
-      <div className="relative z-10 bg-gradient-to-r from-slate-900/30 via-orange-900/20 to-slate-900/30 border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      {/* ENHANCED CRYPTO STOCKS SECTION */}
+      <div className="relative z-10 bg-gradient-to-r from-slate-900/25 via-indigo-900/15 to-slate-900/25 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-4 w-4 text-orange-400" />
+            <TrendingUp className="h-4 w-4 text-indigo-400" />
             <h3 className="text-white text-sm font-medium">Crypto Stocks</h3>
-            <Badge variant="outline" className="text-xs bg-orange-500/20 text-orange-300 border-orange-400/30">
-              {cryptoStocks.length} stocks
-            </Badge>
           </div>
           <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex space-x-3 pb-2" style={{ width: 'max-content' }}>
+            <div className="flex space-x-2 pb-2" style={{ width: 'max-content' }}>
               {cryptoStocks.slice(0, 20).map((stock: StockQuote, index: number) => {
                 const ChangeIcon = getChangeIcon(stock.percentChange24h);
                 return (
                   <div
                     key={stock.symbol}
-                    className="min-w-[140px] bg-white/10 rounded-lg p-3 border border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors text-center"
+                    className="min-w-[120px] bg-white/5 rounded-lg p-2 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all hover:scale-[1.02] text-center"
                     data-testid={`stock-${stock.symbol}`}
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white text-xs font-bold mx-auto mb-2">
-                      {stock.symbol.slice(0, 2)}
+                    <div className="text-white font-bold text-sm mb-1">{stock.symbol}</div>
+                    <div className="text-gray-300 text-xs truncate mb-1">
+                      {stock.name.length > 10 ? stock.name.slice(0, 10) + '...' : stock.name}
                     </div>
-                    <div className="text-white font-bold text-sm">{stock.symbol}</div>
-                    <div className="text-gray-400 text-xs truncate">
-                      {stock.name.length > 12 ? stock.name.slice(0, 12) + '...' : stock.name}
-                    </div>
-                    <div className="text-white font-semibold text-sm mt-1">
+                    <div className="text-white font-semibold text-xs">
                       {formatPrice(stock.price)}
                     </div>
-                    <div className={`flex items-center justify-center text-xs ${getChangeColor(stock.percentChange24h)}`}>
+                    <div className={`flex items-center justify-center text-xs mt-1 ${getChangeColor(stock.percentChange24h)}`}>
                       {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
                       {stock.percentChange24h.toFixed(1)}%
                     </div>
@@ -660,7 +649,7 @@ export default function Dashboard() {
 
           {/* SUPPLEMENTAL SIDEBAR - 1/4 width */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Market Intelligence - Minimal */}
+            {/* Macro Intelligence - Filtered */}
             {newsArticles.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -670,12 +659,18 @@ export default function Dashboard() {
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-white text-sm flex items-center gap-2">
-                      <Newspaper className="h-4 w-4 text-blue-400" />
-                      Market Intel
+                      <Globe className="h-4 w-4 text-purple-400" />
+                      Macro Intel
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {newsArticles.map((article: NewsArticle, index: number) => (
+                    {newsArticles.filter((article: NewsArticle) => {
+                      const title = article.title.toLowerCase();
+                      return title.includes('fed') || title.includes('inflation') || title.includes('economy') || 
+                             title.includes('gdp') || title.includes('interest') || title.includes('monetary') ||
+                             title.includes('policy') || title.includes('treasury') || title.includes('government') ||
+                             title.includes('central bank') || title.includes('recession') || title.includes('economic');
+                    }).slice(0, 3).map((article: NewsArticle, index: number) => (
                       <div
                         key={index}
                         className="p-3 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-colors"

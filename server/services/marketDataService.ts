@@ -126,7 +126,7 @@ export class MarketDataService {
   private async getCryptoQuotesFromCoinGecko(symbols: string[]): Promise<CryptoQuote[]> {
     const cacheKey = `coingecko_${symbols.join(',').toUpperCase()}`;
     
-    // Convert symbols to CoinGecko IDs (simplified mapping)
+    // Convert symbols to CoinGecko IDs (complete mapping for 25 top cryptos)
     const coinIds = symbols.map(symbol => {
       const mapping: { [key: string]: string } = {
         'BTC': 'bitcoin',
@@ -138,7 +138,22 @@ export class MarketDataService {
         'AVAX': 'avalanche-2',
         'DOT': 'polkadot',
         'MATIC': 'matic-network',
-        'LINK': 'chainlink'
+        'LINK': 'chainlink',
+        'LTC': 'litecoin',
+        'BCH': 'bitcoin-cash',
+        'UNI': 'uniswap',
+        'ATOM': 'cosmos',
+        'FTT': 'ftx-token',
+        'ALGO': 'algorand',
+        'XLM': 'stellar',
+        'VET': 'vechain',
+        'ICP': 'internet-computer',
+        'FIL': 'filecoin',
+        'HBAR': 'hedera-hashgraph',
+        'ETC': 'ethereum-classic',
+        'XMR': 'monero',
+        'EOS': 'eos',
+        'BSV': 'bitcoin-sv'
       };
       return mapping[symbol.toUpperCase()] || symbol.toLowerCase();
     });
