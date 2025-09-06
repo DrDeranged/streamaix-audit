@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
@@ -1339,5 +1340,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   const httpServer = createServer(app);
+  
+  // =============================================================================
+  // WEBSOCKET SERVER FOR REAL-TIME UPDATES
+  // =============================================================================
+  
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store connected clients
+  const clients = new Set<WebSocket>();
+  
+  wss.on('connection', (ws: WebSocket) => {
+    console.log('📡 WebSocket client connected');
+    clients.add(ws);
+    
+    // Send initial stock data
+    ws.send(JSON.stringify({
+      type: 'initial',
+      message: 'Connected to real-time stock updates'
+    }));
+    
+    ws.on('close', () => {
+      console.log('📡 WebSocket client disconnected');
+      clients.delete(ws);
+    });
+    
+    ws.on('error', (error) => {
+      console.error('📡 WebSocket error:', error);
+      clients.delete(ws);
+    });
+  });
+  
+  // Broadcast real-time stock updates every 3 seconds
+  const broadcastStockUpdates = async () => {
+    if (clients.size === 0) return;
+    
+    try {
+      const stockData = await MarketDataService.getCryptoStocks();
+      const message = JSON.stringify({
+        type: 'stockUpdate',
+        data: stockData
+      });
+      
+      clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message);
+        }
+      });
+      
+      console.log(`📈 Broadcast real-time stock updates to ${clients.size} clients`);
+    } catch (error) {
+      console.error('📈 Error broadcasting stock updates:', error);
+    }
+  };
+  
+  // Start real-time updates
+  const stockUpdateInterval = setInterval(broadcastStockUpdates, 3000); // Every 3 seconds
+  
+  // Cleanup on server close
+  httpServer.on('close', () => {
+    clearInterval(stockUpdateInterval);
+    clients.clear();
+  });
+  
   return httpServer;
 }
