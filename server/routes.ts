@@ -1376,10 +1376,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (clients.size === 0) return;
     
     try {
-      const stockData = await MarketDataService.getCryptoStocks();
+      const marketService = MarketDataService.getInstance();
+      const stocks = await marketService.getCryptoStocks();
       const message = JSON.stringify({
         type: 'stockUpdate',
-        data: stockData
+        data: { stocks }
       });
       
       clients.forEach(client => {
