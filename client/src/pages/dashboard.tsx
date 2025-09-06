@@ -757,17 +757,17 @@ export default function Dashboard() {
                       return (
                         <div
                           key={stock.symbol}
-                          className={`px-2 py-1.5 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-all border border-white/5 ${getMomentumClass(stock.momentum)}`}
+                          className={`px-1.5 py-1 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-all border border-white/5 ${getMomentumClass(stock.momentum)}`}
                           data-testid={`sidebar-stock-${stock.symbol}`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="text-white font-medium text-xs">{stock.symbol}</div>
                             <div className={`flex items-center text-xs ${getChangeColor(changePercent)}`}>
-                              {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 mr-0.5" />}
+                              {ChangeIcon && <ChangeIcon className="h-2 w-2 mr-0.5" />}
                               {changePercent.toFixed(1)}%
                             </div>
                           </div>
-                          <div className="text-white font-medium text-xs mt-0.5">
+                          <div className="text-white font-medium text-xs">
                             {formatPrice(stock.price)}
                           </div>
                         </div>
