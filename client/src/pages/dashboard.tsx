@@ -315,18 +315,40 @@ export default function Dashboard() {
       {cryptoStocks.length > 0 && (
         <div className="relative z-10 bg-gradient-to-r from-slate-900/25 via-indigo-900/15 to-slate-900/25 border-b border-white/5">
           <div className="max-w-7xl mx-auto px-4 py-2">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-indigo-400" />
-              <h3 className="text-white text-sm font-medium">Crypto Stocks</h3>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-indigo-400" />
+                <h3 className="text-white text-sm font-medium">Crypto Stocks</h3>
+              </div>
+              <div className="flex gap-1">
+                <button 
+                  className="text-white/50 hover:text-white p-1 rounded transition-colors"
+                  onClick={() => {
+                    const container = document.querySelector('.stocks-scroll-container');
+                    container?.scrollBy({ left: -400, behavior: 'smooth' });
+                  }}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button 
+                  className="text-white/50 hover:text-white p-1 rounded transition-colors"
+                  onClick={() => {
+                    const container = document.querySelector('.stocks-scroll-container');
+                    container?.scrollBy({ left: 400, behavior: 'smooth' });
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-            <div className="overflow-x-auto scrollbar-visible">
+            <div className="overflow-x-auto scrollbar-visible stocks-scroll-container">
               <div className="flex space-x-2 pb-2" style={{ width: 'max-content' }}>
-                {cryptoStocks.slice(0, 20).map((stock: StockQuote, index: number) => {
+                {cryptoStocks.slice(0, 30).map((stock: StockQuote, index: number) => {
                   const ChangeIcon = getChangeIcon(stock.percentChange24h);
                   return (
                     <div
                       key={stock.symbol}
-                      className="min-w-[120px] bg-white/5 rounded-lg p-2 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all hover:scale-[1.02] text-center"
+                      className="min-w-[110px] bg-white/5 rounded-lg p-2 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all hover:scale-[1.02] text-center"
                       data-testid={`stock-${stock.symbol}`}
                     >
                       <div className="text-white font-bold text-sm mb-1">{stock.symbol}</div>

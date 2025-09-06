@@ -45,11 +45,18 @@ export class MarketDataService {
   private cache = new Map<string, { data: any; timestamp: number }>();
   private cacheTimeout = 60000; // 1 minute cache
   
-  // Crypto-related stocks list
+  // Crypto-related stocks list - expanded to 25+ symbols
   private cryptoStocks = [
-    'MSTR', 'TSLA', 'SQ', 'PYPL', 'NVDA', 'AMD', 'INTC', 'COIN',
-    'HOOD', 'RIOT', 'MARA', 'CAN', 'BTBT', 'EBON', 'SOS', 'NCTY',
-    'ARBK', 'DGHI', 'GBTC', 'ETHE', 'BITF', 'HUT', 'HIVE', 'CLSK'
+    // Major crypto companies
+    'MSTR', 'COIN', 'RIOT', 'MARA', 'CLSK', 'HUT', 'BITF', 'BTBT',
+    // Tech companies with crypto exposure
+    'NVDA', 'AMD', 'TSLA', 'PYPL', 'SQ', 'HOOD', 'INTC', 'ORCL',
+    // Mining and infrastructure
+    'CAN', 'EBON', 'SOS', 'NCTY', 'ARBK', 'DGHI', 'HIVE', 'GREE',
+    // ETFs and trusts
+    'GBTC', 'ETHE', 'BITI', 'BITQ', 'BLOK', 'LEGR', 'KOIN', 'META',
+    // Additional tech/fintech
+    'GOOGL', 'MSFT', 'AMZN', 'V', 'MA', 'JPM', 'BAC'
   ];
 
   constructor() {
@@ -499,7 +506,7 @@ export class MarketDataService {
 
     try {
       // Get real-time quotes for crypto-related stocks using Alpha Vantage individual calls
-      const symbols = this.cryptoStocks.slice(0, 5); // Limit to 5 to avoid rate limits
+      const symbols = this.cryptoStocks.slice(0, 25); // Expanded to 25 stocks
       const stockQuotes: StockQuote[] = [];
       
       for (const symbol of symbols) {
@@ -515,8 +522,24 @@ export class MarketDataService {
 
           if (response.data && response.data['Global Quote']) {
             const quote = response.data['Global Quote'];
-            const price = parseFloat(quote['05. price']);
-            const changePercent = parseFloat(quote['10. change percent'].replace('%', ''));
+            
+            // Add error handling for missing or invalid data
+            const priceStr = quote['05. price'];
+            const changeStr = quote['10. change percent'];
+            const volumeStr = quote['06. volume'];
+            
+            if (!priceStr || !changeStr) {
+              console.warn(`Missing price/change data for ${symbol}`);
+              continue;
+            }
+            
+            const price = parseFloat(priceStr);
+            const changePercent = parseFloat(changeStr.replace('%', ''));
+            
+            if (isNaN(price) || isNaN(changePercent)) {
+              console.warn(`Invalid numeric data for ${symbol}`);
+              continue;
+            }
             
             stockQuotes.push({
               symbol: symbol,
@@ -524,15 +547,15 @@ export class MarketDataService {
               price: price,
               percentChange24h: changePercent,
               marketCap: 0,
-              volume: parseInt(quote['06. volume']) || 0,
+              volume: parseInt(volumeStr) || 0,
               lastUpdated: new Date().toISOString()
             });
           }
           
           // Small delay between requests to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 200));
-        } catch (error) {
-          console.warn(`Failed to fetch ${symbol}:`, error.message);
+          await new Promise(resolve => setTimeout(resolve, 150));
+        } catch (error: any) {
+          console.warn(`Failed to fetch ${symbol}:`, error.message || 'Unknown error');
           continue;
         }
       }
@@ -549,18 +572,50 @@ export class MarketDataService {
 
   private getStockName(symbol: string): string {
     const names: { [key: string]: string } = {
-      'MSTR': 'MicroStrategy Inc',
-      'TSLA': 'Tesla Inc',
-      'SQ': 'Block Inc',
-      'PYPL': 'PayPal Holdings',
-      'NVDA': 'NVIDIA Corporation',
-      'AMD': 'Advanced Micro Devices',
-      'INTC': 'Intel Corporation',
-      'COIN': 'Coinbase Global Inc',
-      'HOOD': 'Robinhood Markets',
-      'RIOT': 'Riot Platforms Inc',
+      // Major crypto companies
+      'MSTR': 'MicroStrategy',
+      'COIN': 'Coinbase',
+      'RIOT': 'Riot Platforms',
       'MARA': 'Marathon Digital',
-      'CAN': 'Canaan Inc',
+      'CLSK': 'CleanSpark',
+      'HUT': 'Hut 8 Mining',
+      'BITF': 'Bitfarms',
+      'BTBT': 'Bit Digital',
+      // Tech companies
+      'NVDA': 'NVIDIA',
+      'AMD': 'AMD',
+      'TSLA': 'Tesla',
+      'PYPL': 'PayPal',
+      'SQ': 'Block Inc',
+      'HOOD': 'Robinhood',
+      'INTC': 'Intel',
+      'ORCL': 'Oracle',
+      // Mining companies
+      'CAN': 'Canaan',
+      'EBON': 'Ebang Intl',
+      'SOS': 'SOS Limited',
+      'NCTY': 'The9 Limited',
+      'ARBK': 'Argo Blockchain',
+      'DGHI': 'Digihost Tech',
+      'HIVE': 'HIVE Blockchain',
+      'GREE': 'Greenidge Gen',
+      // ETFs and funds
+      'GBTC': 'Grayscale Bitcoin',
+      'ETHE': 'Grayscale Ethereum',
+      'BITI': 'ProShares Bitcoin',
+      'BITQ': 'Amplify Crypto',
+      'BLOK': 'Amplify Blockchain',
+      'LEGR': 'First Trust Crypto',
+      'KOIN': 'Innovation Crypto',
+      'META': 'Meta Platforms',
+      // Major tech/finance
+      'GOOGL': 'Alphabet',
+      'MSFT': 'Microsoft',
+      'AMZN': 'Amazon',
+      'V': 'Visa',
+      'MA': 'Mastercard',
+      'JPM': 'JPMorgan',
+      'BAC': 'Bank of America'
       'BTBT': 'Bit Digital Inc',
       'EBON': 'Ebang International',
       'SOS': 'SOS Limited',
