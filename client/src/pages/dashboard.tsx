@@ -739,7 +739,7 @@ export default function Dashboard() {
                       {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                  <CardContent className="space-y-1 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                     {displayStocks.slice(0, 15).map((stock: any, index: number) => {
                       // Handle both old format (percentChange24h) and new format (changePercent)
                       const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
@@ -757,20 +757,17 @@ export default function Dashboard() {
                       return (
                         <div
                           key={stock.symbol}
-                          className={`p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-all border border-white/10 ${getMomentumClass(stock.momentum)}`}
+                          className={`px-2 py-1.5 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-all border border-white/5 ${getMomentumClass(stock.momentum)}`}
                           data-testid={`sidebar-stock-${stock.symbol}`}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-white font-bold text-sm">{stock.symbol}</div>
+                          <div className="flex items-center justify-between">
+                            <div className="text-white font-medium text-xs">{stock.symbol}</div>
                             <div className={`flex items-center text-xs ${getChangeColor(changePercent)}`}>
-                              {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
-                              {changePercent.toFixed(2)}%
+                              {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 mr-0.5" />}
+                              {changePercent.toFixed(1)}%
                             </div>
                           </div>
-                          <div className="text-gray-300 text-xs mb-1 truncate">
-                            {stock.name}
-                          </div>
-                          <div className="text-white font-semibold text-sm">
+                          <div className="text-white font-medium text-xs mt-0.5">
                             {formatPrice(stock.price)}
                           </div>
                         </div>
