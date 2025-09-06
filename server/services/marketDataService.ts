@@ -529,17 +529,46 @@ export class MarketDataService {
     if (cached) return cached;
 
     try {
-      // Mock data for crypto stocks since we don't have stock API keys
+      // Realistic mock data for crypto stocks with actual price ranges
       const mockStocks: StockQuote[] = this.cryptoStocks.map((symbol, index) => {
-        const basePrice = Math.random() * 500 + 50;
-        const change = (Math.random() - 0.5) * 10;
+        const realisticPrices: { [key: string]: { base: number; range: number } } = {
+          'MSTR': { base: 145, range: 30 },
+          'TSLA': { base: 240, range: 20 },
+          'SQ': { base: 65, range: 10 },
+          'PYPL': { base: 58, range: 8 },
+          'NVDA': { base: 420, range: 40 },
+          'AMD': { base: 140, range: 15 },
+          'INTC': { base: 23, range: 3 },
+          'COIN': { base: 85, range: 15 },
+          'HOOD': { base: 12, range: 2 },
+          'RIOT': { base: 8, range: 2 },
+          'MARA': { base: 15, range: 3 },
+          'CAN': { base: 2.5, range: 0.5 },
+          'BTBT': { base: 1.8, range: 0.4 },
+          'EBON': { base: 0.85, range: 0.2 },
+          'SOS': { base: 1.2, range: 0.3 },
+          'NCTY': { base: 1.1, range: 0.2 },
+          'ARBK': { base: 0.95, range: 0.2 },
+          'DGHI': { base: 1.4, range: 0.3 },
+          'GBTC': { base: 32, range: 5 },
+          'ETHE': { base: 28, range: 4 },
+          'BITF': { base: 2.1, range: 0.4 },
+          'HUT': { base: 8.5, range: 1.5 },
+          'HIVE': { base: 3.2, range: 0.6 },
+          'CLSK': { base: 12, range: 2 }
+        };
+        
+        const priceData = realisticPrices[symbol] || { base: 10, range: 2 };
+        const basePrice = priceData.base + (Math.random() - 0.5) * priceData.range;
+        const change = (Math.random() - 0.5) * 8; // More realistic daily change range
+        
         return {
           symbol: symbol,
           name: this.getStockName(symbol),
-          price: basePrice,
+          price: Math.max(0.01, basePrice), // Ensure positive prices
           percentChange24h: change,
-          marketCap: basePrice * 1000000000 * Math.random(),
-          volume: Math.random() * 10000000,
+          marketCap: basePrice * Math.random() * 500000000 + 100000000, // More realistic market caps
+          volume: Math.random() * 5000000 + 100000, // More realistic volume
           lastUpdated: new Date().toISOString()
         };
       });
