@@ -505,10 +505,6 @@ export class MarketDataService {
     if (cached) return cached;
 
     try {
-      // Use fewer stocks but ensure they work with real-time data
-      const symbols = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA']; // Core crypto stocks only
-      const stockQuotes: StockQuote[] = [];
-      
       // Use real-time calculated stock data instead of API calls
       console.log(`📈 Generating real-time stock data with market-based calculations`);
       const stockQuotes = this.getRealTimeStockData();
