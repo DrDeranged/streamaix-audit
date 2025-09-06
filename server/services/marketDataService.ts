@@ -581,14 +581,14 @@ export class MarketDataService {
     const now = new Date();
     
     const baseStocks = [
-      { symbol: 'MSTR', name: 'MicroStrategy', basePrice: 330.00, volatility: 0.04 },
-      { symbol: 'COIN', name: 'Coinbase', basePrice: 185.00, volatility: 0.03 },
-      { symbol: 'RIOT', name: 'Riot Platforms', basePrice: 10.99, volatility: 0.05 },
-      { symbol: 'MARA', name: 'Marathon Digital', basePrice: 18.50, volatility: 0.04 },
+      { symbol: 'MSTR', name: 'MicroStrategy', basePrice: 335.87, volatility: 0.04 },
+      { symbol: 'COIN', name: 'Coinbase', basePrice: 299.07, volatility: 0.03 },
+      { symbol: 'RIOT', name: 'Riot Platforms', basePrice: 13.29, volatility: 0.05 },
+      { symbol: 'MARA', name: 'Marathon Digital', basePrice: 15.19, volatility: 0.04 },
       { symbol: 'NVDA', name: 'NVIDIA', basePrice: 167.02, volatility: 0.02 },
-      { symbol: 'AMD', name: 'AMD', basePrice: 142.50, volatility: 0.03 },
-      { symbol: 'TSLA', name: 'Tesla', basePrice: 248.50, volatility: 0.03 },
-      { symbol: 'PYPL', name: 'PayPal', basePrice: 64.20, volatility: 0.02 },
+      { symbol: 'AMD', name: 'AMD', basePrice: 151.14, volatility: 0.03 },
+      { symbol: 'TSLA', name: 'Tesla', basePrice: 350.84, volatility: 0.03 },
+      { symbol: 'PYPL', name: 'PayPal', basePrice: 68.26, volatility: 0.02 },
       { symbol: 'CLSK', name: 'CleanSpark', basePrice: 9.24, volatility: 0.06 },
       { symbol: 'HUT', name: 'Hut 8 Mining', basePrice: 7.59, volatility: 0.05 },
       { symbol: 'BITF', name: 'Bitfarms', basePrice: 2.28, volatility: 0.07 },
