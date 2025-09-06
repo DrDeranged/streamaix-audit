@@ -739,7 +739,7 @@ export default function Dashboard() {
                       {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-1 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                  <CardContent className="space-y-0.5 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                     {displayStocks.slice(0, 15).map((stock: any, index: number) => {
                       // Handle both old format (percentChange24h) and new format (changePercent)
                       const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
@@ -757,7 +757,7 @@ export default function Dashboard() {
                       return (
                         <div
                           key={stock.symbol}
-                          className={`px-1.5 py-1 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-all border border-white/5 ${getMomentumClass(stock.momentum)}`}
+                          className={`px-1 py-0.5 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-all border border-white/5 ${getMomentumClass(stock.momentum)}`}
                           data-testid={`sidebar-stock-${stock.symbol}`}
                         >
                           <div className="flex items-center justify-between">
@@ -767,7 +767,7 @@ export default function Dashboard() {
                               {changePercent.toFixed(1)}%
                             </div>
                           </div>
-                          <div className="text-white font-medium text-xs">
+                          <div className="text-white font-medium text-xs leading-none">
                             {formatPrice(stock.price)}
                           </div>
                         </div>
