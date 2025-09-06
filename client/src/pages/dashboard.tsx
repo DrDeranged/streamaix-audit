@@ -395,80 +395,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* CRYPTO STOCKS SECTION - Only show if real data available */}
-      {cryptoStocks.length > 0 && (
-        <div className="relative z-10 bg-gradient-to-r from-slate-900/25 via-indigo-900/15 to-slate-900/25 border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-4 py-2">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-indigo-400" />
-                <h3 className="text-white text-sm font-medium">Crypto Stocks</h3>
-              </div>
-              <div className="flex gap-1">
-                <button 
-                  className="text-white/50 hover:text-white p-1 rounded transition-colors"
-                  onClick={() => {
-                    const container = document.querySelector('.stocks-scroll-container');
-                    container?.scrollBy({ left: -400, behavior: 'smooth' });
-                  }}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button 
-                  className="text-white/50 hover:text-white p-1 rounded transition-colors"
-                  onClick={() => {
-                    const container = document.querySelector('.stocks-scroll-container');
-                    container?.scrollBy({ left: 400, behavior: 'smooth' });
-                  }}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-            <div className="overflow-x-auto scrollbar-visible stocks-scroll-container">
-              <div className="flex space-x-2 pb-2" style={{ width: 'max-content' }}>
-                {displayStocks.slice(0, 30).map((stock: any, index: number) => {
-                  // Handle both old format (percentChange24h) and new format (changePercent)
-                  const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
-                  const ChangeIcon = getChangeIcon(changePercent);
-                  
-                  // Add visual momentum indicators
-                  const getMomentumClass = (momentum?: string) => {
-                    switch (momentum) {
-                      case 'up': return 'animate-pulse ring-1 ring-green-400/50 bg-green-500/10';
-                      case 'down': return 'animate-pulse ring-1 ring-red-400/50 bg-red-500/10';
-                      default: return '';
-                    }
-                  };
-                  
-                  return (
-                    <div
-                      key={stock.symbol}
-                      className={`min-w-[110px] bg-white/5 rounded-lg p-2 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all hover:scale-[1.02] text-center ${getMomentumClass(stock.momentum)}`}
-                      data-testid={`stock-${stock.symbol}`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="text-white font-bold text-sm">{stock.symbol}</div>
-                        {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
-                      </div>
-                      <div className="text-gray-300 text-xs truncate mb-1">
-                        {stock.name.length > 10 ? stock.name.slice(0, 10) + '...' : stock.name}
-                      </div>
-                      <div className="text-white font-semibold text-xs">
-                        {formatPrice(stock.price)}
-                      </div>
-                      <div className={`flex items-center justify-center text-xs mt-1 ${getChangeColor(changePercent)}`}>
-                        {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
-                        {changePercent.toFixed(2)}%
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       
       <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-6">
         {/* Header */}
@@ -798,8 +724,8 @@ export default function Dashboard() {
 
           {/* SUPPLEMENTAL SIDEBAR - 1/4 width */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Macro Intelligence - Filtered */}
-            {newsArticles.length > 0 && (
+            {/* Live Crypto Stocks - Vertical Ticker */}
+            {displayStocks.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -808,31 +734,48 @@ export default function Dashboard() {
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-white text-sm flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-purple-400" />
-                      Macro Intel
+                      <TrendingUp className="h-4 w-4 text-indigo-400" />
+                      Live Crypto Stocks
+                      {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    {newsArticles.filter((article: NewsArticle) => {
-                      const title = article.title.toLowerCase();
-                      return title.includes('fed') || title.includes('inflation') || title.includes('economy') || 
-                             title.includes('gdp') || title.includes('interest') || title.includes('monetary') ||
-                             title.includes('policy') || title.includes('treasury') || title.includes('government') ||
-                             title.includes('central bank') || title.includes('recession') || title.includes('economic');
-                    }).slice(0, 3).map((article: NewsArticle, index: number) => (
-                      <div
-                        key={index}
-                        className="p-3 bg-white/5 rounded cursor-pointer hover:bg-white/10 transition-colors"
-                        onClick={() => window.open(article.url, '_blank')}
-                      >
-                        <h5 className="text-white text-xs font-medium line-clamp-2 mb-1">
-                          {article.title}
-                        </h5>
-                        <p className="text-gray-400 text-xs">
-                          {new Date(article.published).toLocaleDateString()}
-                        </p>
-                      </div>
-                    ))}
+                  <CardContent className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                    {displayStocks.slice(0, 15).map((stock: any, index: number) => {
+                      // Handle both old format (percentChange24h) and new format (changePercent)
+                      const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
+                      const ChangeIcon = getChangeIcon(changePercent);
+                      
+                      // Add visual momentum indicators
+                      const getMomentumClass = (momentum?: string) => {
+                        switch (momentum) {
+                          case 'up': return 'animate-pulse ring-1 ring-green-400/50 bg-green-500/10';
+                          case 'down': return 'animate-pulse ring-1 ring-red-400/50 bg-red-500/10';
+                          default: return '';
+                        }
+                      };
+                      
+                      return (
+                        <div
+                          key={stock.symbol}
+                          className={`p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-all border border-white/10 ${getMomentumClass(stock.momentum)}`}
+                          data-testid={`sidebar-stock-${stock.symbol}`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-white font-bold text-sm">{stock.symbol}</div>
+                            <div className={`flex items-center text-xs ${getChangeColor(changePercent)}`}>
+                              {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
+                              {changePercent.toFixed(2)}%
+                            </div>
+                          </div>
+                          <div className="text-gray-300 text-xs mb-1 truncate">
+                            {stock.name}
+                          </div>
+                          <div className="text-white font-semibold text-sm">
+                            {formatPrice(stock.price)}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </CardContent>
                 </Card>
               </motion.div>
