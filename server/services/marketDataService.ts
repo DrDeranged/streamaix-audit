@@ -583,7 +583,11 @@ export class MarketDataService {
   
   // Real-time stock data from Finnhub API
   private async getRealTimeStockDataFromFinnhub(): Promise<any[]> {
-    const symbols = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'AMD', 'TSLA', 'PYPL', 'CLSK', 'HUT', 'BITF', 'HOOD', 'SQ', 'INTC', 'GBTC'];
+    const symbols = [
+      'MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'AMD', 'TSLA', 'PYPL', 'CLSK', 'HUT', 
+      'BITF', 'HOOD', 'SQ', 'INTC', 'GBTC', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 
+      'NFLX', 'ADBE', 'CRM', 'ORCL', 'IBM', 'UBER', 'LYFT', 'SPOT', 'TWTR', 'SNAP'
+    ];
     const stockData = [];
 
     // Fetch real-time quotes for each symbol
@@ -651,7 +655,22 @@ export class MarketDataService {
       { symbol: 'HOOD', name: 'Robinhood', basePrice: 24.44, volatility: 0.04 },
       { symbol: 'SQ', name: 'Block Inc', basePrice: 78.90, volatility: 0.03 },
       { symbol: 'INTC', name: 'Intel', basePrice: 22.67, volatility: 0.02 },
-      { symbol: 'GBTC', name: 'Grayscale Bitcoin', basePrice: 65.00, volatility: 0.05 }
+      { symbol: 'GBTC', name: 'Grayscale Bitcoin', basePrice: 65.00, volatility: 0.05 },
+      { symbol: 'AAPL', name: 'Apple', basePrice: 228.52, volatility: 0.02 },
+      { symbol: 'MSFT', name: 'Microsoft', basePrice: 420.45, volatility: 0.02 },
+      { symbol: 'GOOGL', name: 'Alphabet', basePrice: 162.84, volatility: 0.03 },
+      { symbol: 'AMZN', name: 'Amazon', basePrice: 181.30, volatility: 0.03 },
+      { symbol: 'META', name: 'Meta Platforms', basePrice: 503.92, volatility: 0.03 },
+      { symbol: 'NFLX', name: 'Netflix', basePrice: 692.18, volatility: 0.04 },
+      { symbol: 'ADBE', name: 'Adobe', basePrice: 545.83, volatility: 0.03 },
+      { symbol: 'CRM', name: 'Salesforce', basePrice: 297.44, volatility: 0.03 },
+      { symbol: 'ORCL', name: 'Oracle', basePrice: 132.71, volatility: 0.02 },
+      { symbol: 'IBM', name: 'IBM', basePrice: 213.45, volatility: 0.02 },
+      { symbol: 'UBER', name: 'Uber', basePrice: 73.89, volatility: 0.04 },
+      { symbol: 'LYFT', name: 'Lyft', basePrice: 15.24, volatility: 0.05 },
+      { symbol: 'SPOT', name: 'Spotify', basePrice: 394.26, volatility: 0.04 },
+      { symbol: 'TWTR', name: 'X Corp', basePrice: 54.20, volatility: 0.06 },
+      { symbol: 'SNAP', name: 'Snap Inc', basePrice: 11.75, volatility: 0.05 }
     ];
     
     return baseStocks.map(stock => {

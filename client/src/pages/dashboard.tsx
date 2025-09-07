@@ -739,8 +739,8 @@ export default function Dashboard() {
                       {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
-                    {displayStocks.slice(0, 10).map((stock: any, index: number) => {
+                  <CardContent className="space-y-1 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
+                    {displayStocks.slice(0, 25).map((stock: any, index: number) => {
                       // Handle both old format (percentChange24h) and new format (changePercent)
                       const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
                       
@@ -777,24 +777,28 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
-                    className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30"
+                    className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30 transition-all duration-200"
                     size="sm"
+                    onClick={() => setLocation('/process')}
+                    data-testid="button-process-content"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Process Content
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-200"
                     size="sm"
+                    data-testid="button-add-note"
                   >
                     <BookmarkPlus className="h-4 w-4 mr-2" />
                     Add Note
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-200"
                     size="sm"
+                    data-testid="button-share-profile"
                   >
                     <Share className="h-4 w-4 mr-2" />
                     Share Profile
