@@ -777,7 +777,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
-                    className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30 transition-all duration-200"
+                    className="w-full bg-purple-600/80 hover:bg-purple-500 text-white border-2 border-purple-400 shadow-lg transition-all duration-200 font-semibold"
                     size="sm"
                     onClick={() => setLocation('/process')}
                     data-testid="button-process-content"
@@ -786,8 +786,7 @@ export default function Dashboard() {
                     Process Content
                   </Button>
                   <Button 
-                    variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-200"
+                    className="w-full bg-blue-600/80 hover:bg-blue-500 text-white border-2 border-blue-400 shadow-lg transition-all duration-200 font-semibold"
                     size="sm"
                     data-testid="button-add-note"
                   >
@@ -795,8 +794,7 @@ export default function Dashboard() {
                     Add Note
                   </Button>
                   <Button 
-                    variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-200"
+                    className="w-full bg-green-600/80 hover:bg-green-500 text-white border-2 border-green-400 shadow-lg transition-all duration-200 font-semibold"
                     size="sm"
                     data-testid="button-share-profile"
                   >
