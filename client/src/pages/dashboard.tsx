@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import UserNotesList from '@/components/UserNotesList';
@@ -45,7 +50,8 @@ import {
   Video,
   TrendingDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Copy
 } from 'lucide-react';
 
 interface Summary {
@@ -127,6 +133,15 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  // State for note dialog
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [noteContent, setNoteContent] = useState('');
+  const [noteTitle, setNoteTitle] = useState('');
+  
+  // State for share dialog
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   
   // Real-time stock data state
   const [realTimeStocks, setRealTimeStocks] = useState<RealTimeStockData[]>([]);
@@ -172,6 +187,36 @@ export default function Dashboard() {
   const { data: stocksData } = useQuery({
     queryKey: ['/api/market/stocks/crypto'],
     refetchInterval: 300000, // Every 5 minutes
+  });
+
+  // Create note mutation
+  const createNoteMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/notes', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: noteTitle,
+          content: noteContent,
+          summaryId: null, // General note not tied to specific summary
+          isPrivate: true
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Note created successfully!" });
+      setNoteDialogOpen(false);
+      setNoteTitle('');
+      setNoteContent('');
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to create note", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
   });
 
   const summaries = (summariesData as any)?.summaries || [];
@@ -540,7 +585,11 @@ export default function Dashboard() {
                 <TabsContent value="summaries" className="space-y-6 mt-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-white text-xl font-bold">My Summaries ({summaries.length})</h2>
-                    <Button className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30">
+                    <Button 
+                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30"
+                      onClick={() => setLocation('/create-summary')}
+                      data-testid="button-new-summary"
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       New Summary
                     </Button>
@@ -584,6 +633,7 @@ export default function Dashboard() {
                                 size="sm" 
                                 className="text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium"
                                 data-testid="button-view-full"
+                                onClick={() => setLocation(`/summary/${summary.id}`)}
                               >
                                 View Full
                               </Button>
@@ -788,28 +838,119 @@ export default function Dashboard() {
                   <Button 
                     className="w-full bg-purple-600/80 hover:bg-purple-500 text-white border-2 border-purple-400 shadow-lg transition-all duration-200 font-semibold"
                     size="sm"
-                    onClick={() => setLocation('/process')}
+                    onClick={() => setLocation('/create-summary')}
                     data-testid="button-process-content"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Process Content
                   </Button>
-                  <Button 
-                    className="w-full bg-blue-600/80 hover:bg-blue-500 text-white border-2 border-blue-400 shadow-lg transition-all duration-200 font-semibold"
-                    size="sm"
-                    data-testid="button-add-note"
-                  >
-                    <BookmarkPlus className="h-4 w-4 mr-2" />
-                    Add Note
-                  </Button>
-                  <Button 
-                    className="w-full bg-green-600/80 hover:bg-green-500 text-white border-2 border-green-400 shadow-lg transition-all duration-200 font-semibold"
-                    size="sm"
-                    data-testid="button-share-profile"
-                  >
-                    <Share className="h-4 w-4 mr-2" />
-                    Share Profile
-                  </Button>
+                  <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="w-full bg-blue-600/80 hover:bg-blue-500 text-white border-2 border-blue-400 shadow-lg transition-all duration-200 font-semibold"
+                        size="sm"
+                        data-testid="button-add-note"
+                      >
+                        <BookmarkPlus className="h-4 w-4 mr-2" />
+                        Add Note
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-gray-900 border-gray-700 text-white">
+                      <DialogHeader>
+                        <DialogTitle>Create New Note</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="note-title">Title</Label>
+                          <Input
+                            id="note-title"
+                            value={noteTitle}
+                            onChange={(e) => setNoteTitle(e.target.value)}
+                            placeholder="Enter note title..."
+                            className="bg-gray-800 border-gray-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="note-content">Content</Label>
+                          <Textarea
+                            id="note-content"
+                            value={noteContent}
+                            onChange={(e) => setNoteContent(e.target.value)}
+                            placeholder="Write your note here..."
+                            className="bg-gray-800 border-gray-600 text-white min-h-[120px]"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              if (noteTitle.trim() && noteContent.trim()) {
+                                createNoteMutation.mutate();
+                              } else {
+                                toast({ title: "Please fill in both title and content", variant: "destructive" });
+                              }
+                            }}
+                            disabled={createNoteMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            {createNoteMutation.isPending ? "Creating..." : "Create Note"}
+                          </Button>
+                          <Button variant="outline" onClick={() => setNoteDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="w-full bg-green-600/80 hover:bg-green-500 text-white border-2 border-green-400 shadow-lg transition-all duration-200 font-semibold"
+                        size="sm"
+                        data-testid="button-share-profile"
+                      >
+                        <Share className="h-4 w-4 mr-2" />
+                        Share Profile
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-gray-900 border-gray-700 text-white">
+                      <DialogHeader>
+                        <DialogTitle>Share Your Profile</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Profile URL</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              value={`${window.location.origin}/users/${user?.id}`}
+                              readOnly
+                              className="bg-gray-800 border-gray-600 text-white"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/users/${user?.id}`);
+                                toast({ title: "Profile URL copied to clipboard!" });
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => window.open(`https://twitter.com/intent/tweet?text=Check out my StreamAiX profile: ${window.location.origin}/users/${user?.id}`, '_blank')}
+                            className="bg-blue-500 hover:bg-blue-600"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Share on Twitter
+                          </Button>
+                          <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
+                            Close
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             </motion.div>
