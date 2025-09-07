@@ -1,7 +1,7 @@
 import { BrowserProvider, JsonRpcSigner } from 'ethers';
 
 // Define wallet types
-export type WalletType = 'metamask' | 'walletconnect' | 'coinbase';
+export type WalletType = 'metamask' | 'walletconnect' | 'coinbase' | 'injected';
 
 export interface WalletInfo {
   address: string;
@@ -10,6 +10,8 @@ export interface WalletInfo {
   balance?: string;
   provider: BrowserProvider;
   signer: JsonRpcSigner;
+  walletType?: WalletType;
+  walletName?: string;
 }
 
 export interface Chain {
@@ -67,6 +69,28 @@ class Web3Manager {
            (window as any).ethereum.isMetaMask;
   }
 
+  // Check if Coinbase Wallet is available
+  isCoinbaseWalletAvailable(): boolean {
+    return typeof window !== 'undefined' && 
+           typeof (window as any).ethereum !== 'undefined' &&
+           (window as any).ethereum.isCoinbaseWallet;
+  }
+
+  // Check if any injected wallet is available
+  isInjectedWalletAvailable(): boolean {
+    return typeof window !== 'undefined' && 
+           typeof (window as any).ethereum !== 'undefined';
+  }
+
+  // Get available wallet types
+  getAvailableWallets(): Array<{ type: WalletType; name: string; available: boolean }> {
+    return [
+      { type: 'metamask', name: 'MetaMask', available: this.isMetaMaskAvailable() },
+      { type: 'coinbase', name: 'Coinbase Wallet', available: this.isCoinbaseWalletAvailable() },
+      { type: 'walletconnect', name: 'WalletConnect', available: true },
+    ];
+  }
+
   // Connect to MetaMask
   async connectMetaMask(): Promise<WalletInfo> {
     if (!this.isMetaMaskAvailable()) {
@@ -106,7 +130,9 @@ class Web3Manager {
         ensName,
         balance: balance.toString(),
         provider,
-        signer
+        signer,
+        walletType: 'metamask',
+        walletName: 'MetaMask'
       };
 
       this.wallet = walletInfo;
@@ -220,10 +246,102 @@ ${nonce}`;
     return this.wallet !== null;
   }
 
+  // Connect to any injected wallet (generic method)
+  async connectInjectedWallet(): Promise<WalletInfo> {
+    if (!this.isInjectedWalletAvailable()) {
+      throw new Error('No injected wallet found. Please install MetaMask, Coinbase Wallet, or another Web3 wallet.');
+    }
+
+    try {
+      const ethereum = (window as any).ethereum;
+      
+      // Request account access
+      const accounts = await ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found. Please ensure your wallet is unlocked.');
+      }
+
+      const provider = new BrowserProvider(ethereum);
+      const signer = await provider.getSigner();
+      const address = accounts[0];
+      const network = await provider.getNetwork();
+      const balance = await provider.getBalance(address);
+
+      // Determine wallet type
+      let walletType: WalletType = 'injected';
+      let walletName = 'Injected Wallet';
+      
+      if (ethereum.isMetaMask) {
+        walletType = 'metamask';
+        walletName = 'MetaMask';
+      } else if (ethereum.isCoinbaseWallet) {
+        walletType = 'coinbase';
+        walletName = 'Coinbase Wallet';
+      }
+
+      const walletInfo: WalletInfo = {
+        address,
+        chainId: Number(network.chainId),
+        balance: balance.toString(),
+        provider,
+        signer,
+        walletType,
+        walletName
+      };
+
+      this.wallet = walletInfo;
+      this.notifyListeners();
+
+      // Listen for account changes
+      ethereum.on('accountsChanged', (accounts: string[]) => {
+        if (accounts.length === 0) {
+          this.disconnect();
+        } else {
+          this.connectInjectedWallet().catch(console.error);
+        }
+      });
+
+      // Listen for chain changes
+      ethereum.on('chainChanged', () => {
+        this.connectInjectedWallet().catch(console.error);
+      });
+
+      return walletInfo;
+    } catch (error: any) {
+      console.error('Injected wallet connection failed:', error);
+      throw new Error(error.message || 'Failed to connect to wallet');
+    }
+  }
+
+  // Generic connect method
+  async connect(walletType: WalletType): Promise<WalletInfo> {
+    switch (walletType) {
+      case 'metamask':
+        return this.connectMetaMask();
+      case 'coinbase':
+      case 'injected':
+        return this.connectInjectedWallet();
+      case 'walletconnect':
+        throw new Error('WalletConnect support coming soon!');
+      default:
+        throw new Error(`Unsupported wallet type: ${walletType}`);
+    }
+  }
+
   // Disconnect wallet
   disconnect(): void {
     this.wallet = null;
     this.notifyListeners();
+
+    // Clear listeners if they exist
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      const ethereum = (window as any).ethereum;
+      ethereum.removeAllListeners?.('accountsChanged');
+      ethereum.removeAllListeners?.('chainChanged');
+    }
   }
 
   // Add listener for wallet changes

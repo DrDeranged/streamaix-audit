@@ -7,6 +7,14 @@ import { useWeb3 } from '@/hooks/useWeb3';
 import { useToast } from '@/hooks/use-toast';
 import { Wallet, ExternalLink, Copy, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 
+interface WalletOption {
+  type: string;
+  name: string;
+  icon: string;
+  available: boolean;
+  description: string;
+}
+
 interface WalletConnectorProps {
   onWalletConnected?: (address: string, signature: string, message: string) => void;
   onWalletDisconnected?: () => void;
@@ -41,10 +49,37 @@ export function WalletConnector({
   const { toast } = useToast();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  const handleConnect = async () => {
-    const walletInfo = await connectMetaMask();
-    if (walletInfo && onWalletConnected) {
-      await handleAuthenticate(walletInfo.address);
+  const handleConnect = async (walletType: string = 'metamask') => {
+    try {
+      let walletInfo;
+      
+      if (walletType === 'metamask') {
+        walletInfo = await connectMetaMask();
+      } else if (walletType === 'coinbase') {
+        // Try to connect with Coinbase Wallet
+        if (typeof window !== 'undefined' && (window as any).ethereum?.isCoinbaseWallet) {
+          walletInfo = await connectMetaMask(); // Same method, different provider
+        } else {
+          throw new Error('Coinbase Wallet is not installed');
+        }
+      } else if (walletType === 'walletconnect') {
+        // For now, show informative message about WalletConnect
+        toast({
+          title: 'WalletConnect Coming Soon!',
+          description: 'WalletConnect integration is being implemented. Please use MetaMask or Coinbase Wallet for now.',
+        });
+        return;
+      }
+      
+      if (walletInfo && onWalletConnected) {
+        await handleAuthenticate(walletInfo.address);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Connection Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -96,7 +131,33 @@ export function WalletConnector({
 
   const networkInfo = wallet && wallet.chainId ? getNetworkInfo(wallet.chainId) : null;
 
-  if (!isMetaMaskAvailable()) {
+  const walletOptions: WalletOption[] = [
+    {
+      type: 'metamask',
+      name: 'MetaMask',
+      icon: '🦊',
+      available: isMetaMaskAvailable(),
+      description: 'Connect with MetaMask wallet'
+    },
+    {
+      type: 'coinbase',
+      name: 'Coinbase Wallet',
+      icon: '🔵',
+      available: typeof window !== 'undefined' && (window as any).ethereum?.isCoinbaseWallet,
+      description: 'Connect with Coinbase Wallet'
+    },
+    {
+      type: 'walletconnect',
+      name: 'WalletConnect',
+      icon: '🔗',
+      available: true,
+      description: 'Connect with any WalletConnect compatible wallet'
+    }
+  ];
+
+  const hasAnyWallet = walletOptions.some(option => option.available);
+
+  if (!hasAnyWallet) {
     return (
       <Card className="bg-yellow-500/10 border-yellow-500/20">
         <CardContent className="p-4">
@@ -137,28 +198,76 @@ export function WalletConnector({
             <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-2" />
             <CardTitle className="text-gray-900 dark:text-white">Connect Your Wallet</CardTitle>
             <p className="text-gray-300 text-sm">
-              Connect with MetaMask to access Web3 features
+              Choose your preferred wallet to access Web3 features
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={handleConnect}
-              disabled={isConnecting}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-gray-900 dark:text-white font-semibold"
-              data-testid="button-connect-metamask"
-            >
-              {isConnecting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                <>
-                  <Wallet className="mr-2 h-4 w-4" />
-                  Connect MetaMask
-                </>
-              )}
-            </Button>
+          <CardContent className="space-y-3">
+            {walletOptions.map((option) => (
+              <Button
+                key={option.type}
+                onClick={() => handleConnect(option.type)}
+                disabled={isConnecting || !option.available}
+                className={`w-full border transition-all duration-200 ${
+                  option.available
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-transparent'
+                    : 'bg-gray-600/20 hover:bg-gray-600/30 text-gray-400 border-gray-600/30'
+                } font-semibold`}
+                data-testid={`button-connect-${option.type}`}
+              >
+                {isConnecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <span className="mr-2 text-lg">{option.icon}</span>
+                    {option.name}
+                    {!option.available && (
+                      <span className="ml-2 text-xs">(Not Available)</span>
+                    )}
+                  </>
+                )}
+              </Button>
+            ))}
+            
+            <div className="pt-2">
+              <div className="text-xs text-gray-400 text-center mb-2">
+                Need a wallet?
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href="https://metamask.io/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-white/20 text-gray-400 hover:text-white hover:bg-white/10 text-xs"
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Get MetaMask
+                  </Button>
+                </a>
+                <a
+                  href="https://www.coinbase.com/wallet"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-white/20 text-gray-400 hover:text-white hover:bg-white/10 text-xs"
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Get Coinbase
+                  </Button>
+                </a>
+              </div>
+            </div>
 
             {error && (
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
