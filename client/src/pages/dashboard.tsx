@@ -579,7 +579,12 @@ export default function Dashboard() {
                               <Badge variant="outline" className={getStatusColor(summary.processingStatus)}>
                                 {summary.processingStatus}
                               </Badge>
-                              <Button variant="outline" size="sm" className="text-white border-white/20">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium"
+                                data-testid="button-view-full"
+                              >
                                 View Full
                               </Button>
                             </div>
