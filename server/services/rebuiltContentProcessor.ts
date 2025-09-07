@@ -115,19 +115,12 @@ export class RebuiltContentProcessor {
         summary: analysis.summary,
         tldrSummary: analysis.tldrSummary,
         blogPost: analysis.executiveSummary,
-        marketAnalysis: JSON.stringify({
-          bulletPoints: analysis.bulletPoints,
-          trends: analysis.trends,
-          financialTrends: analysis.financialTrends,
-          marketSentiment: analysis.marketSentiment,
-          sourceCredibility: analysis.sourceCredibility,
-          keyQuotes: analysis.keyQuotes
-        }),
-        keyInsights: analysis.bulletPoints.map((point: string, index: number) => ({
-          insight: point,
-          timestamp: `${Math.floor(index * 2)}:${(index * 30 % 60).toString().padStart(2, '0')}`,
-          importance: index < 2 ? 'high' : index < 4 ? 'medium' : 'low'
-        })),
+        marketAnalysis: analysis.marketAnalysis || 'Market analysis not available',
+        keyInsights: JSON.stringify(analysis.bulletPoints || []),
+        keyQuotes: JSON.stringify(analysis.keyQuotes || []),
+        financialTrends: JSON.stringify(analysis.financialTrends || []),
+        marketSentiment: analysis.marketSentiment,
+        sourceCredibility: analysis.sourceCredibility,
         chapters: analysis.chapters || JSON.parse(this.generateDynamicChaptersForPrompt(metadata.duration)),
         tags: analysis.tags,
         originalDuration: metadata.duration,
@@ -487,6 +480,7 @@ Generate expert-level institutional analysis in this exact JSON format:
   "summary": "4-5 paragraph comprehensive executive analysis (450-500 words) focusing on market effects, strategic implications, competitive dynamics, regulatory environment, institutional adoption patterns, capital flows, and long-term structural changes. Include specific market timing, sector rotation implications, risk/reward profiles, portfolio positioning strategies, and how institutional investors should position for these developments. Analyze macroeconomic implications, policy impacts, and cross-asset correlations.",
   "tldrSummary": "3 sentence executive summary highlighting the primary investment thesis, key catalyst timeline, and immediate actionable implications for institutional portfolio management",
   "executiveSummary": "Strategic executive summary (300-350 words) for board-level decision making, focusing on competitive advantages, market positioning opportunities, regulatory arbitrage, institutional flows, and strategic execution pathways with specific timelines and risk mitigation strategies",
+  "marketAnalysis": "Comprehensive Market Intelligence Assessment (400-500 words) in markdown format with headers and structured analysis. Include: ## Market Positioning, ## Investment Landscape, ## Strategic Opportunities, ## Risk Assessment, ## Analyst Recommendations. Focus on specific market dynamics, institutional flows, sector rotation opportunities, and tactical positioning strategies based on video content.",
   "bulletPoints": [
     "Strategic market positioning opportunity with specific institutional implications and timing",
     "Competitive landscape shift with winners/losers identification and portfolio impact", 
@@ -666,20 +660,30 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
     const summary = await this.storage.getSummary(summaryId);
     if (!summary) return null;
 
-    // Parse the marketAnalysis JSON to extract frontend-expected fields
-    let marketData = {};
+    // Parse the stored JSON fields
+    let parsedFields = {};
     try {
-      if (summary.marketAnalysis) {
-        marketData = JSON.parse(summary.marketAnalysis);
-      }
+      parsedFields = {
+        bulletPoints: summary.keyInsights ? JSON.parse(summary.keyInsights) : [],
+        keyInsights: summary.keyInsights ? JSON.parse(summary.keyInsights) : [],
+        keyQuotes: summary.keyQuotes ? JSON.parse(summary.keyQuotes) : [],
+        financialTrends: summary.financialTrends ? JSON.parse(summary.financialTrends) : [],
+      };
     } catch (e) {
-      console.log('Could not parse market analysis data');
+      console.log('Could not parse stored JSON fields:', e);
+      parsedFields = {
+        bulletPoints: [],
+        keyInsights: [],
+        keyQuotes: [],
+        financialTrends: [],
+      };
     }
 
     let result = {
       ...summary,
-      ...marketData, // Spread the parsed fields (bulletPoints, trends, etc.)
-      executiveSummary: summary.blogPost || summary.summary
+      ...parsedFields,
+      executiveSummary: summary.blogPost || summary.summary,
+      marketAnalysis: summary.marketAnalysis || 'Market analysis not available'
     };
 
     // Enhance financial trends with comprehensive multi-asset market data
