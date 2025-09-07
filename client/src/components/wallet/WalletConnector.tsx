@@ -35,7 +35,7 @@ export function WalletConnector({
     isConnected, 
     isConnecting, 
     error,
-    connectMetaMask, 
+    connectWallet, 
     disconnect, 
     signMessage,
     generateAuthMessage,
@@ -43,7 +43,8 @@ export function WalletConnector({
     formatAddress, 
     formatBalance,
     getNetworkInfo,
-    isMetaMaskAvailable 
+    isMetaMaskAvailable,
+    isCoinbaseWalletAvailable 
   } = useWeb3();
   
   const { toast } = useToast();
@@ -51,18 +52,7 @@ export function WalletConnector({
 
   const handleConnect = async (walletType: string = 'metamask') => {
     try {
-      let walletInfo;
-      
-      if (walletType === 'metamask') {
-        walletInfo = await connectMetaMask();
-      } else if (walletType === 'coinbase') {
-        // Try to connect with Coinbase Wallet
-        if (typeof window !== 'undefined' && (window as any).ethereum?.isCoinbaseWallet) {
-          walletInfo = await connectMetaMask(); // Same method, different provider
-        } else {
-          throw new Error('Coinbase Wallet is not installed');
-        }
-      } else if (walletType === 'walletconnect') {
+      if (walletType === 'walletconnect') {
         // For now, show informative message about WalletConnect
         toast({
           title: 'WalletConnect Coming Soon!',
@@ -70,16 +60,15 @@ export function WalletConnector({
         });
         return;
       }
+
+      const walletInfo = await connectWallet(walletType as 'metamask' | 'coinbase' | 'injected');
       
       if (walletInfo && onWalletConnected) {
         await handleAuthenticate(walletInfo.address);
       }
     } catch (error: any) {
-      toast({
-        title: 'Connection Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
+      // Error handling is already done in the connectWallet hook
+      console.error('Wallet connection error:', error);
     }
   };
 
@@ -143,7 +132,7 @@ export function WalletConnector({
       type: 'coinbase',
       name: 'Coinbase Wallet',
       icon: '🔵',
-      available: typeof window !== 'undefined' && (window as any).ethereum?.isCoinbaseWallet,
+      available: isCoinbaseWalletAvailable(),
       description: 'Connect with Coinbase Wallet'
     },
     {
@@ -151,7 +140,7 @@ export function WalletConnector({
       name: 'WalletConnect',
       icon: '🔗',
       available: true,
-      description: 'Connect with any WalletConnect compatible wallet'
+      description: 'Connect with any WalletConnect compatible wallet (Coming Soon)'
     }
   ];
 

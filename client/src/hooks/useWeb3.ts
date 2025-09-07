@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { web3Manager, type WalletInfo, type Chain } from '@/lib/web3';
+import { web3Manager, type WalletInfo, type Chain, type WalletType } from '@/lib/web3';
 import { useToast } from './use-toast';
 
 export function useWeb3() {
@@ -20,19 +20,19 @@ export function useWeb3() {
     return unsubscribe;
   }, []);
 
-  // Connect to MetaMask
-  const connectMetaMask = useCallback(async (): Promise<WalletInfo | null> => {
+  // Generic connect method for any wallet type
+  const connectWallet = useCallback(async (walletType: WalletType): Promise<WalletInfo | null> => {
     if (isConnecting) return null;
 
     setIsConnecting(true);
     setError(null);
 
     try {
-      const walletInfo = await web3Manager.connectMetaMask();
+      const walletInfo = await web3Manager.connect(walletType);
       
       toast({
         title: 'Wallet Connected!',
-        description: `Connected to ${web3Manager.formatAddress(walletInfo.address)}`,
+        description: `Connected to ${walletInfo.walletName || 'wallet'}: ${web3Manager.formatAddress(walletInfo.address)}`,
       });
 
       return walletInfo;
@@ -51,6 +51,11 @@ export function useWeb3() {
       setIsConnecting(false);
     }
   }, [isConnecting, toast]);
+
+  // Connect to MetaMask (legacy method, uses generic connect)
+  const connectMetaMask = useCallback(async (): Promise<WalletInfo | null> => {
+    return connectWallet('metamask');
+  }, [connectWallet]);
 
   // Switch network
   const switchNetwork = useCallback(async (chainId: number): Promise<boolean> => {
@@ -140,6 +145,21 @@ export function useWeb3() {
     return web3Manager.isMetaMaskAvailable();
   }, []);
 
+  // Check if Coinbase Wallet is available
+  const isCoinbaseWalletAvailable = useCallback((): boolean => {
+    return web3Manager.isCoinbaseWalletAvailable();
+  }, []);
+
+  // Check if any injected wallet is available
+  const isInjectedWalletAvailable = useCallback((): boolean => {
+    return web3Manager.isInjectedWalletAvailable();
+  }, []);
+
+  // Get available wallets
+  const getAvailableWallets = useCallback(() => {
+    return web3Manager.getAvailableWallets();
+  }, []);
+
   return {
     // State
     wallet,
@@ -148,7 +168,8 @@ export function useWeb3() {
     error,
 
     // Actions
-    connectMetaMask,
+    connectWallet,
+    connectMetaMask, // Legacy support
     switchNetwork,
     signMessage,
     disconnect,
@@ -160,5 +181,8 @@ export function useWeb3() {
     formatBalance,
     isValidAddress,
     isMetaMaskAvailable,
+    isCoinbaseWalletAvailable,
+    isInjectedWalletAvailable,
+    getAvailableWallets,
   };
 }
