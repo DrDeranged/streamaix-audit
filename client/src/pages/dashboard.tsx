@@ -715,7 +715,11 @@ export default function Dashboard() {
                           <Plus className="h-4 w-4 mr-2" />
                           Deposit
                         </Button>
-                        <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                        <Button 
+                          variant="outline" 
+                          className="text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium"
+                          data-testid="button-withdraw"
+                        >
                           <ArrowUp className="h-4 w-4 mr-2" />
                           Withdraw
                         </Button>
