@@ -761,7 +761,16 @@ export default function Dashboard() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <Button className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30">
+                        <Button 
+                          className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30"
+                          onClick={() => {
+                            toast({ 
+                              title: "Deposit Feature", 
+                              description: "Wallet deposit functionality coming soon! Connect your Web3 wallet to start."
+                            });
+                          }}
+                          data-testid="button-deposit"
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Deposit
                         </Button>
@@ -769,6 +778,12 @@ export default function Dashboard() {
                           variant="outline" 
                           className="text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium"
                           data-testid="button-withdraw"
+                          onClick={() => {
+                            toast({ 
+                              title: "Withdraw Feature", 
+                              description: "Wallet withdrawal functionality coming soon! Connect your Web3 wallet to start."
+                            });
+                          }}
                         >
                           <ArrowUp className="h-4 w-4 mr-2" />
                           Withdraw
