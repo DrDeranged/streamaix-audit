@@ -628,14 +628,29 @@ export default function SummaryView() {
 
 
                       {/* Investment Opportunities */}
-                      {summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0 && (
+                      {(() => {
+                        try {
+                          const analysis = JSON.parse(summary.marketAnalysis || '{}');
+                          const financialTrends = analysis.financialTrends || summary.financialTrends || [];
+                          return financialTrends && Array.isArray(financialTrends) && financialTrends.length > 0;
+                        } catch {
+                          return summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0;
+                        }
+                      })() && (
                         <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
                           <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
                             <BarChart3 className="w-4 h-4" />
                             Investment Opportunities
                           </h5>
                           <div className="space-y-3">
-                            {summary.financialTrends.map((financial: any, idx: number) => (
+                            {(() => {
+                              try {
+                                const analysis = JSON.parse(summary.marketAnalysis || '{}');
+                                return analysis.financialTrends || summary.financialTrends || [];
+                              } catch {
+                                return summary.financialTrends || [];
+                              }
+                            })().map((financial: any, idx: number) => (
                               <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-cyan-400">
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
