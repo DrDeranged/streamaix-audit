@@ -1300,7 +1300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     console.log(`API: Processing result ${req.params.summaryId} found - status: ${summary.processingStatus}`);
-    res.json(summary);
+    res.json({ summary });
   }));
 
   // =============================================================================
