@@ -334,19 +334,19 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4 h-auto">
                       <TabsTrigger value="analysis" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
-                        <FileText className="w-4 h-4" />
+                        <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                         Analysis
                       </TabsTrigger>
                       <TabsTrigger value="insights" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
-                        <TrendingUp className="w-4 h-4" />
+                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         Insights
                       </TabsTrigger>
                       <TabsTrigger value="market" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
-                        <BarChart3 className="w-4 h-4" />
+                        <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
                         Market Intel
                       </TabsTrigger>
                       <TabsTrigger value="structure" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
-                        <Target className="w-4 h-4" />
+                        <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                         Structure
                       </TabsTrigger>
                     </TabsList>
@@ -356,7 +356,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       {/* Executive Summary */}
                       <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
                         <h5 className="text-sm sm:text-base font-semibold text-blue-400 mb-2 flex items-center gap-2">
-                          <Brain className="w-4 h-4" />
+                          <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
                           Executive Takeaway
                           <Button
                             variant="ghost"
@@ -392,7 +392,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       {summary.blogPost && summary.blogPost !== summary.executiveSummary && summary.blogPost !== summary.summary && (
                         <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
                           <h5 className="text-lg font-semibold text-purple-400 mb-3 flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
+                            <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                             Comprehensive Analysis
                           </h5>
                           <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
@@ -519,7 +519,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       {/* Market Positioning Intelligence */}
                       <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20 mb-4">
                         <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4" />
+                          <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                           Market Positioning & Timing
                         </h6>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -584,7 +584,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       {summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0 && (
                         <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
                           <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4" />
+                            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
                             Investment Opportunities
                           </h5>
                           <div className="space-y-3">
@@ -677,7 +677,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       {/* Strategic Intelligence Summary */}
                       <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
                         <h6 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
-                          <Target className="w-4 h-4" />
+                          <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                           Strategic Intelligence Summary
                         </h6>
                         <div className="space-y-3 text-sm">
@@ -770,7 +770,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       {summary.tags && summary.tags.length > 0 && (
                         <div className="p-4 bg-muted/50 rounded-lg">
                           <h5 className="font-semibold mb-3 flex items-center gap-2">
-                            <Target className="w-4 h-4" />
+                            <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                             Content Tags
                           </h5>
                           <div className="flex flex-wrap gap-2">
