@@ -678,8 +678,11 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 
     let result = {
       ...summary,
-      ...marketData, // Spread the parsed fields (bulletPoints, trends, etc.)
-      executiveSummary: summary.blogPost || summary.summary
+      ...marketData, // Spread the parsed fields (trends, financialTrends, etc.)
+      executiveSummary: summary.blogPost || summary.summary,
+      // CRITICAL: Preserve the properly formatted keyInsights from database instead of raw bulletPoints
+      keyInsights: summary.keyInsights, // Use formatted objects with timestamps and importance
+      bulletPoints: summary.keyInsights // Frontend expects both, so map keyInsights to bulletPoints too
     };
 
     // Enhance financial trends with comprehensive multi-asset market data
