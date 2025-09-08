@@ -453,36 +453,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get summary by ID
   app.get('/api/summaries/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log(`API: Fetching summary ${req.params.id}`);
-    const summary = await storage.getSummary(req.params.id);
-    if (!summary) {
+    
+    // Use the exact same method as processing-result endpoint for consistency
+    const processor = RebuiltContentProcessor.getInstance();
+    const transformedSummary = await processor.getProcessingResult(req.params.id);
+    
+    if (!transformedSummary) {
       console.log(`API: Summary ${req.params.id} not found`);
       return res.status(404).json({ error: 'Summary not found' });
     }
 
-    console.log(`API: Summary ${req.params.id} found - status: ${summary.processingStatus}`);
-
-    // Parse the marketAnalysis JSON to extract frontend-expected fields (same as processing-result)
-    let marketData = {};
-    try {
-      if (summary.marketAnalysis) {
-        marketData = JSON.parse(summary.marketAnalysis);
-      }
-    } catch (e) {
-      console.log('Could not parse market analysis data');
-    }
-
-    // Transform summary to match processing-result format
-    const transformedSummary = {
-      ...summary,
-      ...marketData, // Spread the parsed fields (bulletPoints, trends, etc.)
-      executiveSummary: summary.blogPost || summary.summary
-    };
+    console.log(`API: Summary ${req.params.id} found - status: ${transformedSummary.processingStatus}`);
 
     // Track view if user is authenticated
     if (req.user) {
       await storage.createUserInteraction({
         userId: req.user.id,
-        summaryId: summary.id,
+        summaryId: req.params.id,
         interactionType: 'view',
         metadata: { timestamp: new Date().toISOString() }
       });
