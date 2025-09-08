@@ -247,6 +247,66 @@ export function Navigation() {
                 >
                   Bounties
                 </button>
+                
+                {/* Mobile Authentication */}
+                {!isAuthenticated && (
+                  <div className="space-y-3 pt-2 border-t glass-border">
+                    <Link href="/auth" className="block">
+                      <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-indigo-500">
+                        <User className="w-4 h-4 mr-2" />
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/auth" className="block">
+                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                
+                {/* Mobile User Menu */}
+                {isAuthenticated && (
+                  <div className="space-y-3 pt-2 border-t glass-border">
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user?.avatar} alt={user?.username} />
+                          <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm">
+                            {user?.username?.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">{user?.username}</p>
+                          {user?.email && (
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Link href="/dashboard" className="block">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Link href="/wallet-dashboard" className="block">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Wallet
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={() => logoutMutation.mutate()}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                )}
                 {/* Mobile Wallet Connection */}
                 {isConnected && wallet ? (
                   <div className="space-y-3">
