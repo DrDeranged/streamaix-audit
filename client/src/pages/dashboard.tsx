@@ -604,73 +604,145 @@ export default function Dashboard() {
                         <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
                       </div>
                     ) : summaries.length > 0 ? (
-                      summaries.map((summary: Summary) => (
-                        <motion.div
-                          key={summary.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
-                          data-testid={`summary-${summary.id}`}
-                        >
-                          <div className="space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-white text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
-                                <div className="flex flex-col sm:flex-row gap-2 text-xs text-gray-400">
-                                  <span className="flex items-center gap-1">
-                                    <Globe className="h-3 w-3" />
-                                    {summary.platform}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {new Date(summary.createdAt).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className={`${getStatusColor(summary.processingStatus)} text-xs`}>
-                                {summary.processingStatus}
-                              </Badge>
-                            </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="w-full text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
-                              data-testid="button-view-full"
-                              onClick={() => setLocation(`/summary/${summary.id}`)}
+                      <>
+                        {/* Mobile View: Show only 3 most recent summaries */}
+                        <div className="lg:hidden space-y-4">
+                          {summaries.slice(0, 3).map((summary: Summary) => (
+                            <motion.div
+                              key={summary.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
+                              data-testid={`summary-${summary.id}`}
                             >
-                              View Full Summary
-                            </Button>
-                          </div>
-
-                          {summary.accuracy && (
-                            <div className="mb-4">
-                              <div className="flex items-center justify-between text-sm mb-1">
-                                <span className="text-gray-300">AI Accuracy</span>
-                                <span className="text-white">{summary.accuracy}%</span>
+                              <div className="space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-white text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
+                                    <div className="flex flex-col sm:flex-row gap-2 text-xs text-gray-400">
+                                      <span className="flex items-center gap-1">
+                                        <Globe className="h-3 w-3" />
+                                        {summary.platform}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Calendar className="h-3 w-3" />
+                                        {new Date(summary.createdAt).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline" className={`${getStatusColor(summary.processingStatus)} text-xs`}>
+                                    {summary.processingStatus}
+                                  </Badge>
+                                </div>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
+                                  data-testid="button-view-full"
+                                  onClick={() => setLocation(`/summary/${summary.id}`)}
+                                >
+                                  View Full Summary
+                                </Button>
                               </div>
-                              <Progress value={summary.accuracy} className="h-2" />
+                            </motion.div>
+                          ))}
+                          
+                          {/* Show "View All" button if there are more than 3 summaries */}
+                          {summaries.length > 3 && (
+                            <div className="text-center pt-2">
+                              <p className="text-gray-400 text-xs mb-3">
+                                Showing 3 of {summaries.length} summaries
+                              </p>
+                              <Button 
+                                variant="outline"
+                                className="w-full text-purple-300 bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20 touch-manipulation py-3"
+                                onClick={() => {
+                                  // For now, we'll just show a toast - could implement a full list modal later
+                                  toast({ 
+                                    title: "View All Summaries", 
+                                    description: `You have ${summaries.length} total summaries. Use desktop view to see them all, or we can implement a full list view!`
+                                  });
+                                }}
+                                data-testid="button-view-all-summaries"
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                View All {summaries.length} Summaries
+                              </Button>
                             </div>
                           )}
+                        </div>
 
-                          <div className="flex items-center justify-between">
-                            <div className="flex gap-2">
-                              {summary.tags?.slice(0, 3).map((tag, index) => (
-                                <Badge key={index} variant="outline" className="text-xs bg-gray-500/20 text-gray-300">
-                                  #{tag}
-                                </Badge>
-                              ))}
-                            </div>
-                            <div className="flex items-center gap-2 text-gray-400">
-                              <button className="hover:text-white transition-colors">
-                                <Bookmark className="h-4 w-4" />
-                              </button>
-                              <button className="hover:text-white transition-colors">
-                                <Share className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))
+                        {/* Desktop View: Show all summaries */}
+                        <div className="hidden lg:block space-y-4">
+                          {summaries.map((summary: Summary) => (
+                            <motion.div
+                              key={summary.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
+                              data-testid={`summary-${summary.id}`}
+                            >
+                              <div className="space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-white text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
+                                    <div className="flex flex-col sm:flex-row gap-2 text-xs text-gray-400">
+                                      <span className="flex items-center gap-1">
+                                        <Globe className="h-3 w-3" />
+                                        {summary.platform}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Calendar className="h-3 w-3" />
+                                        {new Date(summary.createdAt).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline" className={`${getStatusColor(summary.processingStatus)} text-xs`}>
+                                    {summary.processingStatus}
+                                  </Badge>
+                                </div>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
+                                  data-testid="button-view-full"
+                                  onClick={() => setLocation(`/summary/${summary.id}`)}
+                                >
+                                  View Full Summary
+                                </Button>
+                              </div>
+
+                              {summary.accuracy && (
+                                <div className="mb-4">
+                                  <div className="flex items-center justify-between text-sm mb-1">
+                                    <span className="text-gray-300">AI Accuracy</span>
+                                    <span className="text-white">{summary.accuracy}%</span>
+                                  </div>
+                                  <Progress value={summary.accuracy} className="h-2" />
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between">
+                                <div className="flex gap-2">
+                                  {summary.tags?.slice(0, 3).map((tag, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs bg-gray-500/20 text-gray-300">
+                                      #{tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-400">
+                                  <button className="hover:text-white transition-colors">
+                                    <Bookmark className="h-4 w-4" />
+                                  </button>
+                                  <button className="hover:text-white transition-colors">
+                                    <Share className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </>
                     ) : (
                       <Card className="bg-white/5 border-white/10">
                         <CardContent className="p-8 text-center">
