@@ -686,9 +686,9 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       // CRITICAL: Preserve the properly formatted keyInsights from database instead of raw bulletPoints
       keyInsights: summary.keyInsights, // Use formatted objects with timestamps and importance
       // Extract raw text from keyInsights for bulletPoints compatibility
-      bulletPoints: summary.keyInsights?.map((insight: any) => 
+      bulletPoints: Array.isArray(summary.keyInsights) ? summary.keyInsights.map((insight: any) => 
         typeof insight === 'object' ? insight.insight : insight
-      ) || []
+      ) : []
     };
 
     // Enhance financial trends with comprehensive multi-asset market data
