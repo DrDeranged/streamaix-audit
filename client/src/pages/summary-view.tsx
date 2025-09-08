@@ -121,16 +121,13 @@ export default function SummaryView() {
     };
   }, []);
 
-  // Fetch summary details - same data structure as processing results
-  const { data: summaryData, isLoading, error } = useQuery({
-    queryKey: ['summary', summaryId],
-    queryFn: () => apiRequest(`/api/summaries/${summaryId}`, {
-      headers: getAuthHeaders()
-    }),
+  // Fetch summary details - use same query key as processing results for consistency
+  const { data: summary, isLoading, error } = useQuery({
+    queryKey: ['/api/processing-result', summaryId],
     enabled: !!summaryId,
-  }) as { data: { summary: Summary } | undefined, isLoading: boolean, error: any };
-
-  const summary = summaryData?.summary;
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+  }) as { data: Summary, isLoading: boolean, error: any };
 
   const handleCopy = async (content: string, type: string) => {
     try {
