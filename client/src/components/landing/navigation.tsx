@@ -227,27 +227,27 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden mt-3 py-3 border-t border-border bg-background/95 backdrop-blur-sm"
+              className="md:hidden mt-4 py-4 border-t border-border/60 bg-background/95 backdrop-blur-md"
             >
-              <div className="flex flex-col space-y-1 px-3">
+              <div className="flex flex-col space-y-1 px-4">
                 <button 
                   onClick={() => scrollToSection("features")}
-                  className="text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors"
+                  className="text-left text-foreground/80 hover:text-foreground py-2.5 px-3 rounded-md hover:bg-accent/50 transition-all duration-200 font-medium text-sm"
                 >
                   Features
                 </button>
                 <button 
                   onClick={() => scrollToSection("bounties")}
-                  className="text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors"
+                  className="text-left text-foreground/80 hover:text-foreground py-2.5 px-3 rounded-md hover:bg-accent/50 transition-all duration-200 font-medium text-sm"
                 >
                   Bounties
                 </button>
                 
                 {/* Mobile Authentication - Sign In Only */}
                 {!isAuthenticated && (
-                  <div className="pt-2 border-t border-border mt-2">
+                  <div className="pt-3 border-t border-border/60 mt-3">
                     <Link href="/auth" className="block">
-                      <button className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors">
+                      <button className="w-full text-center bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary border border-primary/20 py-2.5 px-4 rounded-md transition-all duration-200 font-medium text-sm">
                         Sign In
                       </button>
                     </Link>
@@ -256,28 +256,28 @@ export function Navigation() {
                 
                 {/* Mobile User Menu */}
                 {isAuthenticated && (
-                  <div className="space-y-1 pt-2 border-t border-border mt-2">
-                    <div className="flex items-center gap-2 px-3 py-2 text-foreground text-sm">
-                      <Avatar className="h-6 w-6">
+                  <div className="space-y-1 pt-3 border-t border-border/60 mt-3">
+                    <div className="flex items-center gap-3 px-3 py-2.5 bg-muted/50 rounded-md border border-border/40">
+                      <Avatar className="h-7 w-7">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      {user?.username}
+                      <span className="text-foreground font-medium text-sm">{user?.username}</span>
                     </div>
                     <Link href="/dashboard" className="block">
-                      <button className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors">
+                      <button className="w-full text-left text-foreground/80 hover:text-foreground py-2.5 px-3 rounded-md hover:bg-accent/50 transition-all duration-200 font-medium text-sm">
                         Dashboard
                       </button>
                     </Link>
                     <Link href="/wallet-dashboard" className="block">
-                      <button className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors">
+                      <button className="w-full text-left text-foreground/80 hover:text-foreground py-2.5 px-3 rounded-md hover:bg-accent/50 transition-all duration-200 font-medium text-sm">
                         Wallet
                       </button>
                     </Link>
                     <button 
-                      className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors"
+                      className="w-full text-left text-muted-foreground hover:text-destructive py-2.5 px-3 rounded-md hover:bg-destructive/10 transition-all duration-200 font-medium text-sm"
                       onClick={() => logoutMutation.mutate()}
                     >
                       Sign Out
