@@ -351,7 +351,7 @@ export default function Dashboard() {
       <div className="relative z-20 bg-gradient-to-r from-slate-900/80 via-purple-900/60 to-slate-900/80 backdrop-blur-md border-b border-white/10">
         <div className="overflow-hidden py-3">
           <motion.div 
-            className="flex space-x-12 text-sm opacity-95"
+            className="flex space-x-8 sm:space-x-12 text-xs sm:text-sm opacity-95"
             animate={{ x: "-100%" }}
             transition={{ 
               repeat: Infinity, 
@@ -364,11 +364,11 @@ export default function Dashboard() {
               [...cryptoQuotes, ...cryptoQuotes, ...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
                 const ChangeIcon = getChangeIcon(quote.percentChange24h);
                 return (
-                  <div key={index} className="flex items-center space-x-3 text-white whitespace-nowrap">
-                    <span className="font-bold text-orange-300">{quote.symbol}</span>
-                    <span className="font-semibold">{formatPrice(quote.price)}</span>
-                    <span className={`flex items-center font-medium ${getChangeColor(quote.percentChange24h)}`}>
-                      {ChangeIcon && <ChangeIcon className="h-3 w-3 mr-1" />}
+                  <div key={index} className="flex items-center space-x-2 sm:space-x-3 text-white whitespace-nowrap">
+                    <span className="font-bold text-orange-300 text-xs sm:text-sm">{quote.symbol}</span>
+                    <span className="font-semibold text-xs sm:text-sm">{formatPrice(quote.price)}</span>
+                    <span className={`flex items-center font-medium text-xs sm:text-sm ${getChangeColor(quote.percentChange24h)}`}>
+                      {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />}
                       {quote.percentChange24h.toFixed(1)}%
                     </span>
                   </div>
@@ -460,10 +460,10 @@ export default function Dashboard() {
               Back to Home
             </Button>
             <div>
-              <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-3">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-3">
                 Welcome back, {user?.username}! 👋
               </h1>
-              <p className="text-gray-300 text-lg">
+              <p className="text-gray-300 text-base sm:text-lg">
                 Manage your AI summaries and track your progress
               </p>
             </div>
@@ -475,52 +475,52 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Summaries</p>
-                  <p className="text-white text-2xl font-bold">{stats.totalSummaries}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Total Summaries</p>
+                  <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalSummaries}</p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-purple-400" />
+                <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Views</p>
-                  <p className="text-white text-2xl font-bold">{stats.totalViews}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Total Views</p>
+                  <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalViews}</p>
                 </div>
-                <Eye className="h-8 w-8 text-blue-400" />
+                <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">STREAM Tokens</p>
-                  <p className="text-white text-2xl font-bold">{balance.streamTokens.toFixed(2)}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">STREAM Tokens</p>
+                  <p className="text-white text-xl sm:text-2xl font-bold">{balance.streamTokens.toFixed(2)}</p>
                 </div>
-                <Wallet className="h-8 w-8 text-green-400" />
+                <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Creator Rank</p>
-                  <p className="text-white text-lg font-bold">{stats.level}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Creator Rank</p>
+                  <p className="text-white text-base sm:text-lg font-bold">{stats.level}</p>
                 </div>
-                <Award className="h-8 w-8 text-yellow-400" />
+                <Award className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" />
               </div>
             </CardContent>
           </Card>
@@ -536,21 +536,26 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-5 bg-white/5 border border-white/20">
-                  <TabsTrigger value="overview" className="data-[state=active]:bg-purple-500/30">
-                    Overview
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 bg-white/5 border border-white/20 text-xs sm:text-sm">
+                  <TabsTrigger value="overview" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
+                    <span className="hidden sm:inline">Overview</span>
+                    <span className="sm:hidden">Info</span>
                   </TabsTrigger>
-                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30">
-                    My Summaries
+                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
+                    <span className="hidden sm:inline">My Summaries</span>
+                    <span className="sm:hidden">Summaries</span>
                   </TabsTrigger>
-                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30">
-                    My Notes
+                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
+                    <span className="hidden sm:inline">My Notes</span>
+                    <span className="sm:hidden">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-500/30">
-                    Bounties
+                  <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
+                    <span className="hidden lg:inline">Bounties</span>
+                    <span className="lg:hidden">Rewards</span>
                   </TabsTrigger>
-                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30">
-                    Wallet
+                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
+                    <span className="hidden lg:inline">Wallet</span>
+                    <span className="lg:hidden">💰</span>
                   </TabsTrigger>
                 </TabsList>
 
