@@ -454,16 +454,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/summaries/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log(`API: Fetching summary ${req.params.id}`);
     
-    // Use the exact same method as processing-result endpoint for consistency
-    const processor = RebuiltContentProcessor.getInstance();
-    const transformedSummary = await processor.getProcessingResult(req.params.id);
+    // Fetch directly from database without re-processing
+    const summary = await storage.getSummary(req.params.id);
     
-    if (!transformedSummary) {
+    if (!summary) {
       console.log(`API: Summary ${req.params.id} not found`);
       return res.status(404).json({ error: 'Summary not found' });
     }
 
-    console.log(`API: Summary ${req.params.id} found - status: ${transformedSummary.processingStatus}`);
+    console.log(`API: Summary ${req.params.id} found - status: ${summary.processingStatus}`);
 
     // Track view if user is authenticated
     if (req.user) {
@@ -475,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
 
-    res.json({ summary: transformedSummary });
+    res.json({ summary });
   }));
 
   // Create new summary
