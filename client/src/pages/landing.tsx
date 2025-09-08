@@ -2,7 +2,7 @@ import { Navigation } from "@/components/landing/navigation";
 import { AICapabilitiesBanner } from "@/components/landing/ai-capabilities-banner";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
+import { AIProcessor } from "@/components/landing/ai-processor";
 
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
