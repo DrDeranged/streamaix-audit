@@ -125,7 +125,7 @@ export default function UserNotesList({ summaryId, title }: UserNotesListProps) 
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <IconComponent className="w-4 h-4 text-gray-600" />
+                  <IconComponent className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                   <Badge className={noteConfig.color} variant="secondary">
                     {noteConfig.label}
                   </Badge>
@@ -135,7 +135,7 @@ export default function UserNotesList({ summaryId, title }: UserNotesListProps) 
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Clock className="w-3 h-3" />
                   <span data-testid={`text-note-date-${note.id}`}>
                     {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true })}
@@ -145,7 +145,7 @@ export default function UserNotesList({ summaryId, title }: UserNotesListProps) 
             </CardHeader>
             
             <CardContent className="pt-0">
-              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed" data-testid={`text-note-content-${note.id}`}>
+              <p className="text-gray-700 dark:text-gray-200 whitespace-pre-wrap leading-relaxed" data-testid={`text-note-content-${note.id}`}>
                 {note.noteText}
               </p>
               
