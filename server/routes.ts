@@ -461,6 +461,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     console.log(`API: Summary ${req.params.id} found - status: ${summary.processingStatus}`);
 
+    // Parse the marketAnalysis JSON to extract frontend-expected fields (same as processing-result)
+    let marketData = {};
+    try {
+      if (summary.marketAnalysis) {
+        marketData = JSON.parse(summary.marketAnalysis);
+      }
+    } catch (e) {
+      console.log('Could not parse market analysis data');
+    }
+
+    // Transform summary to match processing-result format
+    const transformedSummary = {
+      ...summary,
+      ...marketData, // Spread the parsed fields (bulletPoints, trends, etc.)
+      executiveSummary: summary.blogPost || summary.summary
+    };
+
     // Track view if user is authenticated
     if (req.user) {
       await storage.createUserInteraction({
@@ -471,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
 
-    res.json({ summary });
+    res.json({ summary: transformedSummary });
   }));
 
   // Create new summary
