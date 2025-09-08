@@ -72,7 +72,7 @@ export function HeroSection() {
             <Button 
               size="lg"
               onClick={scrollToProcessor}
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 animate-pulse-glow"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 active:translate-y-[-2px] transition-all duration-300 animate-pulse-glow"
             >
               <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Try AI Analysis
