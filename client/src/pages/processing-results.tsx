@@ -144,8 +144,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
           >
             <Brain className="h-16 w-16 text-purple-400 mx-auto" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading AI Results</h2>
-          <p className="text-gray-600 dark:text-gray-400">Processing your content intelligence...</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading AI Results</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Processing your content intelligence...</p>
         </motion.div>
       </div>
     );
@@ -155,8 +155,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid URL</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No summary ID provided in URL</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid URL</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">No summary ID provided in URL</p>
           <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
@@ -188,7 +188,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
     <div className="min-h-screen bg-slate-900 text-gray-900 dark:text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
       {/* Navigation Header - Landing Page Style */}
       <div className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 

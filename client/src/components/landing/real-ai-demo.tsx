@@ -340,7 +340,7 @@ export function RealAIProcessor() {
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-card/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg">
+            <div className="bg-card/50 backdrop-blur-sm border rounded-2xl p-4 sm:p-6 shadow-lg">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
