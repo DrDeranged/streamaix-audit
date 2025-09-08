@@ -714,6 +714,37 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       }
     }
 
+    // CRITICAL FIX: Persist enhanced data back to database
+    try {
+      console.log(`💾 Persisting enhanced results back to database for: ${summaryId}`);
+      
+      // Prepare enhanced market analysis for database storage
+      const enhancedMarketAnalysis = {
+        bulletPoints: result.bulletPoints,
+        trends: resultWithTrends.trends,
+        financialTrends: resultWithTrends.financialTrends, // Now includes all live market data
+        marketSentiment: resultWithTrends.marketSentiment,
+        sourceCredibility: resultWithTrends.sourceCredibility,
+        lastEnhanced: new Date().toISOString()
+      };
+
+      // Update database with enhanced content
+      await this.storage.updateSummary(summaryId, {
+        // Ensure all summary fields use the comprehensive enhanced content
+        summary: result.summary,
+        tldrSummary: result.tldrSummary, // Now contains detailed analysis
+        blogPost: result.blogPost, // Comprehensive enhanced content
+        marketAnalysis: JSON.stringify(enhancedMarketAnalysis),
+        keyInsights: result.keyInsights, // Preserved formatted objects
+        updatedAt: new Date()
+      });
+
+      console.log(`✅ Enhanced data successfully persisted to database for: ${summaryId}`);
+    } catch (persistError) {
+      console.error(`❌ Failed to persist enhanced data for ${summaryId}:`, persistError);
+      // Continue with enhanced data even if persistence fails
+    }
+
     return result;
   }
 
