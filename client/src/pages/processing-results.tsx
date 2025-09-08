@@ -110,16 +110,14 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
   }, []);
 
   // Query for processing result with real-time updates
-  const { data, isLoading, error } = useQuery({
+  const { data: summary, isLoading, error } = useQuery({
     queryKey: ['/api/processing-result', summaryId],
     enabled: !!summaryId,
     refetchInterval: (query) => {
       const data = query.state.data as any;
-      return data?.summary?.processingStatus === 'processing' ? 1500 : false;
+      return data?.processingStatus === 'processing' ? 1500 : false;
     },
-  });
-  
-  const summary = data?.summary as Summary;
+  }) as { data: Summary, isLoading: boolean, error: any };
 
   const handleCopy = async (content: string, type: string) => {
     try {

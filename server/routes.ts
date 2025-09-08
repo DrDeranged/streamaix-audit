@@ -454,15 +454,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/summaries/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log(`API: Fetching summary ${req.params.id}`);
     
-    // Fetch directly from database without re-processing
-    const summary = await storage.getSummary(req.params.id);
+    // Use the exact same method as processing-result endpoint for consistency
+    const processor = RebuiltContentProcessor.getInstance();
+    const transformedSummary = await processor.getProcessingResult(req.params.id);
     
-    if (!summary) {
+    if (!transformedSummary) {
       console.log(`API: Summary ${req.params.id} not found`);
       return res.status(404).json({ error: 'Summary not found' });
     }
 
-    console.log(`API: Summary ${req.params.id} found - status: ${summary.processingStatus}`);
+    console.log(`API: Summary ${req.params.id} found - status: ${transformedSummary.processingStatus}`);
 
     // Track view if user is authenticated
     if (req.user) {
@@ -474,7 +475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
 
-    res.json({ summary });
+    res.json({ summary: transformedSummary });
   }));
 
   // Create new summary
@@ -1287,20 +1288,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ job });
   }));
 
-  // Get processing result endpoint (Database fetch only - no re-processing)
+  // Get processing result endpoint (Rebuilt Processor)
   app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
-    console.log(`API: Fetching stored processing result for ${req.params.summaryId}`);
+    // Set headers to prevent caching for real-time updates
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     
-    // Fetch directly from database without re-processing
-    const summary = await storage.getSummary(req.params.summaryId);
-    
-    if (!summary) {
-      console.log(`API: Processing result ${req.params.summaryId} not found`);
-      return res.status(404).json({ error: 'Processing result not found' });
-    }
-
-    console.log(`API: Processing result ${req.params.summaryId} found - status: ${summary.processingStatus}`);
-    res.json({ summary });
+    const processor = RebuiltContentProcessor.getInstance();
+    const result = await processor.getProcessingResult(req.params.summaryId);
+    res.json(result);
   }));
 
   // =============================================================================
