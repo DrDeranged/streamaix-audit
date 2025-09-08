@@ -679,7 +679,10 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
     let result = {
       ...summary,
       ...marketData, // Spread the parsed fields (trends, financialTrends, etc.)
-      executiveSummary: summary.blogPost || summary.summary,
+      // CRITICAL: Ensure ALL summary fields use the same comprehensive content
+      executiveSummary: summary.blogPost || summary.summary, // Detailed analysis for processing results
+      tldrSummary: summary.blogPost || summary.summary, // Use same detailed content for dashboard
+      blogPost: summary.blogPost || summary.summary, // Ensure consistency across all fields
       // CRITICAL: Preserve the properly formatted keyInsights from database instead of raw bulletPoints
       keyInsights: summary.keyInsights, // Use formatted objects with timestamps and importance
       // Extract raw text from keyInsights for bulletPoints compatibility
