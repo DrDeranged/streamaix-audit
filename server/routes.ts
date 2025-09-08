@@ -1288,18 +1288,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ job });
   }));
 
-  // Get processing result endpoint (Rebuilt Processor)
+  // Get processing result endpoint (Database fetch only - no re-processing)
   app.get('/api/processing-result/:summaryId', asyncHandler(async (req: Request, res: Response) => {
-    // Set headers to prevent caching for real-time updates
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
+    console.log(`API: Fetching stored processing result for ${req.params.summaryId}`);
     
-    const processor = RebuiltContentProcessor.getInstance();
-    const result = await processor.getProcessingResult(req.params.summaryId);
-    res.json(result);
+    // Fetch directly from database without re-processing
+    const summary = await storage.getSummary(req.params.summaryId);
+    
+    if (!summary) {
+      console.log(`API: Processing result ${req.params.summaryId} not found`);
+      return res.status(404).json({ error: 'Processing result not found' });
+    }
+
+    console.log(`API: Processing result ${req.params.summaryId} found - status: ${summary.processingStatus}`);
+    res.json(summary);
   }));
 
   // =============================================================================
