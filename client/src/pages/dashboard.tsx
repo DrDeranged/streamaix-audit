@@ -442,93 +442,91 @@ export default function Dashboard() {
 
       
       <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-6">
-        {/* Header */}
+        {/* Mobile-Optimized Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pt-4"
+          className="mb-6 pt-2"
         >
-          <div className="flex items-center gap-6 mb-4 sm:mb-0">
-            <Button
-              onClick={() => setLocation('/')}
-              variant="outline"
-              size="sm"
-              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
-              data-testid="button-back-home"
-            >
-              <Home className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <Button
+                onClick={() => setLocation('/')}
+                variant="outline"
+                size="sm"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3 py-2"
+                data-testid="button-back-home"
+              >
+                <Home className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Home</span>
+              </Button>
+              <div className="text-right">
+                <div className="text-xs text-gray-400">Level: {stats.level}</div>
+                <div className="text-sm font-semibold text-green-400">{balance.streamTokens.toFixed(0)} STREAM</div>
+              </div>
+            </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-3">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
                 Welcome back, {user?.username}! 👋
               </h1>
-              <p className="text-gray-300 text-base sm:text-lg">
+              <p className="text-gray-300 text-sm sm:text-base">
                 Manage your AI summaries and track your progress
               </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Stats Cards */}
+        {/* Mobile-Optimized Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6"
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs sm:text-sm">Total Summaries</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalSummaries}</p>
-                </div>
-                <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <BarChart3 className="h-6 w-6 text-purple-400 mx-auto mb-2" />
+                <p className="text-gray-400 text-xs">Summaries</p>
+                <p className="text-white text-lg font-bold">{stats.totalSummaries}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs sm:text-sm">Total Views</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalViews}</p>
-                </div>
-                <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <Eye className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                <p className="text-gray-400 text-xs">Views</p>
+                <p className="text-white text-lg font-bold">{stats.totalViews}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs sm:text-sm">STREAM Tokens</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">{balance.streamTokens.toFixed(2)}</p>
-                </div>
-                <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-green-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <Wallet className="h-6 w-6 text-green-400 mx-auto mb-2" />
+                <p className="text-gray-400 text-xs">STREAM</p>
+                <p className="text-white text-lg font-bold">{balance.streamTokens.toFixed(0)}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs sm:text-sm">Creator Rank</p>
-                  <p className="text-white text-base sm:text-lg font-bold">{stats.level}</p>
-                </div>
-                <Award className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" />
+          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <Award className="h-6 w-6 text-yellow-400 mx-auto mb-2" />
+                <p className="text-gray-400 text-xs">Rank</p>
+                <p className="text-white text-sm font-bold">{stats.level.split(' ')[0]}</p>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Main Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* MAIN CONTENT AREA - 3/4 width */}
+        {/* Mobile-First Main Content Layout */}
+        <div className="space-y-6 lg:grid lg:grid-cols-4 lg:gap-6 lg:space-y-0">
+          {/* MAIN CONTENT AREA - Full width on mobile, 3/4 on desktop */}
           <div className="lg:col-span-3">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -536,26 +534,26 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 bg-white/5 border border-white/20 text-xs sm:text-sm">
-                  <TabsTrigger value="overview" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
-                    <span className="hidden sm:inline">Overview</span>
-                    <span className="sm:hidden">Info</span>
+                <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5 bg-white/5 border border-white/20 touch-manipulation">
+                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                    <FileText className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">Summaries</span>
                   </TabsTrigger>
-                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
-                    <span className="hidden sm:inline">My Summaries</span>
-                    <span className="sm:hidden">Summaries</span>
+                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                    <BookmarkPlus className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
-                    <span className="hidden sm:inline">My Notes</span>
-                    <span className="sm:hidden">Notes</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="bounties" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
-                    <span className="hidden lg:inline">Bounties</span>
-                    <span className="lg:hidden">Rewards</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-4">
+                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                    <Wallet className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Wallet</span>
-                    <span className="lg:hidden">💰</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                    <Target className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">Bounties</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                    <Activity className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">Overview</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -587,16 +585,16 @@ export default function Dashboard() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="summaries" className="space-y-6 mt-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-white text-xl font-bold">My Summaries ({summaries.length})</h2>
+                <TabsContent value="summaries" className="space-y-4 mt-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <h2 className="text-white text-lg font-bold">My Summaries ({summaries.length})</h2>
                     <Button 
-                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30"
+                      className="w-full sm:w-auto bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30 touch-manipulation py-3"
                       onClick={() => setLocation('/create-summary')}
                       data-testid="button-new-summary"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      New Summary
+                      Create New Summary
                     </Button>
                   </div>
 
@@ -611,38 +609,37 @@ export default function Dashboard() {
                           key={summary.id}
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          whileHover={{ scale: 1.02 }}
-                          className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-6 cursor-pointer"
+                          className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
                           data-testid={`summary-${summary.id}`}
                         >
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <h3 className="text-white text-lg font-semibold mb-2">{summary.title}</h3>
-                              <div className="flex items-center gap-4 text-sm text-gray-400">
-                                <span className="flex items-center gap-1">
-                                  <Globe className="h-4 w-4" />
-                                  {summary.platform}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  {new Date(summary.createdAt).toLocaleDateString()}
-                                </span>
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-white text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
+                                <div className="flex flex-col sm:flex-row gap-2 text-xs text-gray-400">
+                                  <span className="flex items-center gap-1">
+                                    <Globe className="h-3 w-3" />
+                                    {summary.platform}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {new Date(summary.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className={getStatusColor(summary.processingStatus)}>
+                              <Badge variant="outline" className={`${getStatusColor(summary.processingStatus)} text-xs`}>
                                 {summary.processingStatus}
                               </Badge>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium"
-                                data-testid="button-view-full"
-                                onClick={() => setLocation(`/summary/${summary.id}`)}
-                              >
-                                View Full
-                              </Button>
                             </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
+                              data-testid="button-view-full"
+                              onClick={() => setLocation(`/summary/${summary.id}`)}
+                            >
+                              View Full Summary
+                            </Button>
                           </div>
 
                           {summary.accuracy && (
@@ -801,54 +798,13 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
-          {/* SUPPLEMENTAL SIDEBAR - 1/4 width */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Live Crypto Stocks - Vertical Ticker */}
-            {displayStocks.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-sm flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-indigo-400" />
-                      Live Crypto Stocks
-                      {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-1 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
-                    {displayStocks.slice(0, 25).map((stock: any, index: number) => {
-                      // Handle both old format (percentChange24h) and new format (changePercent)
-                      const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
-                      
-                      return (
-                        <div
-                          key={stock.symbol}
-                          className="flex items-center justify-between py-1 px-2 rounded text-xs hover:bg-white/5 transition-colors"
-                          data-testid={`sidebar-stock-${stock.symbol}`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-white font-medium">{stock.symbol}</span>
-                            <span className="text-gray-400 truncate">{formatPrice(stock.price)}</span>
-                          </div>
-                          <span className={`font-medium whitespace-nowrap ${getChangeColor(changePercent)}`}>
-                            {changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-
-            {/* Quick Actions */}
+          {/* MOBILE-FIRST SIDEBAR - Bottom on mobile, side on desktop */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* Quick Actions - Priority on Mobile */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.3 }}
             >
               <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                 <CardHeader className="pb-3">
@@ -856,8 +812,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
-                    className="w-full bg-purple-600/80 hover:bg-purple-500 text-white border-2 border-purple-400 shadow-lg transition-all duration-200 font-semibold"
-                    size="sm"
+                    className="w-full bg-purple-600/80 hover:bg-purple-500 text-white border-2 border-purple-400 shadow-lg transition-all duration-200 font-semibold touch-manipulation py-3"
                     onClick={() => setLocation('/create-summary')}
                     data-testid="button-process-content"
                   >
@@ -867,8 +822,7 @@ export default function Dashboard() {
                   <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full bg-blue-600/80 hover:bg-blue-500 text-white border-2 border-blue-400 shadow-lg transition-all duration-200 font-semibold"
-                        size="sm"
+                        className="w-full bg-blue-600/80 hover:bg-blue-500 text-white border-2 border-blue-400 shadow-lg transition-all duration-200 font-semibold touch-manipulation py-3"
                         data-testid="button-add-note"
                       >
                         <BookmarkPlus className="h-4 w-4 mr-2" />
@@ -924,8 +878,7 @@ export default function Dashboard() {
                   <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full bg-green-600/80 hover:bg-green-500 text-white border-2 border-green-400 shadow-lg transition-all duration-200 font-semibold"
-                        size="sm"
+                        className="w-full bg-green-600/80 hover:bg-green-500 text-white border-2 border-green-400 shadow-lg transition-all duration-200 font-semibold touch-manipulation py-3"
                         data-testid="button-share-profile"
                       >
                         <Share className="h-4 w-4 mr-2" />
@@ -974,6 +927,73 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Live Crypto Stocks - Horizontal scroll on mobile */}
+            {displayStocks.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="lg:block"
+              >
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-indigo-400" />
+                      Live Crypto Stocks
+                      {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="lg:space-y-1 lg:max-h-96 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
+                    {/* Mobile: Horizontal scroll */}
+                    <div className="lg:hidden overflow-x-auto pb-2">
+                      <div className="flex space-x-3" style={{ width: 'max-content' }}>
+                        {displayStocks.slice(0, 15).map((stock: any) => {
+                          const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
+                          return (
+                            <div
+                              key={stock.symbol}
+                              className="min-w-[120px] bg-white/5 rounded-lg p-3 border border-white/10"
+                              data-testid={`mobile-stock-${stock.symbol}`}
+                            >
+                              <div className="text-center">
+                                <div className="text-white font-medium text-sm">{stock.symbol}</div>
+                                <div className="text-gray-400 text-xs">{formatPrice(stock.price)}</div>
+                                <div className={`font-medium text-xs ${getChangeColor(changePercent)}`}>
+                                  {changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {/* Desktop: Vertical list */}
+                    <div className="hidden lg:block">
+                      {displayStocks.slice(0, 25).map((stock: any, index: number) => {
+                        const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
+                        
+                        return (
+                          <div
+                            key={stock.symbol}
+                            className="flex items-center justify-between py-1 px-2 rounded text-xs hover:bg-white/5 transition-colors"
+                            data-testid={`sidebar-stock-${stock.symbol}`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-white font-medium">{stock.symbol}</span>
+                              <span className="text-gray-400 truncate">{formatPrice(stock.price)}</span>
+                            </div>
+                            <span className={`font-medium whitespace-nowrap ${getChangeColor(changePercent)}`}>
+                              {changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
