@@ -221,20 +221,20 @@ export default function SummaryView() {
     <div className="min-h-screen bg-slate-900 text-gray-900 dark:text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
       {/* Mobile-Optimized Navigation Header */}
       <div className="border-b border-white/10 backdrop-blur-sm bg-slate-900/80 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-3 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link href="/dashboard">
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10 px-3 py-2"
+                  className="text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10 px-2 py-1.5"
                 >
                   <ArrowLeft className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Back to Dashboard</span>
                 </Button>
               </Link>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
                   Completed
@@ -244,11 +244,11 @@ export default function SummaryView() {
                 </Badge>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-2"
                 onClick={() => shareMutation.mutate('lens')}
               >
                 <Share2 className="h-4 w-4 sm:mr-2" />
@@ -257,7 +257,7 @@ export default function SummaryView() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-2"
                 onClick={() => handleCopy(summary.summary || '', 'summary')}
               >
                 <Download className="h-4 w-4 sm:mr-2" />
@@ -268,20 +268,20 @@ export default function SummaryView() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-3 py-4">
         {/* Mobile-First Hero Section */}
         <motion.div 
-          className="mb-6"
+          className="mb-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 text-white leading-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 text-white leading-tight">
             {summary.title}
           </h1>
           
           {/* Compact Metadata Bar */}
-          <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-300">
+          <div className="flex flex-wrap items-center gap-2 mb-3 text-sm text-gray-300">
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4 text-indigo-400" />
               <span>
