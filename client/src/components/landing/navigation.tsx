@@ -227,33 +227,28 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden mt-4 py-4 border-t border-white/10 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl rounded-b-lg"
+              className="md:hidden mt-3 py-3 border-t border-border bg-background/95 backdrop-blur-sm"
             >
-              <div className="flex flex-col space-y-3 px-4">
+              <div className="flex flex-col space-y-1 px-3">
                 <button 
                   onClick={() => scrollToSection("features")}
-                  className="text-left text-white/90 hover:text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors font-medium"
+                  className="text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors"
                 >
                   Features
                 </button>
                 <button 
                   onClick={() => scrollToSection("bounties")}
-                  className="text-left text-white/90 hover:text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors font-medium"
+                  className="text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors"
                 >
                   Bounties
                 </button>
                 
-                {/* Mobile Authentication - Always Visible */}
+                {/* Mobile Authentication - Sign In Only */}
                 {!isAuthenticated && (
-                  <div className="space-y-3 pt-4 border-t border-white/20">
+                  <div className="pt-2 border-t border-border mt-2">
                     <Link href="/auth" className="block">
-                      <button className="w-full text-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 py-3 px-4 rounded-lg transition-all duration-200 font-medium">
+                      <button className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors">
                         Sign In
-                      </button>
-                    </Link>
-                    <Link href="/auth" className="block">
-                      <button className="w-full text-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-3 px-4 rounded-lg transition-all duration-200 font-medium shadow-lg">
-                        Get Started
                       </button>
                     </Link>
                   </div>
@@ -261,28 +256,28 @@ export function Navigation() {
                 
                 {/* Mobile User Menu */}
                 {isAuthenticated && (
-                  <div className="space-y-3 pt-4 border-t border-white/20">
-                    <div className="flex items-center gap-3 px-4 py-3 bg-white/10 rounded-lg border border-white/20">
-                      <Avatar className="h-8 w-8">
+                  <div className="space-y-1 pt-2 border-t border-border mt-2">
+                    <div className="flex items-center gap-2 px-3 py-2 text-foreground text-sm">
+                      <Avatar className="h-6 w-6">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-indigo-500 text-white text-sm">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-white font-medium">{user?.username}</span>
+                      {user?.username}
                     </div>
                     <Link href="/dashboard" className="block">
-                      <button className="w-full text-left text-white/90 hover:text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors font-medium">
+                      <button className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors">
                         Dashboard
                       </button>
                     </Link>
                     <Link href="/wallet-dashboard" className="block">
-                      <button className="w-full text-left text-white/90 hover:text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors font-medium">
+                      <button className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors">
                         Wallet
                       </button>
                     </Link>
                     <button 
-                      className="w-full text-left text-white/90 hover:text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors font-medium"
+                      className="w-full text-left text-foreground hover:text-foreground py-2 px-3 rounded hover:bg-accent transition-colors"
                       onClick={() => logoutMutation.mutate()}
                     >
                       Sign Out
