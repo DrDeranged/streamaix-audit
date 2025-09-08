@@ -75,49 +75,75 @@ export function Navigation() {
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Avatar className="h-10 w-10">
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-indigo-500/30 transition-all duration-200">
+                      <Avatar className="h-10 w-10 ring-2 ring-indigo-500/20 hover:ring-indigo-500/40 transition-all duration-200">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600 text-gray-900 dark:text-white">
+                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
+                      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full"></div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 glass-bg glass-border" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-2 p-2">
+                  <DropdownMenuContent className="w-64 glass-bg glass-border border-white/20 shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-slate-900/90" align="end" forceMount>
+                    <div className="flex items-center gap-3 p-4 border-b border-white/10">
+                      <Avatar className="h-10 w-10 ring-2 ring-indigo-500/30">
+                        <AvatarImage src={user?.avatar} alt={user?.username} />
+                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
+                          {user?.username?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{user?.username}</p>
+                        <p className="font-semibold text-white">{user?.username}</p>
                         {user?.email && (
-                          <p className="w-[200px] truncate text-sm text-muted-foreground">
+                          <p className="w-[180px] truncate text-xs text-gray-300">
                             {user.email}
                           </p>
                         )}
+                        <span className="inline-block px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
+                          • Online
+                        </span>
                       </div>
                     </div>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="cursor-pointer">
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/wallet-dashboard" className="cursor-pointer">
-                        <Wallet className="mr-2 h-4 w-4" />
-                        Wallet
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="cursor-pointer"
-                      onClick={() => logoutMutation.mutate()}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign out
-                    </DropdownMenuItem>
+                    <div className="py-2">
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-md mx-2">
+                          <BarChart3 className="mr-3 h-4 w-4 text-indigo-400 group-hover:text-indigo-300" />
+                          <div className="flex flex-col">
+                            <span className="font-medium">Dashboard</span>
+                            <span className="text-xs text-gray-400 group-hover:text-indigo-200">View analytics & summaries</span>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/wallet-dashboard" className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-green-500/20 hover:text-green-300 transition-all duration-200 rounded-md mx-2">
+                          <Wallet className="mr-3 h-4 w-4 text-green-400 group-hover:text-green-300" />
+                          <div className="flex flex-col">
+                            <span className="font-medium">Wallet</span>
+                            <span className="text-xs text-gray-400 group-hover:text-green-200">Manage tokens & earnings</span>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 rounded-md mx-2">
+                        <User className="mr-3 h-4 w-4 text-purple-400 group-hover:text-purple-300" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">Profile</span>
+                          <span className="text-xs text-gray-400 group-hover:text-purple-200">Edit settings & preferences</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </div>
+                    <div className="border-t border-white/10 pt-2 pb-1">
+                      <DropdownMenuItem 
+                        className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 rounded-md mx-2"
+                        onClick={() => logoutMutation.mutate()}
+                      >
+                        <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-300" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">Sign out</span>
+                          <span className="text-xs text-gray-400 group-hover:text-red-200">End current session</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
@@ -160,36 +186,54 @@ export function Navigation() {
                       <span className="font-mono text-sm">{formatAddress(wallet.address)}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 glass-bg glass-border" align="end">
-                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Connected Wallet</span>
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      </div>
-                      <div className="mt-2">
-                        <p className="text-xs text-muted-foreground font-mono">{wallet.address}</p>
-                        {wallet.ensName && (
-                          <p className="text-xs text-indigo-400 mt-1">{wallet.ensName}</p>
-                        )}
+                  <DropdownMenuContent className="w-72 glass-bg glass-border border-white/20 shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-slate-900/90" align="end">
+                    <div className="p-4 border-b border-white/10">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                          <Wallet className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-white">Connected Wallet</span>
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                          </div>
+                          <p className="text-xs text-gray-300 font-mono mt-1">{formatAddress(wallet.address)}</p>
+                          {wallet.ensName && (
+                            <p className="text-xs text-indigo-400 mt-1 font-medium">{wallet.ensName}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <DropdownMenuItem asChild>
-                      <Link href="/wallet-dashboard" className="cursor-pointer">
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        Wallet Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      View on Explorer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="cursor-pointer text-red-600 dark:text-red-400"
-                      onClick={disconnect}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Disconnect
-                    </DropdownMenuItem>
+                    <div className="py-2">
+                      <DropdownMenuItem asChild>
+                        <Link href="/wallet-dashboard" className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-md mx-2">
+                          <BarChart3 className="mr-3 h-4 w-4 text-indigo-400 group-hover:text-indigo-300" />
+                          <div className="flex flex-col">
+                            <span className="font-medium">Wallet Dashboard</span>
+                            <span className="text-xs text-gray-400 group-hover:text-indigo-200">View portfolio & transactions</span>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-blue-500/20 hover:text-blue-300 transition-all duration-200 rounded-md mx-2">
+                        <ExternalLink className="mr-3 h-4 w-4 text-blue-400 group-hover:text-blue-300" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">View on Explorer</span>
+                          <span className="text-xs text-gray-400 group-hover:text-blue-200">Open in blockchain explorer</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </div>
+                    <div className="border-t border-white/10 pt-2 pb-1">
+                      <DropdownMenuItem 
+                        className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 rounded-md mx-2"
+                        onClick={disconnect}
+                      >
+                        <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-300" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">Disconnect</span>
+                          <span className="text-xs text-gray-400 group-hover:text-red-200">Remove wallet connection</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
@@ -229,10 +273,11 @@ export function Navigation() {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden mt-4 py-4 border-t glass-border"
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden mt-4 py-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent rounded-b-xl backdrop-blur-sm"
             >
               <div className="flex flex-col space-y-4">
                 <button 
@@ -250,62 +295,92 @@ export function Navigation() {
                 
                 {/* Mobile Authentication */}
                 {!isAuthenticated && (
-                  <div className="space-y-3 pt-2 border-t glass-border">
+                  <motion.div 
+                    className="space-y-3 pt-4 border-t border-white/10"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
                     <Link href="/auth" className="block">
-                      <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-indigo-500">
-                        <User className="w-4 h-4 mr-2" />
-                        Sign In
+                      <Button variant="ghost" className="w-full justify-start text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-lg p-3">
+                        <User className="w-4 h-4 mr-3 text-indigo-400" />
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Sign In</span>
+                          <span className="text-xs text-gray-400">Access your dashboard</span>
+                        </div>
                       </Button>
                     </Link>
                     <Link href="/auth" className="block">
-                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Get Started
+                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 rounded-lg p-3 shadow-lg">
+                        <Sparkles className="w-4 h-4 mr-3" />
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Get Started</span>
+                          <span className="text-xs opacity-80">Start processing content</span>
+                        </div>
                       </Button>
                     </Link>
-                  </div>
+                  </motion.div>
                 )}
                 
                 {/* Mobile User Menu */}
                 {isAuthenticated && (
-                  <div className="space-y-3 pt-2 border-t glass-border">
-                    <div className="p-3 bg-muted/50 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar className="h-8 w-8">
+                  <motion.div 
+                    className="space-y-3 pt-4 border-t border-white/10"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <div className="p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 ring-2 ring-indigo-500/30">
                           <AvatarImage src={user?.avatar} alt={user?.username} />
-                          <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm">
+                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
                             {user?.username?.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-medium text-sm">{user?.username}</p>
+                        <div className="flex flex-col">
+                          <p className="font-semibold text-white text-sm">{user?.username}</p>
                           {user?.email && (
-                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                            <p className="text-xs text-gray-300 truncate">{user.email}</p>
                           )}
+                          <span className="inline-block px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full mt-1 w-fit">
+                            • Online
+                          </span>
                         </div>
                       </div>
                     </div>
                     <Link href="/dashboard" className="block">
-                      <Button variant="ghost" className="w-full justify-start">
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Dashboard
+                      <Button variant="ghost" className="w-full justify-start text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-lg p-3">
+                        <BarChart3 className="w-4 h-4 mr-3 text-indigo-400" />
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Dashboard</span>
+                          <span className="text-xs text-gray-400">View analytics & summaries</span>
+                        </div>
                       </Button>
                     </Link>
                     <Link href="/wallet-dashboard" className="block">
-                      <Button variant="ghost" className="w-full justify-start">
-                        <Wallet className="w-4 h-4 mr-2" />
-                        Wallet
+                      <Button variant="ghost" className="w-full justify-start text-white hover:bg-green-500/20 hover:text-green-300 transition-all duration-200 rounded-lg p-3">
+                        <Wallet className="w-4 h-4 mr-3 text-green-400" />
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Wallet</span>
+                          <span className="text-xs text-gray-400">Manage tokens & earnings</span>
+                        </div>
                       </Button>
                     </Link>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start"
-                      onClick={() => logoutMutation.mutate()}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
+                    <div className="border-t border-white/10 pt-2">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 rounded-lg p-3"
+                        onClick={() => logoutMutation.mutate()}
+                      >
+                        <LogOut className="w-4 h-4 mr-3 text-red-400" />
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Sign Out</span>
+                          <span className="text-xs text-gray-400">End current session</span>
+                        </div>
+                      </Button>
+                    </div>
+                  </motion.div>
                 )}
                 {/* Mobile Wallet Connection */}
                 {isConnected && wallet ? (
