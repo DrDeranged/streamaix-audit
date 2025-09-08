@@ -85,63 +85,37 @@ export function Navigation() {
                       <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full"></div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 glass-bg glass-border border-white/20 shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-slate-900/90" align="end" forceMount>
-                    <div className="flex items-center gap-3 p-4 border-b border-white/10">
-                      <Avatar className="h-10 w-10 ring-2 ring-indigo-500/30">
+                  <DropdownMenuContent className="w-48 glass-bg glass-border bg-white/10 dark:bg-slate-900/90" align="end" forceMount>
+                    <div className="flex items-center gap-2 p-3 border-b border-white/10">
+                      <Avatar className="h-8 w-8">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
+                        <AvatarFallback className="bg-indigo-500 text-white text-sm">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-semibold text-white">{user?.username}</p>
-                        {user?.email && (
-                          <p className="w-[180px] truncate text-xs text-gray-300">
-                            {user.email}
-                          </p>
-                        )}
-                        <span className="inline-block px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
-                          • Online
-                        </span>
-                      </div>
+                      <p className="text-white text-sm">{user?.username}</p>
                     </div>
-                    <div className="py-2">
+                    <div className="py-1">
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-md mx-2">
-                          <BarChart3 className="mr-3 h-4 w-4 text-indigo-400 group-hover:text-indigo-300" />
-                          <div className="flex flex-col">
-                            <span className="font-medium">Dashboard</span>
-                            <span className="text-xs text-gray-400 group-hover:text-indigo-200">View analytics & summaries</span>
-                          </div>
+                        <Link href="/dashboard" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                          Dashboard
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-green-500/20 hover:text-green-300 transition-all duration-200 rounded-md mx-2">
-                          <Wallet className="mr-3 h-4 w-4 text-green-400 group-hover:text-green-300" />
-                          <div className="flex flex-col">
-                            <span className="font-medium">Wallet</span>
-                            <span className="text-xs text-gray-400 group-hover:text-green-200">Manage tokens & earnings</span>
-                          </div>
+                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                          Wallet
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 rounded-md mx-2">
-                        <User className="mr-3 h-4 w-4 text-purple-400 group-hover:text-purple-300" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">Profile</span>
-                          <span className="text-xs text-gray-400 group-hover:text-purple-200">Edit settings & preferences</span>
-                        </div>
+                      <DropdownMenuItem className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                        Profile
                       </DropdownMenuItem>
                     </div>
-                    <div className="border-t border-white/10 pt-2 pb-1">
+                    <div className="border-t border-white/10 pt-1 pb-1">
                       <DropdownMenuItem 
-                        className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 rounded-md mx-2"
+                        className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
                         onClick={() => logoutMutation.mutate()}
                       >
-                        <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-300" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">Sign out</span>
-                          <span className="text-xs text-gray-400 group-hover:text-red-200">End current session</span>
-                        </div>
+                        Sign out
                       </DropdownMenuItem>
                     </div>
                   </DropdownMenuContent>
@@ -186,52 +160,28 @@ export function Navigation() {
                       <span className="font-mono text-sm">{formatAddress(wallet.address)}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-72 glass-bg glass-border border-white/20 shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-slate-900/90" align="end">
-                    <div className="p-4 border-b border-white/10">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                          <Wallet className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-white">Connected Wallet</span>
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                          </div>
-                          <p className="text-xs text-gray-300 font-mono mt-1">{formatAddress(wallet.address)}</p>
-                          {wallet.ensName && (
-                            <p className="text-xs text-indigo-400 mt-1 font-medium">{wallet.ensName}</p>
-                          )}
-                        </div>
+                  <DropdownMenuContent className="w-56 glass-bg glass-border bg-white/10 dark:bg-slate-900/90" align="end">
+                    <div className="p-3 border-b border-white/10">
+                      <div className="text-sm text-white">
+                        <span className="font-mono">{formatAddress(wallet.address)}</span>
                       </div>
                     </div>
-                    <div className="py-2">
+                    <div className="py-1">
                       <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-md mx-2">
-                          <BarChart3 className="mr-3 h-4 w-4 text-indigo-400 group-hover:text-indigo-300" />
-                          <div className="flex flex-col">
-                            <span className="font-medium">Wallet Dashboard</span>
-                            <span className="text-xs text-gray-400 group-hover:text-indigo-200">View portfolio & transactions</span>
-                          </div>
+                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                          Dashboard
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-blue-500/20 hover:text-blue-300 transition-all duration-200 rounded-md mx-2">
-                        <ExternalLink className="mr-3 h-4 w-4 text-blue-400 group-hover:text-blue-300" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">View on Explorer</span>
-                          <span className="text-xs text-gray-400 group-hover:text-blue-200">Open in blockchain explorer</span>
-                        </div>
+                      <DropdownMenuItem className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                        View on Explorer
                       </DropdownMenuItem>
                     </div>
-                    <div className="border-t border-white/10 pt-2 pb-1">
+                    <div className="border-t border-white/10 pt-1 pb-1">
                       <DropdownMenuItem 
-                        className="cursor-pointer group flex items-center px-4 py-3 text-sm text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 rounded-md mx-2"
+                        className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
                         onClick={disconnect}
                       >
-                        <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-300" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">Disconnect</span>
-                          <span className="text-xs text-gray-400 group-hover:text-red-200">Remove wallet connection</span>
-                        </div>
+                        Disconnect
                       </DropdownMenuItem>
                     </div>
                   </DropdownMenuContent>
@@ -277,110 +227,67 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden mt-4 py-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent rounded-b-xl backdrop-blur-sm"
+              className="md:hidden mt-4 py-3 border-t border-white/10 bg-white/5 backdrop-blur-sm"
             >
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-2">
                 <button 
                   onClick={() => scrollToSection("features")}
-                  className="text-left text-muted-foreground hover:text-indigo-500 transition-colors"
+                  className="text-left text-white/80 hover:text-white py-2 px-3 rounded-md hover:bg-white/10 transition-colors"
                 >
                   Features
                 </button>
                 <button 
                   onClick={() => scrollToSection("bounties")}
-                  className="text-left text-muted-foreground hover:text-indigo-500 transition-colors"
+                  className="text-left text-white/80 hover:text-white py-2 px-3 rounded-md hover:bg-white/10 transition-colors"
                 >
                   Bounties
                 </button>
                 
                 {/* Mobile Authentication */}
                 {!isAuthenticated && (
-                  <motion.div 
-                    className="space-y-3 pt-4 border-t border-white/10"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
+                  <div className="space-y-2 pt-3 border-t border-white/10">
                     <Link href="/auth" className="block">
-                      <Button variant="ghost" className="w-full justify-start text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-lg p-3">
-                        <User className="w-4 h-4 mr-3 text-indigo-400" />
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">Sign In</span>
-                          <span className="text-xs text-gray-400">Access your dashboard</span>
-                        </div>
-                      </Button>
+                      <button className="w-full text-left text-white/80 hover:text-white py-2 px-3 rounded-md hover:bg-white/10 transition-colors">
+                        Sign In
+                      </button>
                     </Link>
                     <Link href="/auth" className="block">
-                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 rounded-lg p-3 shadow-lg">
-                        <Sparkles className="w-4 h-4 mr-3" />
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">Get Started</span>
-                          <span className="text-xs opacity-80">Start processing content</span>
-                        </div>
-                      </Button>
+                      <button className="w-full text-left bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-3 rounded-md transition-colors">
+                        Get Started
+                      </button>
                     </Link>
-                  </motion.div>
+                  </div>
                 )}
                 
                 {/* Mobile User Menu */}
                 {isAuthenticated && (
-                  <motion.div 
-                    className="space-y-3 pt-4 border-t border-white/10"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <div className="p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 ring-2 ring-indigo-500/30">
-                          <AvatarImage src={user?.avatar} alt={user?.username} />
-                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
-                            {user?.username?.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <p className="font-semibold text-white text-sm">{user?.username}</p>
-                          {user?.email && (
-                            <p className="text-xs text-gray-300 truncate">{user.email}</p>
-                          )}
-                          <span className="inline-block px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full mt-1 w-fit">
-                            • Online
-                          </span>
-                        </div>
-                      </div>
+                  <div className="space-y-2 pt-3 border-t border-white/10">
+                    <div className="flex items-center gap-2 px-3 py-2 text-white text-sm">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={user?.avatar} alt={user?.username} />
+                        <AvatarFallback className="bg-indigo-500 text-white text-xs">
+                          {user?.username?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      {user?.username}
                     </div>
                     <Link href="/dashboard" className="block">
-                      <Button variant="ghost" className="w-full justify-start text-white hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 rounded-lg p-3">
-                        <BarChart3 className="w-4 h-4 mr-3 text-indigo-400" />
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">Dashboard</span>
-                          <span className="text-xs text-gray-400">View analytics & summaries</span>
-                        </div>
-                      </Button>
+                      <button className="w-full text-left text-white/80 hover:text-white py-2 px-3 rounded-md hover:bg-white/10 transition-colors">
+                        Dashboard
+                      </button>
                     </Link>
                     <Link href="/wallet-dashboard" className="block">
-                      <Button variant="ghost" className="w-full justify-start text-white hover:bg-green-500/20 hover:text-green-300 transition-all duration-200 rounded-lg p-3">
-                        <Wallet className="w-4 h-4 mr-3 text-green-400" />
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">Wallet</span>
-                          <span className="text-xs text-gray-400">Manage tokens & earnings</span>
-                        </div>
-                      </Button>
+                      <button className="w-full text-left text-white/80 hover:text-white py-2 px-3 rounded-md hover:bg-white/10 transition-colors">
+                        Wallet
+                      </button>
                     </Link>
-                    <div className="border-t border-white/10 pt-2">
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 rounded-lg p-3"
-                        onClick={() => logoutMutation.mutate()}
-                      >
-                        <LogOut className="w-4 h-4 mr-3 text-red-400" />
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">Sign Out</span>
-                          <span className="text-xs text-gray-400">End current session</span>
-                        </div>
-                      </Button>
-                    </div>
-                  </motion.div>
+                    <button 
+                      className="w-full text-left text-white/80 hover:text-white py-2 px-3 rounded-md hover:bg-white/10 transition-colors"
+                      onClick={() => logoutMutation.mutate()}
+                    >
+                      Sign Out
+                    </button>
+                  </div>
                 )}
                 {/* Mobile Wallet Connection */}
                 {isConnected && wallet ? (
