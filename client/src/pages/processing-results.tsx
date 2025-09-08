@@ -229,25 +229,25 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Hero Section - Landing Page Style */}
         <motion.div 
-          className="text-center mb-8 sm:mb-16"
+          className="text-center mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
             {summary.title}
           </h2>
           {summary.description && (
-            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 mb-6">
+            <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 mb-4">
               {summary.description}
             </p>
           )}
           
           {/* Content Metadata - Landing Page Style */}
-          <div className="flex justify-center items-center space-x-4 sm:space-x-6 md:space-x-8 opacity-60 flex-wrap gap-2 sm:gap-4 px-4">
+          <div className="flex justify-center items-center space-x-3 sm:space-x-4 md:space-x-6 opacity-70 flex-wrap gap-2 sm:gap-3 px-4">
             <div className="flex items-center space-x-1 sm:space-x-2">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
               <span className="text-xs sm:text-sm">
@@ -288,8 +288,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               {/* Header Card */}
-              <Card className="mb-6 bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
-                <CardContent className="p-6">
+              <Card className="mb-4 bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
+                <CardContent className="p-4 sm:p-5">
                   <div className="flex items-start gap-4">
                     {summary.rawData?.thumbnail && (
                       <img 
@@ -329,40 +329,40 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
               {/* Content Tabs */}
               <Card className="bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-5">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-6">
-                      <TabsTrigger value="analysis" className="flex items-center gap-2">
+                    <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4 h-auto">
+                      <TabsTrigger value="analysis" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                         <FileText className="w-4 h-4" />
                         Analysis
                       </TabsTrigger>
-                      <TabsTrigger value="insights" className="flex items-center gap-2">
+                      <TabsTrigger value="insights" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                         <TrendingUp className="w-4 h-4" />
                         Insights
                       </TabsTrigger>
-                      <TabsTrigger value="market" className="flex items-center gap-2">
+                      <TabsTrigger value="market" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                         <BarChart3 className="w-4 h-4" />
                         Market Intel
                       </TabsTrigger>
-                      <TabsTrigger value="structure" className="flex items-center gap-2">
+                      <TabsTrigger value="structure" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                         <Target className="w-4 h-4" />
                         Structure
                       </TabsTrigger>
                     </TabsList>
 
                     {/* Executive Summary Tab */}
-                    <TabsContent value="analysis" className="space-y-4">
+                    <TabsContent value="analysis" className="space-y-3">
                       {/* Executive Summary */}
-                      <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
-                        <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                      <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                        <h5 className="text-sm sm:text-base font-semibold text-blue-400 mb-2 flex items-center gap-2">
                           <Brain className="w-4 h-4" />
                           Executive Takeaway
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
-                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white"
+                            className="text-gray-600 dark:text-gray-400 hover:text-white p-1"
                           >
                             {copySuccess === 'executive' ? (
                               <CheckCircle2 className="h-4 w-4" />
@@ -416,7 +416,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     </TabsContent>
 
                     {/* Key Insights Tab - MACRO TRENDS ONLY */}
-                    <TabsContent value="insights" className="space-y-4">
+                    <TabsContent value="insights" className="space-y-3">
                       {/* Combine keyInsights and bulletPoints into single section */}
                       {((summary.keyInsights && summary.keyInsights.length > 0) || (summary.bulletPoints && summary.bulletPoints.length > 0)) && (
                         <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
@@ -484,7 +484,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     </TabsContent>
 
                     {/* Market Intel Tab */}
-                    <TabsContent value="market" className="space-y-4">
+                    <TabsContent value="market" className="space-y-3">
                       {/* Market Overview Grid - Single Clean Version */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
