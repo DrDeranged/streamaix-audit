@@ -322,8 +322,8 @@ export default function SummaryView() {
           >
             {/* Compact Info Card */}
             {summary.rawData?.thumbnail && (
-              <Card className="mb-6 bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardContent className="p-4">
+              <Card className="mb-4 bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardContent className="p-3">
                   <div className="flex gap-4">
                     <img 
                       src={summary.rawData.thumbnail}
@@ -356,24 +356,24 @@ export default function SummaryView() {
                 {/* Mobile Tab Navigation */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <div className="border-b border-white/10 bg-white/5">
-                    <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-transparent border-0 h-auto p-1">
+                    <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-transparent border-0 h-auto p-0.5">
                       <TabsTrigger 
                         value="analysis" 
-                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
                       >
                         <FileText className="w-4 h-4" />
                         <span>Analysis</span>
                       </TabsTrigger>
                       <TabsTrigger 
                         value="insights" 
-                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
                       >
                         <TrendingUp className="w-4 h-4" />
                         <span>Insights</span>
                       </TabsTrigger>
                       <TabsTrigger 
                         value="market" 
-                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
                       >
                         <BarChart3 className="w-4 h-4" />
                         <span className="hidden sm:inline">Market Intel</span>
@@ -381,7 +381,7 @@ export default function SummaryView() {
                       </TabsTrigger>
                       <TabsTrigger 
                         value="structure" 
-                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
                       >
                         <Target className="w-4 h-4" />
                         <span>Structure</span>
@@ -390,11 +390,11 @@ export default function SummaryView() {
                   </div>
 
                   {/* Executive Summary Tab */}
-                  <TabsContent value="analysis" className="p-4 sm:p-6 space-y-4">
+                  <TabsContent value="analysis" className="p-3 sm:p-4 space-y-3">
                     {/* Executive Summary */}
-                    <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-base sm:text-lg font-semibold text-blue-400 flex items-center gap-2">
+                    <div className="p-3 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm sm:text-base font-semibold text-blue-400 flex items-center gap-2">
                           <Brain className="w-4 h-4" />
                           Executive Takeaway
                         </h3>
@@ -402,7 +402,7 @@ export default function SummaryView() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
-                          className="text-gray-400 hover:text-white p-2"
+                          className="text-gray-400 hover:text-white p-1.5"
                         >
                           {copySuccess === 'executive' ? (
                             <CheckCircle2 className="h-4 w-4" />
@@ -430,7 +430,7 @@ export default function SummaryView() {
                       
                       {/* Additional Insights */}
                       {summary.blogPost && summary.blogPost !== summary.executiveSummary && summary.blogPost !== summary.summary && (
-                        <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                        <div className="p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
                           <h5 className="text-lg font-semibold text-purple-400 mb-3 flex items-center gap-2">
                             <FileText className="w-4 h-4" />
                             Comprehensive Analysis
@@ -459,15 +459,15 @@ export default function SummaryView() {
                     <TabsContent value="insights" className="space-y-4">
                       {/* Combine keyInsights and bulletPoints into single section */}
                       {((summary.keyInsights && summary.keyInsights.length > 0) || (summary.bulletPoints && summary.bulletPoints.length > 0)) && (
-                        <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                          <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
+                        <div className="p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
+                          <h5 className="font-semibold mb-2 text-green-400 flex items-center gap-2">
                             <Zap className="w-4 h-4" />
                             Key Insights
                           </h5>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {/* Display keyInsights first */}
                             {summary.keyInsights && summary.keyInsights.map((insight: any, idx: number) => (
-                              <div key={`insight-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
+                              <div key={`insight-${idx}`} className="p-2 bg-background/50 rounded-md border-l-2 border-green-400">
                                 <div className="flex items-start justify-between mb-2">
                                   <span className="font-medium text-sm text-gray-900 dark:text-white">
                                     {typeof insight === 'object' ? (insight.insight || insight.text || insight.content) : insight}
@@ -489,7 +489,7 @@ export default function SummaryView() {
                             ))}
                             {/* Display bulletPoints if no keyInsights */}
                             {(!summary.keyInsights || summary.keyInsights.length === 0) && summary.bulletPoints && summary.bulletPoints.map((point: any, idx: number) => (
-                              <div key={`bullet-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
+                              <div key={`bullet-${idx}`} className="p-2 bg-background/50 rounded-md border-l-2 border-green-400">
                                 <span className="text-sm text-gray-900 dark:text-white">
                                   {typeof point === 'object' ? (point.point || point.insight || point.text || JSON.stringify(point)) : point}
                                 </span>
@@ -501,12 +501,12 @@ export default function SummaryView() {
 
 
                       {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                        <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                          <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
+                        <div className="p-3 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                          <h5 className="font-semibold mb-2 text-orange-400 flex items-center gap-2">
                             <MessageSquare className="w-4 h-4" />
                             Key Quotes
                           </h5>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {summary.keyQuotes.map((quote: any, idx: number) => (
                               <div key={idx} className="p-4 bg-background/50 rounded-md border-l-4 border-orange-400">
                                 <blockquote className="text-sm italic mb-3 text-gray-900 dark:text-white leading-relaxed">
@@ -524,9 +524,9 @@ export default function SummaryView() {
                     </TabsContent>
 
                     {/* Market Intel Tab */}
-                    <TabsContent value="market" className="space-y-4">
+                    <TabsContent value="market" className="space-y-3">
                       {/* Market Overview Grid - Single Clean Version */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
                           <div className="text-2xl font-bold mb-1 text-green-400">
                             {(() => {
@@ -631,11 +631,11 @@ export default function SummaryView() {
                         }
                       })() && (
                         <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-                          <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
+                          <h5 className="font-semibold mb-2 text-cyan-400 flex items-center gap-2">
                             <BarChart3 className="w-4 h-4" />
                             Investment Opportunities
                           </h5>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {(() => {
                               try {
                                 const analysis = JSON.parse(summary.marketAnalysis || '{}');
@@ -644,7 +644,7 @@ export default function SummaryView() {
                                 return summary.financialTrends || [];
                               }
                             })().map((financial: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-cyan-400">
+                              <div key={idx} className="p-2 bg-background/50 rounded-md border-l-2 border-cyan-400">
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
                                     <Badge variant="secondary" className="text-xs">
@@ -762,14 +762,14 @@ export default function SummaryView() {
                     </TabsContent>
 
                     {/* Structure Tab */}
-                    <TabsContent value="structure" className="space-y-4">
-                      <div className="flex items-center gap-2 mb-4">
+                    <TabsContent value="structure" className="space-y-3">
+                      <div className="flex items-center gap-2 mb-3">
                         <Clock className="h-5 w-5 text-blue-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           Content Structure ({summary.chapters?.length || 0} chapters)
                         </h3>
                       </div>
-                      <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                         {summary.chapters && summary.chapters.length > 0 ? (
                           <div className="space-y-4">
                             {summary.chapters.map((chapter: any, index: number) => (
