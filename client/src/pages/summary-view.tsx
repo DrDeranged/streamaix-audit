@@ -219,100 +219,90 @@ export default function SummaryView() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-gray-900 dark:text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
-      {/* Navigation Header - Landing Page Style */}
-      <div className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+      {/* Mobile-Optimized Navigation Header */}
+      <div className="border-b border-white/10 backdrop-blur-sm bg-slate-900/80 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link href="/dashboard">
                 <Button 
                   variant="ghost" 
-                  className="text-gray-300 hover:text-gray-900 dark:text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10"
+                  size="sm"
+                  className="text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10 px-3 py-2"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
                 </Button>
               </Link>
-              <div className="h-8 w-px bg-white/20" />
-              <div>
-                <h1 className="text-xl font-orbitron font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-                  AI Content Intelligence
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Completed
-                  </Badge>
-                  <Badge variant="outline" className="border-purple-500/30 text-purple-300">
-                    {summary.accuracy || 95}% Accuracy
-                  </Badge>
-                </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Completed
+                </Badge>
+                <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs hidden sm:inline-flex">
+                  {summary.accuracy || 95}% Accuracy
+                </Badge>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3"
                 onClick={() => shareMutation.mutate('lens')}
               >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
+                <Share2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Share</span>
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3"
                 onClick={() => handleCopy(summary.summary || '', 'summary')}
               >
-                <Download className="h-4 w-4 mr-2" />
-                Export
+                <Download className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Export</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 py-8">
-        {/* Hero Section - Landing Page Style */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Mobile-First Hero Section */}
         <motion.div 
-          className="text-center mb-8 sm:mb-16"
+          className="mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 text-white leading-tight">
             {summary.title}
-          </h2>
-          {summary.description && (
-            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 mb-6">
-              {summary.description}
-            </p>
-          )}
+          </h1>
           
-          {/* Content Metadata - Landing Page Style */}
-          <div className="flex justify-center items-center space-x-4 sm:space-x-6 md:space-x-8 opacity-60 flex-wrap gap-2 sm:gap-4 px-4">
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
-              <span className="text-xs sm:text-sm">
+          {/* Compact Metadata Bar */}
+          <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-300">
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4 text-indigo-400" />
+              <span>
                 {summary.originalDuration ? 
                   `${Math.floor(summary.originalDuration / 60)}:${(summary.originalDuration % 60).toString().padStart(2, '0')}` : 
                   'N/A'
                 }
               </span>
             </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-              <span className="text-xs sm:text-sm">{summary.platform}</span>
+            <div className="flex items-center gap-1">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <span>{summary.platform}</span>
             </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
-              <span className="text-xs sm:text-sm">Processed {new Date(summary.createdAt).toLocaleDateString()}</span>
+            <div className="flex items-center gap-1">
+              <Zap className="w-4 h-4 text-cyan-400" />
+              <span>{new Date(summary.createdAt).toLocaleDateString()}</span>
             </div>
             <Button 
               variant="outline" 
               size="sm"
-              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3 py-1.5"
               asChild
             >
               <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
@@ -323,106 +313,112 @@ export default function SummaryView() {
           </div>
         </motion.div>
 
-        {/* Main Content */}
-        <div className="max-w-4xl mx-auto">
-          {isCompleted && summary && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {/* Header Card */}
-              <Card className="mb-6 bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    {summary.rawData?.thumbnail && (
-                      <img 
-                        src={summary.rawData.thumbnail}
-                        alt={summary.title}
-                        className="w-32 h-24 object-cover rounded-lg"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white" style={{color: '#ffffff'}}>{summary.title}</h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
+        {/* Mobile-Optimized Main Content */}
+        {isCompleted && summary && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {/* Compact Info Card */}
+            {summary.rawData?.thumbnail && (
+              <Card className="mb-6 bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <img 
+                      src={summary.rawData.thumbnail}
+                      alt={summary.title}
+                      className="w-20 h-16 sm:w-32 sm:h-24 object-cover rounded-lg flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-2">
                         {summary.rawData?.channel && <span>📺 {summary.rawData.channel}</span>}
-                        {summary.originalDuration && (
-                          <span>⏱️ {Math.floor(summary.originalDuration / 60)}:{(summary.originalDuration % 60).toString().padStart(2, '0')}</span>
-                        )}
                         {summary.rawData?.views && <span>👁️ {summary.rawData.views} views</span>}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Completed
                         </Badge>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="text-xs">
                           {summary.accuracy || 95}% Accuracy
                         </Badge>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View Source
-                      </a>
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Content Tabs */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
-                <CardContent className="p-6">
-                  {/* Tab Navigation */}
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-6">
-                      <TabsTrigger value="analysis" className="flex items-center gap-2">
+            {/* Mobile-First Content Tabs */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-0">
+                {/* Mobile Tab Navigation */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <div className="border-b border-white/10 bg-white/5">
+                    <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-transparent border-0 h-auto p-1">
+                      <TabsTrigger 
+                        value="analysis" 
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                      >
                         <FileText className="w-4 h-4" />
-                        Analysis
+                        <span>Analysis</span>
                       </TabsTrigger>
-                      <TabsTrigger value="insights" className="flex items-center gap-2">
+                      <TabsTrigger 
+                        value="insights" 
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                      >
                         <TrendingUp className="w-4 h-4" />
-                        Insights
+                        <span>Insights</span>
                       </TabsTrigger>
-                      <TabsTrigger value="market" className="flex items-center gap-2">
+                      <TabsTrigger 
+                        value="market" 
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                      >
                         <BarChart3 className="w-4 h-4" />
-                        Market Intel
+                        <span className="hidden sm:inline">Market Intel</span>
+                        <span className="sm:hidden">Market</span>
                       </TabsTrigger>
-                      <TabsTrigger value="structure" className="flex items-center gap-2">
+                      <TabsTrigger 
+                        value="structure" 
+                        className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300"
+                      >
                         <Target className="w-4 h-4" />
-                        Structure
+                        <span>Structure</span>
                       </TabsTrigger>
                     </TabsList>
+                  </div>
 
-                    {/* Executive Summary Tab */}
-                    <TabsContent value="analysis" className="space-y-4">
-                      {/* Executive Summary */}
-                      <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
-                        <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                  {/* Executive Summary Tab */}
+                  <TabsContent value="analysis" className="p-4 sm:p-6 space-y-4">
+                    {/* Executive Summary */}
+                    <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-base sm:text-lg font-semibold text-blue-400 flex items-center gap-2">
                           <Brain className="w-4 h-4" />
                           Executive Takeaway
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
-                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white"
-                          >
-                            {copySuccess === 'executive' ? (
-                              <CheckCircle2 className="h-4 w-4" />
-                            ) : (
-                              <Copy className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </h5>
-                        <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
-                          <div 
-                            className="text-sm text-gray-900 dark:text-white leading-relaxed"
-                            dangerouslySetInnerHTML={{
-                              __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
-                                .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
-                                .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-blue-200 mt-3 mb-2">$1</h4>')
-                                .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-purple-200 mt-2 mb-1">$1</h5>')
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
+                          className="text-gray-400 hover:text-white p-2"
+                        >
+                          {copySuccess === 'executive' ? (
+                            <CheckCircle2 className="h-4 w-4" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
+                        <div 
+                          className="text-sm sm:text-base text-white leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
+                              .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
+                              .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-blue-200 mt-3 mb-2">$1</h4>')
+                              .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-purple-200 mt-2 mb-1">$1</h5>')
                                 .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-2"><strong class="text-blue-300">$1:</strong> <span class="text-gray-200">$2</span></div>')
                                 .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white">$1</strong>')
                                 .replace(/\n\n/g, '<br><br>')
