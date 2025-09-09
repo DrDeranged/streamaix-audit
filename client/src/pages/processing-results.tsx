@@ -373,16 +373,17 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                         </h5>
                         <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                           <div 
-                            className="text-sm text-gray-900 dark:text-white leading-relaxed"
+                            className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed"
+                            style={{lineHeight: '1.8', fontSize: '16px'}}
                             dangerouslySetInnerHTML={{
                               __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
-                                .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
-                                .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-blue-200 mt-3 mb-2">$1</h4>')
-                                .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-purple-200 mt-2 mb-1">$1</h5>')
-                                .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-2"><strong class="text-blue-300">$1:</strong> <span class="text-gray-200">$2</span></div>')
-                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white">$1</strong>')
-                                .replace(/\n\n/g, '<br><br>')
-                                .replace(/\n/g, '<br>')
+                                .replace(/# (.*)/g, '<h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
+                                .replace(/## (.*)/g, '<h4 class="text-lg sm:text-xl font-semibold text-blue-200 mt-4 mb-3">$1</h4>')
+                                .replace(/### (.*)/g, '<h5 class="text-base sm:text-lg font-medium text-purple-200 mt-3 mb-2">$1</h5>')
+                                .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-3 p-2 bg-blue-500/10 rounded border-l-2 border-blue-400"><strong class="text-blue-300 text-base">$1:</strong> <span class="text-gray-200 text-base block mt-1">$2</span></div>')
+                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white font-semibold">$1</strong>')
+                                .replace(/\n\n/g, '<div class="mb-4"></div>')
+                                .replace(/\n/g, '<br class="mb-2">')
                             }}
                           />
                         </div>
@@ -390,23 +391,24 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                       
                       {/* Additional Insights */}
                       {summary.blogPost && summary.blogPost !== summary.executiveSummary && summary.blogPost !== summary.summary && (
-                        <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
-                          <h5 className="text-lg font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                        <div className="p-3 sm:p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                          <h5 className="text-sm sm:text-base font-semibold text-purple-400 mb-2 flex items-center gap-2">
                             <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                             Comprehensive Analysis
                           </h5>
                           <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
                             <div 
-                              className="text-sm text-gray-900 dark:text-white leading-relaxed"
+                              className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed"
+                              style={{lineHeight: '1.8', fontSize: '16px'}}
                               dangerouslySetInnerHTML={{
                                 __html: summary.blogPost
-                                  .replace(/# (.*)/g, '<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">$1</h3>')
-                                  .replace(/## (.*)/g, '<h4 class="text-base font-semibold text-purple-200 mt-3 mb-2">$1</h4>')
-                                  .replace(/### (.*)/g, '<h5 class="text-sm font-medium text-pink-200 mt-2 mb-1">$1</h5>')
-                                  .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-2"><strong class="text-purple-300">$1:</strong> <span class="text-gray-200">$2</span></div>')
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white">$1</strong>')
-                                  .replace(/\n\n/g, '<br><br>')
-                                  .replace(/\n/g, '<br>')
+                                  .replace(/# (.*)/g, '<h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">$1</h3>')
+                                  .replace(/## (.*)/g, '<h4 class="text-lg sm:text-xl font-semibold text-purple-200 mt-4 mb-3">$1</h4>')
+                                  .replace(/### (.*)/g, '<h5 class="text-base sm:text-lg font-medium text-pink-200 mt-3 mb-2">$1</h5>')
+                                  .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-3 p-2 bg-purple-500/10 rounded border-l-2 border-purple-400"><strong class="text-purple-300 text-base">$1:</strong> <span class="text-gray-200 text-base block mt-1">$2</span></div>')
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white font-semibold">$1</strong>')
+                                  .replace(/\n\n/g, '<div class="mb-4"></div>')
+                                  .replace(/\n/g, '<br class="mb-2">')
                               }}
                             />
                           </div>
@@ -419,17 +421,17 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     <TabsContent value="insights" className="space-y-3">
                       {/* Combine keyInsights and bulletPoints into single section */}
                       {((summary.keyInsights && summary.keyInsights.length > 0) || (summary.bulletPoints && summary.bulletPoints.length > 0)) && (
-                        <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                          <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
+                        <div className="p-3 sm:p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
+                          <h5 className="font-semibold mb-2 text-green-400 flex items-center gap-2 text-sm sm:text-base">
                             <Zap className="w-4 h-4" />
                             Key Insights
                           </h5>
                           <div className="space-y-3">
                             {/* Display keyInsights first */}
                             {summary.keyInsights && summary.keyInsights.map((insight: any, idx: number) => (
-                              <div key={`insight-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
+                              <div key={`insight-${idx}`} className="p-3 sm:p-4 bg-background/50 rounded-md border-l-2 border-green-400">
                                 <div className="flex items-start justify-between mb-2">
-                                  <span className="font-medium text-sm text-gray-900 dark:text-white">
+                                  <span className="font-medium text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed">
                                     {typeof insight === 'object' ? (insight.insight || insight.text || insight.content) : insight}
                                   </span>
                                   {typeof insight === 'object' && insight.importance && (
@@ -450,7 +452,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             {/* Display bulletPoints if no keyInsights */}
                             {(!summary.keyInsights || summary.keyInsights.length === 0) && summary.bulletPoints && summary.bulletPoints.map((point: any, idx: number) => (
                               <div key={`bullet-${idx}`} className="p-3 bg-background/50 rounded-md border-l-2 border-green-400">
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <span className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed">
                                   {typeof point === 'object' ? (point.point || point.insight || point.text || JSON.stringify(point)) : point}
                                 </span>
                               </div>
@@ -461,18 +463,18 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
 
                       {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                        <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
-                          <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
+                        <div className="p-3 sm:p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                          <h5 className="font-semibold mb-2 text-orange-400 flex items-center gap-2 text-sm sm:text-base">
                             <MessageSquare className="w-4 h-4" />
                             Key Quotes
                           </h5>
                           <div className="space-y-3">
                             {summary.keyQuotes.map((quote: any, idx: number) => (
-                              <div key={idx} className="p-4 bg-background/50 rounded-md border-l-4 border-orange-400">
-                                <blockquote className="text-sm italic mb-3 text-gray-900 dark:text-white leading-relaxed">
+                              <div key={idx} className="p-3 sm:p-4 bg-background/50 rounded-md border-l-4 border-orange-400">
+                                <blockquote className="text-base sm:text-lg italic mb-3 text-gray-900 dark:text-white leading-relaxed">
                                   "{quote.quote || quote.text || quote}"
                                 </blockquote>
-                                <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center justify-between text-sm">
                                   <span className="font-medium text-orange-300">{quote.speaker || 'Speaker'}</span>
                                   <span className="text-gray-600 dark:text-gray-300">{quote.timestamp}</span>
                                 </div>
@@ -486,9 +488,9 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                     {/* Market Intel Tab */}
                     <TabsContent value="market" className="space-y-3">
                       {/* Market Overview Grid - Single Clean Version */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                          <div className="text-2xl font-bold mb-1 text-green-400">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
+                          <div className="text-lg sm:text-2xl font-bold mb-1 text-green-400">
                             {(() => {
                               try {
                                 const analysis = JSON.parse(summary.marketAnalysis || '{}');
@@ -498,10 +500,10 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               }
                             })()}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">Market Sentiment</div>
+                          <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Market Sentiment</div>
                         </div>
-                        <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
-                          <div className="text-2xl font-bold text-purple-400 mb-1">
+                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
+                          <div className="text-lg sm:text-2xl font-bold text-purple-400 mb-1">
                             {(() => {
                               try {
                                 const analysis = JSON.parse(summary.marketAnalysis || '{}');
@@ -511,21 +513,21 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               }
                             })()}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">Source Credibility</div>
+                          <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Source Credibility</div>
                         </div>
                       </div>
 
 
                       {/* Market Positioning Intelligence */}
-                      <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20 mb-4">
-                        <h6 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                      <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20 mb-4">
+                        <h6 className="font-semibold text-blue-400 mb-2 flex items-center gap-2 text-sm sm:text-base">
                           <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                           Market Positioning & Timing
                         </h6>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
                           <div className="space-y-2">
-                            <div className="text-blue-400 font-medium text-xs">MARKET CYCLE</div>
-                            <div className="space-y-1 text-xs">
+                            <div className="text-blue-400 font-medium text-sm sm:text-base">MARKET CYCLE</div>
+                            <div className="space-y-1 text-sm">
                               <div className="flex justify-between">
                                 <span className="text-gray-700 dark:text-gray-300">Phase:</span>
                                 <span className="text-green-400">ACCUMULATION</span>
@@ -542,8 +544,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           </div>
                           
                           <div className="space-y-2">
-                            <div className="text-blue-400 font-medium text-xs">INSTITUTIONAL FLOW</div>
-                            <div className="space-y-1 text-xs">
+                            <div className="text-blue-400 font-medium text-sm sm:text-base">INSTITUTIONAL FLOW</div>
+                            <div className="space-y-1 text-sm">
                               <div className="flex justify-between">
                                 <span className="text-gray-700 dark:text-gray-300">Smart Money:</span>
                                 <span className="text-green-400">ACCUMULATING</span>
@@ -560,8 +562,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           </div>
 
                           <div className="space-y-2">
-                            <div className="text-blue-400 font-medium text-xs">STRATEGIC OUTLOOK</div>
-                            <div className="space-y-1 text-xs">
+                            <div className="text-blue-400 font-medium text-sm sm:text-base">STRATEGIC OUTLOOK</div>
+                            <div className="space-y-1 text-sm">
                               <div className="flex justify-between">
                                 <span className="text-gray-700 dark:text-gray-300">Entry Window:</span>
                                 <span className="text-green-400">OPEN</span>
@@ -582,23 +584,23 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                       {/* Investment Opportunities */}
                       {summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0 && (
-                        <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-                          <h5 className="font-semibold mb-3 text-cyan-400 flex items-center gap-2">
+                        <div className="p-3 sm:p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                          <h5 className="font-semibold mb-2 text-cyan-400 flex items-center gap-2 text-sm sm:text-base">
                             <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
                             Investment Opportunities
                           </h5>
                           <div className="space-y-3">
                             {summary.financialTrends.map((financial: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-cyan-400">
+                              <div key={idx} className="p-3 sm:p-4 bg-background/50 rounded-md border-l-2 border-cyan-400">
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Badge variant="secondary" className="text-xs sm:text-sm">
                                       {financial.category}
                                     </Badge>
-                                    <span className="font-mono text-sm font-semibold text-cyan-400">
+                                    <span className="font-mono text-sm sm:text-base font-semibold text-cyan-400">
                                       ${financial.symbol}
                                     </span>
-                                    <span className="text-sm font-medium">{financial.company}</span>
+                                    <span className="text-sm sm:text-base font-medium">{financial.company}</span>
                                     {financial.liveData && (
                                       <div className="flex items-center gap-2 ml-2">
                                         <span className="font-mono text-sm font-bold text-gray-900 dark:text-white">
