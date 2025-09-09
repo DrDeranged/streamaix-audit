@@ -830,7 +830,7 @@ export function RealAIProcessor() {
 
                         {/* MARKET INTEL TAB */}
                         <TabsContent value="market" className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             {result.marketSentiment && (
                               <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
                                 <div className={`text-2xl font-bold mb-1 ${

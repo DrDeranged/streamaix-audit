@@ -521,25 +521,27 @@ export function AIProcessor() {
                                     )
                                     .map((financial: any, idx: number) => (
                                     <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                          <Badge variant="secondary" className="text-xs">
-                                            {financial.category}
-                                          </Badge>
-                                          <span className="font-mono text-sm font-semibold text-emerald-400">
-                                            ${financial.symbol}
-                                          </span>
-                                          <span className="text-sm font-medium text-gray-900 dark:text-gray-900 dark:text-white">{financial.company}</span>
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <Badge variant="secondary" className="text-xs">
+                                              {financial.category}
+                                            </Badge>
+                                            <span className="font-mono text-sm font-semibold text-emerald-400">
+                                              ${financial.symbol}
+                                            </span>
+                                            <span className="text-sm font-medium text-gray-900 dark:text-white">{financial.company}</span>
+                                          </div>
                                           {financial.liveData && (
-                                            <div className="flex items-center gap-2 ml-2">
-                                              <span className="font-mono text-sm font-bold text-gray-900 dark:text-white">
+                                            <div className="flex items-center gap-3 mt-1 sm:mt-0">
+                                              <span className="font-mono text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                                 ${financial.liveData.price?.toLocaleString('en-US', { 
                                                   minimumFractionDigits: 2, 
                                                   maximumFractionDigits: 2 
                                                 })}
                                               </span>
-                                              <span className={`text-xs font-medium ${
-                                                financial.liveData.percentChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                                              <span className={`text-sm font-medium whitespace-nowrap px-2 py-1 rounded ${
+                                                financial.liveData.percentChange24h >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                                               }`}>
                                                 {financial.liveData.percentChange24h >= 0 ? '+' : ''}
                                                 {financial.liveData.percentChange24h?.toFixed(2)}%
@@ -547,7 +549,7 @@ export function AIProcessor() {
                                             </div>
                                           )}
                                         </div>
-                                        <Badge variant="outline" className={`text-xs ${
+                                        <Badge variant="outline" className={`text-xs self-start sm:self-center ${
                                           financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
                                           financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
                                           'text-gray-400 border-gray-500/30'
