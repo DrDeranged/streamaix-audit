@@ -418,23 +418,23 @@ export default function SummaryView() {
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardContent className="p-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-transparent border-0 h-auto p-1 gap-1">
-                    <TabsTrigger value="summary" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-slate-800/30 border border-slate-600/30 h-auto p-1 gap-1 rounded-lg backdrop-blur-sm">
+                    <TabsTrigger value="summary" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:border-blue-400/30 data-[state=active]:text-blue-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
                       Summary
                     </TabsTrigger>
-                    <TabsTrigger value="insights" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
+                    <TabsTrigger value="insights" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:border-purple-400/30 data-[state=active]:text-purple-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
                       Insights
                     </TabsTrigger>
-                    <TabsTrigger value="market" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center col-span-2 sm:col-span-1">
+                    <TabsTrigger value="market" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:border-green-400/30 data-[state=active]:text-green-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent col-span-2 sm:col-span-1">
                       Market Intel
                     </TabsTrigger>
-                    <TabsTrigger value="structure" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
+                    <TabsTrigger value="structure" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:border-amber-400/30 data-[state=active]:text-amber-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
                       Structure
                     </TabsTrigger>
-                    <TabsTrigger value="technical" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
+                    <TabsTrigger value="technical" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-rose-500/20 data-[state=active]:border-red-400/30 data-[state=active]:text-red-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
                       Technical
                     </TabsTrigger>
-                    <TabsTrigger value="notes" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center gap-1">
+                    <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-teal-500/20 data-[state=active]:border-cyan-400/30 data-[state=active]:text-cyan-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent gap-1">
                       <StickyNote className="w-3 h-3" />
                       Notes
                     </TabsTrigger>
