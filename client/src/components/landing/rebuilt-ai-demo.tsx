@@ -566,7 +566,7 @@ export function AIProcessor() {
                                       )}
                                       
                                       {/* Price Targets & Catalysts */}
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                                         {financial.priceTargets && (
                                           <div className="text-xs text-green-600 dark:text-green-400 p-2 bg-green-50 dark:bg-green-900/20 rounded">
                                             <strong>🎯 Targets:</strong> {financial.priceTargets}
