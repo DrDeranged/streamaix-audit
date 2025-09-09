@@ -490,11 +490,93 @@ export default function SummaryView() {
 
                     {/* Market Analysis */}
                     {summary.marketAnalysis && (
-                      <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 rounded-xl p-4 border border-orange-700">
-                        <h5 className="font-bold mb-3 text-orange-300">Market Analysis</h5>
-                        <div className="text-sm text-gray-300 leading-relaxed">
-                          <div dangerouslySetInnerHTML={{ __html: summary.marketAnalysis }} />
-                        </div>
+                      <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 rounded-xl p-4 md:p-6 border border-orange-700 space-y-4">
+                        <h5 className="font-bold mb-3 text-orange-300 text-lg">Market Analysis</h5>
+                        
+                        {(() => {
+                          try {
+                            const analysis = JSON.parse(summary.marketAnalysis);
+                            
+                            return (
+                              <div className="space-y-6">
+                                {/* Market Sentiment & Credibility */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  {analysis.marketSentiment && (
+                                    <div className="text-center p-3 bg-green-900/20 rounded-lg border border-green-700">
+                                      <div className={`text-xl font-bold mb-1 ${
+                                        analysis.marketSentiment === 'BULLISH' ? 'text-green-400' : 
+                                        analysis.marketSentiment === 'BEARISH' ? 'text-red-400' : 'text-yellow-400'
+                                      }`}>
+                                        {analysis.marketSentiment}
+                                      </div>
+                                      <div className="text-xs text-gray-400">Market Sentiment</div>
+                                    </div>
+                                  )}
+                                  {analysis.sourceCredibility && (
+                                    <div className="text-center p-3 bg-purple-900/20 rounded-lg border border-purple-700">
+                                      <div className="text-xl font-bold text-purple-400 mb-1">
+                                        {analysis.sourceCredibility}
+                                      </div>
+                                      <div className="text-xs text-gray-400">Source Credibility</div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Key Insights from Bullet Points */}
+                                {analysis.bulletPoints && analysis.bulletPoints.length > 0 && (
+                                  <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700">
+                                    <h6 className="font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                                      <Target className="w-4 h-4" />
+                                      Key Strategic Insights
+                                    </h6>
+                                    <div className="space-y-3">
+                                      {analysis.bulletPoints.slice(0, 6).map((point: string, idx: number) => (
+                                        <div key={idx} className="flex items-start gap-3 p-2 bg-gray-800/50 rounded-md">
+                                          <span className="font-medium text-blue-400 text-sm mt-1">•</span>
+                                          <span className="text-sm text-gray-300 leading-relaxed">{point}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Market Trends */}
+                                {analysis.trends && analysis.trends.length > 0 && (
+                                  <div className="bg-emerald-900/20 rounded-lg p-4 border border-emerald-700">
+                                    <h6 className="font-semibold text-emerald-300 mb-3 flex items-center gap-2">
+                                      <TrendingUp className="w-4 h-4" />
+                                      Market Trends
+                                    </h6>
+                                    <div className="grid gap-3">
+                                      {analysis.trends.slice(0, 4).map((trend: any, idx: number) => (
+                                        <div key={idx} className="p-3 bg-gray-800/50 rounded-md">
+                                          <div className="flex items-center justify-between mb-2">
+                                            <span className="font-medium text-sm text-emerald-300">{trend.trend}</span>
+                                            <Badge variant="outline" className={`text-xs ${
+                                              trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
+                                              trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
+                                              'text-gray-400 border-gray-500/30'
+                                            }`}>
+                                              {trend.strength}
+                                            </Badge>
+                                          </div>
+                                          <p className="text-xs text-gray-400 leading-relaxed">{trend.evidence}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          } catch (error) {
+                            // Fallback to basic text display if JSON parsing fails
+                            return (
+                              <div className="text-sm text-gray-300 leading-relaxed">
+                                <p>{summary.marketAnalysis}</p>
+                              </div>
+                            );
+                          }
+                        })()}
                       </div>
                     )}
 
@@ -508,12 +590,12 @@ export default function SummaryView() {
                         return summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0;
                       }
                     })() && (
-                      <div className="p-4 bg-cyan-900/10 rounded-lg border border-cyan-700">
-                        <h5 className="font-semibold mb-2 text-cyan-400 flex items-center gap-2">
-                          <BarChart3 className="w-4 h-4" />
+                      <div className="p-4 md:p-6 bg-cyan-900/10 rounded-lg border border-cyan-700 space-y-4">
+                        <h5 className="font-semibold mb-4 text-cyan-400 flex items-center gap-2 text-lg">
+                          <BarChart3 className="w-5 h-5" />
                           Investment Opportunities
                         </h5>
-                        <div className="space-y-2">
+                        <div className="grid gap-4">
                           {(() => {
                             try {
                               const analysis = JSON.parse(summary.marketAnalysis || '{}');
@@ -522,27 +604,94 @@ export default function SummaryView() {
                               return summary.financialTrends || [];
                             }
                           })().map((financial: any, idx: number) => (
-                            <div key={idx} className="p-2 bg-background/50 rounded-md border-l-2 border-cyan-400">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
+                            <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-cyan-400">
+                              {/* Header with symbol and company */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
                                   <Badge variant="secondary" className="text-xs">
                                     {financial.category}
                                   </Badge>
-                                  <span className="font-mono text-sm font-semibold text-cyan-400">
+                                  <span className="font-mono text-lg font-bold text-cyan-400">
                                     ${financial.symbol}
                                   </span>
-                                  <span className="text-sm font-medium">{financial.company}</span>
+                                  <span className="text-sm font-medium text-gray-200">{financial.company}</span>
                                 </div>
-                                <Badge variant="outline" className={`text-xs ${
-                                  financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
-                                  financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
-                                  'text-gray-400 border-gray-500/30'
+                                <Badge variant="outline" className={`text-sm px-3 py-1 ${
+                                  financial.impact === 'bullish' ? 'text-green-400 border-green-500/50 bg-green-900/20' :
+                                  financial.impact === 'bearish' ? 'text-red-400 border-red-500/50 bg-red-900/20' :
+                                  'text-gray-400 border-gray-500/50 bg-gray-900/20'
                                 }`}>
-                                  {financial.impact}
+                                  {financial.impact?.toUpperCase()}
                                 </Badge>
                               </div>
-                              <p className="text-xs text-gray-300 mb-2">{financial.relevance}</p>
-                              <p className="text-xs text-gray-300 italic">{financial.reasoning}</p>
+                              
+                              {/* Live Data */}
+                              {financial.liveData && (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 p-3 bg-gray-900/50 rounded-md">
+                                  <div className="text-center">
+                                    <div className="text-lg font-bold text-cyan-400">
+                                      ${financial.liveData.price?.toLocaleString() || 'N/A'}
+                                    </div>
+                                    <div className="text-xs text-gray-400">Price</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className={`text-sm font-semibold ${
+                                      financial.liveData.percentChange24h > 0 ? 'text-green-400' : 'text-red-400'
+                                    }`}>
+                                      {financial.liveData.percentChange24h > 0 ? '+' : ''}{financial.liveData.percentChange24h?.toFixed(2) || 'N/A'}%
+                                    </div>
+                                    <div className="text-xs text-gray-400">24h Change</div>
+                                  </div>
+                                  {financial.liveData.marketCap && (
+                                    <div className="text-center">
+                                      <div className="text-sm font-semibold text-gray-300">
+                                        ${(financial.liveData.marketCap / 1e9).toFixed(1)}B
+                                      </div>
+                                      <div className="text-xs text-gray-400">Market Cap</div>
+                                    </div>
+                                  )}
+                                  {financial.liveData.volume24h && (
+                                    <div className="text-center">
+                                      <div className="text-sm font-semibold text-gray-300">
+                                        ${(financial.liveData.volume24h / 1e6).toFixed(1)}M
+                                      </div>
+                                      <div className="text-xs text-gray-400">24h Volume</div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* Analysis */}
+                              <div className="space-y-3">
+                                <div className="bg-gray-900/30 rounded-md p-3">
+                                  <h6 className="text-sm font-semibold text-cyan-300 mb-2">Market Relevance</h6>
+                                  <p className="text-sm text-gray-300 leading-relaxed">{financial.relevance}</p>
+                                </div>
+                                
+                                <div className="bg-gray-900/30 rounded-md p-3">
+                                  <h6 className="text-sm font-semibold text-cyan-300 mb-2">Investment Thesis</h6>
+                                  <p className="text-sm text-gray-300 leading-relaxed">{financial.reasoning}</p>
+                                </div>
+                                
+                                {/* Risk & Time Horizon */}
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                  {financial.timeHorizon && (
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-yellow-400 border-yellow-500/30 bg-yellow-900/10">
+                                      {financial.timeHorizon}
+                                    </Badge>
+                                  )}
+                                  {financial.riskLevel && (
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-orange-400 border-orange-500/30 bg-orange-900/10">
+                                      Risk: {financial.riskLevel}
+                                    </Badge>
+                                  )}
+                                  {financial.analystSource && (
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-purple-400 border-purple-500/30 bg-purple-900/10">
+                                      Source: {financial.analystSource}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
