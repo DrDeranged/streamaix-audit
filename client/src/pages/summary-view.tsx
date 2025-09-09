@@ -499,29 +499,6 @@ export default function SummaryView() {
                             
                             return (
                               <div className="space-y-6">
-                                {/* Market Sentiment & Credibility */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  {analysis.marketSentiment && (
-                                    <div className="text-center p-3 bg-green-900/20 rounded-lg border border-green-700">
-                                      <div className={`text-xl font-bold mb-1 ${
-                                        analysis.marketSentiment === 'BULLISH' ? 'text-green-400' : 
-                                        analysis.marketSentiment === 'BEARISH' ? 'text-red-400' : 'text-yellow-400'
-                                      }`}>
-                                        {analysis.marketSentiment}
-                                      </div>
-                                      <div className="text-xs text-gray-400">Market Sentiment</div>
-                                    </div>
-                                  )}
-                                  {analysis.sourceCredibility && (
-                                    <div className="text-center p-3 bg-purple-900/20 rounded-lg border border-purple-700">
-                                      <div className="text-xl font-bold text-purple-400 mb-1">
-                                        {analysis.sourceCredibility}
-                                      </div>
-                                      <div className="text-xs text-gray-400">Source Credibility</div>
-                                    </div>
-                                  )}
-                                </div>
-
                                 {/* Key Insights from Bullet Points */}
                                 {analysis.bulletPoints && analysis.bulletPoints.length > 0 && (
                                   <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700">
