@@ -588,14 +588,6 @@ export default function Dashboard() {
                 <TabsContent value="summaries" className="space-y-4 mt-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <h2 className="text-white text-lg font-bold">My Summaries ({summaries.length})</h2>
-                    <Button 
-                      className="w-full sm:w-auto bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/30 touch-manipulation py-3"
-                      onClick={() => setLocation('/create-summary')}
-                      data-testid="button-new-summary"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create New Summary
-                    </Button>
                   </div>
 
                   <div className="space-y-4">
@@ -883,14 +875,6 @@ export default function Dashboard() {
                   <CardTitle className="text-white text-sm">Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full bg-purple-600/80 hover:bg-purple-500 text-white border-2 border-purple-400 shadow-lg transition-all duration-200 font-semibold touch-manipulation py-3"
-                    onClick={() => setLocation('/create-summary')}
-                    data-testid="button-process-content"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Process Content
-                  </Button>
                   <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
