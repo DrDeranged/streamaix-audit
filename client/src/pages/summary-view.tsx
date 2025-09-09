@@ -327,20 +327,20 @@ export default function SummaryView() {
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardContent className="p-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 bg-transparent border-0 h-auto p-0.5">
-                    <TabsTrigger value="summary" className="data-[state=active]:bg-white/10 text-xs sm:text-sm">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 bg-transparent border-0 h-auto p-1 gap-1">
+                    <TabsTrigger value="summary" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
                       Summary
                     </TabsTrigger>
-                    <TabsTrigger value="insights" className="data-[state=active]:bg-white/10 text-xs sm:text-sm">
+                    <TabsTrigger value="insights" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
                       Insights
                     </TabsTrigger>
-                    <TabsTrigger value="market" className="data-[state=active]:bg-white/10 text-xs sm:text-sm">
+                    <TabsTrigger value="market" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center col-span-2 sm:col-span-1">
                       Market Intel
                     </TabsTrigger>
-                    <TabsTrigger value="structure" className="data-[state=active]:bg-white/10 text-xs sm:text-sm">
+                    <TabsTrigger value="structure" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
                       Structure
                     </TabsTrigger>
-                    <TabsTrigger value="technical" className="data-[state=active]:bg-white/10 text-xs sm:text-sm">
+                    <TabsTrigger value="technical" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
                       Technical
                     </TabsTrigger>
                   </TabsList>
@@ -473,7 +473,7 @@ export default function SummaryView() {
                   {/* MARKET INTEL TAB */}
                   <TabsContent value="market" className="space-y-4 mt-4">
                     {/* Market Sentiment & Credibility */}
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div className="text-center p-4 bg-gradient-to-br from-green-900/20 to-emerald-900/20 rounded-xl border border-green-700">
                         <div className="text-2xl font-bold mb-1 text-green-400">
                           {summary.marketSentiment || 'BULLISH'}
@@ -627,15 +627,15 @@ export default function SummaryView() {
                               
                               {/* Live Data */}
                               {financial.liveData && (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 p-3 bg-gray-900/50 rounded-md">
-                                  <div className="text-center">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3 p-3 bg-gray-900/50 rounded-md">
+                                  <div className="text-center sm:text-left">
                                     <div className="text-lg font-bold text-cyan-400">
                                       ${financial.liveData.price?.toLocaleString() || 'N/A'}
                                     </div>
                                     <div className="text-xs text-gray-400">Price</div>
                                   </div>
-                                  <div className="text-center">
-                                    <div className={`text-sm font-semibold ${
+                                  <div className="text-center sm:text-left">
+                                    <div className={`text-lg font-bold whitespace-nowrap ${
                                       financial.liveData.percentChange24h > 0 ? 'text-green-400' : 'text-red-400'
                                     }`}>
                                       {financial.liveData.percentChange24h > 0 ? '+' : ''}{financial.liveData.percentChange24h?.toFixed(2) || 'N/A'}%
