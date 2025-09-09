@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
@@ -31,8 +33,25 @@ import {
   Globe,
   Star,
   Database,
-  Shield
+  Shield,
+  StickyNote,
+  Edit3,
+  Trash2,
+  Plus,
+  Save,
+  X
 } from 'lucide-react';
+
+interface UserNote {
+  id: string;
+  userId: string;
+  summaryId: string;
+  noteText: string;
+  noteType: 'footnote' | 'analysis' | 'insight';
+  isPrivate: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface Summary {
   id: string;
@@ -107,6 +126,11 @@ export default function SummaryView() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('summary');
   const [copySuccess, setCopySuccess] = useState('');
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [newNoteText, setNewNoteText] = useState('');
+  const [newNoteType, setNewNoteType] = useState<'footnote' | 'analysis' | 'insight'>('footnote');
+  const [isPrivate, setIsPrivate] = useState(true);
+  const [showNewNoteForm, setShowNewNoteForm] = useState(false);
 
   const summaryId = params?.id;
 
@@ -131,6 +155,73 @@ export default function SummaryView() {
     staleTime: 0, // Always fetch fresh data
     refetchOnWindowFocus: true, // Refetch when window gains focus
   }) as { data: Summary, isLoading: boolean, error: any };
+
+  // Fetch user notes for this summary
+  const { data: notesData, isLoading: notesLoading } = useQuery({
+    queryKey: ['/api/notes', { summaryId }],
+    queryFn: () => apiRequest(`/api/notes?summaryId=${summaryId}`, {
+      headers: getAuthHeaders(),
+    }),
+    enabled: !!summaryId && isAuthenticated,
+  });
+
+  const notes = notesData?.notes || [];
+
+  // Create note mutation
+  const createNoteMutation = useMutation({
+    mutationFn: (noteData: { noteText: string; noteType: string; isPrivate: boolean }) =>
+      apiRequest('/api/notes', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          ...noteData,
+          summaryId,
+        }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+      setNewNoteText('');
+      setShowNewNoteForm(false);
+      toast({ title: 'Success!', description: 'Note created successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: 'Failed to create note.', variant: 'destructive' });
+    },
+  });
+
+  // Update note mutation
+  const updateNoteMutation = useMutation({
+    mutationFn: ({ id, noteText }: { id: string; noteText: string }) =>
+      apiRequest(`/api/notes/${id}`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ noteText }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+      setEditingNoteId(null);
+      toast({ title: 'Success!', description: 'Note updated successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: 'Failed to update note.', variant: 'destructive' });
+    },
+  });
+
+  // Delete note mutation
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiRequest(`/api/notes/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+      toast({ title: 'Success!', description: 'Note deleted successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: 'Failed to delete note.', variant: 'destructive' });
+    },
+  });
 
   const handleCopy = async (content: string, type: string) => {
     try {
@@ -327,7 +418,7 @@ export default function SummaryView() {
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardContent className="p-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 bg-transparent border-0 h-auto p-1 gap-1">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-transparent border-0 h-auto p-1 gap-1">
                     <TabsTrigger value="summary" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
                       Summary
                     </TabsTrigger>
@@ -342,6 +433,10 @@ export default function SummaryView() {
                     </TabsTrigger>
                     <TabsTrigger value="technical" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center">
                       Technical
+                    </TabsTrigger>
+                    <TabsTrigger value="notes" className="data-[state=active]:bg-white/10 text-xs sm:text-sm py-2 px-3 min-h-[44px] flex items-center justify-center gap-1">
+                      <StickyNote className="w-3 h-3" />
+                      Notes
                     </TabsTrigger>
                   </TabsList>
                   
@@ -846,6 +941,199 @@ export default function SummaryView() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-3">Content permanently stored on decentralized networks for immutable access</p>
                     </div>
+                  </TabsContent>
+
+                  {/* NOTES TAB */}
+                  <TabsContent value="notes" className="space-y-4 mt-4">
+                    {!isAuthenticated ? (
+                      <div className="text-center py-8">
+                        <StickyNote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h4 className="text-lg font-semibold text-gray-400 mb-2">Sign in to add notes</h4>
+                        <p className="text-gray-500 text-sm">
+                          Personal notes allow you to save insights and thoughts about this content.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Existing Notes */}
+                        {notes.length > 0 && (
+                          <div className="space-y-3">
+                            <h5 className="font-bold text-cyan-400 flex items-center gap-2">
+                              <StickyNote className="w-4 h-4" />
+                              My Notes ({notes.length})
+                            </h5>
+                            {notes.map((note: UserNote) => (
+                              <div key={note.id} className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 rounded-xl p-4 border border-slate-600">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className={`text-xs ${
+                                      note.noteType === 'analysis' ? 'text-blue-400 border-blue-500/30' :
+                                      note.noteType === 'insight' ? 'text-purple-400 border-purple-500/30' :
+                                      'text-gray-400 border-gray-500/30'
+                                    }`}>
+                                      {note.noteType}
+                                    </Badge>
+                                    <Badge variant="outline" className={`text-xs ${
+                                      note.isPrivate ? 'text-amber-400 border-amber-500/30' : 'text-green-400 border-green-500/30'
+                                    }`}>
+                                      {note.isPrivate ? '🔒 Private' : '🌐 Public'}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-400">
+                                      {new Date(note.createdAt).toLocaleDateString()}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setEditingNoteId(note.id)}
+                                      className="text-gray-400 hover:text-blue-400 p-1"
+                                    >
+                                      <Edit3 className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => deleteNoteMutation.mutate(note.id)}
+                                      className="text-gray-400 hover:text-red-400 p-1"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                
+                                {editingNoteId === note.id ? (
+                                  <div className="space-y-3">
+                                    <Textarea
+                                      defaultValue={note.noteText}
+                                      placeholder="Edit your note..."
+                                      className="bg-gray-900/50 border-gray-600 text-white resize-none"
+                                      rows={4}
+                                      id={`edit-note-${note.id}`}
+                                    />
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => {
+                                          const textarea = document.getElementById(`edit-note-${note.id}`) as HTMLTextAreaElement;
+                                          updateNoteMutation.mutate({ id: note.id, noteText: textarea.value });
+                                        }}
+                                        disabled={updateNoteMutation.isPending}
+                                        className="bg-green-600 hover:bg-green-700"
+                                      >
+                                        <Save className="h-3 w-3 mr-1" />
+                                        Save
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setEditingNoteId(null)}
+                                        className="border-gray-600"
+                                      >
+                                        <X className="h-3 w-3 mr-1" />
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                    {note.noteText}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Add New Note Section */}
+                        <div className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 rounded-xl p-4 border border-indigo-700">
+                          {!showNewNoteForm ? (
+                            <Button
+                              onClick={() => setShowNewNoteForm(true)}
+                              className="w-full bg-indigo-600 hover:bg-indigo-700"
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Note
+                            </Button>
+                          ) : (
+                            <div className="space-y-4">
+                              <h5 className="font-bold text-indigo-300 flex items-center gap-2">
+                                <Plus className="w-4 h-4" />
+                                Add New Note
+                              </h5>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <Select value={newNoteType} onValueChange={(value: 'footnote' | 'analysis' | 'insight') => setNewNoteType(value)}>
+                                  <SelectTrigger className="bg-gray-900/50 border-gray-600">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="footnote">📝 Footnote</SelectItem>
+                                    <SelectItem value="analysis">🔍 Analysis</SelectItem>
+                                    <SelectItem value="insight">💡 Insight</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                
+                                <Select value={isPrivate ? 'private' : 'public'} onValueChange={(value) => setIsPrivate(value === 'private')}>
+                                  <SelectTrigger className="bg-gray-900/50 border-gray-600">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="private">🔒 Private</SelectItem>
+                                    <SelectItem value="public">🌐 Public</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <Textarea
+                                value={newNoteText}
+                                onChange={(e) => setNewNoteText(e.target.value)}
+                                placeholder="Write your note here..."
+                                className="bg-gray-900/50 border-gray-600 text-white resize-none"
+                                rows={4}
+                              />
+                              
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={() => createNoteMutation.mutate({
+                                    noteText: newNoteText,
+                                    noteType: newNoteType,
+                                    isPrivate,
+                                  })}
+                                  disabled={!newNoteText.trim() || createNoteMutation.isPending}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Save className="h-4 w-4 mr-2" />
+                                  {createNoteMutation.isPending ? 'Saving...' : 'Save Note'}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setShowNewNoteForm(false);
+                                    setNewNoteText('');
+                                  }}
+                                  className="border-gray-600"
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Empty State */}
+                        {notes.length === 0 && !showNewNoteForm && (
+                          <div className="text-center py-8">
+                            <StickyNote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h4 className="text-lg font-semibold text-gray-400 mb-2">No notes yet</h4>
+                            <p className="text-gray-500 text-sm mb-4">
+                              Add personal notes to remember key insights and thoughts about this content.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </TabsContent>
                 </Tabs>
               </CardContent>
