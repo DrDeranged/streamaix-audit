@@ -160,27 +160,37 @@ export class StreamProcessor {
           ipfsHash,
           arweaveId,
           processingStatus: 'completed',
-          // Add all the rich content intelligence fields
-          ...(aiResult.trends && { trends: aiResult.trends }),
-          ...(aiResult.narratives && { narratives: aiResult.narratives }),
-          ...(aiResult.executiveSummary && { executiveSummary: aiResult.executiveSummary }),
-          ...(aiResult.bulletPoints && { bulletPoints: aiResult.bulletPoints }),
-          ...(aiResult.timeline && { timeline: aiResult.timeline }),
-          ...(aiResult.keyQuotes && { keyQuotes: aiResult.keyQuotes }),
-          ...(aiResult.actionItems && { actionItems: aiResult.actionItems }),
-          ...(aiResult.entities && { entities: aiResult.entities }),
-          ...(aiResult.themes && { themes: aiResult.themes }),
-          ...(aiResult.marketSentiment && { marketSentiment: aiResult.marketSentiment }),
-          ...(aiResult.expertCredibility && { expertCredibility: aiResult.expertCredibility }),
-          ...(aiResult.conflictingViews && { conflictingViews: aiResult.conflictingViews }),
-          ...(aiResult.sourceCredibility && { sourceCredibility: aiResult.sourceCredibility }),
-          ...(aiResult.confidenceLevel && { confidenceLevel: aiResult.confidenceLevel }),
-          ...(aiResult.marketOutlook && { marketOutlook: aiResult.marketOutlook }),
-          ...(aiResult.blogPost && { blogPost: aiResult.blogPost }),
-          ...(aiResult.tldrSummary && { tldrSummary: aiResult.tldrSummary })
         });
         
         console.log('Summary updated successfully with completion status');
+        
+        // Now add the rich analysis fields that exist in aiResult
+        const enrichmentUpdate: any = {};
+        
+        if ((aiResult as any).trends) enrichmentUpdate.trends = (aiResult as any).trends;
+        if ((aiResult as any).narratives) enrichmentUpdate.narratives = (aiResult as any).narratives;
+        if ((aiResult as any).executiveSummary) enrichmentUpdate.executiveSummary = (aiResult as any).executiveSummary;
+        if ((aiResult as any).bulletPoints) enrichmentUpdate.bulletPoints = (aiResult as any).bulletPoints;
+        if ((aiResult as any).timeline) enrichmentUpdate.timeline = (aiResult as any).timeline;
+        if ((aiResult as any).keyQuotes) enrichmentUpdate.keyQuotes = (aiResult as any).keyQuotes;
+        if ((aiResult as any).actionItems) enrichmentUpdate.actionItems = (aiResult as any).actionItems;
+        if ((aiResult as any).entities) enrichmentUpdate.entities = (aiResult as any).entities;
+        if ((aiResult as any).themes) enrichmentUpdate.themes = (aiResult as any).themes;
+        if ((aiResult as any).marketSentiment) enrichmentUpdate.marketSentiment = (aiResult as any).marketSentiment;
+        if ((aiResult as any).expertCredibility) enrichmentUpdate.expertCredibility = (aiResult as any).expertCredibility;
+        if ((aiResult as any).conflictingViews) enrichmentUpdate.conflictingViews = (aiResult as any).conflictingViews;
+        if ((aiResult as any).sourceCredibility) enrichmentUpdate.sourceCredibility = (aiResult as any).sourceCredibility;
+        if ((aiResult as any).confidenceLevel) enrichmentUpdate.confidenceLevel = (aiResult as any).confidenceLevel;
+        if ((aiResult as any).marketOutlook) enrichmentUpdate.marketOutlook = (aiResult as any).marketOutlook;
+        if ((aiResult as any).blogPost) enrichmentUpdate.blogPost = (aiResult as any).blogPost;
+        if ((aiResult as any).tldrSummary) enrichmentUpdate.tldrSummary = (aiResult as any).tldrSummary;
+        if ((aiResult as any).marketAnalysis) enrichmentUpdate.marketAnalysis = (aiResult as any).marketAnalysis;
+        
+        // Update with enrichment data if any exists
+        if (Object.keys(enrichmentUpdate).length > 0) {
+          await storage.updateSummary(job.summaryId, enrichmentUpdate);
+          console.log(`Added ${Object.keys(enrichmentUpdate).length} enrichment fields to summary`);
+        }
       } catch (updateError) {
         console.error('Failed to update summary:', updateError);
         // Fallback: at least update the status
