@@ -515,7 +515,7 @@ export function RealAIProcessor() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
-                      className="p-6"
+                      className="p-4 md:p-6"
                     >
                       <Tabs defaultValue="summary" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 mb-6 p-1 h-auto min-h-[60px] sm:min-h-[40px]">
@@ -574,7 +574,7 @@ export function RealAIProcessor() {
                           </div>
 
                           {/* Main AI Summary */}
-                          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-6 border border-indigo-200 dark:border-indigo-700">
+                          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-4 md:p-6 border border-indigo-200 dark:border-indigo-700">
                             <h4 className="font-bold text-indigo-700 dark:text-indigo-300 mb-4 flex items-center gap-2">
                               <Brain className="w-5 h-5" />
                               AI-Generated Summary
@@ -582,27 +582,35 @@ export function RealAIProcessor() {
                             
                             {/* Content Title */}
                             <div className="mb-4">
-                              <h3 className="text-xl font-bold text-foreground mb-2">
+                              <h3 className="text-lg md:text-xl font-bold text-foreground mb-2 leading-tight">
                                 {result.title || "The AI Content Creation Revolution: Efficiency Meets Ethics"}
                               </h3>
                             </div>
 
                             {/* Executive Summary */}
                             <div className="mb-6">
-                              <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">Executive Summary</h5>
-                              <p className="text-foreground leading-relaxed">
-                                {result.summary || result.content || "Artificial intelligence is fundamentally reshaping how we create, consume, and interact with digital content. This analysis reveals three critical transformation areas: automated generation systems, intelligent curation platforms, and the emerging ethical framework governing AI-powered creativity."}
-                              </p>
+                              <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-4">Executive Summary</h5>
+                              <div className="text-foreground leading-relaxed space-y-3 text-sm md:text-base">
+                                {(result.summary || result.content || "Artificial intelligence is fundamentally reshaping how we create, consume, and interact with digital content. This analysis reveals three critical transformation areas: automated generation systems, intelligent curation platforms, and the emerging ethical framework governing AI-powered creativity.")
+                                  .split('. ')
+                                  .filter(sentence => sentence.trim().length > 0)
+                                  .map((sentence, idx, array) => (
+                                    <p key={idx} className="text-gray-700 dark:text-gray-300">
+                                      {sentence.trim() + (idx < array.length - 1 && !sentence.trim().endsWith('.') ? '.' : '')}
+                                    </p>
+                                  ))
+                                }
+                              </div>
                             </div>
 
                             {/* Key Performance Metrics */}
                             <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 mb-4">
                               <h5 className="font-semibold mb-3 text-indigo-600 dark:text-indigo-400">Key Performance Metrics</h5>
-                              <div className="grid md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                                     <span className="text-sm text-muted-foreground">Production Efficiency:</span>
-                                    <span className="font-semibold text-green-600 dark:text-green-400">80% reduction in creation time</span>
+                                    <span className="font-semibold text-green-600 dark:text-green-400 text-sm">80% reduction in creation time</span>
                                   </div>
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm text-muted-foreground">Quality Consistency:</span>
