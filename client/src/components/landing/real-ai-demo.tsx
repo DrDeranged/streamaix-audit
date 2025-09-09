@@ -518,26 +518,26 @@ export function RealAIProcessor() {
                       className="p-6"
                     >
                       <Tabs defaultValue="summary" className="w-full">
-                        <TabsList className="grid w-full grid-cols-5 mb-6">
-                          <TabsTrigger value="summary" className="flex items-center gap-1 text-xs">
-                            <Brain className="w-3 h-3" />
-                            Summary
+                        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 mb-6 p-1 h-auto min-h-[60px] sm:min-h-[40px]">
+                          <TabsTrigger value="summary" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm py-3 px-2 sm:px-3 min-h-[50px] sm:min-h-[36px]">
+                            <Brain className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                            <span className="font-medium">Summary</span>
                           </TabsTrigger>
-                          <TabsTrigger value="insights" className="flex items-center gap-1 text-xs">
-                            <TrendingUp className="w-3 h-3" />
-                            Insights
+                          <TabsTrigger value="insights" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm py-3 px-2 sm:px-3 min-h-[50px] sm:min-h-[36px]">
+                            <TrendingUp className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                            <span className="font-medium">Insights</span>
                           </TabsTrigger>
-                          <TabsTrigger value="market" className="flex items-center gap-1 text-xs">
-                            <BarChart3 className="w-3 h-3" />
-                            Market Intel
+                          <TabsTrigger value="market" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm py-3 px-2 sm:px-3 min-h-[50px] sm:min-h-[36px] col-span-2 sm:col-span-1">
+                            <BarChart3 className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                            <span className="font-medium">Market Intel</span>
                           </TabsTrigger>
-                          <TabsTrigger value="structure" className="flex items-center gap-1 text-xs">
-                            <MessageSquare className="w-3 h-3" />
-                            Structure
+                          <TabsTrigger value="structure" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm py-3 px-2 sm:px-3 min-h-[50px] sm:min-h-[36px]">
+                            <MessageSquare className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                            <span className="font-medium">Structure</span>
                           </TabsTrigger>
-                          <TabsTrigger value="technical" className="flex items-center gap-1 text-xs">
-                            <Shield className="w-3 h-3" />
-                            Technical
+                          <TabsTrigger value="technical" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm py-3 px-2 sm:px-3 min-h-[50px] sm:min-h-[36px]">
+                            <Shield className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                            <span className="font-medium">Technical</span>
                           </TabsTrigger>
                         </TabsList>
 
