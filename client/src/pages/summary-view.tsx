@@ -640,7 +640,7 @@ export default function SummaryView() {
                             try {
                               if (Array.isArray(summary.keyInsights)) return summary.keyInsights.length;
                               if (Array.isArray(summary.bulletPoints)) return summary.bulletPoints.length;
-                              return summary.keyInsights?.length || summary.bulletPoints?.length || 8;
+                              return 8;
                             } catch (e) { return 8; }
                           })()}
                         </div>
