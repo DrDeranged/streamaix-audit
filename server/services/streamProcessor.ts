@@ -159,7 +159,25 @@ export class StreamProcessor {
           accuracy: aiResult.accuracy || 98,
           ipfsHash,
           arweaveId,
-          processingStatus: 'completed'
+          processingStatus: 'completed',
+          // Add all the rich content intelligence fields
+          ...(aiResult.trends && { trends: aiResult.trends }),
+          ...(aiResult.narratives && { narratives: aiResult.narratives }),
+          ...(aiResult.executiveSummary && { executiveSummary: aiResult.executiveSummary }),
+          ...(aiResult.bulletPoints && { bulletPoints: aiResult.bulletPoints }),
+          ...(aiResult.timeline && { timeline: aiResult.timeline }),
+          ...(aiResult.keyQuotes && { keyQuotes: aiResult.keyQuotes }),
+          ...(aiResult.actionItems && { actionItems: aiResult.actionItems }),
+          ...(aiResult.entities && { entities: aiResult.entities }),
+          ...(aiResult.themes && { themes: aiResult.themes }),
+          ...(aiResult.marketSentiment && { marketSentiment: aiResult.marketSentiment }),
+          ...(aiResult.expertCredibility && { expertCredibility: aiResult.expertCredibility }),
+          ...(aiResult.conflictingViews && { conflictingViews: aiResult.conflictingViews }),
+          ...(aiResult.sourceCredibility && { sourceCredibility: aiResult.sourceCredibility }),
+          ...(aiResult.confidenceLevel && { confidenceLevel: aiResult.confidenceLevel }),
+          ...(aiResult.marketOutlook && { marketOutlook: aiResult.marketOutlook }),
+          ...(aiResult.blogPost && { blogPost: aiResult.blogPost }),
+          ...(aiResult.tldrSummary && { tldrSummary: aiResult.tldrSummary })
         });
         
         console.log('Summary updated successfully with completion status');
