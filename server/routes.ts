@@ -797,11 +797,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: validation.error });
     }
 
-    // Verify the summary exists
+    // Verify the summary exists (skip for journal entries)
     const validatedData = validation.data as any;
-    const summary = await storage.getSummary(validatedData.summaryId);
-    if (!summary) {
-      return res.status(404).json({ error: 'Summary not found' });
+    const isJournalEntry = validatedData.summaryId.startsWith('journal-');
+    
+    if (!isJournalEntry) {
+      const summary = await storage.getSummary(validatedData.summaryId);
+      if (!summary) {
+        return res.status(404).json({ error: 'Summary not found' });
+      }
     }
 
     const note = await storage.createUserNote(validation.data as any);
