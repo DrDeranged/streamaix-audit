@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -51,7 +52,8 @@ import {
   TrendingDown,
   ChevronLeft,
   ChevronRight,
-  Copy
+  Copy,
+  Trash2
 } from 'lucide-react';
 
 interface Summary {
@@ -219,7 +221,35 @@ export default function Dashboard() {
     }
   });
 
+  // Delete summary mutation
+  const deleteSummaryMutation = useMutation({
+    mutationFn: async (summaryId: string) => {
+      return apiRequest(`/api/summaries/${summaryId}`, {
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Summary deleted successfully!" });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/summaries`] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to delete summary", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
+  });
+
   const summaries = (summariesData as any)?.summaries || [];
+  
+  // Sort summaries by creation date (most recent first) and limit to 5
+  const recentSummaries = useMemo(() => 
+    [...summaries]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5), 
+    [summaries]
+  );
   const bounties = (bountiesData as any)?.bounties || [];
   const stats: UserStats = (statsData as any) || {
     totalSummaries: 0,
@@ -564,7 +594,7 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {summaries.slice(0, 5).map((summary: Summary, index: number) => (
+                        {recentSummaries.map((summary: Summary, index: number) => (
                           <div key={summary.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
@@ -587,7 +617,7 @@ export default function Dashboard() {
 
                 <TabsContent value="summaries" className="space-y-4 mt-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <h2 className="text-white text-lg font-bold">My Summaries ({summaries.length})</h2>
+                    <h2 className="text-white text-lg font-bold">Recent Summaries ({recentSummaries.length})</h2>
                   </div>
 
                   <div className="space-y-4">
@@ -595,11 +625,11 @@ export default function Dashboard() {
                       <div className="text-center py-8">
                         <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
                       </div>
-                    ) : summaries.length > 0 ? (
+                    ) : recentSummaries.length > 0 ? (
                       <>
-                        {/* Mobile View: Show only 3 most recent summaries */}
+                        {/* Mobile View: Show only 5 most recent summaries */}
                         <div className="lg:hidden space-y-4">
-                          {summaries.slice(0, 3).map((summary: Summary) => (
+                          {recentSummaries.map((summary: Summary) => (
                             <motion.div
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
@@ -626,24 +656,58 @@ export default function Dashboard() {
                                     {summary.processingStatus}
                                   </Badge>
                                 </div>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="w-full text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
-                                  data-testid="button-view-full"
-                                  onClick={() => setLocation(`/summary/${summary.id}`)}
-                                >
-                                  View Full Summary
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="flex-1 text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
+                                    data-testid="button-view-full"
+                                    onClick={() => setLocation(`/summary/${summary.id}`)}
+                                  >
+                                    View Full Summary
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        disabled={deleteSummaryMutation.isPending}
+                                        className="text-red-400 bg-red-500/10 border-red-400/30 hover:bg-red-500/20 backdrop-blur-md transition-all duration-200 touch-manipulation py-2.5 px-3 disabled:opacity-50"
+                                        data-testid={`button-delete-summary-${summary.id}`}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-gray-900/95 border-gray-700/50 backdrop-blur-md">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-white">Delete Summary</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-gray-300">
+                                          Are you sure you want to delete "{summary.title}"? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600">
+                                          Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={() => deleteSummaryMutation.mutate(summary.id)}
+                                          className="bg-red-600 hover:bg-red-700 text-white"
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
                               </div>
                             </motion.div>
                           ))}
                           
-                          {/* Show "View All" button if there are more than 3 summaries */}
-                          {summaries.length > 3 && (
+                          {/* Show "View All" button if there are more than 5 summaries */}
+                          {summaries.length > 5 && (
                             <div className="text-center pt-2">
                               <p className="text-gray-400 text-xs mb-3">
-                                Showing 3 of {summaries.length} summaries
+                                Showing 5 of {summaries.length} summaries
                               </p>
                               <Button 
                                 variant="outline"
@@ -664,9 +728,9 @@ export default function Dashboard() {
                           )}
                         </div>
 
-                        {/* Desktop View: Show all summaries */}
+                        {/* Desktop View: Show recent 5 summaries */}
                         <div className="hidden lg:block space-y-4">
-                          {summaries.map((summary: Summary) => (
+                          {recentSummaries.map((summary: Summary) => (
                             <motion.div
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
@@ -729,6 +793,36 @@ export default function Dashboard() {
                                   <button className="hover:text-white transition-colors">
                                     <Share className="h-4 w-4" />
                                   </button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <button 
+                                        disabled={deleteSummaryMutation.isPending}
+                                        className="hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        data-testid={`button-delete-summary-desktop-${summary.id}`}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-gray-900/95 border-gray-700/50 backdrop-blur-md">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-white">Delete Summary</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-gray-300">
+                                          Are you sure you want to delete "{summary.title}"? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600">
+                                          Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={() => deleteSummaryMutation.mutate(summary.id)}
+                                          className="bg-red-600 hover:bg-red-700 text-white"
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                 </div>
                               </div>
                             </motion.div>
