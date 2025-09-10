@@ -111,7 +111,15 @@ export const updateKnowledgeStackSchema = z.object({
 // User notes schemas
 export const createUserNoteSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
-  summaryId: z.string().uuid('Invalid summary ID'),
+  summaryId: z.string().refine(
+    (val) => {
+      // Allow UUID format or journal-YYYY-MM-DD format
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+      const isJournal = /^journal-\d{4}-\d{2}-\d{2}$/.test(val);
+      return isUuid || isJournal;
+    },
+    'Invalid summary ID'
+  ),
   noteText: z.string().min(1).max(5000, 'Note text must be between 1 and 5000 characters'),
   noteType: z.enum(['footnote', 'analysis', 'insight']).default('footnote'),
   isPrivate: z.boolean().default(true),
