@@ -717,7 +717,7 @@ export default function InvestmentJournal() {
                       <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
                         {/* Mobile: Clamped with show more/less */}
                         <div className="block md:hidden">
-                          <div className={expandedEntries.has(entry.id) ? '' : 'line-clamp-6'} style={{
+                          <div style={{
                             display: expandedEntries.has(entry.id) ? 'block' : '-webkit-box',
                             WebkitLineClamp: expandedEntries.has(entry.id) ? 'unset' : '6',
                             WebkitBoxOrient: 'vertical' as const,
