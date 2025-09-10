@@ -108,7 +108,7 @@ export const knowledgeStacks = pgTable("knowledge_stacks", {
 export const userNotes = pgTable("user_notes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  summaryId: varchar("summary_id").references(() => summaries.id).notNull(),
+  summaryId: varchar("summary_id").notNull(), // Removed FK constraint to allow journal entries
   noteText: text("note_text").notNull(),
   noteType: text("note_type").notNull().default("footnote"), // footnote, analysis, insight
   isPrivate: boolean("is_private").default(true),
@@ -176,10 +176,7 @@ export const userNotesRelations = relations(userNotes, ({ one }) => ({
     fields: [userNotes.userId],
     references: [users.id],
   }),
-  summary: one(summaries, {
-    fields: [userNotes.summaryId],
-    references: [summaries.id],
-  }),
+  // Removed summary relation since summaryId can now be journal entries
 }));
 
 // Insert schemas
