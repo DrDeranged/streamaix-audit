@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
-import UserNotesList from '@/components/UserNotesList';
+import InvestmentJournal from '@/components/InvestmentJournal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -747,17 +747,7 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="notes" className="space-y-6 mt-6">
-                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <BookmarkPlus className="h-5 w-5" />
-                        My Personal Notes
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <UserNotesList title="" />
-                    </CardContent>
-                  </Card>
+                  <InvestmentJournal />
                 </TabsContent>
 
                 <TabsContent value="bounties" className="space-y-6 mt-6">
