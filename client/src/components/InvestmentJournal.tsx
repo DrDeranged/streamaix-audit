@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerFooter } from '@/components/ui/drawer';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { getAuthHeaders } from '@/lib/auth';
@@ -31,7 +32,8 @@ import {
   Activity,
   Star,
   Brain,
-  Zap
+  Zap,
+  Trash2
 } from 'lucide-react';
 import { format, startOfDay, subDays, addDays, isToday, parseISO } from 'date-fns';
 
@@ -193,6 +195,7 @@ export default function InvestmentJournal() {
   const [selectedMood, setSelectedMood] = useState<'bullish' | 'bearish' | 'neutral'>('neutral');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Format date for API queries
   const dateString = format(selectedDate, 'yyyy-MM-dd');
@@ -246,6 +249,23 @@ export default function InvestmentJournal() {
     },
   });
 
+  // Delete journal entry mutation
+  const deleteEntryMutation = useMutation({
+    mutationFn: (entryId: string) =>
+      apiRequest(`/api/notes/${entryId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+      setDeleteConfirmId(null);
+      toast({ title: 'Success!', description: 'Journal entry deleted successfully.' });
+    },
+    onError: () => {
+      toast({ title: 'Error', description: 'Failed to delete journal entry.', variant: 'destructive' });
+    },
+  });
+
   // Initialize template when selected (both desktop form and mobile drawer)
   useEffect(() => {
     if ((showNewEntry || isDrawerOpen) && selectedTemplate) {
@@ -281,6 +301,10 @@ export default function InvestmentJournal() {
       }
       return newSet;
     });
+  };
+
+  const handleDeleteEntry = (entryId: string) => {
+    deleteEntryMutation.mutate(entryId);
   };
 
   if (!isAuthenticated) {
@@ -705,9 +729,20 @@ export default function InvestmentJournal() {
                             </Badge>
                           )}
                         </div>
-                        <div className="text-xs text-gray-400 flex items-center gap-1 shrink-0">
-                          <Clock className="w-3 h-3" />
-                          {format(parseISO(entry.createdAt), 'HH:mm')}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-xs text-gray-400 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {format(parseISO(entry.createdAt), 'HH:mm')}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteConfirmId(entry.id)}
+                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            data-testid={`button-delete-${entry.id}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                       </div>
                       
@@ -773,6 +808,33 @@ export default function InvestmentJournal() {
           </Card>
         )}
       </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+        <AlertDialogContent className="bg-slate-800 border-slate-600">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete Journal Entry</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Are you sure you want to delete this journal entry? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
+              onClick={() => setDeleteConfirmId(null)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => deleteConfirmId && handleDeleteEntry(deleteConfirmId)}
+              disabled={deleteEntryMutation.isPending}
+            >
+              {deleteEntryMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
