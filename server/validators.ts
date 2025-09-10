@@ -121,13 +121,13 @@ export const createUserNoteSchema = z.object({
     'Invalid summary ID'
   ),
   noteText: z.string().min(1).max(5000, 'Note text must be between 1 and 5000 characters'),
-  noteType: z.enum(['footnote', 'analysis', 'insight']).default('footnote'),
+  noteType: z.enum(['footnote', 'analysis', 'insight', 'trade-analysis', 'market-thoughts', 'goals', 'lessons', 'research', 'general']).default('footnote'),
   isPrivate: z.boolean().default(true),
 });
 
 export const updateUserNoteSchema = z.object({
   noteText: z.string().min(1).max(5000, 'Note text must be between 1 and 5000 characters').optional(),
-  noteType: z.enum(['footnote', 'analysis', 'insight']).optional(),
+  noteType: z.enum(['footnote', 'analysis', 'insight', 'trade-analysis', 'market-thoughts', 'goals', 'lessons', 'research', 'general']).optional(),
   isPrivate: z.boolean().optional(),
 });
 
