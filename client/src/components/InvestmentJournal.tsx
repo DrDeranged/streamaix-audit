@@ -196,7 +196,7 @@ export default function InvestmentJournal() {
   // Fetch journal entries for selected date
   const { data: entriesData, isLoading } = useQuery({
     queryKey: ['/api/notes', { date: dateString }],
-    queryFn: () => apiRequest(`/api/notes?date=${dateString}`, {
+    queryFn: () => apiRequest(`/api/notes?summaryId=journal-${dateString}`, {
       headers: getAuthHeaders(),
     }),
     enabled: !!user && isAuthenticated,
@@ -388,17 +388,17 @@ export default function InvestmentJournal() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border-indigo-700">
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-indigo-300 flex items-center gap-2">
+                <CardTitle className="text-cyan-300 flex items-center gap-2">
                   <Plus className="w-5 h-5" />
-                  New Journal Entry - {journalTemplates[selectedTemplate].label}
+                  📝 New Journal Entry - {journalTemplates[selectedTemplate].label}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Select value={selectedTemplate} onValueChange={(value: keyof typeof journalTemplates) => setSelectedTemplate(value)}>
-                    <SelectTrigger className="bg-gray-900/50 border-gray-600">
+                    <SelectTrigger className="bg-white/5 border-white/20 backdrop-blur-sm text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -414,7 +414,7 @@ export default function InvestmentJournal() {
                   </Select>
                   
                   <Select value={selectedMood} onValueChange={(value: 'bullish' | 'bearish' | 'neutral') => setSelectedMood(value)}>
-                    <SelectTrigger className="bg-gray-900/50 border-gray-600">
+                    <SelectTrigger className="bg-white/5 border-white/20 backdrop-blur-sm text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -429,7 +429,7 @@ export default function InvestmentJournal() {
                   value={newEntryText}
                   onChange={(e) => setNewEntryText(e.target.value)}
                   placeholder="Write your thoughts..."
-                  className="bg-gray-900/50 border-gray-600 text-white resize-none min-h-[200px]"
+                  className="bg-white/5 border-white/20 backdrop-blur-sm text-white resize-none min-h-[200px] placeholder:text-gray-400"
                   rows={8}
                 />
                 
@@ -448,7 +448,7 @@ export default function InvestmentJournal() {
                       setShowNewEntry(false);
                       setNewEntryText('');
                     }}
-                    className="border-gray-600"
+                    className="border-white/20 backdrop-blur-sm bg-white/5 text-white hover:bg-white/10"
                   >
                     Cancel
                   </Button>
