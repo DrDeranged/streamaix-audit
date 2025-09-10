@@ -249,9 +249,12 @@ export default function InvestmentJournal() {
   // Initialize template when selected (both desktop form and mobile drawer)
   useEffect(() => {
     if ((showNewEntry || isDrawerOpen) && selectedTemplate) {
-      setNewEntryText(journalTemplates[selectedTemplate].placeholder);
+      // Only auto-seed if textarea is empty to avoid overwriting user edits
+      if (!newEntryText.trim()) {
+        setNewEntryText(journalTemplates[selectedTemplate].placeholder);
+      }
     }
-  }, [showNewEntry, isDrawerOpen, selectedTemplate]);
+  }, [showNewEntry, isDrawerOpen, selectedTemplate, newEntryText]);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     setSelectedDate(prev => direction === 'prev' ? subDays(prev, 1) : addDays(prev, 1));
@@ -317,15 +320,27 @@ export default function InvestmentJournal() {
           </div>
           
           <div className="flex items-center justify-center gap-2">
+            {/* Mobile prev button */}
             <Button
               variant="ghost"
               size="lg"
               onClick={() => navigateDate('prev')}
-              className="text-gray-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px] md:min-h-8 md:min-w-8 md:p-1"
+              className="text-gray-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px] md:hidden"
               data-testid="button-prev-date"
               aria-label="Previous day"
             >
-              <ChevronLeft className="w-5 h-5 md:w-4 md:h-4" />
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            {/* Desktop prev button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateDate('prev')}
+              className="text-gray-300 hover:text-white hover:bg-white/10 hidden md:inline-flex"
+              data-testid="button-prev-date-desktop"
+              aria-label="Previous day"
+            >
+              <ChevronLeft className="w-4 h-4" />
             </Button>
             
             <div className="px-3 py-2 md:px-4 bg-white/10 rounded-lg min-w-auto md:min-w-[200px] text-center">
@@ -337,27 +352,52 @@ export default function InvestmentJournal() {
               </div>
             </div>
             
+            {/* Mobile next button */}
             <Button
               variant="ghost"
               size="lg"
               onClick={() => navigateDate('next')}
-              className="text-gray-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px] md:min-h-8 md:min-w-8 md:p-1"
+              className="text-gray-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px] md:hidden"
               data-testid="button-next-date"
               aria-label="Next day"
             >
-              <ChevronRight className="w-5 h-5 md:w-4 md:h-4" />
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+            {/* Desktop next button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateDate('next')}
+              className="text-gray-300 hover:text-white hover:bg-white/10 hidden md:inline-flex"
+              data-testid="button-next-date-desktop"
+              aria-label="Next day"
+            >
+              <ChevronRight className="w-4 h-4" />
             </Button>
             
             {!isToday(selectedDate) && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={goToToday}
-                className="ml-2 text-gray-300 hover:text-white bg-white/5 border-white/20 hover:bg-white/10 min-h-[44px] md:min-h-auto"
-                data-testid="button-today"
-              >
-                Today
-              </Button>
+              <>
+                {/* Mobile Today button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={goToToday}
+                  className="ml-2 text-gray-300 hover:text-white bg-white/5 border-white/20 hover:bg-white/10 min-h-[44px] md:hidden"
+                  data-testid="button-today"
+                >
+                  Today
+                </Button>
+                {/* Desktop Today button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToToday}
+                  className="ml-2 text-gray-300 hover:text-white bg-white/5 border-white/20 hover:bg-white/10 hidden md:inline-flex"
+                  data-testid="button-today-desktop"
+                >
+                  Today
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -675,30 +715,32 @@ export default function InvestmentJournal() {
                       </div>
                       
                       <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-                        <div className={`${
-                          expandedEntries.has(entry.id) 
-                            ? '' 
-                            : 'md:line-clamp-none'
-                        }`} style={{
-                          display: expandedEntries.has(entry.id) ? 'block' : '-webkit-box',
-                          WebkitLineClamp: expandedEntries.has(entry.id) ? 'unset' : '6',
-                          WebkitBoxOrient: 'vertical' as const,
-                          overflow: expandedEntries.has(entry.id) ? 'visible' : 'hidden'
-                        }}>
+                        {/* Mobile: Clamped with show more/less */}
+                        <div className="block md:hidden">
+                          <div className={expandedEntries.has(entry.id) ? '' : 'line-clamp-6'} style={{
+                            display: expandedEntries.has(entry.id) ? 'block' : '-webkit-box',
+                            WebkitLineClamp: expandedEntries.has(entry.id) ? 'unset' : '6',
+                            WebkitBoxOrient: 'vertical' as const,
+                            overflow: expandedEntries.has(entry.id) ? 'visible' : 'hidden'
+                          }}>
+                            {entry.noteText}
+                          </div>
+                          {entry.noteText.length > 300 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleEntryExpansion(entry.id)}
+                              className="mt-2 p-0 h-auto text-cyan-400 hover:text-cyan-300"
+                              data-testid={`button-toggle-${entry.id}`}
+                            >
+                              {expandedEntries.has(entry.id) ? 'Show less' : 'Show more'}
+                            </Button>
+                          )}
+                        </div>
+                        {/* Desktop: Full content always */}
+                        <div className="hidden md:block">
                           {entry.noteText}
                         </div>
-                        {/* Show more/less button for long content on mobile */}
-                        {entry.noteText.length > 300 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleEntryExpansion(entry.id)}
-                            className="mt-2 p-0 h-auto text-cyan-400 hover:text-cyan-300 md:hidden"
-                            data-testid={`button-toggle-${entry.id}`}
-                          >
-                            {expandedEntries.has(entry.id) ? 'Show less' : 'Show more'}
-                          </Button>
-                        )}
                       </div>
                     </CardContent>
                   </Card>
