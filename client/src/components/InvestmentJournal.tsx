@@ -249,12 +249,9 @@ export default function InvestmentJournal() {
   // Initialize template when selected (both desktop form and mobile drawer)
   useEffect(() => {
     if ((showNewEntry || isDrawerOpen) && selectedTemplate) {
-      // Only auto-seed if textarea is empty to avoid overwriting user edits
-      if (!newEntryText.trim()) {
-        setNewEntryText(journalTemplates[selectedTemplate].placeholder);
-      }
+      setNewEntryText(journalTemplates[selectedTemplate].placeholder);
     }
-  }, [showNewEntry, isDrawerOpen, selectedTemplate, newEntryText]);
+  }, [showNewEntry, isDrawerOpen, selectedTemplate]);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     setSelectedDate(prev => direction === 'prev' ? subDays(prev, 1) : addDays(prev, 1));
