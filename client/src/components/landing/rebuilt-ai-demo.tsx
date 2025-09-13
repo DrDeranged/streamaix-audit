@@ -143,6 +143,39 @@ export function AIProcessor() {
     }
   }, [result?.processingStatus]);
 
+  // Handle URL parameters for prefilled content and autostart
+  useEffect(() => {
+    const handleHashParams = () => {
+      const hash = window.location.hash;
+      if (hash.includes('ai-processor')) {
+        const params = new URLSearchParams(hash.split('?')[1] || '');
+        const urlParam = params.get('url');
+        const autostart = params.get('autostart');
+        
+        if (urlParam) {
+          setUrl(decodeURIComponent(urlParam));
+          
+          if (autostart === 'true' && !isProcessing && !summaryId) {
+            // Auto-start processing after a short delay
+            setTimeout(() => {
+              handleProcess();
+            }, 500);
+          }
+        }
+      }
+    };
+
+    // Handle initial load
+    handleHashParams();
+    
+    // Handle hash changes
+    window.addEventListener('hashchange', handleHashParams);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashParams);
+    };
+  }, [isProcessing, summaryId]);
+
   const handleProcess = async () => {
     if (!url.trim()) {
       toast({
@@ -204,7 +237,7 @@ export function AIProcessor() {
 
 
   return (
-    <section id="ai-analysis" className="py-16 bg-background">
+    <section id="ai-processor" className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
