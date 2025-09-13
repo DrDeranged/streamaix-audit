@@ -3,7 +3,7 @@ import { AICapabilitiesBanner } from "@/components/landing/ai-capabilities-banne
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
-import { PopularCryptoVideos } from "@/components/landing/popular-crypto-videos";
+import { LongFormPodcasts } from "@/components/landing/long-form-podcasts";
 
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
@@ -20,7 +20,7 @@ export default function Landing() {
       <HeroSection />
       <HowItWorks />
       <AIProcessor />
-      <PopularCryptoVideos />
+      <LongFormPodcasts />
       <WhyBlockchain />
       <KnowledgeAvatars />
       <AISuggestions />
