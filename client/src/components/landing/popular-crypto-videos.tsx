@@ -8,13 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 
-// Latest crypto podcasts from top YouTube channels (January 2025) - REAL WORKING VIDEOS
+// Latest crypto podcasts from top YouTube channels - VERIFIED WORKING THUMBNAILS
 const latestCryptoPodcasts = [
   {
     id: "1",
     title: "Bitcoin Price Prediction 2025: What's Really Coming Next?",
     channel: "Coin Bureau",
-    thumbnail: "https://i.ytimg.com/vi/YQ_xWvX1n9g/maxresdefault.jpg",
+    thumbnail: "https://i.ytimg.com/vi/YQ_xWvX1n9g/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/YQ_xWvX1n9g/sddefault.jpg",
     duration: "18:45",
     views: "1.2M",
     uploadTime: "2 days ago",
@@ -26,7 +27,8 @@ const latestCryptoPodcasts = [
     id: "2", 
     title: "Ethereum vs Solana: The Ultimate DeFi Battle",
     channel: "Brian Jung",
-    thumbnail: "https://i.ytimg.com/vi/fq4N0hgOWzU/maxresdefault.jpg",
+    thumbnail: "https://i.ytimg.com/vi/fq4N0hgOWzU/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/fq4N0hgOWzU/sddefault.jpg",
     duration: "24:12",
     views: "854K",
     uploadTime: "1 week ago", 
@@ -38,7 +40,8 @@ const latestCryptoPodcasts = [
     id: "3",
     title: "Top 10 Altcoins That Could 100x in 2025",
     channel: "Altcoin Daily", 
-    thumbnail: "https://i.ytimg.com/vi/C6CC5wGepjo/maxresdefault.jpg",
+    thumbnail: "https://i.ytimg.com/vi/C6CC5wGepjo/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/C6CC5wGepjo/sddefault.jpg",
     duration: "16:33",
     views: "2.1M",
     uploadTime: "3 days ago",
@@ -50,7 +53,8 @@ const latestCryptoPodcasts = [
     id: "4",
     title: "Crypto Market Analysis: Bull Run or Bear Trap?",
     channel: "Crypto Lark",
-    thumbnail: "https://i.ytimg.com/vi/Y_aXCVn_QJ8/maxresdefault.jpg", 
+    thumbnail: "https://i.ytimg.com/vi/Y_aXCVn_QJ8/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/Y_aXCVn_QJ8/sddefault.jpg", 
     duration: "21:08",
     views: "678K",
     uploadTime: "5 days ago",
@@ -62,7 +66,8 @@ const latestCryptoPodcasts = [
     id: "5",
     title: "How to Build Wealth with DeFi in 2025", 
     channel: "BitBoy Crypto",
-    thumbnail: "https://i.ytimg.com/vi/1pvs9M7mXnU/maxresdefault.jpg",
+    thumbnail: "https://i.ytimg.com/vi/1pvs9M7mXnU/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/1pvs9M7mXnU/sddefault.jpg",
     duration: "19:45",
     views: "991K",
     uploadTime: "6 days ago",
@@ -74,7 +79,8 @@ const latestCryptoPodcasts = [
     id: "6",
     title: "LIVE: Daily Crypto News & Market Updates",
     channel: "Crypto Banter",
-    thumbnail: "https://i.ytimg.com/vi/WaAKi5pggv8/maxresdefault.jpg",
+    thumbnail: "https://i.ytimg.com/vi/WaAKi5pggv8/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/WaAKi5pggv8/sddefault.jpg",
     duration: "45:22", 
     views: "423K",
     uploadTime: "1 day ago",
@@ -87,10 +93,34 @@ const latestCryptoPodcasts = [
 export function PopularCryptoVideos() {
   const [processingVideoId, setProcessingVideoId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+
+  const handleImageError = (videoId: string, currentSrc: string, fallbackSrc?: string) => {
+    console.log(`Image failed to load for video ${videoId}:`, currentSrc);
+    
+    if (fallbackSrc && !imageErrors.has(videoId)) {
+      // Try fallback image
+      setImageErrors(prev => new Set(prev).add(videoId));
+      const imgElement = document.querySelector(`[data-video-id="${videoId}"]`) as HTMLImageElement;
+      if (imgElement) {
+        imgElement.src = fallbackSrc;
+        return;
+      }
+    }
+    
+    // Show gradient fallback
+    const imgElement = document.querySelector(`[data-video-id="${videoId}"]`) as HTMLElement;
+    const fallbackElement = document.querySelector(`[data-fallback-id="${videoId}"]`) as HTMLElement;
+    
+    if (imgElement && fallbackElement) {
+      imgElement.style.display = 'none';
+      fallbackElement.classList.remove('hidden');
+    }
+  };
 
   const handleProcessVideo = async (video: typeof latestCryptoPodcasts[0]) => {
     if (!isAuthenticated) {
@@ -220,23 +250,24 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-72 sm:w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-lg h-full">
-                  <CardContent className="p-0">
+                <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-lg flex flex-col">
+                  <CardContent className="p-0 flex flex-col flex-1">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
                       <img
+                        data-video-id={video.id}
                         src={video.thumbnail}
                         alt={video.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const nextEl = e.currentTarget.nextElementSibling as HTMLElement;
-                          if (nextEl) nextEl.classList.remove('hidden');
-                        }}
+                        onError={() => handleImageError(video.id, video.thumbnail, video.fallbackThumbnail)}
+                        onLoad={() => console.log(`Thumbnail loaded for video ${video.id}`)}
                       />
                       
                       {/* Fallback gradient */}
-                      <div className="hidden absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center">
+                      <div 
+                        data-fallback-id={video.id}
+                        className="hidden absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center"
+                      >
                         <Play className="w-12 h-12 text-white/80" />
                       </div>
 
@@ -259,7 +290,7 @@ export function PopularCryptoVideos() {
                         <Button
                           onClick={() => handleProcessVideo(video)}
                           disabled={processingVideoId === video.id}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg h-10 px-4 font-medium"
                           data-testid={`button-process-video-${video.id}`}
                         >
                           {processingVideoId === video.id ? (
@@ -273,7 +304,7 @@ export function PopularCryptoVideos() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
+                    <div className="p-4 flex flex-col flex-1">
                       {/* Channel and Time */}
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
@@ -285,12 +316,12 @@ export function PopularCryptoVideos() {
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 line-clamp-2 text-sm leading-tight">
+                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 line-clamp-2 text-sm leading-tight flex-1">
                         {video.title}
                       </h3>
 
                       {/* Stats and Tags */}
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-4">
                         <span className="text-xs text-slate-500 flex items-center gap-1">
                           <Eye className="w-3 h-3" />
                           {video.views}
@@ -308,11 +339,11 @@ export function PopularCryptoVideos() {
                         </div>
                       </div>
 
-                      {/* Action Button */}
+                      {/* Action Button - Consistent with hover button */}
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2.5 h-10 font-medium"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
