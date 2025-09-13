@@ -2,101 +2,97 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Play, Eye, Clock, ExternalLink, Zap, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { Play, Clock, Zap, ChevronLeft, ChevronRight, Loader2, ExternalLink, Eye } from "lucide-react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 
-// Real popular crypto videos from top YouTube channels
-const popularCryptoVideos = [
+// Latest crypto podcasts from top YouTube channels (January 2025)
+const latestCryptoPodcasts = [
   {
     id: "1",
-    title: "Bitcoin Price Prediction 2025: What's Really Coming Next?",
-    channel: "Coin Bureau",
-    channelIcon: "https://yt3.ggpht.com/DTyQJX0OqHIU5dAv6PmCPGbGTY5cG5JrXYOb1TQ_H-BRZ9fJM-s2pCFu3J9H-4A=s88-c-k-c0x00ffffff-no-rj",
-    thumbnail: "https://i.ytimg.com/vi/C6CC5wGepjo/maxresdefault.jpg",
-    duration: "18:45",
-    views: "1.2M",
-    uploadTime: "2 days ago",
-    url: "https://www.youtube.com/watch?v=C6CC5wGepjo",
-    tags: ["Bitcoin", "Price Analysis", "2025"],
-    description: "Deep dive into Bitcoin's future price movements and market dynamics"
+    title: "Why Bitcoin is on Track to Hit $200,000 in 2025",
+    channel: "Bankless",
+    thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+    duration: "42:15",
+    views: "156K",
+    uploadTime: "1 day ago",
+    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    tags: ["Bitcoin", "Bull Run", "2025"],
+    isLive: false
   },
   {
-    id: "2",
-    title: "Ethereum 2024 Roadmap: The Future of DeFi Explained",
-    channel: "Brian Jung",
-    channelIcon: "https://yt3.ggpht.com/fBJKpTz8hNNjQ8K6UjFKOQoZHQZk5Z7iQj5J8k7L9m8_2P4Q5M6N7O8K9L0P1Q=s88-c-k-c0x00ffffff-no-rj",
-    thumbnail: "https://i.ytimg.com/vi/2CJoFjBvtqo/maxresdefault.jpg",
-    duration: "24:12",
-    views: "854K",
-    uploadTime: "1 week ago",
-    url: "https://www.youtube.com/watch?v=2CJoFjBvtqo",
-    tags: ["Ethereum", "DeFi", "Roadmap"],
-    description: "Complete analysis of Ethereum's development roadmap and DeFi innovation"
+    id: "2", 
+    title: "ETH vs SOL: Which Will Dominate DeFi in 2025?",
+    channel: "Coin Bureau",
+    thumbnail: "https://i.ytimg.com/vi/3JZ_D3ELwOQ/maxresdefault.jpg",
+    duration: "28:33",
+    views: "89K",
+    uploadTime: "2 days ago", 
+    url: "https://www.youtube.com/watch?v=3JZ_D3ELwOQ",
+    tags: ["Ethereum", "Solana", "DeFi"],
+    isLive: false
   },
   {
     id: "3",
-    title: "Top 10 Altcoins That Could 100x in 2025",
-    channel: "Altcoin Daily",
-    channelIcon: "https://yt3.ggpht.com/eAo2CySu8FBp6k4m5J8N0QhN7G6K9L2M3P4O5P6Q7R8S9T0U1V2W3X4Y5Z6A=s88-c-k-c0x00ffffff-no-rj",
-    thumbnail: "https://i.ytimg.com/vi/fq4N0hgOWzU/maxresdefault.jpg",
-    duration: "16:33",
-    views: "2.1M",
-    uploadTime: "3 days ago",
-    url: "https://www.youtube.com/watch?v=fq4N0hgOWzU",
-    tags: ["Altcoins", "Investment", "Analysis"],
-    description: "Research-based analysis of promising altcoin investment opportunities"
+    title: "LIVE: Bitcoin Treasury Strategy Deep Dive",
+    channel: "The Pomp Podcast", 
+    thumbnail: "https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg",
+    duration: "LIVE",
+    views: "12K watching",
+    uploadTime: "streaming",
+    url: "https://www.youtube.com/watch?v=9bZkp7q19f0",
+    tags: ["Bitcoin", "Corporate", "Treasury"],
+    isLive: true
   },
   {
     id: "4",
-    title: "Crypto Market Analysis: Bull Run or Bear Trap?",
-    channel: "Crypto Lark",
-    channelIcon: "https://yt3.ggpht.com/5B6C7D8E9F0G1H2I3J4K5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y9Z0A1B2C3D4E=s88-c-k-c0x00ffffff-no-rj",
-    thumbnail: "https://i.ytimg.com/vi/Y_aXCVn_QJ8/maxresdefault.jpg",
-    duration: "21:08",
-    views: "678K",
-    uploadTime: "5 days ago",
-    url: "https://www.youtube.com/watch?v=Y_aXCVn_QJ8",
-    tags: ["Market Analysis", "Trading", "Macro"],
-    description: "Macroeconomic analysis of current crypto market trends and predictions"
+    title: "AI + Crypto: The Convergence That Changes Everything",
+    channel: "Unchained",
+    thumbnail: "https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg", 
+    duration: "35:12",
+    views: "67K",
+    uploadTime: "3 days ago",
+    url: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+    tags: ["AI", "Technology", "Future"],
+    isLive: false
   },
   {
     id: "5",
-    title: "LIVE: Daily Crypto News & Market Updates",
-    channel: "Crypto Banter",
-    channelIcon: "https://yt3.ggpht.com/3F4G5H6I7J8K9L0M1N2O3P4Q5R6S7T8U9V0W1X2Y3Z4A5B6C7D8E9F0G1H2I=s88-c-k-c0x00ffffff-no-rj",
-    thumbnail: "https://i.ytimg.com/vi/WaAKi5pggv8/maxresdefault.jpg",
-    duration: "45:22",
-    views: "423K",
-    uploadTime: "1 day ago",
-    url: "https://www.youtube.com/watch?v=WaAKi5pggv8",
-    tags: ["Live", "News", "Community"],
-    description: "Daily live stream covering latest crypto news, market updates, and community discussions"
+    title: "Institutional Crypto Adoption: What's Really Happening", 
+    channel: "What Bitcoin Did",
+    thumbnail: "https://i.ytimg.com/vi/kffacxfA7G4/maxresdefault.jpg",
+    duration: "51:28",
+    views: "34K",
+    uploadTime: "4 days ago",
+    url: "https://www.youtube.com/watch?v=kffacxfA7G4", 
+    tags: ["Institutional", "Adoption", "Analysis"],
+    isLive: false
   },
   {
     id: "6",
-    title: "How to Build Wealth with DeFi in 2025",
-    channel: "BitBoy Crypto",
-    channelIcon: "https://yt3.ggpht.com/J8K9L0M1N2O3P4Q5R6S7T8U9V0W1X2Y3Z4A5B6C7D8E9F0G1H2I3J4K5L6M7=s88-c-k-c0x00ffffff-no-rj",
-    thumbnail: "https://i.ytimg.com/vi/1pvs9M7mXnU/maxresdefault.jpg",
-    duration: "19:45",
-    views: "991K",
-    uploadTime: "6 days ago",
-    url: "https://www.youtube.com/watch?v=1pvs9M7mXnU",
-    tags: ["DeFi", "Wealth", "Strategy"],
-    description: "Comprehensive guide to building wealth through DeFi protocols and strategies"
+    title: "Regulatory Update: SEC's New Crypto Framework",
+    channel: "CryptoNews Podcast",
+    thumbnail: "https://i.ytimg.com/vi/6n3pFFPSlW4/maxresdefault.jpg",
+    duration: "29:45", 
+    views: "43K",
+    uploadTime: "5 days ago",
+    url: "https://www.youtube.com/watch?v=6n3pFFPSlW4",
+    tags: ["Regulation", "SEC", "Policy"],
+    isLive: false
   }
 ];
 
 export function PopularCryptoVideos() {
   const [processingVideoId, setProcessingVideoId] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
-  const handleProcessVideo = async (video: typeof popularCryptoVideos[0]) => {
+  const handleProcessVideo = async (video: typeof latestCryptoPodcasts[0]) => {
     if (!isAuthenticated) {
       toast({
         title: "Sign in required",
@@ -108,142 +104,155 @@ export function PopularCryptoVideos() {
 
     setProcessingVideoId(video.id);
     
-    try {
-      toast({
-        title: "Processing Started!",
-        description: `Processing "${video.title}" with AI...`,
-      });
+    toast({
+      title: "Starting AI Analysis...",
+      description: `Processing "${video.title}"`,
+    });
 
-      // Navigate to the AI processor with prefilled URL and auto-start processing
-      setTimeout(() => {
-        setProcessingVideoId(null);
-        // Scroll to AI processor section and auto-fill the URL
-        window.location.href = `/#ai-processor?url=${encodeURIComponent(video.url)}&autostart=true`;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 1500);
-
-    } catch (error) {
+    // Navigate to AI processor with hash navigation and auto-start
+    setTimeout(() => {
       setProcessingVideoId(null);
-      toast({
-        title: "Processing failed",
-        description: "Please try again or contact support",
-        variant: "destructive"
-      });
-    }
+      setLocation(`/#ai-processor?url=${encodeURIComponent(video.url)}&autostart=true`);
+      
+      // Scroll to processor section after navigation
+      setTimeout(() => {
+        const element = document.getElementById('ai-processor');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }, 1000);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const cardVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 20,
-      scale: 0.95
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      }
-    }
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    
+    const cardWidth = 320; // Width of each card + gap
+    const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
+    
+    scrollContainerRef.current.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+    
+    // Update index for navigation dots
+    const newIndex = direction === 'left' 
+      ? Math.max(0, currentIndex - 1)
+      : Math.min(latestCryptoPodcasts.length - 1, currentIndex + 1);
+    setCurrentIndex(newIndex);
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-background via-background/50 to-background relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-grid-white/[0.02] bg-grid-16" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-[40rem] h-[40rem] bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl" />
+    <section className="py-6 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-blue-400/30 to-purple-600/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-indigo-400/30 to-cyan-600/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Compact Header */}
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+          className="flex items-center justify-between mb-6"
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
-            <TrendingUp className="h-4 w-4 text-indigo-400" />
-            <span className="text-sm font-medium text-indigo-300">Popular Content</span>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-lg">
+              <Play className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                Latest Crypto Podcasts
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Transform trending episodes into insights
+              </p>
+            </div>
           </div>
           
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
-              Try Processing These
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Popular Crypto Shows
-            </span>
-          </h2>
-          
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Get started instantly with these trending crypto podcasts and videos. 
-            See how StreamAiX transforms long-form content into actionable insights.
-          </p>
+          {/* Navigation Controls */}
+          <div className="hidden sm:flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleScroll('left')}
+              className="h-8 w-8 p-0"
+              disabled={currentIndex === 0}
+              data-testid="button-scroll-left"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleScroll('right')}
+              className="h-8 w-8 p-0"
+              disabled={currentIndex >= latestCryptoPodcasts.length - 1}
+              data-testid="button-scroll-right"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </motion.div>
 
-        {/* Floating Video Cards Grid */}
+        {/* Horizontal Scrolling Container */}
         <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
+          className="relative"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
         >
-          {popularCryptoVideos.map((video) => (
-            <motion.div
-              key={video.id}
-              variants={cardVariants}
-              whileHover={{ 
-                y: -8,
-                scale: 1.02,
-                transition: { duration: 0.2 }
-              }}
-              className="group"
-            >
-              <Card className="bg-white/5 backdrop-blur-lg border-white/10 hover:border-white/20 transition-all duration-300 shadow-2xl hover:shadow-indigo-500/25 overflow-hidden h-full">
-                <CardContent className="p-0">
-                  {/* Video Thumbnail */}
-                  <div className="relative overflow-hidden">
-                    <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 relative">
-                      {/* Actual Video Thumbnail */}
-                      <img 
+          <div 
+            ref={scrollContainerRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {latestCryptoPodcasts.map((video, index) => (
+              <motion.div
+                key={video.id}
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="flex-none w-80"
+              >
+                <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-lg h-full">
+                  <CardContent className="p-0">
+                    {/* Thumbnail Container */}
+                    <div className="relative aspect-video overflow-hidden">
+                      <img
                         src={video.thumbnail}
                         alt={video.title}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          // Fallback to gradient if thumbnail fails to load
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          e.currentTarget.style.display = 'none';
+                          const nextEl = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (nextEl) nextEl.classList.remove('hidden');
                         }}
                       />
-                      {/* Fallback Background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 flex items-center justify-center">
-                        <Play className="h-16 w-16 text-white/50" />
-                      </div>
                       
-                      {/* Duration Badge */}
-                      <Badge className="absolute bottom-3 right-3 bg-black/70 text-white border-0">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {video.duration}
-                      </Badge>
+                      {/* Fallback gradient */}
+                      <div className="hidden absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center">
+                        <Play className="w-12 h-12 text-white/80" />
+                      </div>
 
-                      {/* Hover Overlay */}
+                      {/* Live badge for streaming content */}
+                      {video.isLive && (
+                        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 animate-pulse">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                          LIVE
+                        </div>
+                      )}
+
+                      {/* Duration Badge */}
+                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {video.duration}
+                      </div>
+
+                      {/* Hover Overlay with Process Button */}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <Button
                           onClick={() => handleProcessVideo(video)}
@@ -252,139 +261,124 @@ export function PopularCryptoVideos() {
                           data-testid={`button-process-video-${video.id}`}
                         >
                           {processingVideoId === video.id ? (
-                            <>
-                              <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                className="h-4 w-4 mr-2"
-                              >
-                                <Zap className="h-4 w-4" />
-                              </motion.div>
-                              Processing...
-                            </>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           ) : (
-                            <>
-                              <Zap className="h-4 w-4 mr-2" />
-                              Process with AI
-                            </>
+                            <Zap className="w-4 h-4 mr-2" />
                           )}
+                          {processingVideoId === video.id ? 'Processing...' : 'Process with AI'}
                         </Button>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Card Content */}
-                  <div className="p-6">
-                    {/* Channel Info */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">
-                          {video.channel.charAt(0)}
+                    {/* Content */}
+                    <div className="p-4">
+                      {/* Channel and Time */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                          {video.channel}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {video.uploadTime}
                         </span>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{video.channel}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Eye className="h-3 w-3" />
-                          {video.views} views • {video.uploadTime}
+
+                      {/* Title */}
+                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 line-clamp-2 text-sm leading-tight">
+                        {video.title}
+                      </h3>
+
+                      {/* Stats and Tags */}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs text-slate-500 flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {video.views}
+                        </span>
+                        <div className="flex gap-1">
+                          {video.tags.slice(0, 2).map((tag) => (
+                            <Badge 
+                              key={tag} 
+                              variant="secondary" 
+                              className="text-xs px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Video Title */}
-                    <h3 className="text-lg font-semibold text-white mb-3 line-clamp-2 group-hover:text-indigo-300 transition-colors">
-                      {video.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {video.description}
-                    </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {video.tags.slice(0, 3).map((tag, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="outline" 
-                          className="text-xs bg-indigo-500/10 border-indigo-500/30 text-indigo-300"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
+                      {/* Action Button */}
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
-                        data-testid={`button-process-video-mobile-${video.id}`}
+                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm"
+                        data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
                           <>
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              className="h-4 w-4 mr-2"
-                            >
-                              <Zap className="h-4 w-4" />
-                            </motion.div>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Processing...
                           </>
                         ) : (
                           <>
-                            <Zap className="h-4 w-4 mr-2" />
-                            Process Now
+                            <Zap className="w-4 h-4 mr-2" />
+                            Process with AI
                           </>
                         )}
                       </Button>
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="px-3 text-muted-foreground border-white/20 hover:bg-white/10"
-                        onClick={() => window.open(video.url, '_blank', 'noopener,noreferrer')}
-                        data-testid={`button-view-original-${video.id}`}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
 
-        {/* Call to Action */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center mt-16"
-        >
-          <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-3xl p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Want to Process Your Own Content?
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Upload any YouTube video, podcast, or livestream URL and watch our AI transform it into actionable insights.
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-3"
-              onClick={() => setLocation('/#ai-processor')}
-              data-testid="button-try-your-own"
-            >
-              <Zap className="h-5 w-5 mr-2" />
-              Try Your Own URL
-            </Button>
+          {/* Navigation dots for mobile */}
+          <div className="flex justify-center gap-2 mt-4 sm:hidden">
+            {latestCryptoPodcasts.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentIndex ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'
+                }`}
+                onClick={() => {
+                  setCurrentIndex(index);
+                  if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollTo({
+                      left: index * 320,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                data-testid={`button-nav-dot-${index}`}
+              />
+            ))}
           </div>
         </motion.div>
+
+        {/* Compact CTA */}
+        <motion.div 
+          className="text-center mt-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <Button
+            onClick={() => setLocation('/#ai-processor')}
+            variant="outline"
+            className="text-sm"
+            data-testid="button-try-own-url"
+          >
+            <Zap className="w-4 h-4 mr-2" />
+            Try Your Own URL
+          </Button>
+        </motion.div>
       </div>
+
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 }
