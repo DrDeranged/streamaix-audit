@@ -188,11 +188,12 @@ export function PopularCryptoVideos() {
   };
 
   return (
-    <section className="py-6 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-blue-400/30 to-purple-600/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-indigo-400/30 to-cyan-600/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <section className="py-8 bg-gradient-to-br from-slate-900/95 via-indigo-900/90 to-purple-900/95 relative overflow-hidden">
+      {/* Futuristic Background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-cyan-400/40 to-blue-600/40 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-tl from-purple-400/40 to-pink-600/40 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-indigo-400/30 to-cyan-400/30 rounded-full blur-2xl animate-pulse delay-500"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -204,40 +205,40 @@ export function PopularCryptoVideos() {
           viewport={{ once: true }}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-lg">
-              <Play className="w-4 h-4 text-white" />
+            <div className="p-3 bg-gradient-to-r from-cyan-500/90 to-blue-600/90 rounded-xl backdrop-blur-sm border border-cyan-400/30 shadow-lg">
+              <Play className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-cyan-100 bg-clip-text text-transparent">
                 Latest Crypto Podcasts
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Transform trending episodes into insights
+              <p className="text-sm text-cyan-200/80">
+                Transform trending episodes into insights with AI
               </p>
             </div>
           </div>
           
-          {/* Navigation Controls */}
-          <div className="hidden sm:flex items-center gap-2">
+          {/* Futuristic Navigation Controls */}
+          <div className="hidden sm:flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleScroll('left')}
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 p-0 bg-slate-800/30 border-cyan-400/30 hover:bg-cyan-500/20 hover:border-cyan-400/60 text-cyan-100 hover:text-white transition-all duration-300 rounded-xl backdrop-blur-sm"
               disabled={currentIndex === 0}
               data-testid="button-scroll-left"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleScroll('right')}
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 p-0 bg-slate-800/30 border-cyan-400/30 hover:bg-cyan-500/20 hover:border-cyan-400/60 text-cyan-100 hover:text-white transition-all duration-300 rounded-xl backdrop-blur-sm"
               disabled={currentIndex >= latestCryptoPodcasts.length - 1}
               data-testid="button-scroll-right"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
         </motion.div>
@@ -263,88 +264,78 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-lg flex flex-col h-[400px]">
+                <Card className="group relative overflow-hidden bg-slate-800/20 backdrop-blur-md border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/20 flex flex-col h-[400px] rounded-2xl">
                   <CardContent className="p-0 flex flex-col flex-1">
-                    {/* Thumbnail Container */}
-                    <div className="relative aspect-video overflow-hidden">
+                    {/* Thumbnail Container with Glassmorphism */}
+                    <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-slate-900/40">
                       <img
                         data-video-id={video.id}
                         src={video.thumbnail}
                         alt={video.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500 opacity-90 group-hover:opacity-100"
                         onError={() => handleImageError(video.id, video.thumbnail, video.fallbackThumbnail)}
                         onLoad={() => console.log(`Thumbnail loaded for video ${video.id}`)}
+                        style={{ minHeight: '200px' }}
                       />
                       
-                      {/* Fallback gradient */}
+                      {/* Fallback gradient with futuristic styling */}
                       <div 
                         data-fallback-id={video.id}
-                        className="hidden absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center"
+                        className="hidden absolute inset-0 bg-gradient-to-br from-cyan-500/80 via-blue-600/80 to-purple-600/80 flex items-center justify-center backdrop-blur-sm"
                       >
-                        <Play className="w-12 h-12 text-white/80" />
+                        <Play className="w-16 h-16 text-white drop-shadow-lg" />
                       </div>
+                      
+                      {/* Glassmorphism Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none"></div>
 
-                      {/* Live badge for streaming content */}
+                      {/* Live badge with glow effect */}
                       {video.isLive && (
-                        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 animate-pulse">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-pulse shadow-lg shadow-red-500/30 border border-red-400/30">
+                          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                           LIVE
                         </div>
                       )}
 
-                      {/* Duration Badge */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                      {/* Duration Badge with glassmorphism */}
+                      <div className="absolute bottom-3 right-3 bg-slate-800/90 backdrop-blur-md text-cyan-100 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-cyan-400/20 shadow-lg">
+                        <Clock className="w-3.5 h-3.5" />
                         {video.duration}
                       </div>
 
-                      {/* Hover Overlay with Process Button */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Button
-                          onClick={() => handleProcessVideo(video)}
-                          disabled={processingVideoId === video.id}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg h-12 px-6 font-medium text-sm"
-                          data-testid={`button-process-video-${video.id}`}
-                        >
-                          {processingVideoId === video.id ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Zap className="w-4 h-4 mr-2" />
-                          )}
-                          {processingVideoId === video.id ? 'Processing...' : 'Process with AI'}
-                        </Button>
-                      </div>
+                      {/* Subtle hover glow effect - NO BUTTON */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none"></div>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-4 flex flex-col flex-1">
-                      {/* Channel and Time */}
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                    {/* Futuristic Content Section */}
+                    <div className="p-5 flex flex-col flex-1 bg-gradient-to-b from-slate-800/30 to-slate-900/50 backdrop-blur-sm">
+                      {/* Channel and Time with glow */}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                           {video.channel}
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-cyan-300/70 bg-slate-700/50 px-2 py-1 rounded-md">
                           {video.uploadTime}
                         </span>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 line-clamp-2 text-sm leading-tight flex-1">
+                      {/* Title with gradient */}
+                      <h3 className="font-bold text-white mb-4 line-clamp-2 text-sm leading-tight flex-1 drop-shadow-sm">
                         {video.title}
                       </h3>
 
-                      {/* Stats and Tags */}
+                      {/* Stats and Tags with glow effects */}
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
+                        <span className="text-xs text-cyan-300/80 flex items-center gap-1.5 bg-slate-700/30 px-2 py-1 rounded-lg">
+                          <Eye className="w-3.5 h-3.5" />
                           {video.views}
                         </span>
-                        <div className="flex gap-1">
+                        <div className="flex gap-2">
                           {video.tags.slice(0, 2).map((tag) => (
                             <Badge 
                               key={tag} 
                               variant="secondary" 
-                              className="text-xs px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700"
+                              className="text-xs px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 border border-cyan-400/30 backdrop-blur-sm"
                             >
                               {tag}
                             </Badge>
@@ -352,21 +343,21 @@ export function PopularCryptoVideos() {
                         </div>
                       </div>
 
-                      {/* Action Button - Consistent sizing */}
+                      {/* Futuristic AI Process Button - ONLY ONE */}
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm h-12 font-medium"
+                        className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm h-12 font-semibold rounded-xl border border-cyan-400/30 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 transition-all duration-300 backdrop-blur-sm"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                             Processing...
                           </>
                         ) : (
                           <>
-                            <Zap className="w-4 h-4 mr-2" />
+                            <Zap className="w-5 h-5 mr-2" />
                             Process with AI
                           </>
                         )}
@@ -378,13 +369,15 @@ export function PopularCryptoVideos() {
             ))}
           </div>
 
-          {/* Navigation dots for mobile */}
-          <div className="flex justify-center gap-2 mt-4 sm:hidden">
+          {/* Futuristic Navigation dots for mobile */}
+          <div className="flex justify-center gap-3 mt-6 sm:hidden">
             {latestCryptoPodcasts.map((_, index) => (
               <button
                 key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentIndex 
+                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 shadow-lg shadow-cyan-400/40 scale-125' 
+                    : 'bg-slate-600/50 hover:bg-slate-500/70 border border-cyan-400/20'
                 }`}
                 onClick={() => {
                   setCurrentIndex(index);
@@ -402,20 +395,19 @@ export function PopularCryptoVideos() {
           </div>
         </motion.div>
 
-        {/* Compact CTA */}
+        {/* Futuristic CTA */}
         <motion.div 
-          className="text-center mt-6"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          className="text-center mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
           <Button
             onClick={() => setLocation('/#ai-processor')}
-            variant="outline"
-            className="text-sm"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border border-purple-400/30 shadow-lg shadow-purple-500/25 hover:shadow-purple-400/40 transition-all duration-300 backdrop-blur-sm rounded-xl px-6 py-3 text-sm font-semibold"
             data-testid="button-try-own-url"
           >
-            <Zap className="w-4 h-4 mr-2" />
+            <Zap className="w-5 h-5 mr-2" />
             Try Your Own URL
           </Button>
         </motion.div>
