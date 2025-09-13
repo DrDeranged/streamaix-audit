@@ -215,15 +215,15 @@ export function PopularCryptoVideos() {
           viewport={{ once: true }}
         >
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-xl border border-border">
-              <Play className="w-6 h-6 text-primary" />
+            <div className="p-2 bg-background/50 rounded-lg">
+              <Play className="w-5 h-5 text-foreground/70" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-foreground">
-                Long-Form Crypto Podcasts
+              <h2 className="text-2xl font-semibold text-foreground">
+                Turn Hours of Content Into Minutes
               </h2>
-              <p className="text-muted-foreground">
-                Transform 60+ minute episodes into digestible insights with AI
+              <p className="text-muted-foreground text-sm">
+                Get key insights from trending episodes instantly
               </p>
             </div>
           </div>
@@ -231,20 +231,20 @@ export function PopularCryptoVideos() {
           {/* Navigation Controls */}
           <div className="hidden sm:flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => handleScroll('left')}
-              className="h-9 w-9 p-0"
+              className="h-8 w-8 p-0 hover:bg-muted/50"
               disabled={currentIndex === 0}
               data-testid="button-scroll-left"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => handleScroll('right')}
-              className="h-9 w-9 p-0"
+              className="h-8 w-8 p-0 hover:bg-muted/50"
               disabled={currentIndex >= latestCryptoPodcasts.length - 1}
               data-testid="button-scroll-right"
             >
@@ -274,7 +274,7 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-card border-border hover:border-primary/20 transition-all duration-300 hover:shadow-lg flex flex-col h-[400px]">
+                <Card className="group relative overflow-hidden bg-background border-border/50 hover:border-border hover:shadow-sm transition-all duration-200 flex flex-col h-[400px]">
                   <CardContent className="p-0 flex flex-col flex-1">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
@@ -321,16 +321,16 @@ export function PopularCryptoVideos() {
                     <div className="p-4 flex flex-col flex-1">
                       {/* Channel and Time */}
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-primary">
+                        <span className="text-sm font-medium text-foreground/80">
                           {video.channel}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground/80">
                           {video.uploadTime}
                         </span>
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-semibold text-foreground mb-3 line-clamp-2 text-sm leading-tight flex-1">
+                      <h3 className="font-medium text-foreground mb-3 line-clamp-2 text-sm leading-tight flex-1">
                         {video.title}
                       </h3>
 
@@ -357,18 +357,17 @@ export function PopularCryptoVideos() {
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full h-12 font-medium text-sm"
+                        className="w-full h-10 font-normal text-sm"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Processing...
+                            Getting insights...
                           </>
                         ) : (
                           <>
-                            <Zap className="w-4 h-4 mr-2" />
-                            Process with AI
+                            Get Summary
                           </>
                         )}
                       </Button>
@@ -405,7 +404,7 @@ export function PopularCryptoVideos() {
 
         {/* CTA */}
         <motion.div 
-          className="text-center mt-6"
+          className="text-center mt-4"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -413,11 +412,10 @@ export function PopularCryptoVideos() {
           <Button
             onClick={() => setLocation('/#ai-processor')}
             variant="outline"
-            className="text-sm"
+            className="text-sm border-border/50 hover:border-border"
             data-testid="button-try-own-url"
           >
-            <Zap className="w-4 h-4 mr-2" />
-            Process Your Own Podcast URL
+            Try Your Own Content
           </Button>
         </motion.div>
       </div>
