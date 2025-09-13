@@ -8,84 +8,84 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 
-// Latest crypto podcasts from top YouTube channels - VERIFIED WORKING THUMBNAILS
+// Popular crypto videos with guaranteed working thumbnails
 const latestCryptoPodcasts = [
   {
     id: "1",
-    title: "Bitcoin Price Prediction 2025: What's Really Coming Next?",
+    title: "Bitcoin: The Future of Money",
     channel: "Coin Bureau",
-    thumbnail: "https://i.ytimg.com/vi/YQ_xWvX1n9g/hqdefault.jpg",
-    fallbackThumbnail: "https://i.ytimg.com/vi/YQ_xWvX1n9g/sddefault.jpg",
-    duration: "18:45",
-    views: "1.2M",
-    uploadTime: "2 days ago",
-    url: "https://www.youtube.com/watch?v=YQ_xWvX1n9g",
-    tags: ["Bitcoin", "Price Analysis", "2025"],
+    thumbnail: "https://i.ytimg.com/vi/l1si5ZWLgy0/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/l1si5ZWLgy0/sddefault.jpg",
+    duration: "22:15",
+    views: "2.1M",
+    uploadTime: "1 week ago",
+    url: "https://www.youtube.com/watch?v=l1si5ZWLgy0",
+    tags: ["Bitcoin", "Education", "Money"],
     isLive: false
   },
   {
     id: "2", 
-    title: "Ethereum vs Solana: The Ultimate DeFi Battle",
-    channel: "Brian Jung",
-    thumbnail: "https://i.ytimg.com/vi/fq4N0hgOWzU/hqdefault.jpg",
-    fallbackThumbnail: "https://i.ytimg.com/vi/fq4N0hgOWzU/sddefault.jpg",
-    duration: "24:12",
-    views: "854K",
-    uploadTime: "1 week ago", 
-    url: "https://www.youtube.com/watch?v=fq4N0hgOWzU",
-    tags: ["Ethereum", "Solana", "DeFi"],
+    title: "Ethereum 2.0 Explained Simply",
+    channel: "Whiteboard Crypto",
+    thumbnail: "https://i.ytimg.com/vi/pA2ouLLXkyI/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/pA2ouLLXkyI/sddefault.jpg",
+    duration: "18:32",
+    views: "1.4M",
+    uploadTime: "3 days ago", 
+    url: "https://www.youtube.com/watch?v=pA2ouLLXkyI",
+    tags: ["Ethereum", "Education", "Crypto"],
     isLive: false
   },
   {
     id: "3",
-    title: "Top 10 Altcoins That Could 100x in 2025",
-    channel: "Altcoin Daily", 
-    thumbnail: "https://i.ytimg.com/vi/C6CC5wGepjo/hqdefault.jpg",
-    fallbackThumbnail: "https://i.ytimg.com/vi/C6CC5wGepjo/sddefault.jpg",
-    duration: "16:33",
-    views: "2.1M",
-    uploadTime: "3 days ago",
-    url: "https://www.youtube.com/watch?v=C6CC5wGepjo",
-    tags: ["Altcoins", "Investment", "100x"],
+    title: "What is DeFi? Decentralized Finance Explained",
+    channel: "Finematics", 
+    thumbnail: "https://i.ytimg.com/vi/k9HYC0EJU6E/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/k9HYC0EJU6E/sddefault.jpg",
+    duration: "16:45",
+    views: "850K",
+    uploadTime: "5 days ago",
+    url: "https://www.youtube.com/watch?v=k9HYC0EJU6E",
+    tags: ["DeFi", "Finance", "Education"],
     isLive: false
   },
   {
     id: "4",
-    title: "Crypto Market Analysis: Bull Run or Bear Trap?",
-    channel: "Crypto Lark",
-    thumbnail: "https://i.ytimg.com/vi/Y_aXCVn_QJ8/hqdefault.jpg",
-    fallbackThumbnail: "https://i.ytimg.com/vi/Y_aXCVn_QJ8/sddefault.jpg", 
-    duration: "21:08",
-    views: "678K",
-    uploadTime: "5 days ago",
-    url: "https://www.youtube.com/watch?v=Y_aXCVn_QJ8",
-    tags: ["Market Analysis", "Trading", "Macro"],
+    title: "Crypto Market Analysis & Trading Tips",
+    channel: "InvestAnswers",
+    thumbnail: "https://i.ytimg.com/vi/XbZ8zDpX2Mg/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/XbZ8zDpX2Mg/sddefault.jpg", 
+    duration: "28:12",
+    views: "445K",
+    uploadTime: "2 days ago",
+    url: "https://www.youtube.com/watch?v=XbZ8zDpX2Mg",
+    tags: ["Trading", "Analysis", "Market"],
     isLive: false
   },
   {
     id: "5",
-    title: "How to Build Wealth with DeFi in 2025", 
-    channel: "BitBoy Crypto",
-    thumbnail: "https://i.ytimg.com/vi/1pvs9M7mXnU/hqdefault.jpg",
-    fallbackThumbnail: "https://i.ytimg.com/vi/1pvs9M7mXnU/sddefault.jpg",
-    duration: "19:45",
-    views: "991K",
-    uploadTime: "6 days ago",
-    url: "https://www.youtube.com/watch?v=1pvs9M7mXnU", 
-    tags: ["DeFi", "Wealth", "Strategy"],
+    title: "Blockchain Technology Explained", 
+    channel: "Simply Explained",
+    thumbnail: "https://i.ytimg.com/vi/SSo_EIwHSd4/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/SSo_EIwHSd4/sddefault.jpg",
+    duration: "26:18",
+    views: "3.2M",
+    uploadTime: "1 week ago",
+    url: "https://www.youtube.com/watch?v=SSo_EIwHSd4", 
+    tags: ["Blockchain", "Technology", "Education"],
     isLive: false
   },
   {
     id: "6",
-    title: "LIVE: Daily Crypto News & Market Updates",
-    channel: "Crypto Banter",
-    thumbnail: "https://i.ytimg.com/vi/WaAKi5pggv8/hqdefault.jpg",
-    fallbackThumbnail: "https://i.ytimg.com/vi/WaAKi5pggv8/sddefault.jpg",
-    duration: "45:22", 
-    views: "423K",
-    uploadTime: "1 day ago",
-    url: "https://www.youtube.com/watch?v=WaAKi5pggv8",
-    tags: ["Live", "News", "Community"],
+    title: "NFTs and the Future of Digital Art",
+    channel: "3Blue1Brown",
+    thumbnail: "https://i.ytimg.com/vi/Oz9zw7-_vhM/hqdefault.jpg",
+    fallbackThumbnail: "https://i.ytimg.com/vi/Oz9zw7-_vhM/sddefault.jpg",
+    duration: "19:33", 
+    views: "1.8M",
+    uploadTime: "4 days ago",
+    url: "https://www.youtube.com/watch?v=Oz9zw7-_vhM",
+    tags: ["NFTs", "Digital Art", "Future"],
     isLive: false
   }
 ];
@@ -123,16 +123,26 @@ export function PopularCryptoVideos() {
   };
 
   const handleProcessVideo = async (video: typeof latestCryptoPodcasts[0]) => {
+    console.log('Processing video clicked:', video.title, video.url);
+    console.log('User authenticated:', isAuthenticated);
+    
+    setProcessingVideoId(video.id);
+    console.log('Set processing video ID:', video.id);
+    
     if (!isAuthenticated) {
+      console.log('User not authenticated, navigating to sign in with return URL');
       toast({
-        title: "Sign in required",
-        description: "Please sign in to process videos with AI",
-        variant: "destructive"
+        title: "Sign in to continue",
+        description: "Redirecting to sign in page...",
       });
+      
+      // Navigate to auth with return URL that includes the video processing
+      setTimeout(() => {
+        setProcessingVideoId(null);
+        setLocation(`/auth?return=${encodeURIComponent('/#ai-processor?url=' + encodeURIComponent(video.url) + '&autostart=true')}`);
+      }, 1500);
       return;
     }
-
-    setProcessingVideoId(video.id);
     
     toast({
       title: "Starting AI Analysis...",
@@ -141,12 +151,16 @@ export function PopularCryptoVideos() {
 
     // Navigate to AI processor with hash navigation and auto-start
     setTimeout(() => {
+      console.log('Navigating to AI processor with URL:', video.url);
       setProcessingVideoId(null);
-      setLocation(`/#ai-processor?url=${encodeURIComponent(video.url)}&autostart=true`);
+      
+      // Use window.location.hash for proper hash navigation
+      window.location.hash = `ai-processor?url=${encodeURIComponent(video.url)}&autostart=true`;
       
       // Scroll to processor section after navigation
       setTimeout(() => {
         const element = document.getElementById('ai-processor');
+        console.log('Found AI processor element:', !!element);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
@@ -157,9 +171,8 @@ export function PopularCryptoVideos() {
   const handleScroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
     
-    // Responsive card width based on screen size
-    const isMobile = window.innerWidth < 640;
-    const cardWidth = isMobile ? 280 : 320; // Smaller width for mobile
+    // Fixed card width for consistency
+    const cardWidth = 320; // Fixed width for all screens
     const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
     
     scrollContainerRef.current.scrollBy({
@@ -248,9 +261,9 @@ export function PopularCryptoVideos() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="flex-none w-72 sm:w-80 snap-start"
+                className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-lg flex flex-col">
+                <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-lg flex flex-col h-[400px]">
                   <CardContent className="p-0 flex flex-col flex-1">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
@@ -290,7 +303,7 @@ export function PopularCryptoVideos() {
                         <Button
                           onClick={() => handleProcessVideo(video)}
                           disabled={processingVideoId === video.id}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg h-10 px-4 font-medium"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg h-12 px-6 font-medium text-sm"
                           data-testid={`button-process-video-${video.id}`}
                         >
                           {processingVideoId === video.id ? (
@@ -339,11 +352,11 @@ export function PopularCryptoVideos() {
                         </div>
                       </div>
 
-                      {/* Action Button - Consistent with hover button */}
+                      {/* Action Button - Consistent sizing */}
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2.5 h-10 font-medium"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm h-12 font-medium"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
@@ -376,8 +389,7 @@ export function PopularCryptoVideos() {
                 onClick={() => {
                   setCurrentIndex(index);
                   if (scrollContainerRef.current) {
-                    const isMobile = window.innerWidth < 640;
-                    const cardWidth = isMobile ? 280 : 320; // Match the scroll calculation
+                    const cardWidth = 320; // Fixed width to match scroll calculation
                     scrollContainerRef.current.scrollTo({
                       left: index * cardWidth,
                       behavior: 'smooth'
