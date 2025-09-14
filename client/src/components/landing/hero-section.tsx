@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function HeroSection() {
   const scrollToProcessor = () => {
-    document.getElementById('ai-analysis')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
