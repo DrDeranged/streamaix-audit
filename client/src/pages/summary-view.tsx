@@ -242,8 +242,26 @@ export default function SummaryView() {
       headers: getAuthHeaders(),
       body: JSON.stringify({ platform }),
     }),
-    onSuccess: () => {
-      toast({ title: 'Shared!', description: 'Content shared successfully.' });
+    onSuccess: (data: any) => {
+      if (data.result?.success) {
+        toast({
+          title: "Shared to Farcaster!",
+          description: `Your AI summary has been posted to Farcaster. View it at ${data.result.castUrl || 'Farcaster'}`,
+        });
+      } else {
+        toast({
+          title: "Shared successfully",
+          description: "Your content has been shared to the social platform",
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error('Share error:', error);
+      toast({
+        title: "Sharing failed",
+        description: error?.message || "Failed to share content. Please try again.",
+        variant: "destructive"
+      });
     },
   });
 
