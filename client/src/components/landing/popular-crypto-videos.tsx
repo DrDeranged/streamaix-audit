@@ -199,74 +199,43 @@ export function PopularCryptoVideos() {
   };
 
   return (
-    <section className="py-16 relative overflow-hidden">
-      {/* Subtle gradient background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--neon-blue)]/5 via-transparent to-[var(--neon-purple)]/5 pointer-events-none"></div>
-      
-      {/* Subtle background elements */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-accent/10 to-primary/10 rounded-full blur-3xl"></div>
-      </div>
+    <section className="py-12 bg-background">
 
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Glassmorphic Header Container */}
-        <motion.div 
-          className="glass-bg glass-border rounded-2xl p-6 mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-gradient-to-r from-[var(--neon-blue)]/20 to-[var(--neon-purple)]/20 rounded-xl backdrop-blur-sm border border-[var(--glass-border)]">
-              <Brain className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                AI-Powered Content Intelligence
-              </h2>
-              <p className="text-muted-foreground mt-1">
-                Transform hours of content into actionable insights, sentiment analysis, and comprehensive reports
-              </p>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground/60">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span>AI Analysis Ready</span>
-              </div>
-            </div>
+      <div className="container mx-auto px-4">
+        {/* Simple Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-foreground mb-1">
+              Try Our AI Processor
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              See how it works with these trending episodes
+            </p>
           </div>
           
-          {/* Glassmorphic Navigation Controls */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <FileText className="w-4 h-4" />
-              <span>6 trending episodes ready for analysis</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleScroll('left')}
-                className="h-9 w-9 p-0 glass-bg glass-border hover:bg-[var(--glass-bg)] transition-all duration-300"
-                disabled={currentIndex === 0}
-                data-testid="button-scroll-left"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleScroll('right')}
-                className="h-9 w-9 p-0 glass-bg glass-border hover:bg-[var(--glass-bg)] transition-all duration-300"
-                disabled={currentIndex >= latestCryptoPodcasts.length - 1}
-                data-testid="button-scroll-right"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleScroll('left')}
+              className="h-8 w-8 p-0"
+              disabled={currentIndex === 0}
+              data-testid="button-scroll-left"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleScroll('right')}
+              className="h-8 w-8 p-0"
+              disabled={currentIndex >= latestCryptoPodcasts.length - 1}
+              data-testid="button-scroll-right"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Horizontal Scrolling Container */}
         <motion.div 
@@ -289,7 +258,7 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden glass-bg glass-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 flex flex-col h-[420px]">
+                <Card className="group relative overflow-hidden bg-card border border-border hover:border-border/80 transition-colors flex flex-col h-[380px]">
                   <CardContent className="p-0 flex flex-col flex-1">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
@@ -328,23 +297,8 @@ export function PopularCryptoVideos() {
                         {video.duration}
                       </div>
 
-                      {/* Analytics Hover Preview */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                        <div className="flex flex-col gap-2">
-                          <div className="glass-bg glass-border rounded-lg px-3 py-2 flex items-center gap-2">
-                            <Brain className="w-4 h-4 text-primary" />
-                            <span className="text-xs text-white font-medium">Key Insights</span>
-                          </div>
-                          <div className="glass-bg glass-border rounded-lg px-3 py-2 flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4 text-green-400" />
-                            <span className="text-xs text-white font-medium">Sentiment Analysis</span>
-                          </div>
-                          <div className="glass-bg glass-border rounded-lg px-3 py-2 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-blue-400" />
-                            <span className="text-xs text-white font-medium">AI Report</span>
-                          </div>
-                        </div>
-                      </div>
+                      {/* Simple Hover */}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </div>
 
                     {/* Content */}
@@ -384,29 +338,21 @@ export function PopularCryptoVideos() {
                       </div>
 
                       {/* Action Button */}
-                      <div className="space-y-2">
-                        <Button
-                          onClick={() => handleProcessVideo(video)}
-                          disabled={processingVideoId === video.id}
-                          className="w-full h-11 font-medium text-sm bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                          data-testid={`button-process-main-${video.id}`}
-                        >
-                          {processingVideoId === video.id ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Running AI Analysis...
-                            </>
-                          ) : (
-                            <>
-                              <Brain className="w-4 h-4 mr-2" />
-                              Run AI Analysis
-                            </>
-                          )}
-                        </Button>
-                        <button className="w-full text-xs text-muted-foreground hover:text-primary transition-colors">
-                          View sample report →
-                        </button>
-                      </div>
+                      <Button
+                        onClick={() => handleProcessVideo(video)}
+                        disabled={processingVideoId === video.id}
+                        className="w-full h-10"
+                        data-testid={`button-process-main-${video.id}`}
+                      >
+                        {processingVideoId === video.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          "Try This One"
+                        )}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -438,33 +384,16 @@ export function PopularCryptoVideos() {
           </div>
         </motion.div>
 
-        {/* Enhanced CTA */}
-        <motion.div 
-          className="text-center mt-8"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          <div className="glass-bg glass-border rounded-xl p-6 inline-block">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-gradient-to-r from-[var(--neon-blue)]/20 to-[var(--neon-purple)]/20 rounded-lg">
-                <FileText className="w-5 h-5 text-primary" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold text-foreground">Ready to Generate Your AI Report?</h3>
-                <p className="text-xs text-muted-foreground">Paste any video or podcast URL</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => setLocation('/#ai-processor')}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-              data-testid="button-try-own-url"
-            >
-              <Brain className="w-4 h-4 mr-2" />
-              Start AI Analysis
-            </Button>
-          </div>
-        </motion.div>
+        {/* Simple CTA */}
+        <div className="text-center mt-6">
+          <Button
+            onClick={() => setLocation('/#ai-processor')}
+            variant="outline"
+            data-testid="button-try-own-url"
+          >
+            Try Your Own URL
+          </Button>
+        </div>
       </div>
 
       <style>{`
