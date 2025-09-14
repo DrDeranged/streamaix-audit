@@ -338,16 +338,23 @@ export default function SummaryView() {
                 </Badge>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
+              {/* Farcaster Share Button */}
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-2"
-                onClick={() => shareMutation.mutate('lens')}
+                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 backdrop-blur-lg bg-purple-500/5 px-2 border"
+                onClick={() => shareMutation.mutate('farcaster')}
+                disabled={shareMutation.isPending}
+                data-testid="button-share-farcaster"
               >
                 <Share2 className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Share</span>
+                <span className="hidden sm:inline">
+                  {shareMutation.isPending ? 'Posting...' : 'Share to Farcaster'}
+                </span>
               </Button>
+              
+              {/* Export Button */}
               <Button 
                 variant="outline" 
                 size="sm" 

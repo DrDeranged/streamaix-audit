@@ -1012,7 +1012,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         result = await Web3Service.shareToLens(shareContent);
         break;
       case 'farcaster':
-        result = await Web3Service.shareToFarcaster(shareContent);
+        try {
+          // Use real Farcaster service instead of mock
+          const { farcasterService } = await import('./services/farcaster');
+          const castResponse = await farcasterService.createCast({
+            title: shareContent.title,
+            summary: shareContent.summary,
+            originalUrl: summary.originalUrl,
+            summaryUrl: shareContent.url,
+            tags: shareContent.tags
+          });
+          result = {
+            success: true,
+            castHash: castResponse.cast.hash,
+            castUrl: `https://warpcast.com/${castResponse.cast.author.username}/${castResponse.cast.hash.substring(0, 10)}`
+          };
+        } catch (error) {
+          console.error('Farcaster sharing error:', error);
+          result = {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to share to Farcaster'
+          };
+        }
         break;
       default:
         return res.status(400).json({ error: 'Unsupported platform' });

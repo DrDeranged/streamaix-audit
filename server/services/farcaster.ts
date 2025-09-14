@@ -1,5 +1,4 @@
 import { NeynarAPIClient, Configuration } from '@neynar/nodejs-sdk';
-import type { CastResponse } from '@neynar/nodejs-sdk/build/neynar-api/v2';
 
 export class FarcasterService {
   private client: NeynarAPIClient;
@@ -13,10 +12,10 @@ export class FarcasterService {
       throw new Error('Farcaster configuration missing: NEYNAR_API_KEY and FARCASTER_SIGNER_UUID required');
     }
 
+    // Correct SDK instantiation per Neynar docs
     const config = new Configuration({
       apiKey,
     });
-
     this.client = new NeynarAPIClient(config);
     this.signerUuid = signerUuid;
   }
@@ -30,7 +29,7 @@ export class FarcasterService {
     originalUrl: string;
     summaryUrl?: string;
     tags?: string[];
-  }): Promise<CastResponse> {
+  }): Promise<any> {
     const { title, summary, originalUrl, summaryUrl, tags } = params;
 
     // Format the cast content
@@ -43,7 +42,10 @@ export class FarcasterService {
     });
 
     try {
-      const response = await this.client.publishCast(this.signerUuid, castText);
+      const response = await this.client.publishCast({
+        signerUuid: this.signerUuid,
+        text: castText
+      });
       console.log(`✅ Successfully posted cast to Farcaster: ${response.cast.hash}`);
       return response;
     } catch (error) {
@@ -53,7 +55,7 @@ export class FarcasterService {
   }
 
   /**
-   * Format content for Farcaster cast (max 320 chars)
+   * Format content for Farcaster cast (max 320 chars) with proper length enforcement
    */
   private formatCastContent(params: {
     title: string;
@@ -63,64 +65,78 @@ export class FarcasterService {
     tags?: string[];
   }): string {
     const { title, summary, originalUrl, summaryUrl, tags } = params;
+    const MAX_LENGTH = 320;
     
-    // Start with title and AI tag
-    let content = `🤖 AI Summary: ${title}
+    // Essential components that must be included
+    const prefix = `🤖 AI Summary: ${title}
 
 `;
-
-    // Add truncated summary
-    const maxSummaryLength = summaryUrl ? 150 : 200;
-    const truncatedSummary = summary.length > maxSummaryLength 
-      ? summary.substring(0, maxSummaryLength).trim() + '...'
-      : summary;
-    
-    content += truncatedSummary;
-
-    // Add tags if provided
-    if (tags && tags.length > 0) {
-      const hashTags = tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ');
-      content += `
-
-${hashTags}`;
-    }
-
-    // Add links
-    content += `
+    const originalLink = `
 
 🔗 Original: ${originalUrl}`;
-    
-    if (summaryUrl) {
-      content += `
-📊 Full Analysis: ${summaryUrl}`;
-    }
-
-    // Add branding
-    content += `
+    const branding = `
 
 Powered by @StreamAiX`;
+    
+    // Optional components
+    const fullAnalysisLink = summaryUrl ? `
+📊 Full Analysis: ${summaryUrl}` : '';
+    const hashTags = tags && tags.length > 0 
+      ? `
 
-    // Ensure we stay under 320 character limit
-    if (content.length > 320) {
-      // Truncate summary more aggressively
-      const availableSpace = 320 - (content.length - truncatedSummary.length);
-      const newSummary = summary.substring(0, Math.max(50, availableSpace - 10)).trim() + '...';
-      content = content.replace(truncatedSummary, newSummary);
+${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}` 
+      : '';
+    
+    // Calculate space available for summary
+    const fixedContentLength = prefix.length + originalLink.length + branding.length;
+    let remainingSpace = MAX_LENGTH - fixedContentLength;
+    
+    // Try to include optional components in priority order
+    let optionalContent = '';
+    
+    // Priority 1: Add tags if they fit
+    if (hashTags && remainingSpace >= hashTags.length) {
+      optionalContent += hashTags;
+      remainingSpace -= hashTags.length;
     }
-
-    return content;
+    
+    // Priority 2: Add full analysis link if it fits
+    if (fullAnalysisLink && remainingSpace >= fullAnalysisLink.length) {
+      optionalContent += fullAnalysisLink;
+      remainingSpace -= fullAnalysisLink.length;
+    }
+    
+    // Use remaining space for summary (minimum 30 chars, otherwise skip)
+    let summaryContent = '';
+    if (remainingSpace >= 33) { // 30 chars + "..." = 33
+      const summaryText = remainingSpace >= summary.length 
+        ? summary 
+        : summary.substring(0, remainingSpace - 3).trim() + '...';
+      summaryContent = summaryText;
+    }
+    
+    // Build final content
+    const finalContent = prefix + summaryContent + optionalContent + originalLink + branding;
+    
+    // Final safety check - should never exceed 320 but just in case
+    if (finalContent.length > MAX_LENGTH) {
+      console.warn(`Farcaster cast length exceeded: ${finalContent.length} > ${MAX_LENGTH}`);
+      return finalContent.substring(0, MAX_LENGTH - 3) + '...';
+    }
+    
+    return finalContent;
   }
 
   /**
-   * React to a cast (like/unlike)
+   * React to a cast (like/recast)
    */
   async reactToCast(castHash: string, reactionType: 'like' | 'recast'): Promise<any> {
     try {
-      const response = await this.client.reactToCast(
-        this.signerUuid, 
-        reactionType === 'like' ? 'like' : 'recast', 
-        castHash
-      );
+      const response = await this.client.publishReaction({
+        signerUuid: this.signerUuid,
+        reactionType: reactionType,
+        target: castHash // Use target parameter as per SDK
+      });
       console.log(`✅ Successfully ${reactionType}d cast: ${castHash}`);
       return response;
     } catch (error) {
@@ -134,7 +150,10 @@ Powered by @StreamAiX`;
    */
   async getCast(castHash: string): Promise<any> {
     try {
-      const response = await this.client.lookUpCastByHash(castHash);
+      const response = await this.client.lookupCastByHashOrUrl({
+        identifier: castHash,
+        type: 'hash'
+      });
       return response.cast;
     } catch (error) {
       console.error('❌ Failed to get cast:', error);
