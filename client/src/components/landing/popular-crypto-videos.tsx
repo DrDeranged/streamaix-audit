@@ -202,15 +202,24 @@ export function PopularCryptoVideos() {
     <section className="py-12 bg-background">
 
       <div className="container mx-auto px-4">
-        {/* Simple Header */}
+        {/* Professional Header */}
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            Live AI Processing
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            See real AI analysis in action with trending crypto content
+          </p>
+        </motion.div>
+        
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-semibold text-foreground mb-1">
-              Try Our AI Processor
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              See how it works with these trending episodes
-            </p>
           </div>
           
           <div className="hidden sm:flex items-center gap-2">
@@ -218,7 +227,7 @@ export function PopularCryptoVideos() {
               variant="outline"
               size="sm"
               onClick={() => handleScroll('left')}
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 p-0 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 border-indigo-300/30 hover:from-indigo-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
               disabled={currentIndex === 0}
               data-testid="button-scroll-left"
             >
@@ -228,7 +237,7 @@ export function PopularCryptoVideos() {
               variant="outline"
               size="sm"
               onClick={() => handleScroll('right')}
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 p-0 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 border-indigo-300/30 hover:from-indigo-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
               disabled={currentIndex >= latestCryptoPodcasts.length - 1}
               data-testid="button-scroll-right"
             >
@@ -258,7 +267,7 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-card border border-border hover:border-border/80 transition-colors flex flex-col h-[380px]">
+                <Card className="group relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20 border border-indigo-200/20 hover:border-indigo-400/40 hover:shadow-xl hover:shadow-indigo-500/10 transform hover:scale-[1.02] transition-all duration-500 flex flex-col h-[400px]">
                   <CardContent className="p-0 flex flex-col flex-1">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
@@ -297,8 +306,17 @@ export function PopularCryptoVideos() {
                         {video.duration}
                       </div>
 
-                      {/* Simple Hover */}
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                      {/* Professional Hover Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-indigo-600/40 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                            <span className="text-white font-medium text-sm flex items-center gap-2">
+                              <Brain className="w-4 h-4" />
+                              AI Ready
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Content */}
@@ -337,20 +355,23 @@ export function PopularCryptoVideos() {
                         </div>
                       </div>
 
-                      {/* Action Button */}
+                      {/* Professional Action Button */}
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full h-10"
+                        className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 active:translate-y-[-2px] transition-all duration-300 font-medium"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Processing...
+                            Analyzing...
                           </>
                         ) : (
-                          "Try This One"
+                          <>
+                            <Brain className="w-4 h-4 mr-2" />
+                            Process Episode
+                          </>
                         )}
                       </Button>
                     </div>
@@ -384,16 +405,25 @@ export function PopularCryptoVideos() {
           </div>
         </motion.div>
 
-        {/* Simple CTA */}
-        <div className="text-center mt-6">
+        {/* Professional CTA */}
+        <motion.div 
+          className="text-center mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <p className="text-muted-foreground mb-4">Ready to analyze your own content?</p>
           <Button
             onClick={() => setLocation('/#ai-processor')}
-            variant="outline"
+            size="lg"
+            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 font-medium"
             data-testid="button-try-own-url"
           >
-            Try Your Own URL
+            <Zap className="w-5 h-5 mr-2" />
+            Start AI Analysis
           </Button>
-        </div>
+        </motion.div>
       </div>
 
       <style>{`
