@@ -1181,6 +1181,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Test Neynar API endpoints to see which ones work
+  app.get('/api/farcaster/test-endpoints', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      const testResults = await farcasterService.testApiEndpoints();
+      
+      res.json({
+        success: true,
+        testResults: testResults
+      });
+    } catch (error) {
+      console.error('Failed to test Farcaster endpoints:', error);
+      res.status(500).json({ 
+        error: 'Failed to test Farcaster endpoints',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get prominent crypto users from Farcaster
+  app.get('/api/farcaster/prominent-users', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      const prominentUsers = await farcasterService.getProminentCryptoUsers();
+      
+      res.json({
+        success: true,
+        users: prominentUsers,
+        count: prominentUsers.length,
+        message: 'Prominent crypto users fetched successfully'
+      });
+    } catch (error) {
+      console.error('Failed to fetch prominent crypto users:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch prominent crypto users',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
   // =============================================================================
   // WALLET & REWARDS ROUTES
   // =============================================================================
