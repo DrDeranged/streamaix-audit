@@ -1078,6 +1078,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
 
+  // =============================================================================
+  // FARCASTER ACTIVITY ROUTES
+  // =============================================================================
+
+  // Get user's Farcaster activity analytics
+  app.get('/api/farcaster/activity/:fid', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const fid = parseInt(req.params.fid);
+    
+    if (!fid || isNaN(fid)) {
+      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    }
+
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      const analytics = await farcasterService.getUserActivityAnalytics(fid);
+      
+      res.json({
+        success: true,
+        activity: analytics
+      });
+    } catch (error) {
+      console.error('Failed to fetch Farcaster activity:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch Farcaster activity',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get user's recent casts
+  app.get('/api/farcaster/casts/:fid', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const fid = parseInt(req.params.fid);
+    const limit = parseInt(req.query.limit as string) || 25;
+    
+    if (!fid || isNaN(fid)) {
+      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    }
+
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      const casts = await farcasterService.getUserCasts(fid, limit);
+      
+      res.json({
+        success: true,
+        casts: casts,
+        count: casts.length
+      });
+    } catch (error) {
+      console.error('Failed to fetch user casts:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch user casts',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get user profile information
+  app.get('/api/farcaster/profile/:fid', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const fid = parseInt(req.params.fid);
+    
+    if (!fid || isNaN(fid)) {
+      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    }
+
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      const profile = await farcasterService.getUserProfile(fid);
+      
+      res.json({
+        success: true,
+        profile: profile
+      });
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch user profile',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // =============================================================================
+  // WALLET & REWARDS ROUTES
+  // =============================================================================
+
   // Real wallet balance endpoint 
   app.get('/api/wallet/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     // TODO: Implement real wallet integration

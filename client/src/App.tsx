@@ -25,6 +25,7 @@ const GovernancePage = React.lazy(() => import("@/pages/governance"));
 const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
+const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
 
 function Router() {
   return (
@@ -78,6 +79,12 @@ function Router() {
       <Route path="/social-trading">
         <Suspense fallback={<TradingSkeleton />}>
           <SocialTradingPage />
+        </Suspense>
+      </Route>
+      
+      <Route path="/farcaster-activity">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <FarcasterActivity />
         </Suspense>
       </Route>
       

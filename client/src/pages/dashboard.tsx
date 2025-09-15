@@ -38,6 +38,7 @@ import {
   Activity,
   Calendar,
   MessageSquare,
+  MessageCircle,
   FileText,
   Hash,
   Code2,
