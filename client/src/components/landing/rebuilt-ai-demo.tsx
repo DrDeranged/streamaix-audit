@@ -105,181 +105,17 @@ interface ProcessingResult {
   };
 }
 
-// Farcaster Activity Demo Component
-function FarcasterActivityDemo() {
-  const [selectedFid, setSelectedFid] = useState<number>(3); // Default to dwr.eth
+// Trending Social Content Component  
+function TrendingSocialContent() {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
-  const popularFids = [
-    { 
-      fid: 3, 
-      username: "dwr.eth", 
-      displayName: "Dan Romero", 
-      description: "Farcaster Co-founder",
-      avatar: "🚀",
-      followers: "47.2K",
-      casts: "8.9K"
-    },
-    { 
-      fid: 5650, 
-      username: "vitalik.eth", 
-      displayName: "Vitalik Buterin", 
-      description: "Ethereum Founder",
-      avatar: "🔷",
-      followers: "324K",
-      casts: "12.4K"
-    },
-    { 
-      fid: 1, 
-      username: "farcaster", 
-      displayName: "Farcaster", 
-      description: "Official Account",
-      avatar: "⚡",
-      followers: "156K",
-      casts: "3.2K"
-    },
-    { 
-      fid: 6546, 
-      username: "jessepollak", 
-      displayName: "Jesse Pollak", 
-      description: "Base Protocol Lead",
-      avatar: "🔵",
-      followers: "89.3K",
-      casts: "5.7K"
-    },
-  ];
-
-  // Engaging fallback content for demo purposes
-  const demoContent = {
-    3: { // Dan Romero
-      bio: "Building the future of decentralized social at Farcaster. Formerly VP Product at Coinbase.",
-      recentCasts: [
-        {
-          text: "The convergence of AI and Web3 is creating unprecedented opportunities for knowledge ownership. Projects like StreamAiX are leading this transformation.",
-          likes: 156,
-          recasts: 43,
-          replies: 12,
-          time: "2h ago"
-        },
-        {
-          text: "Just saw an impressive demo of AI-powered content summarization with blockchain provenance. The future of information curation is here.",
-          likes: 234,
-          recasts: 67,
-          replies: 28,
-          time: "6h ago"
-        },
-        {
-          text: "Decentralized social protocols are enabling new forms of creator monetization. Exciting to see the innovation happening in this space.",
-          likes: 189,
-          recasts: 52,
-          replies: 19,
-          time: "1d ago"
-        }
-      ]
-    },
-    5650: { // Vitalik
-      bio: "Ethereum co-founder. Interested in crypto, social choice theory, identity, reputation systems, and more.",
-      recentCasts: [
-        {
-          text: "The integration of AI with blockchain technology is creating fascinating new possibilities for knowledge verification and ownership.",
-          likes: 892,
-          recasts: 234,
-          replies: 87,
-          time: "3h ago"
-        },
-        {
-          text: "Decentralized summarization protocols could solve the information overload problem while preserving creator attribution.",
-          likes: 567,
-          recasts: 145,
-          replies: 45,
-          time: "8h ago"
-        },
-        {
-          text: "The future of media consumption will be AI-curated, blockchain-verified, and creator-owned. We're already seeing early examples.",
-          likes: 734,
-          recasts: 189,
-          replies: 62,
-          time: "1d ago"
-        }
-      ]
-    },
-    1: { // Farcaster
-      bio: "The decentralized social network. Built on Ethereum, owned by users.",
-      recentCasts: [
-        {
-          text: "🎉 New protocol features enable richer content experiences with AI-powered insights and blockchain verification.",
-          likes: 445,
-          recasts: 123,
-          replies: 34,
-          time: "4h ago"
-        },
-        {
-          text: "The ecosystem continues to grow! Welcome to all the new builders creating innovative social applications.",
-          likes: 678,
-          recasts: 156,
-          replies: 78,
-          time: "12h ago"
-        },
-        {
-          text: "Excited to see projects exploring the intersection of AI, social graphs, and content curation on Farcaster.",
-          likes: 356,
-          recasts: 89,
-          replies: 23,
-          time: "2d ago"
-        }
-      ]
-    },
-    6546: { // Jesse
-      bio: "Building Base - the secure, low-cost, builder-friendly Ethereum L2. Love crypto, product, and making things people want.",
-      recentCasts: [
-        {
-          text: "Base is becoming the go-to platform for innovative Web3 social applications. The developer experience keeps improving.",
-          likes: 312,
-          recasts: 78,
-          replies: 25,
-          time: "1h ago"
-        },
-        {
-          text: "Seeing incredible innovation in AI-powered content tools built on Base. The combination of low fees and fast transactions is enabling new use cases.",
-          likes: 428,
-          recasts: 94,
-          replies: 31,
-          time: "5h ago"
-        },
-        {
-          text: "The future of content creation involves AI assistance, blockchain verification, and fair creator compensation. We're building the infrastructure for this.",
-          likes: 267,
-          recasts: 56,
-          replies: 18,
-          time: "1d ago"
-        }
-      ]
-    }
-  };
-
-  // Fetch real activity data (with fallback to demo content)
-  const { data: activityData, isLoading, error } = useQuery({
-    queryKey: ['/api/farcaster/activity', selectedFid],
-    enabled: !!selectedFid,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    retry: 1
+  // Fetch trending content from Farcaster
+  const { data: trendingData, isLoading, error } = useQuery({
+    queryKey: ['/api/farcaster/trending'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2
   });
-
-  const { data: castsData, error: castsError } = useQuery({
-    queryKey: ['/api/farcaster/casts', selectedFid],
-    enabled: !!selectedFid,
-    staleTime: 1 * 60 * 1000, // 1 minute
-  });
-
-  const selectedUser = popularFids.find(user => user.fid === selectedFid);
-  const profile = (activityData as any)?.activity?.profile;
-  const stats = (activityData as any)?.activity?.stats;
-  const casts = (castsData as any)?.casts || [];
-  
-  // Use demo content when API fails
-  const shouldUseFallback = error || castsError || (!isLoading && !casts.length);
-  const fallbackData = demoContent[selectedFid as keyof typeof demoContent];
 
   const formatTimeAgo = (timestamp: string) => {
     const now = new Date();
@@ -291,266 +127,158 @@ function FarcasterActivityDemo() {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
+  const trending = (trendingData as any)?.trending || [];
+
   return (
-    <div className="max-w-6xl mx-auto mb-12">
-      {/* Popular Farcaster Users Selector */}
-      <div className="mb-8">
-        <h4 className="text-lg font-semibold mb-6 text-center bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-          Select a Crypto Leader to Follow
-        </h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {popularFids.map((user) => (
-            <motion.button
-              key={user.fid}
-              onClick={() => setSelectedFid(user.fid)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
-                selectedFid === user.fid
-                  ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 shadow-lg'
-                  : 'border-muted hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-purple-50/50 dark:hover:from-blue-900/10 dark:hover:to-purple-900/10 hover:shadow-md'
-              }`}
-              data-testid={`button-select-user-${user.fid}`}
-            >
-              <div className="flex items-center justify-center mb-2">
-                <div className="text-2xl">{user.avatar}</div>
-              </div>
-              <div className="text-sm font-bold">{user.displayName}</div>
-              <div className="text-xs text-muted-foreground">@{user.username}</div>
-              <div className="text-xs text-muted-foreground mt-1">{user.description}</div>
-              <div className="flex justify-between mt-2 text-xs">
-                <span className="text-blue-600 dark:text-blue-400 font-medium">{user.followers} followers</span>
-                <span className="text-purple-600 dark:text-purple-400 font-medium">{user.casts} casts</span>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+    <div className="mt-8 pt-8 border-t border-muted/30">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent mb-2">
+          Trending on Farcaster
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Real-time trending stories and conversations from the decentralized social network
+        </p>
       </div>
 
-      {/* Real Activity Dashboard */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* User Profile Card */}
-        <Card className="md:col-span-1 bg-gradient-to-br from-card/50 to-card/80 backdrop-blur-sm border-muted-foreground/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-500" />
-              Profile Analytics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="p-4">
               <div className="space-y-3">
-                <div className="h-4 bg-muted rounded w-3/4 animate-pulse"></div>
-                <div className="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
-                <div className="h-3 bg-muted rounded w-2/3 animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-full animate-pulse"></div>
+                <div className="h-3 bg-muted rounded w-3/4 animate-pulse"></div>
+                <div className="h-6 bg-muted rounded w-1/4 animate-pulse"></div>
               </div>
-            ) : selectedUser && (shouldUseFallback || profile) ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full border-2 border-blue-400 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 flex items-center justify-center">
-                    <span className="text-2xl">{selectedUser.avatar}</span>
-                  </div>
-                  <div>
-                    <div className="font-bold">{selectedUser.displayName}</div>
-                    <div className="text-sm text-muted-foreground">@{selectedUser.username}</div>
+            </Card>
+          ))}
+        </div>
+      ) : error ? (
+        <Card className="p-8 text-center bg-gradient-to-br from-card/50 to-card/80 backdrop-blur-sm border-muted-foreground/20">
+          <TrendingUp className="w-12 h-12 mx-auto mb-4 text-muted/50" />
+          <h4 className="font-semibold mb-2">Trending Content Unavailable</h4>
+          <p className="text-sm text-muted-foreground mb-4">
+            Unable to load trending content from Farcaster at the moment.
+          </p>
+          {!isAuthenticated && (
+            <Button 
+              onClick={() => setLocation('/auth')}
+              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+              data-testid="button-get-access"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Get Access to Premium Content
+            </Button>
+          )}
+        </Card>
+      ) : trending.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {trending.slice(0, 6).map((story: any, index: number) => (
+            <motion.div
+              key={story.hash || index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="p-4 bg-gradient-to-br from-card/50 to-card/80 backdrop-blur-sm border-muted-foreground/20 hover:border-green-500/30 transition-all duration-200 h-full">
+                <div className="flex items-start gap-3 mb-3">
+                  {story.author?.pfp_url ? (
+                    <img 
+                      src={story.author.pfp_url} 
+                      alt={story.author.display_name}
+                      className="w-8 h-8 rounded-full border"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900 dark:to-blue-900 flex items-center justify-center">
+                      <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm truncate">
+                        {story.author?.display_name || story.author?.username || 'Anonymous'}
+                      </span>
+                      <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">
+                        <TrendingUp className="w-3 h-3 mr-1" />
+                        Trending
+                      </Badge>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      @{story.author?.username} • {formatTimeAgo(story.timestamp)}
+                    </span>
                   </div>
                 </div>
                 
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {shouldUseFallback ? fallbackData?.bio : profile?.profile?.bio?.text || fallbackData?.bio}
+                <p className="text-sm mb-3 line-clamp-3 leading-relaxed">
+                  {story.text}
                 </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
-                    <div className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      {selectedUser.followers}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Followers</div>
+                
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1 text-red-500">
+                      <Heart className="w-3 h-3" />
+                      {story.reactions?.likes_count || 0}
+                    </span>
+                    <span className="flex items-center gap-1 text-green-500">
+                      <Repeat2 className="w-3 h-3" />
+                      {story.reactions?.recasts_count || 0}
+                    </span>
+                    <span className="flex items-center gap-1 text-purple-500">
+                      <MessageSquare className="w-3 h-3" />
+                      {story.replies?.count || 0}
+                    </span>
                   </div>
-                  <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
-                    <div className="font-bold text-lg bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                      {selectedUser.casts}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Casts</div>
-                  </div>
-                </div>
-
-                {isAuthenticated ? (
-                  <Button 
-                    onClick={() => setLocation('/farcaster-activity')}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
-                    size="sm"
-                    data-testid="button-view-full-activity"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    View Full Activity
-                  </Button>
-                ) : (
-                  <div className="p-3 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl text-center">
-                    <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                      🔐 Sign up to access full analytics!
-                    </p>
-                    <Button 
-                      onClick={() => setLocation('/auth')}
-                      size="sm"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                      data-testid="button-get-started"
+                  
+                  {story.hash && (
+                    <a
+                      href={`https://warpcast.com/~/conversations/${story.hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors"
+                      data-testid="link-view-trending-cast"
                     >
-                      Get Started Free
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-muted-foreground">
-                <Users className="w-12 h-12 mx-auto mb-4 text-muted/50" />
-                <p>Unable to load profile</p>
-                <p className="text-xs mt-1">Try selecting a different user</p>
-              </div>
-            )}
-          </CardContent>
+                      <Link2 className="w-3 h-3" />
+                      View
+                    </a>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <Card className="p-8 text-center bg-gradient-to-br from-card/50 to-card/80 backdrop-blur-sm border-muted-foreground/20">
+          <TrendingUp className="w-12 h-12 mx-auto mb-4 text-muted/50" />
+          <h4 className="font-semibold mb-2">No Trending Content Available</h4>
+          <p className="text-sm text-muted-foreground mb-4">
+            Check back soon for the latest trending stories and conversations.
+          </p>
         </Card>
-
-        {/* Live Activity Feed */}
-        <Card className="md:col-span-2 bg-gradient-to-br from-card/50 to-card/80 backdrop-blur-sm border-muted-foreground/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-green-500" />
-              Live Activity Feed
-              <Badge variant="outline" className="ml-auto border-green-500/30 text-green-400">
-                🔴 Real-time
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="h-4 bg-muted rounded w-full animate-pulse"></div>
-                    <div className="h-3 bg-muted rounded w-3/4 animate-pulse"></div>
-                    <div className="h-6 bg-muted rounded w-1/4 animate-pulse"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (shouldUseFallback && fallbackData?.recentCasts) || (casts && casts.length > 0) ? (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {(shouldUseFallback ? fallbackData.recentCasts : casts.slice(0, 5)).map((cast: any, index: number) => (
-                  <motion.div
-                    key={cast.hash || index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="border-b border-muted/30 pb-4 last:border-b-0 p-4 rounded-xl bg-gradient-to-br from-muted/20 to-muted/5 hover:from-muted/30 hover:to-muted/10 transition-all duration-200"
-                  >
-                    <p className="text-sm mb-3 line-clamp-3 leading-relaxed">{cast.text}</p>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                        <Calendar className="w-3 h-3" />
-                        {shouldUseFallback ? cast.time : formatTimeAgo(cast.timestamp)}
-                      </span>
-                      <span className="flex items-center gap-1 text-red-500 hover:text-red-600 transition-colors">
-                        <Heart className="w-3 h-3" />
-                        {shouldUseFallback ? cast.likes : cast.reactions?.likes_count || 0}
-                      </span>
-                      <span className="flex items-center gap-1 text-green-500 hover:text-green-600 transition-colors">
-                        <Repeat2 className="w-3 h-3" />
-                        {shouldUseFallback ? cast.recasts : cast.reactions?.recasts_count || 0}
-                      </span>
-                      <span className="flex items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors">
-                        <MessageSquare className="w-3 h-3" />
-                        {shouldUseFallback ? cast.replies : cast.replies?.count || 0}
-                      </span>
-                      {(cast.hash || shouldUseFallback) && (
-                        <a
-                          href={cast.hash ? `https://warpcast.com/~/conversations/${cast.hash}` : `https://warpcast.com/${selectedUser?.username}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors ml-auto"
-                          data-testid="link-view-cast"
-                        >
-                          <Link2 className="w-3 h-3" />
-                          View
-                        </a>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted/50" />
-                <p className="text-lg font-medium mb-2">No recent activity found</p>
-                <p className="text-sm">Try selecting a different user above</p>
-              </div>
-            )}
-
-            {/* Enhanced CTA Section */}
-            <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl text-center border border-blue-200/30 dark:border-blue-800/30">
-              <div className="flex items-center justify-center mb-3">
-                <Sparkles className="w-6 h-6 text-blue-500 mr-2" />
-                <h4 className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {isAuthenticated ? 'Unlock Full Social Intelligence' : 'Join the StreamAiX Community'}
-                </h4>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {isAuthenticated 
-                  ? 'Access advanced Farcaster analytics, AI-powered insights, and cross-platform social intelligence.' 
-                  : '🚀 Get real-time social analytics, AI-powered insights, and exclusive access to Web3 knowledge tools!'
-                }
-              </p>
-              <Button 
-                onClick={() => setLocation(isAuthenticated ? '/farcaster-activity' : '/auth')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-6"
-                data-testid={isAuthenticated ? "button-unlock-full-features" : "button-join-community"}
-              >
-                {isAuthenticated ? (
-                  <>
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    View Full Analytics
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Join Free Today
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      )}
+      
+      {/* CTA Section */}
+      <div className="mt-6 text-center">
+        <Button 
+          onClick={() => setLocation(isAuthenticated ? '/farcaster-activity' : '/auth')}
+          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium px-8"
+          data-testid={isAuthenticated ? "button-explore-more" : "button-join-trending"}
+        >
+          {isAuthenticated ? (
+            <>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Explore More Social Intelligence
+            </>
+          ) : (
+            <>
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Join the Trending Conversations
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );
 }
 
-// Separate Social Intelligence Section Component
-export function LiveSocialIntelligence() {
-  return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-4 sm:px-6">
-        <motion.div 
-          className="text-center mb-8 sm:mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-            Live Social Intelligence
-          </h2>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            See real AI analysis in action with trending crypto content from Farcaster leaders
-          </p>
-        </motion.div>
-        
-        <div className="max-w-4xl mx-auto">
-          <FarcasterActivityDemo />
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export function AIProcessor() {
   const [url, setUrl] = useState('');
@@ -1300,6 +1028,9 @@ export function AIProcessor() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Trending Social Content */}
+        <TrendingSocialContent />
 
       </div>
 
