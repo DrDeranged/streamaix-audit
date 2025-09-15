@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
 import { PopularCryptoVideos } from "@/components/landing/popular-crypto-videos";
+import { TrendingSocialContent } from "@/components/landing/trending-social-content";
 
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
@@ -21,6 +22,7 @@ export default function Landing() {
       <HowItWorks />
       <AIProcessor />
       <PopularCryptoVideos />
+      <TrendingSocialContent />
       <WhyBlockchain />
       <KnowledgeAvatars />
       <AISuggestions />
