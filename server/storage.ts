@@ -11,12 +11,25 @@ import {
   type InsertKnowledgeStack,
   type UserNote,
   type InsertUserNote,
+  type CryptoLeader,
+  type InsertCryptoLeader,
+  type CuratedCast,
+  type InsertCuratedCast,
+  type TopicTag,
+  type InsertTopicTag,
+  type LearningResource,
+  type InsertLearningResource,
+  type LeaderEducationData,
   users,
   summaries,
   bounties,
   userInteractions,
   knowledgeStacks,
-  userNotes
+  userNotes,
+  cryptoLeaders,
+  curatedCasts,
+  topicTags,
+  learningResources
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray } from "drizzle-orm";
@@ -77,6 +90,27 @@ export interface IStorage {
     interactionsCount: number;
     stacksCount: number;
   }>;
+
+  // Educational content operations
+  getCryptoLeader(id: string): Promise<CryptoLeader | undefined>;
+  getCryptoLeaderByFid(fid: number): Promise<CryptoLeader | undefined>;
+  getCryptoLeaders(limit?: number): Promise<CryptoLeader[]>;
+  createCryptoLeader(leader: InsertCryptoLeader): Promise<CryptoLeader>;
+  updateCryptoLeader(id: string, updates: Partial<InsertCryptoLeader>): Promise<CryptoLeader | undefined>;
+  
+  getCuratedCast(id: string): Promise<CuratedCast | undefined>;
+  getCuratedCastsByLeader(leaderId: string): Promise<CuratedCast[]>;
+  createCuratedCast(cast: InsertCuratedCast): Promise<CuratedCast>;
+  
+  getTopicTag(id: string): Promise<TopicTag | undefined>;
+  getTopicTags(category?: string): Promise<TopicTag[]>;
+  createTopicTag(tag: InsertTopicTag): Promise<TopicTag>;
+  
+  getLearningResource(id: string): Promise<LearningResource | undefined>;
+  getLearningResourcesByLeader(leaderId: string): Promise<LearningResource[]>;
+  createLearningResource(resource: InsertLearningResource): Promise<LearningResource>;
+  
+  getLeaderEducationData(leaderId: string): Promise<LeaderEducationData | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -430,6 +464,140 @@ export class DatabaseStorage implements IStorage {
   async deleteUserNote(id: string): Promise<boolean> {
     const result = await db.delete(userNotes).where(eq(userNotes.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // Educational content operations
+  async getCryptoLeader(id: string): Promise<CryptoLeader | undefined> {
+    const [leader] = await db.select().from(cryptoLeaders).where(eq(cryptoLeaders.id, id));
+    return leader || undefined;
+  }
+
+  async getCryptoLeaderByFid(fid: number): Promise<CryptoLeader | undefined> {
+    const [leader] = await db.select().from(cryptoLeaders).where(eq(cryptoLeaders.fid, fid));
+    return leader || undefined;
+  }
+
+  async getCryptoLeaders(limit = 50): Promise<CryptoLeader[]> {
+    return await db
+      .select()
+      .from(cryptoLeaders)
+      .where(eq(cryptoLeaders.isActive, true))
+      .orderBy(desc(cryptoLeaders.followerCount))
+      .limit(limit);
+  }
+
+  async createCryptoLeader(insertLeader: InsertCryptoLeader): Promise<CryptoLeader> {
+    const [leader] = await db
+      .insert(cryptoLeaders)
+      .values(insertLeader)
+      .returning();
+    return leader;
+  }
+
+  async updateCryptoLeader(id: string, updates: Partial<InsertCryptoLeader>): Promise<CryptoLeader | undefined> {
+    const [leader] = await db
+      .update(cryptoLeaders)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(cryptoLeaders.id, id))
+      .returning();
+    return leader || undefined;
+  }
+
+  async getCuratedCast(id: string): Promise<CuratedCast | undefined> {
+    const [cast] = await db.select().from(curatedCasts).where(eq(curatedCasts.id, id));
+    return cast || undefined;
+  }
+
+  async getCuratedCastsByLeader(leaderId: string): Promise<CuratedCast[]> {
+    return await db
+      .select()
+      .from(curatedCasts)
+      .where(eq(curatedCasts.leaderId, leaderId))
+      .orderBy(desc(curatedCasts.priority), desc(curatedCasts.publishedAt))
+      .limit(10);
+  }
+
+  async createCuratedCast(insertCast: InsertCuratedCast): Promise<CuratedCast> {
+    const [cast] = await db
+      .insert(curatedCasts)
+      .values(insertCast)
+      .returning();
+    return cast;
+  }
+
+  async getTopicTag(id: string): Promise<TopicTag | undefined> {
+    const [tag] = await db.select().from(topicTags).where(eq(topicTags.id, id));
+    return tag || undefined;
+  }
+
+  async getTopicTags(category?: string): Promise<TopicTag[]> {
+    const conditions = category ? [eq(topicTags.category, category)] : [];
+    return await db
+      .select()
+      .from(topicTags)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(topicTags.name);
+  }
+
+  async createTopicTag(insertTag: InsertTopicTag): Promise<TopicTag> {
+    const [tag] = await db
+      .insert(topicTags)
+      .values(insertTag)
+      .returning();
+    return tag;
+  }
+
+  async getLearningResource(id: string): Promise<LearningResource | undefined> {
+    const [resource] = await db.select().from(learningResources).where(eq(learningResources.id, id));
+    return resource || undefined;
+  }
+
+  async getLearningResourcesByLeader(leaderId: string): Promise<LearningResource[]> {
+    return await db
+      .select()
+      .from(learningResources)
+      .where(eq(learningResources.leaderId, leaderId))
+      .orderBy(desc(learningResources.priority), learningResources.title)
+      .limit(10);
+  }
+
+  async createLearningResource(insertResource: InsertLearningResource): Promise<LearningResource> {
+    const [resource] = await db
+      .insert(learningResources)
+      .values(insertResource)
+      .returning();
+    return resource;
+  }
+
+  async getLeaderEducationData(leaderId: string): Promise<LeaderEducationData | undefined> {
+    const leader = await this.getCryptoLeader(leaderId);
+    if (!leader) return undefined;
+
+    const [notableCasts, resources] = await Promise.all([
+      this.getCuratedCastsByLeader(leaderId),
+      this.getLearningResourcesByLeader(leaderId)
+    ]);
+
+    // Get topic tags related to this leader
+    const relatedTopics = await db
+      .select()
+      .from(topicTags)
+      .where(sql`${topicTags.relatedLeaderIds} @> ${JSON.stringify([leaderId])}`);
+
+    // Calculate engagement metrics
+    const engagement = {
+      avgLikes: notableCasts.length > 0 ? Math.round(notableCasts.reduce((sum, cast) => sum + (cast.likesCount || 0), 0) / notableCasts.length) : 0,
+      avgRecasts: notableCasts.length > 0 ? Math.round(notableCasts.reduce((sum, cast) => sum + (cast.recastsCount || 0), 0) / notableCasts.length) : 0,
+      totalEngagement: notableCasts.reduce((sum, cast) => sum + (cast.likesCount || 0) + (cast.recastsCount || 0) + (cast.repliesCount || 0), 0)
+    };
+
+    return {
+      profile: leader,
+      notableCasts,
+      resources,
+      topics: relatedTopics,
+      engagement
+    };
   }
 }
 
