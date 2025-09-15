@@ -478,14 +478,49 @@ export function AIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            Live AI Content Intelligence
+          </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            See real AI analysis in action with trending crypto content
+            Paste any YouTube URL below and watch real AI extract insights, analyze market sentiment, and generate comprehensive intelligence reports
           </p>
         </motion.div>
 
         <div className="max-w-4xl mx-auto">
-          {/* Farcaster Activity Integration */}
-          <FarcasterActivityDemo />
+          {/* Input Section */}
+          <div className="max-w-2xl mx-auto mb-12">
+            <div className="bg-card/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Input
+                  type="url"
+                  placeholder="https://youtube.com/watch?v=..."
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="flex-1 h-12 text-base border-muted-foreground/20 focus:border-indigo-500 transition-colors"
+                  disabled={isProcessing}
+                  data-testid="input-youtube-url"
+                />
+                <Button 
+                  onClick={handleProcess}
+                  disabled={isProcessing || !url.trim()}
+                  className="h-12 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 font-medium"
+                  data-testid="button-analyze"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4 mr-2" />
+                      Analyze
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
 
           {/* Processing Status */}
           <AnimatePresence>
@@ -1043,6 +1078,25 @@ export function AIProcessor() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Farcaster Activity Integration - Positioned underneath AI processor */}
+        <div className="mt-16">
+          <motion.div 
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-xl sm:text-3xl font-orbitron font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+              Live Social Intelligence
+            </h3>
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+              See real AI analysis in action with trending crypto content from Farcaster leaders
+            </p>
+          </motion.div>
+          <FarcasterActivityDemo />
         </div>
       </div>
 
