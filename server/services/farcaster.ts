@@ -162,6 +162,145 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
   }
 
   /**
+   * Get user's recent casts for activity dashboard
+   */
+  async getUserCasts(fid: number, limit: number = 25): Promise<any[]> {
+    try {
+      const response = await this.client.fetchFeedForYou({
+        fid: fid,
+        limit: limit
+      });
+      console.log(`✅ Retrieved casts for user ${fid}`);
+      return response.casts || [];
+    } catch (error) {
+      console.error('❌ Failed to get user casts:', error);
+      throw new Error(`Failed to get user casts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get user's follower information
+   */
+  async getUserFollowers(fid: number, limit: number = 100): Promise<any> {
+    try {
+      const response = await this.client.fetchUserFollowers({
+        fid: fid,
+        limit: limit
+      });
+      console.log(`✅ Retrieved follower data for user ${fid}`);
+      return {
+        followers: response.users,
+        followerCount: response.users.length
+      };
+    } catch (error) {
+      console.error('❌ Failed to get user followers:', error);
+      throw new Error(`Failed to get user followers: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get user's following information
+   */
+  async getUserFollowing(fid: number, limit: number = 100): Promise<any> {
+    try {
+      const response = await this.client.fetchUserFollowing({
+        fid: fid,
+        limit: limit
+      });
+      console.log(`✅ Retrieved following data for user ${fid}`);
+      return {
+        following: response.users,
+        followingCount: response.users.length
+      };
+    } catch (error) {
+      console.error('❌ Failed to get user following:', error);
+      throw new Error(`Failed to get user following: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get cast engagement metrics (likes, recasts, replies)
+   */
+  async getCastEngagement(castHash: string): Promise<any> {
+    try {
+      const cast = await this.getCast(castHash);
+      
+      // Extract engagement metrics from cast data
+      const likes = cast.reactions?.likes_count || 0;
+      const recasts = cast.reactions?.recasts_count || 0;
+      const replies = cast.replies?.count || 0;
+      
+      return {
+        likes,
+        recasts,
+        replies,
+        totalEngagement: likes + recasts + replies
+      };
+    } catch (error) {
+      console.error('❌ Failed to get cast engagement:', error);
+      throw new Error(`Failed to get cast engagement: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get user profile information
+   */
+  async getUserProfile(fid: number): Promise<any> {
+    try {
+      const response = await this.client.fetchBulkUsers({
+        fids: [fid]
+      });
+      
+      if (!response.users || response.users.length === 0) {
+        throw new Error('User not found');
+      }
+      
+      const user = response.users[0];
+      console.log(`✅ Retrieved profile for user ${fid}: @${user.username}`);
+      return user;
+    } catch (error) {
+      console.error('❌ Failed to get user profile:', error);
+      throw new Error(`Failed to get user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get activity analytics for a user
+   */
+  async getUserActivityAnalytics(fid: number): Promise<any> {
+    try {
+      const [casts, followers, following, profile] = await Promise.all([
+        this.getUserCasts(fid, 50),
+        this.getUserFollowers(fid),
+        this.getUserFollowing(fid),
+        this.getUserProfile(fid)
+      ]);
+
+      // Calculate engagement rates
+      const totalEngagement = await Promise.all(
+        casts.slice(0, 10).map(cast => this.getCastEngagement(cast.hash))
+      );
+
+      const avgEngagement = totalEngagement.reduce((sum, eng) => sum + eng.totalEngagement, 0) / totalEngagement.length;
+
+      return {
+        profile,
+        stats: {
+          totalCasts: casts.length,
+          followerCount: followers.followerCount,
+          followingCount: following.followingCount,
+          avgEngagementRate: avgEngagement,
+          recentActivity: casts.slice(0, 10)
+        },
+        engagement: totalEngagement
+      };
+    } catch (error) {
+      console.error('❌ Failed to get user activity analytics:', error);
+      throw new Error(`Failed to get user activity analytics: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
    * Test the Farcaster connection
    */
   async testConnection(): Promise<boolean> {

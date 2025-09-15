@@ -1077,9 +1077,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(recommendations);
   }));
 
-  // =============================================================================
-  // WALLET & REWARDS ROUTES
-  // =============================================================================
 
   // Real wallet balance endpoint 
   app.get('/api/wallet/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
