@@ -156,7 +156,7 @@ export class StreamProcessor {
           chapters: aiResult.chapters,
           tags: [...(summary.tags || []), ...(aiResult.tags || [])],
           originalDuration: aiResult.duration,
-          accuracy: aiResult.accuracy || 98,
+          accuracy: aiResult.accuracy,
           ipfsHash,
           arweaveId,
           processingStatus: 'completed',

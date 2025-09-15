@@ -44,7 +44,7 @@ export class MarketDataService {
   private alphaVantageBaseUrl = 'https://www.alphavantage.co/query';
   private finnhubBaseUrl = 'https://finnhub.io/api/v1';
   private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
-  private cache = new Map<string, { data: any; timestamp: number }>();
+  private cache = new Map<string, { data: any; timestamp: number; customTimeout?: number }>();
   private cacheTimeout = 30000; // 30 second cache for real-time data
   
   // Crypto-related stocks list - expanded to 25+ symbols
@@ -89,7 +89,7 @@ export class MarketDataService {
     const cached = this.cache.get(key);
     if (!cached) return false;
     
-    const timeout = (cached as any).customTimeout || this.cacheTimeout;
+    const timeout = cached.customTimeout || this.cacheTimeout;
     return Date.now() - cached.timestamp < timeout;
   }
 
@@ -100,9 +100,6 @@ export class MarketDataService {
     return null;
   }
 
-  private setCache(key: string, data: any): void {
-    this.cache.set(key, { data, timestamp: Date.now() });
-  }
 
   /**
    * Get live cryptocurrency data by symbols using CoinGecko (with CoinMarketCap fallback)
@@ -209,7 +206,7 @@ export class MarketDataService {
         }
       });
 
-      this.setCache(cacheKey, quotes);
+      this.setCacheWithTimeout(cacheKey, quotes);
       console.log(`📊 [CoinGecko] Fetched live crypto data for: ${symbols.join(', ')}`);
       return quotes;
       
@@ -259,7 +256,7 @@ export class MarketDataService {
         }
       }
 
-      this.setCache(cacheKey, quotes);
+      this.setCacheWithTimeout(cacheKey, quotes);
       console.log(`📊 Fetched live crypto data for: ${symbols.join(', ')}`);
       return quotes;
 
@@ -282,9 +279,9 @@ export class MarketDataService {
     if (cached) return cached;
 
     try {
-      const response = await axios.get(`${this.baseUrl}/cryptocurrency/info`, {
+      const response = await axios.get(`${this.cmcBaseUrl}/cryptocurrency/info`, {
         headers: {
-          'X-CMC_PRO_API_KEY': this.apiKey,
+          'X-CMC_PRO_API_KEY': this.cmcApiKey,
           'Accept': 'application/json'
         },
         params: {
@@ -293,12 +290,12 @@ export class MarketDataService {
       });
 
       const info = response.data.data[symbol.toUpperCase()];
-      this.setCache(cacheKey, info);
+      this.setCacheWithTimeout(cacheKey, info);
       return info;
 
     } catch (error: any) {
       console.error('❌ Failed to fetch crypto info:', error.response?.data || error.message);
-      return this.getMockCryptoInfo(symbol);
+      return null;
     }
   }
 
@@ -306,8 +303,9 @@ export class MarketDataService {
    * Get top cryptocurrencies by market cap
    */
   async getTopCryptos(limit: number = 20): Promise<CryptoQuote[]> {
-    if (!this.apiKey) {
-      return this.getMockTopCryptos(limit);
+    if (!this.cmcApiKey) {
+      console.warn('⚠️ No CMC API key available for top cryptos');
+      return [];
     }
 
     const cacheKey = `top_cryptos_${limit}`;
@@ -315,9 +313,9 @@ export class MarketDataService {
     if (cached) return cached;
 
     try {
-      const response = await axios.get(`${this.baseUrl}/cryptocurrency/listings/latest`, {
+      const response = await axios.get(`${this.cmcBaseUrl}/cryptocurrency/listings/latest`, {
         headers: {
-          'X-CMC_PRO_API_KEY': this.apiKey,
+          'X-CMC_PRO_API_KEY': this.cmcApiKey,
           'Accept': 'application/json'
         },
         params: {
@@ -343,13 +341,14 @@ export class MarketDataService {
         };
       });
 
-      this.setCache(cacheKey, quotes);
+      this.setCacheWithTimeout(cacheKey, quotes);
       console.log(`📊 Fetched top ${limit} cryptocurrencies`);
       return quotes;
 
     } catch (error: any) {
       console.error('❌ Failed to fetch top cryptos:', error.response?.data || error.message);
-      return this.getMockTopCryptos(limit);
+      console.warn('⚠️ Failed to fetch top cryptos, returning empty array');
+      return [];
     }
   }
 
@@ -469,31 +468,7 @@ export class MarketDataService {
     return null;
   }
 
-  private getMockCryptoInfo(symbol: string): any {
-    return {
-      name: symbol,
-      symbol: symbol.toUpperCase(),
-      description: `${symbol} cryptocurrency information`,
-      website: [`https://${symbol.toLowerCase()}.org`],
-      technical_doc: [`https://${symbol.toLowerCase()}.org/whitepaper`]
-    };
-  }
-
-  private getMockTopCryptos(limit: number): CryptoQuote[] {
-    const topCryptos = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
-    return topCryptos.slice(0, limit).map((symbol, index) => ({
-      symbol,
-      name: `${symbol} Token`,
-      price: Math.random() * 1000 + 100,
-      percentChange24h: (Math.random() - 0.5) * 10,
-      percentChange7d: (Math.random() - 0.5) * 20,
-      percentChange30d: (Math.random() - 0.5) * 40,
-      marketCap: Math.random() * 100000000000,
-      volume24h: Math.random() * 10000000000,
-      rank: index + 1,
-      lastUpdated: new Date().toISOString()
-    }));
-  }
+  // Mock methods removed for production readiness
 
   /**
    * Get crypto-related stocks data using Alpha Vantage API
@@ -501,7 +476,8 @@ export class MarketDataService {
   async getCryptoStocks(): Promise<any[]> {
     if (!this.finnhubApiKey) {
       console.log('⚠️ Crypto stocks disabled - no Finnhub API key available');
-      return this.getFallbackStockData();
+      console.log('⚠️ No Finnhub API key - returning empty stock data');
+      return [];
     }
 
     const cacheKey = 'finnhub_crypto_stocks';
@@ -513,14 +489,14 @@ export class MarketDataService {
       const stockQuotes = await this.getRealTimeStockDataFromFinnhub();
 
       // Cache and return the real-time stock data
-      this.setCache(cacheKey, stockQuotes);
+      this.setCacheWithTimeout(cacheKey, stockQuotes);
       console.log(`✅ Fetched ${stockQuotes.length} real-time stock prices from Finnhub`);
       return stockQuotes;
       
     } catch (error: any) {
       console.error('❌ Failed to fetch Finnhub stock data:', error.response?.data || error.message);
-      console.log('🔄 Falling back to market-based calculations');
-      return this.getFallbackStockData();
+      console.log('🔄 Finnhub API failed - returning empty stock data');
+      return [];
     }
   }
 
@@ -577,9 +553,6 @@ export class MarketDataService {
   /**
    * Real-time stock data using current market prices (updated frequently)
    */
-  // Track previous prices for momentum calculation
-  private static previousPrices = new Map<string, number>();
-  private static priceHistory = new Map<string, number[]>();
   
   // Real-time stock data from Finnhub API
   private async getRealTimeStockDataFromFinnhub(): Promise<any[]> {
@@ -625,7 +598,7 @@ export class MarketDataService {
             lastUpdated: new Date().toISOString()
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`⚠️ Failed to fetch ${symbol} from Finnhub:`, error.message);
       }
       
@@ -634,97 +607,6 @@ export class MarketDataService {
     }
 
     return stockData;
-  }
-  
-  // Fallback method with simulated data
-  private getFallbackStockData(): any[] {
-    const now = new Date();
-    
-    const baseStocks = [
-      { symbol: 'MSTR', name: 'MicroStrategy', basePrice: 335.87, volatility: 0.04 },
-      { symbol: 'COIN', name: 'Coinbase', basePrice: 299.07, volatility: 0.03 },
-      { symbol: 'RIOT', name: 'Riot Platforms', basePrice: 13.29, volatility: 0.05 },
-      { symbol: 'MARA', name: 'Marathon Digital', basePrice: 15.19, volatility: 0.04 },
-      { symbol: 'NVDA', name: 'NVIDIA', basePrice: 167.02, volatility: 0.02 },
-      { symbol: 'AMD', name: 'AMD', basePrice: 151.14, volatility: 0.03 },
-      { symbol: 'TSLA', name: 'Tesla', basePrice: 350.84, volatility: 0.03 },
-      { symbol: 'PYPL', name: 'PayPal', basePrice: 68.26, volatility: 0.02 },
-      { symbol: 'CLSK', name: 'CleanSpark', basePrice: 9.24, volatility: 0.06 },
-      { symbol: 'HUT', name: 'Hut 8 Mining', basePrice: 7.59, volatility: 0.05 },
-      { symbol: 'BITF', name: 'Bitfarms', basePrice: 2.28, volatility: 0.07 },
-      { symbol: 'HOOD', name: 'Robinhood', basePrice: 24.44, volatility: 0.04 },
-      { symbol: 'SQ', name: 'Block Inc', basePrice: 78.90, volatility: 0.03 },
-      { symbol: 'INTC', name: 'Intel', basePrice: 22.67, volatility: 0.02 },
-      { symbol: 'GBTC', name: 'Grayscale Bitcoin', basePrice: 65.00, volatility: 0.05 },
-      { symbol: 'AAPL', name: 'Apple', basePrice: 228.52, volatility: 0.02 },
-      { symbol: 'MSFT', name: 'Microsoft', basePrice: 420.45, volatility: 0.02 },
-      { symbol: 'GOOGL', name: 'Alphabet', basePrice: 162.84, volatility: 0.03 },
-      { symbol: 'AMZN', name: 'Amazon', basePrice: 181.30, volatility: 0.03 },
-      { symbol: 'META', name: 'Meta Platforms', basePrice: 503.92, volatility: 0.03 },
-      { symbol: 'NFLX', name: 'Netflix', basePrice: 692.18, volatility: 0.04 },
-      { symbol: 'ADBE', name: 'Adobe', basePrice: 545.83, volatility: 0.03 },
-      { symbol: 'CRM', name: 'Salesforce', basePrice: 297.44, volatility: 0.03 },
-      { symbol: 'ORCL', name: 'Oracle', basePrice: 132.71, volatility: 0.02 },
-      { symbol: 'IBM', name: 'IBM', basePrice: 213.45, volatility: 0.02 },
-      { symbol: 'UBER', name: 'Uber', basePrice: 73.89, volatility: 0.04 },
-      { symbol: 'LYFT', name: 'Lyft', basePrice: 15.24, volatility: 0.05 },
-      { symbol: 'SPOT', name: 'Spotify', basePrice: 394.26, volatility: 0.04 },
-      { symbol: 'TWTR', name: 'X Corp', basePrice: 54.20, volatility: 0.06 },
-      { symbol: 'SNAP', name: 'Snap Inc', basePrice: 11.75, volatility: 0.05 }
-    ];
-    
-    return baseStocks.map(stock => {
-      // Get previous price or use base price
-      const previousPrice = MarketDataService.previousPrices.get(stock.symbol) || stock.basePrice;
-      
-      // Get price history for momentum calculation
-      let history = MarketDataService.priceHistory.get(stock.symbol) || [];
-      if (history.length > 10) {
-        history = history.slice(-10); // Keep last 10 prices
-      }
-      
-      // Create realistic movements with momentum
-      const timeFactor = Math.sin(now.getTime() / 180000) * 0.001; // 3-minute cycles
-      const momentumFactor = history.length > 3 ? 
-        (history[history.length - 1] - history[history.length - 4]) / history[history.length - 4] * 0.3 : 0;
-      const randomFactor = (Math.random() - 0.5) * stock.volatility * 2;
-      const marketSentiment = Math.cos(now.getTime() / 600000) * 0.002; // 10-minute market cycles
-      
-      // Add some mean reversion to keep prices realistic
-      const meanReversion = (stock.basePrice - previousPrice) / stock.basePrice * 0.1;
-      
-      const totalChange = timeFactor + momentumFactor + randomFactor + marketSentiment + meanReversion;
-      const newPrice = Math.max(previousPrice * (1 + totalChange), stock.basePrice * 0.85); // Don't go below 85% of base
-      
-      // Update history
-      history.push(newPrice);
-      MarketDataService.priceHistory.set(stock.symbol, history);
-      MarketDataService.previousPrices.set(stock.symbol, newPrice);
-      
-      // Calculate changes from previous price
-      const change = newPrice - previousPrice;
-      const changePercent = (change / previousPrice) * 100;
-      
-      // Determine momentum
-      let momentum: 'up' | 'down' | 'neutral' = 'neutral';
-      if (Math.abs(changePercent) > 0.05) {
-        momentum = changePercent > 0 ? 'up' : 'down';
-      }
-      
-      return {
-        symbol: stock.symbol,
-        name: stock.name,
-        price: parseFloat(newPrice.toFixed(2)),
-        change: parseFloat(change.toFixed(2)),
-        changePercent: parseFloat(changePercent.toFixed(2)),
-        percentChange24h: parseFloat(changePercent.toFixed(2)), // For backward compatibility
-        momentum,
-        basePrice: stock.basePrice,
-        marketCap: 0,
-        volume: Math.floor(Math.random() * 10000000),
-        lastUpdated: now.toISOString()
-      };
-    });
   }
 
   /**
@@ -747,12 +629,13 @@ export class MarketDataService {
       });
 
       const news = this.parseRSSFeed(response.data, limit);
-      this.setCache(cacheKey, news, 300000); // Cache for 5 minutes
+      this.setCacheWithTimeout(cacheKey, news, 300000); // Cache for 5 minutes
       console.log(`📰 Fetched ${news.length} news articles from CoinDesk`);
       return news;
     } catch (error: any) {
       console.error('❌ Failed to fetch CoinDesk news:', error.message);
-      return this.getMockNews(limit);
+      console.warn('⚠️ Failed to fetch CoinDesk news, returning empty array');
+      return [];
     }
   }
 
@@ -773,7 +656,7 @@ export class MarketDataService {
         if (titleMatch) {
           title = titleMatch[1];
           // Remove CDATA wrapper if present
-          const cdataMatch = title.match(/^<!\[CDATA\[(.*?)\]\]>$/s);
+          const cdataMatch = title.match(/^<!\[CDATA\[(.*?)\]\]>$/);
           if (cdataMatch) {
             title = cdataMatch[1];
           }
@@ -799,7 +682,7 @@ export class MarketDataService {
         const descMatch = item.match(/<description[^>]*>([\s\S]*?)<\/description>/i);
         if (descMatch) {
           description = descMatch[1];
-          const cdataMatch = description.match(/^<!\[CDATA\[(.*?)\]\]>$/s);
+          const cdataMatch = description.match(/^<!\[CDATA\[(.*?)\]\]>$/);
           if (cdataMatch) {
             description = cdataMatch[1];
           }
@@ -822,7 +705,8 @@ export class MarketDataService {
       return articles;
     } catch (error) {
       console.error('❌ Error parsing RSS feed:', error);
-      return this.getMockNews(limit);
+      console.warn('⚠️ Error parsing RSS feed, returning empty array');
+      return [];
     }
   }
 
@@ -836,7 +720,7 @@ export class MarketDataService {
     
     let content = match[1].trim();
     // Handle CDATA sections
-    const cdataRegex = /^<!\[CDATA\[(.*?)\]\]>$/s;
+    const cdataRegex = /^<!\[CDATA\[(.*?)\]\]>$/;
     const cdataMatch = content.match(cdataRegex);
     return cdataMatch ? cdataMatch[1].trim() : content;
   }
@@ -851,7 +735,7 @@ export class MarketDataService {
   /**
    * Enhanced cache method with custom timeout
    */
-  private setCache(key: string, data: any, timeout?: number): void {
+  private setCacheWithTimeout(key: string, data: any, timeout?: number): void {
     this.cache.set(key, { 
       data, 
       timestamp: Date.now(),
@@ -859,13 +743,6 @@ export class MarketDataService {
     });
   }
 
-  /**
-   * Mock news data for fallback
-   */
-  private getMockNews(limit: number): NewsArticle[] {
-    console.log('⚠️ No real news data available - API failed');
-    return []; // Return empty array instead of mock data
-  }
 }
 
 export const marketDataService = MarketDataService.getInstance();

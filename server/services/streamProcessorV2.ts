@@ -15,7 +15,6 @@ import { storage } from '../storage';
 import { AIService } from './aiService';
 import { ContentExtractor } from './contentExtractor';
 import { Web3Service } from './web3Service';
-import { MockContentExtractor, MockAIService, MockWeb3Service } from './mockServices';
 // Note: Importing Summary type causes build issues, using any for now
 
 interface ProcessingJob {
@@ -116,43 +115,36 @@ export class StreamProcessorV2 {
       job.lastUpdate = new Date();
       await this.forceStatusUpdate(job.summaryId, 'processing', 5);
 
-      // Step 1: Extract content with immediate progress update (Using Mock Services for Demo)
+      // Step 1: Extract content with immediate progress update (Real Content Extraction)
       console.log(`[ProcessorV2] Step 1: Extracting content for ${job.id}`);
-      const contentResult = await MockContentExtractor.extractContent(job.url);
+      const contentResult = await ContentExtractor.extractContent(job.url);
       
       job.progress = 25;
       job.lastUpdate = new Date();
       await this.forceStatusUpdate(job.summaryId, 'processing', 25);
       
-      // Step 2: Process with AI with immediate progress update (Using Mock AI for Demo)
+      // Step 2: Process with AI with immediate progress update (Real AI Processing)
       console.log(`[ProcessorV2] Step 2: AI processing for ${job.id}`);
-      const aiResult = await MockAIService.processContent(
-        contentResult.audioPath,
-        {
-          title: contentResult.title,
-          description: contentResult.description,
-          contentType: contentResult.contentType,
-          platform: contentResult.platform,
-          detectedKeywords: contentResult.detectedKeywords,
-          duration: contentResult.duration,
-          originalUrl: contentResult.originalUrl
-        }
-      );
+      const aiResult = await AIService.processContent(job.url, {
+        title: contentResult.title,
+        contentType: contentResult.contentType,
+        platform: contentResult.platform
+      });
       
       job.progress = 70;
       job.lastUpdate = new Date();
       await this.forceStatusUpdate(job.summaryId, 'processing', 70);
 
-      // Step 3: Store on Web3 with immediate progress update (Using Mock Web3 for Demo)
+      // Step 3: Store on Web3 with immediate progress update (Real Web3 Storage)
       console.log(`[ProcessorV2] Step 3: Web3 storage for ${job.id}`);
-      const ipfsHash = await MockWeb3Service.storeOnIPFS({
+      const ipfsHash = await Web3Service.storeOnIPFS({
         summary: aiResult.summary,
         keyInsights: aiResult.keyInsights,
         chapters: aiResult.chapters,
         metadata: { originalUrl: job.url, processedAt: new Date().toISOString() }
       });
 
-      const arweaveId = await MockWeb3Service.storeOnArweave({
+      const arweaveId = await Web3Service.storeOnArweave({
         fullTranscript: aiResult.transcript,
         summary: aiResult.summary,
         metadata: { originalUrl: job.url, processedAt: new Date().toISOString() }
@@ -176,7 +168,7 @@ export class StreamProcessorV2 {
         chapters: aiResult.chapters,
         tags: aiResult.tags || [],
         originalDuration: aiResult.duration,
-        accuracy: aiResult.accuracy || 98,
+        accuracy: aiResult.accuracy,
         ipfsHash,
         arweaveId,
         processingStatus: 'completed' as const

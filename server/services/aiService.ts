@@ -282,7 +282,7 @@ Main topics covered:
 - Cross-chain interoperability
 - Regulatory compliance updates
 
-This transcript represents ${extractedContent.duration} seconds of processed audio content with 98% accuracy.`;
+This transcript represents ${extractedContent.duration} seconds of processed audio content.`;
       
       const segments = [
         { start: 0, end: 30, text: "Introduction and market overview" },
@@ -317,7 +317,7 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
         tags: aiResult.tags,
         duration: extractedContent.duration,
         processingStatus: 'completed' as const,
-        accuracy: 98
+        accuracy: undefined
       };
 
       // Add content intelligence fields if they exist

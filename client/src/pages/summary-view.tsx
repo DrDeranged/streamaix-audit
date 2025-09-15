@@ -352,7 +352,7 @@ export default function SummaryView() {
                   Completed
                 </Badge>
                 <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs hidden sm:inline-flex">
-                  {summary.accuracy || 95}% Accuracy
+                  {summary.accuracy || 0}% Accuracy
                 </Badge>
               </div>
             </div>
@@ -508,7 +508,7 @@ export default function SummaryView() {
                       <div className="mb-6">
                         <h5 className="text-lg font-semibold text-indigo-400 mb-3">Executive Summary</h5>
                         <div className="text-gray-300 leading-relaxed">
-                          <div dangerouslySetInnerHTML={{ __html: summary.executiveSummary || summary.summary || 'No summary available' }} />
+                          <div dangerouslySetInnerHTML={{ __html: summary.executiveSummary || summary.summary || '' }} />
                         </div>
                       </div>
 
@@ -876,7 +876,7 @@ export default function SummaryView() {
                       </div>
                       <div className="text-center p-3 bg-gradient-to-br from-green-900/40 to-green-800/40 rounded-xl border border-green-700">
                         <div className="text-lg font-bold text-green-400 mb-1">
-                          {summary.accuracy || '95'}%
+                          {summary.accuracy || '0'}%
                         </div>
                         <div className="text-xs text-muted-foreground">AI Accuracy</div>
                       </div>
@@ -914,7 +914,7 @@ export default function SummaryView() {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Quality Score:</span>
-                            <span className="font-semibold text-blue-400">{summary.accuracy || 95}% accuracy</span>
+                            <span className="font-semibold text-blue-400">{summary.accuracy || 0}% accuracy</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Status:</span>
@@ -925,10 +925,6 @@ export default function SummaryView() {
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Content Type:</span>
                             <span className="font-semibold text-cyan-400">{summary.platform}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Language:</span>
-                            <span className="font-semibold text-orange-400">English</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Processed:</span>
@@ -1185,7 +1181,7 @@ export default function SummaryView() {
                           Completed
                         </Badge>
                         <Badge variant="outline" className="text-xs">
-                          {summary.accuracy || 95}% Accuracy
+                          {summary.accuracy || 0}% Accuracy
                         </Badge>
                       </div>
                     </div>

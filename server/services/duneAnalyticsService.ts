@@ -89,10 +89,10 @@ export class DuneAnalyticsService {
   /**
    * Execute a Dune query and wait for results
    */
-  private async executeQuery(queryId: number, parameters?: Record<string, any>): Promise<DuneQueryResult> {
+  private async executeQuery(queryId: number, parameters?: Record<string, any>): Promise<DuneQueryResult | null> {
     if (!this.apiKey) {
-      console.log('⚠️ Dune API key not available - using mock data');
-      return this.getMockQueryResult(queryId);
+      console.log('⚠️ Dune API key not available - no data returned');
+      return null;
     }
 
     try {
@@ -141,7 +141,7 @@ export class DuneAnalyticsService {
 
     } catch (error: any) {
       console.error(`❌ Dune query ${queryId} failed:`, error.response?.data || error.message);
-      return this.getMockQueryResult(queryId);
+      return null;
     }
   }
 
@@ -158,7 +158,7 @@ export class DuneAnalyticsService {
       const queryId = 1234567; // Example whale movement query
       const result = await this.executeQuery(queryId, { tokens: tokenSymbols });
 
-      const movements: WhaleMovement[] = result.result?.rows.map(row => ({
+      const movements: WhaleMovement[] = result?.result?.rows?.map(row => ({
         token_symbol: row.token_symbol,
         whale_address: row.whale_address,
         transaction_type: row.transaction_type,
@@ -173,7 +173,7 @@ export class DuneAnalyticsService {
 
     } catch (error) {
       console.error('Failed to fetch whale movements:', error);
-      return this.getMockWhaleMovements(tokenSymbols);
+      return [];
     }
   }
 
@@ -190,7 +190,7 @@ export class DuneAnalyticsService {
       const queryId = 2345678; // Example DeFi metrics query
       const result = await this.executeQuery(queryId, { protocols });
 
-      const metrics: DeFiMetrics[] = result.result?.rows.map(row => ({
+      const metrics: DeFiMetrics[] = result?.result?.rows?.map(row => ({
         protocol_name: row.protocol_name,
         tvl_usd: row.tvl_usd,
         tvl_change_24h: row.tvl_change_24h,
@@ -204,7 +204,7 @@ export class DuneAnalyticsService {
 
     } catch (error) {
       console.error('Failed to fetch DeFi metrics:', error);
-      return this.getMockDeFiMetrics(protocols);
+      return [];
     }
   }
 
@@ -221,7 +221,7 @@ export class DuneAnalyticsService {
       const queryId = 3456789; // Example DEX metrics query
       const result = await this.executeQuery(queryId, { dexes: dexNames });
 
-      const metrics: DEXMetrics[] = result.result?.rows.map(row => ({
+      const metrics: DEXMetrics[] = result?.result?.rows?.map(row => ({
         dex_name: row.dex_name,
         volume_24h: row.volume_24h,
         volume_change_24h: row.volume_change_24h,
@@ -234,7 +234,7 @@ export class DuneAnalyticsService {
 
     } catch (error) {
       console.error('Failed to fetch DEX metrics:', error);
-      return this.getMockDEXMetrics(dexNames);
+      return [];
     }
   }
 
@@ -264,7 +264,12 @@ export class DuneAnalyticsService {
 
     } catch (error) {
       console.error('Failed to fetch on-chain alpha:', error);
-      return this.getMockOnChainAlpha(tokenSymbols);
+      return {
+        whaleActivity: [],
+        dexTrends: [],
+        signals: [],
+        timestamp: new Date().toISOString()
+      };
     }
   }
 
@@ -305,54 +310,8 @@ export class DuneAnalyticsService {
     return signals;
   }
 
-  // Mock data methods for when API is not available
-  private getMockQueryResult(queryId: number): DuneQueryResult {
-    return {
-      execution_id: `mock_${queryId}_${Date.now()}`,
-      query_id: queryId,
-      state: 'QUERY_STATE_COMPLETED',
-      submitted_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      result: {
-        rows: [],
-        metadata: {
-          column_names: [],
-          column_types: [],
-          row_count: 0,
-          result_set_bytes: 0,
-          total_row_count: 0,
-          datapoint_count: 0,
-          pending_time_millis: 100,
-          execution_time_millis: 500
-        }
-      }
-    };
-  }
-
-  private getMockWhaleMovements(tokenSymbols: string[]): WhaleMovement[] {
-    console.log('⚠️ Using mock whale movement data - Dune API integration needed for real data');
-    return [];
-  }
-
-  private getMockDeFiMetrics(protocols: string[]): DeFiMetrics[] {
-    console.log('⚠️ Using mock DeFi metrics - Dune API integration needed for real data');
-    return [];
-  }
-
-  private getMockDEXMetrics(dexNames: string[]): DEXMetrics[] {
-    console.log('⚠️ Using mock DEX metrics - Dune API integration needed for real data');
-    return [];
-  }
-
-  private getMockOnChainAlpha(tokenSymbols: string[]): any {
-    console.log('⚠️ Using mock on-chain alpha - Dune API integration needed for real data');
-    return {
-      whaleActivity: [],
-      dexTrends: [],
-      signals: [],
-      timestamp: new Date().toISOString()
-    };
-  }
+  // Real data methods - mock methods removed for production readiness
+  // Note: These services now require actual Dune API implementation
 }
 
 export const duneAnalyticsService = new DuneAnalyticsService();
