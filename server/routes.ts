@@ -1222,6 +1222,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // CRYPTO LEADERS EDUCATION ROUTES
+  // =============================================================================
+
+  // Get comprehensive education data for all crypto leaders
+  app.get('/api/education/leaders', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    try {
+      const { EducationService } = await import('./services/educationService.js');
+      const educationService = new EducationService();
+      const leadersEducation = await educationService.getAllLeadersEducation(limit);
+      
+      res.json({
+        success: true,
+        leaders: leadersEducation,
+        count: leadersEducation.length,
+        message: 'Crypto leaders education data fetched successfully'
+      });
+    } catch (error) {
+      console.error('Failed to fetch leaders education:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch leaders education',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get detailed education data for a specific leader
+  app.get('/api/education/leader/:fid', asyncHandler(async (req: Request, res: Response) => {
+    const fid = parseInt(req.params.fid);
+    
+    if (!fid || isNaN(fid)) {
+      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    }
+    
+    try {
+      const { EducationService } = await import('./services/educationService.js');
+      const educationService = new EducationService();
+      const leaderEducation = await educationService.getLeaderEducation(fid);
+      
+      if (!leaderEducation) {
+        return res.status(404).json({ error: 'Leader education not found' });
+      }
+      
+      res.json({
+        success: true,
+        education: leaderEducation,
+        message: `Education data for leader ${fid} fetched successfully`
+      });
+    } catch (error) {
+      console.error(`Failed to fetch education for leader ${fid}:`, error);
+      res.status(500).json({ 
+        error: 'Failed to fetch leader education',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get topic tags by category
+  app.get('/api/education/topics', asyncHandler(async (req: Request, res: Response) => {
+    const category = req.query.category as string;
+    
+    try {
+      const { EducationService } = await import('./services/educationService.js');
+      const educationService = new EducationService();
+      const topics = educationService.getTopicsByCategory(category);
+      
+      res.json({
+        success: true,
+        topics: topics,
+        count: topics.length,
+        category: category || 'all'
+      });
+    } catch (error) {
+      console.error('Failed to fetch education topics:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch education topics',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get learning resources for a specific leader
+  app.get('/api/education/resources/:fid', asyncHandler(async (req: Request, res: Response) => {
+    const fid = parseInt(req.params.fid);
+    
+    if (!fid || isNaN(fid)) {
+      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    }
+    
+    try {
+      const { EducationService } = await import('./services/educationService.js');
+      const educationService = new EducationService();
+      const resources = await educationService.getResourcesByLeader(fid);
+      
+      res.json({
+        success: true,
+        resources: resources,
+        count: resources.length,
+        fid: fid
+      });
+    } catch (error) {
+      console.error(`Failed to fetch resources for leader ${fid}:`, error);
+      res.status(500).json({ 
+        error: 'Failed to fetch leader resources',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // =============================================================================
   // WALLET & REWARDS ROUTES
   // =============================================================================
 

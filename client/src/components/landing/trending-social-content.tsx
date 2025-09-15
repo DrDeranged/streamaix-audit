@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { 
-  TrendingUp,
+  BookOpen,
   MessageSquare,
   Users,
   Heart,
@@ -20,18 +21,70 @@ import {
   ExternalLink,
   Crown,
   Zap,
-  Globe
+  Globe,
+  GraduationCap,
+  Target,
+  Clock,
+  TrendingUp,
+  ArrowRight,
+  Lightbulb,
+  FileText,
+  Video,
+  Mic
 } from 'lucide-react';
+
+interface LeaderEducation {
+  profile: {
+    fid: number;
+    username: string;
+    displayName: string;
+    bio: string;
+    pfpUrl: string;
+    followerCount: number;
+    followingCount: number;
+    role: string;
+    expertise: string[];
+    keyTakeaways: string[];
+    ecosystem: string[];
+  };
+  notableCasts: Array<{
+    hash: string;
+    text: string;
+    whyItMatters: string;
+    concepts: string[];
+    priority: number;
+  }>;
+  resources: Array<{
+    title: string;
+    url: string;
+    description: string;
+    type: 'article' | 'talk' | 'thread' | 'website';
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    priority: number;
+  }>;
+  topics: Array<{
+    name: string;
+    definition: string;
+    category: string;
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+  }>;
+  engagement: {
+    avgLikes: number;
+    avgRecasts: number;
+    totalEngagement: number;
+  };
+}
 
 export function TrendingSocialContent() {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedLeader, setSelectedLeader] = useState<LeaderEducation | null>(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  // Fetch prominent crypto users from Farcaster
-  const { data: prominentData, isLoading, error } = useQuery({
-    queryKey: ['/api/farcaster/prominent-users'],
-    staleTime: 10 * 60 * 1000, // 10 minutes
+  // Fetch educational data for crypto leaders
+  const { data: educationData, isLoading, error } = useQuery({
+    queryKey: ['/api/education/leaders'],
+    staleTime: 15 * 60 * 1000, // 15 minutes
     retry: 2
   });
 
@@ -41,20 +94,288 @@ export function TrendingSocialContent() {
     return count.toString();
   };
 
-  const getCryptoIcon = (context: string) => {
-    if (context?.toLowerCase().includes('ethereum') || context?.toLowerCase().includes('vitalik')) return '🔷';
-    if (context?.toLowerCase().includes('farcaster') || context?.toLowerCase().includes('founder')) return '🚀';
-    if (context?.toLowerCase().includes('base') || context?.toLowerCase().includes('coinbase')) return '🔵';
+  const getCryptoIcon = (context: string | string[]) => {
+    const contextStr = Array.isArray(context) ? context.join(' ').toLowerCase() : context?.toLowerCase() || '';
+    if (contextStr.includes('ethereum')) return '🔷';
+    if (contextStr.includes('farcaster')) return '🚀';
+    if (contextStr.includes('base') || contextStr.includes('coinbase')) return '🔵';
+    if (contextStr.includes('bitcoin')) return '🟠';
     return '⚡';
   };
 
-  const isVerified = (user: any) => {
-    // Check if user has verified status or is a known prominent figure
-    return user.verified || user.cryptoContext || user.follower_count > 10000;
+  const getDifficultyBadge = (difficulty: string) => {
+    const colors = {
+      beginner: 'bg-green-500/20 text-green-400 border-green-500/30',
+      intermediate: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      advanced: 'bg-red-500/20 text-red-400 border-red-500/30'
+    };
+    return colors[difficulty as keyof typeof colors] || colors.beginner;
   };
 
-  const prominentUsers = (prominentData as any)?.users || [];
+  const getResourceIcon = (type: string) => {
+    switch(type) {
+      case 'article': return <FileText className="w-4 h-4" />;
+      case 'talk': return <Video className="w-4 h-4" />;
+      case 'thread': return <MessageSquare className="w-4 h-4" />;
+      case 'website': return <Globe className="w-4 h-4" />;
+      default: return <Link2 className="w-4 h-4" />;
+    }
+  };
 
+  const leaders = (educationData as any)?.leaders || [];
+
+  // If a leader is selected, show detailed education view
+  if (selectedLeader) {
+    return (
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-green-500/5 rounded-3xl" />
+        
+        <div className="relative z-10">
+          {/* Header with Back Button */}
+          <div className="flex items-center gap-4 mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedLeader(null)}
+              className="hover:bg-white/10"
+              data-testid="button-back-leaders"
+            >
+              <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
+              Back to Leaders
+            </Button>
+            <div className="flex items-center gap-4">
+              <img 
+                src={selectedLeader.profile.pfpUrl} 
+                alt={selectedLeader.profile.displayName}
+                className="w-12 h-12 rounded-full"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">
+                  {selectedLeader.profile.displayName}
+                </h1>
+                <p className="text-muted-foreground">{selectedLeader.profile.role}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Educational Content Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-8 bg-white/5 backdrop-blur-sm">
+              <TabsTrigger value="overview" data-testid="tab-overview">
+                <Users className="w-4 h-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="casts" data-testid="tab-casts">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Notable Casts
+              </TabsTrigger>
+              <TabsTrigger value="concepts" data-testid="tab-concepts">
+                <Lightbulb className="w-4 h-4 mr-2" />
+                Key Concepts
+              </TabsTrigger>
+              <TabsTrigger value="resources" data-testid="tab-resources">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Resources
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <Card className="p-8 bg-gradient-to-br from-card/60 to-card/40 backdrop-blur-xl border border-white/20">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <Crown className="w-5 h-5 text-yellow-400" />
+                        Profile
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          <img 
+                            src={selectedLeader.profile.pfpUrl} 
+                            alt={selectedLeader.profile.displayName}
+                            className="w-16 h-16 rounded-full"
+                          />
+                          <div>
+                            <p className="font-medium">@{selectedLeader.profile.username}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {formatFollowerCount(selectedLeader.profile.followerCount)} followers
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {selectedLeader.profile.bio}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Expertise Areas
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedLeader.profile.expertise.map((skill, i) => (
+                          <Badge key={i} variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <GraduationCap className="w-4 h-4" />
+                        Key Learning Takeaways
+                      </h4>
+                      <ul className="space-y-3">
+                        {selectedLeader.profile.keyTakeaways.map((takeaway, i) => (
+                          <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                            <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                            <span className="leading-relaxed">{takeaway}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4" />
+                        Engagement Metrics
+                      </h4>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="p-3 bg-white/5 rounded-lg">
+                          <div className="text-lg font-semibold text-blue-400">{selectedLeader.engagement.avgLikes}</div>
+                          <div className="text-xs text-muted-foreground">Avg Likes</div>
+                        </div>
+                        <div className="p-3 bg-white/5 rounded-lg">
+                          <div className="text-lg font-semibold text-green-400">{selectedLeader.engagement.avgRecasts}</div>
+                          <div className="text-xs text-muted-foreground">Avg Recasts</div>
+                        </div>
+                        <div className="p-3 bg-white/5 rounded-lg">
+                          <div className="text-lg font-semibold text-purple-400">{selectedLeader.engagement.totalEngagement}</div>
+                          <div className="text-xs text-muted-foreground">Total Engagement</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </TabsContent>
+
+            {/* Notable Casts Tab */}
+            <TabsContent value="casts" className="space-y-4">
+              {selectedLeader.notableCasts.map((cast, i) => (
+                <Card key={i} className="p-6 bg-gradient-to-br from-card/60 to-card/40 backdrop-blur-xl border border-white/20">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <img 
+                        src={selectedLeader.profile.pfpUrl} 
+                        alt={selectedLeader.profile.displayName}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <p className="font-medium text-sm">@{selectedLeader.profile.username}</p>
+                          <p className="text-foreground mt-2 leading-relaxed">{cast.text}</p>
+                        </div>
+                        
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 p-4 rounded-lg">
+                          <h5 className="font-medium text-yellow-400 mb-2 flex items-center gap-2">
+                            <Lightbulb className="w-4 h-4" />
+                            Why This Matters
+                          </h5>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{cast.whyItMatters}</p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {cast.concepts.map((concept, j) => (
+                            <Badge key={j} variant="outline" className="text-xs">
+                              {concept}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </TabsContent>
+
+            {/* Key Concepts Tab */}
+            <TabsContent value="concepts" className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                {selectedLeader.topics.map((topic, i) => (
+                  <Card key={i} className="p-6 bg-gradient-to-br from-card/60 to-card/40 backdrop-blur-xl border border-white/20">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-foreground">{topic.name}</h4>
+                        <Badge className={getDifficultyBadge(topic.difficulty)}>
+                          {topic.difficulty}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {topic.definition}
+                      </p>
+                      <Badge variant="outline" className="text-xs w-fit">
+                        {topic.category}
+                      </Badge>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Resources Tab */}
+            <TabsContent value="resources" className="space-y-4">
+              {selectedLeader.resources
+                .sort((a, b) => a.priority - b.priority)
+                .map((resource, i) => (
+                <Card key={i} className="p-6 bg-gradient-to-br from-card/60 to-card/40 backdrop-blur-xl border border-white/20">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="text-blue-400 mt-1">
+                          {getResourceIcon(resource.type)}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground mb-2">{resource.title}</h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                            {resource.description}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {resource.type}
+                            </Badge>
+                            <Badge className={getDifficultyBadge(resource.difficulty)}>
+                              {resource.difficulty}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => window.open(resource.url, '_blank')}
+                        className="hover:bg-white/10"
+                        data-testid={`link-resource-${i}`}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+    );
+  }
+
+  // Main leaders overview
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative overflow-hidden">
       {/* Background Effects */}
@@ -70,14 +391,14 @@ export function TrendingSocialContent() {
             transition={{ duration: 0.6 }}
           >
             <Badge className="mb-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 px-4 py-2">
-              <Crown className="w-4 h-4 mr-2" />
-              Crypto Thought Leaders
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Crypto Leaders Learning Hub
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent mb-6">
-              Leading Voices in Crypto
+              Learn from Crypto Pioneers
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with the most influential builders, founders, and visionaries shaping the future of decentralized technology
+              Discover insights, concepts, and resources from the most influential builders and thought leaders in crypto
             </p>
           </motion.div>
         </div>
@@ -103,11 +424,6 @@ export function TrendingSocialContent() {
                     <div className="space-y-3">
                       <div className="h-4 bg-gradient-to-r from-muted/60 to-muted/30 rounded animate-pulse" />
                       <div className="h-4 bg-gradient-to-r from-muted/40 to-muted/20 rounded w-5/6 animate-pulse" />
-                      <div className="h-4 bg-gradient-to-r from-muted/30 to-muted/15 rounded w-3/4 animate-pulse" />
-                    </div>
-                    <div className="flex items-center justify-between pt-4">
-                      <div className="h-6 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full w-20 animate-pulse" />
-                      <div className="h-8 bg-gradient-to-r from-green-400/20 to-blue-400/20 rounded w-24 animate-pulse" />
                     </div>
                   </div>
                 </Card>
@@ -124,326 +440,120 @@ export function TrendingSocialContent() {
               <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-full flex items-center justify-center">
                 <TrendingUp className="w-10 h-10 text-red-400" />
               </div>
-              <h4 className="text-2xl font-bold mb-4 bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-                Crypto Leaders Unavailable
-              </h4>
-              <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
-                Unable to connect with the crypto thought leaders at the moment. Please try again later.
+              <h3 className="text-2xl font-bold text-foreground mb-4">Content Loading Issue</h3>
+              <p className="text-muted-foreground mb-8">
+                We're having trouble loading the educational content right now. Please try again in a moment.
               </p>
-              {!isAuthenticated && (
-                <Button 
-                  onClick={() => setLocation('/auth')}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 hover:from-blue-700 hover:via-purple-700 hover:to-green-700 text-white border-0 px-8 py-3 text-lg font-semibold shadow-xl"
-                  data-testid="button-get-access"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Get Access to Premium Features
-                </Button>
-              )}
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+                data-testid="button-retry-content"
+              >
+                Try Again
+              </Button>
             </Card>
           </motion.div>
-        ) : prominentUsers.length > 0 ? (
-          <>
-            {/* Featured Hero Cards - Top 3 most prominent users */}
-            {prominentUsers.slice(0, 3).length > 0 && (
-              <div className="mb-16">
-                <motion.h3 
-                  className="text-2xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Featured Crypto Pioneers
-                </motion.h3>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {prominentUsers.slice(0, 3).map((user: any, index: number) => (
-                    <motion.div
-                      key={user.fid || index}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 + index * 0.15 }}
-                      whileHover={{ y: -8, scale: 1.02 }}
-                      className="group"
-                    >
-                      <Card className="p-8 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-green-500/10 backdrop-blur-xl border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 h-full relative overflow-hidden">
-                        {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        
-                        <div className="relative z-10">
-                          <div className="flex flex-col items-center text-center space-y-6">
-                            {/* Profile Image with enhanced styling */}
-                            <div className="relative">
-                              {user.pfp_url ? (
-                                <div className="relative">
-                                  <img 
-                                    src={user.pfp_url} 
-                                    alt={user.displayName || user.username}
-                                    className="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl group-hover:shadow-2xl transition-shadow duration-300"
-                                  />
-                                  {isVerified(user) && (
-                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                                      <Shield className="w-4 h-4 text-white" />
-                                    </div>
-                                  )}
-                                  <div className="absolute -bottom-2 -right-2 text-2xl">
-                                    {getCryptoIcon(user.cryptoContext)}
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 flex items-center justify-center border-4 border-white/20">
-                                  <Users className="w-12 h-12 text-blue-400" />
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* User Info */}
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-center gap-2">
-                                <h4 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                  {user.displayName || user.display_name || user.username}
-                                </h4>
-                                {isVerified(user) && (
-                                  <Star className="w-5 h-5 text-yellow-500" />
-                                )}
-                              </div>
-                              
-                              <p className="text-sm text-muted-foreground font-medium">
-                                @{user.username}
-                              </p>
-                              
-                              {user.cryptoContext && (
-                                <Badge className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border-blue-500/30 px-3 py-1">
-                                  <Zap className="w-3 h-3 mr-1" />
-                                  {user.cryptoContext.split(',')[0]}
-                                </Badge>
-                              )}
-                              
-                              {user.bioPreview && (
-                                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                                  {user.bioPreview}
-                                </p>
-                              )}
-                            </div>
-                            
-                            {/* Stats */}
-                            <div className="flex items-center justify-center gap-6 pt-4">
-                              {user.follower_count && (
-                                <div className="text-center">
-                                  <div className="text-lg font-bold text-blue-400">
-                                    {formatFollowerCount(user.follower_count)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    Followers
-                                  </div>
-                                </div>
-                              )}
-                              {user.following_count && (
-                                <div className="text-center">
-                                  <div className="text-lg font-bold text-green-400">
-                                    {formatFollowerCount(user.following_count)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    Following
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Action Button */}
-                            <div className="pt-4">
-                              <Button
-                                onClick={() => window.open(user.profileUrl || `https://warpcast.com/${user.username}`, '_blank')}
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 px-6 py-2 font-medium shadow-lg group-hover:shadow-xl transition-all duration-300"
-                                data-testid={`button-view-profile-${user.username}`}
-                              >
-                                <Globe className="w-4 h-4 mr-2" />
-                                View Profile
-                                <ExternalLink className="w-4 h-4 ml-2" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Additional Users Grid */}
-            {prominentUsers.length > 3 && (
-              <div>
-                <motion.h3 
-                  className="text-2xl font-bold text-center mb-8 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                >
-                  More Crypto Innovators
-                </motion.h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {prominentUsers.slice(3, 9).map((user: any, index: number) => (
-                    <motion.div
-                      key={user.fid || `additional-${index}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1 + index * 0.1 }}
-                      whileHover={{ y: -4, scale: 1.02 }}
-                      className="group"
-                    >
-                      <Card className="p-6 bg-gradient-to-br from-card/60 to-card/30 backdrop-blur-xl border border-white/20 hover:border-blue-500/30 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
-                        <div className="flex items-start gap-4 mb-4">
-                          <div className="relative">
-                            {user.pfp_url ? (
-                              <img 
-                                src={user.pfp_url} 
-                                alt={user.displayName || user.username}
-                                className="w-12 h-12 rounded-full border-2 border-white/20 shadow-md"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400/20 to-green-400/20 flex items-center justify-center border-2 border-white/20">
-                                <Users className="w-6 h-6 text-blue-400" />
-                              </div>
-                            )}
-                            {isVerified(user) && (
-                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                                <Shield className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-sm truncate">
-                                {user.displayName || user.display_name || user.username}
-                              </h4>
-                              {isVerified(user) && (
-                                <Star className="w-4 h-4 text-yellow-500" />
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground mb-2">
-                              @{user.username}
-                            </p>
-                            {user.cryptoContext && (
-                              <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-400">
-                                {getCryptoIcon(user.cryptoContext)} {user.cryptoContext.split(',')[0]}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {user.bioPreview && (
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                            {user.bioPreview}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                          <div className="flex items-center gap-4 text-xs">
-                            {user.follower_count && (
-                              <span className="flex items-center gap-1 text-blue-400">
-                                <Users className="w-3 h-3" />
-                                {formatFollowerCount(user.follower_count)}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(user.profileUrl || `https://warpcast.com/${user.username}`, '_blank')}
-                            className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50"
-                            data-testid={`button-visit-${user.username}`}
-                          >
-                            <ExternalLink className="w-3 h-3 mr-1" />
-                            Visit
-                          </Button>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="p-16 text-center bg-gradient-to-br from-card/60 to-card/40 backdrop-blur-xl border border-white/20 shadow-2xl max-w-2xl mx-auto">
-              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
-                <Users className="w-10 h-10 text-blue-400" />
-              </div>
-              <h4 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Crypto Leaders Coming Soon
-              </h4>
-              <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
-                We're connecting with the most influential voices in crypto. Check back soon to discover the thought leaders shaping our industry.
-              </p>
-            </Card>
-          </motion.div>
-        )}
-        
-        {/* Enhanced CTA Section */}
-        <motion.div 
-          className="mt-20 text-center"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.6 }}
-        >
-          <div className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-green-500/10 backdrop-blur-xl border border-white/20 rounded-3xl p-12 max-w-4xl mx-auto shadow-2xl">
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 1.7, duration: 0.4 }}
-            >
-              <Crown className="w-12 h-12 mx-auto mb-6 text-yellow-500" />
-              <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
-                Join the Crypto Elite
-              </h3>
-              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                Connect with the most influential builders, investors, and visionaries in crypto. Get exclusive access to their insights and join the conversation.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button 
-                  onClick={() => setLocation(isAuthenticated ? '/farcaster-activity' : '/auth')}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 hover:from-blue-700 hover:via-purple-700 hover:to-green-700 text-white border-0 px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-                  data-testid={isAuthenticated ? "button-explore-more" : "button-join-elite"}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {leaders.slice(0, 6).map((leader: LeaderEducation, index: number) => (
+              <motion.div
+                key={leader.profile.fid}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card 
+                  className="group p-8 bg-gradient-to-br from-card/60 to-card/40 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer hover:scale-105 hover:border-white/30"
+                  onClick={() => setSelectedLeader(leader)}
+                  data-testid={`card-leader-${leader.profile.fid}`}
                 >
-                  {isAuthenticated ? (
-                    <>
-                      <BarChart3 className="w-5 h-5 mr-2" />
-                      Explore Advanced Social Intelligence
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Join the Crypto Elite
-                    </>
-                  )}
-                </Button>
-                
-                {!isAuthenticated && (
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    className="border-2 border-white/30 text-foreground hover:bg-white/10 px-8 py-4 text-lg font-medium backdrop-blur-sm"
-                    onClick={() => setLocation('/farcaster-activity')}
-                    data-testid="button-browse-public"
-                  >
-                    <Globe className="w-5 h-5 mr-2" />
-                    Browse Public Content
-                  </Button>
-                )}
-              </div>
-            </motion.div>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img 
+                          src={leader.profile.pfpUrl} 
+                          alt={leader.profile.displayName}
+                          className="w-16 h-16 rounded-full ring-2 ring-white/20 group-hover:ring-white/40 transition-all duration-300"
+                        />
+                        <div className="absolute -top-1 -right-1 text-lg">
+                          {getCryptoIcon(leader.profile.ecosystem)}
+                        </div>
+                      </div>
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-foreground group-hover:text-blue-400 transition-colors">
+                            {leader.profile.displayName}
+                          </h3>
+                          <Shield className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <p className="text-sm text-blue-400 font-medium">{leader.profile.role}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {formatFollowerCount(leader.profile.followerCount)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                          <Target className="w-3 h-3" />
+                          Expertise
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {leader.profile.expertise.slice(0, 2).map((skill, i) => (
+                            <Badge key={i} variant="secondary" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/30">
+                              {skill}
+                            </Badge>
+                          ))}
+                          {leader.profile.expertise.length > 2 && (
+                            <Badge variant="secondary" className="text-xs bg-muted/20 text-muted-foreground border-muted/30">
+                              +{leader.profile.expertise.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                          <BookOpen className="w-3 h-3" />
+                          Learning Content
+                        </h4>
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="p-2 bg-white/5 rounded text-xs">
+                            <div className="font-semibold text-green-400">{leader.notableCasts.length}</div>
+                            <div className="text-muted-foreground">Casts</div>
+                          </div>
+                          <div className="p-2 bg-white/5 rounded text-xs">
+                            <div className="font-semibold text-blue-400">{leader.topics.length}</div>
+                            <div className="text-muted-foreground">Topics</div>
+                          </div>
+                          <div className="p-2 bg-white/5 rounded text-xs">
+                            <div className="font-semibold text-purple-400">{leader.resources.length}</div>
+                            <div className="text-muted-foreground">Resources</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/10">
+                      <Button 
+                        className="w-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-foreground border border-white/20 hover:border-white/30 group-hover:shadow-lg transition-all duration-300"
+                        data-testid={`button-explore-${leader.profile.fid}`}
+                      >
+                        <GraduationCap className="w-4 h-4 mr-2" />
+                        Explore Learning Content
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
+        )}
       </div>
     </section>
   );
