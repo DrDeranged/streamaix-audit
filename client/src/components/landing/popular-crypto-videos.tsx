@@ -405,25 +405,6 @@ export function PopularCryptoVideos() {
           </div>
         </motion.div>
 
-        {/* Professional CTA */}
-        <motion.div 
-          className="text-center mt-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-muted-foreground mb-4">Ready to analyze your own content?</p>
-          <Button
-            onClick={() => setLocation('/#ai-processor')}
-            size="lg"
-            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 font-medium"
-            data-testid="button-try-own-url"
-          >
-            <Zap className="w-5 h-5 mr-2" />
-            Start AI Analysis
-          </Button>
-        </motion.div>
       </div>
 
       <style>{`
