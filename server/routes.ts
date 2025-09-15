@@ -1159,6 +1159,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get trending content from Farcaster
+  app.get('/api/farcaster/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 25;
+    
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      const trending = await farcasterService.getTrendingContent(limit);
+      
+      res.json({
+        success: true,
+        trending: trending,
+        count: trending.length
+      });
+    } catch (error) {
+      console.error('Failed to fetch trending content:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch trending content',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
   // =============================================================================
   // WALLET & REWARDS ROUTES
   // =============================================================================

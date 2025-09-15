@@ -301,6 +301,58 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
   }
 
   /**
+   * Get trending content from Farcaster
+   */
+  async getTrendingContent(limit: number = 25): Promise<any[]> {
+    try {
+      console.log(`🔍 Fetching trending content (limit: ${limit})`);
+      
+      // Try to get trending/popular content from the API
+      // Use the global feed for trending content as fetchFeedTrending may not be available
+      const trendingCasts = await this.client.fetchFeed({
+        feedType: 'following',
+        fid: 3, // Use Dan Romero as a seed for trending content
+        limit: limit
+      });
+      
+      console.log(`✅ Retrieved ${trendingCasts.casts?.length || 0} trending casts`);
+      return trendingCasts.casts || [];
+    } catch (error) {
+      console.error('❌ Failed to get trending content:', error);
+      
+      // Fallback: get recent casts from popular crypto accounts
+      try {
+        console.log('🔄 Falling back to popular accounts\' content...');
+        const popularFids = [3, 5650, 1, 6546]; // Dan, Vitalik, Farcaster, Jesse
+        const allCasts: any[] = [];
+        
+        for (const fid of popularFids) {
+          try {
+            const userCasts = await this.getUserCasts(fid, Math.floor(limit / popularFids.length));
+            allCasts.push(...userCasts);
+          } catch (castError) {
+            console.error(`Failed to get casts for fid ${fid}:`, castError);
+            continue;
+          }
+        }
+        
+        // Sort by engagement and recency
+        const sortedCasts = allCasts.sort((a, b) => {
+          const aEngagement = (a.reactions?.likes_count || 0) + (a.reactions?.recasts_count || 0);
+          const bEngagement = (b.reactions?.likes_count || 0) + (b.reactions?.recasts_count || 0);
+          return bEngagement - aEngagement;
+        });
+        
+        console.log(`✅ Fallback retrieved ${sortedCasts.length} casts from popular accounts`);
+        return sortedCasts.slice(0, limit);
+      } catch (fallbackError) {
+        console.error('❌ Fallback also failed:', fallbackError);
+        return [];
+      }
+    }
+  }
+
+  /**
    * Test the Farcaster connection
    */
   async testConnection(): Promise<boolean> {
