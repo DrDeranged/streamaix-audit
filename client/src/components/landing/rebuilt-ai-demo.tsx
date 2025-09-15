@@ -331,6 +331,34 @@ function FarcasterActivityDemo() {
   );
 }
 
+// Separate Social Intelligence Section Component
+export function LiveSocialIntelligence() {
+  return (
+    <section className="py-16 bg-background">
+      <div className="container mx-auto px-4 sm:px-6">
+        <motion.div 
+          className="text-center mb-8 sm:mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            Live Social Intelligence
+          </h2>
+          <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+            See real AI analysis in action with trending crypto content from Farcaster leaders
+          </p>
+        </motion.div>
+        
+        <div className="max-w-4xl mx-auto">
+          <FarcasterActivityDemo />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function AIProcessor() {
   const [url, setUrl] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -1080,24 +1108,6 @@ export function AIProcessor() {
           </AnimatePresence>
         </div>
 
-        {/* Farcaster Activity Integration - Positioned underneath AI processor */}
-        <div className="mt-16">
-          <motion.div 
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-xl sm:text-3xl font-orbitron font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              Live Social Intelligence
-            </h3>
-            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              See real AI analysis in action with trending crypto content from Farcaster leaders
-            </p>
-          </motion.div>
-          <FarcasterActivityDemo />
-        </div>
       </div>
 
       {/* User Notes Modal */}
