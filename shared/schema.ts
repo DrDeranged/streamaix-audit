@@ -116,6 +116,65 @@ export const userNotes = pgTable("user_notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const cryptoLeaders = pgTable("crypto_leaders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fid: integer("fid").notNull().unique(), // Farcaster ID
+  username: text("username").notNull(),
+  displayName: text("display_name"),
+  bio: text("bio"),
+  pfpUrl: text("pfp_url"),
+  followerCount: integer("follower_count"),
+  followingCount: integer("following_count"),
+  powerBadge: boolean("power_badge").default(false),
+  verifiedAddresses: jsonb("verified_addresses"), // ENS, onchain addresses
+  ecosystem: text("ecosystem").array(), // ["ethereum", "base", "farcaster"]
+  role: text("role"), // "Ethereum Founder", "Farcaster Co-founder", etc
+  keyTakeaways: text("key_takeaways").array(), // Curated learning points
+  expertise: text("expertise").array(), // ["L2 scaling", "social protocols"]
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const curatedCasts = pgTable("curated_casts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leaderId: varchar("leader_id").references(() => cryptoLeaders.id).notNull(),
+  castHash: text("cast_hash").notNull().unique(),
+  castText: text("cast_text").notNull(),
+  publishedAt: timestamp("published_at").notNull(),
+  likesCount: integer("likes_count").default(0),
+  recastsCount: integer("recasts_count").default(0),
+  repliesCount: integer("replies_count").default(0),
+  whyItMatters: text("why_it_matters").notNull(), // Educational context
+  concepts: text("concepts").array(), // Related learning concepts
+  priority: integer("priority").default(1), // 1=highest, 5=lowest
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const topicTags = pgTable("topic_tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  definition: text("definition").notNull(),
+  category: text("category").notNull(), // "technology", "market", "governance"
+  relatedLeaderIds: text("related_leader_ids").array(), // Leaders who discuss this
+  resourceLinks: jsonb("resource_links"), // Links to learn more
+  difficulty: text("difficulty").default("beginner"), // beginner, intermediate, advanced
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const learningResources = pgTable("learning_resources", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leaderId: varchar("leader_id").references(() => cryptoLeaders.id).notNull(),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  description: text("description"),
+  resourceType: text("resource_type").notNull(), // "article", "talk", "thread", "website"
+  difficulty: text("difficulty").default("beginner"),
+  priority: integer("priority").default(3), // 1=must read, 5=optional
+  topics: text("topics").array(), // Related topic tags
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
@@ -177,6 +236,25 @@ export const userNotesRelations = relations(userNotes, ({ one }) => ({
     references: [users.id],
   }),
   // Removed summary relation since summaryId can now be journal entries
+}));
+
+export const cryptoLeadersRelations = relations(cryptoLeaders, ({ many }) => ({
+  curatedCasts: many(curatedCasts),
+  resources: many(learningResources),
+}));
+
+export const curatedCastsRelations = relations(curatedCasts, ({ one }) => ({
+  leader: one(cryptoLeaders, {
+    fields: [curatedCasts.leaderId],
+    references: [cryptoLeaders.id],
+  }),
+}));
+
+export const learningResourcesRelations = relations(learningResources, ({ one }) => ({
+  leader: one(cryptoLeaders, {
+    fields: [learningResources.leaderId],
+    references: [cryptoLeaders.id],
+  }),
 }));
 
 // Insert schemas
@@ -249,6 +327,56 @@ export const insertUserNoteSchema = createInsertSchema(userNotes).pick({
   isPrivate: true,
 });
 
+export const insertCryptoLeaderSchema = createInsertSchema(cryptoLeaders).pick({
+  fid: true,
+  username: true,
+  displayName: true,
+  bio: true,
+  pfpUrl: true,
+  followerCount: true,
+  followingCount: true,
+  powerBadge: true,
+  verifiedAddresses: true,
+  ecosystem: true,
+  role: true,
+  keyTakeaways: true,
+  expertise: true,
+  isActive: true,
+});
+
+export const insertCuratedCastSchema = createInsertSchema(curatedCasts).pick({
+  leaderId: true,
+  castHash: true,
+  castText: true,
+  publishedAt: true,
+  likesCount: true,
+  recastsCount: true,
+  repliesCount: true,
+  whyItMatters: true,
+  concepts: true,
+  priority: true,
+});
+
+export const insertTopicTagSchema = createInsertSchema(topicTags).pick({
+  name: true,
+  definition: true,
+  category: true,
+  relatedLeaderIds: true,
+  resourceLinks: true,
+  difficulty: true,
+});
+
+export const insertLearningResourceSchema = createInsertSchema(learningResources).pick({
+  leaderId: true,
+  title: true,
+  url: true,
+  description: true,
+  resourceType: true,
+  difficulty: true,
+  priority: true,
+  topics: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -267,3 +395,28 @@ export type KnowledgeStack = typeof knowledgeStacks.$inferSelect;
 
 export type InsertUserNote = z.infer<typeof insertUserNoteSchema>;
 export type UserNote = typeof userNotes.$inferSelect;
+
+export type InsertCryptoLeader = z.infer<typeof insertCryptoLeaderSchema>;
+export type CryptoLeader = typeof cryptoLeaders.$inferSelect;
+
+export type InsertCuratedCast = z.infer<typeof insertCuratedCastSchema>;
+export type CuratedCast = typeof curatedCasts.$inferSelect;
+
+export type InsertTopicTag = z.infer<typeof insertTopicTagSchema>;
+export type TopicTag = typeof topicTags.$inferSelect;
+
+export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
+export type LearningResource = typeof learningResources.$inferSelect;
+
+// Educational response types
+export type LeaderEducationData = {
+  profile: CryptoLeader;
+  notableCasts: CuratedCast[];
+  resources: LearningResource[];
+  topics: TopicTag[];
+  engagement: {
+    avgLikes: number;
+    avgRecasts: number;
+    totalEngagement: number;
+  };
+};
