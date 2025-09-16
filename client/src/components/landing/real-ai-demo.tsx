@@ -58,28 +58,28 @@ function FarcasterActivityDemo() {
 
       {/* Popular Farcaster Users Selector */}
       <div className="mb-6">
-        <h4 className="text-lg font-semibold mb-4 text-center">Select a Crypto Leader to Follow</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">Select a Crypto Leader to Follow</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {popularFids.map((user) => (
             <button
               key={user.fid}
               onClick={() => setSelectedFid(user.fid)}
-              className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+              className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 ${
                 selectedFid === user.fid
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                   : 'border-muted hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-900/10'
               }`}
             >
-              <div className="text-sm font-medium">{user.displayName}</div>
+              <div className="text-xs sm:text-sm font-medium">{user.displayName}</div>
               <div className="text-xs text-muted-foreground">@{user.username}</div>
-              <div className="text-xs text-muted-foreground mt-1">{user.description}</div>
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">{user.description}</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Real Activity Dashboard */}
-      <div className="grid md:grid-cols-3 gap-6">
+      {/* Real Activity Dashboard - Mobile-Optimized Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* User Profile Card */}
         <Card className="md:col-span-1">
           <CardHeader>
@@ -168,7 +168,7 @@ function FarcasterActivityDemo() {
                 ))}
               </div>
             ) : casts && casts.length > 0 ? (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3 sm:space-y-4 max-h-72 sm:max-h-96 overflow-y-auto">
                 {casts.slice(0, 5).map((cast: any, index: number) => (
                   <motion.div
                     key={cast.hash || index}
@@ -177,7 +177,7 @@ function FarcasterActivityDemo() {
                     transition={{ delay: index * 0.1 }}
                     className="border-b border-muted pb-4 last:border-b-0"
                   >
-                    <p className="text-sm mb-2 line-clamp-3">{cast.text}</p>
+                    <p className="text-xs sm:text-sm mb-2 line-clamp-2 sm:line-clamp-3">{cast.text}</p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />

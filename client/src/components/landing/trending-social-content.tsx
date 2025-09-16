@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -117,6 +117,11 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
   const [showAll, setShowAll] = useState(false);
   const initialCount = 6; // Show 6 posts initially for better mobile performance
   const displayedCasts = showAll ? casts : casts.slice(0, initialCount);
+
+  // Reset showAll when tab or topic changes to maintain space efficiency
+  useEffect(() => {
+    setShowAll(false);
+  }, [activeTab, selectedTopic]);
 
   if (isLoading) {
     return (
