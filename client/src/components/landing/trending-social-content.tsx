@@ -53,7 +53,283 @@ interface ProminentAccount {
   trending_score: number;
 }
 
-// Compact Trending Topics Section
+// X-style Topic Filter Chips
+function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic: string | null; onTopicSelect: (topic: string | null) => void }) {
+  const { data: trendsData } = useQuery({
+    queryKey: ['/api/trending-topics'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const trends = (trendsData as any)?.topics?.slice(0, 6) || [
+    { topic: 'Bitcoin ETF', mentions: 247 },
+    { topic: 'DePIN', mentions: 189 },
+    { topic: 'L2 scaling', mentions: 156 },
+    { topic: 'Base chain', mentions: 134 },
+    { topic: 'AI x Crypto', mentions: 89 },
+    { topic: 'NFTs', mentions: 67 }
+  ];
+
+  return (
+    <div className="flex gap-2 flex-wrap mb-6">
+      <button
+        onClick={() => onTopicSelect(null)}
+        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          selectedTopic === null
+            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+            : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/60 border border-white/10'
+        }`}
+        data-testid="topic-all"
+      >
+        All
+      </button>
+      {trends.map((trend: any, i: number) => (
+        <motion.button
+          key={trend.topic}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.05 }}
+          onClick={() => onTopicSelect(trend.topic)}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            selectedTopic === trend.topic
+              ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+              : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/60 border border-white/10'
+          }`}
+          data-testid={`topic-${i}`}
+        >
+          {trend.topic}
+          <span className="ml-2 text-xs opacity-70">{trend.mentions}</span>
+        </motion.button>
+      ))}
+    </div>
+  );
+}
+
+// Main Feed Component - X-style
+function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
+  casts: TrendingCast[];
+  isLoading: boolean;
+  error: any;
+  activeTab: string;
+  selectedTopic: string | null;
+}) {
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-6 animate-pulse">
+            <div className="flex gap-4 mb-4">
+              <div className="w-12 h-12 bg-slate-700/40 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-slate-700/40 rounded w-1/3" />
+                <div className="h-3 bg-slate-800/30 rounded w-1/4" />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="h-4 bg-slate-800/30 rounded w-full" />
+              <div className="h-4 bg-slate-800/20 rounded w-4/5" />
+              <div className="h-3 bg-slate-800/10 rounded w-2/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12 bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl">
+        <p className="text-slate-400 mb-4">Unable to load conversations</p>
+        <Button 
+          onClick={() => window.location.reload()} 
+          variant="outline" 
+          size="sm"
+          className="border-white/20 text-slate-300 hover:bg-white/10"
+          data-testid="retry-feed"
+        >
+          Try again
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {casts.slice(0, 12).map((cast, index) => (
+        <FeedPostCard key={cast.hash} cast={cast} index={index} />
+      ))}
+    </div>
+  );
+}
+
+// X-style Right Rail
+function DiscoverRightRail() {
+  return (
+    <div className="space-y-6 sticky top-6">
+      {/* Trending Topics */}
+      <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+        <h3 className="text-lg font-semibold text-white mb-4">What's happening</h3>
+        <TrendingTopicsWidget />
+      </div>
+
+      {/* Who to follow */}
+      <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+        <h3 className="text-lg font-semibold text-white mb-4">Who to follow</h3>
+        <WhoToFollowWidget />
+      </div>
+    </div>
+  );
+}
+
+// Right Rail Widgets
+function TrendingTopicsWidget() {
+  const { data: trendsData } = useQuery({
+    queryKey: ['/api/trending-topics'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const trends = (trendsData as any)?.topics?.slice(0, 5) || [
+    { topic: 'Bitcoin ETF', mentions: 247 },
+    { topic: 'DePIN', mentions: 189 },
+    { topic: 'L2 scaling', mentions: 156 },
+    { topic: 'Base chain', mentions: 134 },
+    { topic: 'AI x Crypto', mentions: 89 }
+  ];
+
+  return (
+    <div className="space-y-3">
+      {trends.map((trend: any, i: number) => (
+        <motion.div
+          key={trend.topic}
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.1 }}
+          className="p-3 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+          data-testid={`trending-widget-${i}`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white font-medium">{trend.topic}</p>
+              <p className="text-slate-400 text-sm">{trend.mentions} posts</p>
+            </div>
+            <TrendingUp className="w-4 h-4 text-indigo-400" />
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function WhoToFollowWidget() {
+  const fallbackAccounts = [
+    { account: { fid: 3, username: 'dwr.eth', display_name: 'Dan Romero', pfp_url: 'https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/99ecb9fe-d38b-4d97-af33-a8a8c2e89100/original' }, recent_activity: 'high', trending_score: 95 },
+    { account: { fid: 2, username: 'v', display_name: 'Vitalik', pfp_url: 'https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/bd9c8b63-5b8f-4aa8-8495-0334306b92c2/original' }, recent_activity: 'high', trending_score: 98 },
+    { account: { fid: 239, username: 'linda', display_name: 'Linda Xie', pfp_url: 'https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/68b4b09e-58e3-4e39-9074-fe6b49a51c34/original' }, recent_activity: 'medium', trending_score: 87 }
+  ];
+
+  return (
+    <div className="space-y-4">
+      {fallbackAccounts.map((account: any, i: number) => (
+        <motion.div
+          key={account.account.fid}
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.1 }}
+          className="flex items-center justify-between p-3 hover:bg-white/5 rounded-lg transition-colors"
+          data-testid={`follow-suggestion-${i}`}
+        >
+          <div className="flex items-center gap-3">
+            <img
+              src={account.account.pfp_url}
+              alt={account.account.display_name}
+              className="w-10 h-10 rounded-full border border-white/20"
+            />
+            <div>
+              <p className="text-white font-medium text-sm">{account.account.display_name}</p>
+              <p className="text-slate-400 text-xs">@{account.account.username}</p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs border-white/20 text-slate-300 hover:bg-white/10"
+            data-testid={`follow-button-${i}`}
+          >
+            Follow
+          </Button>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// X-style Feed Post Card
+function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
+  const formatTime = (timestamp: string) => {
+    const now = Date.now();
+    const castTime = new Date(timestamp).getTime();
+    const diffMinutes = Math.floor((now - castTime) / (1000 * 60));
+    
+    if (diffMinutes < 1) return 'now';
+    if (diffMinutes < 60) return `${diffMinutes}m`;
+    if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h`;
+    return `${Math.floor(diffMinutes / 1440)}d`;
+  };
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-slate-900/70 transition-all cursor-pointer group"
+      data-testid={`feed-post-${index}`}
+    >
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-4">
+        <img
+          src={cast.author.pfpUrl}
+          alt={cast.author.displayName}
+          className="w-12 h-12 rounded-full border border-white/20"
+        />
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="text-white font-semibold">{cast.author.displayName}</h4>
+            <span className="text-slate-400 text-sm">@{cast.author.username}</span>
+            <span className="text-slate-500 text-sm">·</span>
+            <span className="text-slate-500 text-sm">{formatTime(cast.timestamp)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="mb-4">
+        <p className="text-slate-200 leading-relaxed text-sm">{cast.text}</p>
+      </div>
+
+      {/* Engagement */}
+      <div className="flex items-center justify-between pt-3 border-t border-white/10">
+        <div className="flex items-center gap-6">
+          <button className="flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors">
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-xs">{cast.replies}</span>
+          </button>
+          <button className="flex items-center gap-2 text-slate-400 hover:text-green-400 transition-colors">
+            <Repeat2 className="w-4 h-4" />
+            <span className="text-xs">{cast.recasts}</span>
+          </button>
+          <button className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors">
+            <Heart className="w-4 h-4" />
+            <span className="text-xs">{cast.likes}</span>
+          </button>
+        </div>
+        <button className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+          <ExternalLink className="w-4 h-4" />
+        </button>
+      </div>
+    </motion.article>
+  );
+}
+
+// Compact Trending Topics Section (Legacy - keeping for backward compatibility)
 function TrendingTopics() {
   const { data: trendsData } = useQuery({
     queryKey: ['/api/trending-topics'],
@@ -301,124 +577,84 @@ function QuickStats() {
 
 export function TrendingSocialContent() {
   const { isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState<'for-you' | 'trending' | 'following'>('trending');
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   
-  // Fetch trending casts - simplified for landing page efficiency
+  // Fetch trending casts for main feed
   const { data: trendingData, isLoading, error } = useQuery({
-    queryKey: ['/api/trending'],
+    queryKey: ['/api/trending', selectedTopic],
     queryFn: () => {
-      const params = new URLSearchParams({ limit: '8' }); // Reduced limit for landing page
+      const params = new URLSearchParams({ limit: '12' });
+      if (selectedTopic) params.append('topic', selectedTopic);
       return fetch(`/api/trending?${params}`).then(res => res.json());
     },
-    staleTime: 3 * 60 * 1000, // 3 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes for fresher content
   });
 
   const allCasts = trendingData?.items || [];
 
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-      {/* Discrete header with glass morphism effect */}
-      <div className="mb-6">
+    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Header Section - X-style */}
+      <div className="mb-8">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-r from-slate-900/50 to-purple-900/20 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-6"
+          className="mb-6"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-xl font-semibold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
-                  Social Intelligence
-                </h2>
-                <div className="flex items-center gap-1 text-xs text-slate-400">
-                  <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
-                  <span>Live</span>
-                </div>
-              </div>
-              <p className="text-sm text-slate-400">
-                Community conversation highlights and engagement patterns
-              </p>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs text-slate-300 hover:text-white hover:bg-white/10 border border-white/20"
-              data-testid="view-all-conversations"
-            >
-              Explore <ChevronRight className="w-3 h-3 ml-1" />
-            </Button>
-          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
+            Discover
+          </h2>
+          <p className="text-slate-400 text-sm">Stay updated with the latest in crypto conversations</p>
         </motion.div>
-      </div>
 
-      {/* Trending Headlines & Key Voices */}
-      <div className="mb-6 space-y-4">
-        <TrendingTopics />
-        <ProminentAccountsRail />
-      </div>
-
-      {/* Featured Stories Grid */}
-      <div className="grid lg:grid-cols-1 gap-3 mb-6">
-        {isLoading ? (
-          // Story loading states
-          [...Array(8)].map((_, i) => (
-            <div key={i} className="p-4 bg-gradient-to-r from-slate-900/30 to-purple-900/20 backdrop-blur-sm border border-white/10 rounded-lg animate-pulse">
-              <div className="flex gap-3 mb-3">
-                <div className="w-10 h-10 bg-slate-700/40 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-slate-700/40 rounded w-1/3" />
-                  <div className="h-3 bg-slate-800/30 rounded w-1/4" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-slate-800/30 rounded w-full" />
-                <div className="h-4 bg-slate-800/20 rounded w-4/5" />
-                <div className="h-3 bg-slate-800/10 rounded w-2/3" />
-              </div>
-            </div>
-          ))
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-slate-400 mb-2">Unable to load crypto conversations</p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="outline" 
-              size="sm"
-              data-testid="retry-feed"
+        {/* Tab Navigation */}
+        <div className="flex gap-6 mb-4 border-b border-white/10">
+          {(['trending', 'for-you', 'following'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 px-1 text-sm font-medium transition-colors capitalize relative ${
+                activeTab === tab
+                  ? 'text-white'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+              data-testid={`tab-${tab}`}
             >
-              Try again
-            </Button>
-          </div>
-        ) : (
-          allCasts.slice(0, 8).map((cast: TrendingCast, index: number) => (
-            <CompactCastItem key={cast.hash} cast={cast} index={index} />
-          ))
-        )}
+              {tab.replace('-', ' ')}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Topic Filter Chips */}
+        <TrendingTopicsFilter selectedTopic={selectedTopic} onTopicSelect={setSelectedTopic} />
       </div>
 
-      {/* Discrete call to action for more content */}
-      {!isLoading && !error && allCasts.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="text-center py-6 bg-gradient-to-r from-slate-900/30 to-purple-900/20 backdrop-blur-sm rounded-xl border border-white/10"
-        >
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-400 mb-3">
-            <Eye className="w-4 h-4" />
-            <span>Explore detailed analytics and insights</span>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 text-white border border-white/20"
-            onClick={() => window.location.href = isAuthenticated ? '/dashboard' : '/auth'}
-            data-testid="get-more-analytics"
-          >
-            {isAuthenticated ? 'View Full Dashboard' : 'Access Analytics'}
-          </Button>
-        </motion.div>
-      )}
+      {/* Two-Column Layout */}
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Main Feed Column */}
+        <div className="lg:col-span-2">
+          <DiscoverFeed 
+            casts={allCasts} 
+            isLoading={isLoading} 
+            error={error} 
+            activeTab={activeTab}
+            selectedTopic={selectedTopic}
+          />
+        </div>
+
+        {/* Right Rail */}
+        <div className="lg:col-span-1">
+          <DiscoverRightRail />
+        </div>
+      </div>
     </section>
   );
 }
