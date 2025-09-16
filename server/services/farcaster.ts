@@ -318,7 +318,14 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       console.log(`✅ Retrieved profile for user ${fid}: @${user.username}`);
       return user;
     } catch (error) {
-      console.error('❌ Failed to get user profile:', error);
+      // Sanitize error logging to avoid exposing API keys
+      const sanitizedError = error instanceof Error ? {
+        message: error.message,
+        status: (error as any).status || (error as any).response?.status,
+        endpoint: (error as any).config?.url?.split('?')[0] // Remove query params
+      } : 'Unknown error';
+      
+      console.error('❌ Failed to get user profile:', sanitizedError);
       throw new Error(`Failed to get user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
