@@ -152,6 +152,19 @@ export const searchSchema = z.object({
   limit: z.coerce.number().min(1).max(50).default(20),
 });
 
+// Recent activity filtering schema
+export const recentActivitySchema = z.object({
+  since: z.string().datetime().optional().transform(val => {
+    if (!val) {
+      // Default to 24 hours ago if not provided
+      return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    }
+    return val;
+  }),
+  order: z.enum(['asc', 'desc']).optional().default('desc'),
+  limit: z.coerce.number().min(1).max(100).optional().default(25),
+});
+
 // Web3 schemas
 export const web3AuthSchema = z.object({
   walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address'),
@@ -191,6 +204,8 @@ export type UpdateKnowledgeStackRequest = z.infer<typeof updateKnowledgeStackSch
 
 export type CreateUserNoteRequest = z.infer<typeof createUserNoteSchema>;
 export type UpdateUserNoteRequest = z.infer<typeof updateUserNoteSchema>;
+
+export type RecentActivityRequest = z.infer<typeof recentActivitySchema>;
 
 export type ProcessContentRequest = z.infer<typeof processContentSchema>;
 export type SocialShareRequest = z.infer<typeof socialShareSchema>;

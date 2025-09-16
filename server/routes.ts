@@ -28,11 +28,13 @@ import {
   updateUserNoteSchema,
   paginationSchema,
   searchSchema,
+  recentActivitySchema,
   processContentSchema,
   type LoginRequest,
   type RegisterRequest,
   type WalletLoginRequest,
-  type TwitterAuthRequest
+  type TwitterAuthRequest,
+  type RecentActivityRequest
 } from "./validators";
 import { Request, Response } from "express";
 import cors from "cors";
@@ -1159,18 +1161,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get trending content from Farcaster
+  // Get trending content from Farcaster with recent activity filtering
   app.get('/api/farcaster/trending', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 25;
+    const validation = validateRequest<RecentActivityRequest>(recentActivitySchema, req.query);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    const { since, order, limit } = validation.data!;
     
     try {
       const { farcasterService } = await import('./services/farcaster');
-      const trending = await farcasterService.getTrendingContent(limit);
+      const trending = await farcasterService.getTrendingContent(limit, { since, order });
       
       res.json({
         success: true,
         trending: trending,
-        count: trending.length
+        count: trending.length,
+        filters: { since, order, limit }
       });
     } catch (error) {
       console.error('Failed to fetch trending content:', error);

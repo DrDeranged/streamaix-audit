@@ -367,9 +367,9 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
   }
 
   /**
-   * Get trending content from Farcaster
+   * Get trending content from Farcaster with recent activity filtering
    */
-  async getTrendingContent(limit: number = 25): Promise<any[]> {
+  async getTrendingContent(limit: number = 25, filters?: { since?: string; order?: 'asc' | 'desc' }): Promise<any[]> {
     try {
       console.log(`🔍 Fetching trending content (limit: ${limit})`);
       
@@ -469,7 +469,23 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         }
       ];
       
-      return demoTrendingContent.slice(0, limit);
+      // Filter demo content based on recent activity parameters
+      const filteredContent = demoTrendingContent
+        .filter((cast: any) => {
+          if (!filters?.since) return true;
+          const castTime = new Date(cast.timestamp);
+          const sinceTime = new Date(filters.since);
+          return castTime >= sinceTime;
+        })
+        .sort((a: any, b: any) => {
+          const timeA = new Date(a.timestamp).getTime();
+          const timeB = new Date(b.timestamp).getTime();
+          return filters?.order === 'asc' ? timeA - timeB : timeB - timeA;
+        })
+        .slice(0, limit);
+      
+      console.log(`✅ Filtered to ${filteredContent.length} recent casts (since: ${filters?.since || '24h ago'})`);
+      return filteredContent;
     }
   }
 
