@@ -9,14 +9,16 @@ import {
   MessageSquare,
   Heart,
   Repeat2,
-  ChevronLeft,
-  ChevronRight,
   Clock,
   Users,
   ExternalLink,
-  MoreHorizontal,
-  ChevronDown,
-  X
+  TrendingUp,
+  Flame,
+  Star,
+  ChevronRight,
+  Zap,
+  Eye,
+  ArrowUp
 } from 'lucide-react';
 
 interface TrendingCast {
@@ -41,135 +43,116 @@ interface TrendingCast {
   parentHash?: string;
 }
 
-interface AccountWithHighlight {
-  account: {
-    fid: number;
-    username: string;
-    display_name: string;
-    pfp_url: string;
-    follower_count: number;
-  };
-  highlightCast: TrendingCast | null;
+interface ProminentAccount {
+  fid: number;
+  username: string;
+  display_name: string;
+  pfp_url: string;
+  follower_count: number;
+  recent_activity: 'high' | 'medium' | 'low';
+  trending_score: number;
 }
 
-function StoriesRail() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [selectedFid, setSelectedFid] = useState<number | null>(null);
-
-  const { data: accountsData, isLoading } = useQuery({
-    queryKey: ['/api/top-accounts'],
-    staleTime: 3 * 60 * 1000, // 3 minutes
+// Compact Trending Topics Section
+function TrendingTopics() {
+  const { data: trendsData } = useQuery({
+    queryKey: ['/api/trending-topics'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -200 : 200;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
+  const trends = (trendsData as any)?.topics?.slice(0, 4) || [
+    { topic: 'Bitcoin ETF', mentions: 247 },
+    { topic: 'DePIN', mentions: 189 },
+    { topic: 'L2 scaling', mentions: 156 },
+    { topic: 'Base chain', mentions: 134 }
+  ];
+
+  return (
+    <div className="flex gap-2 flex-wrap mb-4">
+      {trends.map((trend: any, i: number) => (
+        <motion.div
+          key={trend.topic}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.1 }}
+        >
+          <Badge 
+            variant="secondary" 
+            className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/30 cursor-pointer transition-colors"
+            data-testid={`trend-topic-${i}`}
+          >
+            <Flame className="w-3 h-3 mr-1" />
+            {trend.topic} • {trend.mentions}
+          </Badge>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// Compact Prominent Accounts Rail
+function ProminentAccountsRail() {
+  const [selectedFid, setSelectedFid] = useState<number | null>(null);
+  const { data: accountsData, isLoading } = useQuery({
+    queryKey: ['/api/top-accounts'],
+    staleTime: 3 * 60 * 1000,
+  });
 
   const accounts = (accountsData as any)?.accounts || [];
 
   if (isLoading) {
     return (
-      <div className="mb-8">
-        <div className="flex gap-4 overflow-hidden">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-20 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full mx-auto mb-2 animate-pulse" />
-              <div className="h-3 bg-muted/40 rounded w-12 mx-auto animate-pulse" />
-            </div>
-          ))}
-        </div>
+      <div className="flex gap-2 mb-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-muted/20 animate-pulse">
+            <div className="w-6 h-6 bg-muted/40 rounded-full" />
+            <div className="h-3 bg-muted/40 rounded w-12" />
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="mb-8 relative">
-      <div className="flex items-center gap-4 mb-4">
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => scroll('left')}
-            className="opacity-60 hover:opacity-100 h-8 w-8 p-0"
-            data-testid="button-stories-left"
+    <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      {accounts.slice(0, 8).map((account: any, index: number) => {
+        const activityColor = account.recent_activity === 'high' ? 'text-green-500' : 
+                            account.recent_activity === 'medium' ? 'text-yellow-500' : 'text-gray-400';
+        const isSelected = selectedFid === account.account.fid;
+        
+        return (
+          <motion.button
+            key={account.account.fid}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-all whitespace-nowrap ${
+              isSelected 
+                ? 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700' 
+                : 'bg-background hover:bg-muted/50'
+            }`}
+            onClick={() => setSelectedFid(isSelected ? null : account.account.fid)}
+            data-testid={`account-pill-${account.account.fid}`}
           >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => scroll('right')}
-            className="opacity-60 hover:opacity-100 h-8 w-8 p-0"
-            data-testid="button-stories-right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-        {selectedFid && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedFid(null)}
-            className="text-muted-foreground hover:text-foreground text-sm"
-            data-testid="button-clear-filter"
-          >
-            Show all
-          </Button>
-        )}
-      </div>
-      
-      <div 
-        ref={scrollRef}
-        className="flex gap-6 overflow-x-auto scrollbar-hide pb-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {accounts.map((item: AccountWithHighlight, index: number) => (
-          <motion.div
-            key={item.account.fid}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
-            className="flex-shrink-0 cursor-pointer group"
-            onClick={() => setSelectedFid(selectedFid === item.account.fid ? null : item.account.fid)}
-            data-testid={`story-account-${item.account.fid}`}
-          >
-            <div className="text-center">
-              <div className={`relative w-16 h-16 mx-auto mb-3 rounded-full p-[2px] transition-all duration-300 ${
-                selectedFid === item.account.fid 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
-                  : item.highlightCast 
-                    ? 'bg-gradient-to-r from-green-400/60 to-blue-400/60 group-hover:from-green-400 group-hover:to-blue-400' 
-                    : 'bg-gradient-to-r from-muted/40 to-muted/60 group-hover:from-muted/60 group-hover:to-muted/80'
-              }`}>
-                <img
-                  src={item.account.pfp_url}
-                  alt={item.account.display_name}
-                  className="w-full h-full rounded-full object-cover"
-                />
-                {item.highlightCast && (
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
-                )}
-              </div>
-              <p className={`text-xs font-medium transition-colors ${
-                selectedFid === item.account.fid ? 'text-blue-400' : 'text-muted-foreground group-hover:text-foreground'
-              }`}>
-                {item.account.username.length > 8 ? `${item.account.username.slice(0, 8)}...` : item.account.username}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            <img
+              src={account.account.pfp_url}
+              alt={account.account.display_name}
+              className="w-6 h-6 rounded-full border"
+            />
+            <span className="text-sm font-medium">
+              {account.account.display_name || account.account.username}
+            </span>
+            <div className={`w-2 h-2 rounded-full ${activityColor}`} />
+            {account.trending_score > 80 && <Star className="w-3 h-3 text-yellow-500" />}
+          </motion.button>
+        );
+      })}
     </div>
   );
 }
 
-function CastItem({ cast, onExpandThread }: { 
-  cast: TrendingCast; 
-  onExpandThread: (hash: string) => void;
-}) {
+// Compact Cast Item for landing page alpha maximization
+function CompactCastItem({ cast, index }: { cast: TrendingCast; index: number }) {
   const formatTime = (timestamp: string) => {
     const now = Date.now();
     const castTime = new Date(timestamp).getTime();
@@ -181,351 +164,249 @@ function CastItem({ cast, onExpandThread }: {
     return `${Math.floor(diffMinutes / 1440)}d`;
   };
 
-  const formatFollowerCount = (count: number) => {
+  const formatCount = (count: number) => {
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toString();
   };
 
+  const getTrendingIndicator = (cast: TrendingCast) => {
+    if (cast.engagement > 100) return { icon: Flame, color: 'text-red-500', label: 'Hot' };
+    if (cast.engagement > 50) return { icon: TrendingUp, color: 'text-orange-500', label: 'Trending' };
+    if (cast.likes > 10) return { icon: ArrowUp, color: 'text-green-500', label: 'Rising' };
+    return null;
+  };
+
+  const trendingInfo = getTrendingIndicator(cast);
+  const isHighEngagement = cast.engagement > 50;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ delay: index * 0.05 }}
+      className={`p-3 border-l-2 hover:bg-muted/30 transition-colors cursor-pointer ${
+        isHighEngagement ? 'border-l-orange-500 bg-orange-50/50 dark:bg-orange-900/10' : 'border-l-transparent'
+      }`}
+      data-testid={`compact-cast-${cast.hash}`}
     >
-      <Card className="p-6 bg-card/60 backdrop-blur-sm border-border/50 hover:bg-card/80 transition-all duration-300">
-        <div className="space-y-4">
-          {/* Author Info */}
-          <div className="flex items-start gap-3">
-            <img
-              src={cast.author.pfpUrl}
-              alt={cast.author.displayName}
-              className="w-10 h-10 rounded-full flex-shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-foreground">{cast.author.displayName}</span>
-                <span className="text-muted-foreground text-sm">@{cast.author.username}</span>
-                <span className="text-muted-foreground text-sm">·</span>
-                <span className="text-muted-foreground text-sm flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {formatTime(cast.timestamp)}
-                </span>
-              </div>
-              <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <Users className="w-3 h-3" />
-                {formatFollowerCount(cast.author.followerCount)} followers
-              </div>
-            </div>
-          </div>
-
-          {/* Cast Content */}
-          <div className="space-y-3">
-            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-              {cast.text}
-            </p>
-            
-            {/* Embeds */}
-            {cast.embeds && cast.embeds.length > 0 && (
-              <div className="space-y-2">
-                {cast.embeds.map((embed, i) => (
-                  <div key={i}>
-                    {embed.url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(embed.url, '_blank')}
-                        className="h-8 text-xs"
-                        data-testid={`link-embed-${i}`}
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Link
-                      </Button>
-                    )}
-                  </div>
-                ))}
+      <div className="flex gap-3">
+        {/* Author Avatar - smaller for space efficiency */}
+        <img
+          src={cast.author.pfpUrl}
+          alt={cast.author.displayName}
+          className="w-8 h-8 rounded-full flex-shrink-0 border"
+        />
+        
+        <div className="flex-1 min-w-0">
+          {/* Header - author info and trending indicator */}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-medium text-sm">{cast.author.displayName}</span>
+            <span className="text-xs text-muted-foreground">@{cast.author.username}</span>
+            <span className="text-xs text-muted-foreground">•</span>
+            <span className="text-xs text-muted-foreground">{formatTime(cast.timestamp)}</span>
+            {trendingInfo && (
+              <div className={`flex items-center gap-1 ${trendingInfo.color}`}>
+                <trendingInfo.icon className="w-3 h-3" />
+                <span className="text-xs font-medium">{trendingInfo.label}</span>
               </div>
             )}
           </div>
 
-          {/* Engagement */}
-          <div className="flex items-center justify-between pt-3 border-t border-border/50">
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <button 
-                className="flex items-center gap-1 hover:text-blue-400 transition-colors"
-                onClick={() => onExpandThread(cast.hash)}
-                data-testid={`button-replies-${cast.hash}`}
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>{cast.replies}</span>
-              </button>
-              <div className="flex items-center gap-1">
-                <Repeat2 className="w-4 h-4" />
-                <span>{cast.recasts}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4" />
-                <span>{cast.likes}</span>
-              </div>
+          {/* Cast Content - truncated for space efficiency */}
+          <p className="text-sm text-foreground mb-2 line-clamp-2 leading-relaxed">
+            {cast.text}
+          </p>
+
+          {/* Engagement metrics - compact horizontal layout */}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" />
+              <span>{formatCount(cast.replies)}</span>
             </div>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Repeat2 className="w-3 h-3" />
+              <span>{formatCount(cast.recasts)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Heart className="w-3 h-3" />
+              <span>{formatCount(cast.likes)}</span>
+            </div>
+            {cast.embeds && cast.embeds.length > 0 && (
+              <div className="flex items-center gap-1">
+                <ExternalLink className="w-3 h-3" />
+                <span>{cast.embeds.length}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <Eye className="w-3 h-3" />
+              <span>{formatCount(cast.engagement)}</span>
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }
 
-function ConversationThread({ hash, onClose }: { hash: string; onClose: () => void }) {
-  const { data: threadData, isLoading } = useQuery({
-    queryKey: ['/api/threads', hash],
-    enabled: !!hash,
+// Quick Stats Summary for Alpha Information
+function QuickStats() {
+  const { data: statsData } = useQuery({
+    queryKey: ['/api/crypto-stats'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  if (isLoading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-      >
-        <Card className="p-6 bg-card/40 backdrop-blur-sm border-border/30 mt-4">
-          <div className="space-y-4">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="w-8 h-8 bg-muted/40 rounded-full animate-pulse" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-muted/40 rounded w-1/3 animate-pulse" />
-                  <div className="h-4 bg-muted/30 rounded w-2/3 animate-pulse" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </motion.div>
-    );
-  }
-
-  const thread = threadData as any;
-  const replies = thread?.replies || [];
+  const stats = (statsData as any)?.stats || {
+    activeCommunities: 142,
+    topInfluencers: 89,
+    dailyConversations: 2847,
+    trendingTopics: 12
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="p-6 bg-card/40 backdrop-blur-sm border-border/30 mt-4">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="font-medium text-foreground flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Conversation ({replies.length} replies)
-          </h4>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0"
-            data-testid="button-close-thread"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        
-        {replies.length > 0 ? (
-          <div className="space-y-4">
-            {replies.slice(0, 5).map((reply: TrendingCast, i: number) => (
-              <div key={reply.hash} className="flex gap-3">
-                <img
-                  src={reply.author.pfpUrl}
-                  alt={reply.author.displayName}
-                  className="w-8 h-8 rounded-full flex-shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm">{reply.author.displayName}</span>
-                    <span className="text-muted-foreground text-xs">@{reply.author.username}</span>
-                  </div>
-                  <p className="text-sm text-foreground leading-relaxed">{reply.text}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" />
-                      {reply.likes}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Repeat2 className="w-3 h-3" />
-                      {reply.recasts}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {replies.length > 5 && (
-              <div className="text-center">
-                <Badge variant="outline" className="text-xs">
-                  +{replies.length - 5} more replies
-                </Badge>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-center py-4">No replies yet</p>
-        )}
-      </Card>
-    </motion.div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      {Object.entries({
+        'Communities': { value: stats.activeCommunities, icon: Users },
+        'Influencers': { value: stats.topInfluencers, icon: Star },
+        'Conversations': { value: stats.dailyConversations, icon: MessageSquare },
+        'Topics': { value: stats.trendingTopics, icon: TrendingUp }
+      }).map(([label, { value, icon: Icon }], i) => (
+        <motion.div
+          key={label}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.1 }}
+          className="text-center p-3 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg border"
+          data-testid={`stat-${label.toLowerCase()}`}
+        >
+          <Icon className="w-4 h-4 mx-auto mb-1 text-blue-600 dark:text-blue-400" />
+          <div className="text-lg font-bold text-foreground">{value.toLocaleString()}</div>
+          <div className="text-xs text-muted-foreground">{label}</div>
+        </motion.div>
+      ))}
+    </div>
   );
 }
 
 export function TrendingSocialContent() {
   const { isAuthenticated } = useAuth();
-  const [selectedFid, setSelectedFid] = useState<number | null>(null);
-  const [expandedThread, setExpandedThread] = useState<string | null>(null);
-  const observerRef = useRef<HTMLDivElement>(null);
-
-  // Fetch trending casts with infinite scroll
-  const {
-    data: trendingData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage
-  } = useInfiniteQuery({
-    queryKey: ['/api/trending', selectedFid],
-    queryFn: ({ pageParam = 0 }) => {
-      const params = new URLSearchParams({
-        limit: '10',
-        ...(selectedFid && { fid: selectedFid.toString() })
-      });
+  
+  // Fetch trending casts - simplified for landing page efficiency
+  const { data: trendingData, isLoading, error } = useQuery({
+    queryKey: ['/api/trending'],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: '8' }); // Reduced limit for landing page
       return fetch(`/api/trending?${params}`).then(res => res.json());
     },
-    getNextPageParam: (lastPage, pages) => {
-      const totalLoaded = pages.reduce((acc, page) => acc + (page.items?.length || 0), 0);
-      return totalLoaded < 50 ? pages.length : undefined;
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 3 * 60 * 1000, // 3 minutes
   });
 
-  // Intersection observer for infinite scroll
-  const lastCastRef = useCallback((node: HTMLDivElement | null) => {
-    if (isLoading) return;
-    if (observerRef.current) observerRef.current.disconnect();
-    observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    });
-    if (node) observerRef.current.observe(node);
-  }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const allCasts = trendingData?.pages.flatMap(page => page.items || []) || [];
+  const allCasts = trendingData?.items || [];
 
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-      {/* Minimal header */}
-      <div className="mb-8">
+    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      {/* Compact header with live indicator */}
+      <div className="mb-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center"
+          className="flex items-center justify-between"
         >
-          <h2 className="text-2xl font-medium text-foreground mb-2">
-            Crypto Conversations
-          </h2>
-          <p className="text-muted-foreground">
-            What's happening in crypto right now
-          </p>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-xl font-semibold text-foreground">
+                Crypto Alpha Feed
+              </h2>
+              <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
+                Live
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Real-time insights from crypto's most influential voices
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs"
+            data-testid="view-all-conversations"
+          >
+            View All <ChevronRight className="w-3 h-3 ml-1" />
+          </Button>
         </motion.div>
       </div>
 
-      {/* Stories Rail */}
-      <StoriesRail />
+      {/* Quick Stats */}
+      <QuickStats />
+      
+      {/* Trending Topics */}
+      <TrendingTopics />
+      
+      {/* Prominent Accounts */}
+      <ProminentAccountsRail />
 
-      {/* Main Feed */}
-      <div className="space-y-4">
-        {isLoading && allCasts.length === 0 ? (
-          <div className="space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="p-6 bg-card/40 backdrop-blur-sm">
-                <div className="space-y-4">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 bg-muted/40 rounded-full animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-muted/40 rounded w-1/3 animate-pulse" />
-                      <div className="h-4 bg-muted/30 rounded w-1/4 animate-pulse" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-muted/30 rounded animate-pulse" />
-                    <div className="h-4 bg-muted/20 rounded w-5/6 animate-pulse" />
-                  </div>
+      {/* Compact Feed Grid */}
+      <div className="grid lg:grid-cols-2 gap-4 mb-6">
+        {isLoading ? (
+          // Compact loading states
+          [...Array(6)].map((_, i) => (
+            <div key={i} className="p-3 border rounded-lg animate-pulse">
+              <div className="flex gap-3 mb-2">
+                <div className="w-8 h-8 bg-muted/40 rounded-full" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-3 bg-muted/40 rounded w-1/3" />
+                  <div className="h-2 bg-muted/30 rounded w-1/4" />
                 </div>
-              </Card>
-            ))}
-          </div>
+              </div>
+              <div className="space-y-1">
+                <div className="h-3 bg-muted/30 rounded w-full" />
+                <div className="h-3 bg-muted/20 rounded w-3/4" />
+              </div>
+            </div>
+          ))
         ) : error ? (
-          <Card className="p-12 text-center bg-card/40 backdrop-blur-sm">
-            <p className="text-muted-foreground mb-4">
-              Unable to load conversations right now
-            </p>
+          <div className="lg:col-span-2 text-center py-8">
+            <p className="text-muted-foreground mb-2">Unable to load crypto conversations</p>
             <Button 
               onClick={() => window.location.reload()} 
-              variant="outline"
-              data-testid="button-retry-feed"
+              variant="outline" 
+              size="sm"
+              data-testid="retry-feed"
             >
               Try again
             </Button>
-          </Card>
+          </div>
         ) : (
-          <>
-            {allCasts.map((cast, index) => (
-              <div key={cast.hash}>
-                <div ref={index === allCasts.length - 1 ? lastCastRef : null}>
-                  <CastItem 
-                    cast={cast} 
-                    onExpandThread={(hash) => 
-                      setExpandedThread(expandedThread === hash ? null : hash)
-                    }
-                  />
-                </div>
-                
-                {/* Expanded Thread */}
-                <AnimatePresence>
-                  {expandedThread === cast.hash && (
-                    <ConversationThread 
-                      hash={cast.hash} 
-                      onClose={() => setExpandedThread(null)}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-
-            {/* Loading more indicator */}
-            {isFetchingNextPage && (
-              <Card className="p-6 text-center bg-card/40 backdrop-blur-sm">
-                <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  Loading more conversations...
-                </div>
-              </Card>
-            )}
-
-            {/* End of feed */}
-            {!hasNextPage && allCasts.length > 0 && (
-              <div className="text-center py-8">
-                <Badge variant="outline" className="text-xs text-muted-foreground">
-                  You're all caught up
-                </Badge>
-              </div>
-            )}
-          </>
+          allCasts.slice(0, 6).map((cast: TrendingCast, index: number) => (
+            <CompactCastItem key={cast.hash} cast={cast} index={index} />
+          ))
         )}
       </div>
+
+      {/* Call to action for more content */}
+      {!isLoading && !error && allCasts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="text-center py-6 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg border border-dashed"
+        >
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
+            <Zap className="w-4 h-4" />
+            <span>Want more crypto alpha?</span>
+          </div>
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => window.location.href = isAuthenticated ? '/dashboard' : '/auth'}
+            data-testid="get-more-alpha"
+          >
+            {isAuthenticated ? 'View Full Dashboard' : 'Sign Up for Free'}
+          </Button>
+        </motion.div>
+      )}
     </section>
   );
 }
