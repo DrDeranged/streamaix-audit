@@ -175,50 +175,6 @@ export const learningResources = pgTable("learning_resources", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Alpha Dashboard: Stories (News headlines with compact summaries)
-export const stories = pgTable("stories", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(), // Headline
-  summary: text("summary").notNull(), // ≤140 chars compact summary
-  sourceUrl: text("source_url").notNull(), // Original URL
-  sourceName: text("source_name").notNull(), // "CoinDesk", "The Block", etc
-  sourceLogoUrl: text("source_logo_url"),
-  tags: text("tags").array(), // ["DeFi", "ETH", "Layer2"]
-  storyType: text("story_type").notNull().default("news"), // news, analysis, breaking
-  // Scoring for trending/alpha algorithms
-  trendScore: real("trend_score").default(0), // Trending momentum
-  alphaScore: real("alpha_score").default(0), // Information value
-  socialVelocity: real("social_velocity").default(0), // Social media momentum
-  // Metadata
-  publishedAt: timestamp("published_at").notNull(),
-  relatedFids: integer("related_fids").array(), // Associated crypto figures
-  mediaThumbUrl: text("media_thumb_url"), // Optional thumbnail
-  contentHash: text("content_hash"), // For deduplication
-  isBreaking: boolean("is_breaking").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Alpha Dashboard: Figures (Prominent crypto people with highlights)
-export const figures = pgTable("figures", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  fid: integer("fid").notNull().unique(), // Farcaster ID
-  handle: text("handle").notNull(), // @username
-  displayName: text("display_name").notNull(),
-  avatarUrl: text("avatar_url"),
-  followerCount: integer("follower_count").default(0),
-  influenceScore: real("influence_score").default(0), // Calculated influence metric
-  lastHighlight: text("last_highlight"), // ≤80 chars latest insight
-  lastHighlightAt: timestamp("last_highlight_at"),
-  topics: text("topics").array(), // ["DeFi", "NFTs", "Layer2"]
-  role: text("role"), // "Ethereum Founder", "DeFi Researcher"
-  ecosystem: text("ecosystem").array(), // ["ethereum", "base", "farcaster"]
-  isActive: boolean("is_active").default(true),
-  priority: integer("priority").default(1), // 1=top tier, 5=lower tier
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
@@ -300,8 +256,6 @@ export const learningResourcesRelations = relations(learningResources, ({ one })
     references: [cryptoLeaders.id],
   }),
 }));
-
-// No explicit relations for stories and figures - they're standalone entities
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -423,40 +377,6 @@ export const insertLearningResourceSchema = createInsertSchema(learningResources
   topics: true,
 });
 
-export const insertStorySchema = createInsertSchema(stories).pick({
-  title: true,
-  summary: true,
-  sourceUrl: true,
-  sourceName: true,
-  sourceLogoUrl: true,
-  tags: true,
-  storyType: true,
-  trendScore: true,
-  alphaScore: true,
-  socialVelocity: true,
-  publishedAt: true,
-  relatedFids: true,
-  mediaThumbUrl: true,
-  contentHash: true,
-  isBreaking: true,
-});
-
-export const insertFigureSchema = createInsertSchema(figures).pick({
-  fid: true,
-  handle: true,
-  displayName: true,
-  avatarUrl: true,
-  followerCount: true,
-  influenceScore: true,
-  lastHighlight: true,
-  lastHighlightAt: true,
-  topics: true,
-  role: true,
-  ecosystem: true,
-  isActive: true,
-  priority: true,
-});
-
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -488,12 +408,6 @@ export type TopicTag = typeof topicTags.$inferSelect;
 export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
 export type LearningResource = typeof learningResources.$inferSelect;
 
-export type InsertStory = z.infer<typeof insertStorySchema>;
-export type Story = typeof stories.$inferSelect;
-
-export type InsertFigure = z.infer<typeof insertFigureSchema>;
-export type Figure = typeof figures.$inferSelect;
-
 // Educational response types
 export type LeaderEducationData = {
   profile: CryptoLeader;
@@ -505,39 +419,4 @@ export type LeaderEducationData = {
     avgRecasts: number;
     totalEngagement: number;
   };
-};
-
-// Alpha Dashboard response types
-export type AlphaTickerItem = {
-  id: string;
-  title: string;
-  impact: 'high' | 'medium' | 'low';
-  sentiment: 'bullish' | 'bearish' | 'neutral';
-  url: string;
-  timestamp: string;
-};
-
-export type CompactStory = {
-  id: string;
-  title: string;
-  summary: string;
-  sourceName: string;
-  sourceLogoUrl?: string;
-  url: string;
-  tags: string[];
-  alphaScore: number;
-  publishedAt: string;
-  isBreaking: boolean;
-};
-
-export type ProminentFigure = {
-  id: string;
-  fid: number;
-  handle: string;
-  displayName: string;
-  avatarUrl: string;
-  role: string;
-  lastHighlight: string;
-  influenceScore: number;
-  topics: string[];
 };
