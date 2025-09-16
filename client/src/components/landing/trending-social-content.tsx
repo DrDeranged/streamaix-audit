@@ -16,6 +16,8 @@ import {
   Flame,
   Star,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Zap,
   Eye,
   ArrowUp
@@ -112,22 +114,26 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
   activeTab: string;
   selectedTopic: string | null;
 }) {
+  const [showAll, setShowAll] = useState(false);
+  const initialCount = 6; // Show 6 posts initially for better mobile performance
+  const displayedCasts = showAll ? casts : casts.slice(0, initialCount);
+
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-6 animate-pulse">
-            <div className="flex gap-4 mb-4">
-              <div className="w-12 h-12 bg-slate-700/40 rounded-full" />
+      <div className="space-y-3">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 animate-pulse">
+            <div className="flex gap-3 mb-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700/40 rounded-full" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-slate-700/40 rounded w-1/3" />
-                <div className="h-3 bg-slate-800/30 rounded w-1/4" />
+                <div className="h-3 sm:h-4 bg-slate-700/40 rounded w-1/3" />
+                <div className="h-2 sm:h-3 bg-slate-800/30 rounded w-1/4" />
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="h-4 bg-slate-800/30 rounded w-full" />
-              <div className="h-4 bg-slate-800/20 rounded w-4/5" />
-              <div className="h-3 bg-slate-800/10 rounded w-2/3" />
+            <div className="space-y-2">
+              <div className="h-3 sm:h-4 bg-slate-800/30 rounded w-full" />
+              <div className="h-3 sm:h-4 bg-slate-800/20 rounded w-4/5" />
+              <div className="h-2 sm:h-3 bg-slate-800/10 rounded w-2/3" />
             </div>
           </div>
         ))}
@@ -137,8 +143,8 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (error) {
     return (
-      <div className="text-center py-12 bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl">
-        <p className="text-slate-400 mb-4">Unable to load conversations</p>
+      <div className="text-center py-8 sm:py-12 bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl">
+        <p className="text-slate-400 mb-4 text-sm sm:text-base">Unable to load conversations</p>
         <Button 
           onClick={() => window.location.reload()} 
           variant="outline" 
@@ -153,10 +159,49 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
   }
 
   return (
-    <div className="space-y-4">
-      {casts.slice(0, 12).map((cast, index) => (
+    <div className="space-y-3 sm:space-y-4">
+      {displayedCasts.map((cast, index) => (
         <FeedPostCard key={cast.hash} cast={cast} index={index} />
       ))}
+      
+      {/* Show More Button */}
+      {casts.length > initialCount && !showAll && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-4"
+        >
+          <Button
+            onClick={() => setShowAll(true)}
+            variant="outline"
+            className="w-full sm:w-auto bg-slate-900/50 border-white/20 text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all"
+            data-testid="show-more-posts"
+          >
+            Show {casts.length - initialCount} more posts
+            <ChevronDown className="w-4 h-4 ml-2" />
+          </Button>
+        </motion.div>
+      )}
+      
+      {/* Show Less Button */}
+      {showAll && casts.length > initialCount && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-4"
+        >
+          <Button
+            onClick={() => setShowAll(false)}
+            variant="ghost"
+            size="sm"
+            className="text-slate-400 hover:text-slate-300"
+            data-testid="show-less-posts"
+          >
+            Show less
+            <ChevronUp className="w-4 h-4 ml-2" />
+          </Button>
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -280,49 +325,49 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-slate-900/70 transition-all cursor-pointer group"
+      className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-slate-900/70 transition-all cursor-pointer group"
       data-testid={`feed-post-${index}`}
     >
       {/* Header */}
-      <div className="flex items-start gap-4 mb-4">
+      <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
         <img
           src={cast.author.pfpUrl}
           alt={cast.author.displayName}
-          className="w-12 h-12 rounded-full border border-white/20"
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20"
         />
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-white font-semibold">{cast.author.displayName}</h4>
-            <span className="text-slate-400 text-sm">@{cast.author.username}</span>
-            <span className="text-slate-500 text-sm">·</span>
-            <span className="text-slate-500 text-sm">{formatTime(cast.timestamp)}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h4 className="text-white font-semibold text-sm sm:text-base truncate">{cast.author.displayName}</h4>
+            <span className="text-slate-400 text-xs sm:text-sm truncate">@{cast.author.username}</span>
+            <span className="text-slate-500 text-xs sm:text-sm hidden sm:inline">·</span>
+            <span className="text-slate-500 text-xs sm:text-sm">{formatTime(cast.timestamp)}</span>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="mb-4">
-        <p className="text-slate-200 leading-relaxed text-sm">{cast.text}</p>
+      <div className="mb-3 sm:mb-4">
+        <p className="text-slate-200 leading-relaxed text-sm sm:text-base">{cast.text}</p>
       </div>
 
       {/* Engagement */}
       <div className="flex items-center justify-between pt-3 border-t border-white/10">
-        <div className="flex items-center gap-6">
-          <button className="flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors">
-            <MessageSquare className="w-4 h-4" />
-            <span className="text-xs">{cast.replies}</span>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <button className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-blue-400 transition-colors">
+            <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">{cast.replies}</span>
           </button>
-          <button className="flex items-center gap-2 text-slate-400 hover:text-green-400 transition-colors">
-            <Repeat2 className="w-4 h-4" />
-            <span className="text-xs">{cast.recasts}</span>
+          <button className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-green-400 transition-colors">
+            <Repeat2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">{cast.recasts}</span>
           </button>
-          <button className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors">
-            <Heart className="w-4 h-4" />
-            <span className="text-xs">{cast.likes}</span>
+          <button className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-red-400 transition-colors">
+            <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">{cast.likes}</span>
           </button>
         </div>
-        <button className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
-          <ExternalLink className="w-4 h-4" />
+        <button className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100 sm:group-hover:opacity-100">
+          <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
     </motion.article>
@@ -637,10 +682,10 @@ export function TrendingSocialContent() {
         <TrendingTopicsFilter selectedTopic={selectedTopic} onTopicSelect={setSelectedTopic} />
       </div>
 
-      {/* Two-Column Layout */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      {/* Two-Column Layout - Mobile Optimized */}
+      <div className="grid lg:grid-cols-3 gap-4 lg:gap-8">
         {/* Main Feed Column */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-1">
           <DiscoverFeed 
             casts={allCasts} 
             isLoading={isLoading} 
@@ -650,8 +695,8 @@ export function TrendingSocialContent() {
           />
         </div>
 
-        {/* Right Rail */}
-        <div className="lg:col-span-1">
+        {/* Right Rail - Hidden on mobile to save space */}
+        <div className="lg:col-span-1 hidden lg:block order-2">
           <DiscoverRightRail />
         </div>
       </div>
