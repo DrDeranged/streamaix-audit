@@ -1222,111 +1222,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
-  // CRYPTO LEADERS EDUCATION ROUTES
+  // TRENDING CRYPTO CONTENT ROUTES
   // =============================================================================
 
-  // Get comprehensive education data for all crypto leaders
-  app.get('/api/education/leaders', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 10;
+  // Get trending casts from top crypto accounts
+  app.get('/api/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const fid = req.query.fid ? parseInt(req.query.fid as string) : undefined;
     
     try {
-      const { EducationService } = await import('./services/educationService.js');
-      const educationService = new EducationService();
-      const leadersEducation = await educationService.getAllLeadersEducation(limit);
+      const { farcasterService } = await import('./services/farcaster.js');
+      const { getTopFids } = await import('./services/farcasterTopAccounts.js');
       
-      res.json({
-        success: true,
-        leaders: leadersEducation,
-        count: leadersEducation.length,
-        message: 'Crypto leaders education data fetched successfully'
-      });
-    } catch (error) {
-      console.error('Failed to fetch leaders education:', error);
-      res.status(500).json({ 
-        error: 'Failed to fetch leaders education',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }));
-
-  // Get detailed education data for a specific leader
-  app.get('/api/education/leader/:fid', asyncHandler(async (req: Request, res: Response) => {
-    const fid = parseInt(req.params.fid);
-    
-    if (!fid || isNaN(fid)) {
-      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
-    }
-    
-    try {
-      const { EducationService } = await import('./services/educationService.js');
-      const educationService = new EducationService();
-      const leaderEducation = await educationService.getLeaderEducation(fid);
-      
-      if (!leaderEducation) {
-        return res.status(404).json({ error: 'Leader education not found' });
+      let trendingCasts;
+      if (fid) {
+        // Get casts from specific account
+        trendingCasts = await farcasterService.fetchUserRecent(fid, limit);
+      } else {
+        // Get trending from all top accounts
+        const topFids = getTopFids(10);
+        trendingCasts = await farcasterService.aggregateTrendingFromFids(topFids, limit);
       }
       
       res.json({
         success: true,
-        education: leaderEducation,
-        message: `Education data for leader ${fid} fetched successfully`
+        items: trendingCasts,
+        count: trendingCasts.length,
+        fid: fid || null
       });
     } catch (error) {
-      console.error(`Failed to fetch education for leader ${fid}:`, error);
+      console.error('Failed to fetch trending content:', error);
       res.status(500).json({ 
-        error: 'Failed to fetch leader education',
+        error: 'Failed to fetch trending content',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }));
 
-  // Get topic tags by category
-  app.get('/api/education/topics', asyncHandler(async (req: Request, res: Response) => {
-    const category = req.query.category as string;
+  // Get top crypto accounts with their highlight casts
+  app.get('/api/top-accounts', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 6;
     
     try {
-      const { EducationService } = await import('./services/educationService.js');
-      const educationService = new EducationService();
-      const topics = educationService.getTopicsByCategory(category);
+      const { farcasterService } = await import('./services/farcaster.js');
+      const accountsWithHighlights = await farcasterService.getTopAccountsWithHighlights(limit);
       
       res.json({
         success: true,
-        topics: topics,
-        count: topics.length,
-        category: category || 'all'
+        accounts: accountsWithHighlights,
+        count: accountsWithHighlights.length
       });
     } catch (error) {
-      console.error('Failed to fetch education topics:', error);
+      console.error('Failed to fetch top accounts:', error);
       res.status(500).json({ 
-        error: 'Failed to fetch education topics',
+        error: 'Failed to fetch top accounts',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }));
 
-  // Get learning resources for a specific leader
-  app.get('/api/education/resources/:fid', asyncHandler(async (req: Request, res: Response) => {
-    const fid = parseInt(req.params.fid);
+  // Get conversation thread for a cast
+  app.get('/api/threads/:hash', asyncHandler(async (req: Request, res: Response) => {
+    const { hash } = req.params;
+    const depth = parseInt(req.query.depth as string) || 2;
     
-    if (!fid || isNaN(fid)) {
-      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    if (!hash) {
+      return res.status(400).json({ error: 'Cast hash required' });
     }
     
     try {
-      const { EducationService } = await import('./services/educationService.js');
-      const educationService = new EducationService();
-      const resources = await educationService.getResourcesByLeader(fid);
+      const { farcasterService } = await import('./services/farcaster.js');
+      const thread = await farcasterService.fetchCastThread(hash, depth);
       
       res.json({
         success: true,
-        resources: resources,
-        count: resources.length,
-        fid: fid
+        root: thread.root,
+        replies: thread.replies,
+        count: thread.replies.length
       });
     } catch (error) {
-      console.error(`Failed to fetch resources for leader ${fid}:`, error);
+      console.error(`Failed to fetch thread for cast ${hash}:`, error);
       res.status(500).json({ 
-        error: 'Failed to fetch leader resources',
+        error: 'Failed to fetch thread',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
