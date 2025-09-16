@@ -1222,10 +1222,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
-  // TRENDING CRYPTO CONTENT ROUTES
+  // ALPHA DASHBOARD NEWS ROUTES (Compact crypto stories and figures)
   // =============================================================================
 
-  // Get trending casts from top crypto accounts
+  // Get new crypto stories (recently published, high alpha potential)
+  app.get('/api/news/new', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    try {
+      const { newsService } = await import('./services/newsService.js');
+      const stories = await newsService.getNewStories(limit);
+      
+      res.json({
+        success: true,
+        stories,
+        count: stories.length,
+        type: 'new'
+      });
+    } catch (error) {
+      console.error('Failed to fetch new stories:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch new stories',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get trending crypto stories (high engagement, rising alpha scores)
+  app.get('/api/news/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    try {
+      const { newsService } = await import('./services/newsService.js');
+      const stories = await newsService.getTrendingStories(limit);
+      
+      res.json({
+        success: true,
+        stories,
+        count: stories.length,
+        type: 'trending'
+      });
+    } catch (error) {
+      console.error('Failed to fetch trending stories:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch trending stories',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get prominent crypto figures with their latest highlights
+  app.get('/api/figures/top', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 8;
+    
+    try {
+      const { newsService } = await import('./services/newsService.js');
+      const figures = await newsService.getProminentFigures(limit);
+      
+      res.json({
+        success: true,
+        figures,
+        count: figures.length
+      });
+    } catch (error) {
+      console.error('Failed to fetch prominent figures:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch prominent figures',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get alpha ticker items (top headlines for scrolling ticker)
+  app.get('/api/alpha-ticker', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 15;
+    
+    try {
+      const { newsService } = await import('./services/newsService.js');
+      const items = await newsService.getAlphaTickerItems(limit);
+      
+      res.json({
+        success: true,
+        items,
+        count: items.length
+      });
+    } catch (error) {
+      console.error('Failed to fetch alpha ticker items:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch alpha ticker items',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // =============================================================================
+  // LEGACY TRENDING ROUTES (Deprecated - for backward compatibility)
+  // =============================================================================
+
+  // Get trending casts from top crypto accounts (LEGACY)
   app.get('/api/trending', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 20;
     const fid = req.query.fid ? parseInt(req.query.fid as string) : undefined;
@@ -1259,7 +1353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get top crypto accounts with their highlight casts
+  // Get top crypto accounts with their highlight casts (LEGACY)
   app.get('/api/top-accounts', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 6;
     
@@ -1281,7 +1375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get conversation thread for a cast
+  // Get conversation thread for a cast (LEGACY)
   app.get('/api/threads/:hash', asyncHandler(async (req: Request, res: Response) => {
     const { hash } = req.params;
     const depth = parseInt(req.query.depth as string) || 2;
