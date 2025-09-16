@@ -77,12 +77,13 @@ function TrendingTopics() {
           transition={{ delay: i * 0.1 }}
         >
           <Badge 
-            variant="secondary" 
-            className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/30 cursor-pointer transition-colors"
+            variant="ghost" 
+            className="text-xs px-3 py-1.5 bg-gradient-to-r from-slate-800/50 to-purple-800/30 text-slate-300 hover:from-slate-700/60 hover:to-purple-700/40 cursor-pointer transition-all border border-white/10 backdrop-blur-sm"
             data-testid={`trend-topic-${i}`}
           >
-            <Flame className="w-3 h-3 mr-1" />
-            {trend.topic} • {trend.mentions}
+            <span className="text-slate-400 mr-1">#{i + 1}</span>
+            {trend.topic}
+            <span className="text-slate-500 ml-2 text-[10px]">{trend.mentions}</span>
           </Badge>
         </motion.div>
       ))}
@@ -305,36 +306,38 @@ export function TrendingSocialContent() {
 
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-      {/* Compact header with live indicator */}
+      {/* Discrete header with glass morphism effect */}
       <div className="mb-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center justify-between"
+          className="bg-gradient-to-r from-slate-900/50 to-purple-900/20 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-6"
         >
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-xl font-semibold text-foreground">
-                Crypto Alpha Feed
-              </h2>
-              <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
-                Live
-              </Badge>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+                  Social Intelligence
+                </h2>
+                <div className="flex items-center gap-1 text-xs text-slate-400">
+                  <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
+                  <span>Live</span>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400">
+                Community conversation highlights and engagement patterns
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Real-time insights from crypto's most influential voices
-            </p>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs text-slate-300 hover:text-white hover:bg-white/10 border border-white/20"
+              data-testid="view-all-conversations"
+            >
+              Explore <ChevronRight className="w-3 h-3 ml-1" />
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-xs"
-            data-testid="view-all-conversations"
-          >
-            View All <ChevronRight className="w-3 h-3 ml-1" />
-          </Button>
         </motion.div>
       </div>
 
@@ -385,25 +388,26 @@ export function TrendingSocialContent() {
         )}
       </div>
 
-      {/* Call to action for more content */}
+      {/* Discrete call to action for more content */}
       {!isLoading && !error && allCasts.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="text-center py-6 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg border border-dashed"
+          className="text-center py-6 bg-gradient-to-r from-slate-900/30 to-purple-900/20 backdrop-blur-sm rounded-xl border border-white/10"
         >
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
-            <Zap className="w-4 h-4" />
-            <span>Want more crypto alpha?</span>
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-400 mb-3">
+            <Eye className="w-4 h-4" />
+            <span>Explore detailed analytics and insights</span>
           </div>
           <Button 
-            variant="default" 
+            variant="ghost" 
             size="sm"
+            className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 text-white border border-white/20"
             onClick={() => window.location.href = isAuthenticated ? '/dashboard' : '/auth'}
-            data-testid="get-more-alpha"
+            data-testid="get-more-analytics"
           >
-            {isAuthenticated ? 'View Full Dashboard' : 'Sign Up for Free'}
+            {isAuthenticated ? 'View Full Dashboard' : 'Access Analytics'}
           </Button>
         </motion.div>
       )}
