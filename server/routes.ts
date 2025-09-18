@@ -9,6 +9,7 @@ import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { MarketDataService } from "./services/marketDataService";
+import { youtubeService } from "./services/youtubeService";
 import passport from "passport";
 import session from "express-session";
 import { 
@@ -1312,6 +1313,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error(`Failed to fetch thread for cast ${hash}:`, error);
       res.status(500).json({ 
         error: 'Failed to fetch thread',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // =============================================================================
+  // YOUTUBE CONTENT ROUTES
+  // =============================================================================
+
+  // Get latest crypto podcast content from YouTube
+  app.get('/api/youtube/crypto-content', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    try {
+      const videos = await youtubeService.getLatestCryptoContent(limit);
+      
+      res.json({
+        success: true,
+        videos,
+        count: videos.length,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Failed to fetch YouTube crypto content:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch crypto content',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Search crypto videos on YouTube
+  app.get('/api/youtube/search', asyncHandler(async (req: Request, res: Response) => {
+    const query = req.query.q as string;
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Search query required' });
+    }
+    
+    try {
+      const videos = await youtubeService.searchCryptoVideos(query, limit);
+      
+      res.json({
+        success: true,
+        videos,
+        count: videos.length,
+        query
+      });
+    } catch (error) {
+      console.error('Failed to search YouTube videos:', error);
+      res.status(500).json({ 
+        error: 'Failed to search videos',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }

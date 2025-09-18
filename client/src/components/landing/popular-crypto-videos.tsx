@@ -2,11 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Play, Clock, Zap, ChevronLeft, ChevronRight, Loader2, ExternalLink, Eye, Brain, BarChart3, FileText } from "lucide-react";
-import { useState, useRef } from "react";
+import { Play, Clock, Zap, ChevronLeft, ChevronRight, Loader2, ExternalLink, Eye, Brain, BarChart3, FileText, Wifi } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 // Long-form crypto podcasts (60+ minutes) showcasing AI processing utility
 const latestCryptoPodcasts = [
