@@ -28,14 +28,12 @@ class YouTubeService {
 
   // Top crypto YouTube channels
   private cryptoChannels: YouTubeChannel[] = [
-    { id: 'UC0zV0eXKjDbOjqDjKnVKLVg', name: 'What Bitcoin Did', handle: '@WhatBitcoinDid' },
-    { id: 'UCAl9Ld79qaZxp2JeuEYr7Ow', name: 'Bankless', handle: '@Bankless' },
-    { id: 'UCfwLxfr8_B8M2qaRVajl7eg', name: 'Unchained', handle: '@UnchainedPodcast' },
-    { id: 'UC4sS8q8E5ayyQMtlNuCOTqA', name: 'The Investors Podcast', handle: '@TheInvestorsPodcast' },
-    { id: 'UCiUnrCUGCJTCC7KjuW493Ww', name: 'Epicenter', handle: '@Epicenter' },
-    { id: 'UCdOdJfz7QMXDNQY9bqDyShA', name: 'InvestAnswers', handle: '@InvestAnswers' },
+    { id: 'UCtvg5cXLY_tHDJeBoRySBtg', name: 'What Bitcoin Did', handle: '@WhatBitcoinDid' },
+    { id: 'UCAl9Ld79qaZxp9JzEOwd3aA', name: 'Bankless', handle: '@Bankless' },
+    { id: 'UCWiiMnsnw5Isc2PP1to9nNw', name: 'Unchained', handle: '@UnchainedPodcast' },
     { id: 'UCqK_GSMbpiV8spgD3ZGloSw', name: 'Coin Bureau', handle: '@CoinBureau' },
-    { id: 'UCdmoWMKXWGBSxhJn6QjLy7A', name: 'Anthony Pompliano', handle: '@AnthonyPompliano' }
+    { id: 'UCdOdJfz7QMXDNQY9bqDyShA', name: 'InvestAnswers', handle: '@InvestAnswers' },
+    { id: 'UCiUnrCUGCJTCC7KjuW493Ww', name: 'Epicenter', handle: '@Epicenter' }
   ];
 
   constructor() {
