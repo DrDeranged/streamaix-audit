@@ -21,18 +21,21 @@ function FarcasterActivityDemo() {
     { fid: 6546, username: "jessepollak", displayName: "Jesse Pollak", description: "Base Protocol Lead" },
   ];
 
-  // Fetch real activity data
+  // Fetch real activity data with live updates
   const { data: activityData, isLoading } = useQuery({
     queryKey: ['/api/farcaster/activity', selectedFid],
     enabled: !!selectedFid,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    retry: 1
+    staleTime: 30 * 1000, // 30 seconds for live updates
+    refetchInterval: 60 * 1000, // Refresh every minute
+    retry: 3
   });
 
   const { data: castsData } = useQuery({
     queryKey: ['/api/farcaster/casts', selectedFid],
     enabled: !!selectedFid,
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 20 * 1000, // 20 seconds for live casts
+    refetchInterval: 30 * 1000, // Refresh every 30 seconds
+    retry: 3
   });
 
   const profile = (activityData as any)?.activity?.profile;

@@ -59,7 +59,9 @@ interface ProminentAccount {
 function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic: string | null; onTopicSelect: (topic: string | null) => void }) {
   const { data: trendsData } = useQuery({
     queryKey: ['/api/trending-topics'],
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 seconds for live updates
+    refetchInterval: 45 * 1000, // Refresh every 45 seconds
+    retry: 3
   });
 
   const trends = (trendsData as any)?.topics?.slice(0, 6) || [
@@ -234,7 +236,9 @@ function DiscoverRightRail() {
 function TrendingTopicsWidget() {
   const { data: trendsData } = useQuery({
     queryKey: ['/api/trending-topics'],
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 seconds for live updates
+    refetchInterval: 45 * 1000, // Refresh every 45 seconds
+    retry: 3
   });
 
   const trends = (trendsData as any)?.topics?.slice(0, 5) || [
@@ -303,6 +307,17 @@ function WhoToFollowWidget() {
             variant="outline"
             className="text-xs border-white/20 text-slate-300 hover:bg-white/10"
             data-testid={`follow-button-${i}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Simulate follow action
+              if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+                navigator.vibrate(50);
+              }
+              console.log(`Following user ${account.account.username} (FID: ${account.account.fid})`);
+              // TODO: In real implementation, this would call API to follow user
+              // and update button state to "Following"
+            }}
+            title={`Follow @${account.account.username}`}
           >
             Follow
           </Button>
@@ -358,20 +373,66 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       {/* Engagement */}
       <div className="flex items-center justify-between pt-3 border-t border-white/10">
         <div className="flex items-center gap-4 sm:gap-6">
-          <button className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-blue-400 transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              // Simulate reply action - show toast notification
+              if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+                navigator.vibrate(50);
+              }
+              console.log(`Replying to cast ${cast.hash}`);
+            }}
+            className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-blue-400 transition-colors"
+            data-testid={`reply-button-${cast.hash}`}
+            title="Reply to this cast"
+          >
             <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm">{cast.replies}</span>
           </button>
-          <button className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-green-400 transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              // Simulate recast action - optimistic UI update
+              if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+                navigator.vibrate(50);
+              }
+              console.log(`Recasting ${cast.hash}`);
+            }}
+            className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-green-400 transition-colors"
+            data-testid={`recast-button-${cast.hash}`}
+            title="Recast this"
+          >
             <Repeat2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm">{cast.recasts}</span>
           </button>
-          <button className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-red-400 transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              // Simulate like action - optimistic UI update
+              if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+                navigator.vibrate(50);
+              }
+              console.log(`Liking cast ${cast.hash}`);
+            }}
+            className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-red-400 transition-colors"
+            data-testid={`like-button-${cast.hash}`}
+            title="Like this cast"
+          >
             <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm">{cast.likes}</span>
           </button>
         </div>
-        <button className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100 sm:group-hover:opacity-100">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            // Open original cast in new tab
+            const farcasterUrl = `https://warpcast.com/~/conversations/${cast.hash}`;
+            window.open(farcasterUrl, '_blank', 'noopener,noreferrer');
+          }}
+          className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100 sm:group-hover:opacity-100"
+          data-testid={`external-link-${cast.hash}`}
+          title="View on Farcaster"
+        >
           <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
@@ -383,7 +444,9 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
 function TrendingTopics() {
   const { data: trendsData } = useQuery({
     queryKey: ['/api/trending-topics'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds for live updates
+    refetchInterval: 45 * 1000, // Refresh every 45 seconds
+    retry: 3
   });
 
   const trends = (trendsData as any)?.topics?.slice(0, 4) || [
@@ -422,7 +485,9 @@ function ProminentAccountsRail() {
   const [selectedFid, setSelectedFid] = useState<number | null>(null);
   const { data: accountsData, isLoading } = useQuery({
     queryKey: ['/api/top-accounts'],
-    staleTime: 3 * 60 * 1000,
+    staleTime: 60 * 1000, // 1 minute for live account updates
+    refetchInterval: 90 * 1000, // Refresh every 90 seconds
+    retry: 3
   });
 
   // Fallback accounts for when API fails to ensure prominent figures are always shown
@@ -590,7 +655,9 @@ function CompactCastItem({ cast, index }: { cast: TrendingCast; index: number })
 function QuickStats() {
   const { data: statsData } = useQuery({
     queryKey: ['/api/crypto-stats'],
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 60 * 1000, // 1 minute for live crypto stats
+    refetchInterval: 75 * 1000, // Refresh every 75 seconds
+    retry: 3
   });
 
   const stats = (statsData as any)?.stats || {
@@ -638,7 +705,9 @@ export function TrendingSocialContent() {
       if (selectedTopic) params.append('topic', selectedTopic);
       return fetch(`/api/trending?${params}`).then(res => res.json());
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes for fresher content
+    staleTime: 30 * 1000, // 30 seconds for live content updates
+    refetchInterval: 45 * 1000, // Refresh every 45 seconds
+    retry: 3
   });
 
   const allCasts = trendingData?.items || [];

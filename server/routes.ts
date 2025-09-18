@@ -11,6 +11,9 @@ import { Web3Service } from "./services/web3Service";
 import { MarketDataService } from "./services/marketDataService";
 import { youtubeService } from "./services/youtubeService";
 import passport from "passport";
+
+// Initialize services
+const marketDataService = MarketDataService.getInstance();
 import session from "express-session";
 import { 
   loginSchema, 
