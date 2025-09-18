@@ -160,12 +160,13 @@ export function AIProcessor() {
         const autostart = params.get('autostart');
         
         if (urlParam) {
-          setUrl(decodeURIComponent(urlParam));
+          const decodedUrl = decodeURIComponent(urlParam);
+          setUrl(decodedUrl);
           
           if (autostart === 'true' && !isProcessing && !summaryId) {
-            // Auto-start processing after a short delay
+            // Auto-start processing after URL is set
             setTimeout(() => {
-              handleProcess();
+              handleProcessWithUrl(decodedUrl);
             }, 500);
           }
         }
@@ -183,8 +184,9 @@ export function AIProcessor() {
     };
   }, [isProcessing, summaryId]);
 
-  const handleProcess = async () => {
-    if (!url.trim()) {
+  // Helper function to process with a specific URL (for auto-start)
+  const handleProcessWithUrl = async (targetUrl: string) => {
+    if (!targetUrl.trim()) {
       toast({
         title: "URL Required",
         description: "Please enter a YouTube URL to process.",
@@ -200,7 +202,7 @@ export function AIProcessor() {
     try {
       const response = await apiRequest('/api/analyze-content', {
         method: 'POST',
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: targetUrl.trim() }),
         headers: { 'Content-Type': 'application/json' }
       });
 
@@ -237,6 +239,10 @@ export function AIProcessor() {
       });
       setIsProcessing(false);
     }
+  };
+
+  const handleProcess = async () => {
+    return handleProcessWithUrl(url);
   };
 
   const isCompleted = result?.processingStatus === 'completed';
