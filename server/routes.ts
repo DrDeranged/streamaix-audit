@@ -1622,33 +1622,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
-  // CRYPTO STATS API ROUTES
-  // =============================================================================
-
-  // Get crypto market stats for dashboard
-  app.get('/api/crypto-stats', asyncHandler(async (req: Request, res: Response) => {
-    try {
-      const stats = {
-        totalMarketCap: '$2.1T',
-        dominance: { bitcoin: 42.1, ethereum: 18.7 },
-        trending: ['Bitcoin', 'Ethereum', 'Base', 'Solana'],
-        volume24h: '$127B',
-        activeProjects: 12847,
-        defiTvl: '$47.2B'
-      };
-      
-      res.json({
-        success: true,
-        stats,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Failed to fetch crypto stats:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch crypto stats' });
-    }
-  }));
-
-  // =============================================================================
   // MARKET DATA API ROUTES
   // =============================================================================
 
@@ -1676,6 +1649,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const limit = parseInt(req.query.limit as string) || 20;
     const cryptos = await marketDataService.getTopCryptos(limit);
     res.json({ cryptos });
+  }));
+
+  // Get crypto market stats for dashboard
+  app.get('/api/crypto-stats', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const stats = await marketDataService.getCryptoStats();
+      res.json({
+        success: true,
+        stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch crypto stats:', error);
+      res.status(502).json({ 
+        success: false, 
+        error: 'Market data temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
   }));
 
   // Enhance financial trends with live market data
