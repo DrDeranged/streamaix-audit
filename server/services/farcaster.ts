@@ -850,20 +850,20 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         author: {
           fid: cast.author.fid,
           username: cast.author.username,
-          displayName: cast.author.display_name,
-          pfpUrl: cast.author.pfp_url,
-          followerCount: cast.author.follower_count
+          displayName: cast.author.display_name || cast.author.username || 'Unknown',
+          pfpUrl: cast.author.pfp_url || '',
+          followerCount: cast.author.follower_count || 0
         },
         timestamp: cast.timestamp,
-        replies: cast.replies?.count || 0,
-        recasts: cast.reactions?.recasts?.count || 0,
-        likes: cast.reactions?.likes?.count || 0,
-        engagement: (cast.reactions?.recasts?.count || 0) + (cast.reactions?.likes?.count || 0) + (cast.replies?.count || 0),
-        embeds: cast.embeds?.map(embed => ({
-          url: embed.url,
-          castId: embed.cast_id ? { fid: embed.cast_id.fid, hash: embed.cast_id.hash } : undefined
+        replies: (cast.replies as any)?.count || 0,
+        recasts: (cast.reactions?.recasts as any)?.length || 0,
+        likes: (cast.reactions?.likes as any)?.length || 0,
+        engagement: ((cast.reactions?.recasts as any)?.length || 0) + ((cast.reactions?.likes as any)?.length || 0) + ((cast.replies as any)?.count || 0),
+        embeds: cast.embeds?.map((embed: any) => ({
+          url: (embed as any).url || undefined,
+          castId: (embed as any).cast_id ? { fid: (embed as any).cast_id.fid, hash: (embed as any).cast_id.hash } : undefined
         })),
-        parentHash: cast.parent_hash
+        parentHash: cast.parent_hash || undefined
       }));
 
       this.cache.set(cacheKey, casts, 60); // 1 minute cache
@@ -909,7 +909,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
           url: embed.url,
           castId: embed.cast_id ? { fid: embed.cast_id.fid, hash: embed.cast_id.hash } : undefined
         })),
-        parentHash: cast.parent_hash
+        parentHash: cast.parent_hash || undefined
       });
 
       const root = response.conversation.cast ? mapCast(response.conversation.cast) : null;
@@ -989,11 +989,11 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
 
     try {
       const topFids = getTopFids(limit);
-      const profiles = await this.fetchBulkUsers(topFids);
+      const profiles = await this.getProminentCryptoUsers().then(users => users.slice(0, limit));
       
       // Get highlight cast (most engaged recent cast) for each account
       const accountsWithHighlights = await Promise.all(
-        profiles.map(async (profile) => {
+        profiles.map(async (profile: any) => {
           const recentCasts = await this.fetchUserRecent(profile.fid, 3);
           const highlightCast = recentCasts.length > 0 
             ? recentCasts.reduce((best, current) => current.engagement > best.engagement ? current : best)
