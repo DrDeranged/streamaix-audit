@@ -132,17 +132,20 @@ class YouTubeService {
         id: videoIds
       });
 
-      return videosResponse.items.map((item: any) => ({
-        id: item.id,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnails: item.snippet.thumbnails,
-        publishedAt: item.snippet.publishedAt,
-        channelTitle: item.snippet.channelTitle,
-        duration: this.parseDuration(item.contentDetails.duration),
-        viewCount: item.statistics.viewCount ? parseInt(item.statistics.viewCount).toLocaleString() : undefined,
-        url: `https://www.youtube.com/watch?v=${item.id}`
-      }));
+      // Filter for long-form content (60+ minutes) only
+      return videosResponse.items
+        .filter((item: any) => this.isLongFormVideo(item.contentDetails.duration))
+        .map((item: any) => ({
+          id: item.id,
+          title: item.snippet.title,
+          description: item.snippet.description,
+          thumbnails: item.snippet.thumbnails,
+          publishedAt: item.snippet.publishedAt,
+          channelTitle: item.snippet.channelTitle,
+          duration: this.parseDuration(item.contentDetails.duration),
+          viewCount: item.statistics.viewCount ? parseInt(item.statistics.viewCount).toLocaleString() : undefined,
+          url: `https://www.youtube.com/watch?v=${item.id}`
+        }));
     } catch (error) {
       console.error(`📺 Error fetching videos for channel ${channelId}:`, error);
       return [];
@@ -152,10 +155,11 @@ class YouTubeService {
   async getLatestCryptoContent(limit: number = 20): Promise<YouTubeVideo[]> {
     const allVideos: YouTubeVideo[] = [];
     
-    // Fetch from multiple channels in parallel
+    // Fetch from multiple channels in parallel with higher limits to account for filtering
     const channelPromises = this.cryptoChannels.slice(0, 4).map(async (channel) => {
       try {
-        const videos = await this.getLatestVideos(channel.id, 5);
+        // Request more videos since we'll filter for long-form content (60+ min)
+        const videos = await this.getLatestVideos(channel.id, 20);
         return videos;
       } catch (error) {
         console.error(`📺 Error fetching from ${channel.name}:`, error);
@@ -167,6 +171,7 @@ class YouTubeService {
     results.forEach(videos => allVideos.push(...videos));
 
     // Sort by publish date (most recent first) and limit results
+    // Note: Individual channel queries already filter for long-form content (60+ min)
     return allVideos
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
       .slice(0, limit)
@@ -196,6 +201,23 @@ class YouTubeService {
     } else {
       return `${seconds}s`;
     }
+  }
+
+  private getDurationInSeconds(isoDuration: string): number {
+    const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+    const matches = isoDuration.match(regex);
+    
+    if (!matches) return 0;
+    
+    const hours = parseInt(matches[1] || '0');
+    const minutes = parseInt(matches[2] || '0');
+    const seconds = parseInt(matches[3] || '0');
+    
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  private isLongFormVideo(isoDuration: string): boolean {
+    return this.getDurationInSeconds(isoDuration) >= 3600; // 3600+ seconds (60+ minutes)
   }
 
   private formatTimeAgo(publishedAt: string): string {
@@ -229,6 +251,7 @@ class YouTubeService {
         type: 'video',
         order: 'date',
         maxResults,
+        videoDuration: 'long', // Pre-filter for videos over 4 minutes (YouTube's "long" category)
         publishedAfter: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // Last 7 days
       });
 
@@ -242,20 +265,23 @@ class YouTubeService {
         id: videoIds
       });
 
-      return videosResponse.items.map((item: any) => ({
-        id: item.id,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnails: item.snippet.thumbnails,
-        publishedAt: item.snippet.publishedAt,
-        channelTitle: item.snippet.channelTitle,
-        duration: this.parseDuration(item.contentDetails.duration),
-        viewCount: item.statistics.viewCount ? parseInt(item.statistics.viewCount).toLocaleString() : undefined,
-        url: `https://www.youtube.com/watch?v=${item.id}`,
-        uploadTime: this.formatTimeAgo(item.snippet.publishedAt),
-        isLive: false,
-        tags: this.extractTags(item.snippet.title, item.snippet.description)
-      }));
+      // Filter for long-form content in search results too
+      return videosResponse.items
+        .filter((item: any) => this.isLongFormVideo(item.contentDetails.duration))
+        .map((item: any) => ({
+          id: item.id,
+          title: item.snippet.title,
+          description: item.snippet.description,
+          thumbnails: item.snippet.thumbnails,
+          publishedAt: item.snippet.publishedAt,
+          channelTitle: item.snippet.channelTitle,
+          duration: this.parseDuration(item.contentDetails.duration),
+          viewCount: item.statistics.viewCount ? parseInt(item.statistics.viewCount).toLocaleString() : undefined,
+          url: `https://www.youtube.com/watch?v=${item.id}`,
+          uploadTime: this.formatTimeAgo(item.snippet.publishedAt),
+          isLive: false,
+          tags: this.extractTags(item.snippet.title, item.snippet.description)
+        }));
     } catch (error) {
       console.error('📺 Error searching YouTube videos:', error);
       return [];
