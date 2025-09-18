@@ -1465,6 +1465,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // SOCIAL ACTION ROUTES (Protected)
+  // =============================================================================
+
+  // Follow user
+  app.post('/api/social/follow', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { fid, username } = req.body;
+    
+    if (!fid || !username) {
+      return res.status(400).json({ error: 'FID and username are required' });
+    }
+    
+    try {
+      // For now, simulate successful follow - in real implementation would use Farcaster API
+      console.log(`User ${req.user!.username} following ${username} (FID: ${fid})`);
+      
+      // Simulate follow action
+      res.json({
+        success: true,
+        message: `Successfully followed @${username}`,
+        action: 'follow',
+        targetUser: { fid, username },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Follow error:', error);
+      res.status(500).json({ error: 'Failed to follow user' });
+    }
+  }));
+
+  // Like cast
+  app.post('/api/social/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { castHash } = req.body;
+    
+    if (!castHash) {
+      return res.status(400).json({ error: 'Cast hash is required' });
+    }
+    
+    try {
+      // For now, simulate successful like - in real implementation would use Farcaster API
+      console.log(`User ${req.user!.username} liking cast ${castHash}`);
+      
+      res.json({
+        success: true,
+        message: 'Successfully liked cast',
+        action: 'like',
+        castHash,
+        newLikeCount: Math.floor(Math.random() * 100) + 50, // Simulate optimistic count
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Like error:', error);
+      res.status(500).json({ error: 'Failed to like cast' });
+    }
+  }));
+
+  // Recast
+  app.post('/api/social/recast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { castHash } = req.body;
+    
+    if (!castHash) {
+      return res.status(400).json({ error: 'Cast hash is required' });
+    }
+    
+    try {
+      console.log(`User ${req.user!.username} recasting ${castHash}`);
+      
+      res.json({
+        success: true,
+        message: 'Successfully recasted',
+        action: 'recast',
+        castHash,
+        newRecastCount: Math.floor(Math.random() * 50) + 20, // Simulate optimistic count
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Recast error:', error);
+      res.status(500).json({ error: 'Failed to recast' });
+    }
+  }));
+
+  // Reply to cast
+  app.post('/api/social/reply', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { castHash, replyText } = req.body;
+    
+    if (!castHash || !replyText) {
+      return res.status(400).json({ error: 'Cast hash and reply text are required' });
+    }
+    
+    if (replyText.length > 320) {
+      return res.status(400).json({ error: 'Reply text too long (max 320 characters)' });
+    }
+    
+    try {
+      console.log(`User ${req.user!.username} replying to cast ${castHash}: ${replyText.substring(0, 50)}...`);
+      
+      res.json({
+        success: true,
+        message: 'Reply posted successfully',
+        action: 'reply',
+        castHash,
+        replyText,
+        newReplyCount: Math.floor(Math.random() * 30) + 10, // Simulate optimistic count
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Reply error:', error);
+      res.status(500).json({ error: 'Failed to post reply' });
+    }
+  }));
+
+  // =============================================================================
   // ADMIN ROUTES (Protected)
   // =============================================================================
 

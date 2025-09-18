@@ -1,10 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import { 
   MessageSquare,
   Heart,
@@ -232,6 +234,216 @@ function DiscoverRightRail() {
   );
 }
 
+// Social Action Hooks
+function useSocialMutations() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const followMutation = useMutation({
+    mutationFn: async ({ fid, username }: { fid: number; username: string }) => {
+      return await apiRequest('/api/social/follow', {
+        method: 'POST',
+        body: JSON.stringify({ fid, username }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+    onMutate: async ({ fid }) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/top-accounts'] });
+      const previousData = queryClient.getQueryData(['/api/top-accounts']);
+      
+      // Optimistically update follow status in accounts list
+      queryClient.setQueryData(['/api/top-accounts'], (old: any) => {
+        if (!old?.accounts) return old;
+        return {
+          ...old,
+          accounts: old.accounts.map((account: any) => 
+            account.account.fid === fid 
+              ? { ...account, isFollowed: true }
+              : account
+          )
+        };
+      });
+      
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['/api/top-accounts'], context?.previousData);
+      toast({
+        title: "Error",
+        description: "Failed to follow user",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/top-accounts'] });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success!",
+        description: data.message || "Successfully followed user",
+      });
+    }
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: async ({ castHash }: { castHash: string }) => {
+      return await apiRequest('/api/social/like', {
+        method: 'POST',
+        body: JSON.stringify({ castHash }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+    onMutate: async ({ castHash }) => {
+      // Cancel outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['/api/trending'] });
+      
+      // Snapshot all matching queries correctly
+      const previousQueries = queryClient.getQueriesData({ queryKey: ['/api/trending'] });
+      
+      // Optimistically update all trending queries with different topics
+      queryClient.setQueriesData({ queryKey: ['/api/trending'] }, (old: any) => {
+        if (!old?.items) return old;
+        return {
+          ...old,
+          items: old.items.map((item: any) => 
+            item.hash === castHash 
+              ? { ...item, likes: item.likes + 1, isLiked: true }
+              : item
+          )
+        };
+      });
+      
+      // Return a context object with the snapshotted queries
+      return { previousQueries };
+    },
+    onError: (err, variables, context) => {
+      // Restore each query individually with correct rollback pattern
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      toast({
+        title: "Error",
+        description: "Failed to like cast",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure server state
+      queryClient.invalidateQueries({ queryKey: ['/api/trending'] });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Liked!",
+        description: "Cast liked successfully",
+      });
+    }
+  });
+
+  const recastMutation = useMutation({
+    mutationFn: async ({ castHash }: { castHash: string }) => {
+      return await apiRequest('/api/social/recast', {
+        method: 'POST',
+        body: JSON.stringify({ castHash }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+    onMutate: async ({ castHash }) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/trending'] });
+      const previousQueries = queryClient.getQueriesData({ queryKey: ['/api/trending'] });
+      
+      // Optimistically update recast count and state
+      queryClient.setQueriesData({ queryKey: ['/api/trending'] }, (old: any) => {
+        if (!old?.items) return old;
+        return {
+          ...old,
+          items: old.items.map((item: any) => 
+            item.hash === castHash 
+              ? { ...item, recasts: item.recasts + 1, isRecasted: true }
+              : item
+          )
+        };
+      });
+      
+      return { previousQueries };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      toast({
+        title: "Error",
+        description: "Failed to recast",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trending'] });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Recasted!",
+        description: "Successfully recasted",
+      });
+    }
+  });
+
+  const replyMutation = useMutation({
+    mutationFn: async ({ castHash, replyText }: { castHash: string; replyText: string }) => {
+      return await apiRequest('/api/social/reply', {
+        method: 'POST',
+        body: JSON.stringify({ castHash, replyText }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+    onMutate: async ({ castHash }) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/trending'] });
+      const previousQueries = queryClient.getQueriesData({ queryKey: ['/api/trending'] });
+      
+      // Optimistically update reply count
+      queryClient.setQueriesData({ queryKey: ['/api/trending'] }, (old: any) => {
+        if (!old?.items) return old;
+        return {
+          ...old,
+          items: old.items.map((item: any) => 
+            item.hash === castHash 
+              ? { ...item, replies: item.replies + 1 }
+              : item
+          )
+        };
+      });
+      
+      return { previousQueries };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      toast({
+        title: "Error",
+        description: "Failed to post reply",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trending'] });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Reply sent!",
+        description: "Your reply was posted successfully",
+      });
+    }
+  });
+
+  return { followMutation, likeMutation, recastMutation, replyMutation };
+}
+
 // Right Rail Widgets
 function TrendingTopicsWidget() {
   const { data: trendsData } = useQuery({
@@ -274,11 +486,30 @@ function TrendingTopicsWidget() {
 }
 
 function WhoToFollowWidget() {
+  const { followMutation } = useSocialMutations();
+  const [followedUsers, setFollowedUsers] = useState<Set<number>>(new Set());
+  
   const fallbackAccounts = [
     { account: { fid: 3, username: 'dwr.eth', display_name: 'Dan Romero', pfp_url: 'https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/99ecb9fe-d38b-4d97-af33-a8a8c2e89100/original' }, recent_activity: 'high', trending_score: 95 },
     { account: { fid: 2, username: 'v', display_name: 'Vitalik', pfp_url: 'https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/bd9c8b63-5b8f-4aa8-8495-0334306b92c2/original' }, recent_activity: 'high', trending_score: 98 },
     { account: { fid: 239, username: 'linda', display_name: 'Linda Xie', pfp_url: 'https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/68b4b09e-58e3-4e39-9074-fe6b49a51c34/original' }, recent_activity: 'medium', trending_score: 87 }
   ];
+
+  const handleFollow = async (fid: number, username: string) => {
+    // Optimistic update
+    setFollowedUsers(prev => new Set([...prev, fid]));
+    
+    try {
+      await followMutation.mutateAsync({ fid, username });
+    } catch (error) {
+      // Rollback optimistic update on error
+      setFollowedUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fid);
+        return newSet;
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -309,17 +540,15 @@ function WhoToFollowWidget() {
             data-testid={`follow-button-${i}`}
             onClick={(e) => {
               e.stopPropagation();
-              // Simulate follow action
+              handleFollow(account.account.fid, account.account.username);
               if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
                 navigator.vibrate(50);
               }
-              console.log(`Following user ${account.account.username} (FID: ${account.account.fid})`);
-              // TODO: In real implementation, this would call API to follow user
-              // and update button state to "Following"
             }}
             title={`Follow @${account.account.username}`}
+            disabled={followMutation.isPending}
           >
-            Follow
+            {followedUsers.has(account.account.fid) ? 'Following' : 'Follow'}
           </Button>
         </motion.div>
       ))}
@@ -329,6 +558,46 @@ function WhoToFollowWidget() {
 
 // X-style Feed Post Card
 function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
+  const { likeMutation, recastMutation, replyMutation } = useSocialMutations();
+  const [likedCasts, setLikedCasts] = useState<Set<string>>(new Set());
+  const [recastedCasts, setRecastedCasts] = useState<Set<string>>(new Set());
+
+  const handleLike = async (castHash: string) => {
+    setLikedCasts(prev => new Set([...prev, castHash]));
+    try {
+      await likeMutation.mutateAsync({ castHash });
+    } catch (error) {
+      setLikedCasts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(castHash);
+        return newSet;
+      });
+    }
+  };
+
+  const handleRecast = async (castHash: string) => {
+    setRecastedCasts(prev => new Set([...prev, castHash]));
+    try {
+      await recastMutation.mutateAsync({ castHash });
+    } catch (error) {
+      setRecastedCasts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(castHash);
+        return newSet;
+      });
+    }
+  };
+
+  const handleReply = async (castHash: string) => {
+    const replyText = prompt("Enter your reply:");
+    if (replyText && replyText.trim()) {
+      try {
+        await replyMutation.mutateAsync({ castHash, replyText: replyText.trim() });
+      } catch (error) {
+        // Error handled by mutation onError
+      }
+    }
+  };
   const formatTime = (timestamp: string) => {
     const now = Date.now();
     const castTime = new Date(timestamp).getTime();
@@ -376,15 +645,15 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              // Simulate reply action - show toast notification
+              handleReply(cast.hash);
               if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
                 navigator.vibrate(50);
               }
-              console.log(`Replying to cast ${cast.hash}`);
             }}
             className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-blue-400 transition-colors"
             data-testid={`reply-button-${cast.hash}`}
             title="Reply to this cast"
+            disabled={replyMutation.isPending}
           >
             <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm">{cast.replies}</span>
@@ -392,15 +661,19 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              // Simulate recast action - optimistic UI update
+              handleRecast(cast.hash);
               if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
                 navigator.vibrate(50);
               }
-              console.log(`Recasting ${cast.hash}`);
             }}
-            className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-green-400 transition-colors"
+            className={`flex items-center gap-1 sm:gap-2 transition-colors ${
+              recastedCasts.has(cast.hash) || cast.isRecasted
+                ? 'text-green-400' 
+                : 'text-slate-400 hover:text-green-400'
+            }`}
             data-testid={`recast-button-${cast.hash}`}
             title="Recast this"
+            disabled={recastMutation.isPending}
           >
             <Repeat2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm">{cast.recasts}</span>
@@ -408,15 +681,19 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              // Simulate like action - optimistic UI update
+              handleLike(cast.hash);
               if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
                 navigator.vibrate(50);
               }
-              console.log(`Liking cast ${cast.hash}`);
             }}
-            className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-red-400 transition-colors"
+            className={`flex items-center gap-1 sm:gap-2 transition-colors ${
+              likedCasts.has(cast.hash) || cast.isLiked
+                ? 'text-red-400' 
+                : 'text-slate-400 hover:text-red-400'
+            }`}
             data-testid={`like-button-${cast.hash}`}
             title="Like this cast"
+            disabled={likeMutation.isPending}
           >
             <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm">{cast.likes}</span>
