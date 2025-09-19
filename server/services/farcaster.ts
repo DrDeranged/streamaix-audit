@@ -687,9 +687,12 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     console.log('Testing fetchBulkUsers...');
     try {
       const prominentFids = [3, 5650, 1, 2]; // Dan Romero, Vitalik, Farcaster founder, etc.
-      const bulkUsersResponse = await this.client.fetchBulkUsers({
-        fids: prominentFids
-      });
+      const bulkUsersResponse = await this.requestWithLimiter(
+        () => this.client.fetchBulkUsers({ fids: prominentFids }),
+        'getProminentCryptoUsers',
+        'prominentUsers:v1',
+        600 // 10 minutes cache
+      );
       
       results.workingEndpoints.push('fetchBulkUsers');
       results.testResults.fetchBulkUsers = {
@@ -711,10 +714,13 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     console.log('Testing lookupCastByHashOrUrl...');
     try {
       // Use a sample cast hash - this might not exist, but we'll see the API response
-      const castResponse = await this.client.lookupCastByHashOrUrl({
-        identifier: '0xa48dd46161d8e57725f5e26e34ec19c13ff7f3b9',
-        type: 'hash'
-      });
+      const castResponse = await this.requestWithLimiter(
+        () => this.client.lookupCastByHashOrUrl({
+          identifier: '0xa48dd46161d8e57725f5e26e34ec19c13ff7f3b9',
+          type: 'hash'
+        }),
+        'testApiEndpoints:cast'
+      );
       
       results.workingEndpoints.push('lookupCastByHashOrUrl');
       results.testResults.lookupCastByHashOrUrl = {
@@ -734,11 +740,14 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     // Test 3: fetchFeed (we know this fails with 402, but let's confirm)
     console.log('Testing fetchFeed...');
     try {
-      const feedResponse = await this.client.fetchFeed({
-        feedType: 'following',
-        fid: 3,
-        limit: 5
-      });
+      const feedResponse = await this.requestWithLimiter(
+        () => this.client.fetchFeed({
+          feedType: 'following',
+          fid: 3,
+          limit: 5
+        }),
+        'testApiEndpoints:feed'
+      );
       
       results.workingEndpoints.push('fetchFeed');
       results.testResults.fetchFeed = {
@@ -758,10 +767,13 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     // Test 4: fetchUserFollowers
     console.log('Testing fetchUserFollowers...');
     try {
-      const followersResponse = await this.client.fetchUserFollowers({
-        fid: 3,
-        limit: 5
-      });
+      const followersResponse = await this.requestWithLimiter(
+        () => this.client.fetchUserFollowers({
+          fid: 3,
+          limit: 5
+        }),
+        'testApiEndpoints:followers'
+      );
       
       results.workingEndpoints.push('fetchUserFollowers');
       results.testResults.fetchUserFollowers = {
@@ -781,10 +793,13 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     // Test 5: fetchUserFollowing
     console.log('Testing fetchUserFollowing...');
     try {
-      const followingResponse = await this.client.fetchUserFollowing({
-        fid: 3,
-        limit: 5
-      });
+      const followingResponse = await this.requestWithLimiter(
+        () => this.client.fetchUserFollowing({
+          fid: 3,
+          limit: 5
+        }),
+        'testApiEndpoints:following'
+      );
       
       results.workingEndpoints.push('fetchUserFollowing');
       results.testResults.fetchUserFollowing = {
@@ -830,9 +845,14 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
 
     try {
       // First, test if fetchBulkUsers works
-      const usersResponse = await this.client.fetchBulkUsers({
-        fids: prominentCryptoFids
-      });
+      const usersResponse = await this.requestWithLimiter(
+        () => this.client.fetchBulkUsers({
+          fids: prominentCryptoFids
+        }),
+        'getProminentCryptoUsers',
+        'prominentUsers:v1',
+        600 // 10 minutes cache
+      );
       
       if (usersResponse.users && usersResponse.users.length > 0) {
         console.log(`✅ Successfully fetched ${usersResponse.users.length} prominent crypto users`);
