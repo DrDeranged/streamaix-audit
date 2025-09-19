@@ -252,12 +252,26 @@ export default function Dashboard() {
     [summaries]
   );
   const bounties = (bountiesData as any)?.bounties || [];
-  // Production-ready data handling - no fallback mock data
-  const stats: UserStats = (statsData as any);
-  const balance = (balanceData as any)?.balance;
-  const cryptoQuotes = (cryptoData as any)?.quotes;
-  const newsArticles = (newsData as any)?.articles;
-  const cryptoStocks = (stocksData as any)?.stocks;
+  // Production-ready data handling with safe fallbacks
+  const stats: UserStats = (statsData as any) || {
+    totalSummaries: 0,
+    totalViews: 0,
+    totalEarnings: 0,
+    rank: 0,
+    level: 'Beginner',
+    accuracy: 0,
+    streak: 0
+  };
+  const balance = (balanceData as any)?.balance || { 
+    streamTokens: 0, 
+    usdValue: 0,
+    ethBalance: 0,
+    btcBalance: 0,
+    totalPortfolioValue: 0
+  };
+  const cryptoQuotes = (cryptoData as any)?.quotes || [];
+  const newsArticles = (newsData as any)?.articles || [];
+  const cryptoStocks = (stocksData as any)?.stocks || [];
 
   // WebSocket connection for real-time stock updates
   const connectWebSocket = useCallback(() => {
@@ -327,7 +341,7 @@ export default function Dashboard() {
   }, [connectWebSocket]);
 
   // Use real-time stocks if available, otherwise fall back to cached data
-  const displayStocks = realTimeStocks.length > 0 ? realTimeStocks : cryptoStocks;
+  const displayStocks = (realTimeStocks?.length > 0 ? realTimeStocks : cryptoStocks) || [];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
