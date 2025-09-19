@@ -1795,6 +1795,266 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ enhancedTrends });
   }));
 
+  // =============================================================================
+  // DISCOVER PAGE API ROUTES (Phase 1)
+  // =============================================================================
+
+  // Get market overview for discover page
+  app.get('/api/market/overview', asyncHandler(async (req: Request, res: Response) => {
+    const timeFilter = req.query.timeFilter as string || '24h';
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      // Get top crypto movers
+      const [cryptoQuotes, stocks] = await Promise.all([
+        marketData.getTopCryptos(20),
+        marketData.getCryptoStocks()
+      ]);
+      
+      // Calculate market movers based on percentage change
+      const movers = [
+        ...cryptoQuotes.map(crypto => ({
+          symbol: crypto.symbol,
+          name: crypto.name,
+          price: crypto.price,
+          change24h: crypto.percentChange24h,
+          changePercent: crypto.percentChange24h,
+          volume: crypto.volume24h,
+          marketCap: crypto.marketCap,
+          category: 'crypto' as const,
+          momentum: crypto.percentChange24h > 2 ? 'bullish' as const : 
+                   crypto.percentChange24h < -2 ? 'bearish' as const : 'neutral' as const
+        })),
+        ...stocks.slice(0, 10).map(stock => ({
+          symbol: stock.symbol,
+          name: stock.name,
+          price: stock.price,
+          change24h: stock.percentChange24h || 0,
+          changePercent: stock.percentChange24h || 0,
+          volume: stock.volume || 0,
+          marketCap: stock.marketCap,
+          category: 'stock' as const,
+          momentum: (stock.percentChange24h || 0) > 2 ? 'bullish' as const : 
+                   (stock.percentChange24h || 0) < -2 ? 'bearish' as const : 'neutral' as const
+        }))
+      ]
+      .sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))
+      .slice(0, 12);
+
+      res.json({
+        movers,
+        timestamp: new Date().toISOString(),
+        timeFilter
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch market overview:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch market overview',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get trending stories for discover page
+  app.get('/api/discover/trending', asyncHandler(async (req: Request, res: Response) => {
+    const timeFilter = req.query.timeFilter as string || '24h';
+    const storyFilter = req.query.storyFilter as string || 'all';
+    
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      
+      // Get trending content from multiple sources
+      const [farcasterTrending, youtubeData, marketNews] = await Promise.all([
+        farcasterService.getTrendingContent({
+          limit: 20,
+          since: timeFilter === '1h' ? '1h' : timeFilter === '6h' ? '6h' : '24h',
+          order: 'desc'
+        }),
+        // YouTube data from existing endpoint
+        req.app.locals?.youtubeService?.searchCryptoContent?.('trending crypto') || Promise.resolve([]),
+        MarketDataService.getInstance().getFinancialNews(10)
+      ]);
+
+      // Transform and combine stories from different sources
+      const stories = [];
+
+      // Add Farcaster stories (if filter allows)
+      if (storyFilter === 'all' || storyFilter === 'farcaster') {
+        farcasterTrending.forEach((cast: any) => {
+          stories.push({
+            id: cast.hash,
+            title: cast.text.slice(0, 100) + (cast.text.length > 100 ? '...' : ''),
+            description: cast.text,
+            source: cast.author.username,
+            sourceType: 'farcaster',
+            engagement: {
+              likes: cast.likes || 0,
+              comments: cast.replies || 0,
+              shares: cast.recasts || 0,
+              views: cast.engagement || 0,
+              score: (cast.likes || 0) + (cast.replies || 0) * 2 + (cast.recasts || 0) * 3
+            },
+            metadata: {
+              publishedAt: cast.timestamp,
+              author: cast.author.displayName || cast.author.username,
+              tags: ['farcaster', 'social'],
+              sentiment: 'neutral' as const,
+              trendingScore: cast.engagement || 0
+            },
+            url: `https://warpcast.com/${cast.author.username}/${cast.hash}`
+          });
+        });
+      }
+
+      // Add news stories (if filter allows)
+      if (storyFilter === 'all' || storyFilter === 'news') {
+        marketNews.forEach((article: any, index: number) => {
+          stories.push({
+            id: `news-${index}`,
+            title: article.title,
+            description: article.summary || article.title,
+            source: article.source,
+            sourceType: 'news',
+            engagement: {
+              likes: Math.floor(Math.random() * 100),
+              comments: Math.floor(Math.random() * 50),
+              shares: Math.floor(Math.random() * 25),
+              views: Math.floor(Math.random() * 1000) + 500,
+              score: Math.floor(Math.random() * 100) + 50
+            },
+            metadata: {
+              publishedAt: article.published,
+              author: article.source,
+              tags: ['news', 'crypto', 'finance'],
+              sentiment: 'neutral' as const,
+              trendingScore: Math.floor(Math.random() * 100) + 50
+            },
+            url: article.url
+          });
+        });
+      }
+
+      // Sort by engagement score and trending score
+      const sortedStories = stories
+        .sort((a, b) => (b.engagement.score + b.metadata.trendingScore) - (a.engagement.score + a.metadata.trendingScore))
+        .slice(0, 20);
+
+      res.json({
+        stories: sortedStories,
+        count: sortedStories.length,
+        timeFilter,
+        storyFilter,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch trending stories:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch trending stories',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get sector data for discover page  
+  app.get('/api/market/sectors', asyncHandler(async (req: Request, res: Response) => {
+    const timeFilter = req.query.timeFilter as string || '24h';
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      // Get crypto data to calculate sector performance
+      const cryptos = await marketData.getTopCryptos(50);
+      
+      // Define sector mappings
+      const sectorMappings: { [key: string]: string[] } = {
+        'DeFi': ['UNI', 'AAVE', 'MKR', 'COMP', 'SNX', 'YFI', 'CRV'],
+        'Layer 1': ['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'DOT', 'ATOM'],
+        'Layer 2': ['MATIC', 'OP', 'ARB', 'LRC', 'IMX'],
+        'Gaming': ['AXS', 'SAND', 'MANA', 'ENJ', 'GALA', 'ILV'],
+        'AI & Data': ['FET', 'OCEAN', 'GRT', 'RNDR', 'LPT'],
+        'Memecoins': ['DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK']
+      };
+
+      const sectors = Object.entries(sectorMappings).map(([sectorName, symbols]) => {
+        const sectorCryptos = cryptos.filter(crypto => 
+          symbols.includes(crypto.symbol.toUpperCase())
+        );
+        
+        if (sectorCryptos.length === 0) {
+          return {
+            name: sectorName,
+            performance: 0,
+            volume: 0,
+            assets: 0,
+            trend: 'stable' as const,
+            sentiment: 0.5
+          };
+        }
+
+        const avgPerformance = sectorCryptos.reduce((sum, crypto) => sum + crypto.percentChange24h, 0) / sectorCryptos.length;
+        const totalVolume = sectorCryptos.reduce((sum, crypto) => sum + crypto.volume24h, 0);
+        
+        return {
+          name: sectorName,
+          performance: avgPerformance,
+          volume: totalVolume,
+          assets: sectorCryptos.length,
+          trend: avgPerformance > 2 ? 'up' as const : avgPerformance < -2 ? 'down' as const : 'stable' as const,
+          sentiment: Math.max(0, Math.min(1, (avgPerformance + 10) / 20)) // Normalize to 0-1
+        };
+      });
+
+      res.json({
+        sectors,
+        timestamp: new Date().toISOString(),
+        timeFilter
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch sector data:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch sector data',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get social trending data
+  app.get('/api/social/trending', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { farcasterService } = await import('./services/farcaster');
+      
+      // Get prominent crypto users and their recent activity
+      const [prominentUsers, trendingContent] = await Promise.all([
+        farcasterService.getProminentCryptoUsers(10),
+        farcasterService.getTrendingContent({ limit: 15, since: '6h' })
+      ]);
+
+      // Calculate social metrics
+      const socialMetrics = {
+        totalEngagement: trendingContent.reduce((sum: number, cast: any) => 
+          sum + (cast.likes || 0) + (cast.replies || 0) + (cast.recasts || 0), 0),
+        activeUsers: prominentUsers.length,
+        trending: trendingContent.slice(0, 5).map((cast: any) => ({
+          text: cast.text.slice(0, 80) + '...',
+          author: cast.author.username,
+          engagement: (cast.likes || 0) + (cast.replies || 0) + (cast.recasts || 0)
+        }))
+      };
+
+      res.json({
+        metrics: socialMetrics,
+        prominentUsers: prominentUsers.slice(0, 5),
+        trendingContent: trendingContent.slice(0, 10),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch social trending data:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch social trending data',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
   const httpServer = createServer(app);
   
   // =============================================================================
