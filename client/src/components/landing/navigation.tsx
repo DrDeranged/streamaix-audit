@@ -102,6 +102,11 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
+                        <Link href="/discover" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                          Discover
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link href="/wallet-dashboard" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
                           Wallet
                         </Link>
