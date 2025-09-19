@@ -199,9 +199,9 @@ export class FarcasterService {
       if (cached) return cached;
     }
 
-    // Check rate limiter
-    if (!this.rateLimiter.canMakeRequest()) {
-      // Return stale data if available
+    // Consume rate limit token (includes canMakeRequest check)
+    if (!this.rateLimiter.consumeToken()) {
+      // Return stale data if available during rate limiting
       if (cacheKey) {
         const stale = this.cache.getStale<T>(cacheKey);
         if (stale) {
@@ -210,15 +210,6 @@ export class FarcasterService {
         }
       }
       throw new Error(`Rate limited: ${operationName}`);
-    }
-
-    // Consume rate limit token
-    if (!this.rateLimiter.consumeToken()) {
-      if (cacheKey) {
-        const stale = this.cache.getStale<T>(cacheKey);
-        if (stale) return stale;
-      }
-      throw new Error(`No tokens available: ${operationName}`);
     }
 
     try {
@@ -305,17 +296,16 @@ export class FarcasterService {
       tags
     });
 
-    try {
-      const response = await this.client.publishCast({
+    return this.requestWithLimiter(
+      () => this.client.publishCast({
         signerUuid: this.signerUuid,
         text: castText
-      });
+      }),
+      'createCast'
+    ).then(response => {
       console.log(`✅ Successfully posted cast to Farcaster: ${response.cast.hash}`);
       return response;
-    } catch (error) {
-      console.error('❌ Failed to create Farcaster cast:', this.sanitizeError(error));
-      throw new Error(`Failed to post to Farcaster: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    });
   }
 
   /**
@@ -395,91 +385,84 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
    * React to a cast (like/recast)
    */
   async reactToCast(castHash: string, reactionType: 'like' | 'recast'): Promise<any> {
-    try {
-      const response = await this.client.publishReaction({
+    return this.requestWithLimiter(
+      () => this.client.publishReaction({
         signerUuid: this.signerUuid,
         reactionType: reactionType,
-        target: castHash // Use target parameter as per SDK
-      });
+        target: castHash
+      }),
+      `reactToCast:${reactionType}`
+    ).then(response => {
       console.log(`✅ Successfully ${reactionType}d cast: ${castHash}`);
       return response;
-    } catch (error) {
-      console.error(`❌ Failed to ${reactionType} cast:`, this.sanitizeError(error));
-      throw new Error(`Failed to ${reactionType} cast: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    });
   }
 
   /**
    * Get cast information
    */
   async getCast(castHash: string): Promise<any> {
-    try {
-      const response = await this.client.lookupCastByHashOrUrl({
+    return this.requestWithLimiter(
+      () => this.client.lookupCastByHashOrUrl({
         identifier: castHash,
         type: 'hash'
-      });
-      return response.cast;
-    } catch (error) {
-      console.error('❌ Failed to get cast:', this.sanitizeError(error));
-      throw new Error(`Failed to get cast: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+      }).then(response => response.cast),
+      'getCast',
+      `cast:${castHash}`,
+      300 // 5 minutes cache for individual casts
+    );
   }
 
   /**
    * Get user's recent casts for activity dashboard
    */
   async getUserCasts(fid: number, limit: number = 25): Promise<any[]> {
-    try {
-      const response = await this.client.fetchFeedForYou({
-        fid: fid,
-        limit: limit
-      });
+    return this.requestWithLimiter(
+      () => this.client.fetchFeedForYou({ fid, limit })
+        .then(response => response.casts || []),
+      'getUserCasts',
+      `userCasts:${fid}:${limit}`,
+      120 // 2 minutes cache
+    ).then(casts => {
       console.log(`✅ Retrieved casts for user ${fid}`);
-      return response.casts || [];
-    } catch (error) {
-      console.error('❌ Failed to get user casts:', this.sanitizeError(error));
-      throw new Error(`Failed to get user casts: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+      return casts;
+    });
   }
 
   /**
    * Get user's follower information
    */
   async getUserFollowers(fid: number, limit: number = 100): Promise<any> {
-    try {
-      const response = await this.client.fetchUserFollowers({
-        fid: fid,
-        limit: limit
-      });
+    return this.requestWithLimiter(
+      () => this.client.fetchUserFollowers({ fid, limit }),
+      'getUserFollowers',
+      `userFollowers:${fid}:${limit}`,
+      180 // 3 minutes cache
+    ).then(response => {
       console.log(`✅ Retrieved follower data for user ${fid}`);
       return {
         followers: response.users,
         followerCount: response.users.length
       };
-    } catch (error) {
-      console.error('❌ Failed to get user followers:', this.sanitizeError(error));
-      throw new Error(`Failed to get user followers: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    });
   }
 
   /**
    * Get user's following information
    */
   async getUserFollowing(fid: number, limit: number = 100): Promise<any> {
-    try {
-      const response = await this.client.fetchUserFollowing({
-        fid: fid,
-        limit: limit
-      });
+    return this.requestWithLimiter(
+      () => this.client.fetchUserFollowing({ fid, limit }),
+      'getUserFollowing', 
+      `userFollowing:${fid}:${limit}`,
+      180 // 3 minutes cache
+    ).then(response => {
       console.log(`✅ Retrieved following data for user ${fid}`);
       return {
         following: response.users,
         followingCount: response.users.length
       };
-    } catch (error) {
-      console.error('❌ Failed to get user following:', this.sanitizeError(error));
-      throw new Error(`Failed to get user following: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    });
   }
 
   /**
@@ -510,11 +493,12 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
    * Get user profile information
    */
   async getUserProfile(fid: number): Promise<any> {
-    try {
-      const response = await this.client.fetchBulkUsers({
-        fids: [fid]
-      });
-      
+    return this.requestWithLimiter(
+      () => this.client.fetchBulkUsers({ fids: [fid] }),
+      'getUserProfile',
+      `userProfile:${fid}`,
+      300 // 5 minutes cache for profiles
+    ).then(response => {
       if (!response.users || response.users.length === 0) {
         throw new Error('User not found');
       }
@@ -522,17 +506,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       const user = response.users[0];
       console.log(`✅ Retrieved profile for user ${fid}: @${user.username}`);
       return user;
-    } catch (error) {
-      // Sanitize error logging to avoid exposing API keys
-      const sanitizedError = error instanceof Error ? {
-        message: error.message,
-        status: (error as any).status || (error as any).response?.status,
-        endpoint: (error as any).config?.url?.split('?')[0] // Remove query params
-      } : 'Unknown error';
-      
-      console.error('❌ Failed to get user profile:', sanitizedError);
-      throw new Error(`Failed to get user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    });
   }
 
   /**
@@ -578,13 +552,17 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     try {
       console.log(`🔍 Fetching trending content (limit: ${limit})`);
       
-      // Try to get trending/popular content from the API
-      // Use the global feed for trending content as fetchFeedTrending may not be available
-      const trendingCasts = await this.client.fetchFeed({
-        feedType: 'following',
-        fid: 3, // Use Dan Romero as a seed for trending content
-        limit: limit
-      });
+      // Try to get trending/popular content from the API with rate limiting
+      const trendingCasts = await this.requestWithLimiter(
+        () => this.client.fetchFeed({
+          feedType: 'following',
+          fid: 3, // Use Dan Romero as a seed for trending content  
+          limit: limit
+        }),
+        'getTrendingContent',
+        `trending:${limit}`,
+        120 // 2 minutes cache
+      );
       
       console.log(`✅ Retrieved ${trendingCasts.casts?.length || 0} trending casts`);
       return trendingCasts.casts || [];
