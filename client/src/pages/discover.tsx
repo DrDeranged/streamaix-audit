@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -86,10 +88,110 @@ interface SectorData {
 
 export default function Discover() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [timeFilter, setTimeFilter] = useState<'1h' | '6h' | '24h' | '7d'>('24h');
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [storyFilter, setStoryFilter] = useState<'all' | 'farcaster' | 'youtube' | 'news'>('all');
+  const pageStartTime = useRef<number>(Date.now());
+
+  // Interaction tracking mutation
+  const trackInteraction = useMutation({
+    mutationFn: async (interactionData: {
+      interactionType: string;
+      targetType?: string;
+      targetId?: string;
+      metadata?: any;
+    }) => {
+      if (!user) return; // Only track for logged-in users
+      
+      return apiRequest('/api/interactions/track', {
+        method: 'POST',
+        body: JSON.stringify(interactionData)
+      });
+    },
+    onError: (error) => {
+      console.warn('Failed to track interaction:', error);
+    }
+  });
+
+  // Helper function to track interactions
+  const trackUserInteraction = (
+    interactionType: string,
+    targetType?: string,
+    targetId?: string,
+    metadata?: any
+  ) => {
+    if (user) {
+      trackInteraction.mutate({
+        interactionType,
+        targetType,
+        targetId,
+        metadata
+      });
+    }
+  };
+
+  // Track page view on mount
+  useEffect(() => {
+    trackUserInteraction('view', 'page', 'discover', {
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    });
+
+    // Track time spent on page when leaving
+    return () => {
+      const timeSpent = Date.now() - pageStartTime.current;
+      if (timeSpent > 5000) { // Only track if spent more than 5 seconds
+        trackUserInteraction('time_spent', 'page', 'discover', {
+          duration: timeSpent,
+          timestamp: new Date().toISOString()
+        });
+      }
+    };
+  }, [user]);
+
+  // Track time filter changes
+  const handleTimeFilterChange = (period: '1h' | '6h' | '24h' | '7d') => {
+    setTimeFilter(period);
+    trackUserInteraction('filter_change', 'time_filter', period, {
+      previousFilter: timeFilter,
+      timestamp: new Date().toISOString()
+    });
+  };
+
+  // Track sector clicks
+  const handleSectorClick = (sectorName: string, sectorData: any) => {
+    const newSelectedSector = selectedSector === sectorName ? null : sectorName;
+    setSelectedSector(newSelectedSector);
+    
+    trackUserInteraction(
+      newSelectedSector ? 'sector_click' : 'sector_unclick', 
+      'sector', 
+      sectorName,
+      {
+        sectorPerformance: sectorData.performance,
+        sectorSentiment: sectorData.sentiment,
+        sectorTrend: sectorData.trend,
+        timestamp: new Date().toISOString()
+      }
+    );
+  };
+
+  // Track story clicks  
+  const handleStoryClick = (story: any, action: 'view' | 'tag_click' = 'view') => {
+    trackUserInteraction('story_click', 'story', story.id, {
+      storyTitle: story.title,
+      storySource: story.source,
+      storySourceType: story.sourceType,
+      storyEngagement: story.engagement,
+      storySentiment: story.metadata.sentiment,
+      storyTags: story.metadata.tags,
+      action,
+      selectedSector,
+      timestamp: new Date().toISOString()
+    });
+  };
 
   // Market data queries
   const { data: marketData } = useQuery({
@@ -167,7 +269,7 @@ export default function Discover() {
                 {(['1h', '6h', '24h', '7d'] as const).map((period) => (
                   <button
                     key={period}
-                    onClick={() => setTimeFilter(period)}
+                    onClick={() => handleTimeFilterChange(period)}
                     className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
                       timeFilter === period
                         ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
@@ -286,7 +388,7 @@ export default function Discover() {
                 className={`bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer ${
                   selectedSector === sector.name ? 'ring-2 ring-blue-400/50' : ''
                 }`}
-                onClick={() => setSelectedSector(selectedSector === sector.name ? null : sector.name)}
+                onClick={() => handleSectorClick(sector.name, sector)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -408,6 +510,7 @@ export default function Discover() {
                     className={`bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer ${
                       index < 3 ? 'ring-1 ring-orange-400/30' : ''
                     }`}
+                    onClick={() => handleStoryClick(story, 'view')}
                   >
                     <CardContent className="p-6">
                       <div className="flex gap-4">
@@ -507,7 +610,11 @@ export default function Discover() {
                                   selectedSector && tag.toLowerCase().includes(selectedSector.toLowerCase()) ?
                                   'border-blue-400/30 text-blue-300' : ''
                                 }`}
-                                onClick={() => setSelectedSector(tag)}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent triggering story click
+                                  handleStoryClick(story, 'tag_click');
+                                  setSelectedSector(tag);
+                                }}
                               >
                                 {tag}
                               </Badge>

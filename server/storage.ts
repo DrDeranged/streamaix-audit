@@ -64,7 +64,7 @@ export interface IStorage {
   deleteBounty(id: string): Promise<boolean>;
 
   // User interaction operations
-  getUserInteractions(userId: string, summaryId?: string): Promise<UserInteraction[]>;
+  getUserInteractions(userId: string, options?: { summaryId?: string; limit?: number; targetType?: string; since?: Date }): Promise<UserInteraction[]>;
   createUserInteraction(interaction: InsertUserInteraction): Promise<UserInteraction>;
   deleteUserInteraction(userId: string, summaryId: string, interactionType: string): Promise<boolean>;
 
