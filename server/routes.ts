@@ -2056,6 +2056,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // =============================================================================
+  // PHASE 3: USER INTEREST CALCULATION UTILITY
+  // =============================================================================
+  
+  interface UserInterests {
+    sectors: Record<string, number>;
+    contentTypes: Record<string, number>;
+    topics: Record<string, number>;
+  }
+
+  function calculateUserInterests(interactions: any[]): UserInterests {
+    const interests: UserInterests = {
+      sectors: {},
+      contentTypes: {},
+      topics: {}
+    };
+
+    // Weight recent interactions more heavily
+    const now = Date.now();
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+    interactions.forEach(interaction => {
+      const age = now - new Date(interaction.createdAt).getTime();
+      const recencyWeight = Math.max(0.1, 1 - (age / maxAge)); // Decay over 7 days
+
+      // Weight different interaction types
+      const interactionWeights = {
+        'sector_click': 1.0,
+        'story_click': 0.8,
+        'time_spent': 0.6,
+        'filter_change': 0.4,
+        'view': 0.2
+      };
+
+      const weight = (interactionWeights[interaction.interactionType] || 0.5) * recencyWeight;
+
+      // Track sector interests
+      if (interaction.targetType === 'sector' && interaction.targetId) {
+        interests.sectors[interaction.targetId] = (interests.sectors[interaction.targetId] || 0) + weight;
+      }
+
+      // Track content type interests  
+      if (interaction.targetType === 'story' && interaction.metadata?.contentType) {
+        const contentType = interaction.metadata.contentType;
+        interests.contentTypes[contentType] = (interests.contentTypes[contentType] || 0) + weight;
+      }
+
+      // Extract topics from metadata
+      if (interaction.metadata?.topics) {
+        interaction.metadata.topics.forEach((topic: string) => {
+          interests.topics[topic] = (interests.topics[topic] || 0) + weight * 0.5;
+        });
+      }
+    });
+
+    // Normalize scores to 0-1 range
+    const normalizeSores = (scores: Record<string, number>) => {
+      const max = Math.max(...Object.values(scores), 1);
+      Object.keys(scores).forEach(key => {
+        scores[key] = scores[key] / max;
+      });
+    };
+
+    normalizeSores(interests.sectors);
+    normalizeSores(interests.contentTypes);
+    normalizeSores(interests.topics);
+
+    return interests;
+  }
+
+  // =============================================================================
+  // PHASE 3: USER INTERACTION TRACKING & PERSONALIZATION APIs
+  // =============================================================================
+  
+  // Track user interactions for personalization
+  app.post('/api/interactions/track', asyncHandler(async (req: Request, res: Response) => {
+    const storage = new DatabaseStorage();
+    const { interactionType, targetType, targetId, metadata } = req.body;
+    
+    // Get user ID from session/auth
+    const userId = req.session?.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    try {
+      const interaction = await storage.createUserInteraction({
+        userId,
+        summaryId: targetType === 'summary' ? targetId : undefined,
+        interactionType,
+        targetType,
+        targetId,
+        metadata: metadata || {}
+      });
+
+      console.log(`📊 Tracked interaction: ${userId} ${interactionType} ${targetType}:${targetId}`);
+      res.json({ success: true, interactionId: interaction.id });
+    } catch (error) {
+      console.error('❌ Interaction tracking error:', error);
+      res.status(500).json({ error: 'Failed to track interaction' });
+    }
+  }));
+
+  // Get personalized discover feed
+  app.get('/api/discover/personalized', asyncHandler(async (req: Request, res: Response) => {
+    const storage = new DatabaseStorage();
+    const timeFilter = req.query.timeFilter as string || '24h';
+    const userId = req.session?.user?.id;
+
+    try {
+      // Get base data (same as regular discover)
+      const marketData = MarketDataService.getInstance();
+      const [marketOverview, trendingData, sectorsData] = await Promise.all([
+        marketData.getTopCryptos(25),
+        marketData.getTrendingContent(timeFilter),
+        marketData.getSectorPerformance(timeFilter)
+      ]);
+
+      let responseData = {
+        market: {
+          movers: marketOverview.slice(0, 6).map(crypto => ({
+            symbol: crypto.symbol,
+            name: crypto.name,
+            price: crypto.currentPrice,
+            change24h: crypto.percentChange24h,
+            volume: crypto.volume24h,
+            momentum: crypto.percentChange24h > 5 ? 'strong_up' : 
+                     crypto.percentChange24h > 0 ? 'up' : 
+                     crypto.percentChange24h < -5 ? 'strong_down' : 'down'
+          }))
+        },
+        trending: trendingData,
+        sectors: sectorsData,
+        personalized: !!userId,
+        timestamp: new Date().toISOString()
+      };
+
+      // If user is authenticated, apply personalization
+      if (userId) {
+        const interactions = await storage.getUserInteractions(userId, { limit: 50 });
+        const interests = calculateUserInterests(interactions);
+        
+        // Rerank sectors based on user interactions
+        if (interests.sectors && Object.keys(interests.sectors).length > 0) {
+          responseData.sectors.sectors = responseData.sectors.sectors.sort((a: any, b: any) => {
+            const aScore = interests.sectors[a.name] || 0;
+            const bScore = interests.sectors[b.name] || 0;
+            return bScore - aScore;
+          });
+        }
+      }
+
+      res.json(responseData);
+    } catch (error) {
+      console.error('❌ Personalized discover error:', error);
+      // Fallback to regular discover endpoint
+      const marketData = MarketDataService.getInstance();
+      const fallbackData = await marketData.getTopCryptos(6);
+      res.json({
+        market: { movers: fallbackData },
+        trending: { stories: [] },
+        sectors: { sectors: [] },
+        personalized: false,
+        error: 'Personalization unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
   const httpServer = createServer(app);
   
   // =============================================================================

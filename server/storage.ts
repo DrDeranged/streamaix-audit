@@ -19,6 +19,8 @@ import {
   type InsertTopicTag,
   type LearningResource,
   type InsertLearningResource,
+  type UserPreferences,
+  type InsertUserPreferences,
   type LeaderEducationData,
   users,
   summaries,
@@ -29,10 +31,11 @@ import {
   cryptoLeaders,
   curatedCasts,
   topicTags,
-  learningResources
+  learningResources,
+  userPreferences
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, inArray } from "drizzle-orm";
+import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -263,17 +266,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   // User interaction operations
-  async getUserInteractions(userId: string, summaryId?: string): Promise<UserInteraction[]> {
+  async getUserInteractions(
+    userId: string, 
+    options?: { summaryId?: string; limit?: number; targetType?: string; since?: Date }
+  ): Promise<UserInteraction[]> {
     const conditions = [eq(userInteractions.userId, userId)];
-    if (summaryId) {
-      conditions.push(eq(userInteractions.summaryId, summaryId));
+    
+    if (options?.summaryId) {
+      conditions.push(eq(userInteractions.summaryId, options.summaryId));
+    }
+    if (options?.targetType) {
+      conditions.push(eq(userInteractions.targetType, options.targetType));
+    }
+    if (options?.since) {
+      conditions.push(gte(userInteractions.createdAt, options.since));
     }
     
-    return await db
+    let query = db
       .select()
       .from(userInteractions)
       .where(and(...conditions))
       .orderBy(desc(userInteractions.createdAt));
+      
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    return await query;
   }
 
   async createUserInteraction(interaction: InsertUserInteraction): Promise<UserInteraction> {
@@ -295,6 +314,35 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // User preferences operations
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId));
+    return preferences || undefined;
+  }
+
+  async updateUserPreferences(userId: string, updates: Partial<InsertUserPreferences>): Promise<UserPreferences> {
+    // Upsert pattern: try update first, if no rows affected, insert
+    const [existing] = await db
+      .update(userPreferences)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userPreferences.userId, userId))
+      .returning();
+
+    if (existing) {
+      return existing;
+    }
+
+    // If no existing record, create new one
+    const [newPreferences] = await db
+      .insert(userPreferences)
+      .values({ ...updates, userId })
+      .returning();
+    return newPreferences;
   }
 
   // Knowledge stack operations

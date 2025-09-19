@@ -87,10 +87,26 @@ export const bounties = pgTable("bounties", {
 export const userInteractions = pgTable("user_interactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  summaryId: varchar("summary_id").references(() => summaries.id).notNull(),
-  interactionType: text("interaction_type").notNull(), // like, bookmark, share, view
+  summaryId: varchar("summary_id").references(() => summaries.id),
+  interactionType: text("interaction_type").notNull(), // like, bookmark, share, view, sector_click, story_click, filter_change, time_spent
+  targetType: text("target_type"), // summary, sector, story, filter
+  targetId: text("target_id"), // ID of the target (sector name, story ID, etc.)
   metadata: jsonb("metadata"), // additional interaction data
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userPreferences = pgTable("user_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  interests: jsonb("interests"), // { sectors: {DeFi: 0.8, "Layer 1": 0.6}, contentTypes: {social: 0.9, news: 0.7}, topics: [...] }
+  timePreference: text("time_preference").default("24h"), // 1h, 6h, 24h, 7d
+  contentPriority: text("content_priority").default("engagement"), // engagement, recency, relevance
+  notificationSettings: jsonb("notification_settings"), // { major_trends: true, sector_alerts: true, price_movements: false }
+  filterPreferences: jsonb("filter_preferences"), // saved filter combinations
+  feedCustomization: jsonb("feed_customization"), // layout preferences, section priorities
+  isOnboarded: boolean("is_onboarded").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const knowledgeStacks = pgTable("knowledge_stacks", {
@@ -307,7 +323,20 @@ export const insertUserInteractionSchema = createInsertSchema(userInteractions).
   userId: true,
   summaryId: true,
   interactionType: true,
+  targetType: true,
+  targetId: true,
   metadata: true,
+});
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).pick({
+  userId: true,
+  interests: true,
+  timePreference: true,
+  contentPriority: true,
+  notificationSettings: true,
+  filterPreferences: true,
+  feedCustomization: true,
+  isOnboarded: true,
 });
 
 export const insertKnowledgeStackSchema = createInsertSchema(knowledgeStacks).pick({
@@ -389,6 +418,9 @@ export type Bounty = typeof bounties.$inferSelect;
 
 export type InsertUserInteraction = z.infer<typeof insertUserInteractionSchema>;
 export type UserInteraction = typeof userInteractions.$inferSelect;
+
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type UserPreferences = typeof userPreferences.$inferSelect;
 
 export type InsertKnowledgeStack = z.infer<typeof insertKnowledgeStackSchema>;
 export type KnowledgeStack = typeof knowledgeStacks.$inferSelect;
