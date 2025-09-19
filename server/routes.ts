@@ -1957,6 +1957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get sector data for discover page  
   app.get('/api/market/sectors', asyncHandler(async (req: Request, res: Response) => {
+    console.log(`🔍 API Call: GET /api/market/sectors - Query:`, req.query, 'Headers:', req.headers.accept);
     const timeFilter = req.query.timeFilter as string || '24h';
     const marketData = MarketDataService.getInstance();
     

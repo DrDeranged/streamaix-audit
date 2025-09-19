@@ -93,22 +93,22 @@ export default function Discover() {
 
   // Market data queries
   const { data: marketData } = useQuery({
-    queryKey: ['/api/market/overview', timeFilter],
+    queryKey: [`/api/market/overview?timeFilter=${timeFilter}`],
     refetchInterval: 30000, // 30 seconds
   });
 
   const { data: trendingData } = useQuery({
-    queryKey: ['/api/discover/trending', timeFilter, storyFilter],
+    queryKey: [`/api/discover/trending?timeFilter=${timeFilter}&storyFilter=${storyFilter}`],
     refetchInterval: 45000, // 45 seconds
   });
 
   const { data: sectorsData } = useQuery({
-    queryKey: ['/api/market/sectors', timeFilter],
+    queryKey: [`/api/market/sectors?timeFilter=${timeFilter}`],
     refetchInterval: 60000, // 1 minute
   });
 
   const { data: socialData } = useQuery({
-    queryKey: ['/api/social/trending'],
+    queryKey: [`/api/social/trending`],
     refetchInterval: 30000,
   });
 
