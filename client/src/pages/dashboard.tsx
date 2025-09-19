@@ -407,7 +407,7 @@ export default function Dashboard() {
                     <span className="font-semibold text-xs sm:text-sm">{formatPrice(quote.price)}</span>
                     <span className={`flex items-center font-medium text-xs sm:text-sm ${getChangeColor(quote.percentChange24h)}`}>
                       {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />}
-                      {quote.percentChange24h.toFixed(1)}%
+                      {(quote.percentChange24h || 0).toFixed(1)}%
                     </span>
                   </div>
                 );
@@ -1076,8 +1076,8 @@ export default function Dashboard() {
               </Card>
             </motion.div>
 
-            {/* Live Crypto Stocks - Horizontal scroll on mobile */}
-            {displayStocks.length > 0 && (
+            {/* Live Crypto Stocks - Always show section */}
+            {true && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -1096,7 +1096,7 @@ export default function Dashboard() {
                     {/* Mobile: Horizontal scroll */}
                     <div className="lg:hidden overflow-x-auto pb-2">
                       <div className="flex space-x-3" style={{ width: 'max-content' }}>
-                        {displayStocks.slice(0, 15).map((stock: any) => {
+                        {displayStocks.length > 0 ? displayStocks.slice(0, 15).map((stock: any) => {
                           const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
                           return (
                             <div
@@ -1108,17 +1108,23 @@ export default function Dashboard() {
                                 <div className="text-white font-medium text-sm">{stock.symbol}</div>
                                 <div className="text-gray-400 text-xs">{formatPrice(stock.price)}</div>
                                 <div className={`font-medium text-xs ${getChangeColor(changePercent)}`}>
-                                  {changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%
+                                  {changePercent > 0 ? '+' : ''}{(changePercent || 0).toFixed(1)}%
                                 </div>
                               </div>
                             </div>
                           );
-                        })}
-                      </div>
+                        }) : (
+                          <div className="text-center py-6 text-gray-400 text-sm">
+                            <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                            <p>Live stock data temporarily unavailable</p>
+                            <p className="text-xs">API rate limit reached - refreshing...</p>
+                          </div>
+                        )}
+                    </div>
                     </div>
                     {/* Desktop: Vertical list */}
                     <div className="hidden lg:block">
-                      {displayStocks.slice(0, 25).map((stock: any, index: number) => {
+                      {displayStocks.length > 0 ? displayStocks.slice(0, 25).map((stock: any, index: number) => {
                         const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
                         
                         return (
@@ -1132,11 +1138,17 @@ export default function Dashboard() {
                               <span className="text-gray-400 truncate">{formatPrice(stock.price)}</span>
                             </div>
                             <span className={`font-medium whitespace-nowrap ${getChangeColor(changePercent)}`}>
-                              {changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%
+                              {changePercent > 0 ? '+' : ''}{(changePercent || 0).toFixed(1)}%
                             </span>
                           </div>
                         );
-                      })}
+                      }) : (
+                        <div className="text-center py-6 text-gray-400 text-sm">
+                          <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p>Live stock data temporarily unavailable</p>
+                          <p className="text-xs">API rate limit reached - refreshing...</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
