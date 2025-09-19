@@ -261,7 +261,7 @@ export default function Discover() {
           </div>
         </motion.div>
 
-        {/* Phase 1: Trending Stories Hub */}
+        {/* Phase 2: Sector Intelligence */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -270,14 +270,91 @@ export default function Discover() {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-400" />
+              Sector Intelligence
+            </h2>
+            <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30">
+              Real-time Correlations
+            </Badge>
+          </div>
+
+          {/* Sector Performance Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sectors.slice(0, 6).map((sector) => (
+              <Card 
+                key={sector.name} 
+                className={`bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer ${
+                  selectedSector === sector.name ? 'ring-2 ring-blue-400/50' : ''
+                }`}
+                onClick={() => setSelectedSector(selectedSector === sector.name ? null : sector.name)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-semibold">{sector.name}</h3>
+                    <div className="flex items-center gap-1">
+                      {sector.trend === 'up' ? <ArrowUp className="h-4 w-4 text-green-400" /> :
+                       sector.trend === 'down' ? <ArrowDown className="h-4 w-4 text-red-400" /> :
+                       <Activity className="h-4 w-4 text-gray-400" />}
+                      <span className={`text-sm font-medium ${getChangeColor(sector.performance)}`}>
+                        {sector.performance > 0 ? '+' : ''}{sector.performance.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>Assets</span>
+                      <span>{sector.assets}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>Volume</span>
+                      <span>{formatVolume(sector.volume)}</span>
+                    </div>
+                    
+                    {/* Sentiment Bar */}
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Sentiment</span>
+                        <span>{Math.round(sector.sentiment * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all ${
+                            sector.sentiment > 0.6 ? 'bg-green-400' : 
+                            sector.sentiment > 0.4 ? 'bg-yellow-400' : 'bg-red-400'
+                          }`}
+                          style={{ width: `${sector.sentiment * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Phase 2: Enhanced Trending Stories Hub */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Flame className="h-5 w-5 text-orange-400" />
-              Trending Stories
+              Content Intelligence
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 ml-2">
+                <Brain className="h-3 w-3 mr-1" />
+                AI-Ranked
+              </Badge>
             </h2>
             
-            {/* Story Type Filter */}
+            {/* Enhanced Story Type Filter */}
             <div className="flex gap-2">
               {([
-                { key: 'all', label: 'All', icon: Globe },
+                { key: 'all', label: 'All Sources', icon: Globe },
                 { key: 'farcaster', label: 'Social', icon: MessageSquare },
                 { key: 'youtube', label: 'Videos', icon: Video },
                 { key: 'news', label: 'News', icon: Newspaper }
@@ -299,83 +376,167 @@ export default function Discover() {
             </div>
           </div>
 
-          {/* Trending Stories List */}
-          <div className="space-y-4">
-            {trendingStories.length > 0 ? trendingStories.slice(0, 10).map((story) => (
-              <Card key={story.id} className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    {story.thumbnail && (
-                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                        <img 
-                          src={story.thumbnail} 
-                          alt={story.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-white font-semibold text-lg line-clamp-2">{story.title}</h3>
-                          <p className="text-gray-300 text-sm mt-1 line-clamp-2">{story.description}</p>
-                        </div>
-                        
-                        <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30 ml-4">
-                          <Star className="h-3 w-3 mr-1" />
-                          {story.metadata.trendingScore}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Globe className="h-3 w-3" />
-                            {story.source}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {getTimeAgo(story.metadata.publishedAt)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {story.metadata.author}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Heart className="h-3 w-3" />
-                            {story.engagement.likes}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="h-3 w-3" />
-                            {story.engagement.comments}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {story.engagement.views}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {story.metadata.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs bg-white/5 border-white/20 text-gray-300">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+          {/* Story Clustering Indicator */}
+          {selectedSector && (
+            <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-400/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Target className="h-5 w-5 text-blue-400" />
+                  <div>
+                    <h3 className="text-white font-medium">Sector Focus: {selectedSector}</h3>
+                    <p className="text-gray-300 text-sm">Stories and discussions related to {selectedSector} sector</p>
                   </div>
-                </CardContent>
-              </Card>
-            )) : (
+                  <button
+                    onClick={() => setSelectedSector(null)}
+                    className="ml-auto text-gray-400 hover:text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Phase 2: Smart Story Clustering */}
+          <div className="space-y-4">
+            {trendingStories.length > 0 ? (
+              <>
+                {/* Story clusters with enhanced ranking */}
+                {trendingStories.slice(0, 12).map((story, index) => (
+                  <Card 
+                    key={story.id} 
+                    className={`bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer ${
+                      index < 3 ? 'ring-1 ring-orange-400/30' : ''
+                    }`}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex gap-4">
+                        {story.thumbnail && (
+                          <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                            <img 
+                              src={story.thumbnail} 
+                              alt={story.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              {/* Priority indicator for top stories */}
+                              {index < 3 && (
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30">
+                                    <Flame className="h-3 w-3 mr-1" />
+                                    Hot Trend #{index + 1}
+                                  </Badge>
+                                </div>
+                              )}
+                              
+                              <h3 className="text-white font-semibold text-lg line-clamp-2">{story.title}</h3>
+                              <p className="text-gray-300 text-sm mt-1 line-clamp-2">{story.description}</p>
+                              
+                              {/* Sector correlation indicator */}
+                              {selectedSector && story.metadata.tags.some(tag => 
+                                tag.toLowerCase().includes(selectedSector.toLowerCase())
+                              ) && (
+                                <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 mt-2">
+                                  <Target className="h-3 w-3 mr-1" />
+                                  {selectedSector} Related
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <div className="flex flex-col items-end gap-2 ml-4">
+                              <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30">
+                                <Star className="h-3 w-3 mr-1" />
+                                {story.metadata.trendingScore}
+                              </Badge>
+                              
+                              {/* Sentiment indicator */}
+                              <Badge className={`${
+                                story.metadata.sentiment === 'positive' ? 'bg-green-500/20 text-green-300 border-green-400/30' :
+                                story.metadata.sentiment === 'negative' ? 'bg-red-500/20 text-red-300 border-red-400/30' :
+                                'bg-gray-500/20 text-gray-300 border-gray-400/30'
+                              }`}>
+                                {story.metadata.sentiment === 'positive' ? '📈' :
+                                 story.metadata.sentiment === 'negative' ? '📉' : '➖'}
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <Globe className="h-3 w-3" />
+                                {story.source}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {getTimeAgo(story.metadata.publishedAt)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                {story.metadata.author}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <Heart className="h-3 w-3" />
+                                {story.engagement.likes}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="h-3 w-3" />
+                                {story.engagement.comments}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                {story.engagement.views}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            {story.metadata.tags.slice(0, 4).map((tag) => (
+                              <Badge 
+                                key={tag} 
+                                variant="outline" 
+                                className={`text-xs bg-white/5 border-white/20 text-gray-300 hover:bg-white/10 cursor-pointer ${
+                                  selectedSector && tag.toLowerCase().includes(selectedSector.toLowerCase()) ?
+                                  'border-blue-400/30 text-blue-300' : ''
+                                }`}
+                                onClick={() => setSelectedSector(tag)}
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Load more indicator */}
+                {trendingStories.length > 12 && (
+                  <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-400/20 hover:bg-purple-500/20 transition-all cursor-pointer">
+                    <CardContent className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-2 text-purple-300">
+                        <ChevronRight className="h-4 w-4" />
+                        <span>Load {trendingStories.length - 12} more stories</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
               <Card className="bg-white/5 border-white/10">
                 <CardContent className="p-8 text-center">
                   <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-spin" />
                   <p className="text-gray-300">Loading trending stories...</p>
+                  <p className="text-gray-400 text-sm mt-2">Analyzing content intelligence across platforms...</p>
                 </CardContent>
               </Card>
             )}
