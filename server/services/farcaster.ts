@@ -8,15 +8,92 @@ interface CacheEntry<T> {
   ttl: number;
 }
 
+// Token bucket rate limiter for API calls
+class TokenBucketLimiter {
+  private tokens: number;
+  private lastRefill: number;
+  private readonly capacity: number;
+  private readonly refillRate: number; // tokens per second
+  private readonly refillInterval: number;
+  private backoffUntil: number = 0;
+  private currentBackoffMs: number = 1000; // Start with 1 second
+  private readonly maxBackoffMs: number = 60000; // Max 60 seconds
+
+  constructor(capacity: number = 5, refillRate: number = 5/60) { // 5 tokens per minute
+    this.capacity = capacity;
+    this.refillRate = refillRate;
+    this.refillInterval = 1000; // Refill every second
+    this.tokens = capacity;
+    this.lastRefill = Date.now();
+  }
+
+  private refillTokens(): void {
+    const now = Date.now();
+    const timeSinceRefill = now - this.lastRefill;
+    const tokensToAdd = (timeSinceRefill / 1000) * this.refillRate;
+    
+    this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
+    this.lastRefill = now;
+  }
+
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    
+    // Check if still in backoff period
+    if (now < this.backoffUntil) {
+      return false;
+    }
+    
+    this.refillTokens();
+    return this.tokens >= 1;
+  }
+
+  consumeToken(): boolean {
+    if (!this.canMakeRequest()) {
+      return false;
+    }
+    
+    this.tokens -= 1;
+    return true;
+  }
+
+  handle429Error(retryAfterSeconds?: number): void {
+    // Use retry-after header if provided, otherwise exponential backoff
+    if (retryAfterSeconds) {
+      this.backoffUntil = Date.now() + (retryAfterSeconds * 1000);
+    } else {
+      this.backoffUntil = Date.now() + this.currentBackoffMs;
+      this.currentBackoffMs = Math.min(this.maxBackoffMs, this.currentBackoffMs * 2);
+    }
+    
+    // Reset tokens to prevent immediate retry
+    this.tokens = 0;
+  }
+
+  resetBackoff(): void {
+    this.backoffUntil = 0;
+    this.currentBackoffMs = 1000;
+  }
+}
+
 class MemoryCache {
   private cache = new Map<string, CacheEntry<any>>();
+  private staleCache = new Map<string, CacheEntry<any>>(); // Stale-while-revalidate cache
 
   set<T>(key: string, data: T, ttlSeconds = 120): void {
-    this.cache.set(key, {
+    const entry = {
       data,
       timestamp: Date.now(),
       ttl: ttlSeconds * 1000
-    });
+    };
+    
+    // Move current entry to stale cache before setting new one
+    const current = this.cache.get(key);
+    if (current) {
+      this.staleCache.set(key, current);
+    }
+    
+    this.cache.set(key, entry);
   }
 
   get<T>(key: string): T | null {
@@ -31,8 +108,25 @@ class MemoryCache {
     return entry.data;
   }
 
+  getStale<T>(key: string): T | null {
+    // Get stale data for stale-while-revalidate pattern
+    const staleEntry = this.staleCache.get(key);
+    if (staleEntry) {
+      return staleEntry.data;
+    }
+    
+    // Fallback to expired fresh cache
+    const freshEntry = this.cache.get(key);
+    if (freshEntry) {
+      return freshEntry.data;
+    }
+    
+    return null;
+  }
+
   clear(): void {
     this.cache.clear();
+    this.staleCache.clear();
   }
 }
 
@@ -62,6 +156,117 @@ export class FarcasterService {
   private client: NeynarAPIClient;
   private signerUuid: string;
   private cache = new MemoryCache();
+  private rateLimiter = new TokenBucketLimiter();
+
+  /**
+   * Centralized error sanitization to prevent API key exposure
+   */
+  private sanitizeError(error: any): any {
+    if (!error) return error;
+    
+    // If it's an axios error with config/headers, sanitize it
+    if (error.config || error.request || error.response) {
+      return {
+        message: error.message || 'API request failed',
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        // Remove config, headers, and request data that could contain API keys
+        endpoint: error.config?.url ? error.config.url.replace(/\?.*$/, '') : undefined
+      };
+    }
+    
+    // For regular Error objects, just return the message
+    if (error instanceof Error) {
+      return { message: error.message };
+    }
+    
+    // For other objects, return a safe representation
+    return { message: String(error) };
+  }
+
+  /**
+   * Rate-limited request wrapper for all Farcaster SDK calls
+   */
+  private async requestWithLimiter<T>(
+    operation: () => Promise<T>, 
+    operationName: string,
+    cacheKey?: string,
+    cacheTtl: number = 120
+  ): Promise<T> {
+    // Check cache first if cache key provided
+    if (cacheKey) {
+      const cached = this.cache.get<T>(cacheKey);
+      if (cached) return cached;
+    }
+
+    // Check rate limiter
+    if (!this.rateLimiter.canMakeRequest()) {
+      // Return stale data if available
+      if (cacheKey) {
+        const stale = this.cache.getStale<T>(cacheKey);
+        if (stale) {
+          console.log(`🔄 Rate limited - returning stale data for ${operationName}`);
+          return stale;
+        }
+      }
+      throw new Error(`Rate limited: ${operationName}`);
+    }
+
+    // Consume rate limit token
+    if (!this.rateLimiter.consumeToken()) {
+      if (cacheKey) {
+        const stale = this.cache.getStale<T>(cacheKey);
+        if (stale) return stale;
+      }
+      throw new Error(`No tokens available: ${operationName}`);
+    }
+
+    try {
+      const result = await operation();
+      
+      // Reset backoff on successful request
+      this.rateLimiter.resetBackoff();
+      
+      // Cache result if cache key provided
+      if (cacheKey) {
+        this.cache.set(cacheKey, result, cacheTtl);
+      }
+      
+      return result;
+    } catch (error: any) {
+      // Handle 429 rate limit errors specifically
+      if (error?.response?.status === 429) {
+        const retryAfter = error.response.headers['retry-after'];
+        const retrySeconds = retryAfter ? parseInt(retryAfter) : undefined;
+        this.rateLimiter.handle429Error(retrySeconds);
+        console.log(`⏱️  Rate limit hit for ${operationName}, backing off for ${retrySeconds || 'exponential'} seconds`);
+        
+        // Return stale data if available
+        if (cacheKey) {
+          const stale = this.cache.getStale<T>(cacheKey);
+          if (stale) {
+            console.log(`🔄 Returning stale data for ${operationName} due to rate limit`);
+            return stale;
+          }
+        }
+      }
+      
+      // Always sanitize errors to prevent API key exposure
+      const sanitizedError = this.sanitizeError(error);
+      console.error(`${operationName} failed:`, sanitizedError);
+      
+      // Return stale data as fallback for any error
+      if (cacheKey) {
+        const stale = this.cache.getStale<T>(cacheKey);
+        if (stale) {
+          console.log(`🔄 Returning stale data for ${operationName} due to error`);
+          return stale;
+        }
+      }
+      
+      throw error;
+    }
+  }
 
   constructor() {
     const apiKey = process.env.NEYNAR_API_KEY;
@@ -108,7 +313,7 @@ export class FarcasterService {
       console.log(`✅ Successfully posted cast to Farcaster: ${response.cast.hash}`);
       return response;
     } catch (error) {
-      console.error('❌ Failed to create Farcaster cast:', error);
+      console.error('❌ Failed to create Farcaster cast:', this.sanitizeError(error));
       throw new Error(`Failed to post to Farcaster: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -199,7 +404,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       console.log(`✅ Successfully ${reactionType}d cast: ${castHash}`);
       return response;
     } catch (error) {
-      console.error(`❌ Failed to ${reactionType} cast:`, error);
+      console.error(`❌ Failed to ${reactionType} cast:`, this.sanitizeError(error));
       throw new Error(`Failed to ${reactionType} cast: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -215,7 +420,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       });
       return response.cast;
     } catch (error) {
-      console.error('❌ Failed to get cast:', error);
+      console.error('❌ Failed to get cast:', this.sanitizeError(error));
       throw new Error(`Failed to get cast: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -232,7 +437,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       console.log(`✅ Retrieved casts for user ${fid}`);
       return response.casts || [];
     } catch (error) {
-      console.error('❌ Failed to get user casts:', error);
+      console.error('❌ Failed to get user casts:', this.sanitizeError(error));
       throw new Error(`Failed to get user casts: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -252,7 +457,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         followerCount: response.users.length
       };
     } catch (error) {
-      console.error('❌ Failed to get user followers:', error);
+      console.error('❌ Failed to get user followers:', this.sanitizeError(error));
       throw new Error(`Failed to get user followers: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -272,7 +477,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         followingCount: response.users.length
       };
     } catch (error) {
-      console.error('❌ Failed to get user following:', error);
+      console.error('❌ Failed to get user following:', this.sanitizeError(error));
       throw new Error(`Failed to get user following: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -296,7 +501,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         totalEngagement: likes + recasts + replies
       };
     } catch (error) {
-      console.error('❌ Failed to get cast engagement:', error);
+      console.error('❌ Failed to get cast engagement:', this.sanitizeError(error));
       throw new Error(`Failed to get cast engagement: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -361,7 +566,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         engagement: totalEngagement
       };
     } catch (error) {
-      console.error('❌ Failed to get user activity analytics:', error);
+      console.error('❌ Failed to get user activity analytics:', this.sanitizeError(error));
       throw new Error(`Failed to get user activity analytics: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -384,7 +589,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       console.log(`✅ Retrieved ${trendingCasts.casts?.length || 0} trending casts`);
       return trendingCasts.casts || [];
     } catch (error) {
-      console.error('❌ Failed to get trending content:', error);
+      console.error('❌ Failed to get trending content:', this.sanitizeError(error));
       
       // Since Neynar API requires paid plan, provide demo content for showcase
       console.log('🎭 Using demo trending content for showcase');
@@ -672,7 +877,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       }
       
     } catch (error: any) {
-      console.error('❌ Failed to fetch prominent crypto users:', error);
+      console.error('❌ Failed to fetch prominent crypto users:', this.sanitizeError(error));
       
       if (error.response?.status === 402) {
         // If the API requires payment, provide curated demo data
@@ -824,18 +1029,39 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         return false;
       }
     } catch (error) {
-      console.error('❌ Farcaster connection test failed:', error);
+      console.error('❌ Farcaster connection test failed:', this.sanitizeError(error));
       return false;
     }
   }
 
   /**
-   * Fetch recent casts from a specific user
+   * Fetch recent casts from a specific user with rate limiting and stale-while-revalidate
    */
   async fetchUserRecent(fid: number, limit = 10): Promise<TrendingCast[]> {
     const cacheKey = `user_recent_${fid}_${limit}`;
+    
+    // Return fresh cache if available
     const cached = this.cache.get<TrendingCast[]>(cacheKey);
     if (cached) return cached;
+
+    // Check rate limiter before making API call
+    if (!this.rateLimiter.canMakeRequest()) {
+      // Return stale data if available
+      const stale = this.cache.getStale<TrendingCast[]>(cacheKey);
+      if (stale) {
+        console.log(`🔄 Rate limited - returning stale data for user ${fid}`);
+        return stale;
+      }
+      console.log(`⏳ Rate limited - no stale data available for user ${fid}`);
+      return [];
+    }
+
+    // Consume rate limit token
+    if (!this.rateLimiter.consumeToken()) {
+      const stale = this.cache.getStale<TrendingCast[]>(cacheKey);
+      if (stale) return stale;
+      return [];
+    }
 
     try {
       const response = await this.client.fetchCastsForUser({
@@ -866,10 +1092,39 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         parentHash: cast.parent_hash || undefined
       }));
 
-      this.cache.set(cacheKey, casts, 60); // 1 minute cache
+      // Reset backoff on successful request
+      this.rateLimiter.resetBackoff();
+      
+      // Cache for longer to reduce API calls
+      this.cache.set(cacheKey, casts, 120); // 2 minutes cache (increased from 1)
       return casts;
-    } catch (error) {
-      console.error(`Failed to fetch casts for user ${fid}:`, error);
+    } catch (error: any) {
+      // Handle 429 rate limit errors specifically
+      if (error?.response?.status === 429) {
+        const retryAfter = error.response.headers['retry-after'];
+        const retrySeconds = retryAfter ? parseInt(retryAfter) : undefined;
+        this.rateLimiter.handle429Error(retrySeconds);
+        console.log(`⏱️  Rate limit hit for user ${fid}, backing off for ${retrySeconds || 'exponential'} seconds`);
+        
+        // Return stale data if available
+        const stale = this.cache.getStale<TrendingCast[]>(cacheKey);
+        if (stale) {
+          console.log(`🔄 Returning stale data for user ${fid} due to rate limit`);
+          return stale;
+        }
+      }
+      
+      // Sanitize error to prevent API key exposure
+      const sanitizedError = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Failed to fetch casts for user ${fid}:`, sanitizedError);
+      
+      // Return stale data as fallback for any error
+      const stale = this.cache.getStale<TrendingCast[]>(cacheKey);
+      if (stale) {
+        console.log(`🔄 Returning stale data for user ${fid} due to error`);
+        return stale;
+      }
+      
       return [];
     }
   }
@@ -919,7 +1174,9 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       this.cache.set(cacheKey, result, 120); // 2 minute cache
       return result;
     } catch (error) {
-      console.error(`Failed to fetch thread for cast ${hash}:`, error);
+      // Sanitize error to prevent API key exposure  
+      const sanitizedError = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Failed to fetch thread for cast ${hash}:`, sanitizedError);
       return { root: null, replies: [] };
     }
   }
@@ -969,7 +1226,9 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       this.cache.set(cacheKey, trending, 90); // 1.5 minute cache
       return trending;
     } catch (error) {
-      console.error('Failed to aggregate trending casts:', error);
+      // Sanitize error to prevent API key exposure
+      const sanitizedError = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to aggregate trending casts:', sanitizedError);
       
       // Return demo data if API fails
       return this.getDemoTrendingCasts();
@@ -1009,7 +1268,9 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       this.cache.set(cacheKey, accountsWithHighlights, 180); // 3 minute cache
       return accountsWithHighlights;
     } catch (error) {
-      console.error('Failed to fetch top accounts with highlights:', error);
+      // Sanitize error to prevent API key exposure
+      const sanitizedError = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to fetch top accounts with highlights:', sanitizedError);
       return [];
     }
   }
