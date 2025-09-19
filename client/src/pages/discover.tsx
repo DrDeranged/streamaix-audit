@@ -105,13 +105,21 @@ export default function Discover() {
     }) => {
       if (!user) return; // Only track for logged-in users
       
-      return apiRequest('/api/interactions/track', {
+      console.log('📡 Sending interaction tracking request:', interactionData);
+      
+      const response = await apiRequest('/api/interactions/track', {
         method: 'POST',
         body: JSON.stringify(interactionData)
       });
+      
+      console.log('✅ Interaction tracking response:', response);
+      return response;
+    },
+    onSuccess: (data) => {
+      console.log('✅ Interaction tracked successfully:', data);
     },
     onError: (error) => {
-      console.warn('Failed to track interaction:', error);
+      console.error('❌ Failed to track interaction:', error);
     }
   });
 
@@ -122,6 +130,8 @@ export default function Discover() {
     targetId?: string,
     metadata?: any
   ) => {
+    console.log(`🔍 Tracking interaction: ${interactionType} ${targetType}:${targetId}`, { user: !!user, metadata });
+    
     if (user) {
       trackInteraction.mutate({
         interactionType,
@@ -129,6 +139,8 @@ export default function Discover() {
         targetId,
         metadata
       });
+    } else {
+      console.warn('❌ User not authenticated - interaction not tracked');
     }
   };
 
@@ -386,9 +398,10 @@ export default function Discover() {
               <Card 
                 key={sector.name} 
                 className={`bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer ${
-                  selectedSector === sector.name ? 'ring-2 ring-blue-400/50' : ''
+                  selectedSector === sector.name ? 'ring-2 ring-blue-400/50 border-blue-400/30' : ''
                 }`}
                 onClick={() => handleSectorClick(sector.name, sector)}
+                data-testid={`sector-card-${sector.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
+import { storage, DatabaseStorage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
