@@ -50,8 +50,749 @@ import {
   CheckCircle2,
   XCircle,
   Info,
-  LineChart
+  LineChart,
+  TrendingUpIcon,
+  TriangleIcon as Triangle,
+  CircleIcon as Circle,
+  SquareIcon as Square,
+  HexagonIcon as Hexagon,
+  Zap,
+  Crosshair,
+  BarChart2,
+  Layers
 } from 'lucide-react';
+
+// Types for pattern recognition
+interface ChartPattern {
+  id: string;
+  symbol: string;
+  patternType: string;
+  timeframe: string;
+  confidence: number;
+  status: 'active' | 'completed' | 'failed';
+  detectedAt: string;
+  targetPrice?: number;
+  stopLoss?: number;
+  description: string;
+}
+
+interface TrendAnalysis {
+  symbol: string;
+  primaryTrend: {
+    direction: 'bullish' | 'bearish' | 'sideways';
+    strength: number;
+    duration: string;
+  };
+  technicalIndicators: {
+    rsi: number;
+    macd: { line: number; signal: number; histogram: number };
+    adx: number;
+    bollingerBands: { upper: number; middle: number; lower: number };
+    volume: { trend: string; strength: number };
+  };
+  supportResistance: Array<{
+    level: number;
+    type: 'support' | 'resistance';
+    strength: number;
+  }>;
+}
+
+interface MarketCycle {
+  phase: 'accumulation' | 'markup' | 'distribution' | 'markdown';
+  confidence: number;
+  duration: string;
+  nextPhaseEstimate: string;
+}
+
+interface PatternAlert {
+  id: string;
+  symbol: string;
+  message: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  timestamp: string;
+  acknowledged: boolean;
+}
+
+interface TradingSetup {
+  id: string;
+  symbol: string;
+  setupType: string;
+  direction: 'long' | 'short';
+  confidence: number;
+  entryPrice: number;
+  stopLoss: number;
+  targetPrice: number;
+  riskReward: number;
+  timeframe: string;
+  rationale: string;
+}
+
+// Pattern Recognition Section Component
+const PatternRecognitionSection = () => {
+  const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('4h');
+  const [activeTab, setActiveTab] = useState<string>('patterns');
+
+  // Pattern recognition queries
+  const { data: patterns, isLoading: patternsLoading } = useQuery({
+    queryKey: ['/api/patterns/detect', selectedSymbol, selectedTimeframe],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: trendAnalysis, isLoading: trendLoading } = useQuery({
+    queryKey: ['/api/patterns/trend', selectedSymbol, selectedTimeframe],
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 1
+  });
+
+  const { data: marketCycles, isLoading: cyclesLoading } = useQuery({
+    queryKey: ['/api/patterns/cycles', selectedSymbol],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1
+  });
+
+  const { data: patternAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['/api/patterns/alerts'],
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 1
+  });
+
+  const { data: tradingSetups, isLoading: setupsLoading } = useQuery({
+    queryKey: ['/api/patterns/setups', selectedSymbol, selectedTimeframe],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: patternSummary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['/api/patterns/summary'],
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1
+  });
+
+  // Get pattern icon based on pattern type
+  const getPatternIcon = (patternType: string) => {
+    switch (patternType.toLowerCase()) {
+      case 'triangle':
+      case 'ascending_triangle':
+      case 'descending_triangle':
+        return Triangle;
+      case 'head_and_shoulders':
+      case 'inverse_head_and_shoulders':
+        return Hexagon;
+      case 'double_top':
+      case 'double_bottom':
+        return Square;
+      case 'flag':
+      case 'pennant':
+        return Circle;
+      default:
+        return BarChart2;
+    }
+  };
+
+  // Pattern confidence color
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 80) return 'text-green-400 bg-green-500/20 border-green-400/30';
+    if (confidence >= 60) return 'text-yellow-400 bg-yellow-500/20 border-yellow-400/30';
+    return 'text-red-400 bg-red-500/20 border-red-400/30';
+  };
+
+  // Trend direction color and icon
+  const getTrendDisplay = (direction: string, strength: number) => {
+    if (direction === 'bullish') {
+      return {
+        icon: TrendingUp,
+        color: 'text-green-400',
+        bgColor: 'bg-green-500/20',
+        borderColor: 'border-green-400/30'
+      };
+    } else if (direction === 'bearish') {
+      return {
+        icon: TrendingDown,
+        color: 'text-red-400',
+        bgColor: 'bg-red-500/20',
+        borderColor: 'border-red-400/30'
+      };
+    } else {
+      return {
+        icon: Activity,
+        color: 'text-gray-400',
+        bgColor: 'bg-gray-500/20',
+        borderColor: 'border-gray-400/30'
+      };
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Asset and Timeframe Selector */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-500/30 rounded-lg backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-cyan-300 text-sm font-medium">Asset:</label>
+            <select
+              value={selectedSymbol}
+              onChange={(e) => setSelectedSymbol(e.target.value)}
+              className="bg-black/20 border border-cyan-500/30 text-white rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+              data-testid="select-pattern-symbol"
+            >
+              {['BTC', 'ETH', 'SOL', 'LINK', 'UNI', 'AAVE', 'TSLA', 'NVDA'].map(symbol => (
+                <option key={symbol} value={symbol}>{symbol}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-cyan-300 text-sm font-medium">Timeframe:</label>
+            <select
+              value={selectedTimeframe}
+              onChange={(e) => setSelectedTimeframe(e.target.value)}
+              className="bg-black/20 border border-cyan-500/30 text-white rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+              data-testid="select-pattern-timeframe"
+            >
+              <option value="1h">1H</option>
+              <option value="4h">4H</option>
+              <option value="1d">1D</option>
+              <option value="1w">1W</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30">
+            <Activity className="h-3 w-3 mr-1" />
+            Live Analysis
+          </Badge>
+          <Button size="sm" className="bg-cyan-600 hover:bg-cyan-700 text-white">
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-black/20 border border-gray-500/30">
+          <TabsTrigger value="patterns" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300">
+            Patterns
+          </TabsTrigger>
+          <TabsTrigger value="trends" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300">
+            Trends
+          </TabsTrigger>
+          <TabsTrigger value="cycles" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300">
+            Cycles
+          </TabsTrigger>
+          <TabsTrigger value="setups" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300">
+            Setups
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300">
+            Alerts
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Chart Patterns Tab */}
+        <TabsContent value="patterns" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {patternsLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                    <div className="h-20 bg-gray-600 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : patterns?.patterns?.length ? (
+              patterns.patterns.map((pattern: ChartPattern, index: number) => {
+                const PatternIcon = getPatternIcon(pattern.patternType);
+                return (
+                  <Card key={pattern.id} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm hover:border-cyan-400/50 transition-all duration-300">
+                    <CardHeader>
+                      <CardTitle className="text-cyan-300 flex items-center gap-2 text-lg">
+                        <PatternIcon className="h-5 w-5" />
+                        {pattern.patternType.replace(/_/g, ' ').toUpperCase()}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-xs ${getConfidenceColor(pattern.confidence)}`}>
+                            {pattern.confidence}% Confidence
+                          </Badge>
+                          <Badge className={`text-xs ${
+                            pattern.status === 'active' ? 'bg-green-500/20 text-green-300 border-green-400/30' :
+                            pattern.status === 'completed' ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' :
+                            'bg-red-500/20 text-red-300 border-red-400/30'
+                          }`}>
+                            {pattern.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <span className="text-gray-400 text-xs">{pattern.timeframe}</span>
+                      </div>
+                      
+                      {pattern.targetPrice && (
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-400 text-xs">Target</p>
+                            <p className="text-green-400 font-medium">${pattern.targetPrice.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Stop Loss</p>
+                            <p className="text-red-400 font-medium">${pattern.stopLoss?.toLocaleString()}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <p className="text-gray-300 text-sm">{pattern.description}</p>
+                      
+                      <div className="flex items-center justify-between pt-2 border-t border-cyan-500/20">
+                        <span className="text-gray-400 text-xs">
+                          {new Date(pattern.detectedAt).toLocaleString()}
+                        </span>
+                        <Button size="sm" variant="outline" className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
+                          <Crosshair className="h-3 w-3 mr-1" />
+                          View Chart
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <div className="col-span-full">
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-8 text-center">
+                    <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-300">No patterns detected for {selectedSymbol}</p>
+                    <p className="text-gray-400 text-sm mt-2">Try a different timeframe or asset</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Trend Analysis Tab */}
+        <TabsContent value="trends" className="mt-6">
+          {trendLoading ? (
+            <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-6 bg-gray-700 rounded mb-4"></div>
+                <div className="h-32 bg-gray-600 rounded"></div>
+              </CardContent>
+            </Card>
+          ) : trendAnalysis?.data ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Primary Trend */}
+              <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-cyan-300 flex items-center gap-2">
+                    <TrendingUpIcon className="h-5 w-5" />
+                    Primary Trend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(() => {
+                    const trendDisplay = getTrendDisplay(trendAnalysis.data.primaryTrend.direction, trendAnalysis.data.primaryTrend.strength);
+                    const TrendIcon = trendDisplay.icon;
+                    return (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${trendDisplay.bgColor} ${trendDisplay.borderColor} border`}>
+                            <TrendIcon className={`h-6 w-6 ${trendDisplay.color}`} />
+                          </div>
+                          <div>
+                            <p className={`font-medium ${trendDisplay.color}`}>
+                              {trendAnalysis.data.primaryTrend.direction.toUpperCase()}
+                            </p>
+                            <p className="text-gray-400 text-sm">{trendAnalysis.data.primaryTrend.duration}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-white font-bold text-lg">{trendAnalysis.data.primaryTrend.strength}%</p>
+                          <p className="text-gray-400 text-xs">Strength</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${
+                        trendAnalysis.data.primaryTrend.direction === 'bullish' ? 'bg-green-500' :
+                        trendAnalysis.data.primaryTrend.direction === 'bearish' ? 'bg-red-500' : 'bg-gray-500'
+                      }`}
+                      style={{ width: `${trendAnalysis.data.primaryTrend.strength}%` }}
+                    ></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Technical Indicators */}
+              <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-cyan-300 flex items-center gap-2">
+                    <Gauge className="h-5 w-5" />
+                    Technical Indicators
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
+                      <p className="text-gray-400 text-xs">RSI</p>
+                      <p className={`font-bold text-lg ${
+                        trendAnalysis.data.technicalIndicators.rsi > 70 ? 'text-red-400' :
+                        trendAnalysis.data.technicalIndicators.rsi < 30 ? 'text-green-400' : 'text-yellow-400'
+                      }`}>
+                        {trendAnalysis.data.technicalIndicators.rsi.toFixed(1)}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
+                      <p className="text-gray-400 text-xs">ADX</p>
+                      <p className={`font-bold text-lg ${
+                        trendAnalysis.data.technicalIndicators.adx > 50 ? 'text-green-400' :
+                        trendAnalysis.data.technicalIndicators.adx > 25 ? 'text-yellow-400' : 'text-red-400'
+                      }`}>
+                        {trendAnalysis.data.technicalIndicators.adx.toFixed(1)}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
+                      <p className="text-gray-400 text-xs">MACD</p>
+                      <p className={`font-bold text-lg ${
+                        trendAnalysis.data.technicalIndicators.macd.line > trendAnalysis.data.technicalIndicators.macd.signal ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {trendAnalysis.data.technicalIndicators.macd.line.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
+                      <p className="text-gray-400 text-xs">Volume</p>
+                      <p className={`font-bold text-lg ${
+                        trendAnalysis.data.technicalIndicators.volume.trend === 'increasing' ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {trendAnalysis.data.technicalIndicators.volume.strength}%
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Support & Resistance */}
+              <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-cyan-300 flex items-center gap-2">
+                    <Layers className="h-5 w-5" />
+                    Support & Resistance Levels
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    {trendAnalysis.data.supportResistance.slice(0, 4).map((level: any, index: number) => (
+                      <div key={index} className={`p-3 rounded-lg border ${
+                        level.type === 'support' ? 'bg-green-500/10 border-green-400/30' : 'bg-red-500/10 border-red-400/30'
+                      }`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-2 h-2 rounded-full ${level.type === 'support' ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                          <p className={`text-xs font-medium ${level.type === 'support' ? 'text-green-400' : 'text-red-400'}`}>
+                            {level.type.toUpperCase()}
+                          </p>
+                        </div>
+                        <p className="text-white font-bold">${level.level.toLocaleString()}</p>
+                        <p className="text-gray-400 text-xs">{level.strength}% strength</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <TrendingUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-300">Trend analysis unavailable</p>
+                <p className="text-gray-400 text-sm mt-2">Technical analysis will resume shortly</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Market Cycles Tab */}
+        <TabsContent value="cycles" className="mt-6">
+          {cyclesLoading ? (
+            <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-6 bg-gray-700 rounded mb-4"></div>
+                <div className="h-24 bg-gray-600 rounded"></div>
+              </CardContent>
+            </Card>
+          ) : marketCycles?.data ? (
+            <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-cyan-300 flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Market Cycle Analysis - {selectedSymbol}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-lg font-bold ${
+                      marketCycles.data.phase === 'accumulation' ? 'bg-blue-500/20 text-blue-300' :
+                      marketCycles.data.phase === 'markup' ? 'bg-green-500/20 text-green-300' :
+                      marketCycles.data.phase === 'distribution' ? 'bg-yellow-500/20 text-yellow-300' :
+                      'bg-red-500/20 text-red-300'
+                    }`}>
+                      <div className={`w-3 h-3 rounded-full animate-pulse ${
+                        marketCycles.data.phase === 'accumulation' ? 'bg-blue-400' :
+                        marketCycles.data.phase === 'markup' ? 'bg-green-400' :
+                        marketCycles.data.phase === 'distribution' ? 'bg-yellow-400' :
+                        'bg-red-400'
+                      }`}></div>
+                      {marketCycles.data.phase.toUpperCase()}
+                    </div>
+                    <p className="text-gray-400 text-sm mt-2">Current Phase</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-white">{marketCycles.data.confidence}%</p>
+                    <p className="text-gray-400 text-sm">Confidence</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="text-lg font-medium text-gray-300">{marketCycles.data.duration}</p>
+                    <p className="text-gray-400 text-sm">Duration</p>
+                  </div>
+                </div>
+                
+                <div className="bg-black/20 rounded-lg p-4 border border-cyan-500/20">
+                  <p className="text-cyan-300 font-medium mb-2">Phase Transition Estimate:</p>
+                  <p className="text-gray-300">{marketCycles.data.nextPhaseEstimate}</p>
+                </div>
+                
+                {/* Cycle Phases Visual */}
+                <div className="grid grid-cols-4 gap-2">
+                  {['accumulation', 'markup', 'distribution', 'markdown'].map((phase, index) => (
+                    <div key={phase} className={`text-center p-3 rounded-lg border transition-all duration-300 ${
+                      marketCycles.data.phase === phase 
+                        ? 'border-cyan-400 bg-cyan-500/20' 
+                        : 'border-gray-600 bg-gray-500/10'
+                    }`}>
+                      <p className={`text-xs font-medium ${
+                        marketCycles.data.phase === phase ? 'text-cyan-300' : 'text-gray-400'
+                      }`}>
+                        {phase.charAt(0).toUpperCase() + phase.slice(1)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-300">Market cycle analysis unavailable</p>
+                <p className="text-gray-400 text-sm mt-2">Cycle detection will resume shortly</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Trading Setups Tab */}
+        <TabsContent value="setups" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {setupsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                    <div className="h-20 bg-gray-600 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : tradingSetups?.setups?.length ? (
+              tradingSetups.setups.map((setup: TradingSetup) => (
+                <Card key={setup.id} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm hover:border-cyan-400/50 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-cyan-300 flex items-center gap-2">
+                      <Zap className="h-5 w-5" />
+                      {setup.setupType.replace(/_/g, ' ').toUpperCase()}
+                      <Badge className={`ml-auto ${setup.direction === 'long' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+                        {setup.direction.toUpperCase()}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge className={`${getConfidenceColor(setup.confidence)}`}>
+                        {setup.confidence}% Confidence
+                      </Badge>
+                      <span className="text-gray-400 text-sm">{setup.timeframe}</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-400 text-xs">Entry</p>
+                        <p className="text-blue-400 font-medium">${setup.entryPrice.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 text-xs">Target</p>
+                        <p className="text-green-400 font-medium">${setup.targetPrice.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 text-xs">Stop</p>
+                        <p className="text-red-400 font-medium">${setup.stopLoss.toLocaleString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-black/20 rounded-lg p-3 border border-cyan-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-cyan-300 text-xs font-medium">Risk/Reward Ratio</span>
+                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                          1:{setup.riskReward.toFixed(1)}
+                        </Badge>
+                      </div>
+                      <p className="text-gray-300 text-sm">{setup.rationale}</p>
+                    </div>
+                    
+                    <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" data-testid={`button-setup-${setup.id}`}>
+                      <Target className="h-4 w-4 mr-2" />
+                      Execute Setup
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full">
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-8 text-center">
+                    <Zap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-300">No trading setups available for {selectedSymbol}</p>
+                    <p className="text-gray-400 text-sm mt-2">Check back later for AI-generated opportunities</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Pattern Alerts Tab */}
+        <TabsContent value="alerts" className="mt-6">
+          <div className="space-y-4">
+            {alertsLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm animate-pulse">
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-600 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : patternAlerts?.alerts?.length ? (
+              patternAlerts.alerts.map((alert: PatternAlert) => (
+                <Card key={alert.id} className={`bg-gradient-to-br border backdrop-blur-sm ${
+                  alert.severity === 'critical' ? 'from-red-900/30 to-red-800/20 border-red-500/50' :
+                  alert.severity === 'high' ? 'from-orange-900/30 to-orange-800/20 border-orange-500/50' :
+                  alert.severity === 'medium' ? 'from-yellow-900/30 to-yellow-800/20 border-yellow-500/50' :
+                  'from-blue-900/30 to-blue-800/20 border-blue-500/50'
+                }`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <Bell className={`h-5 w-5 mt-0.5 ${
+                          alert.severity === 'critical' ? 'text-red-400' :
+                          alert.severity === 'high' ? 'text-orange-400' :
+                          alert.severity === 'medium' ? 'text-yellow-400' :
+                          'text-blue-400'
+                        }`} />
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className="bg-gray-500/20 text-gray-300 text-xs">{alert.symbol}</Badge>
+                            <Badge className={`text-xs ${
+                              alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                              alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                              alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-blue-500/20 text-blue-300'
+                            }`}>
+                              {alert.severity.toUpperCase()}
+                            </Badge>
+                            {alert.acknowledged && (
+                              <Badge className="bg-green-500/20 text-green-300 text-xs">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Acknowledged
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-white font-medium">{alert.message}</p>
+                          <p className="text-gray-400 text-xs mt-1">
+                            {new Date(alert.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      {!alert.acknowledged && (
+                        <Button size="sm" variant="outline" className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Acknowledge
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-8 text-center">
+                  <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-300">No active pattern alerts</p>
+                  <p className="text-gray-400 text-sm mt-2">Pattern monitoring is active across all assets</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Pattern Summary Dashboard */}
+      {patternSummary?.data && (
+        <Card className="bg-gradient-to-r from-gray-900/50 to-slate-900/50 border-gray-500/30 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-gray-300 flex items-center gap-2">
+              <PieChart className="h-5 w-5" />
+              Pattern Recognition Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Total Symbols</p>
+                <p className="text-white font-bold text-lg">{patternSummary.data.overview.totalSymbols}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Avg Patterns</p>
+                <p className="text-cyan-400 font-bold text-lg">{patternSummary.data.overview.avgPatternCount}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Avg Confidence</p>
+                <p className="text-blue-400 font-bold text-lg">{(patternSummary.data.overview.avgConfidence * 100).toFixed(0)}%</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Bullish</p>
+                <p className="text-green-400 font-bold text-lg">{patternSummary.data.overview.bullishCount}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Bearish</p>
+                <p className="text-red-400 font-bold text-lg">{patternSummary.data.overview.bearishCount}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Neutral</p>
+                <p className="text-gray-400 font-bold text-lg">{patternSummary.data.overview.neutralCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
 
 // Types for market data
 interface MarketMover {
@@ -4490,6 +5231,36 @@ export default function Discover() {
               </CardContent>
             </Card>
           )}
+        </motion.div>
+
+        {/* Pattern Recognition and Trend Analysis - Phase 3 Feature */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <Brain className="h-7 w-7 text-cyan-400" />
+              Pattern Recognition & Trend Analysis
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                AI-Powered
+              </Badge>
+            </h2>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
+                <Target className="h-4 w-4 mr-1" />
+                Screen All
+              </Button>
+              <Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
+                <Bell className="h-4 w-4 mr-1" />
+                Alerts
+              </Button>
+            </div>
+          </div>
+
+          <PatternRecognitionSection />
         </motion.div>
 
         {/* Quick Actions */}

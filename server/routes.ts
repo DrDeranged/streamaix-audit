@@ -20,6 +20,7 @@ import { derivativesAnalyticsService } from "./services/derivativesAnalyticsServ
 import { institutionalFlowService } from "./services/institutionalFlowService";
 import { RiskAssessmentService } from "./services/riskAssessmentService";
 import { marketEventModelingService } from "./services/marketEventModelingService";
+import { patternRecognitionService } from "./services/patternRecognitionService";
 import passport from "passport";
 
 // Initialize services
@@ -3416,6 +3417,475 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         error: 'Failed to search Fed communications',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // =============================================================================
+  // PATTERN RECOGNITION AND TREND ANALYSIS ROUTES - Phase 3 Feature
+  // =============================================================================
+
+  // Get detected chart patterns for a specific symbol
+  app.get('/api/patterns/detect/:symbol', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.params.symbol?.toUpperCase();
+    const timeframe = (req.query.timeframe as string) || '4h';
+    
+    console.log(`🎯 API Call: GET /api/patterns/detect/${symbol} - Timeframe: ${timeframe}`);
+    
+    try {
+      const patterns = await patternRecognitionService.detectChartPatterns(symbol, timeframe);
+      
+      res.json({
+        success: true,
+        patterns,
+        symbol,
+        timeframe,
+        count: patterns.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Pattern detection error for ${symbol}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern detection failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get comprehensive pattern analysis for a symbol
+  app.get('/api/patterns/analyze/:symbol', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.params.symbol?.toUpperCase();
+    const timeframe = (req.query.timeframe as string) || '4h';
+    
+    console.log(`📊 API Call: GET /api/patterns/analyze/${symbol} - Comprehensive analysis`);
+    
+    try {
+      const analysis = await patternRecognitionService.analyzePatterns(symbol, timeframe);
+      
+      res.json({
+        success: true,
+        data: analysis,
+        symbol,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Pattern analysis error for ${symbol}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern analysis failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get trend analysis for a symbol
+  app.get('/api/patterns/trend/:symbol', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.params.symbol?.toUpperCase();
+    const timeframe = (req.query.timeframe as string) || '1d';
+    
+    console.log(`📈 API Call: GET /api/patterns/trend/${symbol} - Trend analysis`);
+    
+    try {
+      const trendAnalysis = await patternRecognitionService.analyzeTrend(symbol, timeframe);
+      
+      res.json({
+        success: true,
+        data: trendAnalysis,
+        symbol,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Trend analysis error for ${symbol}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Trend analysis failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get market cycle analysis for a symbol
+  app.get('/api/patterns/cycles/:symbol', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.params.symbol?.toUpperCase();
+    
+    console.log(`🔄 API Call: GET /api/patterns/cycles/${symbol} - Market cycle analysis`);
+    
+    try {
+      const cycleAnalysis = await patternRecognitionService.analyzeMarketCycles(symbol);
+      
+      res.json({
+        success: true,
+        data: cycleAnalysis,
+        symbol,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Market cycle analysis error for ${symbol}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Market cycle analysis failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Generate AI trading setups for a symbol
+  app.get('/api/patterns/setups/:symbol', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.params.symbol?.toUpperCase();
+    const timeframe = (req.query.timeframe as string) || '4h';
+    const setupType = req.query.setupType as string;
+    
+    console.log(`🤖 API Call: GET /api/patterns/setups/${symbol} - AI trading setups`);
+    
+    try {
+      const setups = await patternRecognitionService.generateTradingSetups(symbol, timeframe, setupType);
+      
+      res.json({
+        success: true,
+        setups,
+        symbol,
+        timeframe,
+        setupType: setupType || 'all',
+        count: setups.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Trading setup generation error for ${symbol}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Trading setup generation failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Screen patterns across multiple assets
+  app.post('/api/patterns/screen', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const filter = req.body || {};
+    
+    console.log('🔍 API Call: POST /api/patterns/screen - Pattern screening with filter:', filter);
+    
+    try {
+      const screeningResults = await patternRecognitionService.screenPatterns(filter);
+      
+      res.json({
+        success: true,
+        data: screeningResults,
+        filter,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Pattern screening error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern screening failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get pattern alerts
+  app.get('/api/patterns/alerts', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbol = req.query.symbol as string;
+    const severity = req.query.severity as string;
+    const active = req.query.active !== 'false';
+    
+    console.log(`🔔 API Call: GET /api/patterns/alerts - Pattern alerts (active: ${active})`);
+    
+    try {
+      const alerts = patternRecognitionService.getActiveAlerts();
+      
+      let filteredAlerts = alerts;
+      
+      if (symbol) {
+        filteredAlerts = filteredAlerts.filter(alert => alert.symbol === symbol.toUpperCase());
+      }
+      
+      if (severity) {
+        filteredAlerts = filteredAlerts.filter(alert => alert.severity === severity);
+      }
+      
+      if (!active) {
+        // Include resolved alerts from storage if not active-only
+        const allStoredAlerts = await storage.getPatternAlerts({ 
+          symbol: symbol?.toUpperCase(),
+          severity,
+          limit: 50 
+        });
+        filteredAlerts = allStoredAlerts;
+      }
+      
+      res.json({
+        success: true,
+        alerts: filteredAlerts,
+        count: filteredAlerts.length,
+        filters: { symbol, severity, active },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Pattern alerts error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern alerts retrieval failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Acknowledge a pattern alert
+  app.post('/api/patterns/alerts/:alertId/acknowledge', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const alertId = req.params.alertId;
+    
+    console.log(`✅ API Call: POST /api/patterns/alerts/${alertId}/acknowledge`);
+    
+    try {
+      const acknowledged = patternRecognitionService.acknowledgeAlert(alertId);
+      
+      if (acknowledged) {
+        // Also update in storage
+        await storage.acknowledgePatternAlert(alertId);
+        
+        res.json({
+          success: true,
+          message: 'Alert acknowledged successfully',
+          alertId,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: 'Alert not found',
+          alertId,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error: any) {
+      console.error(`Alert acknowledgment error for ${alertId}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Alert acknowledgment failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get pattern recognition dashboard data
+  app.get('/api/patterns/dashboard', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    console.log('📊 API Call: GET /api/patterns/dashboard - Comprehensive dashboard');
+    
+    try {
+      const dashboardData = await patternRecognitionService.getDashboard();
+      
+      res.json({
+        success: true,
+        data: dashboardData,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Pattern dashboard error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern dashboard generation failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get pattern recognition service configuration
+  app.get('/api/patterns/config', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    console.log('⚙️ API Call: GET /api/patterns/config - Service configuration');
+    
+    try {
+      const config = patternRecognitionService.getConfig();
+      
+      res.json({
+        success: true,
+        config,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Pattern config error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern configuration retrieval failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Update pattern recognition service configuration
+  app.post('/api/patterns/config', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const configUpdates = req.body;
+    
+    console.log('⚙️ API Call: POST /api/patterns/config - Update configuration:', configUpdates);
+    
+    try {
+      patternRecognitionService.updateConfig(configUpdates);
+      const updatedConfig = patternRecognitionService.getConfig();
+      
+      res.json({
+        success: true,
+        config: updatedConfig,
+        message: 'Configuration updated successfully',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Pattern config update error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern configuration update failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get historical pattern performance and backtesting data
+  app.get('/api/patterns/backtest/:patternType', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const patternType = req.params.patternType;
+    const symbol = req.query.symbol as string;
+    const timeframe = (req.query.timeframe as string) || '1d';
+    
+    console.log(`📈 API Call: GET /api/patterns/backtest/${patternType} - Backtesting data`);
+    
+    try {
+      // Mock backtest results - in production would use actual historical data
+      const backtestResults = {
+        patternType,
+        symbol: symbol?.toUpperCase() || 'BTC',
+        timeframe,
+        totalPatterns: Math.floor(Math.random() * 100) + 50,
+        successfulPatterns: Math.floor(Math.random() * 60) + 30,
+        successRate: 0.65 + Math.random() * 0.2,
+        averageReturn: (Math.random() - 0.5) * 15,
+        averageHoldTime: Math.floor(Math.random() * 10) + 2,
+        maxDrawdown: -(Math.random() * 25 + 5),
+        sharpeRatio: Math.random() * 2 + 0.5,
+        profitFactor: Math.random() * 2 + 1,
+        winRate: 0.55 + Math.random() * 0.25,
+        averageWin: Math.random() * 12 + 3,
+        averageLoss: -(Math.random() * 8 + 2),
+        largestWin: Math.random() * 25 + 10,
+        largestLoss: -(Math.random() * 20 + 5),
+        consecutiveWins: Math.floor(Math.random() * 8) + 2,
+        consecutiveLosses: Math.floor(Math.random() * 5) + 1,
+        monthlyReturns: Array.from({length: 12}, (_, i) => ({
+          month: new Date(2024, i, 1).toLocaleString('default', { month: 'short' }),
+          returns: (Math.random() - 0.5) * 20,
+          patterns: Math.floor(Math.random() * 15) + 5
+        })),
+        performanceByMarketRegime: {
+          bull: { successRate: 0.75, avgReturn: 8.5, count: 25 },
+          bear: { successRate: 0.45, avgReturn: -2.3, count: 15 },
+          sideways: { successRate: 0.55, avgReturn: 1.2, count: 35 }
+        }
+      };
+      
+      res.json({
+        success: true,
+        data: backtestResults,
+        patternType,
+        symbol,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Pattern backtest error for ${patternType}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern backtesting failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get pattern recognition summary for specific assets
+  app.get('/api/patterns/summary', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const symbols = req.query.symbols as string;
+    const timeframe = (req.query.timeframe as string) || '4h';
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    const symbolList = symbols ? symbols.split(',').map(s => s.toUpperCase()) : ['BTC', 'ETH', 'SOL'];
+    
+    console.log(`📋 API Call: GET /api/patterns/summary - Symbols: ${symbolList.join(', ')}`);
+    
+    try {
+      const summaryPromises = symbolList.slice(0, limit).map(async (symbol) => {
+        try {
+          const [patterns, trendAnalysis] = await Promise.all([
+            patternRecognitionService.detectChartPatterns(symbol, timeframe),
+            patternRecognitionService.analyzeTrend(symbol, timeframe)
+          ]);
+          
+          return {
+            symbol,
+            patternCount: patterns.length,
+            highConfidencePatterns: patterns.filter(p => (p.confidence || 0) > 0.8).length,
+            averageConfidence: patterns.length > 0 ? 
+              patterns.reduce((sum, p) => sum + (p.confidence || 0), 0) / patterns.length : 0,
+            dominantPatternType: patterns.length > 0 ? 
+              patterns.sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0].patternType : null,
+            trendDirection: trendAnalysis.primaryTrend.direction,
+            trendStrength: trendAnalysis.primaryTrend.strength,
+            riskLevel: trendAnalysis.primaryTrend.strength > 80 ? 'low' : 
+                      trendAnalysis.primaryTrend.strength > 50 ? 'medium' : 'high'
+          };
+        } catch (error) {
+          console.warn(`Summary failed for ${symbol}:`, error);
+          return {
+            symbol,
+            patternCount: 0,
+            highConfidencePatterns: 0,
+            averageConfidence: 0,
+            dominantPatternType: null,
+            trendDirection: 'sideways' as const,
+            trendStrength: 50,
+            riskLevel: 'medium' as const,
+            error: 'Analysis failed'
+          };
+        }
+      });
+      
+      const summaryResults = await Promise.all(summaryPromises);
+      
+      res.json({
+        success: true,
+        data: {
+          summaries: summaryResults,
+          overview: {
+            totalSymbols: symbolList.length,
+            avgPatternCount: Math.round(summaryResults.reduce((sum, s) => sum + s.patternCount, 0) / summaryResults.length),
+            avgConfidence: Math.round(summaryResults.reduce((sum, s) => sum + s.averageConfidence, 0) / summaryResults.length * 100) / 100,
+            bullishCount: summaryResults.filter(s => s.trendDirection === 'bullish').length,
+            bearishCount: summaryResults.filter(s => s.trendDirection === 'bearish').length,
+            neutralCount: summaryResults.filter(s => s.trendDirection === 'sideways').length
+          }
+        },
+        symbols: symbolList,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Pattern summary error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pattern summary generation failed',
         message: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
       });

@@ -273,6 +273,8 @@ export const learningResourcesRelations = relations(learningResources, ({ one })
   }),
 }));
 
+// Pattern Recognition Relations will be defined after table definitions
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -406,6 +408,8 @@ export const insertLearningResourceSchema = createInsertSchema(learningResources
   topics: true,
 });
 
+// Pattern Recognition Insert Schemas moved after table definitions
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -439,6 +443,22 @@ export type TopicTag = typeof topicTags.$inferSelect;
 
 export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
 export type LearningResource = typeof learningResources.$inferSelect;
+
+// Pattern Recognition Types
+export type InsertChartPattern = z.infer<typeof insertChartPatternSchema>;
+export type ChartPattern = typeof chartPatterns.$inferSelect;
+
+export type InsertTrendAnalysis = z.infer<typeof insertTrendAnalysisSchema>;
+export type TrendAnalysis = typeof trendAnalysis.$inferSelect;
+
+export type InsertMarketCycle = z.infer<typeof insertMarketCycleSchema>;
+export type MarketCycle = typeof marketCycles.$inferSelect;
+
+export type InsertPatternAlert = z.infer<typeof insertPatternAlertSchema>;
+export type PatternAlert = typeof patternAlerts.$inferSelect;
+
+export type InsertAiTradingSetup = z.infer<typeof insertAiTradingSetupSchema>;
+export type AiTradingSetup = typeof aiTradingSetups.$inferSelect;
 
 // Educational response types
 export type LeaderEducationData = {
@@ -1576,3 +1596,1073 @@ export type EventModelingDashboard = {
     predictionQueue: number;
   };
 };
+
+// Pattern Recognition Service Types - Phase 3 Feature
+export type PatternRecognitionConfig = {
+  enableMLPatternDetection: boolean;
+  enableTrendAnalysis: boolean;
+  enableCycleDetection: boolean;
+  enableAlertGeneration: boolean;
+  confidenceThreshold: number; // 0-100
+  minPatternDuration: number; // minutes
+  maxPatternAge: number; // hours
+  alertCooldownPeriod: number; // minutes between similar alerts
+  supportedTimeframes: string[];
+  supportedAssetTypes: string[];
+};
+
+export type PatternDetectionResult = {
+  patterns: ChartPattern[];
+  trendAnalysis: TrendAnalysis[];
+  marketCycles: MarketCycle[];
+  confidence: number;
+  processingTime: number;
+  dataQuality: 'excellent' | 'good' | 'fair' | 'poor';
+  recommendedActions: string[];
+  riskFactors: string[];
+  marketContext: {
+    overallTrend: 'bullish' | 'bearish' | 'sideways';
+    volatilityEnvironment: 'low' | 'normal' | 'high' | 'extreme';
+    marketRegime: 'bull' | 'bear' | 'transition' | 'ranging';
+  };
+};
+
+export type PatternBacktestResults = {
+  patternType: string;
+  symbol: string;
+  timeframe: string;
+  totalPatterns: number;
+  successfulPatterns: number;
+  successRate: number;
+  averageReturn: number;
+  averageHoldTime: number; // in days
+  maxDrawdown: number;
+  sharpeRatio: number;
+  profitFactor: number;
+  winRate: number;
+  averageWin: number;
+  averageLoss: number;
+  largestWin: number;
+  largestLoss: number;
+  consecutiveWins: number;
+  consecutiveLosses: number;
+  monthlyReturns: Array<{
+    month: string;
+    returns: number;
+    patterns: number;
+  }>;
+  performanceByMarketRegime: {
+    bull: { successRate: number; avgReturn: number; count: number };
+    bear: { successRate: number; avgReturn: number; count: number };
+    sideways: { successRate: number; avgReturn: number; count: number };
+  };
+};
+
+export type PatternScreenerFilter = {
+  symbols?: string[];
+  assetTypes?: ('crypto' | 'stock' | 'commodity')[];
+  patternTypes?: string[];
+  timeframes?: string[];
+  minConfidence?: number;
+  maxAge?: number; // hours
+  patternStatus?: ('forming' | 'complete' | 'confirmed' | 'failed')[];
+  trendAlignment?: boolean;
+  volumeConfirmation?: boolean;
+  riskRewardRatio?: { min: number; max: number };
+  marketRegimes?: string[];
+  sortBy?: 'confidence' | 'age' | 'riskReward' | 'strength';
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+};
+
+export type PatternScreenerResult = {
+  patterns: Array<{
+    id: string;
+    symbol: string;
+    patternType: string;
+    confidence: number;
+    age: number; // hours since detection
+    riskRewardRatio: number;
+    targetPrice: number;
+    currentPrice: number;
+    potentialReturn: number;
+    timeToTarget: number; // estimated days
+    keyLevels: {
+      support: number[];
+      resistance: number[];
+    };
+    strength: 'weak' | 'moderate' | 'strong' | 'very_strong';
+    recommendation: 'buy' | 'sell' | 'hold' | 'watch';
+  }>;
+  summary: {
+    totalPatterns: number;
+    highConfidencePatterns: number;
+    bullishPatterns: number;
+    bearishPatterns: number;
+    averageConfidence: number;
+    topPerformingPattern: string;
+  };
+  marketOverview: {
+    overallSentiment: 'bullish' | 'bearish' | 'neutral';
+    patternDistribution: { [patternType: string]: number };
+    sectorStrength: { [sector: string]: number };
+    timeframeAnalysis: { [timeframe: string]: number };
+  };
+};
+
+export type TrendAnalysisResult = {
+  symbol: string;
+  timeframe: string;
+  primaryTrend: {
+    direction: 'bullish' | 'bearish' | 'sideways';
+    strength: number; // 0-100
+    duration: number; // days
+    confidence: number; // 0-100
+    momentum: number; // -100 to 100
+  };
+  trendLevels: {
+    support: Array<{ price: number; strength: number; tests: number }>;
+    resistance: Array<{ price: number; strength: number; tests: number }>;
+    trendLine: { slope: number; rSquared: number; equation: string };
+  };
+  technicalIndicators: {
+    movingAverages: {
+      sma20: { value: number; slope: number; pricePosition: 'above' | 'below' };
+      sma50: { value: number; slope: number; pricePosition: 'above' | 'below' };
+      ema12: { value: number; slope: number; pricePosition: 'above' | 'below' };
+    };
+    momentum: {
+      rsi: number;
+      macd: { value: number; signal: number; histogram: number };
+      stochastic: { k: number; d: number };
+      adx: number;
+    };
+    volume: {
+      average: number;
+      trend: 'increasing' | 'decreasing' | 'flat';
+      onBalanceVolume: number;
+      volumeRatio: number; // current vs average
+    };
+  };
+  predictions: {
+    nextMove: 'up' | 'down' | 'sideways';
+    probability: number;
+    targetLevel: number;
+    timeHorizon: string;
+    keyRisks: string[];
+  };
+  signals: Array<{
+    type: 'entry' | 'exit' | 'stop_adjust';
+    action: 'buy' | 'sell' | 'hold';
+    strength: number;
+    reasoning: string;
+    level: number;
+  }>;
+};
+
+export type MarketCycleAnalysis = {
+  symbol: string;
+  currentCycle: {
+    type: 'bull_market' | 'bear_market' | 'accumulation' | 'distribution';
+    phase: 'early' | 'mid' | 'late' | 'transition';
+    stage: 'emerging' | 'developing' | 'mature' | 'ending';
+    strength: number; // 0-100
+    daysSinceStart: number;
+    estimatedDaysRemaining: number;
+    confidence: number; // 0-100
+  };
+  historicalComparisons: Array<{
+    cycleName: string;
+    similarity: number; // 0-100
+    duration: number;
+    maxGain: number;
+    maxDrawdown: number;
+    keyCharacteristics: string[];
+  }>;
+  cycleMetrics: {
+    priceGainFromStart: number;
+    maxDrawdownInCycle: number;
+    volatilityProfile: number;
+    participationRate: number;
+    institutionalFlow: 'accumulating' | 'distributing' | 'neutral';
+    retailSentiment: 'euphoric' | 'optimistic' | 'neutral' | 'fearful' | 'despair';
+  };
+  phaseTransitionProbabilities: {
+    nextPhase: string;
+    probability: number;
+    timeframe: string;
+    triggerEvents: string[];
+  };
+  tradingImplications: {
+    optimalStrategy: string;
+    expectedVolatility: 'low' | 'medium' | 'high';
+    riskLevel: 'low' | 'medium' | 'high';
+    positionSizing: 'conservative' | 'moderate' | 'aggressive';
+    recommendations: string[];
+  };
+};
+
+export type PatternAlertSummary = {
+  totalAlerts: number;
+  activeAlerts: number;
+  criticalAlerts: number;
+  recentAlerts: PatternAlert[];
+  alertsByType: { [type: string]: number };
+  alertsBySeverity: { [severity: string]: number };
+  averageAccuracy: number;
+  topPerformingAlertTypes: Array<{
+    type: string;
+    accuracy: number;
+    count: number;
+  }>;
+};
+
+export type PatternRecognitionDashboard = {
+  overview: {
+    totalPatterns: number;
+    activePatterns: number;
+    completedPatterns: number;
+    successRate: number;
+    averageConfidence: number;
+  };
+  recentPatterns: ChartPattern[];
+  topAlerts: PatternAlert[];
+  trendAnalysis: TrendAnalysisResult[];
+  marketCycles: MarketCycleAnalysis[];
+  tradingSetups: AiTradingSetup[];
+  performance: {
+    dailySuccess: Array<{ date: string; rate: number }>;
+    monthlyReturns: Array<{ month: string; returns: number }>;
+    patternPerformance: Array<{
+      pattern: string;
+      successRate: number;
+      avgReturn: number;
+      count: number;
+    }>;
+  };
+  alerts: PatternAlertSummary;
+  systemStatus: {
+    modelsActive: number;
+    lastUpdate: string;
+    dataQuality: string;
+    processingLatency: number;
+  };
+};
+
+// Pattern Recognition and Technical Analysis Tables - Phase 3 Feature
+export const chartPatterns = pgTable("chart_patterns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(), // BTC, ETH, AAPL, etc.
+  assetType: text("asset_type").notNull(), // crypto, stock, commodity
+  
+  // Pattern Classification
+  patternType: text("pattern_type").notNull(), // triangle, head_shoulders, channel, flag, pennant, etc.
+  patternSubtype: text("pattern_subtype"), // ascending_triangle, descending_triangle, symmetrical_triangle
+  patternCategory: text("pattern_category").notNull(), // continuation, reversal, bilateral
+  
+  // Pattern Geometry and Detection
+  detectionAlgorithm: text("detection_algorithm").notNull(), // ml_cnn, geometric_rules, hybrid
+  confidence: real("confidence").notNull(), // 0-1 ML confidence score
+  patternQuality: text("pattern_quality").notNull(), // excellent, good, fair, poor
+  
+  // Price Data and Levels
+  startPrice: real("start_price").notNull(),
+  endPrice: real("end_price").notNull(),
+  highPrice: real("high_price").notNull(),
+  lowPrice: real("low_price").notNull(),
+  currentPrice: real("current_price").notNull(),
+  
+  // Support and Resistance Levels
+  supportLevels: jsonb("support_levels").notNull(), // Array of {price: number, strength: number}
+  resistanceLevels: jsonb("resistance_levels").notNull(),
+  keyLevels: jsonb("key_levels"), // Additional significant levels
+  
+  // Time Analysis
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"), // Null if pattern is still forming
+  timeframe: text("timeframe").notNull(), // 5m, 15m, 1h, 4h, 1d, 1w
+  duration: integer("duration"), // Pattern duration in minutes
+  
+  // Pattern Dimensions
+  height: real("height").notNull(), // Price range of pattern (high - low)
+  width: integer("width").notNull(), // Time span of pattern in bars
+  volume: real("volume"), // Average volume during pattern formation
+  volumeProfile: jsonb("volume_profile"), // Volume analysis data
+  
+  // Prediction and Targets
+  targetDirection: text("target_direction").notNull(), // bullish, bearish, neutral
+  targetPrice: real("target_price"), // Projected target price
+  stopLoss: real("stop_loss"), // Suggested stop loss level
+  riskRewardRatio: real("risk_reward_ratio"),
+  probabilitySuccess: real("probability_success"), // Historical success rate for this pattern type
+  
+  // Completion Status
+  isComplete: boolean("is_complete").default(false),
+  isConfirmed: boolean("is_confirmed").default(false), // Breakout confirmed
+  breakoutDirection: text("breakout_direction"), // up, down, failed
+  breakoutPrice: real("breakout_price"),
+  breakoutTime: timestamp("breakout_time"),
+  
+  // Market Context
+  marketRegime: text("market_regime"), // bull, bear, sideways, volatile
+  trendAlignment: boolean("trend_alignment"), // Pattern aligned with broader trend
+  volumeConfirmation: boolean("volume_confirmation"), // Volume supports pattern
+  
+  // Technical Indicators Context
+  indicatorSignals: jsonb("indicator_signals"), // RSI, MACD, etc. at pattern formation
+  movingAveragePosition: text("ma_position"), // above_all, below_all, mixed
+  volatilityEnvironment: text("volatility_environment"), // low, normal, high, extreme
+  
+  // Performance Tracking
+  actualOutcome: text("actual_outcome"), // success, failure, partial
+  actualTargetReached: boolean("actual_target_reached"),
+  maxFavorableExcursion: real("max_favorable_excursion"),
+  maxAdverseExcursion: real("max_adverse_excursion"),
+  finalPnL: real("final_pnl"), // If position was taken
+  
+  // Alert and Notification
+  alertGenerated: boolean("alert_generated").default(false),
+  alertSent: boolean("alert_sent").default(false),
+  alertTime: timestamp("alert_time"),
+  userInteractions: jsonb("user_interactions"), // User acknowledgments, notes, etc.
+  
+  // Metadata
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastValidated: timestamp("last_validated").defaultNow(),
+  tags: text("tags").array(),
+});
+
+export const trendAnalysis = pgTable("trend_analysis", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(),
+  
+  // Trend Classification
+  primaryTrend: text("primary_trend").notNull(), // bullish, bearish, sideways
+  secondaryTrend: text("secondary_trend"), // For multi-timeframe analysis
+  trendStrength: real("trend_strength").notNull(), // 0-1 strength score
+  trendQuality: text("trend_quality").notNull(), // strong, moderate, weak
+  
+  // Trend Metrics
+  trendDuration: integer("trend_duration").notNull(), // Days in current trend
+  trendAngle: real("trend_angle"), // Angle of trend line in degrees
+  slopeCoefficient: real("slope_coefficient"), // Linear regression slope
+  rSquared: real("r_squared"), // R² of trend line fit (0-1)
+  
+  // Price Momentum Analysis
+  momentum: real("momentum").notNull(), // Current momentum score (-1 to 1)
+  acceleration: real("acceleration"), // Rate of change in momentum
+  momentumDivergence: boolean("momentum_divergence"), // Momentum vs price divergence
+  
+  // Technical Trend Indicators
+  adx: real("adx"), // Average Directional Index (trend strength)
+  adxTrend: text("adx_trend"), // strengthening, weakening, neutral
+  pdi: real("pdi"), // Positive Directional Indicator
+  ndi: real("ndi"), // Negative Directional Indicator
+  
+  // Moving Average Analysis
+  maConfiguration: jsonb("ma_configuration").notNull(), // MA periods and types used
+  maAlignment: text("ma_alignment").notNull(), // bullish, bearish, mixed
+  priceVsMAs: jsonb("price_vs_mas"), // Price position relative to each MA
+  maSlope: jsonb("ma_slope"), // Slope of each moving average
+  maSpread: real("ma_spread"), // Spread between fast and slow MA
+  
+  // Trend Lines and Channels
+  trendLines: jsonb("trend_lines").notNull(), // Support/resistance trend lines
+  channelBounds: jsonb("channel_bounds"), // Upper and lower channel bounds
+  channelWidth: real("channel_width"), // Current channel width
+  channelPosition: real("channel_position"), // Price position in channel (0-1)
+  
+  // Volume Analysis
+  volumeTrend: text("volume_trend").notNull(), // increasing, decreasing, flat
+  volumeConfirmation: boolean("volume_confirmation"), // Volume confirms price trend
+  onBalanceVolume: real("on_balance_volume"), // OBV indicator
+  volumeMovingAverage: real("volume_moving_average"),
+  
+  // Volatility and Strength
+  volatilityTrend: text("volatility_trend"), // expanding, contracting, stable
+  atr: real("atr"), // Average True Range
+  atrPercent: real("atr_percent"), // ATR as percentage of price
+  volatilityRank: real("volatility_rank"), // Current vol vs historical (0-1)
+  
+  // Fibonacci Levels
+  fibonacciLevels: jsonb("fibonacci_levels"), // Key fib retracement/extension levels
+  currentFibLevel: text("current_fib_level"), // Which fib level price is at
+  fibSupport: real("fib_support"), // Nearest fib support
+  fibResistance: real("fib_resistance"), // Nearest fib resistance
+  
+  // Trend Signals and Predictions
+  trendSignal: text("trend_signal").notNull(), // buy, sell, hold, wait
+  signalStrength: real("signal_strength").notNull(), // 0-1 signal strength
+  entryLevel: real("entry_level"), // Suggested entry level
+  stopLoss: real("stop_loss"), // Suggested stop loss
+  targetLevels: jsonb("target_levels"), // Array of profit target levels
+  
+  // Reversal Analysis
+  reversalProbability: real("reversal_probability"), // 0-1 probability of trend reversal
+  reversalSignals: jsonb("reversal_signals"), // Early reversal warning signals
+  supportingPatterns: text("supporting_patterns").array(), // Chart patterns supporting trend
+  
+  // Time Analysis
+  timeframe: text("timeframe").notNull(), // Analysis timeframe
+  analysisTime: timestamp("analysis_time").notNull(),
+  nextUpdate: timestamp("next_update"), // When analysis should be refreshed
+  
+  // Historical Context
+  historicalTrendStats: jsonb("historical_trend_stats"), // Historical trend statistics
+  similarPeriods: jsonb("similar_periods"), // Similar historical periods
+  seasonalityFactor: real("seasonality_factor"), // Seasonal bias (-1 to 1)
+  
+  // Performance Tracking
+  predictionAccuracy: real("prediction_accuracy"), // Historical accuracy for this asset
+  lastPredictionResult: text("last_prediction_result"), // success, failure, partial
+  
+  // Metadata
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  algorithmVersion: text("algorithm_version").default("v1.0"),
+  dataQuality: text("data_quality").default("good"), // good, fair, poor
+});
+
+export const marketCycles = pgTable("market_cycles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(),
+  
+  // Cycle Classification
+  cycleType: text("cycle_type").notNull(), // bull_market, bear_market, accumulation, distribution
+  cyclePhase: text("cycle_phase").notNull(), // early, mid, late, transition
+  cycleStage: text("cycle_stage").notNull(), // emerging, developing, mature, ending
+  
+  // Cycle Timing
+  cycleStart: timestamp("cycle_start").notNull(),
+  cycleEnd: timestamp("cycle_end"), // Null if cycle is ongoing
+  cycleDuration: integer("cycle_duration"), // Duration in days
+  estimatedTimeRemaining: integer("estimated_time_remaining"), // Days until cycle end
+  
+  // Cycle Metrics
+  cycleStrength: real("cycle_strength").notNull(), // 0-1 strength of current cycle
+  cycleMomentum: real("cycle_momentum"), // Current momentum within cycle (-1 to 1)
+  cycleConfidence: real("cycle_confidence").notNull(), // 0-1 confidence in cycle identification
+  
+  // Price Analysis
+  startPrice: real("start_price").notNull(),
+  currentPrice: real("current_price").notNull(),
+  peakPrice: real("peak_price"), // Highest price in cycle
+  troughPrice: real("trough_price"), // Lowest price in cycle
+  priceChange: real("price_change"), // Total price change from cycle start
+  priceChangePercent: real("price_change_percent"),
+  
+  // Cycle Characteristics
+  volatilityProfile: jsonb("volatility_profile").notNull(), // Volatility across cycle phases
+  volumeProfile: jsonb("volume_profile").notNull(), // Volume patterns across cycle
+  participationRate: real("participation_rate"), // Market breadth/participation
+  sentimentProfile: jsonb("sentiment_profile"), // Sentiment indicators across cycle
+  
+  // Technical Analysis
+  supportLevels: jsonb("support_levels").notNull(),
+  resistanceLevels: jsonb("resistance_levels").notNull(),
+  keyLevels: jsonb("key_levels"), // Critical levels for cycle continuation/reversal
+  trendStrength: real("trend_strength"), // Underlying trend strength
+  
+  // Market Structure
+  marketStructure: text("market_structure").notNull(), // trending, ranging, breaking_out, breaking_down
+  structureQuality: text("structure_quality"), // clean, messy, deteriorating
+  structureShifts: jsonb("structure_shifts"), // Major structure changes in cycle
+  
+  // Institutional Activity
+  institutionalFlow: text("institutional_flow"), // accumulating, distributing, neutral
+  smartMoneyBehavior: text("smart_money_behavior"), // buying, selling, waiting
+  retailSentiment: text("retail_sentiment"), // euphoric, fearful, neutral, FOMO
+  
+  // Cycle Predictions
+  nextPhaseTarget: text("next_phase_target"), // What phase is coming next
+  nextPhaseProbability: real("next_phase_probability"), // Probability of transition
+  nextPhaseTimeframe: text("next_phase_timeframe"), // When transition might occur
+  reversalRisk: real("reversal_risk"), // 0-1 risk of cycle reversal
+  
+  // Historical Context
+  historicalComparisons: jsonb("historical_comparisons"), // Similar historical cycles
+  cycleDevelopment: jsonb("cycle_development"), // How cycle has evolved
+  anomalies: text("anomalies").array(), // Unusual aspects of this cycle
+  
+  // Economic Context
+  macroEnvironment: jsonb("macro_environment"), // Macro conditions during cycle
+  catalysts: text("catalysts").array(), // Key drivers of current cycle
+  headwinds: text("headwinds").array(), // Factors working against cycle
+  tailwinds: text("tailwinds").array(), // Factors supporting cycle
+  
+  // Cross-Asset Analysis
+  correlatedAssets: jsonb("correlated_assets"), // Other assets in similar cycles
+  sectorRotation: jsonb("sector_rotation"), // Sector performance patterns
+  riskOnOff: text("risk_on_off"), // Risk-on or risk-off environment
+  
+  // Alert Thresholds
+  alertTriggers: jsonb("alert_triggers"), // Conditions that trigger alerts
+  warningSignals: jsonb("warning_signals"), // Early warning indicators
+  confirmationSignals: jsonb("confirmation_signals"), // Signals that confirm cycle phase
+  
+  // Performance Metrics
+  sharpeRatio: real("sharpe_ratio"), // Risk-adjusted return for cycle
+  maxDrawdown: real("max_drawdown"), // Maximum drawdown in cycle
+  winRate: real("win_rate"), // Success rate of cycle-based signals
+  
+  // Metadata
+  detectionAlgorithm: text("detection_algorithm").default("hybrid_ml"),
+  modelVersion: text("model_version").default("v1.0"),
+  dataQuality: text("data_quality").default("good"),
+  lastValidated: timestamp("last_validated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const patternAlerts = pgTable("pattern_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Alert Classification
+  alertType: text("alert_type").notNull(), // pattern_detected, pattern_completion, breakout, breakdown, trend_change
+  alertCategory: text("alert_category").notNull(), // technical_analysis, pattern_recognition, trend_analysis, cycle_analysis
+  severity: text("severity").notNull(), // low, medium, high, critical
+  priority: text("priority").notNull(), // low, normal, high, urgent
+  
+  // Related Entities
+  patternId: varchar("pattern_id").references(() => chartPatterns.id),
+  trendId: varchar("trend_id").references(() => trendAnalysis.id),
+  cycleId: varchar("cycle_id").references(() => marketCycles.id),
+  
+  // Asset Information
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(),
+  currentPrice: real("current_price").notNull(),
+  priceChange: real("price_change"),
+  priceChangePercent: real("price_change_percent"),
+  
+  // Alert Content
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  detailedDescription: text("detailed_description"),
+  technicalAnalysis: text("technical_analysis"), // Detailed technical reasoning
+  
+  // Actionable Information
+  recommendations: jsonb("recommendations").notNull(), // Array of recommended actions
+  tradingSignals: jsonb("trading_signals"), // Specific trading recommendations
+  riskFactors: text("risk_factors").array(), // Risks to consider
+  keyLevels: jsonb("key_levels"), // Important support/resistance levels
+  
+  // Timing and Urgency
+  timeframe: text("timeframe").notNull(), // How long alert is relevant
+  expiresAt: timestamp("expires_at"), // When alert expires
+  urgency: text("urgency").notNull(), // immediate, within_1h, within_24h, monitor
+  optimalEntryWindow: jsonb("optimal_entry_window"), // Best time window for action
+  
+  // Confidence and Quality
+  confidence: real("confidence").notNull(), // 0-1 confidence in alert
+  signalStrength: real("signal_strength").notNull(), // 0-1 strength of underlying signal
+  historicalAccuracy: real("historical_accuracy"), // Historical accuracy for similar alerts
+  
+  // Market Context
+  marketEnvironment: jsonb("market_environment"), // Current market conditions
+  correlatedAlerts: text("correlated_alerts").array(), // Related alerts for other assets
+  sectorImpact: text("sector_impact"), // Broader sector implications
+  
+  // User Interaction
+  isViewed: boolean("is_viewed").default(false),
+  isAcknowledged: boolean("is_acknowledged").default(false),
+  userNotes: text("user_notes"), // User's notes on alert
+  userRating: integer("user_rating"), // User feedback 1-5
+  userActions: jsonb("user_actions"), // Actions taken by user
+  
+  // Delivery and Notification
+  deliveryChannels: text("delivery_channels").array(), // email, sms, push, dashboard
+  deliveredAt: jsonb("delivered_at"), // Delivery timestamps per channel
+  deliveryStatus: jsonb("delivery_status"), // Delivery status per channel
+  
+  // Performance Tracking
+  isTriggered: boolean("is_triggered").default(true),
+  triggeredAt: timestamp("triggered_at").defaultNow(),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedAt: timestamp("resolved_at"),
+  outcome: text("outcome"), // successful, false_positive, partial, pending
+  actualResult: text("actual_result"), // What actually happened
+  
+  // Follow-up Alerts
+  parentAlertId: varchar("parent_alert_id").references(() => patternAlerts.id), // Original alert this follows up
+  childAlerts: text("child_alerts").array(), // Follow-up alert IDs
+  alertSequence: integer("alert_sequence").default(1), // Position in alert sequence
+  
+  // Metadata
+  generatedBy: text("generated_by").default("pattern_ai"), // AI system that generated alert
+  algorithmVersion: text("algorithm_version").default("v1.0"),
+  dataSource: text("data_source").array(), // Sources of data used
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  tags: text("tags").array(),
+});
+
+export const aiTradingSetups = pgTable("ai_trading_setups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Setup Classification
+  setupType: text("setup_type").notNull(), // pattern_breakout, trend_continuation, reversal, momentum, mean_reversion
+  setupCategory: text("setup_category").notNull(), // scalp, swing, position, long_term
+  riskProfile: text("risk_profile").notNull(), // conservative, moderate, aggressive, speculative
+  
+  // Related Analysis
+  patternId: varchar("pattern_id").references(() => chartPatterns.id),
+  trendId: varchar("trend_id").references(() => trendAnalysis.id),
+  cycleId: varchar("cycle_id").references(() => marketCycles.id),
+  alertId: varchar("alert_id").references(() => patternAlerts.id),
+  
+  // Asset Information
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(),
+  currentPrice: real("current_price").notNull(),
+  
+  // Trading Strategy
+  direction: text("direction").notNull(), // long, short
+  strategy: text("strategy").notNull(), // breakout, pullback, bounce, reversal, momentum
+  timeframe: text("timeframe").notNull(), // 5m, 15m, 1h, 4h, 1d, 1w
+  holdingPeriod: text("holding_period").notNull(), // minutes, hours, days, weeks, months
+  
+  // Entry Strategy
+  entryType: text("entry_type").notNull(), // market, limit, stop_limit, conditional
+  entryPrice: real("entry_price").notNull(),
+  entryZone: jsonb("entry_zone"), // {min: number, max: number, optimal: number}
+  entryConditions: text("entry_conditions").array(), // Conditions that must be met
+  entryTiming: text("entry_timing"), // immediate, on_breakout, on_pullback, on_confirmation
+  
+  // Exit Strategy
+  targetPrice: real("target_price").notNull(),
+  targetZone: jsonb("target_zone"), // Multiple target levels
+  stopLoss: real("stop_loss").notNull(),
+  stopType: text("stop_type").default("fixed"), // fixed, trailing, dynamic, time_based
+  trailingStopDistance: real("trailing_stop_distance"), // For trailing stops
+  
+  // Risk Management
+  riskRewardRatio: real("risk_reward_ratio").notNull(),
+  maxRisk: real("max_risk").notNull(), // Maximum risk percentage
+  positionSize: real("position_size"), // Recommended position size percentage
+  maxDrawdown: real("max_drawdown"), // Maximum acceptable drawdown
+  
+  // Probability Analysis
+  successProbability: real("success_probability").notNull(), // 0-1 probability of success
+  probabilityMethod: text("probability_method"), // historical, ml_model, hybrid
+  expectedValue: real("expected_value"), // Expected value of trade
+  kellyPercentage: real("kelly_percentage"), // Kelly criterion position size
+  
+  // Setup Quality Metrics
+  setupStrength: real("setup_strength").notNull(), // 0-1 overall setup strength
+  patternQuality: real("pattern_quality"), // Quality of underlying pattern
+  trendAlignment: real("trend_alignment"), // Alignment with broader trend
+  volumeConfirmation: real("volume_confirmation"), // Volume support for setup
+  confluenceFactors: integer("confluence_factors"), // Number of supporting factors
+  
+  // Technical Confluence
+  supportingIndicators: jsonb("supporting_indicators"), // Technical indicators supporting setup
+  resistanceLevels: jsonb("resistance_levels"), // Key resistance levels
+  supportLevels: jsonb("support_levels"), // Key support levels
+  fibonacciLevels: jsonb("fibonacci_levels"), // Relevant fibonacci levels
+  
+  // Market Context
+  marketConditions: jsonb("market_conditions"), // Current market environment
+  sectorStrength: real("sector_strength"), // Sector momentum
+  correlationAnalysis: jsonb("correlation_analysis"), // Correlation with market/sector
+  newsAnalysis: jsonb("news_analysis"), // Relevant news and events
+  
+  // Execution Details
+  optimalExecution: jsonb("optimal_execution"), // Best execution approach
+  slippageExpectation: real("slippage_expectation"), // Expected slippage
+  liquidityAssessment: text("liquidity_assessment"), // high, medium, low
+  tradingHours: text("trading_hours"), // optimal trading hours
+  
+  // Performance Expectations
+  expectedReturn: real("expected_return"), // Expected return percentage
+  expectedTimeToTarget: integer("expected_time_to_target"), // Days to reach target
+  volatilityExpectation: real("volatility_expectation"), // Expected volatility
+  drawdownExpectation: real("drawdown_expectation"), // Expected max drawdown
+  
+  // Historical Context
+  historicalPerformance: jsonb("historical_performance"), // Similar setup performance
+  backtestResults: jsonb("backtest_results"), // Backtest statistics
+  similarSetups: text("similar_setups").array(), // IDs of similar historical setups
+  seasonalityBias: real("seasonality_bias"), // Seasonal performance bias
+  
+  // AI Model Information
+  modelVersion: text("model_version").default("v1.0"),
+  modelConfidence: real("model_confidence").notNull(), // AI model confidence
+  featureImportance: jsonb("feature_importance"), // Most important features for setup
+  alternativeSetups: jsonb("alternative_setups"), // Alternative setup suggestions
+  
+  // Status and Lifecycle
+  status: text("status").default("active"), // active, expired, triggered, completed, cancelled
+  isTriggered: boolean("is_triggered").default(false),
+  triggeredAt: timestamp("triggered_at"),
+  entryExecuted: boolean("entry_executed").default(false),
+  exitExecuted: boolean("exit_executed").default(false),
+  
+  // Performance Tracking
+  actualEntry: real("actual_entry"), // Actual entry price
+  actualExit: real("actual_exit"), // Actual exit price
+  actualReturn: real("actual_return"), // Actual return percentage
+  actualHoldTime: integer("actual_hold_time"), // Actual holding time in minutes
+  outcome: text("outcome"), // success, failure, partial, stopped_out
+  
+  // User Interaction
+  userRating: integer("user_rating"), // 1-5 user rating
+  userNotes: text("user_notes"),
+  isBookmarked: boolean("is_bookmarked").default(false),
+  sharingLevel: text("sharing_level").default("private"), // private, followers, public
+  
+  // Metadata
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  expiresAt: timestamp("expires_at"), // When setup expires
+  lastValidated: timestamp("last_validated").defaultNow(),
+  tags: text("tags").array(),
+  notes: text("notes"), // Internal notes for setup
+});
+
+// =============================================================================
+// PATTERN RECOGNITION RELATIONS - Added after table definitions
+// =============================================================================
+
+export const chartPatternsRelations = relations(chartPatterns, ({ many }) => ({
+  alerts: many(patternAlerts),
+  tradingSetups: many(aiTradingSetups),
+}));
+
+export const trendAnalysisRelations = relations(trendAnalysis, ({ many }) => ({
+  alerts: many(patternAlerts),
+  tradingSetups: many(aiTradingSetups),
+}));
+
+export const marketCyclesRelations = relations(marketCycles, ({ many }) => ({
+  alerts: many(patternAlerts),
+  tradingSetups: many(aiTradingSetups),
+}));
+
+export const patternAlertsRelations = relations(patternAlerts, ({ one, many }) => ({
+  pattern: one(chartPatterns, {
+    fields: [patternAlerts.patternId],
+    references: [chartPatterns.id],
+  }),
+  trend: one(trendAnalysis, {
+    fields: [patternAlerts.trendId],
+    references: [trendAnalysis.id],
+  }),
+  cycle: one(marketCycles, {
+    fields: [patternAlerts.cycleId],
+    references: [marketCycles.id],
+  }),
+  parentAlert: one(patternAlerts, {
+    fields: [patternAlerts.parentAlertId],
+    references: [patternAlerts.id],
+  }),
+  childAlerts: many(patternAlerts),
+  tradingSetups: many(aiTradingSetups),
+}));
+
+export const aiTradingSetupsRelations = relations(aiTradingSetups, ({ one }) => ({
+  pattern: one(chartPatterns, {
+    fields: [aiTradingSetups.patternId],
+    references: [chartPatterns.id],
+  }),
+  trend: one(trendAnalysis, {
+    fields: [aiTradingSetups.trendId],
+    references: [trendAnalysis.id],
+  }),
+  cycle: one(marketCycles, {
+    fields: [aiTradingSetups.cycleId],
+    references: [marketCycles.id],
+  }),
+  alert: one(patternAlerts, {
+    fields: [aiTradingSetups.alertId],
+    references: [patternAlerts.id],
+  }),
+}));
+
+// =============================================================================
+// PATTERN RECOGNITION INSERT SCHEMAS - Added after table definitions
+// =============================================================================
+
+export const insertChartPatternSchema = createInsertSchema(chartPatterns).pick({
+  symbol: true,
+  assetType: true,
+  patternType: true,
+  patternSubtype: true,
+  patternCategory: true,
+  detectionAlgorithm: true,
+  confidence: true,
+  patternQuality: true,
+  startPrice: true,
+  endPrice: true,
+  highPrice: true,
+  lowPrice: true,
+  currentPrice: true,
+  supportLevels: true,
+  resistanceLevels: true,
+  keyLevels: true,
+  startTime: true,
+  endTime: true,
+  timeframe: true,
+  duration: true,
+  height: true,
+  width: true,
+  volume: true,
+  volumeProfile: true,
+  targetDirection: true,
+  targetPrice: true,
+  stopLoss: true,
+  riskRewardRatio: true,
+  probabilitySuccess: true,
+  marketRegime: true,
+  trendAlignment: true,
+  volumeConfirmation: true,
+  indicatorSignals: true,
+  movingAveragePosition: true,
+  volatilityEnvironment: true,
+  tags: true,
+});
+
+export const insertTrendAnalysisSchema = createInsertSchema(trendAnalysis).pick({
+  symbol: true,
+  assetType: true,
+  primaryTrend: true,
+  secondaryTrend: true,
+  trendStrength: true,
+  trendQuality: true,
+  trendDuration: true,
+  trendAngle: true,
+  slopeCoefficient: true,
+  rSquared: true,
+  momentum: true,
+  acceleration: true,
+  momentumDivergence: true,
+  adx: true,
+  adxTrend: true,
+  pdi: true,
+  ndi: true,
+  maConfiguration: true,
+  maAlignment: true,
+  priceVsMAs: true,
+  maSlope: true,
+  maSpread: true,
+  trendLines: true,
+  channelBounds: true,
+  channelWidth: true,
+  channelPosition: true,
+  volumeTrend: true,
+  volumeConfirmation: true,
+  onBalanceVolume: true,
+  volumeMovingAverage: true,
+  volatilityTrend: true,
+  atr: true,
+  atrPercent: true,
+  volatilityRank: true,
+  fibonacciLevels: true,
+  currentFibLevel: true,
+  fibSupport: true,
+  fibResistance: true,
+  trendSignal: true,
+  signalStrength: true,
+  entryLevel: true,
+  stopLoss: true,
+  targetLevels: true,
+  reversalProbability: true,
+  reversalSignals: true,
+  supportingPatterns: true,
+  timeframe: true,
+  analysisTime: true,
+  nextUpdate: true,
+  historicalTrendStats: true,
+  similarPeriods: true,
+  seasonalityFactor: true,
+  predictionAccuracy: true,
+  lastPredictionResult: true,
+  algorithmVersion: true,
+  dataQuality: true,
+});
+
+export const insertMarketCycleSchema = createInsertSchema(marketCycles).pick({
+  symbol: true,
+  assetType: true,
+  cycleType: true,
+  cyclePhase: true,
+  cycleStage: true,
+  cycleStart: true,
+  cycleEnd: true,
+  cycleDuration: true,
+  estimatedTimeRemaining: true,
+  cycleStrength: true,
+  cycleMomentum: true,
+  cycleConfidence: true,
+  startPrice: true,
+  currentPrice: true,
+  peakPrice: true,
+  troughPrice: true,
+  priceChange: true,
+  priceChangePercent: true,
+  volatilityProfile: true,
+  volumeProfile: true,
+  participationRate: true,
+  sentimentProfile: true,
+  supportLevels: true,
+  resistanceLevels: true,
+  keyLevels: true,
+  trendStrength: true,
+  marketStructure: true,
+  structureQuality: true,
+  structureShifts: true,
+  institutionalFlow: true,
+  smartMoneyBehavior: true,
+  retailSentiment: true,
+  nextPhaseTarget: true,
+  nextPhaseProbability: true,
+  nextPhaseTimeframe: true,
+  reversalRisk: true,
+  historicalComparisons: true,
+  cycleDevelopment: true,
+  anomalies: true,
+  macroEnvironment: true,
+  catalysts: true,
+  headwinds: true,
+  tailwinds: true,
+  correlatedAssets: true,
+  sectorRotation: true,
+  riskOnOff: true,
+  alertTriggers: true,
+  warningSignals: true,
+  confirmationSignals: true,
+  sharpeRatio: true,
+  maxDrawdown: true,
+  winRate: true,
+  detectionAlgorithm: true,
+  modelVersion: true,
+  dataQuality: true,
+});
+
+export const insertPatternAlertSchema = createInsertSchema(patternAlerts).pick({
+  alertType: true,
+  alertCategory: true,
+  severity: true,
+  priority: true,
+  patternId: true,
+  trendId: true,
+  cycleId: true,
+  symbol: true,
+  assetType: true,
+  currentPrice: true,
+  priceChange: true,
+  priceChangePercent: true,
+  title: true,
+  message: true,
+  detailedDescription: true,
+  technicalAnalysis: true,
+  recommendations: true,
+  tradingSignals: true,
+  riskFactors: true,
+  keyLevels: true,
+  timeframe: true,
+  expiresAt: true,
+  urgency: true,
+  optimalEntryWindow: true,
+  confidence: true,
+  signalStrength: true,
+  historicalAccuracy: true,
+  marketEnvironment: true,
+  correlatedAlerts: true,
+  sectorImpact: true,
+  deliveryChannels: true,
+  parentAlertId: true,
+  childAlerts: true,
+  alertSequence: true,
+  generatedBy: true,
+  algorithmVersion: true,
+  dataSource: true,
+  tags: true,
+});
+
+export const insertAiTradingSetupSchema = createInsertSchema(aiTradingSetups).pick({
+  setupType: true,
+  setupCategory: true,
+  riskProfile: true,
+  patternId: true,
+  trendId: true,
+  cycleId: true,
+  alertId: true,
+  symbol: true,
+  assetType: true,
+  currentPrice: true,
+  direction: true,
+  strategy: true,
+  timeframe: true,
+  holdingPeriod: true,
+  entryType: true,
+  entryPrice: true,
+  entryZone: true,
+  entryConditions: true,
+  entryTiming: true,
+  targetPrice: true,
+  targetZone: true,
+  stopLoss: true,
+  stopType: true,
+  trailingStopDistance: true,
+  riskRewardRatio: true,
+  maxRisk: true,
+  positionSize: true,
+  maxDrawdown: true,
+  successProbability: true,
+  probabilityMethod: true,
+  expectedValue: true,
+  kellyPercentage: true,
+  setupStrength: true,
+  patternQuality: true,
+  trendAlignment: true,
+  volumeConfirmation: true,
+  confluenceFactors: true,
+  supportingIndicators: true,
+  resistanceLevels: true,
+  supportLevels: true,
+  fibonacciLevels: true,
+  marketConditions: true,
+  sectorStrength: true,
+  correlationAnalysis: true,
+  newsAnalysis: true,
+  optimalExecution: true,
+  slippageExpectation: true,
+  liquidityAssessment: true,
+  tradingHours: true,
+  expectedReturn: true,
+  expectedTimeToTarget: true,
+  volatilityExpectation: true,
+  drawdownExpectation: true,
+  historicalPerformance: true,
+  backtestResults: true,
+  similarSetups: true,
+  seasonalityBias: true,
+  modelVersion: true,
+  modelConfidence: true,
+  featureImportance: true,
+  alternativeSetups: true,
+  expiresAt: true,
+  sharingLevel: true,
+  tags: true,
+  notes: true,
+});
+
+// Pattern Recognition Types
+export type InsertChartPattern = z.infer<typeof insertChartPatternSchema>;
+export type ChartPatternData = typeof chartPatterns.$inferSelect;
+
+export type InsertTrendAnalysis = z.infer<typeof insertTrendAnalysisSchema>;
+export type TrendAnalysisData = typeof trendAnalysis.$inferSelect;
+
+export type InsertMarketCycle = z.infer<typeof insertMarketCycleSchema>;
+export type MarketCycleData = typeof marketCycles.$inferSelect;
+
+export type InsertPatternAlert = z.infer<typeof insertPatternAlertSchema>;
+export type PatternAlertData = typeof patternAlerts.$inferSelect;
+
+export type InsertAiTradingSetup = z.infer<typeof insertAiTradingSetupSchema>;
+export type AiTradingSetupData = typeof aiTradingSetups.$inferSelect;

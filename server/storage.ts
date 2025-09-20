@@ -22,6 +22,17 @@ import {
   type UserPreferences,
   type InsertUserPreferences,
   type LeaderEducationData,
+  // Pattern Recognition Types
+  type ChartPattern,
+  type InsertChartPattern,
+  type TrendAnalysis,
+  type InsertTrendAnalysis,
+  type MarketCycle,
+  type InsertMarketCycle,
+  type PatternAlert,
+  type InsertPatternAlert,
+  type AiTradingSetup,
+  type InsertAiTradingSetup,
   users,
   summaries,
   bounties,
@@ -32,7 +43,13 @@ import {
   curatedCasts,
   topicTags,
   learningResources,
-  userPreferences
+  userPreferences,
+  // Pattern Recognition Tables
+  chartPatterns,
+  trendAnalysis,
+  marketCycles,
+  patternAlerts,
+  aiTradingSetups
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -114,6 +131,86 @@ export interface IStorage {
   createLearningResource(resource: InsertLearningResource): Promise<LearningResource>;
   
   getLeaderEducationData(leaderId: string): Promise<LeaderEducationData | undefined>;
+
+  // Pattern Recognition operations
+  
+  // Chart Pattern operations
+  getChartPattern(id: string): Promise<ChartPattern | undefined>;
+  getChartPatterns(options?: {
+    symbol?: string;
+    assetType?: string;
+    patternType?: string;
+    timeframe?: string;
+    minConfidence?: number;
+    isComplete?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<ChartPattern[]>;
+  getChartPatternsBySymbol(symbol: string, timeframe?: string): Promise<ChartPattern[]>;
+  createChartPattern(pattern: InsertChartPattern): Promise<ChartPattern>;
+  updateChartPattern(id: string, updates: Partial<InsertChartPattern>): Promise<ChartPattern | undefined>;
+  deleteChartPattern(id: string): Promise<boolean>;
+
+  // Trend Analysis operations
+  getTrendAnalysis(id: string): Promise<TrendAnalysis | undefined>;
+  getTrendAnalysesBySymbol(symbol: string, timeframe?: string): Promise<TrendAnalysis[]>;
+  getLatestTrendAnalysis(symbol: string, timeframe?: string): Promise<TrendAnalysis | undefined>;
+  createTrendAnalysis(analysis: InsertTrendAnalysis): Promise<TrendAnalysis>;
+  updateTrendAnalysis(id: string, updates: Partial<InsertTrendAnalysis>): Promise<TrendAnalysis | undefined>;
+  deleteTrendAnalysis(id: string): Promise<boolean>;
+
+  // Market Cycle operations
+  getMarketCycle(id: string): Promise<MarketCycle | undefined>;
+  getMarketCycles(options?: {
+    symbol?: string;
+    assetType?: string;
+    cycleType?: string;
+    isActive?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<MarketCycle[]>;
+  getMarketCyclesBySymbol(symbol: string): Promise<MarketCycle[]>;
+  getActiveMarketCycles(): Promise<MarketCycle[]>;
+  createMarketCycle(cycle: InsertMarketCycle): Promise<MarketCycle>;
+  updateMarketCycle(id: string, updates: Partial<InsertMarketCycle>): Promise<MarketCycle | undefined>;
+  deleteMarketCycle(id: string): Promise<boolean>;
+
+  // Pattern Alert operations
+  getPatternAlert(id: string): Promise<PatternAlert | undefined>;
+  getPatternAlerts(options?: {
+    symbol?: string;
+    assetType?: string;
+    alertType?: string;
+    severity?: string;
+    isActive?: boolean;
+    isAcknowledged?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<PatternAlert[]>;
+  getActivePatternAlerts(symbol?: string): Promise<PatternAlert[]>;
+  getPatternAlertsByPattern(patternId: string): Promise<PatternAlert[]>;
+  createPatternAlert(alert: InsertPatternAlert): Promise<PatternAlert>;
+  updatePatternAlert(id: string, updates: Partial<InsertPatternAlert>): Promise<PatternAlert | undefined>;
+  acknowledgePatternAlert(id: string): Promise<PatternAlert | undefined>;
+  deletePatternAlert(id: string): Promise<boolean>;
+
+  // AI Trading Setup operations
+  getAiTradingSetup(id: string): Promise<AiTradingSetup | undefined>;
+  getAiTradingSetups(options?: {
+    symbol?: string;
+    assetType?: string;
+    setupType?: string;
+    setupCategory?: string;
+    riskProfile?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<AiTradingSetup[]>;
+  getAiTradingSetupsBySymbol(symbol: string): Promise<AiTradingSetup[]>;
+  getActiveAiTradingSetups(): Promise<AiTradingSetup[]>;
+  createAiTradingSetup(setup: InsertAiTradingSetup): Promise<AiTradingSetup>;
+  updateAiTradingSetup(id: string, updates: Partial<InsertAiTradingSetup>): Promise<AiTradingSetup | undefined>;
+  deleteAiTradingSetup(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -646,6 +743,453 @@ export class DatabaseStorage implements IStorage {
       topics: relatedTopics,
       engagement
     };
+  }
+
+  // Pattern Recognition implementations
+
+  // Chart Pattern operations
+  async getChartPattern(id: string): Promise<ChartPattern | undefined> {
+    const [pattern] = await db.select().from(chartPatterns).where(eq(chartPatterns.id, id));
+    return pattern || undefined;
+  }
+
+  async getChartPatterns(options?: {
+    symbol?: string;
+    assetType?: string;
+    patternType?: string;
+    timeframe?: string;
+    minConfidence?: number;
+    isComplete?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<ChartPattern[]> {
+    const conditions = [];
+    
+    if (options?.symbol) {
+      conditions.push(eq(chartPatterns.symbol, options.symbol));
+    }
+    if (options?.assetType) {
+      conditions.push(eq(chartPatterns.assetType, options.assetType));
+    }
+    if (options?.patternType) {
+      conditions.push(eq(chartPatterns.patternType, options.patternType));
+    }
+    if (options?.timeframe) {
+      conditions.push(eq(chartPatterns.timeframe, options.timeframe));
+    }
+    if (options?.minConfidence) {
+      conditions.push(sql`${chartPatterns.confidence} >= ${options.minConfidence}`);
+    }
+    if (options?.isComplete !== undefined) {
+      conditions.push(eq(chartPatterns.isComplete, options.isComplete));
+    }
+
+    let query = db
+      .select()
+      .from(chartPatterns)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(chartPatterns.createdAt));
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    return await query;
+  }
+
+  async getChartPatternsBySymbol(symbol: string, timeframe?: string): Promise<ChartPattern[]> {
+    const conditions = [eq(chartPatterns.symbol, symbol)];
+    
+    if (timeframe) {
+      conditions.push(eq(chartPatterns.timeframe, timeframe));
+    }
+
+    return await db
+      .select()
+      .from(chartPatterns)
+      .where(and(...conditions))
+      .orderBy(desc(chartPatterns.createdAt))
+      .limit(20);
+  }
+
+  async createChartPattern(insertPattern: InsertChartPattern): Promise<ChartPattern> {
+    const [pattern] = await db
+      .insert(chartPatterns)
+      .values(insertPattern)
+      .returning();
+    return pattern;
+  }
+
+  async updateChartPattern(id: string, updates: Partial<InsertChartPattern>): Promise<ChartPattern | undefined> {
+    const [pattern] = await db
+      .update(chartPatterns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chartPatterns.id, id))
+      .returning();
+    return pattern || undefined;
+  }
+
+  async deleteChartPattern(id: string): Promise<boolean> {
+    const result = await db.delete(chartPatterns).where(eq(chartPatterns.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Trend Analysis operations
+  async getTrendAnalysis(id: string): Promise<TrendAnalysis | undefined> {
+    const [analysis] = await db.select().from(trendAnalysis).where(eq(trendAnalysis.id, id));
+    return analysis || undefined;
+  }
+
+  async getTrendAnalysesBySymbol(symbol: string, timeframe?: string): Promise<TrendAnalysis[]> {
+    const conditions = [eq(trendAnalysis.symbol, symbol)];
+    
+    if (timeframe) {
+      conditions.push(eq(trendAnalysis.timeframe, timeframe));
+    }
+
+    return await db
+      .select()
+      .from(trendAnalysis)
+      .where(and(...conditions))
+      .orderBy(desc(trendAnalysis.createdAt))
+      .limit(10);
+  }
+
+  async getLatestTrendAnalysis(symbol: string, timeframe?: string): Promise<TrendAnalysis | undefined> {
+    const conditions = [eq(trendAnalysis.symbol, symbol)];
+    
+    if (timeframe) {
+      conditions.push(eq(trendAnalysis.timeframe, timeframe));
+    }
+
+    const [latest] = await db
+      .select()
+      .from(trendAnalysis)
+      .where(and(...conditions))
+      .orderBy(desc(trendAnalysis.analysisTime))
+      .limit(1);
+
+    return latest || undefined;
+  }
+
+  async createTrendAnalysis(insertAnalysis: InsertTrendAnalysis): Promise<TrendAnalysis> {
+    const [analysis] = await db
+      .insert(trendAnalysis)
+      .values(insertAnalysis)
+      .returning();
+    return analysis;
+  }
+
+  async updateTrendAnalysis(id: string, updates: Partial<InsertTrendAnalysis>): Promise<TrendAnalysis | undefined> {
+    const [analysis] = await db
+      .update(trendAnalysis)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(trendAnalysis.id, id))
+      .returning();
+    return analysis || undefined;
+  }
+
+  async deleteTrendAnalysis(id: string): Promise<boolean> {
+    const result = await db.delete(trendAnalysis).where(eq(trendAnalysis.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Market Cycle operations
+  async getMarketCycle(id: string): Promise<MarketCycle | undefined> {
+    const [cycle] = await db.select().from(marketCycles).where(eq(marketCycles.id, id));
+    return cycle || undefined;
+  }
+
+  async getMarketCycles(options?: {
+    symbol?: string;
+    assetType?: string;
+    cycleType?: string;
+    isActive?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<MarketCycle[]> {
+    const conditions = [];
+    
+    if (options?.symbol) {
+      conditions.push(eq(marketCycles.symbol, options.symbol));
+    }
+    if (options?.assetType) {
+      conditions.push(eq(marketCycles.assetType, options.assetType));
+    }
+    if (options?.cycleType) {
+      conditions.push(eq(marketCycles.cycleType, options.cycleType));
+    }
+    if (options?.isActive !== undefined) {
+      if (options.isActive) {
+        conditions.push(sql`${marketCycles.cycleEnd} IS NULL`);
+      } else {
+        conditions.push(sql`${marketCycles.cycleEnd} IS NOT NULL`);
+      }
+    }
+
+    let query = db
+      .select()
+      .from(marketCycles)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(marketCycles.createdAt));
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    return await query;
+  }
+
+  async getMarketCyclesBySymbol(symbol: string): Promise<MarketCycle[]> {
+    return await db
+      .select()
+      .from(marketCycles)
+      .where(eq(marketCycles.symbol, symbol))
+      .orderBy(desc(marketCycles.cycleStart))
+      .limit(10);
+  }
+
+  async getActiveMarketCycles(): Promise<MarketCycle[]> {
+    return await db
+      .select()
+      .from(marketCycles)
+      .where(sql`${marketCycles.cycleEnd} IS NULL`)
+      .orderBy(desc(marketCycles.cycleStart));
+  }
+
+  async createMarketCycle(insertCycle: InsertMarketCycle): Promise<MarketCycle> {
+    const [cycle] = await db
+      .insert(marketCycles)
+      .values(insertCycle)
+      .returning();
+    return cycle;
+  }
+
+  async updateMarketCycle(id: string, updates: Partial<InsertMarketCycle>): Promise<MarketCycle | undefined> {
+    const [cycle] = await db
+      .update(marketCycles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(marketCycles.id, id))
+      .returning();
+    return cycle || undefined;
+  }
+
+  async deleteMarketCycle(id: string): Promise<boolean> {
+    const result = await db.delete(marketCycles).where(eq(marketCycles.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Pattern Alert operations
+  async getPatternAlert(id: string): Promise<PatternAlert | undefined> {
+    const [alert] = await db.select().from(patternAlerts).where(eq(patternAlerts.id, id));
+    return alert || undefined;
+  }
+
+  async getPatternAlerts(options?: {
+    symbol?: string;
+    assetType?: string;
+    alertType?: string;
+    severity?: string;
+    isActive?: boolean;
+    isAcknowledged?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<PatternAlert[]> {
+    const conditions = [];
+    
+    if (options?.symbol) {
+      conditions.push(eq(patternAlerts.symbol, options.symbol));
+    }
+    if (options?.assetType) {
+      conditions.push(eq(patternAlerts.assetType, options.assetType));
+    }
+    if (options?.alertType) {
+      conditions.push(eq(patternAlerts.alertType, options.alertType));
+    }
+    if (options?.severity) {
+      conditions.push(eq(patternAlerts.severity, options.severity));
+    }
+    if (options?.isActive !== undefined) {
+      if (options.isActive) {
+        conditions.push(sql`${patternAlerts.resolvedAt} IS NULL`);
+      } else {
+        conditions.push(sql`${patternAlerts.resolvedAt} IS NOT NULL`);
+      }
+    }
+    if (options?.isAcknowledged !== undefined) {
+      conditions.push(eq(patternAlerts.isAcknowledged, options.isAcknowledged));
+    }
+
+    let query = db
+      .select()
+      .from(patternAlerts)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(patternAlerts.triggeredAt));
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    return await query;
+  }
+
+  async getActivePatternAlerts(symbol?: string): Promise<PatternAlert[]> {
+    const conditions = [sql`${patternAlerts.resolvedAt} IS NULL`];
+    
+    if (symbol) {
+      conditions.push(eq(patternAlerts.symbol, symbol));
+    }
+
+    return await db
+      .select()
+      .from(patternAlerts)
+      .where(and(...conditions))
+      .orderBy(desc(patternAlerts.triggeredAt))
+      .limit(50);
+  }
+
+  async getPatternAlertsByPattern(patternId: string): Promise<PatternAlert[]> {
+    return await db
+      .select()
+      .from(patternAlerts)
+      .where(eq(patternAlerts.patternId, patternId))
+      .orderBy(desc(patternAlerts.triggeredAt));
+  }
+
+  async createPatternAlert(insertAlert: InsertPatternAlert): Promise<PatternAlert> {
+    const [alert] = await db
+      .insert(patternAlerts)
+      .values(insertAlert)
+      .returning();
+    return alert;
+  }
+
+  async updatePatternAlert(id: string, updates: Partial<InsertPatternAlert>): Promise<PatternAlert | undefined> {
+    const [alert] = await db
+      .update(patternAlerts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(patternAlerts.id, id))
+      .returning();
+    return alert || undefined;
+  }
+
+  async acknowledgePatternAlert(id: string): Promise<PatternAlert | undefined> {
+    const [alert] = await db
+      .update(patternAlerts)
+      .set({ 
+        isAcknowledged: true, 
+        acknowledgedAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(patternAlerts.id, id))
+      .returning();
+    return alert || undefined;
+  }
+
+  async deletePatternAlert(id: string): Promise<boolean> {
+    const result = await db.delete(patternAlerts).where(eq(patternAlerts.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // AI Trading Setup operations
+  async getAiTradingSetup(id: string): Promise<AiTradingSetup | undefined> {
+    const [setup] = await db.select().from(aiTradingSetups).where(eq(aiTradingSetups.id, id));
+    return setup || undefined;
+  }
+
+  async getAiTradingSetups(options?: {
+    symbol?: string;
+    assetType?: string;
+    setupType?: string;
+    setupCategory?: string;
+    riskProfile?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<AiTradingSetup[]> {
+    const conditions = [];
+    
+    if (options?.symbol) {
+      conditions.push(eq(aiTradingSetups.symbol, options.symbol));
+    }
+    if (options?.assetType) {
+      conditions.push(eq(aiTradingSetups.assetType, options.assetType));
+    }
+    if (options?.setupType) {
+      conditions.push(eq(aiTradingSetups.setupType, options.setupType));
+    }
+    if (options?.setupCategory) {
+      conditions.push(eq(aiTradingSetups.setupCategory, options.setupCategory));
+    }
+    if (options?.riskProfile) {
+      conditions.push(eq(aiTradingSetups.riskProfile, options.riskProfile));
+    }
+    if (options?.status) {
+      conditions.push(eq(aiTradingSetups.status, options.status));
+    }
+
+    let query = db
+      .select()
+      .from(aiTradingSetups)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(aiTradingSetups.createdAt));
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    return await query;
+  }
+
+  async getAiTradingSetupsBySymbol(symbol: string): Promise<AiTradingSetup[]> {
+    return await db
+      .select()
+      .from(aiTradingSetups)
+      .where(eq(aiTradingSetups.symbol, symbol))
+      .orderBy(desc(aiTradingSetups.createdAt))
+      .limit(10);
+  }
+
+  async getActiveAiTradingSetups(): Promise<AiTradingSetup[]> {
+    return await db
+      .select()
+      .from(aiTradingSetups)
+      .where(eq(aiTradingSetups.status, 'active'))
+      .orderBy(desc(aiTradingSetups.createdAt));
+  }
+
+  async createAiTradingSetup(insertSetup: InsertAiTradingSetup): Promise<AiTradingSetup> {
+    const [setup] = await db
+      .insert(aiTradingSetups)
+      .values(insertSetup)
+      .returning();
+    return setup;
+  }
+
+  async updateAiTradingSetup(id: string, updates: Partial<InsertAiTradingSetup>): Promise<AiTradingSetup | undefined> {
+    const [setup] = await db
+      .update(aiTradingSetups)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(aiTradingSetups.id, id))
+      .returning();
+    return setup || undefined;
+  }
+
+  async deleteAiTradingSetup(id: string): Promise<boolean> {
+    const result = await db.delete(aiTradingSetups).where(eq(aiTradingSetups.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 
