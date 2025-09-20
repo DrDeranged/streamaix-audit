@@ -310,6 +310,33 @@ export default function Discover() {
     refetchInterval: 180000, // 3 minutes
   });
 
+  // Correlation Analysis queries
+  const [correlationTimeframe, setCorrelationTimeframe] = useState<'7d' | '30d' | '90d'>('30d');
+  
+  const { data: correlationMatrix, isLoading: correlationLoading } = useQuery({
+    queryKey: [`/api/correlation/matrix?timeframe=${correlationTimeframe}`],
+    refetchInterval: 300000, // 5 minutes - correlations change slowly
+    retry: 1
+  });
+
+  const { data: marketRegime, isLoading: regimeLoading } = useQuery({
+    queryKey: ['/api/correlation/market-regime'],
+    refetchInterval: 180000, // 3 minutes
+    retry: 1
+  });
+
+  const { data: riskSentiment, isLoading: riskSentimentLoading } = useQuery({
+    queryKey: [`/api/correlation/risk-sentiment?timeframe=${correlationTimeframe === '90d' ? '30d' : '7d'}`],
+    refetchInterval: 120000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: correlationSummary, isLoading: correlationSummaryLoading } = useQuery({
+    queryKey: [`/api/correlation/summary?timeframe=${correlationTimeframe}`],
+    refetchInterval: 240000, // 4 minutes
+    retry: 1
+  });
+
   // Phase 1: Market Pulse Data
   // Enhanced market movers with priority levels and risk assessment
   const rawMarketMovers: MarketMover[] = (marketData as any)?.movers || [
@@ -1405,6 +1432,303 @@ export default function Discover() {
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+
+        {/* Correlation Analysis Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-indigo-400" />
+              Cross-Asset Correlation Analysis
+              <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30 ml-2">
+                <Activity className="h-3 w-3 mr-1" />
+                Live Correlations
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-black/20 rounded-lg p-1">
+                {(['7d', '30d', '90d'] as const).map((timeframe) => (
+                  <button
+                    key={timeframe}
+                    onClick={() => setCorrelationTimeframe(timeframe)}
+                    className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                      correlationTimeframe === timeframe
+                        ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
+                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                    }`}
+                    data-testid={`timeframe-${timeframe}`}
+                  >
+                    {timeframe}
+                  </button>
+                ))}
+              </div>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                📊 Matrix View
+              </Badge>
+              <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30 text-xs">
+                🎯 Regime Detection
+              </Badge>
+            </div>
+          </div>
+
+          {/* Market Regime & Risk Sentiment Banner */}
+          {(!regimeLoading && marketRegime?.data) && (
+            <Card className={`bg-gradient-to-r backdrop-blur-sm ${
+              marketRegime.data.regime === 'risk_on' 
+                ? 'from-green-900/20 via-emerald-900/20 to-green-900/20 border-green-500/30'
+                : marketRegime.data.regime === 'risk_off'
+                ? 'from-red-900/20 via-rose-900/20 to-red-900/20 border-red-500/30'
+                : marketRegime.data.regime === 'decoupled'
+                ? 'from-purple-900/20 via-indigo-900/20 to-purple-900/20 border-purple-500/30'
+                : 'from-yellow-900/20 via-amber-900/20 to-yellow-900/20 border-yellow-500/30'
+            }`}>
+              <CardHeader className="pb-4">
+                <CardTitle className={`flex items-center gap-2 ${
+                  marketRegime.data.regime === 'risk_on' ? 'text-green-300'
+                  : marketRegime.data.regime === 'risk_off' ? 'text-red-300'
+                  : marketRegime.data.regime === 'decoupled' ? 'text-purple-300'
+                  : 'text-yellow-300'
+                }`}>
+                  <Target className="h-4 w-4" />
+                  Market Regime: {marketRegime.data.regime.replace('_', '-').toUpperCase()}
+                  <Badge className={`ml-2 ${
+                    marketRegime.data.confidence > 0.8 ? 'bg-green-500/30 text-green-200 border-green-400/50'
+                    : marketRegime.data.confidence > 0.6 ? 'bg-yellow-500/30 text-yellow-200 border-yellow-400/50'
+                    : 'bg-red-500/30 text-red-200 border-red-400/50'
+                  }`}>
+                    {Math.round(marketRegime.data.confidence * 100)}% Confidence
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Regime Description */}
+                  <div className="space-y-4">
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      {marketRegime.data.description}
+                    </p>
+                    
+                    {/* Key Indicators */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-black/30 rounded-lg p-3">
+                        <div className="text-xs text-gray-400 mb-1">Crypto-Stock Correlation</div>
+                        <div className="text-sm font-medium text-white">
+                          {(marketRegime.data.characteristics.cryptoTradStockCorr * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                      <div className="bg-black/30 rounded-lg p-3">
+                        <div className="text-xs text-gray-400 mb-1">Risk Sentiment</div>
+                        <div className="text-sm font-medium text-white">
+                          {marketRegime.data.characteristics.riskSentiment > 0 ? '+' : ''}{(marketRegime.data.characteristics.riskSentiment * 100).toFixed(1)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actionable Insights */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-white">💡 Actionable Insights</h4>
+                    <div className="space-y-2">
+                      {marketRegime.data.actionableInsights.slice(0, 3).map((insight: string, index: number) => (
+                        <div key={index} className="flex items-start gap-2 text-xs text-gray-300">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0"></div>
+                          <span>{insight}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Correlation Matrix & Risk Sentiment */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Correlation Heatmap */}
+            <Card className="lg:col-span-2 bg-black/40 border-indigo-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-indigo-300 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Correlation Heatmap ({correlationTimeframe})
+                  <Badge className="bg-indigo-500/20 text-indigo-200 border-indigo-400/30 ml-2">
+                    Cross-Asset Matrix
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {correlationLoading ? (
+                  <div className="text-center py-8 text-gray-400">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50 animate-pulse" />
+                    <p>Loading correlation matrix...</p>
+                  </div>
+                ) : correlationMatrix?.success && correlationMatrix.data ? (
+                  <div className="space-y-4">
+                    {/* Top Correlations Summary */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      {correlationMatrix.data.matrix
+                        .sort((a: any, b: any) => Math.abs(b.correlation) - Math.abs(a.correlation))
+                        .slice(0, 3)
+                        .map((pair: any) => (
+                          <div key={`${pair.asset1}-${pair.asset2}`} className="bg-black/30 rounded-lg p-3 text-center">
+                            <div className="text-xs text-gray-400 mb-1">{pair.asset1} × {pair.asset2}</div>
+                            <div className={`text-sm font-medium ${
+                              pair.correlation > 0.5 ? 'text-green-400' 
+                              : pair.correlation < -0.5 ? 'text-red-400' 
+                              : 'text-yellow-400'
+                            }`}>
+                              {pair.correlation > 0 ? '+' : ''}{(pair.correlation * 100).toFixed(1)}%
+                            </div>
+                            <div className="text-xs text-gray-500 capitalize">{pair.strength}</div>
+                          </div>
+                        ))}
+                    </div>
+
+                    {/* Simplified Correlation Grid */}
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {correlationMatrix.data.assets.slice(0, 8).map((asset1: any) => (
+                        <div key={asset1.symbol} className="grid grid-cols-9 gap-1 items-center">
+                          <div className="text-xs font-medium text-white w-12 truncate">
+                            {asset1.symbol}
+                          </div>
+                          {correlationMatrix.data.assets.slice(0, 8).map((asset2: any) => {
+                            if (asset1.symbol === asset2.symbol) {
+                              return <div key={asset2.symbol} className="w-6 h-6 bg-white/20 rounded text-xs flex items-center justify-center text-white">1</div>;
+                            }
+                            
+                            const correlation = correlationMatrix.data.matrix.find((pair: any) => 
+                              (pair.asset1 === asset1.symbol && pair.asset2 === asset2.symbol) ||
+                              (pair.asset1 === asset2.symbol && pair.asset2 === asset1.symbol)
+                            );
+                            
+                            const corrValue = correlation?.correlation || 0;
+                            const intensity = Math.abs(corrValue);
+                            
+                            return (
+                              <div 
+                                key={asset2.symbol} 
+                                className={`w-6 h-6 rounded text-xs flex items-center justify-center text-white text-[10px] font-medium ${
+                                  corrValue > 0.5 ? 'bg-green-500' 
+                                  : corrValue > 0.2 ? 'bg-green-500/60'
+                                  : corrValue < -0.5 ? 'bg-red-500'
+                                  : corrValue < -0.2 ? 'bg-red-500/60'
+                                  : 'bg-gray-500/40'
+                                }`}
+                                style={{ opacity: Math.max(0.3, intensity) }}
+                                title={`${asset1.symbol} × ${asset2.symbol}: ${(corrValue * 100).toFixed(1)}%`}
+                              >
+                                {Math.round(corrValue * 10)}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No correlation data available</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Risk Sentiment Indicator */}
+            <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-purple-300 flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Risk Sentiment
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {riskSentimentLoading ? (
+                  <div className="text-center py-6 text-gray-400">
+                    <Target className="h-8 w-8 mx-auto mb-2 opacity-50 animate-pulse" />
+                    <p className="text-xs">Loading sentiment...</p>
+                  </div>
+                ) : riskSentiment?.success && riskSentiment.data ? (
+                  <>
+                    {/* Sentiment Score */}
+                    <div className="text-center">
+                      <div className="text-2xl font-bold mb-1" style={{
+                        color: riskSentiment.data.score > 40 ? '#10b981' 
+                             : riskSentiment.data.score > 0 ? '#f59e0b'
+                             : riskSentiment.data.score > -40 ? '#f97316'
+                             : '#ef4444'
+                      }}>
+                        {riskSentiment.data.score > 0 ? '+' : ''}{riskSentiment.data.score}
+                      </div>
+                      <div className="text-xs text-gray-400 capitalize mb-2">
+                        {riskSentiment.data.sentiment.replace('_', ' ')}
+                      </div>
+                      
+                      {/* Sentiment Bar */}
+                      <div className="w-full bg-gray-700 rounded-full h-2 mb-4">
+                        <div 
+                          className="h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.abs(riskSentiment.data.score)}%`,
+                            backgroundColor: riskSentiment.data.score > 0 ? '#10b981' : '#ef4444',
+                            marginLeft: riskSentiment.data.score < 0 ? `${100 - Math.abs(riskSentiment.data.score)}%` : '0'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Components Breakdown */}
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium text-white mb-2">Component Analysis</div>
+                      {[
+                        { label: 'Crypto-Traditional', value: riskSentiment.data.components.cryptoTraditionalCorr },
+                        { label: 'Volatility Spreads', value: riskSentiment.data.components.volatilitySpreads },
+                        { label: 'Safe Haven Demand', value: riskSentiment.data.components.safeHavenDemand },
+                        { label: 'Momentum Alignment', value: riskSentiment.data.components.momentumAlignment }
+                      ].map((component) => (
+                        <div key={component.label} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">{component.label}</span>
+                          <span className={`font-medium ${
+                            component.value > 20 ? 'text-green-400' 
+                            : component.value > 0 ? 'text-yellow-400'
+                            : component.value > -20 ? 'text-orange-400'
+                            : 'text-red-400'
+                          }`}>
+                            {component.value > 0 ? '+' : ''}{component.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Signals */}
+                    {riskSentiment.data.signals.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-white">Active Signals</div>
+                        <div className="space-y-1">
+                          {riskSentiment.data.signals.slice(0, 3).map((signal: string, index: number) => (
+                            <div key={index} className="flex items-start gap-2 text-xs text-gray-300">
+                              <div className="w-1 h-1 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></div>
+                              <span>{signal}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-6 text-gray-400">
+                    <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs">No sentiment data available</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

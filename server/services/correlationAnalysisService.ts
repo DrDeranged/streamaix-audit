@@ -1,0 +1,599 @@
+import { MarketDataService, CryptoQuote, StockQuote } from './marketDataService';
+
+export interface CorrelationData {
+  assetPair: {
+    asset1: string;
+    asset2: string;
+    asset1Type: 'crypto' | 'stock' | 'commodity' | 'currency';
+    asset2Type: 'crypto' | 'stock' | 'commodity' | 'currency';
+  };
+  correlation: number; // -1 to 1
+  pValue: number; // statistical significance
+  confidence: number; // confidence level 0-1
+  timeframe: '7d' | '30d' | '90d';
+  strength: 'very_weak' | 'weak' | 'moderate' | 'strong' | 'very_strong';
+  direction: 'positive' | 'negative' | 'neutral';
+  lastUpdated: string;
+}
+
+export interface MarketRegime {
+  regime: 'risk_on' | 'risk_off' | 'mixed' | 'decoupled';
+  confidence: number; // 0-1
+  characteristics: {
+    cryptoTradStockCorr: number; // Crypto vs traditional stocks correlation
+    cryptoSafeHavenCorr: number; // Crypto vs safe haven assets correlation
+    cryptoVolatility: number; // Crypto market volatility
+    traditionalVolatility: number; // Traditional market volatility
+    riskSentiment: number; // Overall risk sentiment score (-1 to 1)
+  };
+  indicators: {
+    cryptoStockSync: boolean; // Are crypto and stocks moving together?
+    flightToSafety: boolean; // Are investors fleeing to safe havens?
+    cryptoLeading: boolean; // Is crypto leading the move?
+    traditionalLeading: boolean; // Are traditional assets leading?
+  };
+  description: string;
+  actionableInsights: string[];
+  lastUpdated: string;
+}
+
+export interface RiskSentimentIndicator {
+  sentiment: 'extremely_bullish' | 'bullish' | 'neutral' | 'bearish' | 'extremely_bearish';
+  score: number; // -100 to 100
+  components: {
+    cryptoTraditionalCorr: number; // -100 to 100
+    volatilitySpreads: number; // -100 to 100
+    safeHavenDemand: number; // -100 to 100
+    momentumAlignment: number; // -100 to 100
+  };
+  signals: string[];
+  timeframe: '1d' | '7d' | '30d';
+  lastUpdated: string;
+}
+
+export interface CorrelationHeatmapData {
+  matrix: Array<{
+    asset1: string;
+    asset2: string;
+    correlation: number;
+    strength: string;
+  }>;
+  assets: Array<{
+    symbol: string;
+    name: string;
+    type: 'crypto' | 'stock' | 'commodity' | 'currency';
+    price: number;
+    change24h: number;
+  }>;
+  timeframe: '7d' | '30d' | '90d';
+  lastUpdated: string;
+}
+
+export class CorrelationAnalysisService {
+  private static instance: CorrelationAnalysisService;
+  private marketDataService: MarketDataService;
+  private cache = new Map<string, { data: any; timestamp: number }>();
+  private cacheTimeout = 300000; // 5 minutes cache
+
+  // Asset lists for correlation analysis
+  private cryptoAssets = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
+  private traditionalStocks = ['SPY', 'QQQ', 'DIA', 'IWM', 'VTI', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN'];
+  private cryptoStocks = ['MSTR', 'COIN', 'RIOT', 'MARA', 'CLSK', 'HUT', 'BITF', 'TSLA'];
+  private safeHavenAssets = ['GLD', 'TLT', 'VXX', 'DXY']; // Gold, Bonds, VIX, Dollar Index
+  private commodityAssets = ['USO', 'UNG', 'DBA', 'COPX']; // Oil, Gas, Agriculture, Copper
+
+  constructor() {
+    this.marketDataService = MarketDataService.getInstance();
+  }
+
+  static getInstance(): CorrelationAnalysisService {
+    if (!CorrelationAnalysisService.instance) {
+      CorrelationAnalysisService.instance = new CorrelationAnalysisService();
+    }
+    return CorrelationAnalysisService.instance;
+  }
+
+  private isValidCache(key: string): boolean {
+    const cached = this.cache.get(key);
+    if (!cached) return false;
+    return Date.now() - cached.timestamp < this.cacheTimeout;
+  }
+
+  private getFromCache(key: string): any | null {
+    if (this.isValidCache(key)) {
+      return this.cache.get(key)?.data || null;
+    }
+    return null;
+  }
+
+  private setCache(key: string, data: any): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  /**
+   * Calculate correlation coefficient between two price arrays
+   */
+  private calculateCorrelation(prices1: number[], prices2: number[]): { correlation: number; pValue: number } {
+    if (prices1.length !== prices2.length || prices1.length < 2) {
+      return { correlation: 0, pValue: 1 };
+    }
+
+    const n = prices1.length;
+    const mean1 = prices1.reduce((a, b) => a + b, 0) / n;
+    const mean2 = prices2.reduce((a, b) => a + b, 0) / n;
+
+    let numerator = 0;
+    let sum1Sq = 0;
+    let sum2Sq = 0;
+
+    for (let i = 0; i < n; i++) {
+      const diff1 = prices1[i] - mean1;
+      const diff2 = prices2[i] - mean2;
+      numerator += diff1 * diff2;
+      sum1Sq += diff1 * diff1;
+      sum2Sq += diff2 * diff2;
+    }
+
+    const denominator = Math.sqrt(sum1Sq * sum2Sq);
+    const correlation = denominator === 0 ? 0 : numerator / denominator;
+
+    // Simple p-value approximation for correlation significance
+    const tStat = correlation * Math.sqrt((n - 2) / (1 - correlation * correlation));
+    const pValue = Math.max(0.001, 2 * (1 - this.normalCDF(Math.abs(tStat))));
+
+    return { correlation: Math.max(-1, Math.min(1, correlation)), pValue };
+  }
+
+  /**
+   * Normal cumulative distribution function approximation
+   */
+  private normalCDF(x: number): number {
+    return (1 + Math.erf(x / Math.sqrt(2))) / 2;
+  }
+
+  /**
+   * Error function approximation
+   */
+  private erf(x: number): number {
+    const a1 = 0.254829592;
+    const a2 = -0.284496736;
+    const a3 = 1.421413741;
+    const a4 = -1.453152027;
+    const a5 = 1.061405429;
+    const p = 0.3275911;
+
+    const sign = x < 0 ? -1 : 1;
+    x = Math.abs(x);
+
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+    return sign * y;
+  }
+
+  /**
+   * Classify correlation strength
+   */
+  private classifyCorrelationStrength(correlation: number): 'very_weak' | 'weak' | 'moderate' | 'strong' | 'very_strong' {
+    const abs = Math.abs(correlation);
+    if (abs < 0.2) return 'very_weak';
+    if (abs < 0.4) return 'weak';
+    if (abs < 0.6) return 'moderate';
+    if (abs < 0.8) return 'strong';
+    return 'very_strong';
+  }
+
+  /**
+   * Generate mock historical price data for demonstration
+   * In production, this would fetch real historical data
+   */
+  private generateMockPriceHistory(basePrice: number, volatility: number, days: number): number[] {
+    const prices: number[] = [basePrice];
+    
+    for (let i = 1; i < days; i++) {
+      const change = (Math.random() - 0.5) * volatility * 2;
+      const newPrice = prices[i - 1] * (1 + change / 100);
+      prices.push(Math.max(newPrice, basePrice * 0.1)); // Prevent negative prices
+    }
+    
+    return prices;
+  }
+
+  /**
+   * Get current asset prices for correlation matrix
+   */
+  private async getCurrentAssetPrices(): Promise<Array<{ symbol: string; name: string; type: string; price: number; change24h: number }>> {
+    const allAssets: Array<{ symbol: string; name: string; type: string; price: number; change24h: number }> = [];
+
+    try {
+      // Fetch crypto data
+      const cryptoData = await this.marketDataService.getCryptoQuotes(this.cryptoAssets);
+      for (const crypto of cryptoData) {
+        allAssets.push({
+          symbol: crypto.symbol,
+          name: crypto.name,
+          type: 'crypto',
+          price: crypto.price,
+          change24h: crypto.percentChange24h
+        });
+      }
+
+      // Fetch stock data (simplified - using mock data for demo)
+      const allStocks = [...this.traditionalStocks, ...this.cryptoStocks, ...this.safeHavenAssets, ...this.commodityAssets];
+      for (const stock of allStocks) {
+        const mockPrice = 100 + Math.random() * 300;
+        const mockChange = (Math.random() - 0.5) * 10;
+        allAssets.push({
+          symbol: stock,
+          name: this.getAssetName(stock),
+          type: this.getAssetType(stock),
+          price: mockPrice,
+          change24h: mockChange
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ Error fetching asset prices for correlation:', error);
+    }
+
+    return allAssets;
+  }
+
+  /**
+   * Get asset name for display
+   */
+  private getAssetName(symbol: string): string {
+    const nameMap: { [key: string]: string } = {
+      'SPY': 'SPDR S&P 500 ETF',
+      'QQQ': 'Invesco QQQ ETF',
+      'GLD': 'SPDR Gold Shares',
+      'TLT': 'iShares 20+ Year Treasury',
+      'VXX': 'iPath S&P 500 VIX',
+      'DXY': 'US Dollar Index',
+      'MSTR': 'MicroStrategy Inc',
+      'COIN': 'Coinbase Global Inc',
+      'RIOT': 'Riot Platforms Inc',
+      'MARA': 'Marathon Digital Holdings',
+      'TSLA': 'Tesla Inc',
+      'NVDA': 'NVIDIA Corporation',
+      'AAPL': 'Apple Inc'
+    };
+    return nameMap[symbol] || symbol;
+  }
+
+  /**
+   * Get asset type for classification
+   */
+  private getAssetType(symbol: string): 'crypto' | 'stock' | 'commodity' | 'currency' {
+    if (this.cryptoAssets.includes(symbol)) return 'crypto';
+    if (this.safeHavenAssets.includes(symbol) || symbol === 'DXY') return 'currency';
+    if (this.commodityAssets.includes(symbol) || symbol === 'GLD') return 'commodity';
+    return 'stock';
+  }
+
+  /**
+   * Calculate cross-asset correlations for correlation matrix
+   */
+  async getCorrelationMatrix(timeframe: '7d' | '30d' | '90d' = '30d'): Promise<CorrelationHeatmapData> {
+    const cacheKey = `correlation_matrix_${timeframe}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    console.log(`📊 Calculating correlation matrix for ${timeframe} timeframe`);
+
+    const assets = await this.getCurrentAssetPrices();
+    const matrix: Array<{ asset1: string; asset2: string; correlation: number; strength: string }> = [];
+    
+    const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
+
+    // Generate correlation matrix
+    for (let i = 0; i < assets.length; i++) {
+      for (let j = i + 1; j < assets.length; j++) {
+        const asset1 = assets[i];
+        const asset2 = assets[j];
+
+        // Generate mock price histories for demonstration
+        const prices1 = this.generateMockPriceHistory(asset1.price, Math.abs(asset1.change24h) * 2, days);
+        const prices2 = this.generateMockPriceHistory(asset2.price, Math.abs(asset2.change24h) * 2, days);
+
+        const { correlation } = this.calculateCorrelation(prices1, prices2);
+        const strength = this.classifyCorrelationStrength(correlation);
+
+        matrix.push({
+          asset1: asset1.symbol,
+          asset2: asset2.symbol,
+          correlation: Number(correlation.toFixed(3)),
+          strength
+        });
+      }
+    }
+
+    const result: CorrelationHeatmapData = {
+      matrix,
+      assets,
+      timeframe,
+      lastUpdated: new Date().toISOString()
+    };
+
+    this.setCache(cacheKey, result);
+    console.log(`✅ Generated correlation matrix with ${matrix.length} pairs`);
+    return result;
+  }
+
+  /**
+   * Analyze current market regime based on correlations
+   */
+  async getMarketRegime(): Promise<MarketRegime> {
+    const cacheKey = 'market_regime';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    console.log('🎯 Analyzing current market regime');
+
+    try {
+      // Get correlation data
+      const correlationMatrix = await this.getCorrelationMatrix('30d');
+      
+      // Calculate key metrics
+      const cryptoTradStockCorr = this.calculateAvgCorrelation(correlationMatrix, 'crypto', 'stock');
+      const cryptoSafeHavenCorr = this.calculateAvgCorrelation(correlationMatrix, 'crypto', 'currency');
+      
+      // Mock volatility data (in production, calculate from real price data)
+      const cryptoVolatility = 45 + Math.random() * 30; // 45-75%
+      const traditionalVolatility = 15 + Math.random() * 15; // 15-30%
+      
+      // Calculate risk sentiment
+      const riskSentiment = (cryptoTradStockCorr + (1 - cryptoSafeHavenCorr)) / 2;
+
+      // Determine regime
+      let regime: 'risk_on' | 'risk_off' | 'mixed' | 'decoupled';
+      let confidence: number;
+      let description: string;
+      let actionableInsights: string[];
+
+      if (cryptoTradStockCorr > 0.6 && riskSentiment > 0.3) {
+        regime = 'risk_on';
+        confidence = 0.8;
+        description = 'Markets are in risk-on mode with crypto and stocks moving in sync. High correlation suggests coordinated bullish sentiment.';
+        actionableInsights = [
+          'Consider increasing exposure to growth assets',
+          'Crypto may follow traditional market trends closely',
+          'Monitor for reversal signals in traditional markets',
+          'Diversification benefits between crypto and stocks are reduced'
+        ];
+      } else if (cryptoTradStockCorr > 0.4 && riskSentiment < -0.2) {
+        regime = 'risk_off';
+        confidence = 0.75;
+        description = 'Risk-off sentiment dominates with synchronized selling across asset classes. Safe haven demand is elevated.';
+        actionableInsights = [
+          'Consider defensive positioning',
+          'Safe haven assets (gold, bonds) may outperform',
+          'Crypto may face additional selling pressure',
+          'Wait for stabilization before increasing risk'
+        ];
+      } else if (Math.abs(cryptoTradStockCorr) < 0.3) {
+        regime = 'decoupled';
+        confidence = 0.7;
+        description = 'Crypto markets are operating independently from traditional assets. Sector-specific factors are driving price action.';
+        actionableInsights = [
+          'Focus on crypto-specific fundamentals',
+          'Traditional market signals may be less relevant',
+          'Opportunities for alpha generation in crypto',
+          'Monitor crypto-native metrics and developments'
+        ];
+      } else {
+        regime = 'mixed';
+        confidence = 0.6;
+        description = 'Mixed market regime with varying correlations across asset classes. Uncertainty and rotation between sectors.';
+        actionableInsights = [
+          'Maintain balanced portfolio allocation',
+          'Be prepared for regime shifts',
+          'Focus on high-conviction opportunities',
+          'Monitor correlation changes closely'
+        ];
+      }
+
+      const result: MarketRegime = {
+        regime,
+        confidence,
+        characteristics: {
+          cryptoTradStockCorr,
+          cryptoSafeHavenCorr,
+          cryptoVolatility,
+          traditionalVolatility,
+          riskSentiment
+        },
+        indicators: {
+          cryptoStockSync: cryptoTradStockCorr > 0.5,
+          flightToSafety: cryptoSafeHavenCorr > 0.3,
+          cryptoLeading: cryptoVolatility > traditionalVolatility * 2,
+          traditionalLeading: cryptoTradStockCorr > 0.7
+        },
+        description,
+        actionableInsights,
+        lastUpdated: new Date().toISOString()
+      };
+
+      this.setCache(cacheKey, result);
+      console.log(`✅ Market regime analysis complete: ${regime}`);
+      return result;
+
+    } catch (error) {
+      console.error('❌ Error analyzing market regime:', error);
+      
+      // Return fallback regime
+      return {
+        regime: 'mixed',
+        confidence: 0.3,
+        characteristics: {
+          cryptoTradStockCorr: 0,
+          cryptoSafeHavenCorr: 0,
+          cryptoVolatility: 50,
+          traditionalVolatility: 20,
+          riskSentiment: 0
+        },
+        indicators: {
+          cryptoStockSync: false,
+          flightToSafety: false,
+          cryptoLeading: false,
+          traditionalLeading: false
+        },
+        description: 'Unable to determine market regime due to data limitations.',
+        actionableInsights: ['Monitor market conditions for regime clarity'],
+        lastUpdated: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Calculate average correlation between asset types
+   */
+  private calculateAvgCorrelation(correlationMatrix: CorrelationHeatmapData, type1: string, type2: string): number {
+    const relevantPairs = correlationMatrix.matrix.filter(pair => {
+      const asset1Type = correlationMatrix.assets.find(a => a.symbol === pair.asset1)?.type;
+      const asset2Type = correlationMatrix.assets.find(a => a.symbol === pair.asset2)?.type;
+      return (asset1Type === type1 && asset2Type === type2) || (asset1Type === type2 && asset2Type === type1);
+    });
+
+    if (relevantPairs.length === 0) return 0;
+    
+    const avgCorr = relevantPairs.reduce((sum, pair) => sum + pair.correlation, 0) / relevantPairs.length;
+    return Number(avgCorr.toFixed(3));
+  }
+
+  /**
+   * Generate risk sentiment indicator
+   */
+  async getRiskSentimentIndicator(timeframe: '1d' | '7d' | '30d' = '7d'): Promise<RiskSentimentIndicator> {
+    const cacheKey = `risk_sentiment_${timeframe}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    console.log(`📡 Calculating risk sentiment for ${timeframe} timeframe`);
+
+    try {
+      const regime = await this.getMarketRegime();
+      
+      // Calculate component scores
+      const cryptoTraditionalCorr = Math.round(regime.characteristics.cryptoTradStockCorr * 100);
+      const volatilitySpreads = Math.round((regime.characteristics.traditionalVolatility - regime.characteristics.cryptoVolatility) / 2);
+      const safeHavenDemand = Math.round(regime.characteristics.cryptoSafeHavenCorr * -100);
+      const momentumAlignment = Math.round(regime.characteristics.riskSentiment * 100);
+
+      // Overall sentiment score
+      const score = Math.round((cryptoTraditionalCorr + volatilitySpreads + safeHavenDemand + momentumAlignment) / 4);
+
+      // Determine sentiment category
+      let sentiment: 'extremely_bullish' | 'bullish' | 'neutral' | 'bearish' | 'extremely_bearish';
+      if (score > 60) sentiment = 'extremely_bullish';
+      else if (score > 20) sentiment = 'bullish';
+      else if (score > -20) sentiment = 'neutral';
+      else if (score > -60) sentiment = 'bearish';
+      else sentiment = 'extremely_bearish';
+
+      // Generate signals
+      const signals: string[] = [];
+      if (regime.indicators.cryptoStockSync) {
+        signals.push(score > 0 ? 'Coordinated uptrend across assets' : 'Synchronized market decline');
+      }
+      if (regime.indicators.flightToSafety) {
+        signals.push('Flight to safety observed');
+      }
+      if (regime.indicators.cryptoLeading) {
+        signals.push('Crypto leading market direction');
+      }
+      if (Math.abs(regime.characteristics.cryptoTradStockCorr) > 0.7) {
+        signals.push('High correlation regime - reduced diversification');
+      }
+
+      const result: RiskSentimentIndicator = {
+        sentiment,
+        score,
+        components: {
+          cryptoTraditionalCorr,
+          volatilitySpreads,
+          safeHavenDemand,
+          momentumAlignment
+        },
+        signals,
+        timeframe,
+        lastUpdated: new Date().toISOString()
+      };
+
+      this.setCache(cacheKey, result);
+      console.log(`✅ Risk sentiment calculated: ${sentiment} (${score})`);
+      return result;
+
+    } catch (error) {
+      console.error('❌ Error calculating risk sentiment:', error);
+      
+      return {
+        sentiment: 'neutral',
+        score: 0,
+        components: {
+          cryptoTraditionalCorr: 0,
+          volatilitySpreads: 0,
+          safeHavenDemand: 0,
+          momentumAlignment: 0
+        },
+        signals: ['Unable to calculate sentiment due to data limitations'],
+        timeframe,
+        lastUpdated: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Get specific asset pair correlations with detailed analysis
+   */
+  async getAssetPairCorrelations(asset1: string, asset2: string, timeframes: Array<'7d' | '30d' | '90d'> = ['7d', '30d', '90d']): Promise<CorrelationData[]> {
+    const results: CorrelationData[] = [];
+
+    for (const timeframe of timeframes) {
+      const cacheKey = `pair_correlation_${asset1}_${asset2}_${timeframe}`;
+      let cached = this.getFromCache(cacheKey);
+      
+      if (!cached) {
+        console.log(`📊 Calculating ${asset1}-${asset2} correlation for ${timeframe}`);
+        
+        const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
+        
+        // Mock price data generation (in production, fetch real historical data)
+        const basePrice1 = 100 + Math.random() * 500;
+        const basePrice2 = 50 + Math.random() * 200;
+        const volatility1 = 5 + Math.random() * 15;
+        const volatility2 = 5 + Math.random() * 15;
+        
+        const prices1 = this.generateMockPriceHistory(basePrice1, volatility1, days);
+        const prices2 = this.generateMockPriceHistory(basePrice2, volatility2, days);
+        
+        const { correlation, pValue } = this.calculateCorrelation(prices1, prices2);
+        const strength = this.classifyCorrelationStrength(correlation);
+        const direction = correlation > 0.05 ? 'positive' : correlation < -0.05 ? 'negative' : 'neutral';
+        
+        cached = {
+          assetPair: {
+            asset1,
+            asset2,
+            asset1Type: this.getAssetType(asset1),
+            asset2Type: this.getAssetType(asset2)
+          },
+          correlation: Number(correlation.toFixed(3)),
+          pValue: Number(pValue.toFixed(4)),
+          confidence: pValue < 0.05 ? 0.95 : pValue < 0.1 ? 0.9 : 0.8,
+          timeframe,
+          strength,
+          direction,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        this.setCache(cacheKey, cached);
+      }
+      
+      results.push(cached);
+    }
+
+    console.log(`✅ Calculated correlations for ${asset1}-${asset2} across ${timeframes.length} timeframes`);
+    return results;
+  }
+}
