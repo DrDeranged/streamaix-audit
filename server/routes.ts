@@ -16,6 +16,7 @@ import { duneAnalyticsService } from "./services/duneAnalyticsService";
 import { federalReserveService } from "./services/federalReserveService";
 import { CorrelationAnalysisService } from "./services/correlationAnalysisService";
 import { chartingService } from "./services/chartingService";
+import { derivativesAnalyticsService } from "./services/derivativesAnalyticsService";
 import passport from "passport";
 
 // Initialize services
@@ -3355,6 +3356,219 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Failed to fetch sector data:', error);
       res.status(500).json({ 
         error: 'Failed to fetch sector data',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // =============================================================================
+  // DERIVATIVES ANALYTICS API ROUTES (Phase 2)
+  // =============================================================================
+
+  // Get derivatives market overview
+  app.get('/api/derivatives/overview', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const overview = await derivativesAnalyticsService.getDerivativesOverview();
+      res.json({
+        overview,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch derivatives overview:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch derivatives overview',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get options data for a specific underlying
+  app.get('/api/derivatives/options/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    try {
+      const options = await derivativesAnalyticsService.getOptionsData(underlying.toUpperCase());
+      res.json({
+        options,
+        underlying: underlying.toUpperCase(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch options data for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch options data for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get options flow analysis
+  app.get('/api/derivatives/options-flow/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    const timeRange = req.query.timeRange as '1h' | '4h' | '24h' || '24h';
+    
+    try {
+      const optionsFlow = await derivativesAnalyticsService.getOptionsFlow(underlying.toUpperCase(), timeRange);
+      res.json({
+        flow: optionsFlow,
+        underlying: underlying.toUpperCase(),
+        timeRange,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch options flow for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch options flow for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get volatility surface
+  app.get('/api/derivatives/volatility-surface/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    
+    try {
+      const volatilitySurface = await derivativesAnalyticsService.getVolatilitySurface(underlying.toUpperCase());
+      res.json({
+        surface: volatilitySurface,
+        underlying: underlying.toUpperCase(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch volatility surface for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch volatility surface for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get options market sentiment
+  app.get('/api/derivatives/options-sentiment/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    
+    try {
+      const sentiment = await derivativesAnalyticsService.getOptionsMarketSentiment(underlying.toUpperCase());
+      res.json({
+        sentiment,
+        underlying: underlying.toUpperCase(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch options sentiment for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch options sentiment for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get futures data for a specific underlying
+  app.get('/api/derivatives/futures/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    
+    try {
+      const futures = await derivativesAnalyticsService.getFuturesData(underlying.toUpperCase());
+      res.json({
+        futures,
+        underlying: underlying.toUpperCase(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch futures data for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch futures data for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get futures positioning data
+  app.get('/api/derivatives/futures-positioning/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    
+    try {
+      const positioning = await derivativesAnalyticsService.getFuturesPositioning(underlying.toUpperCase());
+      res.json({
+        positioning,
+        underlying: underlying.toUpperCase(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch futures positioning for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch futures positioning for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get liquidation data and heatmap
+  app.get('/api/derivatives/liquidations/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    
+    try {
+      const liquidations = await derivativesAnalyticsService.getLiquidationData(underlying.toUpperCase());
+      res.json({
+        liquidations,
+        underlying: underlying.toUpperCase(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Failed to fetch liquidation data for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch liquidation data for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get combined derivatives analytics for discover page
+  app.get('/api/derivatives/analytics/:underlying', asyncHandler(async (req: Request, res: Response) => {
+    const { underlying } = req.params;
+    const symbol = underlying.toUpperCase();
+    
+    try {
+      // Fetch all derivatives data in parallel for better performance
+      const [
+        optionsData,
+        optionsFlow,
+        volatilitySurface,
+        optionsSentiment,
+        futuresData,
+        futuresPositioning,
+        liquidationData
+      ] = await Promise.allSettled([
+        derivativesAnalyticsService.getOptionsData(symbol),
+        derivativesAnalyticsService.getOptionsFlow(symbol, '24h'),
+        derivativesAnalyticsService.getVolatilitySurface(symbol),
+        derivativesAnalyticsService.getOptionsMarketSentiment(symbol),
+        derivativesAnalyticsService.getFuturesData(symbol),
+        derivativesAnalyticsService.getFuturesPositioning(symbol),
+        derivativesAnalyticsService.getLiquidationData(symbol)
+      ]);
+
+      const analytics = {
+        underlying: symbol,
+        options: {
+          data: optionsData.status === 'fulfilled' ? optionsData.value : [],
+          flow: optionsFlow.status === 'fulfilled' ? optionsFlow.value : [],
+          volatilitySurface: volatilitySurface.status === 'fulfilled' ? volatilitySurface.value : null,
+          sentiment: optionsSentiment.status === 'fulfilled' ? optionsSentiment.value : null
+        },
+        futures: {
+          data: futuresData.status === 'fulfilled' ? futuresData.value : [],
+          positioning: futuresPositioning.status === 'fulfilled' ? futuresPositioning.value : null
+        },
+        liquidations: liquidationData.status === 'fulfilled' ? liquidationData.value : null,
+        timestamp: new Date().toISOString()
+      };
+
+      res.json(analytics);
+    } catch (error: any) {
+      console.error(`Failed to fetch derivatives analytics for ${underlying}:`, error);
+      res.status(500).json({ 
+        error: `Failed to fetch derivatives analytics for ${underlying}`,
         timestamp: new Date().toISOString()
       });
     }

@@ -95,6 +95,7 @@ export default function Discover() {
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [storyFilter, setStoryFilter] = useState<'all' | 'farcaster' | 'youtube' | 'news'>('all');
   const [showInsights, setShowInsights] = useState<boolean>(false);
+  const [selectedDerivativesAsset, setSelectedDerivativesAsset] = useState<string>('BTC');
   const pageStartTime = useRef<number>(Date.now());
 
   // Predictive analytics queries
@@ -140,6 +141,31 @@ export default function Discover() {
   const { data: fedCalendar, isLoading: fedCalendarLoading } = useQuery({
     queryKey: ['/api/fed/calendar'],
     staleTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1
+  });
+
+  // Derivatives analytics queries
+  const { data: derivativesOverview, isLoading: derivativesOverviewLoading } = useQuery({
+    queryKey: ['/api/derivatives/overview'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: derivativesAnalytics, isLoading: derivativesAnalyticsLoading } = useQuery({
+    queryKey: ['/api/derivatives/analytics', selectedDerivativesAsset],
+    staleTime: 30 * 1000, // 30 seconds for real-time data
+    retry: 1
+  });
+
+  const { data: optionsFlow, isLoading: optionsFlowLoading } = useQuery({
+    queryKey: ['/api/derivatives/options-flow', selectedDerivativesAsset],
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1
+  });
+
+  const { data: liquidationsData, isLoading: liquidationsLoading } = useQuery({
+    queryKey: ['/api/derivatives/liquidations', selectedDerivativesAsset],
+    staleTime: 10 * 1000, // 10 seconds for liquidation data
     retry: 1
   });
 
@@ -862,6 +888,341 @@ export default function Discover() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </motion.div>
+
+        {/* Phase 2.5: Derivatives Analytics Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-purple-400" />
+              Derivatives Analytics
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 ml-2">
+                <Zap className="h-3 w-3 mr-1" />
+                Live Options & Futures
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              {/* Asset Selector */}
+              <select
+                value={selectedDerivativesAsset}
+                onChange={(e) => setSelectedDerivativesAsset(e.target.value)}
+                className="bg-black/40 border border-purple-500/30 text-purple-300 text-sm rounded-lg px-3 py-1 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500"
+                data-testid="derivatives-asset-selector"
+              >
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Derivatives Overview Banner */}
+          {!derivativesOverviewLoading && derivativesOverview?.overview && (
+            <Card className="bg-gradient-to-r from-purple-900/20 via-indigo-900/20 to-purple-900/20 border-purple-500/30 backdrop-blur-sm">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <p className="text-gray-400 text-sm">Options Volume 24h</p>
+                    <p className="text-white font-bold text-lg">
+                      ${((derivativesOverview.overview.totalOptionsVolume24h || 0) / 1e6).toFixed(1)}M
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-400 text-sm">Futures Volume 24h</p>
+                    <p className="text-white font-bold text-lg">
+                      ${((derivativesOverview.overview.totalFuturesVolume24h || 0) / 1e9).toFixed(2)}B
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-400 text-sm">Avg IV</p>
+                    <p className="text-white font-bold text-lg">
+                      {((derivativesOverview.overview.averageImpliedVolatility || 0) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-400 text-sm">Fear/Greed</p>
+                    <p className={`font-bold text-lg ${
+                      (derivativesOverview.overview.fearGreedIndex || 50) > 60 ? 'text-green-400' :
+                      (derivativesOverview.overview.fearGreedIndex || 50) < 40 ? 'text-red-400' : 'text-yellow-400'
+                    }`}>
+                      {derivativesOverview.overview.fearGreedIndex || 50}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Derivatives Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            
+            {/* Options Flow Analysis */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-green-300 flex items-center gap-2 text-sm">
+                  <TrendingUp className="h-4 w-4" />
+                  Options Flow
+                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+                    24h Analysis
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {optionsFlowLoading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                ) : optionsFlow?.flow?.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {optionsFlow.flow.slice(0, 5).map((flow: any, idx: number) => (
+                      <div key={idx} className="bg-black/30 rounded p-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <Badge className={`text-xs ${
+                              flow.sentiment === 'bullish' ? 'bg-green-500/20 text-green-300' :
+                              flow.sentiment === 'bearish' ? 'bg-red-500/20 text-red-300' :
+                              'bg-gray-500/20 text-gray-300'
+                            }`}>
+                              {flow.type.toUpperCase()}
+                            </Badge>
+                            <span className="text-white font-medium">
+                              ${flow.strike}
+                            </span>
+                          </div>
+                          <span className={`font-medium ${
+                            flow.sentiment === 'bullish' ? 'text-green-400' :
+                            flow.sentiment === 'bearish' ? 'text-red-400' : 'text-gray-400'
+                          }`}>
+                            {flow.side === 'buy' ? '↗' : '↘'} {flow.size.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          IV: {(flow.impliedVolatility * 100).toFixed(1)}% • 
+                          ${(flow.notionalValue / 1000).toFixed(0)}K notional
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No options flow data</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Futures Positioning */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-blue-300 flex items-center gap-2 text-sm">
+                  <BarChart3 className="h-4 w-4" />
+                  Futures Positioning
+                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
+                    Open Interest
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {derivativesAnalyticsLoading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded w-2/3"></div>
+                    <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                ) : derivativesAnalytics?.futures?.positioning ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Long/Short Ratio</span>
+                      <span className="text-white font-medium">
+                        {derivativesAnalytics.futures.positioning.longShortRatio.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Total OI</span>
+                      <span className="text-white font-medium">
+                        ${((derivativesAnalytics.futures.positioning.totalLongOI + 
+                           derivativesAnalytics.futures.positioning.totalShortOI) / 1e6).toFixed(1)}M
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Top Trader Long %</span>
+                      <span className="text-white font-medium">
+                        {(derivativesAnalytics.futures.positioning.topTraderLongRatio * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    
+                    {/* OI Change Indicator */}
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>OI Change 24h</span>
+                        <span className={`${
+                          derivativesAnalytics.futures.positioning.oiChange24h > 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          {derivativesAnalytics.futures.positioning.oiChange24h > 0 ? '+' : ''}
+                          {derivativesAnalytics.futures.positioning.oiChange24h.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No positioning data</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Liquidation Heatmap */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-red-300 flex items-center gap-2 text-sm">
+                  <Flame className="h-4 w-4" />
+                  Liquidation Heatmap
+                  <Badge className="bg-red-500/20 text-red-300 border-red-400/30 text-xs">
+                    Risk Levels
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {liquidationsLoading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                ) : liquidationsData?.liquidations ? (
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-gray-400">24h Liquidations</span>
+                        <span className="text-white font-medium">
+                          {liquidationsData.liquidations.liquidations24h.total}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-red-500/10 rounded p-2">
+                          <div className="text-red-300">Longs</div>
+                          <div className="text-white font-medium">
+                            {liquidationsData.liquidations.liquidations24h.long}
+                          </div>
+                        </div>
+                        <div className="bg-green-500/10 rounded p-2">
+                          <div className="text-green-300">Shorts</div>
+                          <div className="text-white font-medium">
+                            {liquidationsData.liquidations.liquidations24h.short}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Heatmap Visualization */}
+                    <div className="mt-3">
+                      <div className="text-xs text-gray-400 mb-2">Price Levels</div>
+                      <div className="space-y-1">
+                        {liquidationsData.liquidations.heatmap?.slice(0, 6).map((level: any, idx: number) => (
+                          <div key={idx} className="flex items-center justify-between text-xs">
+                            <span className="text-gray-300">
+                              ${level.price.toFixed(0)}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className={`h-2 rounded ${
+                                  level.side === 'long' ? 'bg-red-500' : 'bg-green-500'
+                                }`}
+                                style={{ 
+                                  width: `${Math.max(10, level.intensity)}px`,
+                                  opacity: Math.max(0.3, level.intensity / 100)
+                                }}
+                              />
+                              <span className="text-white text-[10px] w-8">
+                                {level.intensity.toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <Flame className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No liquidation data</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Options Market Sentiment */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm lg:col-span-2 xl:col-span-3">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-cyan-300 flex items-center gap-2 text-sm">
+                  <Brain className="h-4 w-4" />
+                  Options Market Sentiment
+                  <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                    Gamma Exposure
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {derivativesAnalyticsLoading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                  </div>
+                ) : derivativesAnalytics?.options?.sentiment ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400 mb-1">Put/Call Ratio</div>
+                      <div className="text-white font-bold">
+                        {derivativesAnalytics.options.sentiment.putCallRatio.volume.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-gray-500">Volume Based</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400 mb-1">Flow Sentiment</div>
+                      <div className={`font-bold ${
+                        derivativesAnalytics.options.sentiment.flowSentiment.score > 20 ? 'text-green-400' :
+                        derivativesAnalytics.options.sentiment.flowSentiment.score < -20 ? 'text-red-400' :
+                        'text-yellow-400'
+                      }`}>
+                        {derivativesAnalytics.options.sentiment.flowSentiment.score.toFixed(0)}
+                      </div>
+                      <div className="text-xs text-gray-500">-100 to +100</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400 mb-1">Max Pain</div>
+                      <div className="text-white font-bold">
+                        ${derivativesAnalytics.options.sentiment.maxPain.toFixed(0)}
+                      </div>
+                      <div className="text-xs text-gray-500">Price Level</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400 mb-1">Total Gamma</div>
+                      <div className="text-white font-bold">
+                        {(derivativesAnalytics.options.sentiment.gexExposure.totalGamma / 1e6).toFixed(1)}M
+                      </div>
+                      <div className="text-xs text-gray-500">Exposure</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No sentiment data available</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
           </div>
         </motion.div>
 
