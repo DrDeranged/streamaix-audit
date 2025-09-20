@@ -70,6 +70,11 @@ export function Navigation() {
               >
                 Bounties
               </button>
+              <Link href="/discover">
+                <button className="text-muted-foreground hover:text-indigo-500 transition-colors">
+                  Discover
+                </button>
+              </Link>
               
               {/* Authentication */}
               {isAuthenticated ? (
@@ -247,6 +252,14 @@ export function Navigation() {
                 >
                   Bounties
                 </button>
+                <Link href="/discover" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left text-foreground/80 hover:text-foreground py-2.5 px-3 rounded-md hover:bg-accent/50 transition-all duration-200 font-medium text-sm"
+                  >
+                    Discover
+                  </button>
+                </Link>
                 
                 {/* Mobile Authentication - Sign In Only */}
                 {!isAuthenticated && (
