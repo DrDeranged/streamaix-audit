@@ -983,3 +983,187 @@ export type MultiAssetChartResponse = {
     dataPoints: number;
   };
 };
+
+// Risk Assessment and Portfolio Analysis Types
+export type PortfolioPosition = {
+  symbol: string;
+  assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
+  allocation: number; // percentage of portfolio (0-100)
+  currentPrice: number;
+  quantity: number;
+  value: number; // current market value
+  costBasis?: number; // average purchase price
+  unrealizedPnL?: number;
+  unrealizedPnLPercent?: number;
+};
+
+export type PortfolioMetrics = {
+  totalValue: number;
+  totalAllocated: number; // percentage allocated (should be <= 100)
+  availableCash: number;
+  positions: PortfolioPosition[];
+  lastUpdated: string;
+};
+
+export type RiskMetrics = {
+  // Value at Risk (VaR) calculations
+  var95_1d: number; // 1-day VaR at 95% confidence
+  var99_1d: number; // 1-day VaR at 99% confidence
+  var95_7d: number; // 7-day VaR at 95% confidence
+  var99_7d: number; // 7-day VaR at 99% confidence
+  
+  // Portfolio volatility and correlation
+  portfolioVolatility: number; // annualized volatility
+  sharpeRatio: number; // risk-adjusted return metric
+  maxDrawdown: number; // maximum historical drawdown percentage
+  maxDrawdownDays: number; // days in max drawdown period
+  
+  // Concentration and diversification
+  concentrationRisk: number; // 0-100, higher = more concentrated
+  diversificationScore: number; // 0-100, higher = more diversified
+  largestPositionPercent: number; // largest single position percentage
+  topThreePositionsPercent: number; // top 3 positions combined percentage
+  
+  // Asset class breakdown
+  assetClassExposure: {
+    crypto: number;
+    stocks: number;
+    commodities: number;
+    cash: number;
+  };
+  
+  // Risk-adjusted metrics
+  calmarRatio: number; // return/max drawdown
+  sortinoRatio: number; // downside deviation adjusted return
+  beta: number; // portfolio beta vs market
+  alpha: number; // portfolio alpha vs market
+  
+  calculatedAt: string;
+};
+
+export type StressTestScenario = {
+  name: string;
+  description: string;
+  scenarioType: 'market_crash' | 'crypto_winter' | 'correlation_breakdown' | 'liquidity_crisis' | 'inflation_spike' | 'black_swan';
+  severity: 'mild' | 'moderate' | 'severe' | 'extreme';
+  
+  // Asset-specific stress factors (multipliers applied to returns)
+  stressFactors: {
+    crypto: number; // e.g., -0.50 for 50% decline
+    stocks: number;
+    commodities: number;
+    correlationMultiplier: number; // how correlations change during stress
+  };
+  
+  // Expected timeline and recovery
+  durationDays: number;
+  recoveryMonths: number;
+  historicalPrecedent?: string;
+};
+
+export type StressTestResult = {
+  scenario: StressTestScenario;
+  portfolioImpact: {
+    totalLoss: number; // absolute loss amount
+    totalLossPercent: number; // percentage loss
+    timeToRecover: number; // estimated days to break even
+    worstDayLoss: number; // worst single day loss
+    positionImpacts: Array<{
+      symbol: string;
+      currentValue: number;
+      stressedValue: number;
+      lossAmount: number;
+      lossPercent: number;
+    }>;
+  };
+  riskMetrics: {
+    stressedVaR: number; // VaR under stress conditions
+    stressedVolatility: number;
+    liquidityRisk: number; // 0-100 difficulty of exiting positions
+    correlationRisk: number; // 0-100 correlation breakdown risk
+  };
+  actionableInsights: string[];
+  calculatedAt: string;
+};
+
+export type PositionSizingRecommendation = {
+  symbol: string;
+  assetType: 'crypto' | 'stock' | 'commodity';
+  currentAllocation: number;
+  recommendedAllocation: number;
+  rationale: string;
+  riskScore: number; // 0-100, higher = riskier
+  expectedReturn: number; // annualized expected return
+  maxDrawdownExpectation: number;
+  
+  sizingMethod: 'kelly_criterion' | 'equal_weight' | 'risk_parity' | 'momentum_based' | 'mean_reversion';
+  confidence: number; // 0-100 confidence in recommendation
+  timeHorizon: '1w' | '1m' | '3m' | '6m' | '1y';
+};
+
+export type RiskAlert = {
+  id: string;
+  alertType: 'concentration_risk' | 'var_breach' | 'correlation_spike' | 'volatility_spike' | 'drawdown_limit' | 'rebalancing_needed';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  affectedPositions: string[];
+  
+  threshold: {
+    metric: string;
+    currentValue: number;
+    thresholdValue: number;
+    breachPercent: number;
+  };
+  
+  recommendedActions: string[];
+  estimatedImpact: string;
+  createdAt: string;
+  isActive: boolean;
+  acknowledgedAt?: string;
+};
+
+export type PortfolioComposition = {
+  assetAllocation: {
+    crypto: { allocation: number; value: number; positions: number; };
+    stocks: { allocation: number; value: number; positions: number; };
+    commodities: { allocation: number; value: number; positions: number; };
+    cash: { allocation: number; value: number; };
+  };
+  
+  sectorExposure: Array<{
+    sector: string;
+    allocation: number;
+    value: number;
+    riskScore: number;
+    topSymbols: string[];
+  }>;
+  
+  geographicExposure: Array<{
+    region: string;
+    allocation: number;
+    value: number;
+    symbols: string[];
+  }>;
+  
+  rebalancingNeeds: Array<{
+    position: string;
+    currentWeight: number;
+    targetWeight: number;
+    deviation: number;
+    action: 'buy' | 'sell' | 'hold';
+    urgency: 'low' | 'medium' | 'high';
+  }>;
+  
+  lastRebalanced: string;
+  nextRebalancingDate: string;
+};
+
+export type RiskDashboardResponse = {
+  portfolio: PortfolioMetrics;
+  riskMetrics: RiskMetrics;
+  stressTests: StressTestResult[];
+  positionSizing: PositionSizingRecommendation[];
+  riskAlerts: RiskAlert[];
+  composition: PortfolioComposition;
+};

@@ -38,7 +38,19 @@ import {
   Video,
   RefreshCw,
   Sparkles,
-  Brain
+  Brain,
+  Shield,
+  AlertTriangle,
+  TrendingDownIcon,
+  Gauge,
+  PieChart,
+  Scale,
+  Calculator,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Info,
+  LineChart
 } from 'lucide-react';
 
 // Types for market data
@@ -746,6 +758,31 @@ export default function Discover() {
   const { data: liquidationsData, isLoading: liquidationsLoading } = useQuery({
     queryKey: ['/api/derivatives/liquidations', selectedDerivativesAsset],
     staleTime: 10 * 1000, // 10 seconds for liquidation data
+    retry: 1
+  });
+
+  // Risk assessment queries
+  const { data: riskDashboard, isLoading: riskDashboardLoading } = useQuery({
+    queryKey: ['/api/risk/dashboard'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: riskAlerts, isLoading: riskAlertsLoading } = useQuery({
+    queryKey: ['/api/risk/alerts'],
+    staleTime: 30 * 1000, // 30 seconds for alerts
+    retry: 1
+  });
+
+  const { data: stressTests, isLoading: stressTestsLoading } = useQuery({
+    queryKey: ['/api/risk/stress-tests'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1
+  });
+
+  const { data: positionSizing, isLoading: positionSizingLoading } = useQuery({
+    queryKey: ['/api/risk/position-sizing'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
     retry: 1
   });
 
@@ -3300,6 +3337,389 @@ export default function Discover() {
               </Card>
             )}
           </div>
+        </motion.div>
+
+        {/* Risk Assessment and Portfolio Analysis */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Shield className="h-6 w-6 text-purple-400" />
+              Risk Assessment & Portfolio Analysis
+            </h2>
+            {!riskDashboardLoading && (
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
+                Live Analytics
+              </Badge>
+            )}
+          </div>
+
+          {riskDashboardLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Card key={i} className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 border-gray-700/50 animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                    <div className="h-8 bg-gray-600 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : riskDashboard?.data ? (
+            <div className="space-y-6">
+              {/* Risk Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Portfolio Value */}
+                <Card className="bg-gradient-to-r from-emerald-900/20 to-green-900/20 border-emerald-500/30 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-emerald-300 text-sm font-medium">Portfolio Value</p>
+                        <p className="text-white text-xl font-bold">
+                          ${riskDashboard.data.portfolio.totalValue.toLocaleString()}
+                        </p>
+                        <p className="text-emerald-400 text-xs">
+                          {riskDashboard.data.portfolio.totalAllocated.toFixed(1)}% allocated
+                        </p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-emerald-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Value at Risk */}
+                <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-red-300 text-sm font-medium">VaR (95% 1d)</p>
+                        <p className="text-white text-xl font-bold">
+                          {riskDashboard.data.riskMetrics.var95_1d.toFixed(2)}%
+                        </p>
+                        <p className="text-red-400 text-xs">
+                          ${(riskDashboard.data.portfolio.totalValue * riskDashboard.data.riskMetrics.var95_1d / 100).toLocaleString()}
+                        </p>
+                      </div>
+                      <AlertTriangle className="h-8 w-8 text-red-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Sharpe Ratio */}
+                <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-blue-300 text-sm font-medium">Sharpe Ratio</p>
+                        <p className="text-white text-xl font-bold">
+                          {riskDashboard.data.riskMetrics.sharpeRatio.toFixed(2)}
+                        </p>
+                        <p className={`text-xs ${
+                          riskDashboard.data.riskMetrics.sharpeRatio > 1 ? 'text-green-400' :
+                          riskDashboard.data.riskMetrics.sharpeRatio > 0.5 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {riskDashboard.data.riskMetrics.sharpeRatio > 1 ? 'Excellent' :
+                           riskDashboard.data.riskMetrics.sharpeRatio > 0.5 ? 'Good' : 'Poor'} Risk-Adjusted Return
+                        </p>
+                      </div>
+                      <Scale className="h-8 w-8 text-blue-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Diversification Score */}
+                <Card className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border-purple-500/30 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-purple-300 text-sm font-medium">Diversification</p>
+                        <p className="text-white text-xl font-bold">
+                          {riskDashboard.data.riskMetrics.diversificationScore.toFixed(0)}/100
+                        </p>
+                        <p className={`text-xs ${
+                          riskDashboard.data.riskMetrics.diversificationScore > 75 ? 'text-green-400' :
+                          riskDashboard.data.riskMetrics.diversificationScore > 50 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {riskDashboard.data.riskMetrics.diversificationScore > 75 ? 'Well Diversified' :
+                           riskDashboard.data.riskMetrics.diversificationScore > 50 ? 'Moderately Diversified' : 'Concentrated'}
+                        </p>
+                      </div>
+                      <PieChart className="h-8 w-8 text-purple-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Risk Alerts */}
+              {riskAlerts?.data?.alerts && riskAlerts.data.alerts.length > 0 && (
+                <Card className="bg-gradient-to-r from-red-900/10 to-orange-900/10 border-red-500/20 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-red-300 flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5" />
+                      Active Risk Alerts ({riskAlerts.data.summary.activeAlerts})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {riskAlerts.data.alerts.slice(0, 3).map((alert: any) => (
+                      <div key={alert.id} className="flex items-start justify-between p-3 bg-black/20 rounded-lg border border-red-500/20">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className={`text-xs border-0 ${
+                              alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                              alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                              alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-gray-500/20 text-gray-300'
+                            }`}>
+                              {alert.severity.toUpperCase()}
+                            </Badge>
+                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
+                              {alert.alertType.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          </div>
+                          <h4 className="text-white font-medium text-sm">{alert.title}</h4>
+                          <p className="text-gray-300 text-xs mt-1">{alert.description}</p>
+                          {alert.affectedPositions.length > 0 && (
+                            <p className="text-gray-400 text-xs mt-1">
+                              Affected: {alert.affectedPositions.join(', ')}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="ml-3 border-red-400/30 text-red-300 hover:bg-red-500/20"
+                          onClick={() => trackUserInteraction('risk_alert_acknowledge', 'alert', alert.id)}
+                          data-testid={`button-acknowledge-alert-${alert.id}`}
+                        >
+                          Acknowledge
+                        </Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Portfolio Composition and Stress Tests */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Portfolio Composition */}
+                <Card className="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-cyan-300 flex items-center gap-2">
+                      <PieChart className="h-5 w-5" />
+                      Portfolio Composition
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Asset Allocation */}
+                    <div className="space-y-3">
+                      {Object.entries(riskDashboard.data.composition.assetAllocation).map(([asset, data]: [string, any]) => (
+                        <div key={asset} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${
+                              asset === 'crypto' ? 'bg-orange-400' :
+                              asset === 'stocks' ? 'bg-blue-400' :
+                              asset === 'commodities' ? 'bg-yellow-400' : 'bg-green-400'
+                            }`}></div>
+                            <span className="text-white capitalize text-sm">{asset}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-white font-medium text-sm">{data.allocation.toFixed(1)}%</p>
+                            <p className="text-gray-400 text-xs">${data.value.toLocaleString()}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Rebalancing Needs */}
+                    {riskDashboard.data.composition.rebalancingNeeds.length > 0 && (
+                      <div className="pt-4 border-t border-cyan-500/20">
+                        <p className="text-cyan-300 text-sm font-medium mb-2">Rebalancing Recommendations</p>
+                        <div className="space-y-2">
+                          {riskDashboard.data.composition.rebalancingNeeds.slice(0, 3).map((rebalance: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between text-xs">
+                              <span className="text-gray-300">{rebalance.position}</span>
+                              <div className="flex items-center gap-2">
+                                <Badge className={`text-xs ${
+                                  rebalance.action === 'buy' ? 'bg-green-500/20 text-green-300' :
+                                  rebalance.action === 'sell' ? 'bg-red-500/20 text-red-300' :
+                                  'bg-gray-500/20 text-gray-300'
+                                }`}>
+                                  {rebalance.action.toUpperCase()}
+                                </Badge>
+                                <span className={`text-xs ${
+                                  rebalance.urgency === 'high' ? 'text-red-400' :
+                                  rebalance.urgency === 'medium' ? 'text-yellow-400' : 'text-green-400'
+                                }`}>
+                                  {rebalance.deviation > 0 ? '+' : ''}{rebalance.deviation.toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Stress Testing Results */}
+                <Card className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border-red-500/30 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-red-300 flex items-center gap-2">
+                      <Gauge className="h-5 w-5" />
+                      Stress Test Scenarios
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {stressTests?.data?.stressTests?.slice(0, 4).map((test: any, index: number) => (
+                      <div key={index} className="p-3 bg-black/20 rounded-lg border border-red-500/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Badge className={`text-xs border-0 ${
+                              test.scenario.severity === 'extreme' ? 'bg-red-500/30 text-red-300' :
+                              test.scenario.severity === 'severe' ? 'bg-orange-500/30 text-orange-300' :
+                              test.scenario.severity === 'moderate' ? 'bg-yellow-500/30 text-yellow-300' :
+                              'bg-gray-500/30 text-gray-300'
+                            }`}>
+                              {test.scenario.severity.toUpperCase()}
+                            </Badge>
+                            <span className="text-white text-sm font-medium">{test.scenario.name}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-red-400 font-medium text-sm">
+                              -{test.portfolioImpact.totalLossPercent.toFixed(1)}%
+                            </p>
+                            <p className="text-gray-400 text-xs">
+                              ${test.portfolioImpact.totalLoss.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-gray-300 text-xs">{test.scenario.description}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-gray-400 text-xs">Recovery: {test.portfolioImpact.timeToRecover} days</span>
+                          <span className="text-gray-400 text-xs">Worst Day: -{test.portfolioImpact.worstDayLoss.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Position Sizing Recommendations */}
+              {positionSizing?.data?.recommendations && positionSizing.data.recommendations.length > 0 && (
+                <Card className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border-indigo-500/30 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-indigo-300 flex items-center gap-2">
+                      <Calculator className="h-5 w-5" />
+                      Position Sizing Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {positionSizing.data.recommendations.slice(0, 6).map((rec: any, index: number) => (
+                        <div key={index} className="p-3 bg-black/20 rounded-lg border border-indigo-500/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white font-medium text-sm">{rec.symbol}</span>
+                              <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30 text-xs">
+                                {rec.assetType.toUpperCase()}
+                              </Badge>
+                            </div>
+                            <Badge className={`text-xs border-0 ${
+                              rec.confidence > 80 ? 'bg-green-500/20 text-green-300' :
+                              rec.confidence > 60 ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-red-500/20 text-red-300'
+                            }`}>
+                              {rec.confidence}% Confidence
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-400">Current:</span>
+                              <span className="text-gray-300">{rec.currentAllocation.toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-400">Recommended:</span>
+                              <span className={`font-medium ${
+                                rec.recommendedAllocation > rec.currentAllocation ? 'text-green-400' :
+                                rec.recommendedAllocation < rec.currentAllocation ? 'text-red-400' : 'text-gray-300'
+                              }`}>
+                                {rec.recommendedAllocation.toFixed(1)}%
+                                {rec.recommendedAllocation !== rec.currentAllocation && (
+                                  <span className="ml-1">
+                                    ({rec.recommendedAllocation > rec.currentAllocation ? '+' : ''}
+                                    {(rec.recommendedAllocation - rec.currentAllocation).toFixed(1)})
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-400">Risk Score:</span>
+                              <span className={`${
+                                rec.riskScore > 70 ? 'text-red-400' :
+                                rec.riskScore > 40 ? 'text-yellow-400' : 'text-green-400'
+                              }`}>
+                                {rec.riskScore}/100
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-300 text-xs mt-2">{rec.rationale}</p>
+                          
+                          <div className="flex items-center justify-between mt-2">
+                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
+                              {rec.sizingMethod.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                            <span className="text-gray-400 text-xs">{rec.timeHorizon}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Risk Metrics Summary */}
+              <Card className="bg-gradient-to-r from-gray-900/50 to-slate-900/50 border-gray-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-gray-300 flex items-center gap-2">
+                    <LineChart className="h-5 w-5" />
+                    Detailed Risk Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {[
+                      { label: 'Portfolio Volatility', value: `${riskDashboard.data.riskMetrics.portfolioVolatility.toFixed(2)}%`, color: 'text-orange-400' },
+                      { label: 'Max Drawdown', value: `${riskDashboard.data.riskMetrics.maxDrawdown.toFixed(2)}%`, color: 'text-red-400' },
+                      { label: 'Calmar Ratio', value: riskDashboard.data.riskMetrics.calmarRatio.toFixed(2), color: 'text-green-400' },
+                      { label: 'Sortino Ratio', value: riskDashboard.data.riskMetrics.sortinoRatio.toFixed(2), color: 'text-blue-400' },
+                      { label: 'Portfolio Beta', value: riskDashboard.data.riskMetrics.beta.toFixed(2), color: 'text-purple-400' },
+                      { label: 'Portfolio Alpha', value: `${riskDashboard.data.riskMetrics.alpha.toFixed(2)}%`, color: 'text-cyan-400' }
+                    ].map((metric, index) => (
+                      <div key={index} className="text-center">
+                        <p className="text-gray-400 text-xs">{metric.label}</p>
+                        <p className={`${metric.color} font-bold text-lg`}>{metric.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-300">Risk assessment data temporarily unavailable</p>
+                <p className="text-gray-400 text-sm mt-2">Portfolio analysis will resume shortly</p>
+              </CardContent>
+            </Card>
+          )}
         </motion.div>
 
         {/* Quick Actions */}
