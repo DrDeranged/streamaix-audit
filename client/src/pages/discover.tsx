@@ -259,6 +259,32 @@ export default function Discover() {
     refetchInterval: 120000, // 2 minutes
   });
 
+  // On-chain Analytics queries
+  const { data: whaleMovements, isLoading: whalesLoading } = useQuery({
+    queryKey: ['/api/onchain/whale-movements?symbols=BTC,ETH,USDT,USDC&minAmount=1000000'],
+    refetchInterval: 60000, // 1 minute for real-time whale data
+  });
+
+  const { data: exchangeFlows, isLoading: exchangeFlowsLoading } = useQuery({
+    queryKey: ['/api/onchain/exchange-flows?exchanges=Binance,Coinbase,Kraken,OKX'],
+    refetchInterval: 90000, // 1.5 minutes
+  });
+
+  const { data: networkMetrics, isLoading: networkLoading } = useQuery({
+    queryKey: ['/api/onchain/network-metrics?networks=ethereum,bitcoin,binance_smart_chain'],
+    refetchInterval: 120000, // 2 minutes
+  });
+
+  const { data: onChainAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['/api/onchain/alerts?severity=all&limit=10'],
+    refetchInterval: 30000, // 30 seconds for alerts
+  });
+
+  const { data: defiMetrics, isLoading: defiLoading } = useQuery({
+    queryKey: ['/api/onchain/defi-metrics?protocols=Uniswap,Aave,Compound,MakerDAO'],
+    refetchInterval: 180000, // 3 minutes
+  });
+
   // Phase 1: Market Pulse Data
   // Enhanced market movers with priority levels and risk assessment
   const rawMarketMovers: MarketMover[] = (marketData as any)?.movers || [
@@ -785,6 +811,372 @@ export default function Discover() {
               </Card>
             ))}
           </div>
+        </motion.div>
+
+        {/* On-Chain Analytics Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <Activity className="h-5 w-5 text-orange-400" />
+              On-Chain Analytics
+              <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30 ml-2">
+                <Zap className="h-3 w-3 mr-1" />
+                Real-time
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                🐋 Whale Activity
+              </Badge>
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                🏦 Exchange Flows
+              </Badge>
+              <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+                ⚡ Network Health
+              </Badge>
+            </div>
+          </div>
+
+          {/* On-Chain Alerts Banner */}
+          {!alertsLoading && onChainAlerts?.alerts?.length > 0 && (
+            <Card className="bg-gradient-to-r from-orange-900/20 via-red-900/20 to-orange-900/20 border-orange-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-orange-300 flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  Live On-Chain Alerts
+                  <Badge className="bg-red-500/30 text-red-200 border-red-400/50 ml-2">
+                    {onChainAlerts.alerts.filter((alert: any) => alert.severity === 'critical').length} Critical
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {onChainAlerts.alerts.slice(0, 6).map((alert: any) => (
+                    <motion.div 
+                      key={alert.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`bg-black/30 rounded-lg p-4 border ${
+                        alert.severity === 'critical' ? 'border-red-500/40' :
+                        alert.severity === 'high' ? 'border-orange-500/40' :
+                        'border-yellow-500/40'
+                      }`}
+                      data-testid={`alert-${alert.id}`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="text-white font-semibold text-sm line-clamp-2">{alert.title}</h4>
+                          <p className="text-gray-300 text-xs mt-1 line-clamp-2">{alert.description}</p>
+                        </div>
+                        <Badge className={`text-xs ml-2 flex-shrink-0 ${
+                          alert.severity === 'critical' ? 'bg-red-500/30 text-red-200' :
+                          alert.severity === 'high' ? 'bg-orange-500/30 text-orange-200' :
+                          'bg-yellow-500/30 text-yellow-200'
+                        }`}>
+                          {alert.severity === 'critical' ? '🚨' :
+                           alert.severity === 'high' ? '⚡' : '⚠️'}
+                          {alert.severity}
+                        </Badge>
+                      </div>
+                      
+                      {alert.amount_usd && (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-400">Amount:</span>
+                          <span className="text-white font-medium">
+                            {alert.amount_usd >= 1e9 ? `$${(alert.amount_usd / 1e9).toFixed(1)}B` :
+                             alert.amount_usd >= 1e6 ? `$${(alert.amount_usd / 1e6).toFixed(1)}M` :
+                             `$${(alert.amount_usd / 1e3).toFixed(1)}K`}
+                          </span>
+                        </div>
+                      )}
+                      
+                      <div className="flex justify-between items-center text-xs text-gray-500 mt-2">
+                        <span>{alert.token_symbol || 'Multiple'}</span>
+                        <span>{new Date(alert.timestamp).toLocaleDateString()}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Main On-Chain Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Whale Movements */}
+            <Card className="lg:col-span-2 bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-purple-300 flex items-center gap-2">
+                  🐋 Whale Movements
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
+                    >$1M Transactions
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {whalesLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="bg-white/5 rounded-lg p-4 animate-pulse">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-gray-600 rounded w-24"></div>
+                            <div className="h-3 bg-gray-700 rounded w-32"></div>
+                          </div>
+                          <div className="h-6 bg-gray-600 rounded w-20"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : whaleMovements?.whaleMovements?.length > 0 ? (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {whaleMovements.whaleMovements.slice(0, 8).map((whale: any) => (
+                      <motion.div 
+                        key={whale.transaction_hash || whale.hash}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all"
+                        data-testid={`whale-movement-${whale.transaction_hash || whale.hash}`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${
+                              whale.whale_tier === 'mega' ? 'bg-red-400' :
+                              whale.whale_tier === 'large' ? 'bg-orange-400' :
+                              'bg-yellow-400'
+                            }`} />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-white font-semibold text-sm">
+                                  {whale.token_symbol || 'ETH'}
+                                </span>
+                                <Badge className={`text-xs ${
+                                  whale.transaction_type === 'buy' ? 'bg-green-500/20 text-green-300' :
+                                  whale.transaction_type === 'sell' ? 'bg-red-500/20 text-red-300' :
+                                  'bg-blue-500/20 text-blue-300'
+                                }`}>
+                                  {whale.transaction_type}
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-gray-400 font-mono">
+                                {whale.whale_address ? `${whale.whale_address.slice(0, 6)}...${whale.whale_address.slice(-4)}` :
+                                 whale.from ? `${whale.from.slice(0, 6)}...${whale.from.slice(-4)}` : 'Unknown'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-right">
+                            <div className="text-white font-bold text-sm">
+                              {whale.amount_usd || whale.valueUsd ? 
+                                `$${((whale.amount_usd || whale.valueUsd) / 1e6).toFixed(1)}M` : 
+                                'Unknown'}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {whale.timestamp ? new Date(whale.timestamp).toLocaleTimeString() : 'Recent'}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {whale.exchange && (
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>Exchange: {whale.exchange}</span>
+                            {whale.gas_used && <span>Gas: {whale.gas_used} gwei</span>}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No whale movements detected</p>
+                    <p className="text-xs">Monitoring transactions >$1M</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Network Status */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-green-300 flex items-center gap-2">
+                  ⚡ Network Health
+                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30">
+                    Live
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {networkLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="bg-white/5 rounded-lg p-3 animate-pulse">
+                        <div className="h-4 bg-gray-600 rounded w-20 mb-2"></div>
+                        <div className="h-8 bg-gray-700 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : networkMetrics?.networkStatus?.length > 0 ? (
+                  <div className="space-y-4">
+                    {networkMetrics.networkStatus.map((network: any) => (
+                      <motion.div 
+                        key={network.network}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white/5 rounded-lg p-3"
+                        data-testid={`network-${network.network.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-white font-semibold text-sm">{network.network}</h4>
+                          <Badge className={`text-xs ${
+                            network.congestionLevel === 'low' ? 'bg-green-500/20 text-green-300' :
+                            network.congestionLevel === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-red-500/20 text-red-300'
+                          }`}>
+                            {network.congestionLevel === 'low' ? '🟢' :
+                             network.congestionLevel === 'medium' ? '🟡' : '🔴'}
+                            {network.congestionLevel}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between text-gray-400">
+                            <span>Gas (Fast):</span>
+                            <span className="text-white">{network.gasPrice?.fast || 'N/A'} gwei</span>
+                          </div>
+                          <div className="flex justify-between text-gray-400">
+                            <span>Block Time:</span>
+                            <span className="text-white">{network.blockTime || 'N/A'}s</span>
+                          </div>
+                          {network.tps_current && (
+                            <div className="flex justify-between text-gray-400">
+                              <span>TPS:</span>
+                              <span className="text-white">{network.tps_current}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Gas Price Bar */}
+                        <div className="mt-2">
+                          <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full transition-all ${
+                                (network.gasPrice?.fast || 0) > 100 ? 'bg-red-400' :
+                                (network.gasPrice?.fast || 0) > 50 ? 'bg-yellow-400' :
+                                'bg-green-400'
+                              }`}
+                              style={{ 
+                                width: `${Math.min(100, ((network.gasPrice?.fast || 0) / 150) * 100)}%` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-400">
+                    <Globe className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Network data loading...</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Exchange Flows */}
+          <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-cyan-300 flex items-center gap-2">
+                🏦 Exchange Flows
+                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30">
+                  24h Activity
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {exchangeFlowsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-white/5 rounded-lg p-4 animate-pulse">
+                      <div className="h-4 bg-gray-600 rounded w-20 mb-3"></div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-gray-700 rounded"></div>
+                        <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : exchangeFlows?.exchangeFlows?.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {exchangeFlows.exchangeFlows.map((flow: any) => (
+                    <motion.div 
+                      key={flow.exchange_name}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all"
+                      data-testid={`exchange-flow-${flow.exchange_name.toLowerCase()}`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-white font-semibold">{flow.exchange_name}</h4>
+                        <Badge className={`text-xs ${
+                          flow.net_flow_24h > 0 ? 'bg-green-500/20 text-green-300' :
+                          flow.net_flow_24h < 0 ? 'bg-red-500/20 text-red-300' :
+                          'bg-gray-500/20 text-gray-300'
+                        }`}>
+                          {flow.net_flow_24h > 0 ? '📈 Inflow' :
+                           flow.net_flow_24h < 0 ? '📉 Outflow' : '➡️ Neutral'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between text-gray-400">
+                          <span>Net Flow:</span>
+                          <span className={`font-medium ${
+                            flow.net_flow_24h > 0 ? 'text-green-300' :
+                            flow.net_flow_24h < 0 ? 'text-red-300' : 'text-white'
+                          }`}>
+                            {flow.net_flow_24h >= 1e6 ? `$${(Math.abs(flow.net_flow_24h) / 1e6).toFixed(1)}M` :
+                             flow.net_flow_24h >= 1e3 ? `$${(Math.abs(flow.net_flow_24h) / 1e3).toFixed(1)}K` :
+                             `$${Math.abs(flow.net_flow_24h || 0).toFixed(0)}`}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between text-gray-400">
+                          <span>Large TXs:</span>
+                          <span className="text-white">{flow.large_transactions || 0}</span>
+                        </div>
+
+                        {flow.flow_change_percentage !== 0 && (
+                          <div className="flex justify-between text-gray-400">
+                            <span>24h Change:</span>
+                            <span className={`${
+                              flow.flow_change_percentage > 0 ? 'text-green-300' : 'text-red-300'
+                            }`}>
+                              {flow.flow_change_percentage > 0 ? '+' : ''}{flow.flow_change_percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No exchange flow data available</p>
+                  <p className="text-xs">Monitoring major exchanges</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Economic Calendar Section */}

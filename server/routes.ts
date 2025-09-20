@@ -11,6 +11,8 @@ import { Web3Service } from "./services/web3Service";
 import { MarketDataService } from "./services/marketDataService";
 import { youtubeService } from "./services/youtubeService";
 import { PredictiveAnalyticsService } from "./services/predictiveAnalyticsService";
+import { onChainAnalyticsService } from "./services/onChainAnalyticsService";
+import { duneAnalyticsService } from "./services/duneAnalyticsService";
 import passport from "passport";
 
 // Initialize services
@@ -1569,6 +1571,284 @@ export async function registerRoutes(app: Express): Promise<Server> {
         articles: [], 
         error: 'News data unavailable', 
         timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // =============================================================================
+  // ON-CHAIN ANALYTICS ROUTES
+  // =============================================================================
+
+  // Get whale movements (large transactions >$1M)
+  app.get('/api/onchain/whale-movements', asyncHandler(async (req: Request, res: Response) => {
+    const symbols = (req.query.symbols as string)?.split(',') || ['BTC', 'ETH', 'USDT', 'USDC'];
+    const minAmount = parseInt(req.query.minAmount as string) || 1000000; // $1M default
+    
+    console.log(`🐋 API Call: GET /api/onchain/whale-movements - Symbols: ${symbols.join(', ')}, Min Amount: $${minAmount.toLocaleString()}`);
+    
+    try {
+      const [duneWhales, realTimeWhales] = await Promise.all([
+        duneAnalyticsService.getWhaleMovements(symbols, minAmount),
+        onChainAnalyticsService.getRealTimeWhaleMovements(minAmount / 3000) // Convert USD to ETH approximation
+      ]);
+
+      // Combine and deduplicate whale movements
+      const combined = [...duneWhales, ...realTimeWhales.map(whale => ({
+        token_symbol: whale.token_symbol || 'ETH',
+        whale_address: whale.from,
+        transaction_type: whale.valueUsd ? 'transfer' : 'unknown',
+        amount_usd: whale.valueUsd || 0,
+        amount_tokens: whale.valueEth || 0,
+        timestamp: whale.timestamp,
+        exchange: whale.exchange || undefined,
+        transaction_hash: whale.hash,
+        block_number: whale.blockNumber || 0,
+        gas_used: whale.gasPrice || 0,
+        is_whale: whale.isWhale || false,
+        whale_tier: whale.whale_tier || 'medium'
+      }))];
+
+      // Remove duplicates by transaction hash
+      const uniqueWhales = combined.reduce((acc, whale) => {
+        if (!acc.find(existing => existing.transaction_hash === whale.transaction_hash)) {
+          acc.push(whale);
+        }
+        return acc;
+      }, [] as any[]);
+
+      // Sort by timestamp descending
+      uniqueWhales.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      res.json({
+        whaleMovements: uniqueWhales.slice(0, 50), // Return latest 50
+        count: uniqueWhales.length,
+        minAmountUsd: minAmount,
+        symbols,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Whale movements error:', error);
+      res.json({
+        whaleMovements: [],
+        count: 0,
+        error: 'Whale movement data temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get exchange inflow/outflow data
+  app.get('/api/onchain/exchange-flows', asyncHandler(async (req: Request, res: Response) => {
+    const exchanges = (req.query.exchanges as string)?.split(',') || ['Binance', 'Coinbase', 'Kraken', 'OKX'];
+    
+    console.log(`🏦 API Call: GET /api/onchain/exchange-flows - Exchanges: ${exchanges.join(', ')}`);
+    
+    try {
+      const [duneFlows, realTimeFlows] = await Promise.all([
+        duneAnalyticsService.getExchangeFlows(exchanges),
+        onChainAnalyticsService.getExchangeFlowAlerts()
+      ]);
+
+      res.json({
+        exchangeFlows: duneFlows,
+        realtimeAlerts: realTimeFlows,
+        exchanges,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Exchange flows error:', error);
+      res.json({
+        exchangeFlows: [],
+        realtimeAlerts: [],
+        error: 'Exchange flow data temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get network activity metrics
+  app.get('/api/onchain/network-metrics', asyncHandler(async (req: Request, res: Response) => {
+    const networks = (req.query.networks as string)?.split(',') || ['ethereum', 'bitcoin', 'binance_smart_chain'];
+    
+    console.log(`⚡ API Call: GET /api/onchain/network-metrics - Networks: ${networks.join(', ')}`);
+    
+    try {
+      const [duneMetrics, networkStatus] = await Promise.all([
+        duneAnalyticsService.getNetworkMetrics(networks),
+        onChainAnalyticsService.getNetworkStatus()
+      ]);
+
+      res.json({
+        networkMetrics: duneMetrics,
+        networkStatus,
+        networks,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Network metrics error:', error);
+      res.json({
+        networkMetrics: [],
+        networkStatus: [],
+        error: 'Network metrics temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get on-chain alerts and signals
+  app.get('/api/onchain/alerts', asyncHandler(async (req: Request, res: Response) => {
+    const severity = req.query.severity as string || 'all';
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    console.log(`🚨 API Call: GET /api/onchain/alerts - Severity: ${severity}, Limit: ${limit}`);
+    
+    try {
+      const [duneAlerts, realTimeAlerts] = await Promise.all([
+        duneAnalyticsService.getOnChainAlerts(),
+        onChainAnalyticsService.getExchangeFlowAlerts()
+      ]);
+
+      // Combine alerts and convert to common format
+      const combinedAlerts = [
+        ...duneAlerts,
+        ...realTimeAlerts.map(alert => ({
+          id: alert.id,
+          alert_type: alert.type,
+          severity: alert.severity === 'critical' ? 'critical' : 
+                   alert.severity === 'warning' ? 'high' : 'medium',
+          title: alert.title,
+          description: alert.message,
+          token_symbol: alert.data.token_symbol,
+          amount_usd: alert.data.amount_usd,
+          timestamp: alert.timestamp,
+          is_active: true,
+          metadata: alert.data
+        }))
+      ];
+
+      // Filter by severity if specified
+      const filteredAlerts = severity === 'all' ? combinedAlerts : 
+        combinedAlerts.filter(alert => alert.severity === severity);
+
+      // Sort by timestamp and limit
+      const sortedAlerts = filteredAlerts
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, limit);
+
+      res.json({
+        alerts: sortedAlerts,
+        count: sortedAlerts.length,
+        totalCount: combinedAlerts.length,
+        severity,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ On-chain alerts error:', error);
+      res.json({
+        alerts: [],
+        count: 0,
+        error: 'Alert data temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get comprehensive on-chain analytics dashboard data
+  app.get('/api/onchain/dashboard', asyncHandler(async (req: Request, res: Response) => {
+    console.log(`📊 API Call: GET /api/onchain/dashboard - Comprehensive analytics`);
+    
+    try {
+      const analyticsData = await onChainAnalyticsService.getComprehensiveAnalytics();
+      
+      // Add summary statistics
+      const summary = {
+        totalWhaleMovements: analyticsData.whaleMovements.length,
+        totalAlerts: analyticsData.alerts.length,
+        activeNetworks: analyticsData.networkStatus.length,
+        highestWhaleTransaction: analyticsData.whaleMovements.reduce((max, whale) => 
+          whale.valueUsd > max ? whale.valueUsd : max, 0),
+        networkCongestionCount: analyticsData.networkStatus.filter(n => 
+          n.congestionLevel === 'high').length
+      };
+
+      res.json({
+        ...analyticsData,
+        summary,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Comprehensive analytics error:', error);
+      res.json({
+        whaleMovements: [],
+        exchangeFlows: [],
+        networkStatus: [],
+        alerts: [],
+        duneData: null,
+        summary: {
+          totalWhaleMovements: 0,
+          totalAlerts: 0,
+          activeNetworks: 0,
+          highestWhaleTransaction: 0,
+          networkCongestionCount: 0
+        },
+        error: 'Analytics data temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get DeFi protocol metrics  
+  app.get('/api/onchain/defi-metrics', asyncHandler(async (req: Request, res: Response) => {
+    const protocols = (req.query.protocols as string)?.split(',') || 
+      ['Uniswap', 'Aave', 'Compound', 'MakerDAO', 'Curve', 'SushiSwap'];
+    
+    console.log(`🏦 API Call: GET /api/onchain/defi-metrics - Protocols: ${protocols.join(', ')}`);
+    
+    try {
+      const defiMetrics = await duneAnalyticsService.getDeFiMetrics(protocols);
+      
+      res.json({
+        defiMetrics,
+        protocols,
+        count: defiMetrics.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ DeFi metrics error:', error);
+      res.json({
+        defiMetrics: [],
+        protocols,
+        count: 0,
+        error: 'DeFi metrics temporarily unavailable',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get DEX trading metrics
+  app.get('/api/onchain/dex-metrics', asyncHandler(async (req: Request, res: Response) => {
+    const dexes = (req.query.dexes as string)?.split(',') || 
+      ['Uniswap', 'SushiSwap', 'Curve', 'Balancer', 'PancakeSwap'];
+    
+    console.log(`🔄 API Call: GET /api/onchain/dex-metrics - DEXes: ${dexes.join(', ')}`);
+    
+    try {
+      const dexMetrics = await duneAnalyticsService.getDEXMetrics(dexes);
+      
+      res.json({
+        dexMetrics,
+        dexes,
+        count: dexMetrics.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ DEX metrics error:', error);
+      res.json({
+        dexMetrics: [],
+        dexes,
+        count: 0,
+        error: 'DEX metrics temporarily unavailable',
+        timestamp: new Date().toISOString()
       });
     }
   }));
