@@ -382,7 +382,7 @@ export default function Discover() {
                         <div className="h-3 bg-gray-700 rounded"></div>
                         <div className="h-3 bg-gray-700 rounded w-3/4"></div>
                       </div>
-                    ) : recommendations?.recommendations?.slice(0, 3).map((rec: any, idx: number) => (
+                    ) : (recommendations as any)?.recommendations?.slice(0, 3).map((rec: any, idx: number) => (
                       <div key={idx} className="text-xs text-gray-300 hover:text-white transition-colors cursor-pointer">
                         <div className="font-medium text-white">{rec.title}</div>
                         <div className="text-gray-400 truncate">{rec.description}</div>
@@ -416,7 +416,7 @@ export default function Discover() {
                         <div className="h-3 bg-gray-700 rounded"></div>
                         <div className="h-3 bg-gray-700 rounded w-2/3"></div>
                       </div>
-                    ) : marketAlerts?.alerts?.slice(0, 3).map((alert: any, idx: number) => (
+                    ) : (marketAlerts as any)?.alerts?.slice(0, 3).map((alert: any, idx: number) => (
                       <div key={idx} className="text-xs">
                         <div className="flex items-center gap-2 mb-1">
                           <div className={`w-2 h-2 rounded-full ${
@@ -454,25 +454,25 @@ export default function Discover() {
                             <div className="h-3 bg-gray-700 rounded"></div>
                             <div className="h-3 bg-gray-700 rounded w-1/2"></div>
                           </div>
-                        ) : sectorPredictions?.predictions ? (
+                        ) : (sectorPredictions as any)?.predictions ? (
                           <div className="space-y-2">
                             <div className="text-xs">
                               <div className="text-white font-medium">{selectedSector} Outlook</div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div className={`text-lg font-bold ${
-                                  sectorPredictions.predictions.prediction > 0 ? 'text-green-400' :
-                                  sectorPredictions.predictions.prediction < 0 ? 'text-red-400' : 'text-gray-400'
+                                  (sectorPredictions as any)?.predictions?.prediction > 0 ? 'text-green-400' :
+                                  (sectorPredictions as any)?.predictions?.prediction < 0 ? 'text-red-400' : 'text-gray-400'
                                 }`}>
-                                  {sectorPredictions.predictions.prediction > 0 ? '+' : ''}
-                                  {(sectorPredictions.predictions.prediction * 100).toFixed(1)}%
+                                  {(sectorPredictions as any)?.predictions?.prediction > 0 ? '+' : ''}
+                                  {((sectorPredictions as any)?.predictions?.prediction * 100)?.toFixed(1) || '0.0'}%
                                 </div>
                                 <div className="text-xs text-gray-400">
-                                  {Math.round(sectorPredictions.predictions.confidence * 100)}% confidence
+                                  {Math.round(((sectorPredictions as any)?.predictions?.confidence || 0) * 100)}% confidence
                                 </div>
                               </div>
                             </div>
                             <div className="space-y-1">
-                              {sectorPredictions.predictions.reasoning?.slice(0, 2).map((reason: string, idx: number) => (
+                              {(sectorPredictions as any)?.predictions?.reasoning?.slice(0, 2).map((reason: string, idx: number) => (
                                 <div key={idx} className="text-xs text-gray-400">• {reason}</div>
                               ))}
                             </div>
