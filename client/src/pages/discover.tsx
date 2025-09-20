@@ -732,14 +732,32 @@ export default function Discover() {
               >
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-white font-semibold">{sector.name}</h3>
-                    <div className="flex items-center gap-1">
-                      {sector.trend === 'up' ? <ArrowUp className="h-4 w-4 text-green-400" /> :
-                       sector.trend === 'down' ? <ArrowDown className="h-4 w-4 text-red-400" /> :
-                       <Activity className="h-4 w-4 text-gray-400" />}
-                      <span className={`text-sm font-medium ${getChangeColor(sector.performance)}`}>
-                        {sector.performance > 0 ? '+' : ''}{sector.performance.toFixed(2)}%
-                      </span>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-white font-semibold">{sector.name}</h3>
+                      <Badge className={`text-xs border-0 w-fit ${
+                        (sector as any).priority === 'critical' ? 'bg-red-500/20 text-red-300' :
+                        (sector as any).priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                        (sector as any).priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {(sector as any).priority === 'critical' ? '🚨' :
+                         (sector as any).priority === 'high' ? '⚡' :
+                         (sector as any).priority === 'medium' ? '📊' : '📈'}
+                        {(sector as any).priority || 'low'} Priority
+                      </Badge>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="flex items-center gap-1">
+                        {sector.trend === 'up' ? <ArrowUp className="h-4 w-4 text-green-400" /> :
+                         sector.trend === 'down' ? <ArrowDown className="h-4 w-4 text-red-400" /> :
+                         <Activity className="h-4 w-4 text-gray-400" />}
+                        <span className={`text-sm font-medium ${getChangeColor(sector.performance)}`}>
+                          {sector.performance > 0 ? '+' : ''}{sector.performance.toFixed(2)}%
+                        </span>
+                      </div>
+                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                        Score: {(sector as any).urgencyScore || Math.round(Math.abs(sector.performance) * 10)}
+                      </Badge>
                     </div>
                   </div>
                   
