@@ -13,6 +13,7 @@ import { youtubeService } from "./services/youtubeService";
 import { PredictiveAnalyticsService } from "./services/predictiveAnalyticsService";
 import { onChainAnalyticsService } from "./services/onChainAnalyticsService";
 import { duneAnalyticsService } from "./services/duneAnalyticsService";
+import { federalReserveService } from "./services/federalReserveService";
 import passport from "passport";
 
 // Initialize services
@@ -2019,6 +2020,271 @@ export async function registerRoutes(app: Express): Promise<Server> {
         events: [], 
         error: 'High-impact event data unavailable', 
         timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // =============================================================================
+  // FEDERAL RESERVE COMMUNICATION MONITORING ROUTES
+  // =============================================================================
+
+  // Get recent Federal Reserve communications
+  app.get('/api/fed/communications', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const type = req.query.type as string; // speech, statement, minutes, press_release, etc.
+    
+    try {
+      console.log(`🏛️ Fetching Fed communications (limit: ${limit}, type: ${type || 'all'})`);
+      let communications = await federalReserveService.getRecentCommunications(limit * 2); // Get more for filtering
+      
+      // Filter by type if specified
+      if (type && type !== 'all') {
+        communications = communications.filter(comm => comm.type === type);
+      }
+      
+      // Limit results
+      communications = communications.slice(0, limit);
+      
+      res.json({
+        success: true,
+        communications,
+        count: communications.length,
+        filters: { limit, type: type || 'all' },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed communications error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed communications',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get Federal Reserve officials
+  app.get('/api/fed/officials', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log('🏛️ Fetching Fed officials');
+      const officials = federalReserveService.getFedOfficials();
+      
+      res.json({
+        success: true,
+        officials,
+        count: officials.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed officials error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed officials',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get Federal Reserve policy alerts
+  app.get('/api/fed/policy-alerts', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const severity = req.query.severity as string; // low, medium, high, critical
+    const active = req.query.active !== 'false'; // Default to active alerts only
+    
+    try {
+      console.log(`🏛️ Fetching Fed policy alerts (severity: ${severity || 'all'}, active: ${active})`);
+      let alerts = await federalReserveService.getPolicyAlerts();
+      
+      // Filter by severity if specified
+      if (severity && severity !== 'all') {
+        alerts = alerts.filter(alert => alert.severity === severity);
+      }
+      
+      // Filter by active status
+      if (active) {
+        alerts = alerts.filter(alert => alert.isActive);
+      }
+      
+      res.json({
+        success: true,
+        alerts,
+        count: alerts.length,
+        filters: { severity: severity || 'all', active },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed policy alerts error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed policy alerts',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get upcoming Federal Reserve calendar events
+  app.get('/api/fed/calendar', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const eventType = req.query.eventType as string; // fomc_meeting, fed_speech, testimony, etc.
+    
+    try {
+      console.log(`🏛️ Fetching Fed calendar events (limit: ${limit}, type: ${eventType || 'all'})`);
+      let events = await federalReserveService.getUpcomingEvents(limit * 2);
+      
+      // Filter by event type if specified
+      if (eventType && eventType !== 'all') {
+        events = events.filter(event => event.eventType === eventType);
+      }
+      
+      // Limit results
+      events = events.slice(0, limit);
+      
+      res.json({
+        success: true,
+        events,
+        count: events.length,
+        filters: { limit, eventType: eventType || 'all' },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed calendar events error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed calendar events',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get Federal Reserve sentiment trend analysis
+  app.get('/api/fed/sentiment-trend', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const days = parseInt(req.query.days as string) || 30;
+    
+    try {
+      console.log(`🏛️ Fetching Fed sentiment trend (${days} days)`);
+      const sentimentTrend = await federalReserveService.getSentimentTrend(days);
+      
+      res.json({
+        success: true,
+        sentimentTrend,
+        count: sentimentTrend.length,
+        timeframe: `${days} days`,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed sentiment trend error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed sentiment trend',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get comprehensive Federal Reserve analytics summary
+  app.get('/api/fed/analytics', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const timeframe = req.query.timeframe as '1d' | '7d' | '30d' | '90d' || '30d';
+    
+    try {
+      console.log(`🏛️ Fetching Fed analytics summary (${timeframe})`);
+      const summary = await federalReserveService.getAnalyticsSummary(timeframe);
+      
+      res.json({
+        success: true,
+        summary,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed analytics summary error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed analytics summary',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get Federal Reserve communication by ID
+  app.get('/api/fed/communications/:id', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      console.log(`🏛️ Fetching Fed communication: ${id}`);
+      // Get recent communications and find the specific one
+      const communications = await federalReserveService.getRecentCommunications(50);
+      const communication = communications.find(comm => comm.id === id);
+      
+      if (!communication) {
+        return res.status(404).json({
+          success: false,
+          error: 'Communication not found',
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      res.json({
+        success: true,
+        communication,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed communication by ID error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Fed communication',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Search Federal Reserve communications
+  app.get('/api/fed/search', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+    const query = req.query.q as string;
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    if (!query || query.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        error: 'Search query must be at least 2 characters',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    try {
+      console.log(`🏛️ Searching Fed communications: "${query}"`);
+      // Get recent communications and filter by search query
+      const communications = await federalReserveService.getRecentCommunications(100);
+      const lowerQuery = query.toLowerCase();
+      
+      const results = communications.filter(comm => 
+        comm.title.toLowerCase().includes(lowerQuery) ||
+        comm.description?.toLowerCase().includes(lowerQuery) ||
+        comm.content.toLowerCase().includes(lowerQuery) ||
+        comm.officialName.toLowerCase().includes(lowerQuery) ||
+        comm.keyTopics.some(topic => topic.toLowerCase().includes(lowerQuery)) ||
+        comm.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+      ).slice(0, limit);
+      
+      res.json({
+        success: true,
+        results,
+        count: results.length,
+        query,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Fed search error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to search Fed communications',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   }));

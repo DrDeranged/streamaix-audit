@@ -487,3 +487,179 @@ export type EconomicCalendarFilter = {
   countries?: string[];
   onlyUpcoming?: boolean;
 };
+
+// Federal Reserve Communication Types
+export type FedOfficial = {
+  id: string;
+  name: string;
+  title: string;
+  isMember: boolean; // FOMC member
+  isVotingMember: boolean; // Current voting member
+  bank?: string; // Reserve Bank (for regional presidents)
+  termStart?: string;
+  termEnd?: string;
+  bio?: string;
+  avatar?: string;
+  isActive: boolean;
+  lastSpeech?: string;
+  speechCount?: number;
+  avgSentiment?: number; // Average hawkish/dovish sentiment (-1 to 1)
+};
+
+export type FedCommunication = {
+  id: string;
+  title: string;
+  description?: string;
+  content: string;
+  type: 'speech' | 'statement' | 'minutes' | 'press_release' | 'testimony' | 'interview' | 'beige_book';
+  officialId?: string; // Reference to FedOfficial
+  officialName: string;
+  date: string;
+  url: string;
+  source: string; // 'fed.gov', 'reuters', 'bloomberg', etc.
+  venue?: string; // Where the speech was given
+  audience?: string; // Who it was targeted at
+  
+  // Sentiment Analysis
+  sentiment: {
+    score: number; // -1 (dovish) to 1 (hawkish)
+    confidence: number; // 0-1 confidence level
+    stance: 'hawkish' | 'dovish' | 'neutral';
+    reasoning: string[]; // Key phrases that indicate sentiment
+  };
+  
+  // Policy Analysis
+  policySignals: {
+    rateDirection: 'raise' | 'cut' | 'hold' | 'unclear';
+    confidence: number; // How clear the signal is
+    timeline?: string; // When changes might occur
+    conditions?: string[]; // What conditions need to be met
+  };
+  
+  // Content Analysis
+  keyTopics: string[]; // Main topics discussed
+  keyPhrases: string[]; // Important quotes/phrases
+  marketRelevance: number; // 0-100 score of market impact
+  surpriseFactor: number; // 0-100 how unexpected this communication was
+  
+  // Market Impact Assessment
+  marketImpact?: {
+    immediate: 'positive' | 'negative' | 'neutral';
+    expectedVolatility: 'high' | 'medium' | 'low';
+    affectedAssets: string[]; // Which assets might be affected
+    timeframe: 'immediate' | 'short_term' | 'long_term';
+  };
+  
+  isHighImpact: boolean;
+  tags: string[];
+  lastUpdated: string;
+};
+
+export type FedPolicyAlert = {
+  id: string;
+  title: string;
+  description: string;
+  alertType: 'rate_signal' | 'policy_shift' | 'stance_change' | 'emergency_action' | 'guidance_update';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  
+  // Related communication
+  communicationId: string;
+  officialName: string;
+  
+  // Alert details
+  previousStance?: string;
+  newStance: string;
+  confidenceLevel: number; // How confident we are in this alert
+  
+  // Market implications
+  expectedImpact: {
+    stocks: 'bullish' | 'bearish' | 'neutral';
+    bonds: 'bullish' | 'bearish' | 'neutral';
+    dollar: 'bullish' | 'bearish' | 'neutral';
+    crypto: 'bullish' | 'bearish' | 'neutral';
+  };
+  
+  dateCreated: string;
+  isActive: boolean;
+  tags: string[];
+};
+
+export type FedCalendarEvent = {
+  id: string;
+  title: string;
+  description?: string;
+  eventType: 'fomc_meeting' | 'fed_speech' | 'testimony' | 'data_release' | 'press_conference';
+  scheduledDate: string;
+  actualDate?: string;
+  officialName?: string; // For speeches/testimony
+  venue?: string;
+  isCompleted: boolean;
+  hasTranscript: boolean;
+  hasStatement: boolean;
+  
+  // Pre-event expectations
+  expectations?: {
+    rateAction: 'raise' | 'cut' | 'hold';
+    rateProbability: number; // Market-implied probability
+    keyQuestions: string[];
+  };
+  
+  // Post-event analysis
+  outcome?: {
+    actualAction?: string;
+    surpriseFactor: number;
+    marketReaction: 'positive' | 'negative' | 'muted';
+    keyTakeaways: string[];
+  };
+  
+  timeToEvent?: number; // milliseconds until event
+  marketRelevance: number; // 0-100 score
+  lastUpdated: string;
+};
+
+export type FedSentimentTrend = {
+  date: string;
+  overallSentiment: number; // Average sentiment across all communications
+  communicationCount: number;
+  hawkishSignals: number;
+  dovishSignals: number;
+  neutralSignals: number;
+  
+  // Breakdown by official type
+  memberSentiment: number; // FOMC voting members
+  nonMemberSentiment: number; // Non-voting officials
+  
+  // Topic-based sentiment
+  topicSentiments: {
+    inflation: number;
+    employment: number;
+    growth: number;
+    financial_stability: number;
+  };
+  
+  confidenceLevel: number; // Overall confidence in sentiment analysis
+};
+
+export type FedAnalyticsSummary = {
+  timeframe: '1d' | '7d' | '30d' | '90d';
+  totalCommunications: number;
+  highImpactCommunications: number;
+  
+  sentimentTrend: {
+    direction: 'increasingly_hawkish' | 'increasingly_dovish' | 'stable' | 'mixed';
+    strength: number; // 0-100 how strong the trend is
+    consistency: number; // 0-100 how consistent officials are
+  };
+  
+  upcomingEvents: FedCalendarEvent[];
+  recentHighlights: FedCommunication[];
+  activeAlerts: FedPolicyAlert[];
+  
+  marketImplications: {
+    shortTerm: string[]; // Key short-term implications
+    longTerm: string[]; // Key long-term implications
+    watchList: string[]; // Things to watch for
+  };
+  
+  lastUpdated: string;
+};

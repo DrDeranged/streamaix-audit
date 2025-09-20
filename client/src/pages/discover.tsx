@@ -118,6 +118,31 @@ export default function Discover() {
     retry: 1
   });
 
+  // Federal Reserve monitoring queries
+  const { data: fedCommunications, isLoading: fedCommLoading } = useQuery({
+    queryKey: ['/api/fed/communications'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1
+  });
+
+  const { data: fedAnalytics, isLoading: fedAnalyticsLoading } = useQuery({
+    queryKey: ['/api/fed/analytics'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1
+  });
+
+  const { data: fedPolicyAlerts, isLoading: fedAlertsLoading } = useQuery({
+    queryKey: ['/api/fed/policy-alerts'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: fedCalendar, isLoading: fedCalendarLoading } = useQuery({
+    queryKey: ['/api/fed/calendar'],
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1
+  });
+
   // Interaction tracking mutation
   const trackInteraction = useMutation({
     mutationFn: async (interactionData: {
@@ -1382,6 +1407,342 @@ export default function Discover() {
                 ))}
               </CardContent>
             </Card>
+          </div>
+        </motion.div>
+
+        {/* Federal Reserve Communication Monitoring Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              🏛️ Federal Reserve Monitor
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 ml-2">
+                <Activity className="h-3 w-3 mr-1" />
+                Policy Insights
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+                📈 Sentiment Analysis
+              </Badge>
+              <Badge className="bg-amber-500/20 text-amber-300 border-amber-400/30 text-xs">
+                🗣️ Communications
+              </Badge>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                ⚠️ Policy Alerts
+              </Badge>
+            </div>
+          </div>
+
+          {/* Fed Policy Alerts Banner */}
+          {!fedAlertsLoading && fedPolicyAlerts?.success && fedPolicyAlerts.alerts?.length > 0 && (
+            <Card className="bg-gradient-to-r from-blue-900/20 via-indigo-900/20 to-blue-900/20 border-blue-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-blue-300 flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  Fed Policy Alerts
+                  <Badge className="bg-red-500/30 text-red-200 border-red-400/50 ml-2">
+                    {fedPolicyAlerts.alerts.filter((alert: any) => alert.severity === 'high' || alert.severity === 'critical').length} High Priority
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {fedPolicyAlerts.alerts.slice(0, 4).map((alert: any) => (
+                    <motion.div 
+                      key={alert.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`bg-black/30 rounded-lg p-4 border ${
+                        alert.severity === 'critical' ? 'border-red-500/40' :
+                        alert.severity === 'high' ? 'border-orange-500/40' :
+                        'border-blue-500/40'
+                      }`}
+                      onClick={() => trackUserInteraction('fed_alert_click', 'alert', alert.id)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <Badge className={`text-xs ${
+                          alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                          alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                          'bg-blue-500/20 text-blue-300'
+                        }`}>
+                          {alert.alertType.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                        <span className="text-xs text-gray-400">
+                          {new Date(alert.dateCreated).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <h4 className="text-white font-medium text-sm mb-1">{alert.title}</h4>
+                      <p className="text-gray-300 text-xs line-clamp-2">{alert.description}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-xs text-gray-400">by {alert.officialName}</span>
+                        <div className="flex gap-1">
+                          {alert.expectedImpact.stocks === 'bullish' && <span className="text-green-400">📈</span>}
+                          {alert.expectedImpact.stocks === 'bearish' && <span className="text-red-400">📉</span>}
+                          {alert.expectedImpact.bonds === 'bullish' && <span className="text-blue-400">🏦</span>}
+                          {alert.expectedImpact.dollar === 'bullish' && <span className="text-green-400">💵</span>}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Main Fed Monitoring Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Recent Fed Communications */}
+            <Card className="lg:col-span-2 bg-white/5 border-white/10 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-blue-300 flex items-center gap-2">
+                  🗣️ Recent Communications
+                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30">
+                    Sentiment Analysis
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fedCommLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : fedCommunications?.success ? (
+                  <div className="space-y-4">
+                    {fedCommunications.communications.slice(0, 5).map((comm: any) => (
+                      <motion.div 
+                        key={comm.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-black/20 rounded-lg p-4 hover:bg-black/30 transition-colors cursor-pointer"
+                        onClick={() => trackUserInteraction('fed_communication_click', 'communication', comm.id)}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Badge className={`text-xs ${
+                              comm.sentiment.stance === 'hawkish' ? 'bg-red-500/20 text-red-300' :
+                              comm.sentiment.stance === 'dovish' ? 'bg-green-500/20 text-green-300' :
+                              'bg-gray-500/20 text-gray-300'
+                            }`}>
+                              {comm.sentiment.stance === 'hawkish' ? '🦅 Hawkish' :
+                               comm.sentiment.stance === 'dovish' ? '🕊️ Dovish' :
+                               '⚖️ Neutral'}
+                            </Badge>
+                            <Badge className="bg-blue-500/20 text-blue-300 text-xs">
+                              {comm.type.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                            {comm.isHighImpact && (
+                              <Badge className="bg-orange-500/20 text-orange-300 text-xs">
+                                <Flame className="h-3 w-3 mr-1" />
+                                High Impact
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-400">
+                            {new Date(comm.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        
+                        <h4 className="text-white font-medium mb-2 text-sm">{comm.title}</h4>
+                        <p className="text-gray-300 text-xs line-clamp-2 mb-3">{comm.description}</p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">by {comm.officialName}</span>
+                            <div className="flex items-center gap-1">
+                              {comm.keyTopics.slice(0, 2).map((topic: string) => (
+                                <Badge key={topic} className="bg-purple-500/20 text-purple-300 text-xs">
+                                  {topic}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">
+                              Market Relevance: {comm.marketRelevance}%
+                            </span>
+                            <div className="w-12 h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full transition-all ${
+                                  comm.marketRelevance >= 80 ? 'bg-red-400' :
+                                  comm.marketRelevance >= 60 ? 'bg-orange-400' :
+                                  'bg-blue-400'
+                                }`}
+                                style={{ width: `${comm.marketRelevance}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-400">
+                    <MessageSquare className="h-8 w-8 mx-auto mb-2" />
+                    <p>Fed communications will appear here</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Fed Analytics Summary & Calendar */}
+            <div className="space-y-6">
+              
+              {/* Fed Analytics Summary */}
+              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-green-300 flex items-center gap-2">
+                    📊 Policy Insights
+                    <Badge className="bg-green-500/20 text-green-300 border-green-400/30">
+                      30D Trend
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {fedAnalyticsLoading ? (
+                    <div className="space-y-3">
+                      <div className="animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded w-full mb-2"></div>
+                        <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+                      </div>
+                    </div>
+                  ) : fedAnalytics?.success ? (
+                    <div className="space-y-4">
+                      {/* Sentiment Trend */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-300">Overall Sentiment</span>
+                          <Badge className={`text-xs ${
+                            fedAnalytics.summary.sentimentTrend.direction === 'increasingly_hawkish' ? 'bg-red-500/20 text-red-300' :
+                            fedAnalytics.summary.sentimentTrend.direction === 'increasingly_dovish' ? 'bg-green-500/20 text-green-300' :
+                            'bg-gray-500/20 text-gray-300'
+                          }`}>
+                            {fedAnalytics.summary.sentimentTrend.direction.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        <div className="bg-gray-700 rounded-full h-3 overflow-hidden">
+                          <div 
+                            className={`h-full transition-all ${
+                              fedAnalytics.summary.sentimentTrend.direction === 'increasingly_hawkish' ? 'bg-red-400' :
+                              fedAnalytics.summary.sentimentTrend.direction === 'increasingly_dovish' ? 'bg-green-400' :
+                              'bg-gray-400'
+                            }`}
+                            style={{ width: `${fedAnalytics.summary.sentimentTrend.strength}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-400 mt-1">
+                          <span>Dovish</span>
+                          <span>Neutral</span>
+                          <span>Hawkish</span>
+                        </div>
+                      </div>
+
+                      {/* Key Stats */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-black/20 rounded-lg p-3">
+                          <div className="text-2xl font-bold text-blue-300">{fedAnalytics.summary.totalCommunications}</div>
+                          <div className="text-xs text-gray-400">Communications</div>
+                        </div>
+                        <div className="bg-black/20 rounded-lg p-3">
+                          <div className="text-2xl font-bold text-orange-300">{fedAnalytics.summary.highImpactCommunications}</div>
+                          <div className="text-xs text-gray-400">High Impact</div>
+                        </div>
+                      </div>
+
+                      {/* Market Implications */}
+                      <div>
+                        <h4 className="text-sm font-medium text-white mb-2">Market Implications</h4>
+                        <div className="space-y-1">
+                          {fedAnalytics.summary.marketImplications.shortTerm.slice(0, 2).map((implication: string, index: number) => (
+                            <div key={index} className="text-xs text-gray-300 flex items-start gap-2">
+                              <ChevronRight className="h-3 w-3 text-blue-400 mt-0.5 flex-shrink-0" />
+                              <span className="line-clamp-2">{implication}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-400">
+                      <BarChart3 className="h-6 w-6 mx-auto mb-2" />
+                      <p className="text-xs">Analytics loading...</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Upcoming Fed Events */}
+              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-purple-300 flex items-center gap-2">
+                    📅 Upcoming Events
+                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
+                      Calendar
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {fedCalendarLoading ? (
+                    <div className="space-y-3">
+                      {[...Array(2)].map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-3 bg-gray-700 rounded w-full mb-1"></div>
+                          <div className="h-3 bg-gray-700 rounded w-2/3"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : fedCalendar?.success ? (
+                    <div className="space-y-3">
+                      {fedCalendar.events.slice(0, 3).map((event: any) => (
+                        <motion.div 
+                          key={event.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-black/20 rounded-lg p-3"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge className="bg-purple-500/20 text-purple-300 text-xs">
+                              {event.eventType.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                            <span className="text-xs text-gray-400">
+                              {new Date(event.scheduledDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <h4 className="text-white font-medium text-sm mb-1">{event.title}</h4>
+                          {event.officialName && (
+                            <p className="text-gray-300 text-xs">Speaker: {event.officialName}</p>
+                          )}
+                          <div className="mt-2">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-blue-400" />
+                              <span className="text-xs text-gray-400">
+                                Market Relevance: {event.marketRelevance}%
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-400">
+                      <Calendar className="h-6 w-6 mx-auto mb-2" />
+                      <p className="text-xs">No upcoming events</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </motion.div>
 
