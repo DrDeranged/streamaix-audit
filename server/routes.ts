@@ -5044,6 +5044,368 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // =============================================================================
+  // VOLATILITY FORECASTING AND STRESS MONITORING ROUTES - Phase 3 Feature
+  // =============================================================================
+
+  // Get volatility forecasting dashboard data
+  app.get('/api/volatility-forecasting/dashboard', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log('📊 Getting volatility forecasting dashboard...');
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      // Get comprehensive dashboard data
+      const [
+        stressIndicators,
+        riskRegime,
+        crisisIndicators,
+        activeAlerts
+      ] = await Promise.all([
+        volatilityForecastingService.getStressIndicators(),
+        volatilityForecastingService.analyzeRiskRegime(),
+        volatilityForecastingService.detectCrisisIndicators(),
+        volatilityForecastingService.getVolatilityAlerts()
+      ]);
+      
+      // Calculate summary metrics
+      const overallStressLevel = Math.floor(
+        stressIndicators.reduce((sum, indicator) => sum + indicator.normalizedValue, 0) / stressIndicators.length
+      );
+      
+      const highestCrisisProbability = Math.max(
+        ...crisisIndicators.map(indicator => indicator.probability),
+        0
+      );
+
+      const dashboard = {
+        summary: {
+          overallStressLevel,
+          activeRegime: riskRegime.regime,
+          regimeConfidence: riskRegime.confidence,
+          highestCrisisProbability,
+          activeAlerts: activeAlerts.length,
+          totalForecasts: 15 // Mock number of assets being forecasted
+        },
+        stressIndicators,
+        riskRegime,
+        crisisIndicators,
+        activeAlerts,
+        marketContext: {
+          overallVolatility: 42,
+          correlationLevel: 0.65,
+          liquidityConditions: 'normal',
+          sentimentScore: 0.25
+        },
+        recommendations: {
+          positionSizing: riskRegime.implications.positionSizing >= 1.0 ? 'Normal sizing' : 'Reduced sizing recommended',
+          hedgingStrategy: overallStressLevel > 60 ? 'Implement hedging' : 'Monitor conditions',
+          monitoringPriorities: [
+            'Watch VIX levels',
+            'Monitor credit spreads',
+            'Track correlation breakdown'
+          ],
+          riskManagement: [
+            'Review stop-loss levels',
+            'Consider position diversification',
+            'Monitor liquidity conditions'
+          ]
+        },
+        lastUpdated: new Date().toISOString()
+      };
+
+      res.json(dashboard);
+    } catch (error) {
+      console.error('❌ Failed to get volatility forecasting dashboard:', error);
+      res.status(500).json({ error: 'Failed to get volatility forecasting dashboard' });
+    }
+  }));
+
+  // Get volatility forecast for specific asset
+  app.get('/api/volatility-forecasting/forecast/:symbol', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { symbol } = req.params;
+      const { horizons } = req.query;
+      
+      console.log(`📊 Getting volatility forecast for ${symbol}...`);
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const forecastHorizons = horizons ? (horizons as string).split(',') : ['1d', '7d', '30d', '90d'];
+      const forecast = await volatilityForecastingService.generateVolatilityForecast(symbol, forecastHorizons);
+      
+      res.json(forecast);
+    } catch (error) {
+      console.error(`❌ Failed to get volatility forecast for ${req.params.symbol}:`, error);
+      res.status(500).json({ error: 'Failed to get volatility forecast' });
+    }
+  }));
+
+  // Get multiple volatility forecasts
+  app.post('/api/volatility-forecasting/forecasts', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { symbols, horizons = ['1d', '7d', '30d'] } = req.body;
+      
+      if (!symbols || !Array.isArray(symbols)) {
+        return res.status(400).json({ error: 'Symbols array is required' });
+      }
+      
+      console.log(`📊 Getting volatility forecasts for ${symbols.length} assets...`);
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const forecasts = await Promise.all(
+        symbols.map(symbol => 
+          volatilityForecastingService.generateVolatilityForecast(symbol, horizons)
+        )
+      );
+      
+      res.json({ forecasts });
+    } catch (error) {
+      console.error('❌ Failed to get volatility forecasts:', error);
+      res.status(500).json({ error: 'Failed to get volatility forecasts' });
+    }
+  }));
+
+  // Get stress indicators
+  app.get('/api/volatility-forecasting/stress-indicators', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log('🚨 Getting stress indicators...');
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const indicators = await volatilityForecastingService.getStressIndicators();
+      
+      res.json({ indicators });
+    } catch (error) {
+      console.error('❌ Failed to get stress indicators:', error);
+      res.status(500).json({ error: 'Failed to get stress indicators' });
+    }
+  }));
+
+  // Get risk regime analysis
+  app.get('/api/volatility-forecasting/risk-regime', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log('🔍 Getting risk regime analysis...');
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const regime = await volatilityForecastingService.analyzeRiskRegime();
+      
+      res.json(regime);
+    } catch (error) {
+      console.error('❌ Failed to get risk regime analysis:', error);
+      res.status(500).json({ error: 'Failed to get risk regime analysis' });
+    }
+  }));
+
+  // Get crisis indicators
+  app.get('/api/volatility-forecasting/crisis-indicators', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log('⚠️ Getting crisis indicators...');
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const indicators = await volatilityForecastingService.detectCrisisIndicators();
+      
+      res.json({ indicators });
+    } catch (error) {
+      console.error('❌ Failed to get crisis indicators:', error);
+      res.status(500).json({ error: 'Failed to get crisis indicators' });
+    }
+  }));
+
+  // Get volatility surface
+  app.get('/api/volatility-forecasting/volatility-surface/:symbol', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { symbol } = req.params;
+      
+      console.log(`📊 Getting volatility surface for ${symbol}...`);
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const surface = await volatilityForecastingService.generateVolatilitySurface(symbol);
+      
+      if (!surface) {
+        return res.status(404).json({ error: 'Volatility surface not available for this asset' });
+      }
+      
+      res.json(surface);
+    } catch (error) {
+      console.error(`❌ Failed to get volatility surface for ${req.params.symbol}:`, error);
+      res.status(500).json({ error: 'Failed to get volatility surface' });
+    }
+  }));
+
+  // Run stress tests
+  app.post('/api/volatility-forecasting/stress-tests', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { assets, scenarioIds } = req.body;
+      
+      if (!assets || !Array.isArray(assets)) {
+        return res.status(400).json({ error: 'Assets array is required' });
+      }
+      
+      console.log(`🧪 Running stress tests for ${assets.length} assets...`);
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const results = await volatilityForecastingService.runStressTests(assets, scenarioIds);
+      
+      res.json({ results });
+    } catch (error) {
+      console.error('❌ Failed to run stress tests:', error);
+      res.status(500).json({ error: 'Failed to run stress tests' });
+    }
+  }));
+
+  // Get tail risk metrics
+  app.get('/api/volatility-forecasting/tail-risk/:symbol', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { symbol } = req.params;
+      const { timeframes } = req.query;
+      
+      console.log(`📉 Getting tail risk metrics for ${symbol}...`);
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      const requestedTimeframes = timeframes ? (timeframes as string).split(',') : ['1d', '7d', '30d'];
+      const metrics = await volatilityForecastingService.calculateTailRiskMetrics(symbol, requestedTimeframes);
+      
+      res.json({ metrics });
+    } catch (error) {
+      console.error(`❌ Failed to get tail risk metrics for ${req.params.symbol}:`, error);
+      res.status(500).json({ error: 'Failed to get tail risk metrics' });
+    }
+  }));
+
+  // Get volatility alerts
+  app.get('/api/volatility-forecasting/alerts', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { severity, type, active } = req.query;
+      
+      console.log('🚨 Getting volatility alerts...');
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      let alerts = await volatilityForecastingService.getVolatilityAlerts();
+      
+      // Apply filters
+      if (severity) {
+        alerts = alerts.filter(alert => alert.severity === severity);
+      }
+      if (type) {
+        alerts = alerts.filter(alert => alert.alertType === type);
+      }
+      if (active === 'true') {
+        alerts = alerts.filter(alert => alert.isActive);
+      }
+      
+      res.json({ alerts });
+    } catch (error) {
+      console.error('❌ Failed to get volatility alerts:', error);
+      res.status(500).json({ error: 'Failed to get volatility alerts' });
+    }
+  }));
+
+  // Acknowledge volatility alert
+  app.post('/api/volatility-forecasting/alerts/:alertId/acknowledge', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { alertId } = req.params;
+      const { acknowledgedBy } = req.body;
+      
+      console.log(`🚨 Acknowledging volatility alert ${alertId}...`);
+      
+      // In a real implementation, this would update the alert in the database
+      // For now, we'll just return success
+      res.json({ 
+        message: 'Alert acknowledged successfully',
+        alertId,
+        acknowledgedBy,
+        acknowledgedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error(`❌ Failed to acknowledge alert ${req.params.alertId}:`, error);
+      res.status(500).json({ error: 'Failed to acknowledge alert' });
+    }
+  }));
+
+  // Get comprehensive volatility analysis for discover page
+  app.get('/api/volatility-forecasting/discover-analysis', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log('📊 Getting volatility analysis for discover page...');
+      const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
+      
+      // Get key assets for analysis
+      const keyAssets = ['BTC', 'ETH', 'SOL', 'SPY', 'QQQ'];
+      
+      const [
+        forecasts,
+        stressIndicators,
+        riskRegime,
+        crisisIndicators,
+        activeAlerts
+      ] = await Promise.all([
+        Promise.all(keyAssets.map(symbol => 
+          volatilityForecastingService.generateVolatilityForecast(symbol, ['1d', '7d', '30d'])
+        )),
+        volatilityForecastingService.getStressIndicators(),
+        volatilityForecastingService.analyzeRiskRegime(),
+        volatilityForecastingService.detectCrisisIndicators(),
+        volatilityForecastingService.getVolatilityAlerts()
+      ]);
+      
+      // Create volatility heatmap data
+      const volatilityHeatmap = forecasts.map(forecast => ({
+        symbol: forecast.symbol,
+        currentVol: forecast.currentVolatility.realized7d,
+        forecastVol: forecast.predictions.find(p => p.horizon === '7d')?.expectedVolatility || 0,
+        change: forecast.predictions.find(p => p.horizon === '7d')?.expectedVolatility || 0 - forecast.currentVolatility.realized7d,
+        regime: forecast.predictions.find(p => p.horizon === '7d')?.regime || 'normal',
+        confidence: forecast.predictions.find(p => p.horizon === '7d')?.confidence || 70
+      }));
+      
+      // Get top stress indicators
+      const topStressIndicators = stressIndicators
+        .sort((a, b) => b.normalizedValue - a.normalizedValue)
+        .slice(0, 4);
+      
+      // Get highest crisis probability
+      const topCrisisIndicator = crisisIndicators.reduce((max, indicator) => 
+        indicator.probability > max.probability ? indicator : max, 
+        crisisIndicators[0] || { probability: 0, name: 'No crisis indicators' }
+      );
+      
+      const analysis = {
+        overview: {
+          overallStressLevel: Math.floor(
+            stressIndicators.reduce((sum, indicator) => sum + indicator.normalizedValue, 0) / stressIndicators.length
+          ),
+          activeRegime: riskRegime.regime,
+          regimeConfidence: riskRegime.confidence,
+          crisisProbability: topCrisisIndicator.probability || 0,
+          activeAlertsCount: activeAlerts.length
+        },
+        volatilityHeatmap,
+        stressIndicators: topStressIndicators,
+        riskRegime: {
+          current: riskRegime.regime,
+          confidence: riskRegime.confidence,
+          duration: riskRegime.duration.current,
+          recommendations: riskRegime.implications.recommendedAction
+        },
+        crisisWatch: {
+          highestProbability: topCrisisIndicator.probability || 0,
+          type: topCrisisIndicator.type || 'none',
+          name: topCrisisIndicator.name || 'No active crisis indicators',
+          timeframe: topCrisisIndicator.timeframe || 'N/A'
+        },
+        alerts: activeAlerts.slice(0, 3), // Top 3 alerts
+        recommendations: {
+          positionSizing: riskRegime.implications.positionSizing >= 1.0 ? 'normal' : 'reduced',
+          hedging: stressIndicators.some(i => i.level === 'extreme') ? 'required' : 'optional',
+          monitoring: ['VIX levels', 'Credit spreads', 'Correlation metrics']
+        },
+        lastUpdated: new Date().toISOString()
+      };
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error('❌ Failed to get volatility analysis for discover page:', error);
+      res.status(500).json({ error: 'Failed to get volatility analysis' });
+    }
+  }));
+
   const httpServer = createServer(app);
   
   // =============================================================================

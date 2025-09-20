@@ -2666,3 +2666,547 @@ export type PatternAlertData = typeof patternAlerts.$inferSelect;
 
 export type InsertAiTradingSetup = z.infer<typeof insertAiTradingSetupSchema>;
 export type AiTradingSetupData = typeof aiTradingSetups.$inferSelect;
+
+// =============================================================================
+// VOLATILITY FORECASTING AND STRESS INDICATORS TABLES - Phase 3 Feature
+// =============================================================================
+
+export const volatilityForecasts = pgTable("volatility_forecasts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(), // crypto, stock, commodity, currency
+  forecastType: text("forecast_type").notNull(), // garch, ml_ensemble, regime_switching, stochastic
+  
+  // Current volatility metrics
+  currentVolatility: jsonb("current_volatility").notNull(), // { realized1d, realized7d, realized30d, impliedVolatility, percentile }
+  
+  // Volatility predictions
+  predictions: jsonb("predictions").notNull(), // Array of prediction objects
+  
+  // Model performance metrics
+  modelPerformance: jsonb("model_performance").notNull(), // { accuracy, mape, lastCalibrated, backtestPeriod }
+  
+  // Risk metrics
+  riskMetrics: jsonb("risk_metrics").notNull(), // { var95, var99, expectedShortfall, maxDrawdownProbability }
+  
+  // Market context
+  marketContext: jsonb("market_context").notNull(), // { stressLevel, regime, correlationEnvironment, liquidityConditions }
+  
+  confidence: integer("confidence").notNull(), // 0-100 overall forecast confidence
+  accuracy: real("accuracy"), // Historical accuracy percentage
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  nextUpdate: timestamp("next_update").notNull(),
+  
+  // Metadata
+  dataQuality: text("data_quality"), // excellent, good, fair, poor
+  calibrationDate: timestamp("calibration_date"),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const stressIndicators = pgTable("stress_indicators", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // market_stress, liquidity_stress, volatility_stress, correlation_stress
+  
+  currentValue: real("current_value").notNull(),
+  normalizedValue: real("normalized_value").notNull(), // 0-100 scale
+  
+  // Stress level classification
+  level: text("level").notNull(), // normal, elevated, high, extreme
+  
+  // Thresholds
+  thresholds: jsonb("thresholds").notNull(), // { elevated, high, extreme }
+  
+  // Historical context
+  percentile: real("percentile").notNull(), // Historical percentile
+  zScore: real("z_score").notNull(), // Z-score from historical mean
+  
+  // Time series data (last 30 days)
+  history: jsonb("history"), // Array of historical values
+  
+  // Impact assessment
+  impact: jsonb("impact").notNull(), // { severity, affectedAssets, expectedDuration, previousOccurrences }
+  
+  description: text("description").notNull(),
+  interpretation: text("interpretation").notNull(),
+  actionableInsights: jsonb("actionable_insights"), // Array of insights
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  
+  // Alert configuration
+  alertEnabled: boolean("alert_enabled").default(true),
+  alertThreshold: real("alert_threshold"),
+  lastAlertAt: timestamp("last_alert_at"),
+});
+
+export const riskRegimes = pgTable("risk_regimes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  regime: text("regime").notNull(), // accumulation, risk_on, risk_off, distribution, crisis, recovery
+  confidence: integer("confidence").notNull(), // 0-100 confidence in regime classification
+  
+  // Regime characteristics
+  characteristics: jsonb("characteristics").notNull(), // { averageVolatility, correlationLevel, liquidityConditions, sentimentScore, momentumStrength }
+  
+  // Regime duration and transition
+  duration: jsonb("duration").notNull(), // { current, typical, remaining }
+  
+  // Transition probabilities
+  transitions: jsonb("transitions"), // Array of transition objects
+  
+  // Historical analysis
+  historical: jsonb("historical").notNull(), // { frequency, averageDuration, returnCharacteristics }
+  
+  // Strategic implications
+  implications: jsonb("implications").notNull(), // { recommendedAction, riskTolerance, assetAllocation, positionSizing }
+  
+  detectedAt: timestamp("detected_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  
+  // Regime tracking
+  isActive: boolean("is_active").default(true),
+  previousRegime: text("previous_regime"),
+  regimeStartDate: timestamp("regime_start_date"),
+  expectedEndDate: timestamp("expected_end_date"),
+});
+
+export const crisisIndicators = pgTable("crisis_indicators", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // market_crash, liquidity_crisis, correlation_breakdown, volatility_spike, systemic_risk
+  
+  // Crisis probability
+  probability: real("probability").notNull(), // 0-100 probability of crisis
+  timeframe: text("timeframe").notNull(), // 1d, 7d, 30d, 90d
+  severity: text("severity").notNull(), // minor, moderate, major, systemic
+  
+  // Early warning signals
+  signals: jsonb("signals").notNull(), // Array of signal objects
+  
+  // Crisis characteristics
+  characteristics: jsonb("characteristics").notNull(), // { expectedDuration, expectedImpact, recoveryTime }
+  
+  // Historical precedents
+  precedents: jsonb("precedents"), // Array of historical precedent objects
+  
+  // Mitigation strategies
+  mitigation: jsonb("mitigation").notNull(), // { hedging, positioning, monitoring }
+  
+  confidence: integer("confidence").notNull(), // 0-100 confidence in indicator
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  
+  // Crisis tracking
+  isActive: boolean("is_active").default(true),
+  triggeredAt: timestamp("triggered_at"),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+export const volatilitySurfaces = pgTable("volatility_surfaces", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(), // crypto, stock
+  
+  // Surface data points
+  surface: jsonb("surface").notNull(), // Array of surface points
+  
+  // Surface characteristics
+  characteristics: jsonb("characteristics").notNull(), // { atmVolatility, skew, termStructure, smile }
+  
+  // Model fit metrics
+  modelFit: jsonb("model_fit").notNull(), // { method, r_squared, rmse, parameters }
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  nextUpdate: timestamp("next_update").notNull(),
+  
+  // Data quality
+  dataPoints: integer("data_points"),
+  fitQuality: text("fit_quality"), // excellent, good, fair, poor
+  lastCalibrated: timestamp("last_calibrated"),
+});
+
+export const stressTestScenarios = pgTable("stress_test_scenarios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // historical, hypothetical, regulatory, extreme
+  severity: text("severity").notNull(), // mild, moderate, severe, extreme
+  
+  // Scenario parameters
+  parameters: jsonb("parameters").notNull(), // { marketShock, volatilityMultiplier, correlationIncrease, liquidityDryup, duration }
+  
+  // Asset-specific shocks
+  assetShocks: jsonb("asset_shocks"), // Array of asset shock objects
+  
+  // Historical basis
+  historicalBasis: jsonb("historical_basis"), // { date, event, actualImpact }
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUsed: timestamp("last_used"),
+  
+  // Usage tracking
+  usageCount: integer("usage_count").default(0),
+  averageImpact: real("average_impact"),
+});
+
+export const tailRiskMetrics = pgTable("tail_risk_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  metric: text("metric").notNull(), // expected_shortfall, tail_expectation, extreme_value, peak_over_threshold
+  symbol: text("symbol").notNull(),
+  timeframe: text("timeframe").notNull(), // 1d, 7d, 30d
+  
+  // Risk measurements
+  value: real("value").notNull(),
+  confidence: real("confidence").notNull(), // Confidence level (95%, 99%, etc.)
+  
+  // Tail characteristics
+  tailShape: jsonb("tail_shape").notNull(), // { heaviness, asymmetry, extremeEvents }
+  
+  // Historical context
+  historical: jsonb("historical").notNull(), // { average, maximum, percentile, exceedances }
+  
+  calculatedAt: timestamp("calculated_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  
+  // Model parameters
+  modelType: text("model_type"), // GPD, EVT, POT
+  parameters: jsonb("parameters"),
+  fitQuality: real("fit_quality"),
+});
+
+export const volatilityAlerts = pgTable("volatility_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  alertType: text("alert_type").notNull(), // volatility_spike, regime_change, stress_threshold, crisis_warning, model_drift
+  severity: text("severity").notNull(), // low, medium, high, critical
+  
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  
+  // Alert details
+  symbol: text("symbol"),
+  metric: text("metric").notNull(),
+  currentValue: real("current_value").notNull(),
+  thresholdValue: real("threshold_value").notNull(),
+  deviationPercent: real("deviation_percent").notNull(),
+  
+  // Context
+  context: jsonb("context").notNull(), // { timeframe, historicalContext, implications }
+  
+  // Recommendations
+  recommendations: jsonb("recommendations").notNull(), // { immediate, shortTerm, monitoring }
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  
+  // Alert lifecycle
+  isActive: boolean("is_active").default(true),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  acknowledgedBy: text("acknowledged_by"),
+  
+  // Delivery tracking
+  deliveryChannels: jsonb("delivery_channels"), // Array of delivery channels
+  deliveredAt: jsonb("delivered_at"), // Delivery timestamps by channel
+  
+  // Alert classification
+  priority: text("priority").default('medium'), // low, medium, high, urgent
+  category: text("category"), // market, portfolio, technical, fundamental
+  tags: text("tags").array(),
+});
+
+export const volatilityModelCalibrations = pgTable("volatility_model_calibrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  modelId: text("model_id").notNull(),
+  modelType: text("model_type").notNull(), // garch, stochastic_vol, jump_diffusion, regime_switching
+  symbol: text("symbol").notNull(),
+  
+  // Model parameters
+  parameters: jsonb("parameters").notNull(),
+  
+  // Calibration metrics
+  calibration: jsonb("calibration").notNull(), // { method, logLikelihood, aic, bic, convergence }
+  
+  // Performance metrics
+  performance: jsonb("performance").notNull(), // { insampleR2, oosampleR2, forecastAccuracy, volatilityForecastMape }
+  
+  calibrationDate: timestamp("calibration_date").defaultNow(),
+  validUntil: timestamp("valid_until").notNull(),
+  
+  // Model versioning
+  version: text("version").notNull(),
+  previousVersion: text("previous_version"),
+  
+  // Quality metrics
+  dataQuality: real("data_quality"), // 0-100
+  convergenceStatus: boolean("convergence_status"),
+  outlierCount: integer("outlier_count"),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// =============================================================================
+// VOLATILITY FORECASTING RELATIONS
+// =============================================================================
+
+export const volatilityForecastsRelations = relations(volatilityForecasts, ({ many }) => ({
+  alerts: many(volatilityAlerts),
+  tailRiskMetrics: many(tailRiskMetrics),
+}));
+
+export const stressIndicatorsRelations = relations(stressIndicators, ({ many }) => ({
+  alerts: many(volatilityAlerts),
+}));
+
+export const riskRegimesRelations = relations(riskRegimes, ({ many }) => ({
+  alerts: many(volatilityAlerts),
+}));
+
+export const crisisIndicatorsRelations = relations(crisisIndicators, ({ many }) => ({
+  alerts: many(volatilityAlerts),
+}));
+
+export const volatilitySurfacesRelations = relations(volatilitySurfaces, ({ one }) => ({
+  forecast: one(volatilityForecasts, {
+    fields: [volatilitySurfaces.symbol],
+    references: [volatilityForecasts.symbol],
+  }),
+}));
+
+export const tailRiskMetricsRelations = relations(tailRiskMetrics, ({ one }) => ({
+  forecast: one(volatilityForecasts, {
+    fields: [tailRiskMetrics.symbol],
+    references: [volatilityForecasts.symbol],
+  }),
+}));
+
+export const volatilityAlertsRelations = relations(volatilityAlerts, ({ one }) => ({
+  forecast: one(volatilityForecasts, {
+    fields: [volatilityAlerts.symbol],
+    references: [volatilityForecasts.symbol],
+  }),
+  stressIndicator: one(stressIndicators),
+  riskRegime: one(riskRegimes),
+  crisisIndicator: one(crisisIndicators),
+}));
+
+export const volatilityModelCalibrationsRelations = relations(volatilityModelCalibrations, ({ one }) => ({
+  forecast: one(volatilityForecasts, {
+    fields: [volatilityModelCalibrations.symbol],
+    references: [volatilityForecasts.symbol],
+  }),
+}));
+
+// =============================================================================
+// VOLATILITY FORECASTING INSERT SCHEMAS
+// =============================================================================
+
+export const insertVolatilityForecastSchema = createInsertSchema(volatilityForecasts).pick({
+  symbol: true,
+  assetType: true,
+  forecastType: true,
+  currentVolatility: true,
+  predictions: true,
+  modelPerformance: true,
+  riskMetrics: true,
+  marketContext: true,
+  confidence: true,
+  accuracy: true,
+  nextUpdate: true,
+  dataQuality: true,
+  calibrationDate: true,
+  expiresAt: true,
+});
+
+export const insertStressIndicatorSchema = createInsertSchema(stressIndicators).pick({
+  name: true,
+  category: true,
+  currentValue: true,
+  normalizedValue: true,
+  level: true,
+  thresholds: true,
+  percentile: true,
+  zScore: true,
+  history: true,
+  impact: true,
+  description: true,
+  interpretation: true,
+  actionableInsights: true,
+  alertEnabled: true,
+  alertThreshold: true,
+});
+
+export const insertRiskRegimeSchema = createInsertSchema(riskRegimes).pick({
+  regime: true,
+  confidence: true,
+  characteristics: true,
+  duration: true,
+  transitions: true,
+  historical: true,
+  implications: true,
+  isActive: true,
+  previousRegime: true,
+  regimeStartDate: true,
+  expectedEndDate: true,
+});
+
+export const insertCrisisIndicatorSchema = createInsertSchema(crisisIndicators).pick({
+  name: true,
+  type: true,
+  probability: true,
+  timeframe: true,
+  severity: true,
+  signals: true,
+  characteristics: true,
+  precedents: true,
+  mitigation: true,
+  confidence: true,
+  isActive: true,
+  triggeredAt: true,
+});
+
+export const insertVolatilitySurfaceSchema = createInsertSchema(volatilitySurfaces).pick({
+  symbol: true,
+  assetType: true,
+  surface: true,
+  characteristics: true,
+  modelFit: true,
+  nextUpdate: true,
+  dataPoints: true,
+  fitQuality: true,
+  lastCalibrated: true,
+});
+
+export const insertStressTestScenarioSchema = createInsertSchema(stressTestScenarios).pick({
+  name: true,
+  description: true,
+  category: true,
+  severity: true,
+  parameters: true,
+  assetShocks: true,
+  historicalBasis: true,
+  isActive: true,
+  usageCount: true,
+  averageImpact: true,
+});
+
+export const insertTailRiskMetricSchema = createInsertSchema(tailRiskMetrics).pick({
+  metric: true,
+  symbol: true,
+  timeframe: true,
+  value: true,
+  confidence: true,
+  tailShape: true,
+  historical: true,
+  modelType: true,
+  parameters: true,
+  fitQuality: true,
+});
+
+export const insertVolatilityAlertSchema = createInsertSchema(volatilityAlerts).pick({
+  alertType: true,
+  severity: true,
+  title: true,
+  description: true,
+  symbol: true,
+  metric: true,
+  currentValue: true,
+  thresholdValue: true,
+  deviationPercent: true,
+  context: true,
+  recommendations: true,
+  expiresAt: true,
+  acknowledgedBy: true,
+  deliveryChannels: true,
+  priority: true,
+  category: true,
+  tags: true,
+});
+
+export const insertVolatilityModelCalibrationSchema = createInsertSchema(volatilityModelCalibrations).pick({
+  modelId: true,
+  modelType: true,
+  symbol: true,
+  parameters: true,
+  calibration: true,
+  performance: true,
+  validUntil: true,
+  version: true,
+  previousVersion: true,
+  dataQuality: true,
+  convergenceStatus: true,
+  outlierCount: true,
+  isActive: true,
+});
+
+// =============================================================================
+// VOLATILITY FORECASTING TYPES
+// =============================================================================
+
+export type InsertVolatilityForecast = z.infer<typeof insertVolatilityForecastSchema>;
+export type VolatilityForecast = typeof volatilityForecasts.$inferSelect;
+
+export type InsertStressIndicator = z.infer<typeof insertStressIndicatorSchema>;
+export type StressIndicator = typeof stressIndicators.$inferSelect;
+
+export type InsertRiskRegime = z.infer<typeof insertRiskRegimeSchema>;
+export type RiskRegime = typeof riskRegimes.$inferSelect;
+
+export type InsertCrisisIndicator = z.infer<typeof insertCrisisIndicatorSchema>;
+export type CrisisIndicator = typeof crisisIndicators.$inferSelect;
+
+export type InsertVolatilitySurface = z.infer<typeof insertVolatilitySurfaceSchema>;
+export type VolatilitySurface = typeof volatilitySurfaces.$inferSelect;
+
+export type InsertStressTestScenario = z.infer<typeof insertStressTestScenarioSchema>;
+export type StressTestScenario = typeof stressTestScenarios.$inferSelect;
+
+export type InsertTailRiskMetric = z.infer<typeof insertTailRiskMetricSchema>;
+export type TailRiskMetric = typeof tailRiskMetrics.$inferSelect;
+
+export type InsertVolatilityAlert = z.infer<typeof insertVolatilityAlertSchema>;
+export type VolatilityAlert = typeof volatilityAlerts.$inferSelect;
+
+export type InsertVolatilityModelCalibration = z.infer<typeof insertVolatilityModelCalibrationSchema>;
+export type VolatilityModelCalibration = typeof volatilityModelCalibrations.$inferSelect;
+
+// =============================================================================
+// VOLATILITY FORECASTING DASHBOARD TYPES
+// =============================================================================
+
+export type VolatilityForecastingDashboard = {
+  summary: {
+    overallStressLevel: number; // 0-100
+    activeRegime: string;
+    regimeConfidence: number;
+    highestCrisisProbability: number;
+    activeAlerts: number;
+    totalForecasts: number;
+  };
+  
+  volatilityForecasts: VolatilityForecast[];
+  stressIndicators: StressIndicator[];
+  riskRegime: RiskRegime;
+  crisisIndicators: CrisisIndicator[];
+  activeAlerts: VolatilityAlert[];
+  
+  marketContext: {
+    overallVolatility: number;
+    correlationLevel: number;
+    liquidityConditions: string;
+    sentimentScore: number;
+  };
+  
+  recommendations: {
+    positionSizing: string;
+    hedgingStrategy: string;
+    monitoringPriorities: string[];
+    riskManagement: string[];
+  };
+  
+  lastUpdated: string;
+};

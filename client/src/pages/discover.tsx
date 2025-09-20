@@ -127,6 +127,498 @@ interface TradingSetup {
   rationale: string;
 }
 
+// Volatility Forecasting Section Component
+const VolatilityForecastingSection = () => {
+  const [selectedAsset, setSelectedAsset] = useState<string>('BTC');
+  const [activeVolTab, setActiveVolTab] = useState<string>('overview');
+
+  // Volatility forecasting queries
+  const { data: volatilityAnalysis, isLoading: volatilityLoading } = useQuery({
+    queryKey: ['/api/volatility-forecasting/discover-analysis'],
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1
+  });
+
+  const { data: assetForecast, isLoading: forecastLoading } = useQuery({
+    queryKey: ['/api/volatility-forecasting/forecast', selectedAsset],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: stressIndicators, isLoading: stressLoading } = useQuery({
+    queryKey: ['/api/volatility-forecasting/stress-indicators'],
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 1
+  });
+
+  const { data: riskRegime, isLoading: regimeLoading } = useQuery({
+    queryKey: ['/api/volatility-forecasting/risk-regime'],
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1
+  });
+
+  const { data: crisisIndicators, isLoading: crisisLoading } = useQuery({
+    queryKey: ['/api/volatility-forecasting/crisis-indicators'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: volatilityAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['/api/volatility-forecasting/alerts'],
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 1
+  });
+
+  // Helper functions
+  const getStressColor = (level: number) => {
+    if (level >= 80) return 'text-red-400 bg-red-500/20 border-red-400/30';
+    if (level >= 60) return 'text-orange-400 bg-orange-500/20 border-orange-400/30';
+    if (level >= 40) return 'text-yellow-400 bg-yellow-500/20 border-yellow-400/30';
+    return 'text-green-400 bg-green-500/20 border-green-400/30';
+  };
+
+  const getRegimeColor = (regime: string) => {
+    switch (regime) {
+      case 'risk_on': return 'text-green-400 bg-green-500/20 border-green-400/30';
+      case 'risk_off': return 'text-red-400 bg-red-500/20 border-red-400/30';
+      case 'crisis': return 'text-red-600 bg-red-600/30 border-red-500/40';
+      case 'recovery': return 'text-blue-400 bg-blue-500/20 border-blue-400/30';
+      case 'accumulation': return 'text-cyan-400 bg-cyan-500/20 border-cyan-400/30';
+      case 'distribution': return 'text-orange-400 bg-orange-500/20 border-orange-400/30';
+      default: return 'text-gray-400 bg-gray-500/20 border-gray-400/30';
+    }
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical': return <AlertCircle className="h-4 w-4 text-red-400" />;
+      case 'high': return <AlertTriangle className="h-4 w-4 text-orange-400" />;
+      case 'medium': return <Info className="h-4 w-4 text-yellow-400" />;
+      default: return <CheckCircle2 className="h-4 w-4 text-green-400" />;
+    }
+  };
+
+  const getVolatilityIcon = (regime: string) => {
+    switch (regime) {
+      case 'extreme': return <AlertTriangle className="h-4 w-4 text-red-400" />;
+      case 'high': return <TrendingUp className="h-4 w-4 text-orange-400" />;
+      case 'normal': return <Activity className="h-4 w-4 text-green-400" />;
+      default: return <Gauge className="h-4 w-4 text-blue-400" />;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Volatility Overview Cards */}
+      {volatilityAnalysis && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Overall Stress Level */}
+          <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-red-300 text-sm font-medium">Market Stress</p>
+                  <p className="text-white text-2xl font-bold">{volatilityAnalysis.overview.overallStressLevel}</p>
+                  <p className="text-gray-400 text-xs">0-100 Scale</p>
+                </div>
+                <div className={`p-3 rounded-full ${getStressColor(volatilityAnalysis.overview.overallStressLevel)}`}>
+                  <Gauge className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Risk Regime */}
+          <Card className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-blue-500/30 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-300 text-sm font-medium">Risk Regime</p>
+                  <p className="text-white text-lg font-bold capitalize">{volatilityAnalysis.riskRegime.current}</p>
+                  <p className="text-gray-400 text-xs">{volatilityAnalysis.riskRegime.confidence}% confidence</p>
+                </div>
+                <div className={`p-3 rounded-full ${getRegimeColor(volatilityAnalysis.riskRegime.current)}`}>
+                  <Shield className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Crisis Probability */}
+          <Card className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-purple-500/30 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-300 text-sm font-medium">Crisis Risk</p>
+                  <p className="text-white text-2xl font-bold">{volatilityAnalysis.crisisWatch.highestProbability.toFixed(0)}%</p>
+                  <p className="text-gray-400 text-xs capitalize">{volatilityAnalysis.crisisWatch.timeframe}</p>
+                </div>
+                <div className={`p-3 rounded-full ${
+                  volatilityAnalysis.crisisWatch.highestProbability > 50 ? 'bg-red-500/20 border-red-400/30' : 'bg-purple-500/20 border-purple-400/30'
+                }`}>
+                  <AlertTriangle className={`h-6 w-6 ${
+                    volatilityAnalysis.crisisWatch.highestProbability > 50 ? 'text-red-400' : 'text-purple-400'
+                  }`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Active Alerts */}
+          <Card className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-yellow-500/30 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-yellow-300 text-sm font-medium">Active Alerts</p>
+                  <p className="text-white text-2xl font-bold">{volatilityAnalysis.overview.activeAlertsCount}</p>
+                  <p className="text-gray-400 text-xs">Need attention</p>
+                </div>
+                <div className="p-3 rounded-full bg-yellow-500/20 border-yellow-400/30">
+                  <Bell className="h-6 w-6 text-yellow-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Main Volatility Analysis */}
+      <Tabs value={activeVolTab} onValueChange={setActiveVolTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4 bg-black/40 border border-white/10">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-300">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="forecasts" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-300">
+            Forecasts
+          </TabsTrigger>
+          <TabsTrigger value="stress" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-300">
+            Stress Analysis
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-300">
+            Alerts
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {volatilityAnalysis && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Volatility Heatmap */}
+              <Card className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border-red-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-red-300 flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Volatility Heatmap
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {volatilityAnalysis.volatilityHeatmap.map((asset: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-red-500/20">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${getVolatilityIcon(asset.regime) ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
+                          {getVolatilityIcon(asset.regime)}
+                        </div>
+                        <div>
+                          <span className="text-white font-medium">{asset.symbol}</span>
+                          <p className="text-gray-400 text-xs">Current: {asset.currentVol.toFixed(1)}%</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-medium ${
+                          asset.change > 0 ? 'text-red-400' : 'text-green-400'
+                        }`}>
+                          {asset.forecastVol.toFixed(1)}%
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                          {asset.change > 0 ? '+' : ''}{asset.change.toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Risk Regime Analysis */}
+              <Card className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-blue-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-blue-300 flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Risk Regime Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Current Regime:</span>
+                    <Badge className={`${getRegimeColor(volatilityAnalysis.riskRegime.current)} border-0`}>
+                      {volatilityAnalysis.riskRegime.current.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Duration:</span>
+                    <span className="text-white">{volatilityAnalysis.riskRegime.duration} days</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Confidence:</span>
+                    <span className="text-white">{volatilityAnalysis.riskRegime.confidence}%</span>
+                  </div>
+                  <div className="pt-3 border-t border-blue-500/20">
+                    <p className="text-blue-300 text-sm font-medium mb-2">Recommendation:</p>
+                    <p className="text-gray-300 text-sm capitalize">
+                      {volatilityAnalysis.riskRegime.recommendations}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Top Stress Indicators */}
+          {volatilityAnalysis && volatilityAnalysis.stressIndicators && (
+            <Card className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border-orange-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-orange-300 flex items-center gap-2">
+                  <Gauge className="h-5 w-5" />
+                  Top Stress Indicators
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {volatilityAnalysis.stressIndicators.map((indicator: any, index: number) => (
+                    <div key={index} className="p-3 bg-black/20 rounded-lg border border-orange-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-white font-medium text-sm">{indicator.name}</span>
+                        <Badge className={`text-xs border-0 ${getStressColor(indicator.normalizedValue)}`}>
+                          {indicator.level.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-xs">Value:</span>
+                        <span className="text-white text-sm">{indicator.normalizedValue.toFixed(1)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-xs">Percentile:</span>
+                        <span className="text-gray-300 text-xs">{indicator.percentile.toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Forecasts Tab */}
+        <TabsContent value="forecasts" className="space-y-6">
+          <div className="flex gap-4 mb-4">
+            <select 
+              value={selectedAsset} 
+              onChange={(e) => setSelectedAsset(e.target.value)}
+              className="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
+            >
+              {['BTC', 'ETH', 'SOL', 'SPY', 'QQQ'].map(asset => (
+                <option key={asset} value={asset}>{asset}</option>
+              ))}
+            </select>
+          </div>
+
+          {assetForecast && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Volatility Predictions */}
+              <Card className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-purple-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-purple-300 flex items-center gap-2">
+                    <LineChart className="h-5 w-5" />
+                    Volatility Predictions - {selectedAsset}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {assetForecast.predictions.map((pred: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-purple-500/20">
+                      <div>
+                        <span className="text-white font-medium">{pred.horizon}</span>
+                        <p className="text-gray-400 text-xs">{pred.confidence}% confidence</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-white font-medium">{pred.expectedVolatility.toFixed(1)}%</p>
+                        <p className="text-gray-400 text-xs">
+                          {pred.range.lower.toFixed(1)}% - {pred.range.upper.toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Risk Metrics */}
+              <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-red-300 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    Risk Metrics - {selectedAsset}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs">VaR 95%</p>
+                      <p className="text-red-400 font-bold text-lg">{assetForecast.riskMetrics.var95.toFixed(1)}%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs">VaR 99%</p>
+                      <p className="text-red-400 font-bold text-lg">{assetForecast.riskMetrics.var99.toFixed(1)}%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs">Expected Shortfall</p>
+                      <p className="text-orange-400 font-bold text-lg">{assetForecast.riskMetrics.expectedShortfall.toFixed(1)}%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs">Max Drawdown Risk</p>
+                      <p className="text-yellow-400 font-bold text-lg">{assetForecast.riskMetrics.maxDrawdownProbability.toFixed(0)}%</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Stress Analysis Tab */}
+        <TabsContent value="stress" className="space-y-6">
+          {stressIndicators && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stressIndicators.indicators.map((indicator: any, index: number) => (
+                <Card key={index} className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border-orange-500/30 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-orange-300 flex items-center gap-2 text-base">
+                      <Gauge className="h-4 w-4" />
+                      {indicator.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-sm">Level:</span>
+                      <Badge className={`text-xs border-0 ${getStressColor(indicator.normalizedValue)}`}>
+                        {indicator.level.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-sm">Value:</span>
+                      <span className="text-white font-medium">{indicator.normalizedValue.toFixed(1)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-sm">Percentile:</span>
+                      <span className="text-gray-300">{indicator.percentile.toFixed(0)}%</span>
+                    </div>
+                    <p className="text-gray-400 text-xs mt-2">{indicator.interpretation}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Crisis Indicators */}
+          {crisisIndicators && (
+            <Card className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border-red-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-red-300 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Crisis Indicators
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {crisisIndicators.indicators.map((indicator: any, index: number) => (
+                    <div key={index} className="p-4 bg-black/20 rounded-lg border border-red-500/20">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-white font-medium">{indicator.name}</span>
+                        <Badge className={`text-xs border-0 ${
+                          indicator.probability > 70 ? 'bg-red-500/30 text-red-300' :
+                          indicator.probability > 40 ? 'bg-orange-500/30 text-orange-300' :
+                          'bg-yellow-500/30 text-yellow-300'
+                        }`}>
+                          {indicator.probability.toFixed(0)}%
+                        </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400 text-sm">Type:</span>
+                          <span className="text-gray-300 text-sm capitalize">{indicator.type.replace('_', ' ')}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400 text-sm">Severity:</span>
+                          <span className="text-gray-300 text-sm capitalize">{indicator.severity}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400 text-sm">Timeframe:</span>
+                          <span className="text-gray-300 text-sm">{indicator.timeframe}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Alerts Tab */}
+        <TabsContent value="alerts" className="space-y-6">
+          {volatilityAlerts && volatilityAlerts.alerts && volatilityAlerts.alerts.length > 0 ? (
+            <div className="space-y-4">
+              {volatilityAlerts.alerts.map((alert: any, index: number) => (
+                <Card key={index} className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-yellow-500/30 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {getSeverityIcon(alert.severity)}
+                          <span className="text-white font-medium">{alert.title}</span>
+                          <Badge className={`text-xs border-0 ${
+                            alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                            alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                            alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-green-500/20 text-green-300'
+                          }`}>
+                            {alert.severity.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-300 text-sm mb-2">{alert.description}</p>
+                        {alert.symbol && (
+                          <p className="text-gray-400 text-xs">Asset: {alert.symbol}</p>
+                        )}
+                        <p className="text-gray-400 text-xs">
+                          Current: {alert.currentValue} | Threshold: {alert.thresholdValue} | 
+                          Deviation: {alert.deviationPercent > 0 ? '+' : ''}{alert.deviationPercent.toFixed(1)}%
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-3 border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/20"
+                        data-testid={`button-acknowledge-vol-alert-${alert.id}`}
+                      >
+                        Acknowledge
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <CheckCircle2 className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                <p className="text-gray-300">No active volatility alerts</p>
+                <p className="text-gray-400 text-sm mt-2">All systems operating within normal parameters</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
 // Pattern Recognition Section Component
 const PatternRecognitionSection = () => {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC');
@@ -5263,11 +5755,41 @@ export default function Discover() {
           <PatternRecognitionSection />
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Volatility Forecasting and Stress Monitoring - Phase 3 Feature */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <Activity className="h-7 w-7 text-red-400" />
+              Volatility Forecasting & Stress Monitoring
+              <Badge className="bg-red-500/20 text-red-300 border-red-400/30 text-xs">
+                Real-Time
+              </Badge>
+            </h2>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="border-red-500/30 text-red-300 hover:bg-red-500/10">
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                Stress Test
+              </Button>
+              <Button variant="outline" size="sm" className="border-red-500/30 text-red-300 hover:bg-red-500/10">
+                <Gauge className="h-4 w-4 mr-1" />
+                Dashboard
+              </Button>
+            </div>
+          </div>
+
+          <VolatilityForecastingSection />
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
           className="flex flex-wrap gap-4"
         >
           <Button
