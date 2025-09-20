@@ -661,14 +661,27 @@ export default function Discover() {
                       <h3 className="text-white font-semibold">{mover.symbol}</h3>
                       <p className="text-gray-400 text-sm">{mover.name}</p>
                     </div>
-                    <Badge className={`${mover.momentum === 'bullish' ? 'bg-green-500/20 text-green-300' : 
-                                     mover.momentum === 'bearish' ? 'bg-red-500/20 text-red-300' : 
-                                     'bg-gray-500/20 text-gray-300'} border-0`}>
-                      {mover.momentum === 'bullish' ? <TrendingUp className="h-3 w-3 mr-1" /> :
-                       mover.momentum === 'bearish' ? <TrendingDown className="h-3 w-3 mr-1" /> :
-                       <Activity className="h-3 w-3 mr-1" />}
-                      {mover.momentum}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge className={`${mover.momentum === 'bullish' ? 'bg-green-500/20 text-green-300' : 
+                                       mover.momentum === 'bearish' ? 'bg-red-500/20 text-red-300' : 
+                                       'bg-gray-500/20 text-gray-300'} border-0 text-xs`}>
+                        {mover.momentum === 'bullish' ? <TrendingUp className="h-3 w-3 mr-1" /> :
+                         mover.momentum === 'bearish' ? <TrendingDown className="h-3 w-3 mr-1" /> :
+                         <Activity className="h-3 w-3 mr-1" />}
+                        {mover.momentum}
+                      </Badge>
+                      <Badge className={`text-xs border-0 ${
+                        (mover as any).priority === 'critical' ? 'bg-red-500/20 text-red-300' :
+                        (mover as any).priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                        (mover as any).priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {(mover as any).priority === 'critical' ? '🚨' :
+                         (mover as any).priority === 'high' ? '⚡' :
+                         (mover as any).priority === 'medium' ? '📊' : '📈'}
+                        {(mover as any).priority || 'low'}
+                      </Badge>
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
@@ -860,20 +873,35 @@ export default function Discover() {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               {/* Priority indicator for top stories */}
-                              {index < 3 && (
-                                <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                {index < 3 && (
                                   <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30">
                                     <Flame className="h-3 w-3 mr-1" />
                                     Hot Trend #{index + 1}
                                   </Badge>
-                                </div>
-                              )}
+                                )}
+                                <Badge className={`text-xs border-0 ${
+                                  (story as any).priority === 'critical' ? 'bg-red-500/20 text-red-300' :
+                                  (story as any).priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                                  (story as any).priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                                  'bg-gray-500/20 text-gray-300'
+                                }`}>
+                                  {(story as any).priority === 'critical' ? '🔥' :
+                                   (story as any).priority === 'high' ? '⚡' :
+                                   (story as any).priority === 'medium' ? '📈' : '📊'}
+                                  {(story as any).priority || 'low'} Priority
+                                </Badge>
+                                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  AI Rank #{(story as any).aiRank || index + 1}
+                                </Badge>
+                              </div>
                               
                               <h3 className="text-white font-semibold text-base sm:text-lg line-clamp-2">{story.title}</h3>
                               <p className="text-gray-300 text-xs sm:text-sm mt-1 line-clamp-2">{story.description}</p>
                               
                               {/* Sector correlation indicator */}
-                              {selectedSector && story.metadata.tags.some(tag => 
+                              {selectedSector && story.metadata.tags.some((tag: string) => 
                                 tag.toLowerCase().includes(selectedSector.toLowerCase())
                               ) && (
                                 <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 mt-2">
@@ -934,7 +962,7 @@ export default function Discover() {
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            {story.metadata.tags.slice(0, 4).map((tag) => (
+                            {story.metadata.tags.slice(0, 4).map((tag: string) => (
                               <Badge 
                                 key={tag} 
                                 variant="outline" 
