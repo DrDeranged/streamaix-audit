@@ -10,10 +10,12 @@ import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { MarketDataService } from "./services/marketDataService";
 import { youtubeService } from "./services/youtubeService";
+import { PredictiveAnalyticsService } from "./services/predictiveAnalyticsService";
 import passport from "passport";
 
 // Initialize services
 const marketDataService = MarketDataService.getInstance();
+const predictiveAnalyticsService = new PredictiveAnalyticsService(storage as DatabaseStorage);
 import session from "express-session";
 import { 
   loginSchema, 
@@ -1400,6 +1402,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const transactions: any[] = [];
     
     res.json({ transactions });
+  }));
+
+  // =============================================================================
+  // PREDICTIVE ANALYTICS ROUTES 
+  // =============================================================================
+
+  // Get sector trend predictions
+  app.get('/api/analytics/sector-trends/:sector', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { sector } = req.params;
+    const timeframe = req.query.timeframe as string || '24h';
+    
+    try {
+      const predictions = await predictiveAnalyticsService.predictSectorTrends(sector, timeframe as any);
+      res.json({
+        success: true,
+        sector,
+        timeframe,
+        predictions,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Sector trend prediction error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate sector trend predictions',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get personalized content recommendations
+  app.get('/api/analytics/recommendations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    try {
+      const recommendations = await predictiveAnalyticsService.generateContentRecommendations(userId, limit);
+      res.json({
+        success: true,
+        recommendations,
+        count: recommendations.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Content recommendations error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate content recommendations',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get market alerts
+  app.get('/api/analytics/market-alerts', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    
+    try {
+      const alerts = await predictiveAnalyticsService.generateMarketAlerts(userId);
+      res.json({
+        success: true,
+        alerts,
+        count: alerts.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Market alerts error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate market alerts',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get user engagement predictions
+  app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { contentTypes } = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    if (!contentTypes || !Array.isArray(contentTypes)) {
+      return res.status(400).json({ success: false, error: 'contentTypes array is required' });
+    }
+    
+    try {
+      const forecasts = await predictiveAnalyticsService.predictUserEngagement(userId, contentTypes);
+      res.json({
+        success: true,
+        forecasts,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Engagement forecast error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate engagement forecasts',
+        timestamp: new Date().toISOString()
+      });
+    }
   }));
 
   // =============================================================================
