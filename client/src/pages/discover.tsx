@@ -355,12 +355,12 @@ export default function Discover() {
               </h1>
               
               {/* Time Filter Pills */}
-              <div className="flex gap-2">
+              <div className="flex gap-1 sm:gap-2 flex-wrap">
                 {(['1h', '6h', '24h', '7d'] as const).map((period) => (
                   <button
                     key={period}
                     onClick={() => handleTimeFilterChange(period)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                    className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-all ${
                       timeFilter === period
                         ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
                         : 'bg-white/10 text-gray-300 hover:bg-white/20'
@@ -421,8 +421,8 @@ export default function Discover() {
             transition={{ duration: 0.3 }}
             className="bg-gradient-to-r from-purple-900/20 via-indigo-900/20 to-purple-900/20 backdrop-blur-sm border-b border-purple-500/20"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 
                 {/* Personalized Recommendations */}
                 <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
@@ -549,7 +549,7 @@ export default function Discover() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-6 sm:space-y-8">
         {/* Phase 1: Market Pulse Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -557,7 +557,7 @@ export default function Discover() {
           className="space-y-6"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <Activity className="h-5 w-5 text-indigo-400" />
               Market Pulse
             </h2>
@@ -568,10 +568,10 @@ export default function Discover() {
           </div>
 
           {/* Market Movers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {marketMovers.slice(0, 6).map((mover) => (
               <Card key={mover.symbol} className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all">
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h3 className="text-white font-semibold">{mover.symbol}</h3>
@@ -613,7 +613,7 @@ export default function Discover() {
           className="space-y-6"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-blue-400" />
               Sector Intelligence
             </h2>
@@ -623,7 +623,7 @@ export default function Discover() {
           </div>
 
           {/* Sector Performance Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {sectors.slice(0, 6).map((sector) => (
               <Card 
                 key={sector.name} 
@@ -633,7 +633,7 @@ export default function Discover() {
                 onClick={() => handleSectorClick(sector.name, sector)}
                 data-testid={`sector-card-${sector.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-white font-semibold">{sector.name}</h3>
                     <div className="flex items-center gap-1">
@@ -686,8 +686,8 @@ export default function Discover() {
           transition={{ delay: 0.3 }}
           className="space-y-6"
         >
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <Flame className="h-5 w-5 text-orange-400" />
               Content Intelligence
               <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 ml-2">
@@ -697,7 +697,7 @@ export default function Discover() {
             </h2>
             
             {/* Enhanced Story Type Filter */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {([
                 { key: 'all', label: 'All Sources', icon: Globe },
                 { key: 'farcaster', label: 'Social', icon: MessageSquare },
@@ -707,7 +707,7 @@ export default function Discover() {
                 <button
                   key={key}
                   onClick={() => setStoryFilter(key)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 ${
                     storyFilter === key
                       ? 'bg-orange-500/20 text-orange-300 border border-orange-400/30'
                       : 'bg-white/10 text-gray-300 hover:bg-white/20'
@@ -760,10 +760,10 @@ export default function Discover() {
                     }`}
                     onClick={() => handleStoryClick(story, 'view')}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex gap-4">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex gap-3 sm:gap-4">
                         {story.thumbnail && (
-                          <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0">
                             <img 
                               src={story.thumbnail} 
                               alt={story.title}
@@ -785,8 +785,8 @@ export default function Discover() {
                                 </div>
                               )}
                               
-                              <h3 className="text-white font-semibold text-lg line-clamp-2">{story.title}</h3>
-                              <p className="text-gray-300 text-sm mt-1 line-clamp-2">{story.description}</p>
+                              <h3 className="text-white font-semibold text-base sm:text-lg line-clamp-2">{story.title}</h3>
+                              <p className="text-gray-300 text-xs sm:text-sm mt-1 line-clamp-2">{story.description}</p>
                               
                               {/* Sector correlation indicator */}
                               {selectedSector && story.metadata.tags.some(tag => 
