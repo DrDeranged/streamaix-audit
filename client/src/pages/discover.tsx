@@ -90,7 +90,7 @@ export default function Discover() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [timeFilter, setTimeFilter] = useState<'1h' | '6h' | '24h' | '7d'>('24h');
+  const timeFilter = '24h'; // Fixed to 24h only
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [storyFilter, setStoryFilter] = useState<'all' | 'farcaster' | 'youtube' | 'news'>('all');
   const [showInsights, setShowInsights] = useState<boolean>(false);
@@ -191,13 +191,7 @@ export default function Discover() {
   }, [user]);
 
   // Track time filter changes
-  const handleTimeFilterChange = (period: '1h' | '6h' | '24h' | '7d') => {
-    setTimeFilter(period);
-    trackUserInteraction('filter_change', 'time_filter', period, {
-      previousFilter: timeFilter,
-      timestamp: new Date().toISOString()
-    });
-  };
+  // Removed time filter handler - now using fixed 24h period
 
   // Track sector clicks
   const handleSectorClick = (sectorName: string, sectorData: any) => {
@@ -438,23 +432,10 @@ export default function Discover() {
                 Discover
               </h1>
               
-              {/* Time Filter Pills */}
-              <div className="flex gap-1 sm:gap-2 flex-wrap">
-                {(['1h', '6h', '24h', '7d'] as const).map((period) => (
-                  <button
-                    key={period}
-                    onClick={() => handleTimeFilterChange(period)}
-                    className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-all ${
-                      timeFilter === period
-                        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                    }`}
-                    data-testid={`time-filter-${period}`}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
+              {/* Fixed to 24h display - no time filter buttons */}
+              <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                24h View
+              </Badge>
             </div>
 
             <div className="flex items-center gap-3">
