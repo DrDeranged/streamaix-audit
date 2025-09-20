@@ -87,6 +87,586 @@ interface SectorData {
   sentiment: number;
 }
 
+// Institutional Analytics Components
+const InstitutionalAnalyticsOverview = () => {
+  const { data: institutionalOverview, isLoading } = useQuery({
+    queryKey: ['/api/institutional/overview'],
+    refetchInterval: 30000, // 30 seconds
+  });
+
+  if (isLoading) {
+    return (
+      <Card className="bg-gradient-to-r from-emerald-900/20 via-teal-900/20 to-emerald-900/20 border-emerald-500/30 backdrop-blur-sm animate-pulse">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="text-center">
+                <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="h-6 bg-gray-600 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!institutionalOverview?.overview) return null;
+
+  const overview = institutionalOverview.overview;
+  const sentiment = overview.sentiment;
+  const smartMoney = overview.smartMoneyMovements || [];
+  const fundFlows = overview.fundFlows || [];
+  
+  const totalFlowValue = fundFlows.reduce((sum: number, flow: any) => sum + Math.abs(flow.value), 0);
+  const smartMoneyVolume = smartMoney.reduce((sum: number, tx: any) => sum + tx.value, 0);
+
+  return (
+    <Card className="bg-gradient-to-r from-emerald-900/20 via-teal-900/20 to-emerald-900/20 border-emerald-500/30 backdrop-blur-sm">
+      <CardContent className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="text-center">
+            <p className="text-gray-400 text-sm">Smart Money Volume 24h</p>
+            <p className="text-white font-bold text-lg">
+              ${(smartMoneyVolume / 1e6).toFixed(1)}M
+            </p>
+            <p className="text-emerald-400 text-xs">{smartMoney.length} transactions</p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-400 text-sm">Fund Flows 24h</p>
+            <p className="text-white font-bold text-lg">
+              ${(totalFlowValue / 1e6).toFixed(1)}M
+            </p>
+            <p className="text-cyan-400 text-xs">{fundFlows.length} flows tracked</p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-400 text-sm">Institutional Sentiment</p>
+            <p className={`font-bold text-lg ${sentiment?.overall > 0 ? 'text-green-400' : sentiment?.overall < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+              {sentiment ? (sentiment.overall * 100).toFixed(1) : 'N/A'}%
+            </p>
+            <p className="text-gray-400 text-xs">{sentiment?.trend || 'Unknown'}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-400 text-sm">Confidence Score</p>
+            <p className="text-white font-bold text-lg">
+              {sentiment?.confidence?.toFixed(0) || 'N/A'}%
+            </p>
+            <p className="text-purple-400 text-xs">Analysis strength</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const SmartMoneyMovements = () => {
+  const { data: smartMoney, isLoading } = useQuery({
+    queryKey: ['/api/institutional/smart-money'],
+    refetchInterval: 15000, // 15 seconds
+  });
+
+  return (
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-emerald-300 flex items-center gap-2">
+          🧠 Smart Money Movements
+          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30">
+            High Confidence
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="h-3 bg-gray-800 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        ) : smartMoney?.smartMoneyMovements?.length > 0 ? (
+          <div className="space-y-3">
+            {smartMoney.smartMoneyMovements.slice(0, 5).map((tx: any, idx: number) => (
+              <motion.div
+                key={tx.hash}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-black/30 rounded-lg p-3 border-l-2 border-emerald-500/50"
+                data-testid={`smart-money-${idx}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white font-medium text-sm">{tx.asset}</span>
+                      <Badge className={`text-xs ${
+                        tx.type === 'accumulation' ? 'bg-green-500/20 text-green-300' :
+                        tx.type === 'distribution' ? 'bg-red-500/20 text-red-300' :
+                        'bg-blue-500/20 text-blue-300'
+                      }`}>
+                        {tx.type}
+                      </Badge>
+                      <Badge className={`text-xs ${
+                        tx.impact === 'critical' ? 'bg-red-500/20 text-red-300' :
+                        tx.impact === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                        'bg-yellow-500/20 text-yellow-300'
+                      }`}>
+                        {tx.impact}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-300 text-xs mb-1">
+                      ${(tx.value / 1e6).toFixed(2)}M • {tx.strategy || 'Unknown Strategy'}
+                    </p>
+                    <p className="text-gray-500 text-xs">
+                      {new Date(tx.timestamp).toLocaleTimeString()} • Confidence: {tx.confidence}%
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No smart money movements detected</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const InstitutionalFundFlows = () => {
+  const { data: fundFlows, isLoading } = useQuery({
+    queryKey: ['/api/institutional/fund-flows'],
+    refetchInterval: 30000, // 30 seconds
+  });
+
+  return (
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-cyan-300 flex items-center gap-2">
+          💰 Fund Flows
+          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30">
+            Exchange Tracking
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="h-3 bg-gray-800 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        ) : fundFlows?.fundFlows?.length > 0 ? (
+          <div className="space-y-3">
+            {fundFlows.fundFlows.slice(0, 5).map((flow: any, idx: number) => (
+              <motion.div
+                key={flow.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-black/30 rounded-lg p-3 border-l-2 border-cyan-500/50"
+                data-testid={`fund-flow-${idx}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white font-medium text-sm">{flow.asset}</span>
+                      <Badge className={`text-xs ${
+                        flow.flowType === 'inflow' ? 'bg-green-500/20 text-green-300' :
+                        flow.flowType === 'outflow' ? 'bg-red-500/20 text-red-300' :
+                        'bg-blue-500/20 text-blue-300'
+                      }`}>
+                        {flow.flowType}
+                      </Badge>
+                      <Badge className={`text-xs ${
+                        flow.significance === 'critical' ? 'bg-red-500/20 text-red-300' :
+                        flow.significance === 'major' ? 'bg-orange-500/20 text-orange-300' :
+                        'bg-yellow-500/20 text-yellow-300'
+                      }`}>
+                        {flow.significance}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-300 text-xs mb-1">
+                      {flow.sourceExchange} → {flow.destinationExchange}
+                    </p>
+                    <p className="text-gray-300 text-xs mb-1">
+                      ${(flow.value / 1e6).toFixed(2)}M • {flow.amount.toLocaleString()} {flow.asset}
+                    </p>
+                    <p className="text-gray-500 text-xs">
+                      {new Date(flow.timestamp).toLocaleTimeString()} • Score: {flow.institutionalScore}%
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No institutional flows detected</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const InstitutionalSentiment = () => {
+  const { data: sentimentData, isLoading } = useQuery({
+    queryKey: ['/api/institutional/sentiment'],
+    refetchInterval: 60000, // 1 minute
+  });
+
+  return (
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-purple-300 flex items-center gap-2">
+          📊 Institutional Sentiment
+          <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
+            7D Analysis
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="animate-pulse space-y-4">
+            <div className="h-20 bg-gray-700 rounded"></div>
+            <div className="space-y-2">
+              <div className="h-3 bg-gray-800 rounded"></div>
+              <div className="h-3 bg-gray-800 rounded w-3/4"></div>
+            </div>
+          </div>
+        ) : sentimentData?.sentiment ? (
+          <div className="space-y-4">
+            {/* Overall Sentiment */}
+            <div className="text-center">
+              <div className={`text-3xl font-bold mb-2 ${
+                sentimentData.sentiment.overall > 0.3 ? 'text-green-400' :
+                sentimentData.sentiment.overall < -0.3 ? 'text-red-400' :
+                'text-gray-400'
+              }`}>
+                {(sentimentData.sentiment.overall * 100).toFixed(1)}%
+              </div>
+              <p className="text-gray-400 text-sm mb-1">Overall Sentiment</p>
+              <Badge className={`text-xs ${
+                sentimentData.sentiment.trend === 'increasingly_bullish' ? 'bg-green-500/20 text-green-300' :
+                sentimentData.sentiment.trend === 'increasingly_bearish' ? 'bg-red-500/20 text-red-300' :
+                'bg-gray-500/20 text-gray-300'
+              }`}>
+                {sentimentData.sentiment.trend.replace('_', ' ')}
+              </Badge>
+            </div>
+
+            {/* Sentiment Indicators */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-xs">Accumulation</span>
+                <span className="text-green-400 text-xs">
+                  {sentimentData.sentiment.indicators.accumulation_score}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-xs">Distribution</span>
+                <span className="text-red-400 text-xs">
+                  {sentimentData.sentiment.indicators.distribution_score}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-xs">Exchange Flows</span>
+                <span className="text-cyan-400 text-xs">
+                  {sentimentData.sentiment.indicators.exchange_flows}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-xs">Whale Activity</span>
+                <span className="text-purple-400 text-xs">
+                  {sentimentData.sentiment.indicators.whale_activity}%
+                </span>
+              </div>
+            </div>
+
+            <div className="text-center pt-2">
+              <p className="text-gray-500 text-xs">
+                Confidence: {sentimentData.sentiment.confidence}% • 
+                Updated: {new Date(sentimentData.sentiment.lastUpdated).toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Sentiment analysis unavailable</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const InstitutionalPositioning = () => {
+  const { data: positioningData, isLoading } = useQuery({
+    queryKey: ['/api/institutional/positioning'],
+    refetchInterval: 60000, // 1 minute
+  });
+
+  return (
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-orange-300 flex items-center gap-2">
+          🎯 Asset Positioning
+          <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30">
+            Net Flows
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="h-3 bg-gray-800 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        ) : positioningData?.positioning?.length > 0 ? (
+          <div className="space-y-4">
+            {positioningData.positioning.map((pos: any, idx: number) => (
+              <motion.div
+                key={pos.asset}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-black/30 rounded-lg p-4"
+                data-testid={`positioning-${pos.asset}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white font-medium">{pos.asset}</span>
+                  <Badge className={`text-xs ${
+                    pos.sentiment === 'accumulating' ? 'bg-green-500/20 text-green-300' :
+                    pos.sentiment === 'distributing' ? 'bg-red-500/20 text-red-300' :
+                    'bg-gray-500/20 text-gray-300'
+                  }`}>
+                    {pos.sentiment}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">Net Flow 7d:</span>
+                    <span className={pos.netFlow > 0 ? 'text-green-400' : pos.netFlow < 0 ? 'text-red-400' : 'text-gray-400'}>
+                      {pos.netFlow > 0 ? '+' : ''}${(pos.netFlow / 1e6).toFixed(1)}M
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">Flow 24h:</span>
+                    <span className="text-cyan-400">${(pos.flow24h / 1e6).toFixed(1)}M</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">Concentration:</span>
+                    <span className="text-purple-400">{pos.concentration}%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">Signal Strength:</span>
+                    <span className="text-yellow-400">{pos.strength}%</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No positioning data available</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const WalletAnalysis = () => {
+  const { data: walletData, isLoading } = useQuery({
+    queryKey: ['/api/institutional/wallet-analysis'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  return (
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-indigo-300 flex items-center gap-2">
+          🏛️ Wallet Analysis
+          <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30">
+            Categorized
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-3 bg-gray-800 rounded w-3/4"></div>
+            <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+          </div>
+        ) : walletData?.walletAnalysis ? (
+          <div className="space-y-4">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="text-white font-bold text-lg">
+                  {walletData.walletAnalysis.totalWallets}
+                </div>
+                <p className="text-gray-400 text-xs">Total Tracked</p>
+              </div>
+              <div className="text-center">
+                <div className="text-green-400 font-bold text-lg">
+                  {walletData.walletAnalysis.categorized}
+                </div>
+                <p className="text-gray-400 text-xs">Verified</p>
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div className="space-y-2">
+              <p className="text-gray-400 text-xs font-medium mb-2">Categories:</p>
+              {Object.entries(walletData.walletAnalysis.categories || {}).map(([category, count]) => (
+                <div key={category} className="flex justify-between text-xs">
+                  <span className="text-gray-300 capitalize">{category.replace('_', ' ')}</span>
+                  <span className="text-white">{count as number}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Recent Activity */}
+            {walletData.walletAnalysis.recentActivity?.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-gray-400 text-xs font-medium">Recent Activity:</p>
+                {walletData.walletAnalysis.recentActivity.slice(0, 3).map((wallet: any, idx: number) => (
+                  <div key={wallet.address} className="bg-black/30 rounded p-2">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 text-xs">
+                        {wallet.type}
+                      </Badge>
+                      <span className="text-white text-xs font-medium">{wallet.name}</span>
+                    </div>
+                    <p className="text-gray-400 text-xs mt-1">
+                      {new Date(wallet.lastActivity).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Wallet analysis unavailable</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const FlowTrends = () => {
+  const { data: flowData, isLoading } = useQuery({
+    queryKey: ['/api/institutional/fund-flows'],
+    refetchInterval: 60000, // 1 minute
+  });
+
+  return (
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-pink-300 flex items-center gap-2">
+          📈 Flow Trends
+          <Badge className="bg-pink-500/20 text-pink-300 border-pink-400/30">
+            Trending
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+          </div>
+        ) : flowData?.fundFlows?.length > 0 ? (
+          <div className="space-y-4">
+            {/* Flow Summary */}
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <div className="text-green-400 font-bold text-sm">
+                  {flowData.fundFlows.filter((f: any) => f.flowType === 'inflow').length}
+                </div>
+                <p className="text-gray-400 text-xs">Inflows</p>
+              </div>
+              <div>
+                <div className="text-red-400 font-bold text-sm">
+                  {flowData.fundFlows.filter((f: any) => f.flowType === 'outflow').length}
+                </div>
+                <p className="text-gray-400 text-xs">Outflows</p>
+              </div>
+              <div>
+                <div className="text-blue-400 font-bold text-sm">
+                  {flowData.fundFlows.filter((f: any) => f.flowType === 'internal_transfer').length}
+                </div>
+                <p className="text-gray-400 text-xs">Internal</p>
+              </div>
+            </div>
+
+            {/* Market Timing Analysis */}
+            <div className="space-y-2">
+              <p className="text-gray-400 text-xs font-medium">Market Timing:</p>
+              {['pre_pump', 'accumulation', 'distribution'].map(timing => {
+                const count = flowData.fundFlows.filter((f: any) => f.marketTiming === timing).length;
+                return count > 0 ? (
+                  <div key={timing} className="flex justify-between text-xs">
+                    <span className="text-gray-300 capitalize">{timing.replace('_', ' ')}</span>
+                    <span className="text-white">{count}</span>
+                  </div>
+                ) : null;
+              })}
+            </div>
+
+            {/* Significance Levels */}
+            <div className="space-y-2">
+              <p className="text-gray-400 text-xs font-medium">Significance:</p>
+              {['critical', 'major', 'moderate'].map(significance => {
+                const count = flowData.fundFlows.filter((f: any) => f.significance === significance).length;
+                return count > 0 ? (
+                  <div key={significance} className="flex justify-between text-xs">
+                    <span className="text-gray-300 capitalize">{significance}</span>
+                    <Badge className={`text-xs ${
+                      significance === 'critical' ? 'bg-red-500/20 text-red-300' :
+                      significance === 'major' ? 'bg-orange-500/20 text-orange-300' :
+                      'bg-yellow-500/20 text-yellow-300'
+                    }`}>
+                      {count}
+                    </Badge>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No flow trends available</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function Discover() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1222,6 +1802,63 @@ export default function Discover() {
                 )}
               </CardContent>
             </Card>
+
+          </div>
+        </motion.div>
+
+        {/* Institutional Flow Analytics Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.28 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <Users className="h-5 w-5 text-emerald-400" />
+              Institutional Flow Analytics
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 ml-2">
+                <Brain className="h-3 w-3 mr-1" />
+                Smart Money Tracking
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                🏛️ Institutional Flows
+              </Badge>
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                🧠 Smart Money
+              </Badge>
+              <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-400/30 text-xs">
+                💰 Fund Movements
+              </Badge>
+            </div>
+          </div>
+
+          {/* Institutional Analytics Overview */}
+          <InstitutionalAnalyticsOverview />
+
+          {/* Institutional Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            
+            {/* Smart Money Movements */}
+            <SmartMoneyMovements />
+
+            {/* Institutional Fund Flows */}
+            <InstitutionalFundFlows />
+
+            {/* Institutional Sentiment */}
+            <InstitutionalSentiment />
+
+            {/* Institutional Positioning */}
+            <InstitutionalPositioning />
+
+            {/* Wallet Analysis */}
+            <WalletAnalysis />
+
+            {/* Flow Trends */}
+            <FlowTrends />
 
           </div>
         </motion.div>

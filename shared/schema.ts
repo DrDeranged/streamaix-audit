@@ -664,6 +664,102 @@ export type FedAnalyticsSummary = {
   lastUpdated: string;
 };
 
+// Institutional Flow Tracking Types
+export type InstitutionalWallet = {
+  address: string;
+  type: 'exchange' | 'fund' | 'corporate' | 'mining_pool' | 'dao' | 'defi_protocol';
+  name: string;
+  category: 'tier_1' | 'tier_2' | 'tier_3'; // Based on size and influence
+  aum?: number; // Assets under management in USD
+  verified: boolean;
+  tags: string[];
+  lastActivity: string;
+  riskLevel: 'low' | 'medium' | 'high';
+};
+
+export type SmartMoneyTransaction = {
+  hash: string;
+  from: string;
+  to: string;
+  value: number; // USD value
+  asset: string;
+  timestamp: string;
+  type: 'accumulation' | 'distribution' | 'transfer' | 'arbitrage';
+  confidence: number; // 0-100 confidence score
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  fromType?: string;
+  toType?: string;
+  strategy?: string;
+  marketContext?: {
+    preBTC: number;
+    postBTC: number;
+    priceImpact: number;
+    volumeContext: string;
+  };
+};
+
+export type InstitutionalFundFlow = {
+  id: string;
+  sourceExchange: string;
+  destinationExchange: string;
+  asset: string;
+  amount: number;
+  value: number; // USD value
+  timestamp: string;
+  flowType: 'inflow' | 'outflow' | 'internal_transfer';
+  institutionalScore: number; // How likely this is institutional
+  significance: 'minor' | 'moderate' | 'major' | 'critical';
+  marketTiming: 'pre_pump' | 'during_pump' | 'post_pump' | 'accumulation' | 'distribution';
+};
+
+export type InstitutionalSentiment = {
+  overall: number; // -1 to 1 scale
+  confidence: number; // 0-100
+  trend: 'increasingly_bullish' | 'increasingly_bearish' | 'stable' | 'mixed';
+  indicators: {
+    accumulation_score: number;
+    distribution_score: number;
+    exchange_flows: number;
+    whale_activity: number;
+    corporate_adoption: number;
+  };
+  timeframe: '1d' | '7d' | '30d';
+  lastUpdated: string;
+};
+
+export type InstitutionalPositioning = {
+  asset: string;
+  netFlow: number; // Positive = accumulation, Negative = distribution
+  flow24h: number;
+  flow7d: number;
+  flow30d: number;
+  largestHolders: {
+    address: string;
+    name?: string;
+    holdings: number;
+    percentage: number;
+    change24h: number;
+  }[];
+  concentration: number; // 0-100, higher = more concentrated
+  sentiment: 'accumulating' | 'distributing' | 'holding' | 'mixed';
+  strength: number; // 0-100 strength of the signal
+};
+
+export type InstitutionalAnalytics = {
+  smartMoneyMovements: SmartMoneyTransaction[];
+  fundFlows: InstitutionalFundFlow[];
+  sentiment: InstitutionalSentiment;
+  positioning: InstitutionalPositioning[];
+  walletAnalysis: {
+    totalWallets: number;
+    categorized: number;
+    categories: { [key: string]: number };
+    recentActivity: InstitutionalWallet[];
+    suspicious: InstitutionalWallet[];
+  };
+  lastUpdated: string;
+};
+
 // Chart Configuration Tables
 export const chartConfigurations = pgTable("chart_configurations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

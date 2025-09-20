@@ -17,6 +17,7 @@ import { federalReserveService } from "./services/federalReserveService";
 import { CorrelationAnalysisService } from "./services/correlationAnalysisService";
 import { chartingService } from "./services/chartingService";
 import { derivativesAnalyticsService } from "./services/derivativesAnalyticsService";
+import { institutionalFlowService } from "./services/institutionalFlowService";
 import passport from "passport";
 
 // Initialize services
@@ -3569,6 +3570,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error(`Failed to fetch derivatives analytics for ${underlying}:`, error);
       res.status(500).json({ 
         error: `Failed to fetch derivatives analytics for ${underlying}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // =============================================================================
+  // INSTITUTIONAL FLOW TRACKING API ROUTES (Phase 2)
+  // =============================================================================
+
+  // Get smart money movements
+  app.get('/api/institutional/smart-money', asyncHandler(async (req: Request, res: Response) => {
+    const assets = (req.query.assets as string)?.split(',') || ['BTC', 'ETH'];
+    const minValue = parseInt(req.query.minValue as string) || 1000000;
+    
+    console.log(`🧠 API Call: GET /api/institutional/smart-money - Assets: ${assets.join(', ')}, Min Value: $${minValue.toLocaleString()}`);
+    
+    try {
+      const smartMoneyMovements = await institutionalFlowService.getSmartMoneyMovements(assets, minValue);
+      
+      res.json({
+        success: true,
+        smartMoneyMovements,
+        count: smartMoneyMovements.length,
+        assets,
+        minValue,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Smart money movements error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch smart money movements',
+        smartMoneyMovements: [],
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get institutional fund flows
+  app.get('/api/institutional/fund-flows', asyncHandler(async (req: Request, res: Response) => {
+    const timeframe = (req.query.timeframe as '1h' | '24h' | '7d') || '24h';
+    
+    console.log(`💰 API Call: GET /api/institutional/fund-flows - Timeframe: ${timeframe}`);
+    
+    try {
+      const fundFlows = await institutionalFlowService.getInstitutionalFundFlows(timeframe);
+      
+      res.json({
+        success: true,
+        fundFlows,
+        count: fundFlows.length,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Institutional fund flows error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch institutional fund flows',
+        fundFlows: [],
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get institutional sentiment analysis
+  app.get('/api/institutional/sentiment', asyncHandler(async (req: Request, res: Response) => {
+    const timeframe = (req.query.timeframe as '1d' | '7d' | '30d') || '7d';
+    
+    console.log(`📊 API Call: GET /api/institutional/sentiment - Timeframe: ${timeframe}`);
+    
+    try {
+      const sentiment = await institutionalFlowService.getInstitutionalSentiment(timeframe);
+      
+      res.json({
+        success: true,
+        sentiment,
+        timeframe,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Institutional sentiment error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to analyze institutional sentiment',
+        sentiment: null,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get institutional positioning for specific assets
+  app.get('/api/institutional/positioning', asyncHandler(async (req: Request, res: Response) => {
+    const assets = (req.query.assets as string)?.split(',') || ['BTC', 'ETH'];
+    
+    console.log(`🎯 API Call: GET /api/institutional/positioning - Assets: ${assets.join(', ')}`);
+    
+    try {
+      const positioning = await institutionalFlowService.getInstitutionalPositioning(assets);
+      
+      res.json({
+        success: true,
+        positioning,
+        assets,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Institutional positioning error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get institutional positioning',
+        positioning: [],
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get wallet analysis and categorization
+  app.get('/api/institutional/wallet-analysis', asyncHandler(async (req: Request, res: Response) => {
+    console.log('🏛️ API Call: GET /api/institutional/wallet-analysis');
+    
+    try {
+      const walletAnalysis = await institutionalFlowService.getWalletAnalysis();
+      
+      res.json({
+        success: true,
+        walletAnalysis,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Wallet analysis error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to analyze institutional wallets',
+        walletAnalysis: null,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
+
+  // Get comprehensive institutional analytics
+  app.get('/api/institutional/overview', asyncHandler(async (req: Request, res: Response) => {
+    const timeframe = (req.query.timeframe as '1d' | '7d' | '30d') || '7d';
+    const assets = (req.query.assets as string)?.split(',') || ['BTC', 'ETH'];
+    
+    console.log(`🏛️ API Call: GET /api/institutional/overview - Timeframe: ${timeframe}, Assets: ${assets.join(', ')}`);
+    
+    try {
+      const [smartMoney, fundFlows, sentiment, positioning, walletAnalysis] = await Promise.allSettled([
+        institutionalFlowService.getSmartMoneyMovements(assets),
+        institutionalFlowService.getInstitutionalFundFlows(timeframe === '1d' ? '24h' : timeframe),
+        institutionalFlowService.getInstitutionalSentiment(timeframe),
+        institutionalFlowService.getInstitutionalPositioning(assets),
+        institutionalFlowService.getWalletAnalysis()
+      ]);
+
+      const overview = {
+        smartMoneyMovements: smartMoney.status === 'fulfilled' ? smartMoney.value : [],
+        fundFlows: fundFlows.status === 'fulfilled' ? fundFlows.value : [],
+        sentiment: sentiment.status === 'fulfilled' ? sentiment.value : null,
+        positioning: positioning.status === 'fulfilled' ? positioning.value : [],
+        walletAnalysis: walletAnalysis.status === 'fulfilled' ? walletAnalysis.value : null,
+        lastUpdated: new Date().toISOString()
+      };
+
+      res.json({
+        success: true,
+        overview,
+        timeframe,
+        assets,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ Institutional overview error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch institutional overview',
+        overview: null,
         timestamp: new Date().toISOString()
       });
     }
