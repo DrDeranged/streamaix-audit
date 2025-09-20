@@ -181,7 +181,10 @@ export class DuneAnalyticsService {
       throw new Error(`Query ${queryId} timed out after ${maxAttempts * 2} seconds`);
 
     } catch (error: any) {
-      console.error(`❌ Dune query ${queryId} failed:`, error.response?.data || error.message);
+      // Only log actual errors, not query not found (which is expected for demo queries)
+      if (error.response?.data?.error !== 'Query not found') {
+        console.error(`❌ Dune query ${queryId} failed:`, error.response?.data || error.message);
+      }
       return null;
     }
   }
