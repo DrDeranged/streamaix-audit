@@ -300,7 +300,7 @@ export default function Discover() {
     refetchInterval: 120000, // 2 minutes
   });
 
-  const { data: onChainAlerts, isLoading: alertsLoading } = useQuery({
+  const { data: onChainAlerts, isLoading: onChainAlertsLoading } = useQuery({
     queryKey: ['/api/onchain/alerts?severity=all&limit=10'],
     refetchInterval: 30000, // 30 seconds for alerts
   });
@@ -622,7 +622,7 @@ export default function Discover() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {alertsLoading ? (
+                    {onChainAlertsLoading ? (
                       <div className="animate-pulse space-y-2">
                         <div className="h-3 bg-gray-700 rounded"></div>
                         <div className="h-3 bg-gray-700 rounded w-2/3"></div>
@@ -896,7 +896,7 @@ export default function Discover() {
           </div>
 
           {/* On-Chain Alerts Banner */}
-          {!alertsLoading && onChainAlerts?.alerts?.length > 0 && (
+          {!onChainAlertsLoading && onChainAlerts?.alerts?.length > 0 && (
             <Card className="bg-gradient-to-r from-orange-900/20 via-red-900/20 to-orange-900/20 border-orange-500/30 backdrop-blur-sm">
               <CardHeader className="pb-4">
                 <CardTitle className="text-orange-300 flex items-center gap-2">
@@ -968,7 +968,7 @@ export default function Discover() {
                 <CardTitle className="text-purple-300 flex items-center gap-2">
                   🐋 Whale Movements
                   <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
-                    >$1M Transactions
+                    {'>'} $1M Transactions
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -1049,7 +1049,7 @@ export default function Discover() {
                   <div className="text-center py-8 text-gray-400">
                     <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>No whale movements detected</p>
-                    <p className="text-xs">Monitoring transactions >$1M</p>
+                    <p className="text-xs">Monitoring transactions {'>'} $1M</p>
                   </div>
                 )}
               </CardContent>

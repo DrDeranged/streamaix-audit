@@ -663,3 +663,227 @@ export type FedAnalyticsSummary = {
   
   lastUpdated: string;
 };
+
+// Chart Configuration Tables
+export const chartConfigurations = pgTable("chart_configurations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  name: text("name").notNull(), // User-defined name for the chart layout
+  symbols: text("symbols").array().notNull(), // Primary and comparison symbols
+  assetTypes: jsonb("asset_types").notNull(), // { "BTC": "crypto", "AAPL": "stock" }
+  timeframe: text("timeframe").notNull().default("1d"), // 1m, 5m, 15m, 1h, 4h, 1d, 1w
+  indicators: text("indicators").array().default(sql`'{}'::text[]`), // Active indicators
+  overlays: text("overlays").array().default(sql`'{}'::text[]`), // Chart overlays
+  layout: jsonb("layout"), // Chart layout preferences (panels, sizes, positions)
+  isDefault: boolean("is_default").default(false), // User's default chart
+  isPublic: boolean("is_public").default(false), // Share with other users
+  tags: text("tags").array(), // User tags for organization
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const chartWatchlists = pgTable("chart_watchlists", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  name: text("name").notNull(), // Watchlist name (e.g., "DeFi Tokens", "Tech Stocks")
+  symbols: text("symbols").array().notNull(), // Array of symbols
+  assetTypes: jsonb("asset_types").notNull(), // Asset type mapping for each symbol
+  color: text("color"), // UI color theme for the watchlist
+  isDefault: boolean("is_default").default(false),
+  sortOrder: integer("sort_order").default(0), // User-defined ordering
+  alertsEnabled: boolean("alerts_enabled").default(false), // Price alerts for watchlist
+  alertConditions: jsonb("alert_conditions"), // Alert configuration
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const chartDataCache = pgTable("chart_data_cache", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cacheKey: text("cache_key").notNull().unique(), // Composite key: symbol_timeframe_indicators
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(), // crypto, stock, bond, commodity, currency
+  timeframe: text("timeframe").notNull(),
+  indicators: text("indicators").array(),
+  chartData: jsonb("chart_data").notNull(), // Cached ChartDataPoint[] and indicators
+  dataPoints: integer("data_points").notNull(), // Number of data points
+  lastPrice: real("last_price"), // Latest price for quick reference
+  priceChange24h: real("price_change_24h"), // 24h price change percentage
+  volume24h: real("volume_24h"), // 24h volume
+  marketCap: real("market_cap"), // Market cap (if available)
+  correlation: jsonb("correlation"), // Correlation data with other assets
+  expiresAt: timestamp("expires_at").notNull(), // Cache expiration
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const chartUserPreferences = pgTable("chart_user_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  defaultTimeframe: text("default_timeframe").default("1d"),
+  defaultIndicators: text("default_indicators").array().default(sql`'{rsi,macd,movingAverages}'::text[]`),
+  theme: text("theme").default("dark"), // dark, light, auto
+  candlestickStyle: text("candlestick_style").default("candles"), // candles, bars, line
+  volumeVisible: boolean("volume_visible").default(true),
+  gridVisible: boolean("grid_visible").default(true),
+  crosshairEnabled: boolean("crosshair_enabled").default(true),
+  autoSync: boolean("auto_sync").default(true), // Auto-sync timeframes across charts
+  realTimeUpdates: boolean("real_time_updates").default(true),
+  alertsEnabled: boolean("alerts_enabled").default(true),
+  layout: jsonb("layout"), // Panel layout preferences
+  favoriteSymbols: text("favorite_symbols").array().default(sql`'{}'::text[]`), // Quick access symbols
+  recentSymbols: text("recent_symbols").array().default(sql`'{}'::text[]`), // Recently viewed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chart Relations
+export const chartConfigurationsRelations = relations(chartConfigurations, ({ one }) => ({
+  user: one(users, {
+    fields: [chartConfigurations.userId],
+    references: [users.id],
+  }),
+}));
+
+export const chartWatchlistsRelations = relations(chartWatchlists, ({ one }) => ({
+  user: one(users, {
+    fields: [chartWatchlists.userId],
+    references: [users.id],
+  }),
+}));
+
+export const chartUserPreferencesRelations = relations(chartUserPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [chartUserPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+// Chart Insert Schemas
+export const insertChartConfigurationSchema = createInsertSchema(chartConfigurations).pick({
+  userId: true,
+  name: true,
+  symbols: true,
+  assetTypes: true,
+  timeframe: true,
+  indicators: true,
+  overlays: true,
+  layout: true,
+  isDefault: true,
+  isPublic: true,
+  tags: true,
+});
+
+export const insertChartWatchlistSchema = createInsertSchema(chartWatchlists).pick({
+  userId: true,
+  name: true,
+  symbols: true,
+  assetTypes: true,
+  color: true,
+  isDefault: true,
+  sortOrder: true,
+  alertsEnabled: true,
+  alertConditions: true,
+});
+
+export const insertChartUserPreferencesSchema = createInsertSchema(chartUserPreferences).pick({
+  userId: true,
+  defaultTimeframe: true,
+  defaultIndicators: true,
+  theme: true,
+  candlestickStyle: true,
+  volumeVisible: true,
+  gridVisible: true,
+  crosshairEnabled: true,
+  autoSync: true,
+  realTimeUpdates: true,
+  alertsEnabled: true,
+  layout: true,
+  favoriteSymbols: true,
+  recentSymbols: true,
+});
+
+// Chart Types
+export type InsertChartConfiguration = z.infer<typeof insertChartConfigurationSchema>;
+export type ChartConfiguration = typeof chartConfigurations.$inferSelect;
+
+export type InsertChartWatchlist = z.infer<typeof insertChartWatchlistSchema>;
+export type ChartWatchlist = typeof chartWatchlists.$inferSelect;
+
+export type InsertChartUserPreferences = z.infer<typeof insertChartUserPreferencesSchema>;
+export type ChartUserPreferences = typeof chartUserPreferences.$inferSelect;
+
+export type ChartDataCache = typeof chartDataCache.$inferSelect;
+
+// Chart API Response Types
+export type ChartApiResponse = {
+  success: boolean;
+  data?: any;
+  error?: string;
+  metadata?: {
+    timeframe: string;
+    lastUpdated: string;
+    dataPoints: number;
+    symbols: string[];
+  };
+};
+
+export type MultiAssetChartResponse = {
+  primary: {
+    symbol: string;
+    assetType: string;
+    data: Array<{
+      timestamp: number;
+      date: string;
+      open: number;
+      high: number;
+      low: number;
+      close: number;
+      volume: number;
+    }>;
+    indicators: {
+      rsi?: number[];
+      macd?: {
+        macd: number[];
+        signal: number[];
+        histogram: number[];
+      };
+      movingAverages?: {
+        sma20: number[];
+        sma50: number[];
+        sma200: number[];
+        ema12: number[];
+        ema26: number[];
+      };
+      bollingerBands?: {
+        upper: number[];
+        middle: number[];
+        lower: number[];
+      };
+      volumeIndicators?: {
+        volumeMA: number[];
+        volumeRatio: number[];
+        onBalanceVolume: number[];
+      };
+    };
+  };
+  comparison?: Array<{
+    symbol: string;
+    assetType: string;
+    data: Array<{
+      timestamp: number;
+      date: string;
+      open: number;
+      high: number;
+      low: number;
+      close: number;
+      volume: number;
+    }>;
+    normalizedData: number[];
+  }>;
+  correlations?: { [symbol: string]: number };
+  metadata: {
+    timeframe: string;
+    lastUpdated: string;
+    dataPoints: number;
+  };
+};
