@@ -2627,6 +2627,819 @@ const EventRiskMonitoringCard = () => {
   );
 };
 
+// Cross-Market Signal Generation Section Component - Phase 3 Final Feature
+const CrossMarketSignalSection = () => {
+  const [activeSignalTab, setActiveSignalTab] = useState<string>('dashboard');
+  const [selectedAsset, setSelectedAsset] = useState<string>('BTC');
+  const [signalFilter, setSignalFilter] = useState<string>('all');
+
+  // Cross-market signal queries
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
+    queryKey: ['/api/cross-market-signals/dashboard'],
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 2
+  });
+
+  const { data: unifiedSignals, isLoading: signalsLoading } = useQuery({
+    queryKey: ['/api/cross-market-signals/unified-signals'],
+    staleTime: 60 * 1000, // 1 minute
+    retry: 2
+  });
+
+  const { data: crossMarketAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['/api/cross-market-signals/alerts'],
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 2
+  });
+
+  const { data: correlationData, isLoading: correlationsLoading } = useQuery({
+    queryKey: ['/api/cross-market-signals/correlations'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 2
+  });
+
+  const { data: tradingRecommendations, isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['/api/cross-market-signals/recommendations'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 2
+  });
+
+  const { data: discoverAnalysis, isLoading: analysisLoading } = useQuery({
+    queryKey: ['/api/cross-market-signals/discover-analysis'],
+    staleTime: 60 * 1000, // 1 minute
+    retry: 2
+  });
+
+  // Helper functions
+  const getSignalStrengthColor = (strength: number) => {
+    if (strength >= 90) return 'text-violet-400 bg-violet-500/20 border-violet-400/30';
+    if (strength >= 75) return 'text-cyan-400 bg-cyan-500/20 border-cyan-400/30';
+    if (strength >= 60) return 'text-blue-400 bg-blue-500/20 border-blue-400/30';
+    if (strength >= 40) return 'text-yellow-400 bg-yellow-500/20 border-yellow-400/30';
+    return 'text-gray-400 bg-gray-500/20 border-gray-400/30';
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'text-red-400 bg-red-500/20 border-red-400/30';
+      case 'high': return 'text-orange-400 bg-orange-500/20 border-orange-400/30';
+      case 'medium': return 'text-yellow-400 bg-yellow-500/20 border-yellow-400/30';
+      case 'low': return 'text-green-400 bg-green-500/20 border-green-400/30';
+      default: return 'text-gray-400 bg-gray-500/20 border-gray-400/30';
+    }
+  };
+
+  const getDirectionIcon = (direction: string) => {
+    switch (direction) {
+      case 'bullish': return TrendingUp;
+      case 'bearish': return TrendingDown;
+      default: return Activity;
+    }
+  };
+
+  const getSignalTypeIcon = (signalType: string) => {
+    switch (signalType) {
+      case 'unified_trade_signal': return Target;
+      case 'cross_market_alert': return Bell;
+      case 'regime_shift_signal': return RefreshCw;
+      case 'correlation_break_signal': return AlertTriangle;
+      case 'composite_risk_signal': return Shield;
+      default: return Crosshair;
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'strong_buy': return 'text-green-500 bg-green-500/20';
+      case 'buy': return 'text-green-400 bg-green-400/20';
+      case 'hold': return 'text-yellow-400 bg-yellow-400/20';
+      case 'sell': return 'text-red-400 bg-red-400/20';
+      case 'strong_sell': return 'text-red-500 bg-red-500/20';
+      case 'hedge': return 'text-purple-400 bg-purple-400/20';
+      default: return 'text-gray-400 bg-gray-400/20';
+    }
+  };
+
+  const getRiskLevelColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'low': return 'text-green-400';
+      case 'medium': return 'text-yellow-400';
+      case 'high': return 'text-orange-400';
+      case 'extreme': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Overview Dashboard */}
+      <Card className="bg-gradient-to-r from-violet-900/30 to-purple-900/30 border-violet-500/30 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-violet-300 flex items-center gap-2">
+            <Layers className="h-5 w-5" />
+            Unified Signal Dashboard
+            {discoverAnalysis?.overview && (
+              <Badge className="bg-violet-500/20 text-violet-300 border-violet-400/30 text-xs ml-2">
+                {discoverAnalysis.overview.totalActiveSignals} Active Signals
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {analysisLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                  <div className="h-8 bg-gray-600 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : discoverAnalysis?.overview ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="text-center">
+                <p className="text-gray-400 text-xs mb-1">Active Signals</p>
+                <p className="text-violet-400 font-bold text-2xl">{discoverAnalysis.overview.totalActiveSignals}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs mb-1">Avg Confidence</p>
+                <p className="text-cyan-400 font-bold text-2xl">{discoverAnalysis.overview.avgConfidenceScore}%</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs mb-1">High Priority</p>
+                <p className="text-orange-400 font-bold text-2xl">{discoverAnalysis.overview.highPriorityAlerts}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs mb-1">Success Rate</p>
+                <p className="text-green-400 font-bold text-2xl">{discoverAnalysis.overview.successRateToday}%</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs mb-1">Market Regime</p>
+                <p className="text-blue-400 font-bold text-sm">{discoverAnalysis.overview.marketRegime?.toUpperCase()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs mb-1">Stress Level</p>
+                <p className={`${getSignalStrengthColor(discoverAnalysis.overview.stressLevel).split(' ')[0]} font-bold text-2xl`}>
+                  {discoverAnalysis.overview.stressLevel}%
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Crosshair className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-300">Signal dashboard loading...</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Signal Tabs */}
+      <Tabs value={activeSignalTab} onValueChange={setActiveSignalTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-black/20 border border-violet-500/30">
+          <TabsTrigger value="dashboard" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300">
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="signals" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300">
+            Signals
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300">
+            Alerts
+          </TabsTrigger>
+          <TabsTrigger value="correlations" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300">
+            Correlations
+          </TabsTrigger>
+          <TabsTrigger value="recommendations" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300">
+            Trading
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Dashboard Tab */}
+        <TabsContent value="dashboard" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* Top Signals */}
+            <Card className="bg-gradient-to-br from-violet-900/20 to-purple-900/20 border-violet-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-violet-300 flex items-center gap-2 text-lg">
+                  <Target className="h-5 w-5" />
+                  Top Signals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analysisLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-600 rounded w-3/4"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : discoverAnalysis?.topSignals?.length ? (
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {discoverAnalysis.topSignals.slice(0, 5).map((signal: any, index: number) => {
+                      const DirectionIcon = getDirectionIcon(signal.direction);
+                      const SignalIcon = getSignalTypeIcon(signal.signalType);
+                      return (
+                        <div key={signal.id} className="p-3 bg-black/20 rounded-lg border border-violet-400/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <SignalIcon className="h-4 w-4 text-violet-400" />
+                              <span className="text-white font-semibold text-sm">{signal.symbol}</span>
+                              <Badge className={`${getPriorityColor(signal.priority)} text-xs`}>
+                                {signal.priority?.toUpperCase()}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <DirectionIcon className={`h-4 w-4 ${signal.direction === 'bullish' ? 'text-green-400' : signal.direction === 'bearish' ? 'text-red-400' : 'text-gray-400'}`} />
+                              <span className={`text-sm font-bold ${getSignalStrengthColor(signal.overallScore).split(' ')[0]}`}>
+                                {signal.overallScore}%
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-gray-300 text-xs mb-2">{signal.summary}</p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className={`${getActionColor(signal.primaryAction)} px-2 py-1 rounded text-xs font-medium`}>
+                              {signal.primaryAction?.replace('_', ' ').toUpperCase()}
+                            </span>
+                            <span className="text-gray-400">{signal.timeframe}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <Target className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">No signals available</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Critical Alerts */}
+            <Card className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-red-300 flex items-center gap-2 text-lg">
+                  <AlertTriangle className="h-5 w-5" />
+                  Critical Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analysisLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-600 rounded w-2/3"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : discoverAnalysis?.criticalAlerts?.length ? (
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {discoverAnalysis.criticalAlerts.map((alert: any, index: number) => (
+                      <div key={alert.id} className="p-3 bg-black/20 rounded-lg border border-red-400/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge className={`${getPriorityColor(alert.severity)} text-xs`}>
+                            {alert.severity?.toUpperCase()}
+                          </Badge>
+                          <span className="text-gray-400 text-xs">
+                            {new Date(alert.triggeredAt).toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <h4 className="text-white font-medium text-sm mb-1">{alert.title}</h4>
+                        <p className="text-gray-300 text-xs mb-2">{alert.message}</p>
+                        {alert.affectedAssets?.length && (
+                          <div className="flex flex-wrap gap-1">
+                            {alert.affectedAssets.slice(0, 3).map((asset: string) => (
+                              <Badge key={asset} className="bg-gray-500/20 text-gray-300 text-xs">
+                                {asset}
+                              </Badge>
+                            ))}
+                            {alert.affectedAssets.length > 3 && (
+                              <Badge className="bg-gray-500/20 text-gray-300 text-xs">
+                                +{alert.affectedAssets.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <CheckCircle2 className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">No critical alerts</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Performance Metrics */}
+            <Card className="bg-gradient-to-br from-green-900/20 to-blue-900/20 border-green-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-green-300 flex items-center gap-2 text-lg">
+                  <BarChart3 className="h-5 w-5" />
+                  Performance Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analysisLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-3 bg-gray-700 rounded mb-1"></div>
+                        <div className="h-6 bg-gray-600 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : discoverAnalysis?.performance ? (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-gray-400 text-xs mb-1">Today's Performance</p>
+                      <p className={`text-lg font-bold ${discoverAnalysis.performance.todayPerformance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {discoverAnalysis.performance.todayPerformance >= 0 ? '+' : ''}{discoverAnalysis.performance.todayPerformance}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs mb-1">Week Performance</p>
+                      <p className={`text-lg font-bold ${discoverAnalysis.performance.weekPerformance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {discoverAnalysis.performance.weekPerformance >= 0 ? '+' : ''}{discoverAnalysis.performance.weekPerformance}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs mb-1">Month Performance</p>
+                      <p className={`text-lg font-bold ${discoverAnalysis.performance.monthPerformance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {discoverAnalysis.performance.monthPerformance >= 0 ? '+' : ''}{discoverAnalysis.performance.monthPerformance}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs mb-1">Best Signal</p>
+                      <p className="text-cyan-400 font-medium text-sm">
+                        {discoverAnalysis.performance.bestPerformingSignal?.replace('_', ' ').toUpperCase() || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <BarChart3 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">Performance data loading...</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Unified Signals Tab */}
+        <TabsContent value="signals" className="mt-6">
+          <div className="space-y-6">
+            {/* Filter Controls */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-gray-400" />
+                <span className="text-gray-400 text-sm">Filter:</span>
+                <select 
+                  value={signalFilter} 
+                  onChange={(e) => setSignalFilter(e.target.value)}
+                  className="bg-black/20 border border-violet-500/30 text-violet-300 rounded px-3 py-1 text-sm"
+                >
+                  <option value="all">All Signals</option>
+                  <option value="critical">Critical Priority</option>
+                  <option value="high">High Priority</option>
+                  <option value="bullish">Bullish Only</option>
+                  <option value="bearish">Bearish Only</option>
+                </select>
+              </div>
+              <Badge className="bg-violet-500/20 text-violet-300 border-violet-400/30 text-xs">
+                {unifiedSignals?.signals?.length || 0} Total Signals
+              </Badge>
+            </div>
+
+            {/* Signals Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {signalsLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="bg-gradient-to-br from-violet-900/20 to-purple-900/20 border-violet-500/30 backdrop-blur-sm animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                      <div className="h-20 bg-gray-600 rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : unifiedSignals?.signals?.length ? (
+                unifiedSignals.signals
+                  .filter((signal: any) => {
+                    if (signalFilter === 'all') return true;
+                    if (signalFilter === 'critical') return signal.priority === 'critical';
+                    if (signalFilter === 'high') return signal.priority === 'high';
+                    if (signalFilter === 'bullish') return signal.affectedAssets?.[0]?.direction === 'bullish';
+                    if (signalFilter === 'bearish') return signal.affectedAssets?.[0]?.direction === 'bearish';
+                    return true;
+                  })
+                  .map((signal: any, index: number) => {
+                    const DirectionIcon = getDirectionIcon(signal.affectedAssets?.[0]?.direction);
+                    const SignalIcon = getSignalTypeIcon(signal.signalType);
+                    return (
+                      <Card key={signal.id} className="bg-gradient-to-br from-violet-900/20 to-purple-900/20 border-violet-500/30 backdrop-blur-sm hover:border-violet-400/50 transition-all duration-300">
+                        <CardHeader>
+                          <CardTitle className="text-violet-300 flex items-center gap-2 text-lg">
+                            <SignalIcon className="h-5 w-5" />
+                            {signal.title}
+                            <Badge className={`${getPriorityColor(signal.priority)} text-xs ml-auto`}>
+                              {signal.priority?.toUpperCase()}
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white font-semibold">
+                                {signal.affectedAssets?.[0]?.symbol}
+                              </span>
+                              <DirectionIcon className={`h-4 w-4 ${signal.affectedAssets?.[0]?.direction === 'bullish' ? 'text-green-400' : signal.affectedAssets?.[0]?.direction === 'bearish' ? 'text-red-400' : 'text-gray-400'}`} />
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-sm font-bold ${getSignalStrengthColor(signal.compositeScore?.overall || 0).split(' ')[0]}`}>
+                                {signal.compositeScore?.overall || 0}% Signal
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {signal.compositeScore?.confidence || 0}% Confidence
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <p className="text-gray-300 text-sm">{signal.summary}</p>
+                            
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                              <div>
+                                <p className="text-gray-400 mb-1">Expected Move</p>
+                                <p className="text-cyan-400 font-semibold">
+                                  {signal.affectedAssets?.[0]?.expectedMove || 0}%
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400 mb-1">Timeframe</p>
+                                <p className="text-blue-400 font-semibold">
+                                  {signal.affectedAssets?.[0]?.timeframe || 'N/A'}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400 mb-1">Risk Level</p>
+                                <p className={`${getRiskLevelColor(signal.affectedAssets?.[0]?.riskLevel)} font-semibold`}>
+                                  {signal.affectedAssets?.[0]?.riskLevel?.toUpperCase() || 'N/A'}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400 mb-1">Action</p>
+                                <Badge className={`${getActionColor(signal.tradingRecommendations?.primaryAction)} text-xs`}>
+                                  {signal.tradingRecommendations?.primaryAction?.replace('_', ' ').toUpperCase() || 'N/A'}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Component Scores */}
+                          <div className="space-y-2">
+                            <p className="text-gray-400 text-xs font-medium">AI Component Scores</p>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Event:</span>
+                                <span className="text-cyan-400">{signal.compositeScore?.components?.eventModelingScore || 0}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Pattern:</span>
+                                <span className="text-green-400">{signal.compositeScore?.components?.patternRecognitionScore || 0}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Volatility:</span>
+                                <span className="text-orange-400">{signal.compositeScore?.components?.volatilityForecastScore || 0}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Correlation:</span>
+                                <span className="text-purple-400">{signal.compositeScore?.components?.correlationAnalysisScore || 0}%</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-600/30">
+                            <span className="text-gray-400 text-xs">
+                              Valid until: {new Date(signal.validUntil).toLocaleDateString()}
+                            </span>
+                            <Button size="sm" variant="outline" className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10 text-xs">
+                              View Details
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+              ) : (
+                <div className="col-span-full">
+                  <Card className="bg-white/5 border-white/10">
+                    <CardContent className="p-8 text-center">
+                      <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-300">No unified signals available</p>
+                      <p className="text-gray-400 text-sm mt-2">Signal generation will resume shortly</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Alerts Tab */}
+        <TabsContent value="alerts" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {alertsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                    <div className="h-16 bg-gray-600 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : crossMarketAlerts?.alerts?.length ? (
+              crossMarketAlerts.alerts.map((alert: any, index: number) => (
+                <Card key={alert.id} className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm hover:border-red-400/50 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-red-300 flex items-center gap-2 text-lg">
+                      <Bell className="h-5 w-5" />
+                      {alert.title}
+                      <Badge className={`${getPriorityColor(alert.severity)} text-xs ml-auto`}>
+                        {alert.severity?.toUpperCase()}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-gray-300 text-sm">{alert.message}</p>
+                    
+                    {alert.affectedAssets?.length && (
+                      <div>
+                        <p className="text-gray-400 text-xs mb-2">Affected Assets:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {alert.affectedAssets.map((asset: string) => (
+                            <Badge key={asset} className="bg-red-500/20 text-red-300 text-xs">
+                              {asset}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {alert.urgentActions?.length && (
+                      <div>
+                        <p className="text-gray-400 text-xs mb-2">Recommended Actions:</p>
+                        <ul className="space-y-1">
+                          {alert.urgentActions.slice(0, 3).map((action: any, idx: number) => (
+                            <li key={idx} className="text-gray-300 text-xs flex items-start gap-2">
+                              <span className="text-orange-400 mt-1">•</span>
+                              <span>{action.action}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-600/30">
+                      <span className="text-gray-400 text-xs">
+                        {new Date(alert.triggeredAt).toLocaleString()}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="border-red-500/30 text-red-300 hover:bg-red-500/10 text-xs">
+                          Acknowledge
+                        </Button>
+                        <Button size="sm" variant="outline" className="border-orange-500/30 text-orange-300 hover:bg-orange-500/10 text-xs">
+                          Act Now
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full">
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-8 text-center">
+                    <CheckCircle2 className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                    <p className="text-gray-300">No active alerts</p>
+                    <p className="text-gray-400 text-sm mt-2">All systems operating normally</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Correlations Tab */}
+        <TabsContent value="correlations" className="mt-6">
+          <div className="space-y-6">
+            {/* Correlation Summary */}
+            {discoverAnalysis?.correlationSummary && (
+              <Card className="bg-gradient-to-r from-blue-900/30 to-cyan-900/30 border-blue-500/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-blue-300 flex items-center gap-2">
+                    <BarChart2 className="h-5 w-5" />
+                    Market Correlation Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs mb-1">Current Regime</p>
+                      <Badge className={`${getSignalStrengthColor(discoverAnalysis.correlationSummary.confidence)} text-sm`}>
+                        {discoverAnalysis.correlationSummary.regime?.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs mb-1">Confidence</p>
+                      <p className="text-cyan-400 font-bold text-xl">{discoverAnalysis.correlationSummary.confidence}%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs mb-1">Duration</p>
+                      <p className="text-blue-400 font-bold text-xl">{discoverAnalysis.correlationSummary.duration}d</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs mb-1">Notable Changes</p>
+                      <p className="text-orange-400 font-bold text-xl">{discoverAnalysis.correlationSummary.significantChanges}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Top Correlations */}
+            <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-cyan-300 flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  Key Market Relationships
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {correlationsLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-600 rounded w-3/4"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : discoverAnalysis?.correlationSummary?.topCorrelations?.length ? (
+                  <div className="space-y-4">
+                    {discoverAnalysis.correlationSummary.topCorrelations.map((corr: any, index: number) => (
+                      <div key={index} className="p-4 bg-black/20 rounded-lg border border-cyan-400/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-white font-semibold text-sm">{corr.assetPair}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${corr.correlation > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {(corr.correlation * 100).toFixed(1)}%
+                            </span>
+                            <Badge className={`${getSignalStrengthColor(100 - corr.breakdownRisk)} text-xs`}>
+                              {corr.strength?.toUpperCase()}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">Breakdown Risk: {corr.breakdownRisk}%</span>
+                          <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${corr.correlation > 0 ? 'bg-green-400' : 'bg-red-400'}`}
+                              style={{ width: `${Math.abs(corr.correlation) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <BarChart2 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">Correlation data loading...</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Trading Recommendations Tab */}
+        <TabsContent value="recommendations" className="mt-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {recommendationsLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="bg-gradient-to-br from-green-900/20 to-blue-900/20 border-green-500/30 backdrop-blur-sm animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                      <div className="h-20 bg-gray-600 rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : tradingRecommendations?.recommendations?.length ? (
+                tradingRecommendations.recommendations.slice(0, 9).map((rec: any, index: number) => {
+                  const DirectionIcon = getDirectionIcon(rec.direction);
+                  return (
+                    <Card key={`${rec.symbol}-${index}`} className="bg-gradient-to-br from-green-900/20 to-blue-900/20 border-green-500/30 backdrop-blur-sm hover:border-green-400/50 transition-all duration-300">
+                      <CardHeader>
+                        <CardTitle className="text-green-300 flex items-center gap-2 text-lg">
+                          <Target className="h-5 w-5" />
+                          {rec.symbol}
+                          <Badge className={`${getActionColor(rec.primaryAction)} text-xs ml-auto`}>
+                            {rec.primaryAction?.replace('_', ' ').toUpperCase()}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <DirectionIcon className={`h-4 w-4 ${rec.direction === 'bullish' ? 'text-green-400' : rec.direction === 'bearish' ? 'text-red-400' : 'text-gray-400'}`} />
+                            <span className="text-gray-400 text-sm">{rec.direction?.toUpperCase()}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm font-bold ${getSignalStrengthColor(rec.signalStrength).split(' ')[0]}`}>
+                              {rec.signalStrength}% Signal
+                            </p>
+                            <p className="text-xs text-gray-400">{rec.confidence}% Confidence</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <p className="text-gray-400 mb-1">Expected Move</p>
+                            <p className="text-cyan-400 font-semibold">{rec.expectedMove}%</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 mb-1">Timeframe</p>
+                            <p className="text-blue-400 font-semibold">{rec.timeframe}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 mb-1">Risk Level</p>
+                            <p className={`${getRiskLevelColor(rec.riskLevel)} font-semibold`}>
+                              {rec.riskLevel?.toUpperCase()}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 mb-1">Position Size</p>
+                            <p className="text-purple-400 font-semibold">{rec.positionSizing}%</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-400">Entry:</span>
+                            <span className="text-green-400 font-semibold">${rec.entryPrice?.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-400">Stop Loss:</span>
+                            <span className="text-red-400 font-semibold">${rec.stopLoss?.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-400">Take Profit:</span>
+                            <span className="text-cyan-400 font-semibold">
+                              ${rec.takeProfit?.[0]?.toFixed(2)} - ${rec.takeProfit?.[1]?.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-gray-300 text-xs leading-relaxed">
+                          {rec.rationale}
+                        </p>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-600/30">
+                          <span className="text-gray-400 text-xs">
+                            Updated: {new Date(rec.lastUpdated).toLocaleDateString()}
+                          </span>
+                          <Button size="sm" variant="outline" className="border-green-500/30 text-green-300 hover:bg-green-500/10 text-xs">
+                            Execute Trade
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <div className="col-span-full">
+                  <Card className="bg-white/5 border-white/10">
+                    <CardContent className="p-8 text-center">
+                      <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-300">No trading recommendations available</p>
+                      <p className="text-gray-400 text-sm mt-2">Recommendations will be generated based on signal analysis</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
 export default function Discover() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -5783,6 +6596,36 @@ export default function Discover() {
           </div>
 
           <VolatilityForecastingSection />
+        </motion.div>
+
+        {/* Cross-Market Signal Generation - Phase 3 Final Feature */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <Crosshair className="h-7 w-7 text-violet-400" />
+              Cross-Market Signal Generation
+              <Badge className="bg-violet-500/20 text-violet-300 border-violet-400/30 text-xs">
+                AI-Unified
+              </Badge>
+            </h2>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10">
+                <Layers className="h-4 w-4 mr-1" />
+                Dashboard
+              </Button>
+              <Button variant="outline" size="sm" className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10">
+                <Bell className="h-4 w-4 mr-1" />
+                Alerts
+              </Button>
+            </div>
+          </div>
+
+          <CrossMarketSignalSection />
         </motion.div>
 
         {/* Quick Actions */}

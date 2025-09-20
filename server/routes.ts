@@ -5406,6 +5406,301 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // =============================================================================
+  // CROSS-MARKET SIGNAL GENERATION ROUTES - Phase 3 Final Feature
+  // =============================================================================
+
+  // Initialize cross-market signal service
+  const { crossMarketSignalService } = await import('./services/crossMarketSignalService');
+
+  // Get unified cross-market signals dashboard
+  app.get('/api/cross-market-signals/dashboard', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      console.log('🎯 Fetching cross-market signals dashboard');
+      const dashboardData = await crossMarketSignalService.getSignalDashboardData();
+      res.json(dashboardData);
+    } catch (error) {
+      console.error('❌ Failed to get cross-market signals dashboard:', error);
+      res.status(500).json({ error: 'Failed to get cross-market signals dashboard' });
+    }
+  }));
+
+  // Generate and get unified signals
+  app.get('/api/cross-market-signals/unified-signals', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      console.log('🚀 Generating unified cross-market signals');
+      const signals = await crossMarketSignalService.generateUnifiedSignals();
+      res.json({ 
+        success: true,
+        signals,
+        count: signals.length,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Failed to generate unified signals:', error);
+      res.status(500).json({ error: 'Failed to generate unified signals' });
+    }
+  }));
+
+  // Get cross-market alerts
+  app.get('/api/cross-market-signals/alerts', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      console.log('🚨 Fetching cross-market alerts');
+      const alerts = await crossMarketSignalService.generateCrossMarketAlerts();
+      const criticalAlerts = alerts.filter(alert => alert.severity === 'critical' || alert.severity === 'high');
+      
+      res.json({
+        success: true,
+        alerts: alerts,
+        criticalAlerts: criticalAlerts,
+        totalAlerts: alerts.length,
+        criticalCount: criticalAlerts.length,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Failed to get cross-market alerts:', error);
+      res.status(500).json({ error: 'Failed to get cross-market alerts' });
+    }
+  }));
+
+  // Get cross-market correlation analysis
+  app.get('/api/cross-market-signals/correlations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      console.log('📊 Fetching cross-market correlation data');
+      const correlationData = await crossMarketSignalService.getCrossMarketCorrelationData();
+      res.json({
+        success: true,
+        ...correlationData
+      });
+    } catch (error) {
+      console.error('❌ Failed to get cross-market correlations:', error);
+      res.status(500).json({ error: 'Failed to get cross-market correlations' });
+    }
+  }));
+
+  // Get signal for specific asset
+  app.get('/api/cross-market-signals/asset/:symbol', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { symbol } = req.params;
+      console.log(`🎯 Fetching signal for asset: ${symbol}`);
+      
+      const allSignals = await crossMarketSignalService.generateUnifiedSignals();
+      const assetSignal = allSignals.find(signal => 
+        signal.affectedAssets.some(asset => asset.symbol === symbol.toUpperCase())
+      );
+      
+      if (!assetSignal) {
+        return res.status(404).json({ error: `No signal found for asset ${symbol}` });
+      }
+      
+      res.json({
+        success: true,
+        signal: assetSignal,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error(`❌ Failed to get signal for asset ${req.params.symbol}:`, error);
+      res.status(500).json({ error: 'Failed to get asset signal' });
+    }
+  }));
+
+  // Get comprehensive trading recommendations
+  app.get('/api/cross-market-signals/recommendations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { assets } = req.query; // Optional comma-separated list of assets
+      console.log('📈 Fetching comprehensive trading recommendations');
+      
+      const signals = await crossMarketSignalService.generateUnifiedSignals();
+      
+      // Filter by requested assets if provided
+      let filteredSignals = signals;
+      if (assets && typeof assets === 'string') {
+        const requestedAssets = assets.split(',').map(a => a.trim().toUpperCase());
+        filteredSignals = signals.filter(signal =>
+          signal.affectedAssets.some(asset => requestedAssets.includes(asset.symbol))
+        );
+      }
+      
+      // Transform to recommendations format
+      const recommendations = filteredSignals.map(signal => ({
+        symbol: signal.affectedAssets[0]?.symbol,
+        signalStrength: signal.compositeScore.overall,
+        confidence: signal.compositeScore.confidence,
+        direction: signal.affectedAssets[0]?.direction,
+        expectedMove: signal.affectedAssets[0]?.expectedMove,
+        timeframe: signal.affectedAssets[0]?.timeframe,
+        riskLevel: signal.affectedAssets[0]?.riskLevel,
+        primaryAction: signal.tradingRecommendations.primaryAction,
+        entryPrice: signal.tradingRecommendations.entryStrategy.preferredEntry,
+        stopLoss: signal.tradingRecommendations.riskManagement.stopLoss,
+        takeProfit: signal.tradingRecommendations.riskManagement.takeProfit,
+        positionSizing: signal.tradingRecommendations.positionSizing.recommendedAllocation,
+        rationale: signal.summary,
+        lastUpdated: signal.updatedAt
+      }));
+      
+      res.json({
+        success: true,
+        recommendations: recommendations.slice(0, 20), // Top 20 recommendations
+        totalCount: recommendations.length,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Failed to get trading recommendations:', error);
+      res.status(500).json({ error: 'Failed to get trading recommendations' });
+    }
+  }));
+
+  // Acknowledge an alert
+  app.post('/api/cross-market-signals/alerts/:alertId/acknowledge', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { alertId } = req.params;
+      console.log(`✅ Acknowledging alert: ${alertId}`);
+      
+      // This would update the alert status in a real implementation
+      // For now, just return success
+      res.json({
+        success: true,
+        message: 'Alert acknowledged',
+        alertId,
+        acknowledgedAt: new Date().toISOString(),
+        acknowledgedBy: req.user!.id
+      });
+    } catch (error) {
+      console.error('❌ Failed to acknowledge alert:', error);
+      res.status(500).json({ error: 'Failed to acknowledge alert' });
+    }
+  }));
+
+  // Get signal performance metrics
+  app.get('/api/cross-market-signals/performance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      console.log('📊 Fetching signal performance metrics');
+      
+      const dashboardData = await crossMarketSignalService.getSignalDashboardData();
+      
+      res.json({
+        success: true,
+        performance: dashboardData.performanceSummary,
+        overviewMetrics: dashboardData.overviewMetrics,
+        lastUpdated: dashboardData.lastUpdated
+      });
+    } catch (error) {
+      console.error('❌ Failed to get signal performance metrics:', error);
+      res.status(500).json({ error: 'Failed to get signal performance metrics' });
+    }
+  }));
+
+  // Update signal configuration (admin only)
+  app.post('/api/cross-market-signals/config', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      // In production, you'd want proper admin authentication
+      const newConfig = req.body;
+      console.log('⚙️ Updating cross-market signal configuration');
+      
+      crossMarketSignalService.updateConfiguration(newConfig);
+      
+      res.json({
+        success: true,
+        message: 'Configuration updated successfully',
+        config: crossMarketSignalService.getConfiguration(),
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Failed to update signal configuration:', error);
+      res.status(500).json({ error: 'Failed to update signal configuration' });
+    }
+  }));
+
+  // Get comprehensive analysis for discover page
+  app.get('/api/cross-market-signals/discover-analysis', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      console.log('🔍 Fetching comprehensive cross-market analysis for discover page');
+      
+      const [dashboardData, correlationData, topSignals] = await Promise.all([
+        crossMarketSignalService.getSignalDashboardData(),
+        crossMarketSignalService.getCrossMarketCorrelationData(),
+        crossMarketSignalService.generateUnifiedSignals()
+      ]);
+      
+      // Create comprehensive analysis for discover page
+      const analysis = {
+        // Overview metrics
+        overview: {
+          totalActiveSignals: dashboardData.overviewMetrics.totalActiveSignals,
+          avgConfidenceScore: dashboardData.overviewMetrics.avgConfidenceScore,
+          highPriorityAlerts: dashboardData.overviewMetrics.highPriorityAlerts,
+          successRateToday: dashboardData.overviewMetrics.successRateToday,
+          marketRegime: dashboardData.marketStatus.currentRegime,
+          overallCorrelation: dashboardData.marketStatus.overallCorrelation,
+          stressLevel: dashboardData.marketStatus.stressLevel
+        },
+        
+        // Top signals with key information
+        topSignals: topSignals.slice(0, 8).map(signal => ({
+          id: signal.id,
+          symbol: signal.affectedAssets[0]?.symbol,
+          signalType: signal.signalType,
+          priority: signal.priority,
+          title: signal.title,
+          summary: signal.summary,
+          overallScore: signal.compositeScore.overall,
+          confidence: signal.compositeScore.confidence,
+          direction: signal.affectedAssets[0]?.direction,
+          expectedMove: signal.affectedAssets[0]?.expectedMove,
+          timeframe: signal.affectedAssets[0]?.timeframe,
+          riskLevel: signal.affectedAssets[0]?.riskLevel,
+          primaryAction: signal.tradingRecommendations.primaryAction,
+          components: signal.compositeScore.components,
+          createdAt: signal.createdAt,
+          validUntil: signal.validUntil
+        })),
+        
+        // Critical alerts
+        criticalAlerts: dashboardData.criticalAlerts.map(alert => ({
+          id: alert.id,
+          alertType: alert.alertType,
+          severity: alert.severity,
+          title: alert.title,
+          message: alert.message,
+          affectedAssets: alert.affectedAssets,
+          triggeredAt: alert.triggeredAt,
+          requiresAction: alert.requiresAction
+        })),
+        
+        // Market correlations summary
+        correlationSummary: {
+          regime: correlationData.correlationRegime.current,
+          confidence: correlationData.correlationRegime.confidence,
+          duration: correlationData.correlationRegime.duration,
+          significantChanges: correlationData.significantChanges.length,
+          topCorrelations: correlationData.correlationMatrix
+            .filter(corr => Math.abs(corr.correlation) > 0.6)
+            .slice(0, 5)
+            .map(corr => ({
+              assetPair: `${corr.asset1}-${corr.asset2}`,
+              correlation: corr.correlation,
+              strength: corr.strength,
+              breakdownRisk: corr.breakdownRisk
+            }))
+        },
+        
+        // Performance summary
+        performance: dashboardData.performanceSummary,
+        
+        // Market context
+        marketContext: dashboardData.marketContext,
+        
+        lastUpdated: new Date().toISOString()
+      };
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error('❌ Failed to get cross-market analysis for discover page:', error);
+      res.status(500).json({ error: 'Failed to get cross-market analysis' });
+    }
+  }));
+
   const httpServer = createServer(app);
   
   // =============================================================================

@@ -444,6 +444,295 @@ export type TopicTag = typeof topicTags.$inferSelect;
 export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
 export type LearningResource = typeof learningResources.$inferSelect;
 
+// Cross-Market Signal Generation Types - Phase 3 Final Feature
+export type CrossMarketSignal = {
+  id: string;
+  signalType: 'unified_trade_signal' | 'cross_market_alert' | 'regime_shift_signal' | 'correlation_break_signal' | 'composite_risk_signal';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  
+  // Core signal information
+  title: string;
+  description: string;
+  summary: string;
+  
+  // Unified scoring from all AI services
+  compositeScore: {
+    overall: number; // 0-100 overall signal strength
+    confidence: number; // 0-100 confidence level
+    components: {
+      eventModelingScore: number; // Contribution from market event modeling
+      patternRecognitionScore: number; // Contribution from pattern recognition
+      volatilityForecastScore: number; // Contribution from volatility forecasting
+      correlationAnalysisScore: number; // Contribution from correlation analysis
+    };
+    weightedAverage: number; // Weighted composite of all components
+  };
+  
+  // Multi-asset signal generation
+  affectedAssets: Array<{
+    symbol: string;
+    assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
+    signalStrength: number; // 0-100
+    direction: 'bullish' | 'bearish' | 'neutral';
+    expectedMove: number; // percentage price movement expected
+    timeframe: '1h' | '4h' | '1d' | '1w' | '1m';
+    riskLevel: 'low' | 'medium' | 'high' | 'extreme';
+  }>;
+  
+  // Cross-market correlations and relationships
+  marketRelationships: Array<{
+    asset1: string;
+    asset2: string;
+    correlationType: 'direct' | 'inverse' | 'leading' | 'lagging';
+    strength: number; // 0-1 correlation strength
+    breakdownProbability: number; // 0-100 probability correlation breaks
+    timeDelay: number; // minutes/hours of delay
+  }>;
+  
+  // Comprehensive trading recommendations
+  tradingRecommendations: {
+    primaryAction: 'strong_buy' | 'buy' | 'hold' | 'sell' | 'strong_sell' | 'hedge';
+    positionSizing: {
+      recommendedAllocation: number; // percentage of portfolio
+      maxRisk: number; // maximum risk percentage
+      diversificationAdvice: string;
+    };
+    entryStrategy: {
+      preferredEntry: number; // price level
+      entryRange: { min: number; max: number };
+      timingAdvice: string;
+    };
+    riskManagement: {
+      stopLoss: number;
+      takeProfit: number[];
+      hedgingStrategy?: string;
+      maxDrawdown: number;
+    };
+    timeHorizon: 'scalp' | 'day_trade' | 'swing' | 'position' | 'long_term';
+  };
+  
+  // Advanced algorithm outputs
+  algorithmicInsights: {
+    eventDrivenFactors: Array<{
+      eventType: string;
+      impact: number; // 0-100 impact score
+      probability: number; // 0-100 probability
+      timeToEvent: number; // hours/days
+    }>;
+    patternMatchedSignals: Array<{
+      patternType: string;
+      confidence: number;
+      successRate: number;
+      averageMove: number;
+    }>;
+    volatilityPredictions: Array<{
+      horizon: string;
+      predictedVol: number;
+      regime: 'low' | 'normal' | 'high' | 'extreme';
+      riskMetrics: { var95: number; var99: number };
+    }>;
+    correlationShifts: Array<{
+      assetPair: string;
+      currentCorr: number;
+      expectedCorr: number;
+      timeframe: string;
+    }>;
+  };
+  
+  // Real-time monitoring and alerts
+  alertConfiguration: {
+    priceAlerts: Array<{
+      symbol: string;
+      triggerType: 'above' | 'below' | 'cross';
+      triggerValue: number;
+      isActive: boolean;
+    }>;
+    volatilityAlerts: Array<{
+      symbol: string;
+      volThreshold: number;
+      timeframe: string;
+      isActive: boolean;
+    }>;
+    correlationAlerts: Array<{
+      assetPair: string;
+      breakdownThreshold: number;
+      isActive: boolean;
+    }>;
+  };
+  
+  // Performance tracking and validation
+  performanceMetrics: {
+    backtestResults: {
+      winRate: number;
+      averageReturn: number;
+      sharpeRatio: number;
+      maxDrawdown: number;
+      totalTrades: number;
+    };
+    livePerformance?: {
+      signalsGenerated: number;
+      successRate: number;
+      avgPerformance: number;
+      lastUpdated: string;
+    };
+    predictionAccuracy: {
+      shortTerm: number; // 1-24h accuracy
+      mediumTerm: number; // 1-7d accuracy
+      longTerm: number; // 1m+ accuracy
+    };
+  };
+  
+  // Metadata and lifecycle
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  validUntil: string;
+  createdBy: 'ai_system' | 'hybrid_analysis' | 'user_triggered';
+  lastEvaluated: string;
+  nextEvaluation: string;
+};
+
+export type UnifiedSignalAlert = {
+  id: string;
+  signalId: string;
+  alertType: 'signal_strength_change' | 'new_opportunity' | 'risk_increase' | 'correlation_breakdown' | 'regime_shift' | 'execution_urgent';
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  
+  title: string;
+  message: string;
+  details: string;
+  
+  // Alert specifics
+  triggerConditions: Array<{
+    condition: string;
+    currentValue: number;
+    thresholdValue: number;
+    isTriggered: boolean;
+  }>;
+  
+  affectedAssets: string[];
+  expectedImpact: {
+    direction: 'positive' | 'negative' | 'neutral';
+    magnitude: number; // 0-100
+    timeframe: string;
+  };
+  
+  // Actionable recommendations
+  urgentActions: Array<{
+    action: string;
+    priority: 'immediate' | 'high' | 'medium' | 'low';
+    reasoning: string;
+    estimatedImpact: string;
+  }>;
+  
+  // Alert lifecycle
+  isActive: boolean;
+  triggeredAt: string;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
+  autoResolved?: boolean;
+  
+  // Integration data
+  relatedAlerts: string[]; // IDs of related alerts
+  escalationLevel: number; // 1-5 escalation level
+  requiresAction: boolean;
+};
+
+export type SignalDashboardData = {
+  // Overview metrics
+  overviewMetrics: {
+    totalActiveSignals: number;
+    highPriorityAlerts: number;
+    avgConfidenceScore: number;
+    successRateToday: number;
+    portfolioImpactScore: number;
+  };
+  
+  // Top signals by strength
+  topSignals: CrossMarketSignal[];
+  
+  // Active alerts requiring attention
+  criticalAlerts: UnifiedSignalAlert[];
+  
+  // Market regime and correlation status
+  marketStatus: {
+    currentRegime: string;
+    regimeConfidence: number;
+    overallCorrelation: number;
+    stressLevel: number;
+    volatilityEnvironment: string;
+  };
+  
+  // Performance summary
+  performanceSummary: {
+    todayPerformance: number;
+    weekPerformance: number;
+    monthPerformance: number;
+    bestPerformingSignal: string;
+    worstPerformingSignal: string;
+  };
+  
+  // Real-time market data for context
+  marketContext: {
+    majorAssetPrices: Array<{
+      symbol: string;
+      price: number;
+      change24h: number;
+      volume: number;
+    }>;
+    keyIndicators: Array<{
+      name: string;
+      value: number;
+      change: number;
+      significance: string;
+    }>;
+  };
+  
+  lastUpdated: string;
+};
+
+export type CrossMarketCorrelationData = {
+  // Real-time correlation matrix
+  correlationMatrix: Array<{
+    asset1: string;
+    asset2: string;
+    correlation: number; // -1 to 1
+    strength: 'very_weak' | 'weak' | 'moderate' | 'strong' | 'very_strong';
+    change24h: number;
+    breakdownRisk: number; // 0-100 probability of breakdown
+    timeframe: '1h' | '4h' | '1d' | '1w';
+  }>;
+  
+  // Regime analysis
+  correlationRegime: {
+    current: 'normal' | 'elevated' | 'extreme' | 'breakdown';
+    confidence: number;
+    duration: number; // days in current regime
+    historicalPercentile: number;
+  };
+  
+  // Notable changes and alerts
+  significantChanges: Array<{
+    assetPair: string;
+    oldCorrelation: number;
+    newCorrelation: number;
+    changePercent: number;
+    significance: 'minor' | 'moderate' | 'major' | 'critical';
+    timeDetected: string;
+  }>;
+  
+  // Cross-market flow analysis
+  marketFlows: Array<{
+    fromAsset: string;
+    toAsset: string;
+    flowStrength: number; // 0-100
+    flowType: 'rotation' | 'flight_to_safety' | 'risk_on' | 'risk_off';
+    netFlow: number; // estimated dollar flow
+  }>;
+  
+  lastUpdated: string;
+};
+
 // Pattern Recognition Types
 export type InsertChartPattern = z.infer<typeof insertChartPatternSchema>;
 export type ChartPattern = typeof chartPatterns.$inferSelect;
