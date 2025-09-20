@@ -679,6 +679,721 @@ const FlowTrends = () => {
   );
 };
 
+// =============================================================================
+// MARKET EVENT MODELING COMPONENTS - Phase 3 Feature
+// =============================================================================
+
+const UpcomingEventsCard = () => {
+  const { data: upcomingEvents, isLoading } = useQuery({
+    queryKey: ['/api/events/upcoming'],
+    refetchInterval: 60000, // 1 minute
+  });
+
+  return (
+    <Card className="bg-gradient-to-r from-amber-900/20 via-yellow-900/20 to-amber-900/20 border-amber-500/30 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-amber-300 flex items-center gap-2 text-sm">
+          <Calendar className="h-4 w-4" />
+          Upcoming High-Impact Events
+          <Badge className="bg-amber-500/20 text-amber-300 border-amber-400/30 text-xs">
+            Next 7 Days
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-gray-700 rounded"></div>
+            ))}
+          </div>
+        ) : upcomingEvents?.events ? (
+          <div className="space-y-3">
+            {upcomingEvents.events.slice(0, 4).map((event: any) => (
+              <div key={event.id} className="p-3 bg-black/20 rounded-lg border border-amber-500/20 hover:border-amber-400/40 transition-all">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <h4 className="text-white font-medium text-sm line-clamp-1">{event.title}</h4>
+                    <p className="text-gray-400 text-xs mt-1 line-clamp-2">{event.description}</p>
+                  </div>
+                  <Badge className={`text-xs ml-2 ${
+                    event.impact === 'critical' ? 'bg-red-500/20 text-red-300' :
+                    event.impact === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                    event.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                    'bg-gray-500/20 text-gray-300'
+                  }`}>
+                    {event.impact === 'critical' ? '🚨' :
+                     event.impact === 'high' ? '⚡' :
+                     event.impact === 'medium' ? '📊' : '📈'}
+                    {event.impact}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-purple-500/20 text-purple-300 text-xs">
+                      {event.category?.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                    <span className="text-gray-400 text-xs">
+                      {event.timeToEvent && event.timeToEvent < 86400000 ? 
+                        `${Math.round(event.timeToEvent / 3600000)}h` : 
+                        new Date(event.scheduledDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-amber-400 text-xs">Impact:</span>
+                    <span className="text-white text-xs font-medium">{event.marketRelevance || 85}%</span>
+                  </div>
+                </div>
+                {event.affectedAssets && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {event.affectedAssets.slice(0, 4).map((asset: string) => (
+                      <span key={asset} className="text-xs bg-amber-500/10 text-amber-300 px-1.5 py-0.5 rounded">
+                        {asset}
+                      </span>
+                    ))}
+                    {event.affectedAssets.length > 4 && (
+                      <span className="text-xs text-gray-400">+{event.affectedAssets.length - 4}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No upcoming events</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const EventPredictionsCard = () => {
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const { data: upcomingEvents } = useQuery({
+    queryKey: ['/api/events/upcoming'],
+  });
+
+  const { data: predictions, isLoading: predictionsLoading } = useQuery({
+    queryKey: ['/api/events/predictions', selectedEvent],
+    enabled: !!selectedEvent,
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const handleEventSelect = async (eventId: string) => {
+    setSelectedEvent(eventId);
+    try {
+      const response = await apiRequest(`/api/events/${eventId}/predictions`, { method: 'POST' });
+      // Predictions will be fetched by the query
+    } catch (error) {
+      console.error('Failed to generate predictions:', error);
+    }
+  };
+
+  return (
+    <Card className="bg-gradient-to-r from-purple-900/20 via-indigo-900/20 to-purple-900/20 border-purple-500/30 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-purple-300 flex items-center gap-2 text-sm">
+          <Brain className="h-4 w-4" />
+          AI Impact Predictions
+          <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+            ML Models
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {!selectedEvent ? (
+          <div className="space-y-2">
+            <p className="text-gray-400 text-xs mb-3">Select an event to see AI predictions:</p>
+            {upcomingEvents?.events?.slice(0, 3).map((event: any) => (
+              <button
+                key={event.id}
+                onClick={() => handleEventSelect(event.id)}
+                className="w-full p-2 text-left bg-black/20 rounded border border-purple-500/20 hover:border-purple-400/40 transition-all"
+              >
+                <div className="text-white text-sm font-medium">{event.title}</div>
+                <div className="text-gray-400 text-xs">{event.category?.replace('_', ' ')}</div>
+              </button>
+            ))}
+          </div>
+        ) : predictionsLoading ? (
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-12 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-gray-700 rounded"></div>
+          </div>
+        ) : predictions?.predictions ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="text-purple-400 text-xs hover:text-purple-300"
+              >
+                ← Back to Events
+              </button>
+              <Badge className="bg-green-500/20 text-green-300 text-xs">
+                Avg Confidence: {predictions.averageConfidence?.toFixed(1)}%
+              </Badge>
+            </div>
+            
+            {predictions.predictions.slice(0, 2).map((prediction: any) => (
+              <div key={prediction.id} className="p-3 bg-black/20 rounded-lg border border-purple-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className={`text-xs ${
+                      prediction.predictedDirection === 'bullish' ? 'bg-green-500/20 text-green-300' :
+                      prediction.predictedDirection === 'bearish' ? 'bg-red-500/20 text-red-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      {prediction.predictedDirection === 'bullish' ? '📈' :
+                       prediction.predictedDirection === 'bearish' ? '📉' : '➡️'}
+                      {prediction.predictedDirection}
+                    </Badge>
+                    <span className="text-purple-300 text-xs">{prediction.algorithm}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-medium text-sm">
+                      {prediction.magnitude.expectedMove.toFixed(1)}%
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      Confidence: {prediction.confidence}%
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">Impact Timing</span>
+                    <div className="flex gap-2">
+                      <span className="text-green-400">1h: {prediction.impactTiming.immediate}%</span>
+                      <span className="text-blue-400">24h: {prediction.impactTiming.shortTerm}%</span>
+                    </div>
+                  </div>
+                  
+                  {prediction.assetPredictions?.slice(0, 3).map((asset: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <span className="text-gray-300">{asset.symbol}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`${asset.predictedMove > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {asset.predictedMove > 0 ? '+' : ''}{asset.predictedMove.toFixed(1)}%
+                        </span>
+                        <span className="text-gray-400">{asset.confidence.toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No predictions available</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const EventTradingSignalsCard = () => {
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const { data: upcomingEvents } = useQuery({
+    queryKey: ['/api/events/upcoming'],
+  });
+
+  const { data: signals, isLoading: signalsLoading } = useQuery({
+    queryKey: ['/api/events/signals', selectedEvent],
+    enabled: !!selectedEvent,
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const handleGenerateSignals = async (eventId: string) => {
+    setSelectedEvent(eventId);
+    try {
+      await apiRequest(`/api/events/${eventId}/signals`, {
+        method: 'POST',
+        body: JSON.stringify({ minConfidence: 65, maxSignals: 5 })
+      });
+    } catch (error) {
+      console.error('Failed to generate signals:', error);
+    }
+  };
+
+  return (
+    <Card className="bg-gradient-to-r from-green-900/20 via-emerald-900/20 to-green-900/20 border-green-500/30 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-green-300 flex items-center gap-2 text-sm">
+          <Target className="h-4 w-4" />
+          Event Trading Signals
+          <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+            High Confidence
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {!selectedEvent ? (
+          <div className="space-y-2">
+            <p className="text-gray-400 text-xs mb-3">Select an event to generate trading signals:</p>
+            {upcomingEvents?.events?.slice(0, 3).map((event: any) => (
+              <button
+                key={event.id}
+                onClick={() => handleGenerateSignals(event.id)}
+                className="w-full p-2 text-left bg-black/20 rounded border border-green-500/20 hover:border-green-400/40 transition-all"
+                data-testid={`button-generate-signals-${event.id}`}
+              >
+                <div className="text-white text-sm font-medium">{event.title}</div>
+                <div className="text-gray-400 text-xs">Generate signals for {event.affectedAssets?.length || 0} assets</div>
+              </button>
+            ))}
+          </div>
+        ) : signalsLoading ? (
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-16 bg-gray-700 rounded"></div>
+            <div className="h-12 bg-gray-700 rounded"></div>
+          </div>
+        ) : signals?.signals ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="text-green-400 text-xs hover:text-green-300"
+              >
+                ← Back to Events
+              </button>
+              <Badge className="bg-green-500/20 text-green-300 text-xs">
+                {signals.count} Signals Generated
+              </Badge>
+            </div>
+            
+            {signals.signals.slice(0, 3).map((signal: any) => (
+              <div key={signal.id} className="p-3 bg-black/20 rounded-lg border border-green-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className={`text-xs ${
+                      signal.action === 'buy' ? 'bg-green-500/20 text-green-300' :
+                      signal.action === 'sell' ? 'bg-red-500/20 text-red-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      {signal.action === 'buy' ? '🟢' : '🔴'} {signal.action.toUpperCase()}
+                    </Badge>
+                    <span className="text-white font-medium text-sm">{signal.symbol}</span>
+                    <Badge className={`text-xs ${
+                      signal.priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                      signal.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      {signal.priority}
+                    </Badge>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-green-400 font-medium text-sm">
+                      {signal.strength}% Strength
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      {signal.confidence}% Confidence
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-gray-400">Entry:</span>
+                    <span className="text-white ml-1">${signal.entryPrice?.toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Target:</span>
+                    <span className="text-green-400 ml-1">${signal.targetPrice?.toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Stop:</span>
+                    <span className="text-red-400 ml-1">${signal.stopLoss?.toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">R/R:</span>
+                    <span className="text-white ml-1">{signal.riskRewardRatio?.toFixed(1)}:1</span>
+                  </div>
+                </div>
+                
+                <div className="mt-2">
+                  <div className="text-gray-400 text-xs mb-1">Reasoning:</div>
+                  <div className="text-gray-300 text-xs">
+                    {signal.reasoning?.[0] || 'ML model indicates significant impact expected'}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No signals generated</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const HistoricalAnalysisCard = () => {
+  const [selectedEventType, setSelectedEventType] = useState<string>('fomc_meeting');
+  const { data: historicalData, isLoading } = useQuery({
+    queryKey: ['/api/events/historical', selectedEventType],
+    refetchInterval: 1800000, // 30 minutes
+  });
+
+  const eventTypes = [
+    { value: 'fomc_meeting', label: 'FOMC Meetings', icon: '🏛️' },
+    { value: 'earnings_release', label: 'Earnings', icon: '📊' },
+    { value: 'crypto_upgrade', label: 'Crypto Events', icon: '⚡' },
+    { value: 'regulatory_announcement', label: 'Regulation', icon: '📜' }
+  ];
+
+  return (
+    <Card className="bg-gradient-to-r from-blue-900/20 via-cyan-900/20 to-blue-900/20 border-blue-500/30 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-blue-300 flex items-center gap-2 text-sm">
+          <LineChart className="h-4 w-4" />
+          Historical Impact Analysis
+          <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
+            2Y Analysis
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-1 mb-3">
+          {eventTypes.map((type) => (
+            <button
+              key={type.value}
+              onClick={() => setSelectedEventType(type.value)}
+              className={`p-2 text-xs rounded border transition-all ${
+                selectedEventType === type.value
+                  ? 'bg-blue-500/20 border-blue-400/40 text-blue-300'
+                  : 'bg-black/20 border-blue-500/20 text-gray-400 hover:text-blue-400'
+              }`}
+              data-testid={`button-event-type-${type.value}`}
+            >
+              <div>{type.icon} {type.label}</div>
+            </button>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-gray-700 rounded"></div>
+            <div className="h-6 bg-gray-700 rounded"></div>
+          </div>
+        ) : historicalData?.analysis ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-black/20 rounded-lg p-2">
+                <div className="text-xs text-gray-400">Average Impact</div>
+                <div className="text-blue-400 font-bold text-lg">
+                  {historicalData.analysis.averageImpact.oneDay.toFixed(1)}%
+                </div>
+                <div className="text-xs text-gray-500">24h timeframe</div>
+              </div>
+              <div className="bg-black/20 rounded-lg p-2">
+                <div className="text-xs text-gray-400">Events Analyzed</div>
+                <div className="text-white font-bold text-lg">
+                  {historicalData.analysis.analysisWindow.eventCount}
+                </div>
+                <div className="text-xs text-gray-500">Last 2 years</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs text-gray-400 mb-1">Outcome Distribution:</div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-green-400">Bullish:</span>
+                  <span className="text-white">{historicalData.analysis.outcomesDistribution.bullish}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-400">Bearish:</span>
+                  <span className="text-white">{historicalData.analysis.outcomesDistribution.bearish}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Neutral:</span>
+                  <span className="text-white">{historicalData.analysis.outcomesDistribution.neutral}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs text-gray-400 mb-1">Volatility Analysis:</div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">Avg Vol Spike:</span>
+                <span className="text-orange-400">{historicalData.analysis.volatilityAnalysis.averageVolSpike}%</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">Max Vol Spike:</span>
+                <span className="text-red-400">{historicalData.analysis.volatilityAnalysis.maxVolSpike}%</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-blue-500/20">
+              <div className="text-xs text-gray-400 mb-1">Market Regime Impact:</div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-green-400">Bull Market:</span>
+                  <span className="text-white">{historicalData.analysis.regimeAnalysis.bullMarket.averageImpact.toFixed(1)}%</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-red-400">Bear Market:</span>
+                  <span className="text-white">{historicalData.analysis.regimeAnalysis.bearMarket.averageImpact.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <LineChart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No historical data available</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const ModelPerformanceCard = () => {
+  const { data: modelStatus, isLoading } = useQuery({
+    queryKey: ['/api/events/models/status'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  return (
+    <Card className="bg-gradient-to-r from-indigo-900/20 via-purple-900/20 to-indigo-900/20 border-indigo-500/30 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-indigo-300 flex items-center gap-2 text-sm">
+          <Brain className="h-4 w-4" />
+          ML Model Performance
+          <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30 text-xs">
+            Live Status
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-gray-700 rounded"></div>
+            <div className="h-6 bg-gray-700 rounded"></div>
+          </div>
+        ) : modelStatus?.modelStatus ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-black/20 rounded-lg p-2">
+                <div className="text-xs text-gray-400">Active Models</div>
+                <div className="text-indigo-400 font-bold text-lg">
+                  {modelStatus.modelStatus.activeModels}/{modelStatus.modelStatus.totalModels}
+                </div>
+                <div className="text-xs text-gray-500">Operational</div>
+              </div>
+              <div className="bg-black/20 rounded-lg p-2">
+                <div className="text-xs text-gray-400">Avg Accuracy</div>
+                <div className="text-green-400 font-bold text-lg">
+                  {modelStatus.modelStatus.averageAccuracy.toFixed(1)}%
+                </div>
+                <div className="text-xs text-gray-500">Cross-validation</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs text-gray-400 mb-1">Recent Performance:</div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">Predictions Made:</span>
+                <span className="text-white">{modelStatus.modelStatus.recentPredictions}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">Prediction Accuracy:</span>
+                <span className="text-green-400">{modelStatus.modelStatus.predictionAccuracy.toFixed(1)}%</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs text-gray-400 mb-1">Top Performing Models:</div>
+              {modelStatus.modelStatus.modelsHealth?.slice(0, 3).map((model: any) => (
+                <div key={model.id} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      model.status === 'active' ? 'bg-green-400' : 'bg-red-400'
+                    }`}></div>
+                    <span className="text-gray-300">{model.name.split(' ')[0]}</span>
+                  </div>
+                  <span className="text-white">{model.accuracy.toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-indigo-500/20">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Last Retrained:</span>
+                <span className="text-white">
+                  {new Date(modelStatus.modelStatus.lastRetrained).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Model status unavailable</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const EventRiskMonitoringCard = () => {
+  const { data: alerts, isLoading } = useQuery({
+    queryKey: ['/api/events/alerts'],
+    refetchInterval: 30000, // 30 seconds
+  });
+
+  const { data: upcomingEvents } = useQuery({
+    queryKey: ['/api/events/upcoming'],
+  });
+
+  // Calculate risk score based on upcoming events
+  const calculateRiskScore = () => {
+    if (!upcomingEvents?.events) return 25;
+    
+    const highImpactEvents = upcomingEvents.events.filter((e: any) => 
+      e.impact === 'high' || e.impact === 'critical'
+    );
+    
+    const nearTermEvents = upcomingEvents.events.filter((e: any) => 
+      e.timeToEvent && e.timeToEvent < 86400000 // Less than 24 hours
+    );
+    
+    return Math.min(100, (highImpactEvents.length * 15) + (nearTermEvents.length * 10) + 25);
+  };
+
+  const riskScore = calculateRiskScore();
+  const riskLevel = riskScore > 75 ? 'critical' : riskScore > 50 ? 'high' : riskScore > 30 ? 'medium' : 'low';
+
+  return (
+    <Card className="bg-gradient-to-r from-red-900/20 via-orange-900/20 to-red-900/20 border-red-500/30 backdrop-blur-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-red-300 flex items-center gap-2 text-sm">
+          <AlertTriangle className="h-4 w-4" />
+          Event Risk Monitoring
+          <Badge className={`text-xs ${
+            riskLevel === 'critical' ? 'bg-red-500/20 text-red-300' :
+            riskLevel === 'high' ? 'bg-orange-500/20 text-orange-300' :
+            riskLevel === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+            'bg-gray-500/20 text-gray-300'
+          }`}>
+            {riskLevel === 'critical' ? '🚨' :
+             riskLevel === 'high' ? '⚡' :
+             riskLevel === 'medium' ? '⚠️' : '✅'}
+            {riskLevel.toUpperCase()}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="space-y-3">
+          <div className="bg-black/20 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-400 text-xs">Current Risk Score</span>
+              <Badge className={`text-xs ${
+                riskScore > 75 ? 'bg-red-500/20 text-red-300' :
+                riskScore > 50 ? 'bg-orange-500/20 text-orange-300' :
+                riskScore > 30 ? 'bg-yellow-500/20 text-yellow-300' :
+                'bg-green-500/20 text-green-300'
+              }`}>
+                {riskLevel.toUpperCase()}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`text-2xl font-bold ${
+                riskScore > 75 ? 'text-red-400' :
+                riskScore > 50 ? 'text-orange-400' :
+                riskScore > 30 ? 'text-yellow-400' :
+                'text-green-400'
+              }`}>
+                {riskScore}
+              </div>
+              <div className="flex-1">
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all ${
+                      riskScore > 75 ? 'bg-red-500' :
+                      riskScore > 50 ? 'bg-orange-500' :
+                      riskScore > 30 ? 'bg-yellow-500' :
+                      'bg-green-500'
+                    }`}
+                    style={{ width: `${riskScore}%` }}
+                  ></div>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Based on {upcomingEvents?.events?.length || 0} upcoming events
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-xs text-gray-400 mb-1">Near-term Risks:</div>
+            {upcomingEvents?.events?.filter((e: any) => e.timeToEvent && e.timeToEvent < 86400000)
+              .slice(0, 3).map((event: any) => (
+              <div key={event.id} className="flex items-center justify-between p-2 bg-black/20 rounded text-xs">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    event.impact === 'critical' ? 'bg-red-400' :
+                    event.impact === 'high' ? 'bg-orange-400' :
+                    'bg-yellow-400'
+                  }`}></div>
+                  <span className="text-gray-300">{event.title.split(' ').slice(0, 3).join(' ')}</span>
+                </div>
+                <span className="text-white">
+                  {Math.round(event.timeToEvent / 3600000)}h
+                </span>
+              </div>
+            ))}
+            
+            {!upcomingEvents?.events?.some((e: any) => e.timeToEvent && e.timeToEvent < 86400000) && (
+              <div className="text-center py-4 text-gray-400">
+                <CheckCircle2 className="h-6 w-6 mx-auto mb-1 opacity-50" />
+                <p className="text-xs">No immediate risks detected</p>
+              </div>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="animate-pulse space-y-1">
+              <div className="h-3 bg-gray-700 rounded"></div>
+              <div className="h-3 bg-gray-700 rounded w-2/3"></div>
+            </div>
+          ) : alerts?.alerts?.length > 0 ? (
+            <div className="space-y-2">
+              <div className="text-xs text-gray-400 mb-1">Active Alerts:</div>
+              {alerts.alerts.slice(0, 2).map((alert: any, index: number) => (
+                <div key={index} className="flex items-center gap-2 p-2 bg-black/20 rounded text-xs">
+                  <AlertCircle className="h-3 w-3 text-orange-400" />
+                  <span className="text-gray-300 flex-1">Event monitoring alert</span>
+                  <span className="text-orange-400">Active</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-2">
+              <p className="text-xs text-gray-400">No active alerts</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function Discover() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1841,6 +2556,61 @@ export default function Discover() {
             </Card>
 
           </div>
+        </motion.div>
+
+        {/* Phase 3: Market Event Modeling & Prediction System */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-amber-400" />
+              Event Impact Modeling
+              <Badge className="bg-amber-500/20 text-amber-300 border-amber-400/30 ml-2">
+                <Brain className="h-3 w-3 mr-1" />
+                AI-Powered Predictions
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                🎯 Event Forecasting
+              </Badge>
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                📊 Impact Analysis
+              </Badge>
+              <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+                💡 Trading Signals
+              </Badge>
+            </div>
+          </div>
+
+          {/* Event Modeling Dashboard Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            
+            {/* Upcoming High-Impact Events */}
+            <UpcomingEventsCard />
+
+            {/* Event Impact Predictions */}
+            <EventPredictionsCard />
+
+            {/* Trading Signals from Events */}
+            <EventTradingSignalsCard />
+
+            {/* Historical Impact Analysis */}
+            <HistoricalAnalysisCard />
+
+            {/* Model Performance Dashboard */}
+            <ModelPerformanceCard />
+
+            {/* Event Risk Monitoring */}
+            <EventRiskMonitoringCard />
+
+          </div>
+
         </motion.div>
 
         {/* Institutional Flow Analytics Section */}

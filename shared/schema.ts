@@ -1167,3 +1167,412 @@ export type RiskDashboardResponse = {
   riskAlerts: RiskAlert[];
   composition: PortfolioComposition;
 };
+
+// Market Event Impact Modeling and Prediction Types - Phase 3 Feature
+export type MarketEvent = {
+  id: string;
+  title: string;
+  description?: string;
+  eventType: 'fomc_meeting' | 'fed_speech' | 'cpi_release' | 'nfp_release' | 'gdp_release' | 'inflation_data' | 
+            'earnings_release' | 'regulatory_announcement' | 'geopolitical_event' | 'crypto_upgrade' | 'hack' | 
+            'whale_movement' | 'institutional_adoption' | 'defi_launch' | 'protocol_update' | 'exchange_listing' |
+            'delisting' | 'halving' | 'merge' | 'hard_fork' | 'soft_fork' | 'governance_proposal' | 'audit_release';
+  
+  // Event timing and scheduling
+  scheduledDate: string;
+  actualDate?: string;
+  isCompleted: boolean;
+  timeToEvent?: number; // milliseconds until event
+  
+  // Event classification and importance
+  category: 'monetary_policy' | 'economic_data' | 'corporate_earnings' | 'regulatory' | 'technical' | 'market_structure' | 'geopolitical';
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  volatilityExpected: 'low' | 'medium' | 'high' | 'extreme';
+  marketRelevance: number; // 0-100 score
+  
+  // Asset scope
+  affectedAssets: string[]; // Which assets this event might impact
+  primaryAsset?: string; // Main asset affected
+  assetTypes: ('crypto' | 'stock' | 'commodity' | 'currency' | 'bond')[];
+  
+  // Event details
+  source: string;
+  url?: string;
+  venue?: string;
+  officialName?: string; // For speeches, testimonies
+  expectedAnnouncement?: string; // What's expected to be announced
+  marketConsensus?: {
+    forecast?: number;
+    range?: { min: number; max: number };
+    unit?: string;
+  };
+  
+  // Historical context
+  previousValues?: number[];
+  historicalAverageImpact?: number; // Average price movement percentage
+  lastSimilarEvent?: {
+    date: string;
+    outcome: string;
+    marketReaction: number;
+  };
+  
+  tags: string[];
+  isRecurring: boolean;
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'irregular';
+  lastUpdated: string;
+};
+
+export type EventImpactPrediction = {
+  id: string;
+  eventId: string;
+  predictionType: 'price_movement' | 'volatility_spike' | 'volume_surge' | 'correlation_shift' | 'sentiment_change';
+  
+  // ML Model Information
+  modelVersion: string;
+  algorithm: 'random_forest' | 'gradient_boosting' | 'neural_network' | 'ensemble' | 'linear_regression' | 'svm';
+  trainingDataSize: number;
+  featureCount: number;
+  lastTrainedAt: string;
+  
+  // Prediction Details
+  predictedDirection: 'bullish' | 'bearish' | 'neutral' | 'volatile';
+  magnitude: {
+    expectedMove: number; // percentage price move
+    range: { min: number; max: number };
+    volatilityIncrease: number; // expected volatility spike
+  };
+  
+  // Confidence and Uncertainty
+  confidence: number; // 0-100 overall prediction confidence
+  uncertaintyFactors: string[]; // What makes this prediction uncertain
+  reliabilityScore: number; // 0-100 based on historical accuracy
+  
+  // Timing Predictions
+  impactTiming: {
+    immediate: number; // 0-100 probability of immediate impact
+    shortTerm: number; // 0-100 probability of 1-24h impact
+    mediumTerm: number; // 0-100 probability of 1-7d impact
+    longTerm: number; // 0-100 probability of 1m+ impact
+  };
+  
+  // Asset-Specific Predictions
+  assetPredictions: Array<{
+    symbol: string;
+    assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
+    predictedMove: number; // percentage
+    confidence: number;
+    reasoning: string[];
+  }>;
+  
+  // Market Regime Context
+  marketRegime: 'bull' | 'bear' | 'sideways' | 'volatile';
+  regimeImpact: number; // How current regime affects prediction
+  
+  createdAt: string;
+  expiresAt: string;
+};
+
+export type EventImpactModel = {
+  id: string;
+  name: string;
+  description: string;
+  modelType: 'classification' | 'regression' | 'time_series' | 'hybrid';
+  
+  // Model Configuration
+  algorithm: string;
+  hyperparameters: { [key: string]: any };
+  features: string[];
+  targetVariable: string;
+  
+  // Training Information
+  trainingPeriod: { start: string; end: string };
+  validationMethod: 'holdout' | 'cross_validation' | 'time_series_split';
+  trainAccuracy: number;
+  validationAccuracy: number;
+  testAccuracy?: number;
+  
+  // Performance Metrics
+  metrics: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
+    meanAbsoluteError?: number;
+    rootMeanSquareError?: number;
+    sharpeRatio?: number; // For trading-focused models
+  };
+  
+  // Model Behavior
+  eventTypes: string[]; // Which event types this model handles
+  assetTypes: string[]; // Which asset types it works with
+  timeHorizons: string[]; // Prediction time horizons
+  
+  // Production Status
+  isActive: boolean;
+  productionSince?: string;
+  lastRetrained: string;
+  retrainingFrequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+  
+  // Monitoring
+  driftDetection: {
+    lastCheck: string;
+    driftScore: number; // 0-1, higher = more drift
+    alertThreshold: number;
+    isAlerting: boolean;
+  };
+  
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TradingSignal = {
+  id: string;
+  eventId?: string;
+  predictionId?: string;
+  
+  // Signal Details
+  signalType: 'entry' | 'exit' | 'hedge' | 'risk_management' | 'position_sizing';
+  action: 'buy' | 'sell' | 'hold' | 'reduce' | 'increase';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  
+  // Asset Information
+  symbol: string;
+  assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
+  currentPrice: number;
+  
+  // Signal Specifics
+  direction: 'long' | 'short' | 'neutral';
+  strength: number; // 0-100 signal strength
+  conviction: number; // 0-100 conviction level
+  
+  // Entry/Exit Levels
+  entryPrice?: number;
+  targetPrice?: number;
+  stopLoss?: number;
+  riskRewardRatio?: number;
+  
+  // Position Sizing
+  recommendedAllocation?: number; // percentage of portfolio
+  maxRisk?: number; // maximum risk percentage
+  positionSize?: number; // suggested position size
+  
+  // Timing
+  timeframe: '5m' | '15m' | '1h' | '4h' | '1d' | '1w' | 'long_term';
+  validUntil: string;
+  urgency: 'immediate' | 'within_1h' | 'within_24h' | 'within_week';
+  
+  // Rationale and Context
+  reasoning: string[];
+  catalysts: string[]; // What's driving this signal
+  risks: string[]; // Potential risks to consider
+  marketContext: string;
+  
+  // Performance Tracking
+  isExecuted?: boolean;
+  executedAt?: string;
+  executionPrice?: number;
+  outcome?: 'profitable' | 'loss' | 'breakeven' | 'pending';
+  realizedPnL?: number;
+  
+  // Metadata
+  confidence: number; // 0-100 confidence in signal
+  source: 'model_prediction' | 'manual_analysis' | 'hybrid' | 'risk_management';
+  createdAt: string;
+  lastUpdated: string;
+};
+
+export type HistoricalImpactAnalysis = {
+  id: string;
+  eventType: string;
+  analysisType: 'individual_event' | 'event_category' | 'cross_asset' | 'regime_comparison';
+  
+  // Time Period
+  analysisWindow: {
+    start: string;
+    end: string;
+    eventCount: number;
+  };
+  
+  // Statistical Analysis
+  averageImpact: {
+    immediate: number; // Average immediate price reaction (%)
+    oneHour: number;
+    oneDay: number;
+    oneWeek: number;
+    oneMonth: number;
+  };
+  
+  volatilityAnalysis: {
+    averageVolSpike: number; // Average volatility increase
+    maxVolSpike: number;
+    volatilityDuration: number; // Days until vol normalizes
+  };
+  
+  // Distribution Analysis
+  outcomesDistribution: {
+    bullish: number; // Percentage of bullish outcomes
+    bearish: number;
+    neutral: number;
+    highVolatility: number; // Percentage leading to high vol
+  };
+  
+  // Notable Events
+  significantEvents: Array<{
+    date: string;
+    eventTitle: string;
+    impact: number;
+    reason: string;
+    uniqueFactors: string[];
+  }>;
+  
+  // Pattern Recognition
+  patterns: Array<{
+    pattern: string;
+    frequency: number;
+    reliability: number;
+    description: string;
+    examples: string[];
+  }>;
+  
+  // Predictive Insights
+  predictiveFactors: Array<{
+    factor: string;
+    correlation: number;
+    significance: number;
+    description: string;
+  }>;
+  
+  // Market Regime Analysis
+  regimeAnalysis: {
+    bullMarket: { averageImpact: number; volatility: number; sampleSize: number };
+    bearMarket: { averageImpact: number; volatility: number; sampleSize: number };
+    sidewaysMarket: { averageImpact: number; volatility: number; sampleSize: number };
+  };
+  
+  // Cross-Asset Correlations
+  crossAssetImpacts: Array<{
+    primaryAsset: string;
+    correlatedAsset: string;
+    correlation: number;
+    lagDays: number;
+    strength: 'weak' | 'moderate' | 'strong';
+  }>;
+  
+  // Methodology
+  dataSource: string[];
+  statisticalMethods: string[];
+  confidenceLevel: number;
+  sampleSize: number;
+  
+  createdAt: string;
+  lastUpdated: string;
+};
+
+export type MarketEventAlert = {
+  id: string;
+  eventId?: string;
+  predictionId?: string;
+  
+  // Alert Classification
+  alertType: 'event_detected' | 'prediction_update' | 'impact_threshold' | 'anomaly_detected' | 'model_drift' | 'signal_generated';
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  
+  // Alert Content
+  title: string;
+  message: string;
+  description?: string;
+  
+  // Event/Market Context
+  affectedAssets: string[];
+  expectedImpact: 'positive' | 'negative' | 'neutral' | 'mixed';
+  impactMagnitude: number; // 0-100
+  timeframe: string;
+  
+  // Actionable Information
+  recommendations: string[];
+  suggestedActions: Array<{
+    action: string;
+    urgency: 'immediate' | 'within_1h' | 'within_24h' | 'monitor';
+    reasoning: string;
+  }>;
+  
+  // Alert Lifecycle
+  isActive: boolean;
+  triggeredAt: string;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
+  expiresAt?: string;
+  
+  // Delivery Status
+  deliveryChannels: ('email' | 'sms' | 'push' | 'dashboard')[];
+  deliveredAt?: { [channel: string]: string };
+  
+  // Metadata
+  source: string;
+  confidence: number;
+  tags: string[];
+  lastUpdated: string;
+};
+
+export type EventImpactSummary = {
+  timeframe: '1d' | '7d' | '30d' | '90d';
+  
+  // Upcoming Events
+  upcomingHighImpact: MarketEvent[];
+  upcomingMediumImpact: MarketEvent[];
+  nearTermCatalysts: Array<{
+    event: MarketEvent;
+    prediction: EventImpactPrediction;
+    signal?: TradingSignal;
+  }>;
+  
+  // Current Predictions
+  activePredictions: EventImpactPrediction[];
+  recentSignals: TradingSignal[];
+  activeAlerts: MarketEventAlert[];
+  
+  // Historical Performance
+  modelPerformance: {
+    totalPredictions: number;
+    accurateDirectional: number;
+    accurateMagnitude: number;
+    averageError: number;
+    winRate: number;
+    profitability?: number;
+  };
+  
+  // Market Outlook
+  marketOutlook: {
+    overall: 'bullish' | 'bearish' | 'neutral' | 'uncertain';
+    confidence: number;
+    keyDrivers: string[];
+    riskFactors: string[];
+    timeHorizon: string;
+  };
+  
+  // Risk Assessment
+  eventRisk: {
+    nextWeekRisk: number; // 0-100
+    nextMonthRisk: number;
+    volatilityExpected: number;
+    blackSwanProbability: number;
+  };
+  
+  lastUpdated: string;
+};
+
+export type EventModelingDashboard = {
+  summary: EventImpactSummary;
+  upcomingEvents: MarketEvent[];
+  activePredictions: EventImpactPrediction[];
+  tradingSignals: TradingSignal[];
+  historicalAnalysis: HistoricalImpactAnalysis[];
+  alerts: MarketEventAlert[];
+  modelStatus: {
+    activeModels: number;
+    modelAccuracy: number;
+    lastRetrained: string;
+    predictionQueue: number;
+  };
+};
