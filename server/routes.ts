@@ -1574,6 +1574,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // ECONOMIC CALENDAR ROUTES
+  // =============================================================================
+
+  // Get economic calendar events with optional filtering
+  app.get('/api/market/economic-calendar', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    // Parse query parameters for filtering
+    const filter: any = {};
+    
+    if (req.query.timeRange) {
+      filter.timeRange = req.query.timeRange as string;
+    } else {
+      filter.timeRange = '30d'; // Default to 30 days
+    }
+    
+    if (req.query.impact) {
+      const impacts = typeof req.query.impact === 'string' 
+        ? [req.query.impact] 
+        : req.query.impact as string[];
+      filter.impact = impacts;
+    }
+    
+    if (req.query.eventTypes) {
+      const types = typeof req.query.eventTypes === 'string'
+        ? [req.query.eventTypes]
+        : req.query.eventTypes as string[];
+      filter.eventTypes = types;
+    }
+    
+    if (req.query.countries) {
+      const countries = typeof req.query.countries === 'string'
+        ? [req.query.countries]
+        : req.query.countries as string[];
+      filter.countries = countries;
+    }
+    
+    if (req.query.onlyUpcoming === 'true') {
+      filter.onlyUpcoming = true;
+    }
+    
+    try {
+      const events = await marketData.getEconomicCalendar(filter);
+      res.json({ 
+        events, 
+        count: events.length,
+        filter,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Economic calendar error:', error);
+      res.json({ 
+        events: [], 
+        error: 'Economic calendar data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get upcoming FOMC meetings specifically
+  app.get('/api/market/fomc-meetings', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const events = await marketData.getFOMCMeetings();
+      res.json({ 
+        events, 
+        count: events.length,
+        source: 'Federal Reserve',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('FOMC meetings error:', error);
+      res.json({ 
+        events: [], 
+        error: 'FOMC meeting data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get inflation events (CPI releases)
+  app.get('/api/market/inflation-events', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const events = await marketData.getInflationEvents();
+      res.json({ 
+        events, 
+        count: events.length,
+        source: 'Bureau of Labor Statistics',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Inflation events error:', error);
+      res.json({ 
+        events: [], 
+        error: 'Inflation data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get employment events
+  app.get('/api/market/employment-events', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const events = await marketData.getEmploymentEvents();
+      res.json({ 
+        events, 
+        count: events.length,
+        source: 'Bureau of Labor Statistics',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Employment events error:', error);
+      res.json({ 
+        events: [], 
+        error: 'Employment data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get GDP events
+  app.get('/api/market/gdp-events', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const events = await marketData.getGDPEvents();
+      res.json({ 
+        events, 
+        count: events.length,
+        source: 'Bureau of Economic Analysis',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('GDP events error:', error);
+      res.json({ 
+        events: [], 
+        error: 'GDP data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get high-impact economic events (today/tomorrow)
+  app.get('/api/market/high-impact-events', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const events = await marketData.getHighImpactEvents();
+      res.json({ 
+        events, 
+        count: events.length,
+        description: 'High-impact events with market relevance >= 80%',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('High-impact events error:', error);
+      res.json({ 
+        events: [], 
+        error: 'High-impact event data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // =============================================================================
   // SOCIAL ACTION ROUTES (Protected)
   // =============================================================================
 

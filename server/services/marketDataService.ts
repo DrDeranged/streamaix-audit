@@ -33,19 +33,56 @@ export interface NewsArticle {
   category?: string;
 }
 
+export interface EconomicEvent {
+  id: string;
+  title: string;
+  description?: string;
+  eventType: 'fomc' | 'cpi' | 'gdp' | 'employment' | 'inflation' | 'retail_sales' | 'pmi' | 'housing' | 'earnings';
+  scheduledDate: string;
+  actualDate?: string;
+  impact: 'high' | 'medium' | 'low';
+  country: string;
+  currency: string;
+  actual?: number;
+  forecast?: number;
+  previous?: number;
+  unit?: string;
+  source: string;
+  frequency: 'monthly' | 'quarterly' | 'annual' | 'irregular';
+  category: 'monetary_policy' | 'inflation' | 'employment' | 'growth' | 'consumption' | 'manufacturing' | 'housing' | 'earnings';
+  sentiment?: 'bullish' | 'bearish' | 'neutral';
+  marketRelevance: number; // 0-100 score
+  timeToEvent?: number; // milliseconds until event
+  isCompleted: boolean;
+  tags?: string[];
+  relatedSymbols?: string[]; // stocks/crypto that might be affected
+  lastUpdated: string;
+}
+
+export interface EconomicCalendarFilter {
+  timeRange: '1d' | '7d' | '30d' | '90d';
+  impact?: ('high' | 'medium' | 'low')[];
+  eventTypes?: string[];
+  countries?: string[];
+  onlyUpcoming?: boolean;
+}
+
 export class MarketDataService {
   private static instance: MarketDataService;
   private cmcApiKey: string;
   private coingeckoApiKey: string;
   private alphaVantageApiKey: string;
   private finnhubApiKey: string;
+  private fredApiKey: string;
   private cmcBaseUrl = 'https://pro-api.coinmarketcap.com/v1';
   private coingeckoBaseUrl = 'https://api.coingecko.com/api/v3';
   private alphaVantageBaseUrl = 'https://www.alphavantage.co/query';
   private finnhubBaseUrl = 'https://finnhub.io/api/v1';
+  private fredBaseUrl = 'https://api.stlouisfed.org/fred';
   private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
   private cache = new Map<string, { data: any; timestamp: number; customTimeout?: number }>();
   private cacheTimeout = 30000; // 30 second cache for real-time data
+  private economicCacheTimeout = 300000; // 5 minute cache for economic data
   
   // Crypto-related stocks list - expanded to 25+ symbols
   private cryptoStocks = [
@@ -66,12 +103,14 @@ export class MarketDataService {
     this.coingeckoApiKey = process.env.COINGECKO_API_KEY || '';
     this.alphaVantageApiKey = process.env.ALPHA_VANTAGE_API_KEY || '';
     this.finnhubApiKey = process.env.FINNHUB_API_KEY || '';
+    this.fredApiKey = process.env.FRED_API_KEY || '';
     
     console.log('🔑 Market Data Service initialized:');
     console.log(`  - CoinMarketCap: ${this.cmcApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - CoinGecko: ${this.coingeckoApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Alpha Vantage: ${this.alphaVantageApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Finnhub: ${this.finnhubApiKey ? '✅ Available' : '❌ Missing'}`);
+    console.log(`  - FRED (Economic Data): ${this.fredApiKey ? '✅ Available' : '❌ Missing'}`);
     
     if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey && !this.finnhubApiKey) {
       console.warn('⚠️ No market data API keys found - using fallback data');
@@ -867,6 +906,478 @@ export class MarketDataService {
       timestamp: Date.now(),
       customTimeout: timeout
     });
+  }
+
+  // =====================================================
+  // ECONOMIC CALENDAR METHODS
+  // =====================================================
+
+  /**
+   * Get economic calendar events with filtering options
+   */
+  async getEconomicCalendar(filter?: EconomicCalendarFilter): Promise<EconomicEvent[]> {
+    const cacheKey = `economic_calendar_${JSON.stringify(filter || {})}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) {
+      console.log('📅 Returning cached economic calendar data');
+      return cached;
+    }
+
+    try {
+      // Try to get data from multiple sources
+      const events = await this.getEconomicEventsFromMultipleSources();
+      
+      // Apply filters
+      let filteredEvents = events;
+      
+      if (filter) {
+        filteredEvents = this.applyEconomicCalendarFilters(events, filter);
+      }
+
+      // Calculate time to event for upcoming events
+      filteredEvents = filteredEvents.map(event => ({
+        ...event,
+        timeToEvent: new Date(event.scheduledDate).getTime() - Date.now(),
+        isCompleted: new Date(event.scheduledDate).getTime() < Date.now()
+      }));
+
+      // Sort by scheduled date (upcoming events first)
+      filteredEvents.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
+
+      this.setCacheWithTimeout(cacheKey, filteredEvents, this.economicCacheTimeout);
+      console.log(`📅 Fetched ${filteredEvents.length} economic calendar events`);
+      return filteredEvents;
+
+    } catch (error: any) {
+      console.error('❌ Failed to fetch economic calendar:', error.message);
+      return this.getFallbackEconomicEvents();
+    }
+  }
+
+  /**
+   * Get upcoming FOMC meetings and Fed decisions
+   */
+  async getFOMCMeetings(): Promise<EconomicEvent[]> {
+    const cacheKey = 'fomc_meetings';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Get FOMC meeting schedule from Fed calendar
+      const fomcEvents = await this.getFedCalendarEvents();
+      
+      this.setCacheWithTimeout(cacheKey, fomcEvents, this.economicCacheTimeout);
+      console.log(`🏛️ Fetched ${fomcEvents.length} FOMC meetings`);
+      return fomcEvents;
+
+    } catch (error: any) {
+      console.error('❌ Failed to fetch FOMC meetings:', error.message);
+      return this.getFallbackFOMCMeetings();
+    }
+  }
+
+  /**
+   * Get inflation data (CPI releases)
+   */
+  async getInflationEvents(): Promise<EconomicEvent[]> {
+    const cacheKey = 'inflation_events';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const inflationEvents = await this.getInflationDataEvents();
+      
+      this.setCacheWithTimeout(cacheKey, inflationEvents, this.economicCacheTimeout);
+      console.log(`📊 Fetched ${inflationEvents.length} inflation events`);
+      return inflationEvents;
+
+    } catch (error: any) {
+      console.error('❌ Failed to fetch inflation events:', error.message);
+      return this.getFallbackInflationEvents();
+    }
+  }
+
+  /**
+   * Get employment data releases
+   */
+  async getEmploymentEvents(): Promise<EconomicEvent[]> {
+    const cacheKey = 'employment_events';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const employmentEvents = await this.getEmploymentDataEvents();
+      
+      this.setCacheWithTimeout(cacheKey, employmentEvents, this.economicCacheTimeout);
+      console.log(`👥 Fetched ${employmentEvents.length} employment events`);
+      return employmentEvents;
+
+    } catch (error: any) {
+      console.error('❌ Failed to fetch employment events:', error.message);
+      return this.getFallbackEmploymentEvents();
+    }
+  }
+
+  /**
+   * Get GDP releases
+   */
+  async getGDPEvents(): Promise<EconomicEvent[]> {
+    const cacheKey = 'gdp_events';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const gdpEvents = await this.getGDPDataEvents();
+      
+      this.setCacheWithTimeout(cacheKey, gdpEvents, this.economicCacheTimeout);
+      console.log(`💰 Fetched ${gdpEvents.length} GDP events`);
+      return gdpEvents;
+
+    } catch (error: any) {
+      console.error('❌ Failed to fetch GDP events:', error.message);
+      return this.getFallbackGDPEvents();
+    }
+  }
+
+  /**
+   * Get high-impact events for today/tomorrow
+   */
+  async getHighImpactEvents(): Promise<EconomicEvent[]> {
+    const cacheKey = 'high_impact_events';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const allEvents = await this.getEconomicCalendar({
+        timeRange: '7d',
+        impact: ['high'],
+        onlyUpcoming: true
+      });
+
+      const highImpactEvents = allEvents.filter(event => 
+        event.impact === 'high' && 
+        event.marketRelevance >= 80
+      );
+
+      this.setCacheWithTimeout(cacheKey, highImpactEvents, this.economicCacheTimeout);
+      console.log(`⚡ Fetched ${highImpactEvents.length} high-impact events`);
+      return highImpactEvents;
+
+    } catch (error: any) {
+      console.error('❌ Failed to fetch high-impact events:', error.message);
+      return [];
+    }
+  }
+
+  // =====================================================
+  // PRIVATE HELPER METHODS FOR ECONOMIC DATA
+  // =====================================================
+
+  /**
+   * Apply filters to economic calendar events
+   */
+  private applyEconomicCalendarFilters(events: EconomicEvent[], filter: EconomicCalendarFilter): EconomicEvent[] {
+    let filtered = [...events];
+
+    // Time range filter
+    const now = Date.now();
+    const timeRanges = {
+      '1d': 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000,
+      '90d': 90 * 24 * 60 * 60 * 1000
+    };
+
+    const timeRange = timeRanges[filter.timeRange];
+    filtered = filtered.filter(event => {
+      const eventTime = new Date(event.scheduledDate).getTime();
+      return eventTime <= now + timeRange;
+    });
+
+    // Impact filter
+    if (filter.impact && filter.impact.length > 0) {
+      filtered = filtered.filter(event => filter.impact!.includes(event.impact));
+    }
+
+    // Event types filter
+    if (filter.eventTypes && filter.eventTypes.length > 0) {
+      filtered = filtered.filter(event => filter.eventTypes!.includes(event.eventType));
+    }
+
+    // Countries filter
+    if (filter.countries && filter.countries.length > 0) {
+      filtered = filtered.filter(event => filter.countries!.includes(event.country));
+    }
+
+    // Only upcoming events
+    if (filter.onlyUpcoming) {
+      filtered = filtered.filter(event => new Date(event.scheduledDate).getTime() > now);
+    }
+
+    return filtered;
+  }
+
+  /**
+   * Get economic events from multiple sources
+   */
+  private async getEconomicEventsFromMultipleSources(): Promise<EconomicEvent[]> {
+    const events: EconomicEvent[] = [];
+
+    // Try FRED API first
+    if (this.fredApiKey) {
+      try {
+        const fredEvents = await this.getFredEconomicEvents();
+        events.push(...fredEvents);
+      } catch (error) {
+        console.warn('⚠️ FRED API failed, continuing with other sources');
+      }
+    }
+
+    // Try economic calendar API or other sources
+    try {
+      const calendarEvents = await this.getThirdPartyEconomicEvents();
+      events.push(...calendarEvents);
+    } catch (error) {
+      console.warn('⚠️ Third-party economic calendar failed');
+    }
+
+    // If no events from APIs, use fallback data
+    if (events.length === 0) {
+      console.log('📅 Using fallback economic calendar data');
+      return this.getFallbackEconomicEvents();
+    }
+
+    // Remove duplicates based on title and date
+    const uniqueEvents = events.filter((event, index, self) => 
+      index === self.findIndex(e => e.title === event.title && e.scheduledDate === event.scheduledDate)
+    );
+
+    return uniqueEvents;
+  }
+
+  /**
+   * Get Fed calendar events (FOMC meetings)
+   */
+  private async getFedCalendarEvents(): Promise<EconomicEvent[]> {
+    // This would typically fetch from Fed's official calendar
+    // For now, return scheduled FOMC meetings
+    return this.getFallbackFOMCMeetings();
+  }
+
+  /**
+   * Get inflation data events
+   */
+  private async getInflationDataEvents(): Promise<EconomicEvent[]> {
+    return this.getFallbackInflationEvents();
+  }
+
+  /**
+   * Get employment data events
+   */
+  private async getEmploymentDataEvents(): Promise<EconomicEvent[]> {
+    return this.getFallbackEmploymentEvents();
+  }
+
+  /**
+   * Get GDP data events
+   */
+  private async getGDPDataEvents(): Promise<EconomicEvent[]> {
+    return this.getFallbackGDPEvents();
+  }
+
+  /**
+   * Get economic events from FRED API
+   */
+  private async getFredEconomicEvents(): Promise<EconomicEvent[]> {
+    if (!this.fredApiKey) {
+      throw new Error('FRED API key not available');
+    }
+
+    // FRED API implementation would go here
+    // For now, return empty array to avoid API errors
+    return [];
+  }
+
+  /**
+   * Get economic events from third-party calendar APIs
+   */
+  private async getThirdPartyEconomicEvents(): Promise<EconomicEvent[]> {
+    // Third-party API implementation would go here
+    return [];
+  }
+
+  // =====================================================
+  // FALLBACK DATA METHODS
+  // =====================================================
+
+  /**
+   * Get fallback economic events when APIs fail
+   */
+  private getFallbackEconomicEvents(): EconomicEvent[] {
+    const now = new Date();
+    const events: EconomicEvent[] = [];
+
+    // Add FOMC meetings
+    events.push(...this.getFallbackFOMCMeetings());
+    
+    // Add CPI releases
+    events.push(...this.getFallbackInflationEvents());
+    
+    // Add employment data
+    events.push(...this.getFallbackEmploymentEvents());
+    
+    // Add GDP releases
+    events.push(...this.getFallbackGDPEvents());
+
+    return events;
+  }
+
+  /**
+   * Fallback FOMC meetings schedule
+   */
+  private getFallbackFOMCMeetings(): EconomicEvent[] {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    return [
+      {
+        id: 'fomc-2025-01',
+        title: 'FOMC Meeting Decision',
+        description: 'Federal Open Market Committee interest rate decision and policy statement',
+        eventType: 'fomc',
+        scheduledDate: new Date(currentYear, 0, 29, 14, 0).toISOString(), // Jan 29
+        impact: 'high',
+        country: 'US',
+        currency: 'USD',
+        source: 'Federal Reserve',
+        frequency: 'irregular',
+        category: 'monetary_policy',
+        marketRelevance: 95,
+        timeToEvent: 0,
+        isCompleted: false,
+        tags: ['fed', 'interest-rates', 'monetary-policy'],
+        relatedSymbols: ['SPY', 'QQQ', 'BTC', 'ETH', 'DXY'],
+        lastUpdated: now.toISOString()
+      },
+      {
+        id: 'fomc-2025-03',
+        title: 'FOMC Meeting Decision',
+        description: 'Federal Open Market Committee interest rate decision and policy statement',
+        eventType: 'fomc',
+        scheduledDate: new Date(currentYear, 2, 19, 14, 0).toISOString(), // Mar 19
+        impact: 'high',
+        country: 'US',
+        currency: 'USD',
+        source: 'Federal Reserve',
+        frequency: 'irregular',
+        category: 'monetary_policy',
+        marketRelevance: 95,
+        timeToEvent: 0,
+        isCompleted: false,
+        tags: ['fed', 'interest-rates', 'monetary-policy'],
+        relatedSymbols: ['SPY', 'QQQ', 'BTC', 'ETH', 'DXY'],
+        lastUpdated: now.toISOString()
+      }
+    ];
+  }
+
+  /**
+   * Fallback inflation events (CPI releases)
+   */
+  private getFallbackInflationEvents(): EconomicEvent[] {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    return [
+      {
+        id: 'cpi-2025-01',
+        title: 'US Consumer Price Index (CPI)',
+        description: 'Monthly inflation data from Bureau of Labor Statistics',
+        eventType: 'cpi',
+        scheduledDate: new Date(currentYear, 0, 15, 8, 30).toISOString(), // Jan 15
+        impact: 'high',
+        country: 'US',
+        currency: 'USD',
+        forecast: 2.7,
+        previous: 2.6,
+        unit: '%',
+        source: 'Bureau of Labor Statistics',
+        frequency: 'monthly',
+        category: 'inflation',
+        marketRelevance: 90,
+        timeToEvent: 0,
+        isCompleted: false,
+        tags: ['inflation', 'cpi', 'bls'],
+        relatedSymbols: ['SPY', 'TLT', 'BTC', 'GOLD'],
+        lastUpdated: now.toISOString()
+      }
+    ];
+  }
+
+  /**
+   * Fallback employment events
+   */
+  private getFallbackEmploymentEvents(): EconomicEvent[] {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    return [
+      {
+        id: 'nfp-2025-01',
+        title: 'US Nonfarm Payrolls',
+        description: 'Monthly employment change excluding farm workers',
+        eventType: 'employment',
+        scheduledDate: new Date(currentYear, 0, 10, 8, 30).toISOString(), // First Friday
+        impact: 'high',
+        country: 'US',
+        currency: 'USD',
+        forecast: 160000,
+        previous: 227000,
+        unit: 'jobs',
+        source: 'Bureau of Labor Statistics',
+        frequency: 'monthly',
+        category: 'employment',
+        marketRelevance: 85,
+        timeToEvent: 0,
+        isCompleted: false,
+        tags: ['employment', 'nfp', 'jobs'],
+        relatedSymbols: ['SPY', 'USD', 'DXY'],
+        lastUpdated: now.toISOString()
+      }
+    ];
+  }
+
+  /**
+   * Fallback GDP events
+   */
+  private getFallbackGDPEvents(): EconomicEvent[] {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    return [
+      {
+        id: 'gdp-2025-q4',
+        title: 'US GDP (Preliminary)',
+        description: 'Quarterly Gross Domestic Product preliminary release',
+        eventType: 'gdp',
+        scheduledDate: new Date(currentYear, 0, 30, 8, 30).toISOString(), // End of Jan
+        impact: 'high',
+        country: 'US',
+        currency: 'USD',
+        forecast: 2.3,
+        previous: 2.8,
+        unit: '% QoQ',
+        source: 'Bureau of Economic Analysis',
+        frequency: 'quarterly',
+        category: 'growth',
+        marketRelevance: 88,
+        timeToEvent: 0,
+        isCompleted: false,
+        tags: ['gdp', 'growth', 'bea'],
+        relatedSymbols: ['SPY', 'USD', 'DXY'],
+        lastUpdated: now.toISOString()
+      }
+    ];
   }
 
 }

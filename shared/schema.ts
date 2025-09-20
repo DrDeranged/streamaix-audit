@@ -452,3 +452,38 @@ export type LeaderEducationData = {
     totalEngagement: number;
   };
 };
+
+// Economic Calendar Types
+export type EconomicEvent = {
+  id: string;
+  title: string;
+  description?: string;
+  eventType: 'fomc' | 'cpi' | 'gdp' | 'employment' | 'inflation' | 'retail_sales' | 'pmi' | 'housing' | 'earnings';
+  scheduledDate: string;
+  actualDate?: string;
+  impact: 'high' | 'medium' | 'low';
+  country: string;
+  currency: string;
+  actual?: number;
+  forecast?: number;
+  previous?: number;
+  unit?: string;
+  source: string;
+  frequency: 'monthly' | 'quarterly' | 'annual' | 'irregular';
+  category: 'monetary_policy' | 'inflation' | 'employment' | 'growth' | 'consumption' | 'manufacturing' | 'housing' | 'earnings';
+  sentiment?: 'bullish' | 'bearish' | 'neutral';
+  marketRelevance: number; // 0-100 score
+  timeToEvent?: number; // milliseconds until event
+  isCompleted: boolean;
+  tags?: string[];
+  relatedSymbols?: string[]; // stocks/crypto that might be affected
+  lastUpdated: string;
+};
+
+export type EconomicCalendarFilter = {
+  timeRange: '1d' | '7d' | '30d' | '90d';
+  impact?: ('high' | 'medium' | 'low')[];
+  eventTypes?: string[];
+  countries?: string[];
+  onlyUpcoming?: boolean;
+};

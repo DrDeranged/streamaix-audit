@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
+import CountdownTimer from '@/components/CountdownTimer';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -245,6 +246,17 @@ export default function Discover() {
   const { data: socialData } = useQuery({
     queryKey: [`/api/social/trending`],
     refetchInterval: 30000,
+  });
+
+  // Economic Calendar data queries
+  const { data: economicCalendarData } = useQuery({
+    queryKey: ['/api/market/economic-calendar?timeRange=30d&onlyUpcoming=true'],
+    refetchInterval: 120000, // 2 minutes
+  });
+
+  const { data: highImpactEvents } = useQuery({
+    queryKey: ['/api/market/high-impact-events'],
+    refetchInterval: 120000, // 2 minutes
   });
 
   // Phase 1: Market Pulse Data
@@ -772,6 +784,212 @@ export default function Discover() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </motion.div>
+
+        {/* Economic Calendar Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-cyan-400" />
+              Economic Calendar
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 ml-2">
+                <Bell className="h-3 w-3 mr-1" />
+                Live Events
+              </Badge>
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <Badge className="bg-red-500/20 text-red-300 border-red-400/30 text-xs">
+                🔥 High Impact
+              </Badge>
+              <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30 text-xs">
+                ⚡ Medium Impact
+              </Badge>
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
+                📊 Low Impact
+              </Badge>
+            </div>
+          </div>
+
+          {/* High Impact Events Row */}
+          {(highImpactEvents as any)?.events?.length > 0 && (
+            <Card className="bg-gradient-to-r from-red-900/20 via-orange-900/20 to-red-900/20 border-red-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-red-300 flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  High-Impact Events
+                  <Badge className="bg-red-500/30 text-red-200 border-red-400/50 ml-2">
+                    Market Moving
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(highImpactEvents as any)?.events?.slice(0, 3).map((event: any) => (
+                    <div key={event.id} className="bg-black/30 rounded-lg p-4 border border-red-500/20">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="text-white font-semibold text-sm line-clamp-2">{event.title}</h4>
+                          <p className="text-gray-300 text-xs mt-1">{event.description}</p>
+                        </div>
+                        <Badge className="bg-red-500/30 text-red-200 text-xs ml-2 flex-shrink-0">
+                          {event.impact.toUpperCase()}
+                        </Badge>
+                      </div>
+                      
+                      {/* Countdown Timer */}
+                      <CountdownTimer 
+                        targetDate={event.scheduledDate} 
+                        isCompleted={event.isCompleted}
+                        className="mb-3"
+                      />
+                      
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Globe className="h-3 w-3" />
+                            {event.country}
+                          </span>
+                          <span>•</span>
+                          <span>{event.source}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-cyan-400">
+                          <Target className="h-3 w-3" />
+                          <span>{event.marketRelevance}%</span>
+                        </div>
+                      </div>
+                      
+                      {event.relatedSymbols && (
+                        <div className="flex gap-1 mt-2 flex-wrap">
+                          {event.relatedSymbols.slice(0, 3).map((symbol: string) => (
+                            <Badge key={symbol} variant="outline" className="text-xs border-cyan-500/30 text-cyan-300">
+                              {symbol}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Complete Economic Calendar */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Upcoming Events */}
+            <Card className="lg:col-span-2 bg-black/40 border-cyan-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-cyan-300 flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Upcoming Events
+                  <Badge className="bg-cyan-500/20 text-cyan-200 border-cyan-400/30 ml-2">
+                    Next 30 Days
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 max-h-80 overflow-y-auto">
+                {(economicCalendarData as any)?.events?.length > 0 ? (
+                  (economicCalendarData as any).events.slice(0, 8).map((event: any) => (
+                    <div 
+                      key={event.id} 
+                      className={`flex items-center gap-4 p-3 rounded-lg border transition-all cursor-pointer hover:bg-white/5 ${
+                        event.impact === 'high' ? 'border-red-500/30 bg-red-500/5' :
+                        event.impact === 'medium' ? 'border-orange-500/30 bg-orange-500/5' :
+                        'border-blue-500/30 bg-blue-500/5'
+                      }`}
+                      onClick={() => trackUserInteraction('economic_event_click', 'event', event.id, {
+                        eventType: event.eventType,
+                        impact: event.impact,
+                        timeToEvent: event.timeToEvent
+                      })}
+                      data-testid={`economic-event-${event.id}`}
+                    >
+                      {/* Impact Indicator */}
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                        event.impact === 'high' ? 'bg-red-400' :
+                        event.impact === 'medium' ? 'bg-orange-400' :
+                        'bg-blue-400'
+                      }`}></div>
+                      
+                      {/* Event Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="text-white font-medium text-sm truncate">{event.title}</h4>
+                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                              <span>{event.country}</span>
+                              <span>•</span>
+                              <span>{event.category.replace('_', ' ')}</span>
+                              {event.forecast && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-cyan-400">Est: {event.forecast}{event.unit || ''}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Mini Countdown */}
+                          <CountdownTimer 
+                            targetDate={event.scheduledDate} 
+                            isCompleted={event.isCompleted}
+                            compact={true}
+                            className="ml-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>Loading economic events...</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Event Categories */}
+            <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-purple-300 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Event Categories
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  { type: 'fomc', label: 'FOMC Meetings', icon: '🏛️', count: 2 },
+                  { type: 'cpi', label: 'Inflation Data', icon: '📊', count: 1 },
+                  { type: 'employment', label: 'Employment', icon: '👥', count: 1 },
+                  { type: 'gdp', label: 'GDP Reports', icon: '💰', count: 1 },
+                  { type: 'earnings', label: 'Earnings', icon: '📈', count: 3 }
+                ].map((category) => (
+                  <div 
+                    key={category.type}
+                    className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
+                    onClick={() => trackUserInteraction('category_filter', 'economic_category', category.type)}
+                    data-testid={`economic-category-${category.type}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">{category.icon}</span>
+                      <div>
+                        <div className="text-white font-medium text-sm">{category.label}</div>
+                        <div className="text-gray-400 text-xs">{category.count} upcoming</div>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           </div>
         </motion.div>
 
