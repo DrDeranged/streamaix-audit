@@ -93,7 +93,29 @@ export default function Discover() {
   const [timeFilter, setTimeFilter] = useState<'1h' | '6h' | '24h' | '7d'>('24h');
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [storyFilter, setStoryFilter] = useState<'all' | 'farcaster' | 'youtube' | 'news'>('all');
+  const [showInsights, setShowInsights] = useState<boolean>(false);
   const pageStartTime = useRef<number>(Date.now());
+
+  // Predictive analytics queries
+  const { data: recommendations, isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['/api/analytics/recommendations'],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1
+  });
+
+  const { data: marketAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['/api/analytics/market-alerts'],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1
+  });
+
+  const { data: sectorPredictions, isLoading: predictionsLoading } = useQuery({
+    queryKey: ['/api/analytics/sector-trends', selectedSector || 'DeFi'],
+    enabled: !!selectedSector,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1
+  });
 
   // Interaction tracking mutation
   const trackInteraction = useMutation({
@@ -299,6 +321,20 @@ export default function Discover() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setShowInsights(!showInsights)}
+                className={`border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all ${
+                  showInsights ? 'bg-purple-500/20 border-purple-400' : ''
+                }`}
+                data-testid="button-toggle-insights"
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                AI Insights
+                {showInsights && <span className="ml-1 text-xs">⌄</span>}
+                {!showInsights && <span className="ml-1 text-xs">⌃</span>}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 className="border-white/20 text-white hover:bg-white/10"
                 data-testid="button-notifications"
               >
@@ -318,6 +354,144 @@ export default function Discover() {
           </div>
         </div>
       </div>
+
+      {/* Smart Insights Panel */}
+      <AnimatePresence>
+        {showInsights && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-gradient-to-r from-purple-900/20 via-indigo-900/20 to-purple-900/20 backdrop-blur-sm border-b border-purple-500/20"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Personalized Recommendations */}
+                <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm text-purple-300 flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      For You
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {recommendationsLoading ? (
+                      <div className="animate-pulse space-y-2">
+                        <div className="h-3 bg-gray-700 rounded"></div>
+                        <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                      </div>
+                    ) : recommendations?.recommendations?.slice(0, 3).map((rec: any, idx: number) => (
+                      <div key={idx} className="text-xs text-gray-300 hover:text-white transition-colors cursor-pointer">
+                        <div className="font-medium text-white">{rec.title}</div>
+                        <div className="text-gray-400 truncate">{rec.description}</div>
+                        <div className="flex gap-1 mt-1">
+                          {rec.tags?.slice(0, 2).map((tag: string) => (
+                            <Badge key={tag} variant="outline" className="text-xs border-purple-500/30 text-purple-300">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="text-xs text-gray-400">
+                        {user ? 'Building your recommendations...' : 'Sign in for personalized content'}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Market Alerts */}
+                <Card className="bg-black/40 border-orange-500/30 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm text-orange-300 flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      Smart Alerts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {alertsLoading ? (
+                      <div className="animate-pulse space-y-2">
+                        <div className="h-3 bg-gray-700 rounded"></div>
+                        <div className="h-3 bg-gray-700 rounded w-2/3"></div>
+                      </div>
+                    ) : marketAlerts?.alerts?.slice(0, 3).map((alert: any, idx: number) => (
+                      <div key={idx} className="text-xs">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-2 h-2 rounded-full ${
+                            alert.severity === 'high' ? 'bg-red-400' :
+                            alert.severity === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
+                          }`}></div>
+                          <span className="text-white font-medium">{alert.title}</span>
+                        </div>
+                        <div className="text-gray-400 truncate ml-4">{alert.message}</div>
+                        {alert.probability && (
+                          <div className="text-xs text-cyan-400 ml-4 mt-1">
+                            {Math.round(alert.probability * 100)}% confidence
+                          </div>
+                        )}
+                      </div>
+                    )) || (
+                      <div className="text-xs text-gray-400">No alerts at this time</div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Sector Predictions */}
+                <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm text-cyan-300 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Predictions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {selectedSector ? (
+                      <>
+                        {predictionsLoading ? (
+                          <div className="animate-pulse space-y-2">
+                            <div className="h-3 bg-gray-700 rounded"></div>
+                            <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+                          </div>
+                        ) : sectorPredictions?.predictions ? (
+                          <div className="space-y-2">
+                            <div className="text-xs">
+                              <div className="text-white font-medium">{selectedSector} Outlook</div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className={`text-lg font-bold ${
+                                  sectorPredictions.predictions.prediction > 0 ? 'text-green-400' :
+                                  sectorPredictions.predictions.prediction < 0 ? 'text-red-400' : 'text-gray-400'
+                                }`}>
+                                  {sectorPredictions.predictions.prediction > 0 ? '+' : ''}
+                                  {(sectorPredictions.predictions.prediction * 100).toFixed(1)}%
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {Math.round(sectorPredictions.predictions.confidence * 100)}% confidence
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              {sectorPredictions.predictions.reasoning?.slice(0, 2).map((reason: string, idx: number) => (
+                                <div key={idx} className="text-xs text-gray-400">• {reason}</div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-gray-400">Generating predictions...</div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-xs text-gray-400">Select a sector to see predictions</div>
+                    )}
+                  </CardContent>
+                </Card>
+
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Phase 1: Market Pulse Section */}
