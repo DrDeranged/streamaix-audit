@@ -148,7 +148,7 @@ export class CorrelationAnalysisService {
    * Normal cumulative distribution function approximation
    */
   private normalCDF(x: number): number {
-    return (1 + Math.erf(x / Math.sqrt(2))) / 2;
+    return (1 + this.erf(x / Math.sqrt(2))) / 2;
   }
 
   /**
@@ -202,8 +202,8 @@ export class CorrelationAnalysisService {
   /**
    * Get current asset prices for correlation matrix
    */
-  private async getCurrentAssetPrices(): Promise<Array<{ symbol: string; name: string; type: string; price: number; change24h: number }>> {
-    const allAssets: Array<{ symbol: string; name: string; type: string; price: number; change24h: number }> = [];
+  private async getCurrentAssetPrices(): Promise<Array<{ symbol: string; name: string; type: 'crypto' | 'stock' | 'commodity' | 'currency'; price: number; change24h: number }>> {
+    const allAssets: Array<{ symbol: string; name: string; type: 'crypto' | 'stock' | 'commodity' | 'currency'; price: number; change24h: number }> = [];
 
     try {
       // Fetch crypto data
