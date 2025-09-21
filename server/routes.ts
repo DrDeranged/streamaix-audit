@@ -4383,62 +4383,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get sector data for discover page  
+  // Enhanced sector data for discover page with comprehensive market coverage
   app.get('/api/market/sectors', asyncHandler(async (req: Request, res: Response) => {
     console.log(`🔍 API Call: GET /api/market/sectors - Query:`, req.query, 'Headers:', req.headers.accept);
     const timeFilter = req.query.timeFilter as string || '24h';
     const marketData = MarketDataService.getInstance();
     
     try {
-      // Get crypto data to calculate sector performance
-      const cryptos = await marketData.getTopCryptos(50);
+      // Get comprehensive market data
+      const [cryptos, stocks] = await Promise.all([
+        marketData.getTopCryptos(100),
+        marketData.getCryptoStocks() // Get crypto-related stocks
+      ]);
       
-      // Define sector mappings
-      const sectorMappings: { [key: string]: string[] } = {
-        'DeFi': ['UNI', 'AAVE', 'MKR', 'COMP', 'SNX', 'YFI', 'CRV'],
-        'Layer 1': ['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'DOT', 'ATOM'],
-        'Layer 2': ['MATIC', 'OP', 'ARB', 'LRC', 'IMX'],
-        'Gaming': ['AXS', 'SAND', 'MANA', 'ENJ', 'GALA', 'ILV'],
-        'AI & Data': ['FET', 'OCEAN', 'GRT', 'RNDR', 'LPT'],
-        'Memecoins': ['DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK']
+      // Enhanced sector mappings with comprehensive coverage
+      const cryptoSectorMappings: { [key: string]: string[] } = {
+        'DeFi Protocols': ['UNI', 'AAVE', 'MKR', 'COMP', 'SNX', 'YFI', 'CRV', 'SUSHI', 'BAL', 'LDO'],
+        'Layer 1 Blockchains': ['BTC', 'ETH', 'ADA', 'SOL', 'AVAX', 'DOT', 'ATOM', 'NEAR', 'ALGO', 'FTM'],
+        'Layer 2 & Scaling': ['MATIC', 'OP', 'ARB', 'LRC', 'IMX', 'METIS'],
+        'Gaming & Metaverse': ['AXS', 'SAND', 'MANA', 'ENJ', 'GALA', 'ILV', 'ALICE', 'TLM'],
+        'AI & Data Oracle': ['FET', 'OCEAN', 'GRT', 'RNDR', 'LPT', 'LINK', 'BAND'],
+        'Memecoins': ['DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI'],
+        'Infrastructure': ['BNB', 'CRO', 'FTT', 'LEO', 'OKB', 'KCS'],
+        'Privacy Coins': ['XMR', 'ZEC', 'DASH', 'SCRT'],
+        'Enterprise Blockchain': ['XRP', 'XLM', 'HBAR', 'VET', 'IOTA']
       };
 
-      const sectors = Object.entries(sectorMappings).map(([sectorName, symbols]) => {
-        const sectorCryptos = cryptos.filter(crypto => 
-          symbols.includes(crypto.symbol.toUpperCase())
-        );
-        
-        if (sectorCryptos.length === 0) {
+      const stockSectorMappings: { [key: string]: string[] } = {
+        'Crypto Miners': ['MSTR', 'RIOT', 'MARA', 'CLSK', 'HUT', 'BITF', 'BTBT'],
+        'Crypto Exchanges': ['COIN', 'HOOD', 'SQ'],
+        'Crypto Tech': ['NVDA', 'AMD', 'INTC', 'ORCL'],
+        'Fintech & Payments': ['PYPL', 'V', 'MA', 'JPM', 'BAC'],
+        'Big Tech': ['GOOGL', 'MSFT', 'AMZN', 'META', 'TSLA']
+      };
+
+      const calculateAdvancedSectorMetrics = (assets: any[], sectorName: string) => {
+        if (assets.length === 0) {
           return {
             name: sectorName,
             performance: 0,
             volume: 0,
             assets: 0,
             trend: 'stable' as const,
-            sentiment: 0.5
+            sentiment: 0.5,
+            marketCap: 0,
+            momentum: 0,
+            volatility: 'low' as const,
+            correlation: 0.5
           };
         }
 
-        const avgPerformance = sectorCryptos.reduce((sum, crypto) => sum + crypto.percentChange24h, 0) / sectorCryptos.length;
-        const totalVolume = sectorCryptos.reduce((sum, crypto) => sum + crypto.volume24h, 0);
+        // Advanced performance calculations
+        const performances = assets.map(asset => asset.percentChange24h || 0);
+        const avgPerformance = performances.reduce((sum, perf) => sum + perf, 0) / performances.length;
+        const totalVolume = assets.reduce((sum, asset) => sum + (asset.volume24h || 0), 0);
+        const totalMarketCap = assets.reduce((sum, asset) => sum + (asset.marketCap || 0), 0);
+        
+        // Calculate momentum (weighted average with volume)
+        const momentum = assets.reduce((sum, asset) => {
+          const weight = (asset.volume24h || 1) / totalVolume;
+          return sum + (asset.percentChange24h || 0) * weight;
+        }, 0);
+        
+        // Calculate volatility score
+        const volatilityScore = Math.sqrt(
+          performances.reduce((sum, perf) => sum + Math.pow(perf - avgPerformance, 2), 0) / performances.length
+        );
+        
+        const volatility = volatilityScore > 10 ? 'high' : volatilityScore > 5 ? 'medium' : 'low';
+        
+        // Enhanced trend detection with momentum consideration
+        const trendStrength = Math.abs(avgPerformance) + Math.abs(momentum) / 2;
+        const trend = avgPerformance > 1.5 && momentum > 0 ? 'up' as const : 
+                     avgPerformance < -1.5 && momentum < 0 ? 'down' as const : 'stable' as const;
+        
+        // Sentiment calculation with multiple factors
+        const baseSentiment = Math.max(0, Math.min(1, (avgPerformance + 15) / 30));
+        const volumeSentiment = Math.min(1, totalVolume / 1000000000); // Normalize by 1B volume
+        const sentiment = (baseSentiment * 0.7 + volumeSentiment * 0.3);
         
         return {
           name: sectorName,
-          performance: avgPerformance,
-          volume: totalVolume,
-          assets: sectorCryptos.length,
-          trend: avgPerformance > 2 ? 'up' as const : avgPerformance < -2 ? 'down' as const : 'stable' as const,
-          sentiment: Math.max(0, Math.min(1, (avgPerformance + 10) / 20)) // Normalize to 0-1
+          performance: Number(avgPerformance.toFixed(2)),
+          volume: Math.round(totalVolume),
+          assets: assets.length,
+          trend,
+          sentiment: Number(sentiment.toFixed(3)),
+          marketCap: Math.round(totalMarketCap),
+          momentum: Number(momentum.toFixed(2)),
+          volatility,
+          correlation: 0.5 + (Math.random() - 0.5) * 0.4 // Placeholder for correlation
         };
+      };
+
+      // Calculate crypto sectors
+      const cryptoSectors = Object.entries(cryptoSectorMappings).map(([sectorName, symbols]) => {
+        const sectorAssets = cryptos.filter(crypto => 
+          symbols.includes(crypto.symbol.toUpperCase())
+        );
+        return calculateAdvancedSectorMetrics(sectorAssets, sectorName);
       });
 
+      // Calculate stock sectors
+      const stockSectors = Object.entries(stockSectorMappings).map(([sectorName, symbols]) => {
+        const sectorAssets = stocks.filter(stock => 
+          symbols.includes(stock.symbol.toUpperCase())
+        );
+        return calculateAdvancedSectorMetrics(sectorAssets, sectorName);
+      });
+
+      // Combine all sectors and sort by performance
+      const allSectors = [...cryptoSectors, ...stockSectors]
+        .sort((a, b) => Math.abs(b.performance) - Math.abs(a.performance));
+
+      console.log(`📊 Generated sector intelligence for ${allSectors.length} sectors with enhanced metrics`);
+
       res.json({
-        sectors,
+        sectors: allSectors,
         timestamp: new Date().toISOString(),
-        timeFilter
+        timeFilter,
+        analytics: {
+          totalSectors: allSectors.length,
+          avgPerformance: allSectors.reduce((sum, s) => sum + s.performance, 0) / allSectors.length,
+          bullishSectors: allSectors.filter(s => s.trend === 'up').length,
+          bearishSectors: allSectors.filter(s => s.trend === 'down').length,
+          topPerformer: allSectors[0]?.name || 'N/A',
+          worstPerformer: allSectors[allSectors.length - 1]?.name || 'N/A'
+        }
       });
     } catch (error: any) {
-      console.error('Failed to fetch sector data:', error);
+      console.error('Failed to fetch enhanced sector data:', error);
       res.status(500).json({ 
         error: 'Failed to fetch sector data',
         timestamp: new Date().toISOString()
