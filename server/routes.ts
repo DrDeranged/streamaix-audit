@@ -5807,36 +5807,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Broadcast real-time stock updates every 3 seconds
-  const broadcastStockUpdates = async () => {
+  // Enhanced real-time broadcasting with comprehensive market data
+  let lastBroadcastData = {
+    stocks: '',
+    cryptos: '',
+    patterns: '',
+    signals: '',
+    correlations: '',
+    regime: ''
+  };
+
+  const broadcastMarketUpdates = async () => {
     if (clients.size === 0) return;
     
     try {
       const marketService = MarketDataService.getInstance();
-      const stocks = await marketService.getCryptoStocks();
-      const message = JSON.stringify({
-        type: 'stockUpdate',
-        data: { stocks }
-      });
+      const crossMarketService = CrossMarketSignalService.getInstance();
+      const patternService = PatternRecognitionService.getInstance();
       
-      clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(message);
+      // Get comprehensive market data
+      const [stocks, cryptos, correlations, regime] = await Promise.allSettled([
+        marketService.getCryptoStocks(),
+        marketService.getTopCryptos(12),
+        crossMarketService.getCorrelationMatrix('1h'),
+        crossMarketService.getMarketRegimeAnalysis('1h')
+      ]);
+      
+      // Get latest pattern alerts (last 5 minutes)
+      const patterns = await patternService.getPatternAlerts();
+      const recentPatterns = patterns.filter(p => 
+        new Date(p.timestamp).getTime() > Date.now() - 5 * 60 * 1000
+      );
+      
+      // Get latest cross-market signals
+      const signals = await crossMarketService.getUnifiedSignals();
+      
+      // Create data hashes to detect changes
+      const currentData = {
+        stocks: JSON.stringify(stocks.status === 'fulfilled' ? stocks.value : []),
+        cryptos: JSON.stringify(cryptos.status === 'fulfilled' ? cryptos.value : []),
+        patterns: JSON.stringify(recentPatterns),
+        signals: JSON.stringify(signals),
+        correlations: JSON.stringify(correlations.status === 'fulfilled' ? correlations.value : {}),
+        regime: JSON.stringify(regime.status === 'fulfilled' ? regime.value : {})
+      };
+      
+      // Broadcast updates for changed data only
+      const updates: any[] = [];
+      
+      if (currentData.stocks !== lastBroadcastData.stocks && stocks.status === 'fulfilled') {
+        updates.push({
+          type: 'stockUpdate',
+          data: { stocks: stocks.value },
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      if (currentData.cryptos !== lastBroadcastData.cryptos && cryptos.status === 'fulfilled') {
+        updates.push({
+          type: 'cryptoUpdate',
+          data: { cryptos: cryptos.value },
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      if (currentData.patterns !== lastBroadcastData.patterns && recentPatterns.length > 0) {
+        updates.push({
+          type: 'patternAlert',
+          data: { patterns: recentPatterns },
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      if (currentData.signals !== lastBroadcastData.signals && signals.length > 0) {
+        updates.push({
+          type: 'signalUpdate',
+          data: { signals },
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      if (currentData.correlations !== lastBroadcastData.correlations && correlations.status === 'fulfilled') {
+        // Only broadcast correlation changes if significant
+        const corrData = correlations.value;
+        if (corrData && Object.keys(corrData).length > 0) {
+          updates.push({
+            type: 'correlationUpdate',
+            data: { correlations: corrData },
+            timestamp: new Date().toISOString()
+          });
         }
-      });
+      }
       
-      console.log(`📈 Broadcast real-time stock updates to ${clients.size} clients`);
+      if (currentData.regime !== lastBroadcastData.regime && regime.status === 'fulfilled') {
+        updates.push({
+          type: 'regimeUpdate',
+          data: { regime: regime.value },
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      // Send updates to all connected clients
+      if (updates.length > 0) {
+        const broadcastMessage = {
+          type: 'marketDataBundle',
+          data: { updates },
+          timestamp: new Date().toISOString(),
+          clientCount: clients.size
+        };
+        
+        const message = JSON.stringify(broadcastMessage);
+        
+        clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+        
+        console.log(`📡 Broadcast ${updates.length} market updates to ${clients.size} clients:`, 
+          updates.map(u => u.type).join(', '));
+        
+        // Update last broadcast data
+        lastBroadcastData = currentData;
+      }
+      
     } catch (error) {
-      console.error('📈 Error broadcasting stock updates:', error);
+      console.error('📡 Error broadcasting market updates:', error);
+    }
+  };
+
+  // Enhanced volatility alerts broadcasting
+  const broadcastVolatilityAlerts = async () => {
+    if (clients.size === 0) return;
+    
+    try {
+      const volatilityService = VolatilityForecastingService.getInstance();
+      const alerts = await volatilityService.getVolatilityAlerts();
+      
+      if (alerts && alerts.length > 0) {
+        const message = JSON.stringify({
+          type: 'volatilityAlert',
+          data: { alerts },
+          timestamp: new Date().toISOString()
+        });
+        
+        clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+        
+        console.log(`⚡ Broadcast ${alerts.length} volatility alerts to ${clients.size} clients`);
+      }
+    } catch (error) {
+      console.error('⚡ Error broadcasting volatility alerts:', error);
     }
   };
   
-  // Start real-time updates
-  const stockUpdateInterval = setInterval(broadcastStockUpdates, 30000); // Every 30 seconds for real API calls
+  // Start enhanced real-time updates with multiple intervals
+  const marketUpdateInterval = setInterval(broadcastMarketUpdates, 15000); // Every 15 seconds for comprehensive data
+  const volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 45000); // Every 45 seconds for volatility alerts
   
   // Cleanup on server close
   httpServer.on('close', () => {
-    clearInterval(stockUpdateInterval);
+    clearInterval(marketUpdateInterval);
+    clearInterval(volatilityAlertInterval);
     clients.clear();
   });
   
