@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import CountdownTimer from '@/components/CountdownTimer';
 import { 
   TrendingUp, 
@@ -58,7 +58,8 @@ import {
   HexagonIcon as Hexagon,
   Crosshair,
   BarChart2,
-  Layers
+  Layers,
+  ArrowLeft
 } from 'lucide-react';
 
 // Types for pattern recognition
@@ -3921,6 +3922,18 @@ export default function Discover() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
+              <Link to="/">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border-purple-400/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 hover:scale-105 transition-all duration-200 backdrop-blur-sm"
+                  data-testid="button-back-home"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="font-medium">Home</span>
+                </Button>
+              </Link>
+              
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
                 Discover
               </h1>
