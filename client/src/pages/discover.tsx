@@ -56,7 +56,6 @@ import {
   CircleIcon as Circle,
   SquareIcon as Square,
   HexagonIcon as Hexagon,
-  Zap,
   Crosshair,
   BarChart2,
   Layers

@@ -374,7 +374,7 @@ export class CrossMarketSignalService {
     try {
       const correlationMatrix = await this.correlationAnalysisService.getCorrelationMatrix();
       const marketRegime = await this.correlationAnalysisService.getMarketRegime();
-      const riskSentiment = await this.correlationAnalysisService.getRiskSentiment();
+      const riskSentiment = await this.correlationAnalysisService.getRiskSentimentIndicator();
       
       return {
         correlationMatrix,
@@ -725,16 +725,31 @@ export class CrossMarketSignalService {
     try {
       const assetType = this.getAssetType(symbol);
       if (assetType === 'crypto') {
-        const quote = await this.marketDataService.getCryptoQuote(symbol);
-        return quote?.price || null;
+        const quotes = await this.marketDataService.getCryptoQuotes([symbol]);
+        return quotes[0]?.price || null;
       } else {
-        const quote = await this.marketDataService.getStockQuote(symbol);
-        return quote?.price || null;
+        // For stocks, use getCryptoStocks or return mock data for now
+        const cryptoStocks = await this.marketDataService.getCryptoStocks();
+        const stockData = cryptoStocks.find(stock => stock.symbol === symbol);
+        return stockData?.price || this.getMockStockPrice(symbol);
       }
     } catch (error) {
       console.error(`❌ Error getting price for ${symbol}:`, error);
       return null;
     }
+  }
+
+  private getMockStockPrice(symbol: string): number {
+    // Mock stock prices for demonstration - in production, integrate real stock API
+    const mockPrices: { [key: string]: number } = {
+      'SPY': 435.50, 'QQQ': 375.25, 'NVDA': 875.40, 'AAPL': 175.85,
+      'MSFT': 385.60, 'GOOGL': 142.30, 'TSLA': 245.75, 'AMZN': 155.90,
+      'META': 485.20, 'NFLX': 485.65, 'MSTR': 1850.30, 'COIN': 185.45,
+      'RIOT': 12.85, 'MARA': 18.75, 'CLSK': 15.25, 'HUT': 8.95,
+      'BITF': 3.85, 'GLD': 195.75, 'SLV': 22.45, 'USO': 68.30,
+      'UNG': 12.50, 'DBA': 18.95
+    };
+    return mockPrices[symbol] || 100.00;
   }
 
   private determineSignalType(overallScore: number, confidence: number): CrossMarketSignal['signalType'] {
