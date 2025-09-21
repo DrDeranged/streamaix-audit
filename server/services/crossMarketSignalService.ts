@@ -677,15 +677,20 @@ export class CrossMarketSignalService {
     if (cached) return cached;
     
     try {
-      const correlationMatrix = await this.correlationAnalysisService.getCorrelationMatrix();
+      const correlationMatrixResponse = await this.correlationAnalysisService.getCorrelationMatrix();
       const marketRegime = await this.correlationAnalysisService.getMarketRegime();
+      
+      // Ensure correlationMatrix is an array - fix the critical frontend error
+      const correlationMatrix = Array.isArray(correlationMatrixResponse) 
+        ? correlationMatrixResponse 
+        : (correlationMatrixResponse?.data?.matrix || correlationMatrixResponse?.matrix || []);
       
       const data: CrossMarketCorrelationData = {
         correlationMatrix: correlationMatrix.map((corr: any) => ({
-          asset1: corr.assetPair.asset1,
-          asset2: corr.assetPair.asset2,
-          correlation: corr.correlation,
-          strength: corr.strength,
+          asset1: corr.assetPair?.asset1 || corr.asset1,
+          asset2: corr.assetPair?.asset2 || corr.asset2,
+          correlation: corr.correlation || 0,
+          strength: corr.strength || 'weak',
           change24h: this.calculateCorrelationChange(corr),
           breakdownRisk: this.calculateBreakdownProbability(corr),
           timeframe: '1d'

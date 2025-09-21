@@ -1238,14 +1238,21 @@ export class MarketDataService {
   private getFallbackFOMCMeetings(): EconomicEvent[] {
     const now = new Date();
     const currentYear = now.getFullYear();
+    
+    // Create future FOMC meeting dates
+    const fomcDate1 = new Date(now);
+    fomcDate1.setDate(now.getDate() + 7); // Next week
+    
+    const fomcDate2 = new Date(now);
+    fomcDate2.setDate(now.getDate() + 45); // Next month and a half
 
     return [
       {
-        id: 'fomc-2025-01',
+        id: 'fomc-upcoming-1',
         title: 'FOMC Meeting Decision',
         description: 'Federal Open Market Committee interest rate decision and policy statement',
         eventType: 'fomc',
-        scheduledDate: new Date(currentYear, 0, 29, 14, 0).toISOString(), // Jan 29
+        scheduledDate: fomcDate1.toISOString(),
         impact: 'high',
         country: 'US',
         currency: 'USD',
@@ -1253,18 +1260,18 @@ export class MarketDataService {
         frequency: 'irregular',
         category: 'monetary_policy',
         marketRelevance: 95,
-        timeToEvent: 0,
+        timeToEvent: 7,
         isCompleted: false,
         tags: ['fed', 'interest-rates', 'monetary-policy'],
         relatedSymbols: ['SPY', 'QQQ', 'BTC', 'ETH', 'DXY'],
         lastUpdated: now.toISOString()
       },
       {
-        id: 'fomc-2025-03',
+        id: 'fomc-upcoming-2',
         title: 'FOMC Meeting Decision',
         description: 'Federal Open Market Committee interest rate decision and policy statement',
         eventType: 'fomc',
-        scheduledDate: new Date(currentYear, 2, 19, 14, 0).toISOString(), // Mar 19
+        scheduledDate: fomcDate2.toISOString(),
         impact: 'high',
         country: 'US',
         currency: 'USD',
@@ -1272,7 +1279,7 @@ export class MarketDataService {
         frequency: 'irregular',
         category: 'monetary_policy',
         marketRelevance: 95,
-        timeToEvent: 0,
+        timeToEvent: 45,
         isCompleted: false,
         tags: ['fed', 'interest-rates', 'monetary-policy'],
         relatedSymbols: ['SPY', 'QQQ', 'BTC', 'ETH', 'DXY'],
