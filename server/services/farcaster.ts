@@ -16,10 +16,10 @@ class TokenBucketLimiter {
   private readonly refillRate: number; // tokens per second
   private readonly refillInterval: number;
   private backoffUntil: number = 0;
-  private currentBackoffMs: number = 1000; // Start with 1 second
-  private readonly maxBackoffMs: number = 60000; // Max 60 seconds
+  private currentBackoffMs: number = 2000; // Start with 2 seconds
+  private readonly maxBackoffMs: number = 120000; // Max 2 minutes
 
-  constructor(capacity: number = 5, refillRate: number = 5/60) { // 5 tokens per minute
+  constructor(capacity: number = 10, refillRate: number = 8/60) { // 8 tokens per minute (optimized)
     this.capacity = capacity;
     this.refillRate = refillRate;
     this.refillInterval = 1000; // Refill every second
@@ -80,7 +80,7 @@ class MemoryCache {
   private cache = new Map<string, CacheEntry<any>>();
   private staleCache = new Map<string, CacheEntry<any>>(); // Stale-while-revalidate cache
 
-  set<T>(key: string, data: T, ttlSeconds = 120): void {
+  set<T>(key: string, data: T, ttlSeconds = 300): void { // Increased to 5 minutes
     const entry = {
       data,
       timestamp: Date.now(),
