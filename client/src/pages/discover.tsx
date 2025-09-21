@@ -349,7 +349,7 @@ const VolatilityForecastingSection = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Current Regime:</span>
                     <Badge className={`${getRegimeColor(volatilityAnalysis.riskRegime.current)} border-0`}>
-                      {volatilityAnalysis.riskRegime.current.replace('_', ' ').toUpperCase()}
+                      {(volatilityAnalysis.riskRegime?.current || 'unknown').replace('_', ' ').toUpperCase()}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
@@ -387,7 +387,7 @@ const VolatilityForecastingSection = () => {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-white font-medium text-sm">{indicator.name}</span>
                         <Badge className={`text-xs border-0 ${getStressColor(indicator.normalizedValue)}`}>
-                          {indicator.level.toUpperCase()}
+                          {(indicator.level || 'unknown').toUpperCase()}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
@@ -497,7 +497,7 @@ const VolatilityForecastingSection = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-300 text-sm">Level:</span>
                       <Badge className={`text-xs border-0 ${getStressColor(indicator.normalizedValue)}`}>
-                        {indicator.level.toUpperCase()}
+                        {(indicator.level || 'unknown').toUpperCase()}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
@@ -578,7 +578,7 @@ const VolatilityForecastingSection = () => {
                             alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
                             'bg-green-500/20 text-green-300'
                           }`}>
-                            {alert.severity.toUpperCase()}
+                            {(alert.severity || 'unknown').toUpperCase()}
                           </Badge>
                         </div>
                         <p className="text-gray-300 text-sm mb-2">{alert.description}</p>
@@ -801,7 +801,7 @@ const PatternRecognitionSection = () => {
                     <CardHeader>
                       <CardTitle className="text-cyan-300 flex items-center gap-2 text-lg">
                         <PatternIcon className="h-5 w-5" />
-                        {pattern.patternType.replace(/_/g, ' ').toUpperCase()}
+                        {(pattern.patternType || 'unknown').replace(/_/g, ' ').toUpperCase()}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -815,7 +815,7 @@ const PatternRecognitionSection = () => {
                             pattern.status === 'completed' ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' :
                             'bg-red-500/20 text-red-300 border-red-400/30'
                           }`}>
-                            {pattern.status.toUpperCase()}
+                            {(pattern.status || 'unknown').toUpperCase()}
                           </Badge>
                         </div>
                         <span className="text-gray-400 text-xs">{pattern.timeframe}</span>
@@ -894,7 +894,7 @@ const PatternRecognitionSection = () => {
                           </div>
                           <div>
                             <p className={`font-medium ${trendDisplay.color}`}>
-                              {trendAnalysis.data.primaryTrend.direction.toUpperCase()}
+                              {(trendAnalysis.data?.primaryTrend?.direction || 'unknown').toUpperCase()}
                             </p>
                             <p className="text-gray-400 text-sm">{trendAnalysis.data.primaryTrend.duration}</p>
                           </div>
@@ -984,7 +984,7 @@ const PatternRecognitionSection = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <div className={`w-2 h-2 rounded-full ${level.type === 'support' ? 'bg-green-400' : 'bg-red-400'}`}></div>
                           <p className={`text-xs font-medium ${level.type === 'support' ? 'text-green-400' : 'text-red-400'}`}>
-                            {level.type.toUpperCase()}
+                            {(level.type || 'unknown').toUpperCase()}
                           </p>
                         </div>
                         <p className="text-white font-bold">${level.level.toLocaleString()}</p>
@@ -1038,7 +1038,7 @@ const PatternRecognitionSection = () => {
                         marketCycles.data.phase === 'distribution' ? 'bg-yellow-400' :
                         'bg-red-400'
                       }`}></div>
-                      {marketCycles.data.phase.toUpperCase()}
+                      {(marketCycles.data?.phase || 'unknown').toUpperCase()}
                     </div>
                     <p className="text-gray-400 text-sm mt-2">Current Phase</p>
                   </div>
@@ -1106,9 +1106,9 @@ const PatternRecognitionSection = () => {
                   <CardHeader>
                     <CardTitle className="text-cyan-300 flex items-center gap-2">
                       <Zap className="h-5 w-5" />
-                      {setup.setupType.replace(/_/g, ' ').toUpperCase()}
+                      {(setup.setupType || 'unknown').replace(/_/g, ' ').toUpperCase()}
                       <Badge className={`ml-auto ${setup.direction === 'long' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
-                        {setup.direction.toUpperCase()}
+                        {(setup.direction || 'unknown').toUpperCase()}
                       </Badge>
                     </CardTitle>
                   </CardHeader>
@@ -1204,7 +1204,7 @@ const PatternRecognitionSection = () => {
                               alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
                               'bg-blue-500/20 text-blue-300'
                             }`}>
-                              {alert.severity.toUpperCase()}
+                              {(alert.severity || 'unknown').toUpperCase()}
                             </Badge>
                             {alert.acknowledged && (
                               <Badge className="bg-green-500/20 text-green-300 text-xs">
@@ -2210,7 +2210,7 @@ const EventTradingSignalsCard = () => {
                       signal.action === 'sell' ? 'bg-red-500/20 text-red-300' :
                       'bg-gray-500/20 text-gray-300'
                     }`}>
-                      {signal.action === 'buy' ? '🟢' : '🔴'} {signal.action.toUpperCase()}
+                      {signal.action === 'buy' ? '🟢' : '🔴'} {(signal.action || 'unknown').toUpperCase()}
                     </Badge>
                     <span className="text-white font-medium text-sm">{signal.symbol}</span>
                     <Badge className={`text-xs ${
@@ -6290,7 +6290,7 @@ export default function Discover() {
                               alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
                               'bg-gray-500/20 text-gray-300'
                             }`}>
-                              {alert.severity.toUpperCase()}
+                              {(alert.severity || 'unknown').toUpperCase()}
                             </Badge>
                             <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
                               {alert.alertType.replace('_', ' ').toUpperCase()}
