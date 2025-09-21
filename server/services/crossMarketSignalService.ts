@@ -847,11 +847,12 @@ export class CrossMarketSignalService {
     return Math.min(10, (eventScore + predictionScore / 10));
   }
 
-  private calculatePatternStrength(patterns: any[], trends: any[]): number {
-    if (!patterns?.length && !trends?.length) return 5;
+  private calculatePatternStrength(patterns: any[], trends: any): number {
+    if (!patterns?.length && !trends) return 5;
     
     const patternScore = patterns.reduce((sum, pattern) => sum + (pattern.confidence || 0), 0) / Math.max(1, patterns.length * 10);
-    const trendScore = trends.reduce((sum, trend) => sum + (trend.strength || 0), 0) / Math.max(1, trends.length * 10);
+    // Handle trends as a single object, not an array
+    const trendScore = trends ? (trends.strength || trends.confidence || 0) / 10 : 0;
     
     return Math.min(10, (patternScore + trendScore) * 5);
   }
