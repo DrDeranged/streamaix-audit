@@ -308,14 +308,13 @@ export class CrossMarketSignalService {
     try {
       // Get upcoming events and their impact predictions
       const upcomingEvents = await this.marketEventService.getUpcomingEvents();
-      const impactPredictions = await this.marketEventService.getEventImpactPredictions();
-      const activeAlerts = await this.marketEventService.getActiveAlerts();
+      const dashboard = await this.marketEventService.getEventModelingDashboard();
       
       return {
         upcomingEvents,
-        impactPredictions,
-        activeAlerts,
-        strength: this.calculateEventStrength(upcomingEvents, impactPredictions)
+        impactPredictions: dashboard.predictions || [],
+        activeAlerts: dashboard.alerts || [],
+        strength: this.calculateEventStrength(upcomingEvents, dashboard.predictions || [])
       };
     } catch (error) {
       console.error('❌ Error getting event modeling signals:', error);
@@ -328,15 +327,15 @@ export class CrossMarketSignalService {
    */
   private async getPatternRecognitionSignals(): Promise<any> {
     try {
-      const patterns = await this.patternRecognitionService.getActivePatterns();
-      const trendAnalysis = await this.patternRecognitionService.getTrendAnalysis();
-      const tradingSetups = await this.patternRecognitionService.getAiTradingSetups();
+      const dashboard = await this.patternRecognitionService.getDashboard();
+      const trendAnalysis = await this.patternRecognitionService.analyzeTrend('BTC', '4h');
+      const tradingSetups = await this.patternRecognitionService.generateTradingSetups('BTC', '4h');
       
       return {
-        patterns,
+        patterns: dashboard.recentPatterns || [],
         trendAnalysis,
         tradingSetups,
-        strength: this.calculatePatternStrength(patterns, trendAnalysis)
+        strength: this.calculatePatternStrength(dashboard.recentPatterns || [], trendAnalysis)
       };
     } catch (error) {
       console.error('❌ Error getting pattern recognition signals:', error);
@@ -349,17 +348,17 @@ export class CrossMarketSignalService {
    */
   private async getVolatilityForecastingSignals(): Promise<any> {
     try {
-      const volatilityForecasts = await this.volatilityForecastingService.getVolatilityForecasts();
+      const volatilityForecasts = await this.volatilityForecastingService.generateVolatilityForecast('BTC');
       const stressIndicators = await this.volatilityForecastingService.getStressIndicators();
-      const riskRegime = await this.volatilityForecastingService.getCurrentRiskRegime();
-      const crisisIndicators = await this.volatilityForecastingService.getCrisisIndicators();
+      const riskRegime = await this.volatilityForecastingService.analyzeRiskRegime();
+      const crisisIndicators = await this.volatilityForecastingService.detectCrisisIndicators();
       
       return {
         volatilityForecasts,
         stressIndicators,
         riskRegime,
         crisisIndicators,
-        strength: this.calculateVolatilityStrength(volatilityForecasts, stressIndicators, riskRegime)
+        strength: this.calculateVolatilityStrength([volatilityForecasts], stressIndicators, riskRegime)
       };
     } catch (error) {
       console.error('❌ Error getting volatility forecasting signals:', error);
