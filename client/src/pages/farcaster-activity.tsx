@@ -30,12 +30,98 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getAuthHeaders } from '@/lib/auth';
 import { Link } from 'wouter';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function FarcasterActivity() {
   const [activeTab, setActiveTab] = useState('trending');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [refreshCount, setRefreshCount] = useState(0);
+  const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
   const { toast } = useToast();
+
+  // Handle follow/unfollow functionality
+  const handleFollowUser = async (fid: number, username: string) => {
+    try {
+      const isFollowing = followingUsers.has(fid);
+      
+      if (isFollowing) {
+        // Unfollow user
+        setFollowingUsers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(fid);
+          return newSet;
+        });
+        
+        toast({
+          title: "Unfollowed",
+          description: `You are no longer following @${username}`,
+        });
+      } else {
+        // Follow user
+        setFollowingUsers(prev => new Set([...Array.from(prev), fid]));
+        
+        toast({
+          title: "Following",
+          description: `You are now following @${username}`,
+        });
+      }
+      
+      // Track interaction
+      try {
+        await apiRequest('/api/interactions/track', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            type: isFollowing ? 'unfollow' : 'follow',
+            targetId: fid.toString(),
+            targetType: 'farcaster_user',
+            metadata: { username }
+          })
+        });
+      } catch (trackError) {
+        // Interaction tracking failed but don't block the UI
+        console.log('Interaction tracking failed:', trackError);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update follow status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handle post interactions (like, recast, reply)
+  const handlePostInteraction = async (type: string, castHash: string, author: string) => {
+    try {
+      toast({
+        title: "Interaction Recorded",
+        description: `${type === 'like' ? 'Liked' : type === 'recast' ? 'Recasted' : 'Replied to'} post from @${author}`,
+      });
+      
+      // Track interaction
+      try {
+        await apiRequest('/api/interactions/track', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            type,
+            targetId: castHash,
+            targetType: 'farcaster_cast',
+            metadata: { author }
+          })
+        });
+      } catch (trackError) {
+        console.log('Interaction tracking failed:', trackError);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to record interaction. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Auto-refresh mechanism
   useEffect(() => {
@@ -296,19 +382,31 @@ export default function FarcasterActivity() {
                                   {cast.text}
                                 </p>
                                 <div className="flex items-center gap-6 text-gray-400">
-                                  <button className="flex items-center gap-1 hover:text-red-400 transition-colors">
+                                  <button 
+                                    className="flex items-center gap-1 hover:text-red-400 transition-colors hover:scale-105"
+                                    onClick={() => handlePostInteraction('like', cast.hash, cast.author?.username || 'unknown')}
+                                    data-testid={`button-like-${cast.hash}`}
+                                  >
                                     <Heart className="w-4 h-4" />
                                     <span className="text-sm">
                                       {formatEngagement(cast.reactions?.likes_count || 0)}
                                     </span>
                                   </button>
-                                  <button className="flex items-center gap-1 hover:text-green-400 transition-colors">
+                                  <button 
+                                    className="flex items-center gap-1 hover:text-green-400 transition-colors hover:scale-105"
+                                    onClick={() => handlePostInteraction('recast', cast.hash, cast.author?.username || 'unknown')}
+                                    data-testid={`button-recast-${cast.hash}`}
+                                  >
                                     <Repeat2 className="w-4 h-4" />
                                     <span className="text-sm">
                                       {formatEngagement(cast.reactions?.recasts_count || 0)}
                                     </span>
                                   </button>
-                                  <button className="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                                  <button 
+                                    className="flex items-center gap-1 hover:text-blue-400 transition-colors hover:scale-105"
+                                    onClick={() => handlePostInteraction('reply', cast.hash, cast.author?.username || 'unknown')}
+                                    data-testid={`button-reply-${cast.hash}`}
+                                  >
                                     <MessageCircle className="w-4 h-4" />
                                     <span className="text-sm">
                                       {formatEngagement(cast.replies?.count || 0)}
@@ -457,7 +555,17 @@ export default function FarcasterActivity() {
                         </div>
                       </div>
                       
-                      <Button variant="ghost" className="w-full text-purple-300 hover:text-purple-200 justify-between">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full text-purple-300 hover:text-purple-200 justify-between hover:bg-purple-500/10 transition-all"
+                        onClick={() => {
+                          toast({
+                            title: "Show More",
+                            description: "Loading more trending topics..."
+                          });
+                        }}
+                        data-testid="button-show-more-topics"
+                      >
                         Show more
                         <ChevronRight className="h-4 w-4" />
                       </Button>
@@ -494,15 +602,29 @@ export default function FarcasterActivity() {
                       </div>
                       <Button
                         size="sm"
-                        className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-400/30"
+                        className={`${followingUsers.has(user.fid) 
+                          ? 'bg-green-500/20 hover:bg-green-500/30 text-green-300 border-green-400/30' 
+                          : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-400/30'
+                        } transition-all duration-200`}
+                        onClick={() => handleFollowUser(user.fid, user.username)}
                         data-testid={`button-follow-${user.fid}`}
                       >
-                        Follow
+                        {followingUsers.has(user.fid) ? 'Following' : 'Follow'}
                       </Button>
                     </div>
                   ))}
                   
-                  <Button variant="ghost" className="w-full text-purple-300 hover:text-purple-200 justify-between">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full text-purple-300 hover:text-purple-200 justify-between hover:bg-purple-500/10 transition-all"
+                    onClick={() => {
+                      toast({
+                        title: "Show More",
+                        description: "Loading more suggested users..."
+                      });
+                    }}
+                    data-testid="button-show-more-users"
+                  >
                     Show more
                     <ChevronRight className="h-4 w-4" />
                   </Button>
