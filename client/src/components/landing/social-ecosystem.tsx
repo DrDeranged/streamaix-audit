@@ -1,9 +1,27 @@
-import { MessageCircle, Users, Image, Edit3, Zap, Share2, ArrowRight } from "lucide-react";
+import { MessageCircle, Users, Image, Edit3, Zap, Share2, ArrowRight, ExternalLink, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import navalAvatar from "@/assets/naval-avatar.svg";
-import vitalikAvatar from "@/assets/vitalik-avatar.svg";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export function SocialEcosystem() {
+  // Fetch real-time trending data for preview
+  const { data: trendingData, isLoading: trendingLoading } = useQuery({
+    queryKey: ['/api/trending'],
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 30000, // Auto-refetch every 30 seconds
+    retry: 1
+  });
+
+  // Fetch trending topics for "What's happening" preview
+  const { data: topicsData, isLoading: topicsLoading } = useQuery({
+    queryKey: ['/api/trending-topics'],
+    staleTime: 60000, // 1 minute
+    refetchInterval: 60000, // Auto-refetch every minute
+    retry: 1
+  });
+
   const platforms = [
     { name: "Farcaster", icon: MessageCircle, color: "from-purple-500 to-pink-600" },
     { name: "Lens Protocol", icon: Users, color: "from-green-500 to-teal-600" },
@@ -12,40 +30,26 @@ export function SocialEcosystem() {
     { name: "Optimism", icon: Zap, color: "from-red-500 to-pink-600" }
   ];
 
-  const farcasterFeed = [
-    {
-      user: "naval.eth",
-      avatar: navalAvatar,
-      time: "2h",
-      content: "Just shared a StreamAiX summary of the latest AI alignment research. The insights are 🔥",
-      engagement: { shares: 23, likes: 89, replies: 12 }
-    },
-    {
-      user: "vitalik.lens",
-      avatar: vitalikAvatar,
-      time: "4h",
-      content: "The decentralized summarization model on StreamAiX is fascinating. AI + blockchain provenance = the future of knowledge curation",
-      engagement: { shares: 156, likes: 342, replies: 67 }
-    }
-  ];
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffMs = now.getTime() - time.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
+    return `${Math.floor(diffMins / 1440)}d`;
+  };
 
-  const lensFeed = [
-    {
-      user: "aave.lens",
-      avatar: navalAvatar,
-      time: "1h",
-      content: "Minted a new knowledge NFT from my DeFi deep-dive summary 📚✨ Ownership meets wisdom on StreamAiX",
-      summary: "\"DeFi 2.0 Architecture Patterns\" - 28 min summary",
-      engagement: { mirrors: 45, collects: 23, comments: 18 }
-    },
-    {
-      user: "polygon.lens",
-      avatar: vitalikAvatar,
-      time: "3h",
-      content: "The AI-generated chapter timestamps on StreamAiX are incredibly accurate. Makes navigating long-form content so much easier 🚀",
-      engagement: { mirrors: 78, collects: 12, comments: 31 }
-    }
-  ];
+  const formatEngagement = (count: number) => {
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+    return count.toString();
+  };
+
+  // Use real data if available, otherwise show loading state
+  const displayCasts = (trendingData as any)?.casts?.slice(0, 2) || [];
+  const displayTopics = (topicsData as any)?.topics?.slice(0, 4) || [];
 
   return (
     <section id="ecosystem" className="py-12 sm:py-20">
@@ -58,11 +62,17 @@ export function SocialEcosystem() {
           viewport={{ once: true }}
         >
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            Social + Ecosystem
+            Live Social Intelligence
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-            Seamlessly integrated with your favorite Web3 social platforms
+            Real-time crypto conversations and market insights from Web3's top voices
           </p>
+          <div className="flex justify-center mt-4">
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white animate-pulse">
+              <div className="w-2 h-2 bg-white rounded-full mr-2 animate-ping"></div>
+              Live Data
+            </Badge>
+          </div>
         </motion.div>
         
         {/* Platform Logos */}
@@ -91,47 +101,103 @@ export function SocialEcosystem() {
           ))}
         </div>
         
-        {/* Mock Social Feeds */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
-          {/* Farcaster Feed */}
+        {/* Live Social Intelligence */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+          {/* Real-time Farcaster Feed */}
           <motion.div 
-            className="glass-bg glass-border rounded-2xl p-4 sm:p-6"
+            className="lg:col-span-2 glass-bg glass-border rounded-2xl p-4 sm:p-6"
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground">Live Farcaster Feed</h3>
+                <Badge className="bg-green-500/20 text-green-300 text-xs">
+                  {trendingLoading ? 'Updating...' : 'Live'}
+                </Badge>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground">Farcaster Activity</h3>
+              <Link to="/farcaster-activity">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all text-xs"
+                  data-testid="button-view-full-discover"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Full Discover
+                </Button>
+              </Link>
             </div>
             
             <div className="space-y-3 sm:space-y-4">
-              {farcasterFeed.map((post, index) => (
-                <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4">
-                  <div className="flex items-start space-x-2 sm:space-x-3">
-                    <img src={post.avatar} alt="User avatar" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                        <span className="font-medium text-foreground text-sm sm:text-base">{post.user}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{post.time}</span>
-                      </div>
-                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{post.content}</p>
-                      <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
-                        <span>↗️ {post.engagement.shares}</span>
-                        <span>❤️ {post.engagement.likes}</span>
-                        <span>💬 {post.engagement.replies}</span>
+              {trendingLoading ? (
+                // Loading skeleton
+                [...Array(2)].map((_, index) => (
+                  <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4 animate-pulse">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex-shrink-0"></div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="h-4 bg-muted rounded w-1/4"></div>
+                        <div className="h-3 bg-muted rounded w-full"></div>
+                        <div className="h-3 bg-muted rounded w-3/4"></div>
+                        <div className="flex space-x-4 mt-2">
+                          <div className="h-3 bg-muted rounded w-8"></div>
+                          <div className="h-3 bg-muted rounded w-8"></div>
+                          <div className="h-3 bg-muted rounded w-8"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                ))
+              ) : displayCasts.length > 0 ? (
+                displayCasts.map((cast: any, index: number) => (
+                  <div key={cast.hash || index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4 hover:bg-card/80 transition-colors" data-testid={`live-cast-${index}`}>
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <img 
+                        src={cast.author?.pfp_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${cast.author?.username || 'user'}`} 
+                        alt="User avatar" 
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/identicon/svg?seed=${cast.author?.username || 'user'}`;
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
+                          <span className="font-medium text-foreground text-sm sm:text-base">
+                            {cast.author?.display_name || cast.author?.username || 'Anonymous'}
+                          </span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">
+                            {formatTimeAgo(cast.timestamp)}
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed line-clamp-3">
+                          {cast.text || 'No content available'}
+                        </p>
+                        <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
+                          <span>🔄 {formatEngagement(cast.reactions?.recasts_count || 0)}</span>
+                          <span>❤️ {formatEngagement(cast.reactions?.likes_count || 0)}</span>
+                          <span>💬 {formatEngagement(cast.replies?.count || 0)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No live data available</p>
+                  <p className="text-xs mt-1">Check your network connection</p>
                 </div>
-              ))}
+              )}
             </div>
           </motion.div>
           
-          {/* Lens Feed */}
+          {/* What's Happening Sidebar */}
           <motion.div 
             className="glass-bg glass-border rounded-2xl p-4 sm:p-6"
             initial={{ opacity: 0, x: 30 }}
@@ -140,37 +206,59 @@ export function SocialEcosystem() {
             viewport={{ once: true }}
           >
             <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground">Lens Activity</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground">What's Happening</h3>
             </div>
             
-            <div className="space-y-3 sm:space-y-4">
-              {lensFeed.map((post, index) => (
-                <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4">
-                  <div className="flex items-start space-x-2 sm:space-x-3">
-                    <img src={post.avatar} alt="User avatar" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                        <span className="font-medium text-foreground text-sm sm:text-base">{post.user}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{post.time}</span>
-                      </div>
-                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{post.content}</p>
-                      {post.summary && (
-                        <div className="bg-muted rounded-lg p-2 mt-2">
-                          <div className="text-xs text-muted-foreground">🎯 {post.summary}</div>
-                        </div>
-                      )}
-                      <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
-                        <span>🔄 {post.engagement.mirrors}</span>
-                        <span>🎨 {post.engagement.collects}</span>
-                        <span>💬 {post.engagement.comments}</span>
-                      </div>
+            <div className="space-y-3">
+              {topicsLoading ? (
+                // Loading skeleton for topics
+                [...Array(4)].map((_, index) => (
+                  <div key={index} className="p-3 rounded-lg border border-glass-border animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                  </div>
+                ))
+              ) : displayTopics.length > 0 ? (
+                displayTopics.map((topic: any, index: number) => (
+                  <div key={topic.name || index} className="p-3 rounded-lg border border-glass-border hover:bg-card/50 transition-colors cursor-pointer" data-testid={`trending-topic-${index}`}>
+                    <div className="font-medium text-foreground text-sm">
+                      {topic.name || `Topic ${index + 1}`}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {formatEngagement(topic.count || 0)} posts
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                // Fallback topics when no data
+                [
+                  { name: 'Bitcoin ETF', count: 247 },
+                  { name: 'DePIN', count: 189 },
+                  { name: 'L2 scaling', count: 156 },
+                  { name: 'Base chain', count: 134 }
+                ].map((topic, index) => (
+                  <div key={topic.name} className="p-3 rounded-lg border border-glass-border hover:bg-card/50 transition-colors cursor-pointer">
+                    <div className="font-medium text-foreground text-sm">{topic.name}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{topic.count} posts</div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-glass-border">
+              <Link to="/farcaster-activity">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all"
+                  data-testid="button-explore-more"
+                >
+                  Explore More <ArrowRight className="h-3 w-3 ml-2" />
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>
