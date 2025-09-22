@@ -1,316 +1,518 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, MessageCircle, Repeat2, Heart, Search, TrendingUp, Calendar, ExternalLink } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Users, 
+  MessageCircle, 
+  Repeat2, 
+  Heart, 
+  Search, 
+  TrendingUp, 
+  Calendar, 
+  ExternalLink,
+  RefreshCw,
+  Clock,
+  Flame,
+  Star,
+  ArrowUp,
+  Eye,
+  ChevronRight,
+  Globe,
+  ArrowLeft,
+  Bell
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthHeaders } from '@/lib/auth';
+import { Link } from 'wouter';
 
 export default function FarcasterActivity() {
-  const [fid, setFid] = useState<string>('');
-  const [searchFid, setSearchFid] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState('trending');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [refreshCount, setRefreshCount] = useState(0);
   const { toast } = useToast();
 
-  // Fetch user activity analytics
-  const { data: activityData, isLoading: activityLoading, error: activityError } = useQuery({
-    queryKey: ['/api/farcaster/activity', searchFid],
-    enabled: !!searchFid,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+  // Auto-refresh mechanism
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshCount(prev => prev + 1);
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch trending casts with real-time refresh
+  const { data: trendingData, isLoading: trendingLoading, refetch: refetchTrending } = useQuery({
+    queryKey: ['/api/trending', refreshCount],
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 30000, // Auto-refetch every 30 seconds
     retry: 2
   });
 
-  // Fetch user casts
-  const { data: castsData, isLoading: castsLoading } = useQuery({
-    queryKey: ['/api/farcaster/casts', searchFid],
-    enabled: !!searchFid,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+  // Fetch social trending data
+  const { data: socialData, isLoading: socialLoading } = useQuery({
+    queryKey: ['/api/social/trending', refreshCount],
+    staleTime: 60000, // 1 minute
+    refetchInterval: 60000, // Auto-refetch every minute
   });
 
-  const handleSearch = () => {
-    const fidNumber = parseInt(fid);
-    if (!fidNumber || isNaN(fidNumber) || fidNumber <= 0) {
-      toast({
-        title: "Invalid FID",
-        description: "Please enter a valid Farcaster ID (positive number)",
-        variant: "destructive"
-      });
-      return;
-    }
-    setSearchFid(fidNumber);
-  };
+  // Fetch trending topics for "What's happening"
+  const { data: topicsData, isLoading: topicsLoading } = useQuery({
+    queryKey: ['/api/trending-topics', refreshCount],
+    staleTime: 60000, // 1 minute  
+    refetchInterval: 60000, // Auto-refetch every minute
+  });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  // Categories for filtering content
+  const categories = [
+    { id: 'all', label: 'All', count: 'Live' },
+    { id: 'bitcoin_etf', label: 'Bitcoin ETF', count: '247' },
+    { id: 'depin', label: 'DePIN', count: '189' },
+    { id: 'l2_scaling', label: 'L2 scaling', count: '156' },
+    { id: 'base_chain', label: 'Base chain', count: '134' },
+    { id: 'ai_crypto', label: 'AI x Crypto', count: '89' },
+    { id: 'nfts', label: 'NFTs', count: '67' }
+  ];
+
+  const handleRefresh = async () => {
+    toast({
+      title: "Refreshing feed...",
+      description: "Getting the latest Farcaster activity"
     });
+    setRefreshCount(prev => prev + 1);
+    await refetchTrending();
   };
 
-  const profile = (activityData as any)?.activity?.profile;
-  const stats = (activityData as any)?.activity?.stats;
-  const casts = (castsData as any)?.casts || [];
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffMs = now.getTime() - time.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
+    return `${Math.floor(diffMins / 1440)}d`;
+  };
+
+  const formatEngagement = (count: number) => {
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+    return count.toString();
+  };
+
+  // Extract data from API responses
+  const trendingCasts = (trendingData as any)?.items || [];
+  const socialMetrics = (socialData as any)?.metrics || {};
+  const trendingTopics = (topicsData as any)?.topics || [];
+  
+  // Mock suggested users data (would come from API in real implementation)
+  const suggestedUsers = [
+    { fid: 3, username: 'dwr.eth', displayName: 'Dan Romero', pfp: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face' },
+    { fid: 5650, username: 'vitalik.eth', displayName: 'Vitalik Buterin', pfp: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
+    { fid: 239, username: 'balajis.eth', displayName: 'Balaji', pfp: 'https://images.unsplash.com/photo-1494790108755-2616b612b131?w=100&h=100&fit=crop&crop=face' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Farcaster Activity Dashboard
-          </h1>
-          <p className="text-xl text-purple-200 mb-8">
-            Explore real Farcaster user activity and engagement metrics
-          </p>
-
-          {/* Search */}
-          <div className="flex justify-center gap-4 max-w-md mx-auto">
-            <Input
-              data-testid="input-fid"
-              type="number"
-              placeholder="Enter Farcaster ID (fid)"
-              value={fid}
-              onChange={(e) => setFid(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder-white/50"
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <Button 
-              data-testid="button-search"
-              onClick={handleSearch} 
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              <Search className="w-4 h-4 mr-2" />
-              Search
-            </Button>
-          </div>
-        </motion.div>
-
-        {activityError && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 text-center"
-          >
-            <p className="text-red-200">
-              Failed to load Farcaster activity. Please try again with a valid FID.
-            </p>
-          </motion.div>
-        )}
-
-        {searchFid && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-6"
-          >
-            {/* Profile Card */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  User Profile
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {activityLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-4 w-1/2 bg-white/20" />
-                    <Skeleton className="h-4 w-1/3 bg-white/20" />
-                    <Skeleton className="h-20 w-full bg-white/20" />
-                  </div>
-                ) : profile ? (
-                  <div className="flex items-start gap-4">
-                    {profile.pfp_url && (
-                      <img
-                        src={profile.pfp_url}
-                        alt={`${profile.username} avatar`}
-                        className="w-16 h-16 rounded-full border-2 border-purple-400"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-bold text-white">
-                          {profile.display_name || profile.username}
-                        </h3>
-                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-200">
-                          @{profile.username}
-                        </Badge>
-                        {profile.power_badge && (
-                          <Badge className="bg-yellow-500/20 text-yellow-200">
-                            Power User
-                          </Badge>
-                        )}
-                      </div>
-                      {profile.profile?.bio?.text && (
-                        <p className="text-gray-300 mb-2">{profile.profile.bio.text}</p>
-                      )}
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <span>FID: {profile.fid}</span>
-                        {profile.follower_count && (
-                          <span>{profile.follower_count.toLocaleString()} followers</span>
-                        )}
-                        {profile.following_count && (
-                          <span>{profile.following_count.toLocaleString()} following</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-300">No profile data available</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  {activityLoading ? (
-                    <Skeleton className="h-12 w-12 rounded-full mx-auto mb-2 bg-white/20" />
-                  ) : (
-                    <MessageCircle className="w-12 h-12 mx-auto mb-2 text-blue-400" />
-                  )}
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : stats?.totalCasts || '0'}
-                  </p>
-                  <p className="text-gray-300">Total Casts</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-green-400" />
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : stats?.followerCount || '0'}
-                  </p>
-                  <p className="text-gray-300">Followers</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-2 text-purple-400" />
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : Math.round(stats?.avgEngagementRate || 0)}
-                  </p>
-                  <p className="text-gray-300">Avg Engagement</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-yellow-400" />
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : stats?.followingCount || '0'}
-                  </p>
-                  <p className="text-gray-300">Following</p>
-                </CardContent>
-              </Card>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <Link to="/">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border-purple-400/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 hover:scale-105 transition-all duration-200 backdrop-blur-sm"
+                  data-testid="button-back-home"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="font-medium">Home</span>
+                </Button>
+              </Link>
+              
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+                Discover
+              </h1>
+              
+              <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                Live
+              </Badge>
             </div>
 
-            {/* Recent Casts */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {castsLoading ? (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all"
+                data-testid="button-refresh"
+                disabled={trendingLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${trendingLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/20 text-white hover:bg-white/10"
+                data-testid="button-notifications"
+              >
+                <Bell className="h-4 w-4 mr-2" />
+                Alerts
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left/Main Content Area */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Sub-navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-gray-400 text-sm mb-4">Stay updated with the latest in crypto conversations</p>
+              
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 bg-black/30 backdrop-blur-sm">
+                  <TabsTrigger value="trending" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300">
+                    <Flame className="h-4 w-4 mr-2" />
+                    Trending
+                  </TabsTrigger>
+                  <TabsTrigger value="foryou" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300">
+                    <Star className="h-4 w-4 mr-2" />
+                    For You
+                  </TabsTrigger>
+                  <TabsTrigger value="following" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300">
+                    <Users className="h-4 w-4 mr-2" />
+                    Following
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </motion.div>
+
+            {/* Category Filters */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="flex flex-wrap gap-2 mb-6"
+            >
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`${
+                    selectedCategory === category.id
+                      ? 'bg-purple-500/20 border-purple-400/40 text-purple-300'
+                      : 'bg-black/20 border-purple-500/20 text-gray-400 hover:text-purple-400'
+                  } transition-all`}
+                  data-testid={`button-category-${category.id}`}
+                >
+                  {category.label}
+                  <Badge variant="secondary" className="ml-2 bg-white/10 text-white text-xs">
+                    {category.count}
+                  </Badge>
+                </Button>
+              ))}
+            </motion.div>
+            {/* Main Feed */}
+            <TabsContent value="trending" className="mt-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="space-y-4"
+              >
+                {trendingLoading ? (
                   <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-full bg-white/20" />
-                        <Skeleton className="h-4 w-3/4 bg-white/20" />
-                        <Skeleton className="h-6 w-1/4 bg-white/20" />
-                      </div>
-                    ))}
-                  </div>
-                ) : casts && casts.length > 0 ? (
-                  <div className="space-y-4">
-                    {casts.slice(0, 10).map((cast: any, index: number) => (
-                      <motion.div
-                        key={cast.hash || index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="border-b border-white/10 pb-4 last:border-b-0"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1">
-                            <p className="text-white mb-2">{cast.text}</p>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {formatDate(cast.timestamp)}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Heart className="w-3 h-3" />
-                                {cast.reactions?.likes_count || 0}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Repeat2 className="w-3 h-3" />
-                                {cast.reactions?.recasts_count || 0}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <MessageCircle className="w-3 h-3" />
-                                {cast.replies?.count || 0}
-                              </span>
-                              {cast.hash && (
-                                <a
-                                  href={`https://warpcast.com/~/conversations/${cast.hash}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-1 text-purple-300 hover:text-purple-200"
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                  View
-                                </a>
-                              )}
+                    {[...Array(5)].map((_, i) => (
+                      <Card key={i} className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full bg-white/20" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-1/4 bg-white/20" />
+                              <Skeleton className="h-4 w-full bg-white/20" />
+                              <Skeleton className="h-4 w-3/4 bg-white/20" />
+                              <div className="flex gap-4">
+                                <Skeleton className="h-6 w-12 bg-white/20" />
+                                <Skeleton className="h-6 w-12 bg-white/20" />
+                                <Skeleton className="h-6 w-12 bg-white/20" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </motion.div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
+                ) : trendingCasts && trendingCasts.length > 0 ? (
+                  <AnimatePresence>
+                    {trendingCasts.map((cast: any, index: number) => (
+                      <motion.div
+                        key={cast.hash || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm hover:bg-black/30 transition-all cursor-pointer">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              {cast.author?.pfp_url && (
+                                <img
+                                  src={cast.author.pfp_url}
+                                  alt={`${cast.author.username} avatar`}
+                                  className="w-10 h-10 rounded-full border border-purple-400/30"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="font-semibold text-white truncate">
+                                    {cast.author?.display_name || cast.author?.username}
+                                  </span>
+                                  <span className="text-gray-400 text-sm">
+                                    @{cast.author?.username}
+                                  </span>
+                                  <span className="text-gray-500 text-sm">·</span>
+                                  <span className="text-gray-500 text-sm">
+                                    {formatTimeAgo(cast.timestamp)}
+                                  </span>
+                                </div>
+                                <p className="text-gray-200 mb-3 leading-relaxed">
+                                  {cast.text}
+                                </p>
+                                <div className="flex items-center gap-6 text-gray-400">
+                                  <button className="flex items-center gap-1 hover:text-red-400 transition-colors">
+                                    <Heart className="w-4 h-4" />
+                                    <span className="text-sm">
+                                      {formatEngagement(cast.reactions?.likes_count || 0)}
+                                    </span>
+                                  </button>
+                                  <button className="flex items-center gap-1 hover:text-green-400 transition-colors">
+                                    <Repeat2 className="w-4 h-4" />
+                                    <span className="text-sm">
+                                      {formatEngagement(cast.reactions?.recasts_count || 0)}
+                                    </span>
+                                  </button>
+                                  <button className="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                                    <MessageCircle className="w-4 h-4" />
+                                    <span className="text-sm">
+                                      {formatEngagement(cast.replies?.count || 0)}
+                                    </span>
+                                  </button>
+                                  {cast.hash && (
+                                    <a
+                                      href={`https://warpcast.com/~/conversations/${cast.hash}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1 text-purple-300 hover:text-purple-200 transition-colors"
+                                    >
+                                      <ExternalLink className="w-4 h-4" />
+                                      <span className="text-sm">View</span>
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 ) : (
-                  <p className="text-gray-300 text-center py-8">
-                    No recent activity found for this user
-                  </p>
+                  <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
+                    <CardContent className="p-8 text-center">
+                      <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                      <p className="text-gray-300 text-lg">No trending casts available</p>
+                      <p className="text-gray-500 text-sm mt-2">Check back soon for the latest conversations</p>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+              </motion.div>
+            </TabsContent>
 
-        {!searchFid && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-center text-gray-300 mt-12"
-          >
-            <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-500" />
-            <p className="text-xl">Enter a Farcaster ID to view real activity data</p>
-            <p className="text-sm mt-2">
-              Try popular FIDs like 3 (dwr.eth), 5650 (vitalik.eth), or 1 (farcaster)
-            </p>
-          </motion.div>
-        )}
+            {/* For You Tab */}
+            <TabsContent value="foryou" className="mt-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="space-y-4"
+              >
+                <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
+                  <CardContent className="p-8 text-center">
+                    <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                    <p className="text-gray-300 text-lg">Personalized feed coming soon</p>
+                    <p className="text-gray-500 text-sm mt-2">Connect your wallet to see curated content</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+
+            {/* Following Tab */}
+            <TabsContent value="following" className="mt-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="space-y-4"
+              >
+                <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
+                  <CardContent className="p-8 text-center">
+                    <Users className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                    <p className="text-gray-300 text-lg">Follow users to see their content</p>
+                    <p className="text-gray-500 text-sm mt-2">Start by following some creators in the suggested users section</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            {/* What's happening */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-purple-400" />
+                    What's happening
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {topicsLoading ? (
+                    <div className="space-y-3">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="space-y-1">
+                          <Skeleton className="h-3 w-16 bg-white/20" />
+                          <Skeleton className="h-4 w-full bg-white/20" />
+                          <Skeleton className="h-3 w-12 bg-white/20" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-3">
+                        <div className="hover:bg-white/5 p-2 rounded transition-colors cursor-pointer">
+                          <p className="text-purple-400 text-sm">Bitcoin ETF</p>
+                          <p className="text-white font-medium">247 posts</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <ArrowUp className="h-3 w-3 text-green-400" />
+                            <span className="text-green-400 text-xs">Trending</span>
+                          </div>
+                        </div>
+                        
+                        <div className="hover:bg-white/5 p-2 rounded transition-colors cursor-pointer">
+                          <p className="text-purple-400 text-sm">DePIN</p>
+                          <p className="text-white font-medium">189 posts</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <ArrowUp className="h-3 w-3 text-green-400" />
+                            <span className="text-green-400 text-xs">Trending</span>
+                          </div>
+                        </div>
+                        
+                        <div className="hover:bg-white/5 p-2 rounded transition-colors cursor-pointer">
+                          <p className="text-purple-400 text-sm">L2 scaling</p>
+                          <p className="text-white font-medium">156 posts</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-yellow-400" />
+                            <span className="text-yellow-400 text-xs">Active</span>
+                          </div>
+                        </div>
+                        
+                        <div className="hover:bg-white/5 p-2 rounded transition-colors cursor-pointer">
+                          <p className="text-purple-400 text-sm">Base chain</p>
+                          <p className="text-white font-medium">134 posts</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <ArrowUp className="h-3 w-3 text-green-400" />
+                            <span className="text-green-400 text-xs">Trending</span>
+                          </div>
+                        </div>
+                        
+                        <div className="hover:bg-white/5 p-2 rounded transition-colors cursor-pointer">
+                          <p className="text-purple-400 text-sm">AI x Crypto</p>
+                          <p className="text-white font-medium">89 posts</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Flame className="h-3 w-3 text-orange-400" />
+                            <span className="text-orange-400 text-xs">Hot</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Button variant="ghost" className="w-full text-purple-300 hover:text-purple-200 justify-between">
+                        Show more
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Who to follow */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5 text-cyan-400" />
+                    Who to follow
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {suggestedUsers.map((user) => (
+                    <div key={user.fid} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded transition-colors">
+                      <img
+                        src={user.pfp}
+                        alt={`${user.username} avatar`}
+                        className="w-10 h-10 rounded-full border border-purple-400/30"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate">{user.displayName}</p>
+                        <p className="text-gray-400 text-sm truncate">@{user.username}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-400/30"
+                        data-testid={`button-follow-${user.fid}`}
+                      >
+                        Follow
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  <Button variant="ghost" className="w-full text-purple-300 hover:text-purple-200 justify-between">
+                    Show more
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
       </div>
+
     </div>
   );
 }
