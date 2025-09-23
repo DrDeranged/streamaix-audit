@@ -1285,6 +1285,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get trending topics for "What's Happening" section
+  app.get('/api/trending-topics', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      // Mock trending topics based on current crypto trends
+      const mockTrendingTopics = [
+        { 
+          topic: "Bitcoin ETF", 
+          posts: "2,847", 
+          change: "+12.5%",
+          sentiment: "bullish"
+        },
+        { 
+          topic: "Ethereum Staking", 
+          posts: "1,923", 
+          change: "+8.3%",
+          sentiment: "positive"
+        },
+        { 
+          topic: "L2 Solutions", 
+          posts: "1,456", 
+          change: "+15.7%",
+          sentiment: "optimistic"
+        },
+        { 
+          topic: "DeFi Yields", 
+          posts: "1,189", 
+          change: "-3.2%",
+          sentiment: "neutral"
+        },
+        { 
+          topic: "NFT Market", 
+          posts: "892", 
+          change: "+6.8%",
+          sentiment: "recovering"
+        }
+      ];
+
+      res.json({
+        success: true,
+        topics: mockTrendingTopics,
+        count: mockTrendingTopics.length,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Failed to fetch trending topics:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch trending topics',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
   // Get top crypto accounts with their highlight casts
   app.get('/api/top-accounts', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 6;
