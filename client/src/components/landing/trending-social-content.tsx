@@ -128,6 +128,7 @@ export function TrendingSocialContent() {
   const trendingTopics = topicsData?.topics || [];
   const cryptoVideos = cryptoNewsData?.videos || [];
   
+  
 
   // Generate live trending topics with real data
   const liveTrendingTopics = trendingTopics.length > 0 ? trendingTopics.slice(0, 5) : [
