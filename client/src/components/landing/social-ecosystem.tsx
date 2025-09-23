@@ -48,7 +48,7 @@ export function SocialEcosystem() {
   };
 
   // Use real data if available, otherwise show loading state
-  const displayCasts = (trendingData as any)?.casts?.slice(0, 2) || [];
+  const displayCasts = (trendingData as any)?.items?.slice(0, 2) || [];
   const displayTopics = (topicsData as any)?.topics?.slice(0, 4) || [];
 
   return (
@@ -134,67 +134,159 @@ export function SocialEcosystem() {
               </Link>
             </div>
             
-            <div className="space-y-3 sm:space-y-4">
-              {trendingLoading ? (
-                // Loading skeleton
-                [...Array(2)].map((_, index) => (
-                  <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4 animate-pulse">
-                    <div className="flex items-start space-x-2 sm:space-x-3">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="h-4 bg-muted rounded w-1/4"></div>
-                        <div className="h-3 bg-muted rounded w-full"></div>
-                        <div className="h-3 bg-muted rounded w-3/4"></div>
-                        <div className="flex space-x-4 mt-2">
-                          <div className="h-3 bg-muted rounded w-8"></div>
-                          <div className="h-3 bg-muted rounded w-8"></div>
-                          <div className="h-3 bg-muted rounded w-8"></div>
+              <TabsContent value="trending" className="mt-0">
+                <div className="space-y-3 sm:space-y-4">
+                  {trendingLoading ? (
+                    // Loading skeleton
+                    [...Array(3)].map((_, index) => (
+                      <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4 animate-pulse">
+                        <div className="flex items-start space-x-2 sm:space-x-3">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex-shrink-0"></div>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="h-4 bg-muted rounded w-1/4"></div>
+                            <div className="h-3 bg-muted rounded w-full"></div>
+                            <div className="h-3 bg-muted rounded w-3/4"></div>
+                            <div className="flex space-x-4 mt-2">
+                              <div className="h-3 bg-muted rounded w-8"></div>
+                              <div className="h-3 bg-muted rounded w-8"></div>
+                              <div className="h-3 bg-muted rounded w-8"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : displayCasts.length > 0 ? (
+                    <AnimatePresence>
+                      {displayCasts.map((cast: any, index: number) => (
+                        <motion.div 
+                          key={cast.hash || index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="bg-card border-glass-border rounded-lg p-3 sm:p-4 hover:bg-card/80 transition-colors" 
+                          data-testid={`live-cast-${index}`}
+                        >
+                          <div className="flex items-start space-x-2 sm:space-x-3">
+                            <img 
+                              src={cast.author?.pfp_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${cast.author?.username || 'user'}`} 
+                              alt="User avatar" 
+                              className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/identicon/svg?seed=${cast.author?.username || 'user'}`;
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
+                                <span className="font-medium text-foreground text-sm sm:text-base">
+                                  {cast.author?.display_name || cast.author?.username || 'Anonymous'}
+                                </span>
+                                <span className="text-xs sm:text-sm text-muted-foreground">
+                                  {formatTimeAgo(cast.timestamp)}
+                                </span>
+                              </div>
+                              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed line-clamp-2">
+                                {cast.text || 'No content available'}
+                              </p>
+                              <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
+                                <span>🔄 {formatEngagement(cast.reactions?.recasts_count || 0)}</span>
+                                <span>❤️ {formatEngagement(cast.reactions?.likes_count || 0)}</span>
+                                <span>💬 {formatEngagement(cast.replies?.count || 0)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
+                    </AnimatePresence>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No trending data available</p>
+                      <p className="text-xs mt-1">Check back soon for updates</p>
                     </div>
-                  </div>
-                ))
-              ) : displayCasts.length > 0 ? (
-                displayCasts.map((cast: any, index: number) => (
-                  <div key={cast.hash || index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4 hover:bg-card/80 transition-colors" data-testid={`live-cast-${index}`}>
-                    <div className="flex items-start space-x-2 sm:space-x-3">
-                      <img 
-                        src={cast.author?.pfp_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${cast.author?.username || 'user'}`} 
-                        alt="User avatar" 
-                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/identicon/svg?seed=${cast.author?.username || 'user'}`;
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                          <span className="font-medium text-foreground text-sm sm:text-base">
-                            {cast.author?.display_name || cast.author?.username || 'Anonymous'}
-                          </span>
-                          <span className="text-xs sm:text-sm text-muted-foreground">
-                            {formatTimeAgo(cast.timestamp)}
-                          </span>
-                        </div>
-                        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed line-clamp-3">
-                          {cast.text || 'No content available'}
-                        </p>
-                        <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
-                          <span>🔄 {formatEngagement(cast.reactions?.recasts_count || 0)}</span>
-                          <span>❤️ {formatEngagement(cast.reactions?.likes_count || 0)}</span>
-                          <span>💬 {formatEngagement(cast.replies?.count || 0)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No live data available</p>
-                  <p className="text-xs mt-1">Check your network connection</p>
+                  )}
                 </div>
-              )}
-            </div>
+              </TabsContent>
+
+              <TabsContent value="foryou" className="mt-0">
+                <div className="space-y-3 sm:space-y-4">
+                  {newsLoading ? (
+                    [...Array(3)].map((_, index) => (
+                      <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4 animate-pulse">
+                        <div className="space-y-2">
+                          <div className="h-4 bg-muted rounded w-full"></div>
+                          <div className="h-3 bg-muted rounded w-3/4"></div>
+                          <div className="h-3 bg-muted rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : cryptoNews.length > 0 ? (
+                    <AnimatePresence>
+                      {cryptoNews.map((story: any, index: number) => (
+                        <motion.div
+                          key={story.id || index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="bg-card border-glass-border rounded-lg p-3 sm:p-4 hover:bg-card/80 transition-colors"
+                        >
+                          <div className="flex items-start gap-2">
+                            <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge className="bg-purple-500/20 text-purple-300 text-xs">
+                                  Crypto News
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(story.timestamp || new Date().toISOString())}
+                                </span>
+                              </div>
+                              <h4 className="font-medium text-foreground text-sm mb-1 line-clamp-2">
+                                {story.title || 'Breaking: Major Crypto Development'}
+                              </h4>
+                              <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">
+                                {story.summary || 'Latest developments in the cryptocurrency space with market implications.'}
+                              </p>
+                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                <span>📈 Impact: High</span>
+                                <span>👀 {Math.floor(Math.random() * 1000) + 500}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
+                    </AnimatePresence>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No personalized content available</p>
+                      <p className="text-xs mt-1">Follow more topics for curated content</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="following" className="mt-0">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">Follow users to see their content</p>
+                    <p className="text-xs mt-1">Connect your wallet to follow crypto influencers</p>
+                    <Link to="/farcaster-activity">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-3 border-purple-500/30 text-purple-300 hover:bg-purple-500/10 text-xs"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Explore Users
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </motion.div>
           
           {/* What's Happening Sidebar */}
@@ -205,11 +297,17 @@ export function SocialEcosystem() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground">What's Happening</h3>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground">What's Happening</h3>
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-xs font-medium">Live</span>
+              </div>
             </div>
             
             <div className="space-y-3">
@@ -221,30 +319,51 @@ export function SocialEcosystem() {
                     <div className="h-3 bg-muted rounded w-1/2"></div>
                   </div>
                 ))
-              ) : displayTopics.length > 0 ? (
-                displayTopics.map((topic: any, index: number) => (
-                  <div key={topic.name || index} className="p-3 rounded-lg border border-glass-border hover:bg-card/50 transition-colors cursor-pointer" data-testid={`trending-topic-${index}`}>
-                    <div className="font-medium text-foreground text-sm">
-                      {topic.name || `Topic ${index + 1}`}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {formatEngagement(topic.count || 0)} posts
-                    </div>
-                  </div>
-                ))
               ) : (
-                // Fallback topics when no data
-                [
-                  { name: 'Bitcoin ETF', count: 247 },
-                  { name: 'DePIN', count: 189 },
-                  { name: 'L2 scaling', count: 156 },
-                  { name: 'Base chain', count: 134 }
-                ].map((topic, index) => (
-                  <div key={topic.name} className="p-3 rounded-lg border border-glass-border hover:bg-card/50 transition-colors cursor-pointer">
-                    <div className="font-medium text-foreground text-sm">{topic.name}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{topic.count} posts</div>
-                  </div>
-                ))
+                liveTrendingTopics.map((topic, index) => {
+                  const getTrendIcon = () => {
+                    switch(topic.trend) {
+                      case 'up': return <ArrowUp className="h-3 w-3 text-green-400" />;
+                      case 'hot': return <Flame className="h-3 w-3 text-orange-400" />;
+                      case 'active': return <Clock className="h-3 w-3 text-yellow-400" />;
+                      default: return <ArrowUp className="h-3 w-3 text-green-400" />;
+                    }
+                  };
+                  
+                  const getTrendColor = () => {
+                    switch(topic.trend) {
+                      case 'up': return 'text-green-400';
+                      case 'hot': return 'text-orange-400';
+                      case 'active': return 'text-yellow-400';
+                      default: return 'text-green-400';
+                    }
+                  };
+                  
+                  return (
+                    <motion.div
+                      key={topic.name}
+                      className="p-3 rounded-lg border border-glass-border hover:bg-card/50 transition-colors cursor-pointer"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      data-testid={`trending-topic-${index}`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm">{topic.icon}</span>
+                        <div className="font-medium text-foreground text-sm">{topic.name}</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {topic.count} posts
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        {getTrendIcon()}
+                        <span className={`${getTrendColor()} text-xs font-medium`}>
+                          {topic.trend === 'up' ? 'Trending' : topic.trend === 'hot' ? 'Hot' : 'Active'}
+                        </span>
+                        <span className="text-gray-500 text-xs ml-auto">Live</span>
+                      </div>
+                    </motion.div>
+                  );
+                })
               )}
             </div>
             
