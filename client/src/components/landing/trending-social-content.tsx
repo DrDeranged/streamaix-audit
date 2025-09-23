@@ -348,9 +348,9 @@ export function TrendingSocialContent() {
                             <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm hover:bg-black/30 transition-all cursor-pointer group">
                               <CardContent className="p-4">
                                 <div className="flex items-start gap-3">
-                                  {cast.author?.pfp_url && (
+                                  {cast.author?.pfpUrl && (
                                     <img
-                                      src={cast.author.pfp_url}
+                                      src={cast.author.pfpUrl}
                                       alt={`${cast.author.username} avatar`}
                                       className="w-10 h-10 rounded-full border border-purple-400/30"
                                       onError={(e) => {
@@ -361,7 +361,7 @@ export function TrendingSocialContent() {
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-2">
                                       <span className="font-semibold text-white truncate">
-                                        {cast.author?.display_name || cast.author?.username}
+                                        {cast.author?.displayName || cast.author?.username}
                                       </span>
                                       <span className="text-gray-400 text-sm">
                                         @{cast.author?.username}
@@ -378,19 +378,19 @@ export function TrendingSocialContent() {
                                       <div className="flex items-center gap-1 text-blue-400">
                                         <MessageCircle className="w-4 h-4" />
                                         <span className="text-sm">
-                                          {formatEngagement(cast.replies?.count || 0)}
+                                          {formatEngagement(cast.replies || 0)}
                                         </span>
                                       </div>
                                       <div className="flex items-center gap-1 text-green-400">
                                         <Repeat2 className="w-4 h-4" />
                                         <span className="text-sm">
-                                          {formatEngagement(cast.reactions?.recasts_count || 0)}
+                                          {formatEngagement(cast.recasts || 0)}
                                         </span>
                                       </div>
                                       <div className="flex items-center gap-1 text-red-400">
                                         <Heart className="w-4 h-4" />
                                         <span className="text-sm">
-                                          {formatEngagement(cast.reactions?.likes_count || 0)}
+                                          {formatEngagement(cast.likes || 0)}
                                         </span>
                                       </div>
                                       {cast.hash && (
