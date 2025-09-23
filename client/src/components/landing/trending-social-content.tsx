@@ -65,7 +65,7 @@ export function TrendingSocialContent() {
 
   // Fetch trending casts with real-time refresh
   const { data: trendingData, isLoading: trendingLoading, refetch: refetchTrending } = useQuery({
-    queryKey: ['/api/trending', refreshCount],
+    queryKey: ['/api/trending'],
     staleTime: 30000, // 30 seconds
     refetchInterval: 30000, // Auto-refetch every 30 seconds
     retry: 2
@@ -73,14 +73,14 @@ export function TrendingSocialContent() {
 
   // Fetch trending topics for "What's happening"
   const { data: topicsData, isLoading: topicsLoading } = useQuery({
-    queryKey: ['/api/trending-topics', refreshCount],
+    queryKey: ['/api/trending-topics'],
     staleTime: 30000, // 30 seconds for faster updates
     refetchInterval: 30000, // Auto-refetch every 30 seconds
   });
 
   // Fetch crypto content for "For You" tab
   const { data: cryptoNewsData, isLoading: newsLoading } = useQuery({
-    queryKey: ['/api/youtube/crypto-content', refreshCount],
+    queryKey: ['/api/youtube/crypto-content'],
     staleTime: 60000, // 1 minute
     refetchInterval: 60000, // Auto-refetch every minute
   });
@@ -123,10 +123,11 @@ export function TrendingSocialContent() {
     return count.toString();
   };
 
-  // Extract data from API responses
-  const trendingCasts = (trendingData as any)?.items || [];
-  const trendingTopics = (topicsData as any)?.topics || [];
-  const cryptoVideos = (cryptoNewsData as any)?.videos || [];
+  // Extract data from API responses  
+  const trendingCasts = trendingData?.items || [];
+  const trendingTopics = topicsData?.topics || [];
+  const cryptoVideos = cryptoNewsData?.videos || [];
+  
 
   // Generate live trending topics with real data
   const liveTrendingTopics = trendingTopics.length > 0 ? trendingTopics.slice(0, 5) : [
