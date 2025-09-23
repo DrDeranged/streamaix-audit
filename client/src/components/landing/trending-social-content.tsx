@@ -505,7 +505,7 @@ export function TrendingSocialContent() {
                   </Card>
                 </TabsContent>
               </Tabs>
-            </div>
+            </motion.div>
           </div>
 
           {/* Enhanced Right Sidebar (1/3 width) */}
@@ -627,7 +627,7 @@ export function TrendingSocialContent() {
                             description: `No longer following @${user.username}`,
                           });
                         } else {
-                          setFollowingUsers(prev => new Set([...prev, user.fid]));
+                          setFollowingUsers(prev => new Set([...Array.from(prev), user.fid]));
                           toast({
                             title: "Following",
                             description: `Now following @${user.username}`,
