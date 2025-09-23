@@ -25,8 +25,6 @@ const GovernancePage = React.lazy(() => import("@/pages/governance"));
 const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
-const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
-const Discover = React.lazy(() => import("@/pages/discover"));
 
 function Router() {
   return (
@@ -83,17 +81,6 @@ function Router() {
         </Suspense>
       </Route>
       
-      <Route path="/farcaster-activity">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <FarcasterActivity />
-        </Suspense>
-      </Route>
-      
-      <Route path="/discover">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <Discover />
-        </Suspense>
-      </Route>
       
       <Route path="/summary/:id">
         <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-gray-900 dark:text-white">Loading...</div></div>}>
