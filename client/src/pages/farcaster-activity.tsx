@@ -374,37 +374,36 @@ export default function FarcasterActivity() {
                     Following
                   </TabsTrigger>
                 </TabsList>
-              </Tabs>
-            </motion.div>
 
-            {/* Category Filters */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex flex-wrap gap-2 mb-6"
-            >
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`${
-                    selectedCategory === category.id
-                      ? 'bg-purple-500/20 border-purple-400/40 text-purple-300'
-                      : 'bg-black/20 border-purple-500/20 text-gray-400 hover:text-purple-400'
-                  } transition-all`}
-                  data-testid={`button-category-${category.id}`}
+                {/* Category Filters */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="flex flex-wrap gap-2 mb-6 mt-4"
                 >
-                  {category.label}
-                  <Badge variant="secondary" className="ml-2 bg-white/10 text-white text-xs">
-                    {category.count}
-                  </Badge>
-                </Button>
-              ))}
-            </motion.div>
-            {/* Main Feed */}
+                  {categories.map((category) => (
+                    <Button
+                      key={category.id}
+                      variant={selectedCategory === category.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`${
+                        selectedCategory === category.id
+                          ? 'bg-purple-500/20 border-purple-400/40 text-purple-300'
+                          : 'bg-black/20 border-purple-500/20 text-gray-400 hover:text-purple-400'
+                      } transition-all`}
+                      data-testid={`button-category-${category.id}`}
+                    >
+                      {category.label}
+                      <Badge variant="secondary" className="ml-2 bg-white/10 text-white text-xs">
+                        {category.count}
+                      </Badge>
+                    </Button>
+                  ))}
+                </motion.div>
+
+                {/* Main Feed */}
             <TabsContent value="trending" className="mt-0">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -730,6 +729,8 @@ export default function FarcasterActivity() {
                 )}
               </motion.div>
             </TabsContent>
+              </Tabs>
+            </motion.div>
           </div>
 
           {/* Right Sidebar */}
