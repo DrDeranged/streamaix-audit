@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, 
@@ -37,6 +38,8 @@ export default function FarcasterActivity() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [refreshCount, setRefreshCount] = useState(0);
   const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [nextRefreshIn, setNextRefreshIn] = useState(30);
   const { toast } = useToast();
 
   // Handle follow/unfollow functionality
@@ -123,13 +126,28 @@ export default function FarcasterActivity() {
     }
   };
 
-  // Auto-refresh mechanism
+  // Auto-refresh mechanism with countdown
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshCount(prev => prev + 1);
+      setLastUpdate(new Date());
+      setNextRefreshIn(30); // Reset countdown
     }, 30000); // Refresh every 30 seconds
 
-    return () => clearInterval(interval);
+    // Countdown timer for next refresh
+    const countdownInterval = setInterval(() => {
+      setNextRefreshIn(prev => {
+        if (prev <= 1) {
+          return 30; // Reset when reaching 0
+        }
+        return prev - 1;
+      });
+    }, 1000); // Update every second
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(countdownInterval);
+    };
   }, []);
 
   // Fetch trending casts with real-time refresh
@@ -276,16 +294,26 @@ export default function FarcasterActivity() {
                 Discover
               </h1>
               
-              <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-                Live
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                  Live
+                </Badge>
+                <Badge className="bg-green-500/20 text-green-300 text-xs border-green-400/30">
+                  {nextRefreshIn}s
+                </Badge>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleRefresh}
+                onClick={() => {
+                  handleRefresh();
+                  setLastUpdate(new Date());
+                  setNextRefreshIn(30);
+                }}
                 className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all"
                 data-testid="button-refresh"
                 disabled={trendingLoading}
@@ -318,7 +346,18 @@ export default function FarcasterActivity() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-gray-400 text-sm mb-4">Stay updated with the latest in crypto conversations</p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-gray-400 text-sm">Stay updated with the latest in crypto conversations</p>
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
+                  <span>•</span>
+                  <span>Next refresh: {nextRefreshIn}s</span>
+                  <Progress 
+                    value={((30 - nextRefreshIn) / 30) * 100} 
+                    className="w-12 h-1"
+                  />
+                </div>
+              </div>
               
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-3 bg-black/30 backdrop-blur-sm">
