@@ -552,12 +552,12 @@ export function TrendingSocialContent() {
                       <div className="flex items-center space-x-2">
                         <span className="text-lg">{topic.icon || '📈'}</span>
                         <span className="text-sm sm:text-base font-medium text-foreground group-hover:text-purple-300 transition-colors">
-                          {topic.name || `Topic ${index + 1}`}
+                          {topic.topic || topic.name || `Topic ${index + 1}`}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className="text-xs text-muted-foreground">
-                          {topic.count || Math.floor(Math.random() * 500) + 100} posts
+                          {topic.posts || topic.count || Math.floor(Math.random() * 500) + 100} posts
                         </span>
                         <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all" />
                       </div>
