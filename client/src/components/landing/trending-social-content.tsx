@@ -973,10 +973,37 @@ export function TrendingSocialContent() {
   const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'for-you' | 'trending' | 'following'>('trending');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [nextRefreshIn, setNextRefreshIn] = useState(30);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  // Auto-refresh mechanism with countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshCount(prev => prev + 1);
+      setLastUpdate(new Date());
+      setNextRefreshIn(30); // Reset countdown
+    }, 30000); // Refresh every 30 seconds
+
+    // Countdown timer for next refresh
+    const countdownInterval = setInterval(() => {
+      setNextRefreshIn(prev => {
+        if (prev <= 1) {
+          return 30; // Reset when reaching 0
+        }
+        return prev - 1;
+      });
+    }, 1000); // Update every second
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(countdownInterval);
+    };
+  }, []);
   
   // Fetch trending casts for main feed
   const { data: trendingData, isLoading, error } = useQuery({
-    queryKey: ['/api/trending', selectedTopic],
+    queryKey: ['/api/trending', selectedTopic, refreshCount],
     queryFn: () => {
       const params = new URLSearchParams({ limit: '12' });
       if (selectedTopic) params.append('topic', selectedTopic);
@@ -1000,9 +1027,18 @@ export function TrendingSocialContent() {
           className="mb-6"
         >
           <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
-            Discover
+            Live Crypto Intelligence
           </h2>
-          <p className="text-slate-400 text-sm">Stay updated with the latest in crypto conversations</p>
+          <p className="text-slate-400 text-sm">Real-time market insights and social sentiment from Web3's top voices</p>
+          <div className="flex items-center gap-3 mt-3">
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs animate-pulse">
+              <div className="w-1.5 h-1.5 bg-white rounded-full mr-1 animate-ping"></div>
+              Live Data
+            </Badge>
+            <Badge className="bg-purple-500/20 text-purple-300 text-xs">
+              Auto-refresh: 30s
+            </Badge>
+          </div>
         </motion.div>
 
         {/* Tab Navigation */}
