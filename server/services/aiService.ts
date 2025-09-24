@@ -28,9 +28,28 @@ export class AIService {
     language: string;
   }> {
     try {
-      // For now, return mock data structure with error message
-      // This would integrate with video-to-audio extraction service
-      throw new Error('Video transcription requires additional audio processing service');
+      console.log(`🎵 Extracting audio from: ${videoUrl}`);
+      
+      // Extract audio content using ContentExtractor
+      const extractedContent = await ContentExtractor.extractContent(videoUrl);
+      console.log(`✅ Audio extracted successfully: ${extractedContent.title}`);
+      
+      // Transcribe audio using OpenAI Whisper
+      console.log('🎤 Starting transcription with OpenAI Whisper...');
+      const transcriptionResult = await this.transcribeAudio(extractedContent.audioPath);
+      
+      // Clean up temp file
+      try {
+        await fs.unlink(extractedContent.audioPath);
+      } catch (cleanupError) {
+        console.warn('Failed to cleanup temp file:', cleanupError);
+      }
+      
+      return {
+        transcript: transcriptionResult.text,
+        duration: extractedContent.duration,
+        language: transcriptionResult.language || 'en'
+      };
     } catch (error) {
       throw new Error(`Transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -220,7 +239,7 @@ export class AIService {
   /**
    * Transcribe audio file using OpenAI Whisper (using ES modules)
    */
-  private static async transcribeAudio(audioPath: string): Promise<{ text: string; segments?: any[] }> {
+  private static async transcribeAudio(audioPath: string): Promise<{ text: string; language?: string; segments?: any[] }> {
     const client = this.getClient();
     
     try {
@@ -235,6 +254,7 @@ export class AIService {
       
       return {
         text: transcription.text,
+        language: (transcription as any).language || 'en',
         segments: (transcription as any).segments || []
       };
     } catch (error) {
