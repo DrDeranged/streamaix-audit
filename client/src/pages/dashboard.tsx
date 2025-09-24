@@ -617,16 +617,26 @@ export default function Dashboard() {
                           <p className="text-gray-300 text-sm">Follow thought leaders from the Knowledge Avatars section</p>
                           <p className="text-gray-400 text-xs mt-2">to see their curated content here</p>
                         </div>
-                        <Button 
-                          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-                          onClick={() => {
-                            // Scroll to Knowledge Avatars section on landing page
-                            window.location.href = '/#profiles';
-                          }}
-                        >
-                          <Users className="h-4 w-4 mr-2" />
-                          Discover Knowledge Avatars
-                        </Button>
+                        <div className="space-y-3">
+                          <Button 
+                            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                            onClick={() => {
+                              // Scroll to Knowledge Avatars section on landing page
+                              window.location.href = '/#profiles';
+                            }}
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            Discover Knowledge Avatars
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            className="w-full border-purple-400/30 text-purple-300 hover:bg-purple-500/10"
+                            onClick={() => setLocation('/content-library')}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Browse All Content
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
 

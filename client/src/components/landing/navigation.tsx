@@ -70,9 +70,9 @@ export function Navigation() {
               >
                 Bounties
               </button>
-              <Link href="/discover">
+              <Link href="/content-library">
                 <button className="text-muted-foreground hover:text-indigo-500 transition-colors">
-                  Discover
+                  Library
                 </button>
               </Link>
               
@@ -107,8 +107,8 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/discover" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
-                          Discover
+                        <Link href="/content-library" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                          Content Library
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
