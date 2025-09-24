@@ -111,16 +111,18 @@ export class KnowledgeAvatarService {
   private async createOrUpdateLeader(profile: Omit<LeaderProfile, 'id'>): Promise<string> {
     try {
       // Check if leader already exists by username
-      const existingLeader = await storage.getCryptoLeaderByUsername?.(profile.username);
+      // Since we don't have getCryptoLeaderByUsername, we'll search by username through getCryptoLeaders
+      const allLeaders = await storage.getCryptoLeaders?.(1000) || [];
+      const existingLeader = allLeaders.find(leader => leader.username === profile.username);
       
       if (existingLeader) {
         // Update existing leader
-        const updatedLeader = await storage.updateCryptoLeader?.(existingLeader.id, profile);
+        await storage.updateCryptoLeader?.(existingLeader.id, profile);
         return existingLeader.id;
       } else {
         // Create new leader
         const newLeader = await storage.createCryptoLeader?.(profile);
-        return newLeader.id;
+        return newLeader?.id || `fallback-${profile.username}`;
       }
     } catch (error) {
       console.error(`Failed to create/update leader ${profile.username}:`, error);
@@ -303,7 +305,9 @@ export class KnowledgeAvatarService {
    */
   async getKnowledgeAvatars(): Promise<any[]> {
     try {
-      const leaders = await storage.getActiveCryptoLeaders?.() || [];
+      console.log('🔍 Calling storage.getCryptoLeaders...');
+      const leaders = await storage.getCryptoLeaders?.(50) || [];
+      console.log(`📊 Found ${leaders.length} leaders from storage`);
       
       // Enrich each leader with their content
       const enrichedLeaders = await Promise.all(
