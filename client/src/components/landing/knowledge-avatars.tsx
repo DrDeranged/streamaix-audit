@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bookmark, Heart, Share2, Plus, MessageCircle, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Bookmark, Heart, Share2, Plus, MessageCircle, User, Play, ExternalLink, BookOpen, TrendingUp, Brain, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface KnowledgeAvatar {
   id: string;
@@ -46,6 +49,10 @@ const iconMap = {
 };
 
 export function KnowledgeAvatars() {
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [followedAvatars, setFollowedAvatars] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
   const { data: avatarsData, isLoading, error } = useQuery({
     queryKey: ['/api/knowledge-avatars'],
     queryFn: async () => {
@@ -59,6 +66,35 @@ export function KnowledgeAvatars() {
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
+
+  const handleFollowKnowledgeTrail = (profile: KnowledgeAvatar) => {
+    const isFollowing = followedAvatars.has(profile.id);
+    const newFollowed = new Set(followedAvatars);
+    
+    if (isFollowing) {
+      newFollowed.delete(profile.id);
+      toast({
+        title: "Unfollowed",
+        description: `You're no longer following ${profile.displayName}'s knowledge trail.`,
+      });
+    } else {
+      newFollowed.add(profile.id);
+      toast({
+        title: "Following!",
+        description: `You're now following ${profile.displayName}'s knowledge trail. Discover their curated insights!`,
+      });
+    }
+    
+    setFollowedAvatars(newFollowed);
+  };
+
+  const handleExploreContent = (profile: KnowledgeAvatar) => {
+    setSelectedAvatar(selectedAvatar === profile.id ? null : profile.id);
+    toast({
+      title: "Content Explorer",
+      description: `Exploring ${profile.displayName}'s knowledge base and AI-processed insights.`,
+    });
+  };
 
   // Get gradient for each avatar based on their role
   const getGradient = (role: string) => {
@@ -112,17 +148,28 @@ export function KnowledgeAvatars() {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <Card className="bg-card border-glass-border shadow-xl overflow-hidden">
+                <Card className={`bg-card border-glass-border shadow-xl overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-2xl hover:scale-105 ${
+                  selectedAvatar === profile.id ? 'ring-2 ring-indigo-500 scale-105' : ''
+                }`}
+                onClick={() => handleExploreContent(profile)}>
                   <div className="relative">
                     <div className={`h-24 bg-gradient-to-r ${getGradient(profile.role)}`} />
                     <div className="absolute -bottom-8 left-6">
                       <img 
                         src={profile.pfpUrl} 
                         alt={`${profile.displayName} avatar`} 
-                        className="w-16 h-16 rounded-full border-4 border-card object-cover"
+                        className="w-16 h-16 rounded-full border-4 border-card object-cover hover:scale-110 transition-transform"
                         data-testid={`img-avatar-${profile.username}`}
                       />
                     </div>
+                    {followedAvatars.has(profile.id) && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-green-500 text-white">
+                          <Heart className="w-3 h-3 mr-1" />
+                          Following
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                   
                   <CardContent className="pt-12 p-6">
@@ -187,11 +234,93 @@ export function KnowledgeAvatars() {
                       </div>
                     </div>
                     
+                    {/* Expanded Content Preview */}
+                    {selectedAvatar === profile.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-4 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700"
+                      >
+                        <h5 className="font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center gap-2">
+                          <Brain className="w-4 h-4" />
+                          AI-Curated Knowledge
+                        </h5>
+                        
+                        {/* Top Resources Preview */}
+                        <div className="space-y-2 mb-4">
+                          {profile.resources.slice(0, 2).map((resource, idx) => (
+                            <div key={idx} className="p-2 bg-background/50 rounded-md border border-indigo-200 dark:border-indigo-700">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-foreground">{resource.title}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {resource.resourceType}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">{resource.description}</p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                                  {resource.difficulty}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">Priority: {resource.priority}/5</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Key Takeaways */}
+                        <div className="mb-4">
+                          <h6 className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-2 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" />
+                            Key Insights
+                          </h6>
+                          <div className="space-y-1">
+                            {profile.keyTakeaways.slice(0, 2).map((takeaway, idx) => (
+                              <div key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                <span className="text-indigo-500 text-xs mt-1">•</span>
+                                <span>{takeaway}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Content Actions */}
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" className="flex-1 text-xs">
+                            <BookOpen className="w-3 h-3 mr-1" />
+                            Browse Content
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1 text-xs">
+                            <Play className="w-3 h-3 mr-1" />
+                            AI Summary
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+
                     <Button 
-                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-300"
+                      className={`w-full transition-all duration-300 ${
+                        followedAvatars.has(profile.id)
+                          ? 'bg-green-500 hover:bg-green-600 text-white'
+                          : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFollowKnowledgeTrail(profile);
+                      }}
                       data-testid={`button-follow-${profile.username}`}
                     >
-                      Follow Knowledge Trail
+                      {followedAvatars.has(profile.id) ? (
+                        <>
+                          <Heart className="w-4 h-4 mr-2" />
+                          Following Trail
+                        </>
+                      ) : (
+                        <>
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          Follow Knowledge Trail
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
