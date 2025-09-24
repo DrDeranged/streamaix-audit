@@ -103,7 +103,7 @@ export function KnowledgeAvatars() {
             <p className="text-muted-foreground text-sm">Please try refreshing the page</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {profiles.map((profile, index) => (
               <motion.div
                 key={profile.id}

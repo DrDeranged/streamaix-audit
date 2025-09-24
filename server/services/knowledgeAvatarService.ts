@@ -93,11 +93,147 @@ export class KnowledgeAvatarService {
         isActive: true
       });
 
-      // Populate content for Naval
+      // Balaji Srinivasan - Technologist & Former Coinbase CTO
+      const balajiId = await this.createOrUpdateLeader({
+        fid: 1267,
+        username: 'balajis.eth',
+        displayName: 'Balaji Srinivasan',
+        bio: 'Former CTO of Coinbase, General Partner at a16z. Author of "The Network State". Technologist and crypto thought leader.',
+        pfpUrl: '/assets/balaji-avatar.svg',
+        followerCount: 1600000,
+        followingCount: 800,
+        ecosystem: ['crypto', 'tech', 'governance', 'startups'],
+        role: 'Technologist & Investor',
+        expertise: ['Crypto Economics', 'Network States', 'Decentralization', 'Technology Trends'],
+        keyTakeaways: [
+          'The future is decentralized - crypto enables exit over voice',
+          'Network states will compete with nation states for governance',
+          'Technology and truth are the ultimate arbiters of reality',
+          'Build parallel institutions rather than reform existing ones',
+          'The internet enables unprecedented coordination without coercion'
+        ],
+        isActive: true
+      });
+
+      // Marc Andreessen - a16z Co-founder
+      const marcId = await this.createOrUpdateLeader({
+        fid: 745,
+        username: 'pmarca',
+        displayName: 'Marc Andreessen',
+        bio: 'Co-founder of Andreessen Horowitz (a16z). Co-founded Netscape. Tech visionary and venture capitalist.',
+        pfpUrl: '/assets/marc-avatar.svg',
+        followerCount: 1000000,
+        followingCount: 1200,
+        ecosystem: ['venture-capital', 'tech', 'startups', 'crypto'],
+        role: 'Venture Capitalist',
+        expertise: ['Venture Capital', 'Software', 'Internet Infrastructure', 'Tech Strategy'],
+        keyTakeaways: [
+          'Software is eating the world - every industry will be digitized',
+          'The best startups solve real problems with elegant technical solutions',
+          'Technology trends are more predictable than market timing',
+          'Bold bets on contrarian ideas generate the highest returns',
+          'The internet creates winner-take-all dynamics in many markets'
+        ],
+        isActive: true
+      });
+
+      // Tim Ferriss - Entrepreneur & Author
+      const timId = await this.createOrUpdateLeader({
+        fid: 2890,
+        username: 'tferriss',
+        displayName: 'Tim Ferriss',
+        bio: 'Author of "4-Hour Workweek", angel investor, podcaster. Host of The Tim Ferriss Show.',
+        pfpUrl: '/assets/tim-avatar.svg',
+        followerCount: 2200000,
+        followingCount: 400,
+        ecosystem: ['productivity', 'investing', 'wellness', 'startups'],
+        role: 'Entrepreneur & Author',
+        expertise: ['Productivity Optimization', 'Angel Investing', 'Biohacking', 'Learning Acceleration'],
+        keyTakeaways: [
+          'Focus on high-impact activities that produce disproportionate results',
+          'Question assumptions and test everything empirically',
+          'Lifestyle design is more important than traditional career paths',
+          'Learn from world-class performers in every domain',
+          'Automation and delegation enable lifestyle freedom'
+        ],
+        isActive: true
+      });
+
+      // Cathie Wood - ARK Invest Founder
+      const cathieId = await this.createOrUpdateLeader({
+        fid: 3445,
+        username: 'cathiewood',
+        displayName: 'Cathie Wood',
+        bio: 'Founder & CEO of ARK Invest. Pioneer in disruptive innovation investing. Focus on transformative technologies.',
+        pfpUrl: '/assets/cathie-avatar.svg',
+        followerCount: 1800000,
+        followingCount: 600,
+        ecosystem: ['innovation', 'investing', 'tech', 'genomics'],
+        role: 'Innovation Investor',
+        expertise: ['Disruptive Innovation', 'Technology Investing', 'Genomics', 'AI/Robotics'],
+        keyTakeaways: [
+          'Convergence of technologies creates exponential innovation opportunities',
+          'Disruptive innovations follow predictable cost decline curves',
+          'Traditional valuation methods fail for exponential technologies',
+          'Portfolio concentration in high-conviction ideas beats diversification',
+          'Innovation solves problems and creates massive economic value'
+        ],
+        isActive: true
+      });
+
+      // Reid Hoffman - LinkedIn Founder
+      const reidId = await this.createOrUpdateLeader({
+        fid: 1156,
+        username: 'reidhoffman',
+        displayName: 'Reid Hoffman',
+        bio: 'Co-founder of LinkedIn, Partner at Greylock Partners. Pioneer of professional networking and platform businesses.',
+        pfpUrl: '/assets/reid-avatar.svg',
+        followerCount: 3200000,
+        followingCount: 900,
+        ecosystem: ['networking', 'platforms', 'venture-capital', 'ai'],
+        role: 'Platform Pioneer & VC',
+        expertise: ['Network Effects', 'Platform Strategy', 'Venture Capital', 'AI Ethics'],
+        keyTakeaways: [
+          'Network effects create the most defensible business moats',
+          'Platforms that connect people create exponential value',
+          'Start with a niche and expand methodically to adjacent markets',
+          'Speed and scale matter more than perfection in platform businesses',
+          'AI will augment human intelligence rather than replace it'
+        ],
+        isActive: true
+      });
+
+      // Chamath Palihapitiya - Social Capital Founder
+      const chamathId = await this.createOrUpdateLeader({
+        fid: 2167,
+        username: 'chamath',
+        displayName: 'Chamath Palihapitiya',
+        bio: 'Founder of Social Capital, former Facebook VP. SPAC pioneer and contrarian investor.',
+        pfpUrl: '/assets/chamath-avatar.svg',
+        followerCount: 1700000,
+        followingCount: 300,
+        ecosystem: ['investing', 'spacs', 'crypto', 'climate'],
+        role: 'Contrarian Investor',
+        expertise: ['Growth Investing', 'SPACs', 'Climate Tech', 'Contrarian Analysis'],
+        keyTakeaways: [
+          'Follow the data, not the narrative - numbers reveal truth',
+          'Climate change is the biggest investment opportunity of our lifetime',
+          'Traditional institutions often perpetuate inequality',
+          'Contrarian positions require conviction and patience',
+          'Capital allocation determines civilization outcomes'
+        ],
+        isActive: true
+      });
+
+      // Populate content for all profiles
       await this.populateNavalContent(navalId);
-      
-      // Populate content for Vitalik
       await this.populateVitalikContent(vitalikId);
+      await this.populateBalajiContent(balajiId);
+      await this.populateMarcContent(marcId);
+      await this.populateTimContent(timId);
+      await this.populateCathieContent(cathieId);
+      await this.populateReidContent(reidId);
+      await this.populateChamathContent(chamathId);
 
       console.log('✅ Knowledge Avatars initialized successfully');
     } catch (error) {
@@ -110,22 +246,37 @@ export class KnowledgeAvatarService {
    */
   private async createOrUpdateLeader(profile: Omit<LeaderProfile, 'id'>): Promise<string> {
     try {
+      console.log(`🔍 Processing leader: ${profile.username}`);
+      
       // Check if leader already exists by username
-      // Since we don't have getCryptoLeaderByUsername, we'll search by username through getCryptoLeaders
       const allLeaders = await storage.getCryptoLeaders?.(1000) || [];
+      console.log(`📊 Found ${allLeaders.length} existing leaders in database`);
+      
       const existingLeader = allLeaders.find(leader => leader.username === profile.username);
       
       if (existingLeader) {
-        // Update existing leader
+        console.log(`🔄 Updating existing leader: ${profile.username} (ID: ${existingLeader.id})`);
         await storage.updateCryptoLeader?.(existingLeader.id, profile);
         return existingLeader.id;
       } else {
-        // Create new leader
-        const newLeader = await storage.createCryptoLeader?.(profile);
-        return newLeader?.id || `fallback-${profile.username}`;
+        console.log(`🆕 Creating new leader: ${profile.username}`);
+        
+        if (!storage.createCryptoLeader) {
+          throw new Error('storage.createCryptoLeader method is not available');
+        }
+        
+        const newLeader = await storage.createCryptoLeader(profile);
+        console.log(`✅ Created leader with ID: ${newLeader?.id}`);
+        
+        if (!newLeader?.id) {
+          throw new Error('Failed to get ID from created leader');
+        }
+        
+        return newLeader.id;
       }
     } catch (error) {
-      console.error(`Failed to create/update leader ${profile.username}:`, error);
+      console.error(`❌ Failed to create/update leader ${profile.username}:`, error);
+      console.error('Full error details:', error);
       // Return mock ID for now if database operations fail
       return `mock-${profile.username}-id`;
     }
@@ -339,6 +490,264 @@ export class KnowledgeAvatarService {
       
       // Return hardcoded data as fallback
       return this.getFallbackAvatars();
+    }
+  }
+
+  /**
+   * Populate Balaji's content resources
+   */
+  private async populateBalajiContent(leaderId: string): Promise<void> {
+    const balajiResources: Omit<ContentResource, 'id' | 'leaderId'>[] = [
+      {
+        title: 'The Network State',
+        url: 'https://thenetworkstate.com/',
+        description: 'Balaji\'s book on how online communities can form new countries.',
+        resourceType: 'book',
+        difficulty: 'advanced',
+        priority: 1,
+        topics: ['network-states', 'governance', 'crypto', 'decentralization']
+      },
+      {
+        title: 'Balaji on Lex Fridman Podcast',
+        url: 'https://lexfridman.com/balaji-srinivasan/',
+        description: 'Deep dive into network states, crypto, and the future of governance.',
+        resourceType: 'podcast',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['network-states', 'crypto', 'governance', 'technology']
+      },
+      {
+        title: 'How to Start a New Country',
+        url: 'https://www.youtube.com/watch?v=cOubCHLXT6A',
+        description: 'Balaji\'s framework for creating new forms of governance.',
+        resourceType: 'video',
+        difficulty: 'intermediate',
+        priority: 2,
+        topics: ['governance', 'startups', 'crypto', 'policy']
+      }
+    ];
+
+    for (const resource of balajiResources) {
+      try {
+        await storage.createLearningResource?.({ ...resource, leaderId });
+      } catch (error) {
+        console.log(`Could not create resource "${resource.title}": Database method not available`);
+      }
+    }
+  }
+
+  /**
+   * Populate Marc's content resources  
+   */
+  private async populateMarcContent(leaderId: string): Promise<void> {
+    const marcResources: Omit<ContentResource, 'id' | 'leaderId'>[] = [
+      {
+        title: 'Why Software Is Eating the World',
+        url: 'https://a16z.com/2011/08/20/why-software-is-eating-the-world/',
+        description: 'Marc\'s famous essay on software transformation of industries.',
+        resourceType: 'article',
+        difficulty: 'beginner',
+        priority: 1,
+        topics: ['software', 'digital-transformation', 'venture-capital']
+      },
+      {
+        title: 'The pmarca Guide to Startups',
+        url: 'https://pmarchive.com/',
+        description: 'Comprehensive guide to building and scaling startups.',
+        resourceType: 'article',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['startups', 'product-market-fit', 'venture-capital']
+      },
+      {
+        title: 'Marc Andreessen on The Joe Rogan Experience',
+        url: 'https://open.spotify.com/episode/4kMKwKhJ0xrCv1fNNyQQjt',
+        description: 'Discussion on AI, crypto, and the future of technology.',
+        resourceType: 'podcast',
+        difficulty: 'beginner',
+        priority: 2,
+        topics: ['ai', 'crypto', 'technology', 'venture-capital']
+      }
+    ];
+
+    for (const resource of marcResources) {
+      try {
+        await storage.createLearningResource?.({ ...resource, leaderId });
+      } catch (error) {
+        console.log(`Could not create resource "${resource.title}": Database method not available`);
+      }
+    }
+  }
+
+  /**
+   * Populate Tim's content resources
+   */
+  private async populateTimContent(leaderId: string): Promise<void> {
+    const timResources: Omit<ContentResource, 'id' | 'leaderId'>[] = [
+      {
+        title: 'The 4-Hour Workweek',
+        url: 'https://tim.blog/4-hour-workweek/',
+        description: 'Tim\'s breakthrough book on lifestyle design and automation.',
+        resourceType: 'book',
+        difficulty: 'beginner',
+        priority: 1,
+        topics: ['productivity', 'lifestyle-design', 'automation', 'entrepreneurship']
+      },
+      {
+        title: 'The Tim Ferriss Show',
+        url: 'https://tim.blog/podcast/',
+        description: 'World-class performers sharing their tactics and routines.',
+        resourceType: 'podcast',
+        difficulty: 'beginner',
+        priority: 1,
+        topics: ['productivity', 'performance', 'learning', 'biohacking']
+      },
+      {
+        title: 'Tools of Titans',
+        url: 'https://toolsoftitans.com/',
+        description: 'Tactics, routines, and habits of world-class performers.',
+        resourceType: 'book',
+        difficulty: 'intermediate',
+        priority: 2,
+        topics: ['productivity', 'biohacking', 'performance', 'learning']
+      }
+    ];
+
+    for (const resource of timResources) {
+      try {
+        await storage.createLearningResource?.({ ...resource, leaderId });
+      } catch (error) {
+        console.log(`Could not create resource "${resource.title}": Database method not available`);
+      }
+    }
+  }
+
+  /**
+   * Populate Cathie's content resources
+   */
+  private async populateCathieContent(leaderId: string): Promise<void> {
+    const cathieResources: Omit<ContentResource, 'id' | 'leaderId'>[] = [
+      {
+        title: 'ARK Invest Big Ideas Report',
+        url: 'https://ark-invest.com/big-ideas/',
+        description: 'Annual research on breakthrough technologies and their market potential.',
+        resourceType: 'article',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['innovation', 'technology', 'investing', 'research']
+      },
+      {
+        title: 'Cathie Wood on Invest Like the Best',
+        url: 'https://investlikethebest.com/cathie-wood/',
+        description: 'Discussion on disruptive innovation and investment philosophy.',
+        resourceType: 'podcast',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['investing', 'innovation', 'technology', 'disruptive-innovation']
+      },
+      {
+        title: 'The Convergence of Technologies',
+        url: 'https://ark-invest.com/research/',
+        description: 'Research on how AI, robotics, genomics, and other technologies converge.',
+        resourceType: 'article',
+        difficulty: 'advanced',
+        priority: 2,
+        topics: ['ai', 'robotics', 'genomics', 'convergence']
+      }
+    ];
+
+    for (const resource of cathieResources) {
+      try {
+        await storage.createLearningResource?.({ ...resource, leaderId });
+      } catch (error) {
+        console.log(`Could not create resource "${resource.title}": Database method not available`);
+      }
+    }
+  }
+
+  /**
+   * Populate Reid's content resources
+   */
+  private async populateReidContent(leaderId: string): Promise<void> {
+    const reidResources: Omit<ContentResource, 'id' | 'leaderId'>[] = [
+      {
+        title: 'Blitzscaling',
+        url: 'https://www.blitzscaling.com/',
+        description: 'Reid\'s book on rapidly scaling companies in competitive markets.',
+        resourceType: 'book',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['scaling', 'startups', 'strategy', 'network-effects']
+      },
+      {
+        title: 'Masters of Scale Podcast',
+        url: 'https://mastersofscale.com/',
+        description: 'Reid\'s podcast on how companies grow from zero to massive scale.',
+        resourceType: 'podcast',
+        difficulty: 'beginner',
+        priority: 1,
+        topics: ['scaling', 'entrepreneurship', 'leadership', 'strategy']
+      },
+      {
+        title: 'The Start-up of You',
+        url: 'https://www.thestartupofyou.com/',
+        description: 'Career strategy in the age of uncertainty and disruption.',
+        resourceType: 'book',
+        difficulty: 'beginner',
+        priority: 2,
+        topics: ['career', 'networking', 'strategy', 'adaptability']
+      }
+    ];
+
+    for (const resource of reidResources) {
+      try {
+        await storage.createLearningResource?.({ ...resource, leaderId });
+      } catch (error) {
+        console.log(`Could not create resource "${resource.title}": Database method not available`);
+      }
+    }
+  }
+
+  /**
+   * Populate Chamath's content resources
+   */
+  private async populateChamathContent(leaderId: string): Promise<void> {
+    const chamathResources: Omit<ContentResource, 'id' | 'leaderId'>[] = [
+      {
+        title: 'All-In Podcast',
+        url: 'https://www.allinpodcast.co/',
+        description: 'Weekly discussions on markets, tech, politics, and investing.',
+        resourceType: 'podcast',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['investing', 'markets', 'technology', 'economics']
+      },
+      {
+        title: 'Chamath at Stanford',
+        url: 'https://www.youtube.com/watch?v=59uTUpO8Dzw',
+        description: 'Lecture on growth, metrics, and product-market fit.',
+        resourceType: 'video',
+        difficulty: 'intermediate',
+        priority: 1,
+        topics: ['growth', 'metrics', 'product-market-fit', 'startups']
+      },
+      {
+        title: 'Climate Capital Manifesto',
+        url: 'https://socialcapital.com/climate/',
+        description: 'Chamath\'s thesis on climate tech investing and carbon markets.',
+        resourceType: 'article',
+        difficulty: 'advanced',
+        priority: 2,
+        topics: ['climate-tech', 'investing', 'carbon-markets', 'sustainability']
+      }
+    ];
+
+    for (const resource of chamathResources) {
+      try {
+        await storage.createLearningResource?.({ ...resource, leaderId });
+      } catch (error) {
+        console.log(`Could not create resource "${resource.title}": Database method not available`);
+      }
     }
   }
 
