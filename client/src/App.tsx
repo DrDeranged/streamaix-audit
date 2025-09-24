@@ -111,6 +111,8 @@ function Router() {
         </Suspense>
       </Route>
       
+      <Route path="/discover" component={Landing} />
+      
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />
     </Switch>

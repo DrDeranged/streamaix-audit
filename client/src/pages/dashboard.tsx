@@ -634,7 +634,7 @@ export default function Dashboard() {
                             onClick={() => setLocation('/content-library')}
                           >
                             <FileText className="h-4 w-4 mr-2" />
-                            Browse All Content
+                            Content Library
                           </Button>
                         </div>
                       </CardContent>

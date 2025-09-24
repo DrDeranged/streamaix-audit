@@ -238,5 +238,149 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Authentication endpoints
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({
+          error: 'Username and password are required'
+        });
+      }
+
+      // Check user credentials manually for now
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({
+          error: 'Invalid credentials'
+        });
+      }
+      
+      const isValidPassword = await AuthService.comparePassword(password, user.password || '');
+      if (!isValidPassword) {
+        return res.status(401).json({
+          error: 'Invalid credentials'
+        });
+      }
+      
+      const token = AuthService.generateToken({ id: user.id, username: user.username });
+      const result = { success: true, user, token };
+
+      res.json({
+        success: true,
+        user: result.user,
+        token: result.token
+      });
+    } catch (error: any) {
+      console.error('Login error:', error);
+      res.status(500).json({
+        error: 'Login failed',
+        message: error.message
+      });
+    }
+  });
+
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+      
+      if (!username || !email || !password) {
+        return res.status(400).json({
+          error: 'Username, email, and password are required'
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({
+          error: 'Username already exists'
+        });
+      }
+      
+      const hashedPassword = await AuthService.hashPassword(password);
+      
+      const user = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        authProvider: 'local'
+      });
+      
+      const token = AuthService.generateToken({ id: user.id, username: user.username });
+      const result = { success: true, user, token };
+
+      res.json({
+        success: true,
+        user: result.user,
+        token: result.token
+      });
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      res.status(500).json({
+        error: 'Registration failed',
+        message: error.message
+      });
+    }
+  });
+
+  // Add missing public summaries endpoint for live content demo
+  app.get('/api/summaries/public', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const summaries = await storage.getSummaries(limit);
+      
+      // Filter to only public summaries and add demo data if needed
+      const publicSummaries = summaries.filter(s => s.isPublic);
+      
+      // If no summaries, return demo data for the live demo
+      if (publicSummaries.length === 0) {
+        const demoSummaries = [
+          {
+            id: 'demo-1',
+            title: 'Bitcoin Market Analysis - Crypto Weekly Update',
+            summary: 'Deep dive into Bitcoin price movements and institutional adoption trends.',
+            platform: 'YouTube',
+            contentType: 'video',
+            processingStatus: 'completed',
+            accuracy: 94,
+            createdAt: new Date().toISOString(),
+            tags: ['bitcoin', 'analysis', 'crypto']
+          },
+          {
+            id: 'demo-2',
+            title: 'DeFi Protocol Security Deep Dive',
+            summary: 'Comprehensive analysis of smart contract vulnerabilities and security best practices.',
+            platform: 'Podcast',
+            contentType: 'audio',
+            processingStatus: 'completed',
+            accuracy: 91,
+            createdAt: new Date().toISOString(),
+            tags: ['defi', 'security', 'smartcontracts']
+          }
+        ];
+        
+        return res.json({
+          success: true,
+          summaries: demoSummaries,
+          count: demoSummaries.length
+        });
+      }
+
+      res.json({
+        success: true,
+        summaries: publicSummaries,
+        count: publicSummaries.length
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch public summaries:', error);
+      res.status(500).json({
+        error: 'Failed to fetch public summaries',
+        message: error.message
+      });
+    }
+  });
+
   return server;
 }
