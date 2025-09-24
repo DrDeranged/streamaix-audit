@@ -626,29 +626,10 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       return await this.aggregateTrendingFromFids(getTopFids(50), limit);
     }
   }
-        {
-          hash: '0xb1c2d3e4f5a6',
-          text: 'DeFi yields are back! Seeing 8-12% APY on stablecoin pairs across major protocols. The risk-adjusted returns are finally making sense again',
-          author: {
-            display_name: 'Yield Farmer',
-            username: 'yieldfarmer',
-            pfp_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-            fid: 23456
-          },
-          timestamp: new Date(Date.now() - Math.random() * 3 * 60 * 60 * 1000).toISOString(),
-          reactions: { likes_count: 156, recasts_count: 43 },
-          replies: { count: 71 }
-        },
-        // L2 Scaling content
-        {
-          hash: '0xc2d3e4f5a6b7', 
-          text: 'Layer 2 solutions are processing 10x more transactions than Ethereum mainnet. Base, Arbitrum, and Polygon are leading the scaling revolution 🚀',
-          author: {
-            display_name: 'L2 Researcher',
-            username: 'l2research',
-            pfp_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-            fid: 34567
-          },
+
+  /**
+   * Test connection to Farcaster Hub API
+   */
           timestamp: new Date(Date.now() - Math.random() * 4 * 60 * 60 * 1000).toISOString(),
           reactions: { likes_count: 189, recasts_count: 52 },
           replies: { count: 94 }

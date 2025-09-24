@@ -187,12 +187,19 @@ export function TrendingSocialContent() {
     }
   ];
   
-  // Mock suggested users data
-  const suggestedUsers = [
-    { fid: 3, username: 'dwr.eth', displayName: 'Dan Romero', pfp: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face' },
-    { fid: 5650, username: 'vitalik.eth', displayName: 'Vitalik Buterin', pfp: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
-    { fid: 239, username: 'balajis.eth', displayName: 'Balaji', pfp: 'https://images.unsplash.com/photo-1494790108755-2616b612b131?w=100&h=100&fit=crop&crop=face' }
-  ];
+  // NO MOCK DATA - Get real suggested users from Hub API
+  const { data: topAccounts = [] } = useQuery({
+    queryKey: ['/api/farcaster/top-accounts'],
+    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+  
+  const suggestedUsers = topAccounts.slice(0, 3).map((account: any) => ({
+    fid: account.fid,
+    username: account.username,
+    displayName: account.display_name || account.displayName,
+    pfp: account.pfp_url || account.pfpUrl || `https://api.dicebear.com/6.x/avataaars/svg?seed=${account.username}`
+  }));
 
   return (
     <section id="live-crypto-intelligence" className="py-12 sm:py-20 bg-gradient-to-b from-slate-900/50 to-purple-900/30">
