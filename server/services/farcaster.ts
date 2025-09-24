@@ -630,49 +630,21 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
   /**
    * Test connection to Farcaster Hub API
    */
-          timestamp: new Date(Date.now() - Math.random() * 4 * 60 * 60 * 1000).toISOString(),
-          reactions: { likes_count: 189, recasts_count: 52 },
-          replies: { count: 94 }
-        },
-        {
-          hash: '0xd3e4f5a6b7c8',
-          text: 'Base chain TVL just crossed $8B! Coinbase really nailed the L2 execution. The ecosystem is thriving with 200+ active dApps',
-          author: {
-            display_name: 'Base Builder',
-            username: 'basebuilder',
-            pfp_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b131?w=100&h=100&fit=crop&crop=face', 
-            fid: 45678
-          },
-          timestamp: new Date(Date.now() - Math.random() * 5 * 60 * 60 * 1000).toISOString(),
-          reactions: { likes_count: 267, recasts_count: 78 },
-          replies: { count: 112 }
-        },
-        // AI x Crypto content
-        {
-          hash: '0xe4f5a6b7c8d9',
-          text: 'AI agents are revolutionizing DeFi strategies. My bot generated 23% returns last month using machine learning algorithms for yield optimization 🤖',
-          author: {
-            display_name: 'AI Trader',
-            username: 'aitrader',
-            pfp_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-            fid: 56789
-          },
-          timestamp: new Date(Date.now() - Math.random() * 6 * 60 * 60 * 1000).toISOString(),
-          reactions: { likes_count: 312, recasts_count: 89 },
-          replies: { count: 156 }
-        },
-        {
-          hash: '0xf5a6b7c8d9e0',
-          text: 'GPT-4 powered trading signals are outperforming traditional analysis by 40%. The intersection of AI and crypto is just getting started',
-          author: {
-            display_name: 'ML Researcher', 
-            username: 'mlresearch',
-            pfp_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-            fid: 67890
-          },
-          timestamp: new Date(Date.now() - Math.random() * 7 * 60 * 60 * 1000).toISOString(),
-          reactions: { likes_count: 198, recasts_count: 54 },
-          replies: { count: 87 }
+  async testConnection(): Promise<boolean> {
+    console.log('🔗 Testing Hub API connection...');
+    try {
+      // Test Hub endpoint connectivity
+      const response = await axios.get(`${getActiveHub()}/v1/info`, { timeout: 5000 });
+      console.log('✅ Hub API connection successful');
+      return true;
+    } catch (error) {
+      console.error('❌ Hub API connection failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clean up method - end of class
         },
         // NFT Market content
         {
