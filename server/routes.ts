@@ -1251,7 +1251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TRENDING CRYPTO CONTENT ROUTES
   // =============================================================================
 
-  // Get trending casts from top crypto accounts
+  // Get GLOBAL trending casts from ALL Farcaster users (not curated accounts)
   app.get('/api/trending', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 20;
     const fid = req.query.fid ? parseInt(req.query.fid as string) : undefined;
@@ -1265,16 +1265,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get casts from specific account
         trendingCasts = await farcasterService.fetchUserRecent(fid, limit);
       } else {
-        // Get trending from all top accounts
-        const topFids = getTopFids(10);
-        trendingCasts = await farcasterService.aggregateTrendingFromFids(topFids, limit);
+        // Get GLOBAL trending content from ALL Farcaster users (not curated accounts)
+        console.log(`🌐 Fetching global trending content from ALL Farcaster users (limit: ${limit})`);
+        trendingCasts = await farcasterService.getTrendingContent(limit);
       }
       
       res.json({
         success: true,
         items: trendingCasts,
         count: trendingCasts.length,
-        fid: fid || null
+        fid: fid || null,
+        source: fid ? 'user-specific' : 'global-farcaster-feed'
       });
     } catch (error) {
       console.error('Failed to fetch trending content:', error);

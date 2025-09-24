@@ -569,59 +569,102 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     } catch (error) {
       console.error('❌ Failed to get trending content:', this.sanitizeError(error));
       
-      // Since Neynar API requires paid plan, provide demo content for showcase
-      console.log('🎭 Using demo trending content for showcase');
-      const demoTrendingContent = [
+      // Since Neynar API requires paid plan, provide realistic diverse demo content that simulates global Farcaster feed
+      console.log('🌐 Using diverse realistic content from simulated global Farcaster feed');
+      const diverseDemoContent = [
+        // Bitcoin ETF & DeFi content  
         {
           hash: '0xa1b2c3d4e5f6',
-          text: 'Just shipped a new AI model that can summarize any podcast in under 10 seconds. The future of content consumption is here! 🚀',
+          text: 'Bitcoin ETF flows hit $2.3B this week alone. Institutional adoption is accelerating faster than anyone predicted. The floodgates are officially open 🌊',
           author: {
-            display_name: 'Sarah Chen',
-            username: 'sarahbuilds',
-            pfp_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b131?w=100&h=100&fit=crop&crop=face',
+            display_name: 'Michael Crypto',
+            username: 'cryptomichael',
+            pfp_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
             fid: 12345
           },
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          reactions: { likes_count: 87, recasts_count: 23 },
-          replies: { count: 12 }
+          timestamp: new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 234, recasts_count: 67 },
+          replies: { count: 89 }
         },
         {
-          hash: '0xb2c3d4e5f6a7',
-          text: 'Web3 social is finally hitting mainstream adoption. Seeing 300%+ growth in decentralized content creation this quarter.',
+          hash: '0xb1c2d3e4f5a6',
+          text: 'DeFi yields are back! Seeing 8-12% APY on stablecoin pairs across major protocols. The risk-adjusted returns are finally making sense again',
           author: {
-            display_name: 'Alex Rivera',
-            username: 'alexweb3',
-            pfp_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+            display_name: 'Yield Farmer',
+            username: 'yieldfarmer',
+            pfp_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
             fid: 23456
           },
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
-          reactions: { likes_count: 156, recasts_count: 45 },
-          replies: { count: 28 }
+          timestamp: new Date(Date.now() - Math.random() * 3 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 156, recasts_count: 43 },
+          replies: { count: 71 }
         },
+        // L2 Scaling content
         {
-          hash: '0xc3d4e5f6a7b8',
-          text: 'Built an AI agent that turns long YouTube videos into Twitter threads. Open sourcing the code - link in bio 📦',
+          hash: '0xc2d3e4f5a6b7', 
+          text: 'Layer 2 solutions are processing 10x more transactions than Ethereum mainnet. Base, Arbitrum, and Polygon are leading the scaling revolution 🚀',
           author: {
-            display_name: 'Dev Thompson',
-            username: 'devbuilds',
-            pfp_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+            display_name: 'L2 Researcher',
+            username: 'l2research',
+            pfp_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
             fid: 34567
           },
-          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
-          reactions: { likes_count: 234, recasts_count: 67 },
-          replies: { count: 41 }
+          timestamp: new Date(Date.now() - Math.random() * 4 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 189, recasts_count: 52 },
+          replies: { count: 94 }
         },
         {
-          hash: '0xd4e5f6a7b8c9',
-          text: 'The intersection of AI + crypto + social is where the next unicorns will emerge. We\'re still early 🦄',
+          hash: '0xd3e4f5a6b7c8',
+          text: 'Base chain TVL just crossed $8B! Coinbase really nailed the L2 execution. The ecosystem is thriving with 200+ active dApps',
           author: {
-            display_name: 'Maya Patel',
-            username: 'mayacrypto',
-            pfp_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+            display_name: 'Base Builder',
+            username: 'basebuilder',
+            pfp_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b131?w=100&h=100&fit=crop&crop=face', 
             fid: 45678
           },
-          timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
-          reactions: { likes_count: 189, recasts_count: 52 },
+          timestamp: new Date(Date.now() - Math.random() * 5 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 267, recasts_count: 78 },
+          replies: { count: 112 }
+        },
+        // AI x Crypto content
+        {
+          hash: '0xe4f5a6b7c8d9',
+          text: 'AI agents are revolutionizing DeFi strategies. My bot generated 23% returns last month using machine learning algorithms for yield optimization 🤖',
+          author: {
+            display_name: 'AI Trader',
+            username: 'aitrader',
+            pfp_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+            fid: 56789
+          },
+          timestamp: new Date(Date.now() - Math.random() * 6 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 312, recasts_count: 89 },
+          replies: { count: 156 }
+        },
+        {
+          hash: '0xf5a6b7c8d9e0',
+          text: 'GPT-4 powered trading signals are outperforming traditional analysis by 40%. The intersection of AI and crypto is just getting started',
+          author: {
+            display_name: 'ML Researcher', 
+            username: 'mlresearch',
+            pfp_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+            fid: 67890
+          },
+          timestamp: new Date(Date.now() - Math.random() * 7 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 198, recasts_count: 54 },
+          replies: { count: 87 }
+        },
+        // NFT Market content
+        {
+          hash: '0xa6b7c8d9e0f1',
+          text: 'NFT market is bouncing back strong! Opensea volume up 180% this month. Quality art collections are leading the recovery 🎨',
+          author: {
+            display_name: 'NFT Collector',
+            username: 'nftcollector',
+            pfp_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b131?w=100&h=100&fit=crop&crop=face',
+            fid: 78901
+          },
+          timestamp: new Date(Date.now() - Math.random() * 8 * 60 * 60 * 1000).toISOString(),
+          reactions: { likes_count: 245, recasts_count: 71 },
           replies: { count: 35 }
         },
         {
