@@ -102,5 +102,141 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Core AI Processing Endpoints
+  app.post('/api/analyze-content', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({
+          error: 'URL is required'
+        });
+      }
+
+      console.log(`🚀 Starting content analysis for: ${url}`);
+
+      // Create summary record and start processing
+      const summary = await storage.createSummary({
+        originalUrl: url,
+        processingStatus: 'processing',
+        title: 'Extracting content...',
+        summary: 'Processing your content with AI...',
+        contentType: 'video',
+        platform: 'youtube',
+        creatorId: null, // Anonymous processing for now
+        isPublic: true
+      });
+
+      // Start async processing with real AI service
+      AIService.processContent(url, {
+        contentType: 'video',
+        platform: 'youtube'
+      }).then(async (result) => {
+        await storage.updateSummary(summary.id, {
+          ...result,
+          title: result.summary ? result.summary.slice(0, 100) : 'Processed Content',
+          processingStatus: result.processingStatus,
+          updatedAt: new Date()
+        });
+        console.log(`✅ Processing completed for: ${summary.id}`);
+      }).catch(async (error) => {
+        await storage.updateSummary(summary.id, {
+          processingStatus: 'failed',
+          summary: `Processing failed: ${error.message}`,
+          updatedAt: new Date()
+        });
+        console.error(`❌ Processing failed for: ${summary.id}`, error);
+      });
+
+      res.json({
+        success: true,
+        summaryId: summary.id,
+        message: 'Content processing started'
+      });
+
+    } catch (error: any) {
+      console.error('Failed to start content analysis:', error);
+      res.status(500).json({
+        error: 'Failed to start processing',
+        message: error.message
+      });
+    }
+  });
+
+  // Check processing status and get results
+  app.get('/api/processing-result/:summaryId', async (req, res) => {
+    try {
+      const { summaryId } = req.params;
+      
+      const summary = await storage.getSummary(summaryId);
+      
+      if (!summary) {
+        return res.status(404).json({
+          error: 'Summary not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        status: summary.processingStatus,
+        summary: summary,
+        isComplete: summary.processingStatus === 'completed',
+        isFailed: summary.processingStatus === 'failed'
+      });
+
+    } catch (error: any) {
+      console.error('Failed to get processing result:', error);
+      res.status(500).json({
+        error: 'Failed to get processing status',
+        message: error.message
+      });
+    }
+  });
+
+  // Get summaries (for dashboard)
+  app.get('/api/summaries', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const summaries = await storage.getSummaries(limit);
+      
+      res.json({
+        success: true,
+        summaries,
+        count: summaries.length
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch summaries:', error);
+      res.status(500).json({
+        error: 'Failed to fetch summaries',
+        message: error.message
+      });
+    }
+  });
+
+  // Get single summary
+  app.get('/api/summaries/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const summary = await storage.getSummary(id);
+      
+      if (!summary) {
+        return res.status(404).json({
+          error: 'Summary not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        summary
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch summary:', error);
+      res.status(500).json({
+        error: 'Failed to fetch summary',
+        message: error.message
+      });
+    }
+  });
+
   return server;
 }
