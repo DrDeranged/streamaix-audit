@@ -1194,13 +1194,16 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       for (const fid of fids) {
         try {
           const userCasts = await this.fetchUserRecent(fid, 5);
-          allCastsResults.push(...userCasts);
+          if (userCasts.length > 0) {
+            allCastsResults.push(...userCasts);
+            console.log(`✅ Successfully fetched ${userCasts.length} casts from user ${fid}`);
+          }
           
-          // Add small delay between requests to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Add longer delay between requests to respect strict rate limits  
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
           const sanitizedError = error instanceof Error ? error.message : 'Unknown error';
-          console.warn(`Skipping user ${fid} due to error:`, sanitizedError);
+          console.warn(`⚠️ Skipping user ${fid} due to error:`, sanitizedError);
           continue; // Skip this user and continue with others
         }
       }
@@ -1233,6 +1236,9 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       const trending = scoredCasts
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
+
+      console.log(`📊 Generated ${trending.length} trending casts from ${allCasts.length} total casts`);
+      console.log(`🎯 Top authors: ${trending.slice(0, 5).map(c => c.author.username).join(', ')}`);
 
       this.cache.set(cacheKey, trending, 90); // 1.5 minute cache
       return trending;

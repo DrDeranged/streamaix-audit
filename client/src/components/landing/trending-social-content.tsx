@@ -127,6 +127,29 @@ export function TrendingSocialContent() {
   const trendingCasts = trendingData?.items || [];
   const trendingTopics = topicsData?.topics || [];
   const cryptoVideos = cryptoNewsData?.videos || [];
+
+  // Filter casts based on selected category
+  const filteredCasts = selectedCategory === 'all' 
+    ? trendingCasts 
+    : trendingCasts.filter((cast: any) => {
+        const text = cast.text?.toLowerCase() || '';
+        switch (selectedCategory) {
+          case 'bitcoin_etf':
+            return text.includes('bitcoin') || text.includes('etf') || text.includes('btc');
+          case 'depin':
+            return text.includes('depin') || text.includes('infrastructure') || text.includes('hardware');
+          case 'l2_scaling':
+            return text.includes('l2') || text.includes('layer 2') || text.includes('scaling') || text.includes('optimism') || text.includes('arbitrum') || text.includes('polygon');
+          case 'base_chain':
+            return text.includes('base') || text.includes('base chain') || text.includes('coinbase');
+          case 'ai_crypto':
+            return text.includes('ai') || text.includes('artificial intelligence') || text.includes('machine learning') || text.includes('gpt');
+          case 'nfts':
+            return text.includes('nft') || text.includes('non-fungible') || text.includes('opensea') || text.includes('art') || text.includes('collection');
+          default:
+            return true;
+        }
+      });
   
   
 
@@ -337,9 +360,9 @@ export function TrendingSocialContent() {
                           </Card>
                         ))}
                       </div>
-                    ) : trendingCasts && trendingCasts.length > 0 ? (
+                    ) : filteredCasts && filteredCasts.length > 0 ? (
                       <AnimatePresence>
-                        {trendingCasts.slice(0, 5).map((cast: any, index: number) => (
+                        {filteredCasts.slice(0, 5).map((cast: any, index: number) => (
                           <motion.div
                             key={cast.hash || index}
                             initial={{ opacity: 0, y: 20 }}
@@ -418,8 +441,16 @@ export function TrendingSocialContent() {
                       <Card className="bg-black/20 border-purple-500/20 backdrop-blur-sm">
                         <CardContent className="p-8 text-center">
                           <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-                          <p className="text-gray-300 text-lg">No trending conversations available</p>
-                          <p className="text-gray-500 text-sm mt-2">Live crypto intelligence loading...</p>
+                          <p className="text-gray-300 text-lg">
+                            {selectedCategory === 'all' 
+                              ? 'No trending conversations available' 
+                              : `No ${categories.find(c => c.id === selectedCategory)?.label} posts found`}
+                          </p>
+                          <p className="text-gray-500 text-sm mt-2">
+                            {selectedCategory === 'all' 
+                              ? 'Live crypto intelligence loading...'
+                              : 'Try selecting "All" or a different category'}
+                          </p>
                         </CardContent>
                       </Card>
                     )}
