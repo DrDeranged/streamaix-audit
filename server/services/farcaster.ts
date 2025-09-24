@@ -650,13 +650,11 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     } catch (error) {
       console.error('❌ Failed to get trending content:', this.sanitizeError(error));
       
-      // Since Neynar API requires paid plan, provide realistic diverse demo content that simulates global Farcaster feed
-      console.log('🌐 Using diverse realistic content from simulated global Farcaster feed');
-      const diverseDemoContent = [
-        // Bitcoin ETF & DeFi content  
-        {
-          hash: '0xa1b2c3d4e5f6',
-          text: 'Bitcoin ETF flows hit $2.3B this week alone. Institutional adoption is accelerating faster than anyone predicted. The floodgates are officially open 🌊',
+      // NO DEMO DATA: Removed all mock content - using Hub API for real global trending instead
+      console.log('🚫 Rejecting demo data fallback - Hub API will provide authentic content');
+      
+      // Call Hub-based trending method instead of using demo data
+      return await this.aggregateTrendingFromFids(getTopFids(50), limit);
           author: {
             display_name: 'Michael Crypto',
             username: 'cryptomichael',
@@ -776,8 +774,8 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
         }
       ];
       
-      // Filter demo content based on recent activity parameters
-      const filteredContent = demoTrendingContent
+      // NO DEMO DATA - return empty array (Hub API implementation will be called instead)
+      const filteredContent = []
         .filter((cast: any) => {
           if (!filters?.since) return true;
           const castTime = new Date(cast.timestamp);
@@ -1456,61 +1454,7 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     }
   }
 
-  /**
-   * Demo trending casts for when API is unavailable
-   */
-  private getDemoTrendingCasts(): TrendingCast[] {
-    return [
-      {
-        hash: 'demo_vitalik_1',
-        text: 'The key insight from quadratic funding is that it creates a more democratic way to allocate resources. Instead of pure plutocracy (1 dollar = 1 vote) or pure democracy (1 person = 1 vote), you get something in between.',
-        author: {
-          fid: 5650,
-          username: 'vitalik.eth',
-          displayName: 'Vitalik Buterin',
-          pfpUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-          followerCount: 892000
-        },
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        replies: 24,
-        recasts: 156,
-        likes: 234,
-        engagement: 414
-      },
-      {
-        hash: 'demo_dan_1',
-        text: 'Building in public is underrated. The faster you can get feedback, the faster you can iterate. Don\'t wait for perfection.',
-        author: {
-          fid: 3,
-          username: 'dwr.eth',
-          displayName: 'Dan Romero',
-          pfpUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-          followerCount: 445000
-        },
-        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-        replies: 18,
-        recasts: 89,
-        likes: 167,
-        engagement: 274
-      },
-      {
-        hash: 'demo_jesse_1',
-        text: 'Base is processing over 1M transactions per day. The onchain economy is real and it\'s happening now.',
-        author: {
-          fid: 6806,
-          username: 'jessepollak',
-          displayName: 'Jesse Pollak',
-          pfpUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-          followerCount: 156000
-        },
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        replies: 12,
-        recasts: 67,
-        likes: 134,
-        engagement: 213
-      }
-    ];
-  }
+  // REMOVED: All demo/mock data methods deleted - only real Hub API data allowed
 }
 
 export const farcasterService = new FarcasterService();
