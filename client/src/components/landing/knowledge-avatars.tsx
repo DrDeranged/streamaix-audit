@@ -1,37 +1,76 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bookmark, Heart, Share2, Plus, MessageCircle } from "lucide-react";
+import { Bookmark, Heart, Share2, Plus, MessageCircle, User } from "lucide-react";
 import { motion } from "framer-motion";
-import navalAvatar from "@/assets/naval-avatar.svg";
-import vitalikAvatar from "@/assets/vitalik-avatar.svg";
+import { useQuery } from "@tanstack/react-query";
+
+interface KnowledgeAvatar {
+  id: string;
+  username: string;
+  displayName: string;
+  bio: string;
+  pfpUrl: string;
+  followerCount: number;
+  role: string;
+  expertise: string[];
+  keyTakeaways: string[];
+  stats: {
+    summaries: number;
+    liked: string;
+    saved: number;
+  };
+  resources: Array<{
+    id: string;
+    title: string;
+    url: string;
+    description: string;
+    resourceType: string;
+    difficulty: string;
+    priority: number;
+    topics: string[];
+  }>;
+  recentActivity: Array<{
+    icon: string;
+    text: string;
+    color: string;
+  }>;
+}
+
+const iconMap = {
+  bookmark: Bookmark,
+  heart: Heart,
+  share2: Share2,
+  plus: Plus,
+  'message-circle': MessageCircle,
+  user: User
+};
 
 export function KnowledgeAvatars() {
-  const profiles = [
-    {
-      name: "Naval Ravikant",
-      handle: "@naval.eth",
-      avatar: navalAvatar,
-      gradient: "from-indigo-500 to-purple-600",
-      stats: { summaries: 247, liked: "1.2k", saved: 89 },
-      activities: [
-        { icon: Bookmark, text: "Saved \"AI Safety in Practice\"", color: "text-indigo-400" },
-        { icon: Heart, text: "Liked \"Web3 Infrastructure Deep Dive\"", color: "text-red-400" },
-        { icon: Share2, text: "Shared on Farcaster", color: "text-green-400" }
-      ]
+  const { data: avatarsData, isLoading, error } = useQuery({
+    queryKey: ['/api/knowledge-avatars'],
+    queryFn: async () => {
+      const response = await fetch('/api/knowledge-avatars');
+      if (!response.ok) {
+        throw new Error('Failed to fetch knowledge avatars');
+      }
+      const result = await response.json();
+      return result.avatars as KnowledgeAvatar[];
     },
-    {
-      name: "Vitalik Buterin",
-      handle: "@vitalik.lens",
-      avatar: vitalikAvatar,
-      gradient: "from-purple-500 to-cyan-500",
-      stats: { summaries: 156, liked: "2.1k", saved: 203 },
-      activities: [
-        { icon: Plus, text: "Created \"ZK-Rollup Explainer\"", color: "text-purple-400" },
-        { icon: Bookmark, text: "Saved \"DeFi Security Patterns\"", color: "text-indigo-400" },
-        { icon: MessageCircle, text: "Commented on Lens", color: "text-blue-400" }
-      ]
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
+
+  // Get gradient for each avatar based on their role
+  const getGradient = (role: string) => {
+    if (role.includes('Angel') || role.includes('Philosopher')) {
+      return "from-indigo-500 to-purple-600";
+    } else if (role.includes('Ethereum') || role.includes('Founder')) {
+      return "from-purple-500 to-cyan-500";
     }
-  ];
+    return "from-blue-500 to-indigo-600";
+  };
+
+  const profiles = avatarsData || [];
 
   return (
     <section id="profiles" className="py-20 bg-gray-100 dark:bg-gray-900">
@@ -51,69 +90,115 @@ export function KnowledgeAvatars() {
           </p>
         </motion.div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {profiles.map((profile, index) => (
-            <motion.div
-              key={profile.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              viewport={{ once: true }}
-            >
-              <Card className="bg-card border-glass-border shadow-xl overflow-hidden">
-                <div className="relative">
-                  <div className={`h-24 bg-gradient-to-r ${profile.gradient}`} />
-                  <div className="absolute -bottom-8 left-6">
-                    <img 
-                      src={profile.avatar} 
-                      alt={`${profile.name} avatar`} 
-                      className="w-16 h-16 rounded-full border-4 border-card object-cover"
-                    />
-                  </div>
-                </div>
-                
-                <CardContent className="pt-12 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-foreground">{profile.name}</h3>
-                      <p className="text-muted-foreground">{profile.handle}</p>
-                    </div>
-                    <Button className={`bg-gradient-to-r ${profile.gradient} hover:opacity-90 text-white`}>
-                      Follow Trail
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-foreground">{profile.stats.summaries}</div>
-                      <div className="text-sm text-muted-foreground">Summaries</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-foreground">{profile.stats.liked}</div>
-                      <div className="text-sm text-muted-foreground">Liked</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-foreground">{profile.stats.saved}</div>
-                      <div className="text-sm text-muted-foreground">Saved</div>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading Knowledge Avatars...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-400 mb-4">Failed to load Knowledge Avatars</p>
+            <p className="text-muted-foreground text-sm">Please try refreshing the page</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {profiles.map((profile, index) => (
+              <motion.div
+                key={profile.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+              >
+                <Card className="bg-card border-glass-border shadow-xl overflow-hidden">
+                  <div className="relative">
+                    <div className={`h-24 bg-gradient-to-r ${getGradient(profile.role)}`} />
+                    <div className="absolute -bottom-8 left-6">
+                      <img 
+                        src={profile.pfpUrl} 
+                        alt={`${profile.displayName} avatar`} 
+                        className="w-16 h-16 rounded-full border-4 border-card object-cover"
+                        data-testid={`img-avatar-${profile.username}`}
+                      />
                     </div>
                   </div>
                   
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-foreground">Recent Activity</h4>
-                    <div className="text-sm text-muted-foreground space-y-2">
-                      {profile.activities.map((activity, i) => (
-                        <div key={i} className="flex items-center space-x-2">
-                          <activity.icon className={`w-4 h-4 ${activity.color}`} />
-                          <span>{activity.text}</span>
+                  <CardContent className="pt-12 p-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-xl font-bold" data-testid={`text-name-${profile.username}`}>
+                        {profile.displayName}
+                      </h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm mb-2" data-testid={`text-role-${profile.username}`}>
+                      {profile.role}
+                    </p>
+                    <p className="text-muted-foreground text-xs mb-4 line-clamp-2" data-testid={`text-bio-${profile.username}`}>
+                      {profile.bio}
+                    </p>
+                    
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-indigo-500" data-testid={`stat-summaries-${profile.username}`}>
+                          {profile.stats.summaries}
                         </div>
-                      ))}
+                        <div className="text-xs text-muted-foreground">Resources</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-red-400" data-testid={`stat-liked-${profile.username}`}>
+                          {profile.stats.liked}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Liked</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-purple-400" data-testid={`stat-saved-${profile.username}`}>
+                          {profile.stats.saved}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Saved</div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    
+                    <div className="space-y-2 mb-6">
+                      <h4 className="text-sm font-semibold">Recent Activity</h4>
+                      {(profile.recentActivity || []).map((activity, actIndex) => {
+                        const IconComponent = iconMap[activity.icon as keyof typeof iconMap] || User;
+                        return (
+                          <div key={actIndex} className="flex items-center gap-2 text-sm">
+                            <IconComponent className={`w-4 h-4 ${activity.color}`} />
+                            <span className="text-muted-foreground">{activity.text}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold mb-2">Expertise</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {(profile.expertise || []).slice(0, 3).map((skill, skillIndex) => (
+                          <span 
+                            key={skillIndex} 
+                            className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded-full"
+                            data-testid={`tag-expertise-${profile.username}-${skillIndex}`}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-300"
+                      data-testid={`button-follow-${profile.username}`}
+                    >
+                      Follow Knowledge Trail
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
