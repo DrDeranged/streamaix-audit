@@ -341,52 +341,22 @@ export class FarcasterService {
   }
 
   constructor() {
-    const apiKey = process.env.NEYNAR_API_KEY;
-    const signerUuid = process.env.FARCASTER_SIGNER_UUID;
-
-    if (!apiKey || !signerUuid) {
-      throw new Error('Farcaster configuration missing: NEYNAR_API_KEY and FARCASTER_SIGNER_UUID required');
-    }
-
-    // Correct SDK instantiation per Neynar docs
-    const config = new Configuration({
-      apiKey,
-    });
-    this.client = new NeynarAPIClient(config);
-    this.signerUuid = signerUuid;
+    // Hub API initialization - no API keys required for read operations
+    console.log('🔗 FarcasterService initialized with Hub API endpoints (no API key required)');
+    console.log('📡 Available Hubs:', HUB_ENDPOINTS.length);
+    
+    // Initialize cache and rate limiter for Hub operations  
+    this.cache = new Map();
+    this.limiter = new TokenBucketLimiter(10, 2); // 10 requests per 2 seconds
   }
 
   /**
-   * Create a cast on Farcaster with AI summary content
+   * Create a cast on Farcaster - REMOVED (requires API key and SDK)
+   * This method is not available in the Hub API implementation
    */
-  async createCast(params: {
-    title: string;
-    summary: string;
-    originalUrl: string;
-    summaryUrl?: string;
-    tags?: string[];
-  }): Promise<any> {
-    const { title, summary, originalUrl, summaryUrl, tags } = params;
-
-    // Format the cast content
-    const castText = this.formatCastContent({
-      title,
-      summary,
-      originalUrl,
-      summaryUrl,
-      tags
-    });
-
-    return this.requestWithLimiter(
-      () => this.client.publishCast({
-        signerUuid: this.signerUuid,
-        text: castText
-      }),
-      'createCast'
-    ).then(response => {
-      console.log(`✅ Successfully posted cast to Farcaster: ${response.cast.hash}`);
-      return response;
-    });
+  async createCast(params: any): Promise<any> {
+    console.log('⚠️ createCast not available in Hub API mode - requires authenticated SDK');
+    throw new Error('Cast creation requires Neynar API key - not available in Hub-only mode');
   }
 
   /**
@@ -635,11 +605,10 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       
       // Try to get trending/popular content from the API with rate limiting
       const trendingCasts = await this.requestWithLimiter(
-        () => this.client.fetchFeed({
-          feedType: 'following',
-          fid: 3, // Use Dan Romero as a seed for trending content  
-          limit: limit
-        }),
+        () => {
+          console.log('⚠️ Neynar SDK method not available in Hub API mode');
+          return { casts: [] };
+        },
         'getTrendingContent',
         `trending:${limit}`,
         120 // 2 minutes cache
@@ -655,16 +624,8 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
       
       // Call Hub-based trending method instead of using demo data
       return await this.aggregateTrendingFromFids(getTopFids(50), limit);
-          author: {
-            display_name: 'Michael Crypto',
-            username: 'cryptomichael',
-            pfp_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-            fid: 12345
-          },
-          timestamp: new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000).toISOString(),
-          reactions: { likes_count: 234, recasts_count: 67 },
-          replies: { count: 89 }
-        },
+    }
+  }
         {
           hash: '0xb1c2d3e4f5a6',
           text: 'DeFi yields are back! Seeing 8-12% APY on stablecoin pairs across major protocols. The risk-adjusted returns are finally making sense again',
