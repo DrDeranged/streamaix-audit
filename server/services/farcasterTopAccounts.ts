@@ -302,9 +302,53 @@ export const TOP_CRYPTO_ACCOUNTS: TopAccount[] = [
   }
 ];
 
-// Get top accounts sorted by priority (now includes ALL accounts, not just prominent ones)
-export function getTopAccounts(limit = 30): TopAccount[] {
-  return TOP_CRYPTO_ACCOUNTS
+// Get diverse accounts with smart rotation to avoid rate limits
+export function getTopAccounts(limit = 12): TopAccount[] {
+  // Use time-based rotation to ensure different voices are featured
+  const rotationIndex = Math.floor(Date.now() / (1000 * 60 * 15)) % 3; // Rotate every 15 minutes
+  
+  let selectedAccounts: TopAccount[] = [];
+  
+  if (rotationIndex === 0) {
+    // Rotation 1: Protocol founders + DeFi builders
+    selectedAccounts = TOP_CRYPTO_ACCOUNTS.filter(account => 
+      account.priority >= 5 && (
+        account.ecosystem.includes('ethereum') || 
+        account.ecosystem.includes('defi') ||
+        account.ecosystem.includes('uniswap') ||
+        account.ecosystem.includes('aave')
+      )
+    ).slice(0, limit);
+  } else if (rotationIndex === 1) {
+    // Rotation 2: L2, NFT creators + Media influencers  
+    selectedAccounts = [
+      ...TOP_CRYPTO_ACCOUNTS.filter(account => 
+        account.ecosystem.includes('base') || 
+        account.ecosystem.includes('nft') ||
+        account.ecosystem.includes('trading') ||
+        account.ecosystem.includes('media')
+      ).slice(0, 8),
+      ...TOP_CRYPTO_ACCOUNTS.filter(account => account.priority >= 7).slice(0, 4)
+    ].slice(0, limit);
+  } else {
+    // Rotation 3: Emerging builders + AI/Gaming + Research
+    selectedAccounts = [
+      ...TOP_CRYPTO_ACCOUNTS.filter(account => 
+        account.ecosystem.includes('mev') ||
+        account.ecosystem.includes('research') ||
+        account.ecosystem.includes('ai') ||
+        account.ecosystem.includes('gaming')
+      ).slice(0, 8),
+      ...TOP_CRYPTO_ACCOUNTS.filter(account => account.priority >= 6).slice(0, 4)
+    ].slice(0, limit);
+  }
+  
+  // Always ensure Vitalik is included for consistency
+  if (!selectedAccounts.find(account => account.fid === 5650)) {
+    selectedAccounts[0] = TOP_CRYPTO_ACCOUNTS.find(account => account.fid === 5650)!;
+  }
+  
+  return selectedAccounts
     .sort((a, b) => b.priority - a.priority)
     .slice(0, limit);
 }
@@ -314,7 +358,7 @@ export function getAccountByFid(fid: number): TopAccount | undefined {
   return TOP_CRYPTO_ACCOUNTS.find(account => account.fid === fid);
 }
 
-// Get FIDs for data fetching (expanded to include diverse voices)
-export function getTopFids(limit = 30): number[] {
+// Get FIDs with smart rotation to avoid rate limits while ensuring diversity
+export function getTopFids(limit = 12): number[] {
   return getTopAccounts(limit).map(account => account.fid);
 }

@@ -1188,12 +1188,25 @@ ${tags.slice(0, 3).map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ')}`
     if (cached) return cached;
 
     try {
-      // Fetch recent casts from all FIDs
-      const allCastsPromises = fids.map(fid => this.fetchUserRecent(fid, 5));
-      const allCastsResults = await Promise.all(allCastsPromises);
+      // Fetch recent casts sequentially with delays to avoid rate limits
+      const allCastsResults: TrendingCast[] = [];
       
-      // Flatten and dedupe by hash
-      const allCasts = allCastsResults.flat();
+      for (const fid of fids) {
+        try {
+          const userCasts = await this.fetchUserRecent(fid, 5);
+          allCastsResults.push(...userCasts);
+          
+          // Add small delay between requests to respect rate limits
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          const sanitizedError = error instanceof Error ? error.message : 'Unknown error';
+          console.warn(`Skipping user ${fid} due to error:`, sanitizedError);
+          continue; // Skip this user and continue with others
+        }
+      }
+      
+      // allCastsResults is already flattened, just assign
+      const allCasts = allCastsResults;
       const uniqueCasts = new Map<string, TrendingCast>();
       
       allCasts.forEach(cast => {
