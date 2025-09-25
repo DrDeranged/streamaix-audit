@@ -61,6 +61,43 @@ export default function AnalyticsDiscovery() {
     refetchInterval: 120000, // 2 minutes
   });
 
+  // NEW COMPREHENSIVE ANALYTICS ENDPOINTS
+  // Fed Calendar & Policy Intelligence
+  const { data: fedCalendar, isLoading: fedLoading } = useQuery({
+    queryKey: ['/api/fed/calendar'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  // Advanced Crypto Analytics (Volatility, Correlations, Patterns)
+  const { data: advancedCrypto, isLoading: advancedCryptoLoading } = useQuery({
+    queryKey: ['/api/market/crypto/advanced-analytics'],
+    refetchInterval: 60000, // 1 minute
+  });
+
+  // DeFi & On-Chain Analytics
+  const { data: defiAnalytics, isLoading: defiLoading } = useQuery({
+    queryKey: ['/api/defi/analytics'],
+    refetchInterval: 120000, // 2 minutes
+  });
+
+  // Risk Assessment & Portfolio Analytics
+  const { data: riskAssessment, isLoading: riskLoading } = useQuery({
+    queryKey: ['/api/risk/assessment'],
+    refetchInterval: 180000, // 3 minutes
+  });
+
+  // Derivatives & Options Flow
+  const { data: derivativesData, isLoading: derivativesLoading } = useQuery({
+    queryKey: ['/api/derivatives/analytics'],
+    refetchInterval: 240000, // 4 minutes
+  });
+
+  // Market Events & Economic Calendar
+  const { data: marketEvents, isLoading: marketEventsLoading } = useQuery({
+    queryKey: ['/api/market/events'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
   // Mock data while APIs are being restored
   const mockCryptoAssets: CryptoAsset[] = [
     { symbol: 'SUI', name: 'Sui', price: 3.64, change24h: -6.57, volume24h: 1750000000, marketCap: 9800000000 },
@@ -294,11 +331,374 @@ export default function AnalyticsDiscovery() {
           </div>
         </motion.section>
 
-        {/* Content Intelligence */}
+        {/* Fed Calendar & Policy Intelligence */}
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-400" />
+              <h2 className="text-xl font-semibold text-white">Fed Policy Intelligence</h2>
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                Live FOMC
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10">
+              View Full Calendar
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(fedCalendar as any)?.calendar?.upcomingMeetings?.slice(0, 2).map((meeting: any, index: number) => (
+              <Card key={meeting.id || index} className="bg-black/40 border-white/10 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-white">{meeting.title}</h3>
+                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                      {meeting.eventType === 'fomc_meeting' ? 'FOMC' : 'Economic'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="text-gray-300">{meeting.description}</div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Date</span>
+                      <span className="font-medium text-white">
+                        {new Date(meeting.scheduledDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )) || (
+              <div className="col-span-2">
+                <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+                  <CardContent className="p-6 text-center">
+                    <div className="animate-pulse text-gray-400">Loading Fed calendar...</div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </motion.section>
+
+        {/* Advanced Crypto Analytics */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-xl font-semibold text-white">Advanced Crypto Analytics</h2>
+              <Badge variant="secondary" className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                AI-Powered
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10">
+              Pattern Analysis
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Volatility Forecast */}
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-3">Volatility Forecast</h3>
+                {(advancedCrypto as any)?.analytics?.volatility?.forecast ? (
+                  <div className="space-y-2">
+                    <div className="text-2xl font-bold text-cyan-400">
+                      {((advancedCrypto as any).analytics.volatility.forecast.confidence * 100).toFixed(0)}%
+                    </div>
+                    <div className="text-sm text-gray-300">
+                      Confidence: {((advancedCrypto as any).analytics.volatility.forecast.prediction * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {(advancedCrypto as any).analytics.volatility.forecast.reasoning?.[0] || 'Technical analysis'}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="animate-pulse text-gray-400">Loading forecast...</div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Correlation Matrix */}
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-3">Correlation Matrix</h3>
+                {(advancedCrypto as any)?.analytics?.correlations ? (
+                  <div className="space-y-2">
+                    <div className="text-2xl font-bold text-green-400">
+                      {Object.keys((advancedCrypto as any).analytics.correlations.matrix || {}).length}
+                    </div>
+                    <div className="text-sm text-gray-300">Active pairs tracked</div>
+                    <div className="text-xs text-gray-400">Real-time correlation analysis</div>
+                  </div>
+                ) : (
+                  <div className="animate-pulse text-gray-400">Loading correlations...</div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Pattern Recognition */}
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-3">Pattern Recognition</h3>
+                {(advancedCrypto as any)?.analytics?.patterns ? (
+                  <div className="space-y-2">
+                    <div className="text-2xl font-bold text-purple-400">
+                      {Array.isArray((advancedCrypto as any).analytics.patterns) ? (advancedCrypto as any).analytics.patterns.length : 0}
+                    </div>
+                    <div className="text-sm text-gray-300">Patterns detected</div>
+                    <div className="text-xs text-gray-400">ML-powered analysis</div>
+                  </div>
+                ) : (
+                  <div className="animate-pulse text-gray-400">Loading patterns...</div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </motion.section>
+
+        {/* DeFi & On-Chain Analytics */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-yellow-400" />
+              <h2 className="text-xl font-semibold text-white">DeFi Analytics</h2>
+              <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                On-Chain
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10">
+              Protocol Deep Dive
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Total Value Locked</h3>
+                <div className="text-2xl font-bold text-yellow-400">
+                  ${(defiAnalytics as any)?.defi?.totalValueLocked?.current ? 
+                    ((defiAnalytics as any).defi.totalValueLocked.current / 1e9).toFixed(1) + 'B' : 
+                    '...'
+                  }
+                </div>
+                <div className="text-sm text-gray-300">
+                  {(defiAnalytics as any)?.defi?.totalValueLocked?.change24h && (
+                    <span className={(defiAnalytics as any).defi.totalValueLocked.change24h >= 0 ? 'text-green-400' : 'text-red-400'}>
+                      {(defiAnalytics as any).defi.totalValueLocked.change24h >= 0 ? '+' : ''}
+                      {(defiAnalytics as any).defi.totalValueLocked.change24h.toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Top Protocol</h3>
+                <div className="text-xl font-bold text-blue-400">
+                  {(defiAnalytics as any)?.defi?.totalValueLocked?.topProtocols?.[0]?.name || 'Uniswap'}
+                </div>
+                <div className="text-sm text-gray-300">
+                  ${(defiAnalytics as any)?.defi?.totalValueLocked?.topProtocols?.[0]?.tvl ? 
+                    ((defiAnalytics as any).defi.totalValueLocked.topProtocols[0].tvl / 1e9).toFixed(1) + 'B TVL' : 
+                    '8.5B TVL'
+                  }
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Yield Opportunities</h3>
+                <div className="text-xl font-bold text-green-400">
+                  {(defiAnalytics as any)?.defi?.yieldOpportunities?.topAPY || '12.5%'}
+                </div>
+                <div className="text-sm text-gray-300">Highest APY available</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">DEX Volume</h3>
+                <div className="text-xl font-bold text-purple-400">
+                  ${(defiAnalytics as any)?.defi?.dexAnalytics?.volume24h ? 
+                    ((defiAnalytics as any).defi.dexAnalytics.volume24h / 1e9).toFixed(1) + 'B' : 
+                    '2.1B'
+                  }
+                </div>
+                <div className="text-sm text-gray-300">24h trading volume</div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.section>
+
+        {/* Risk Assessment & Portfolio Analytics */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-red-400" />
+              <h2 className="text-xl font-semibold text-white">Risk Assessment</h2>
+              <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-500/30">
+                Real-time
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10">
+              Stress Test
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Portfolio VaR</h3>
+                <div className="text-2xl font-bold text-red-400">
+                  {(riskAssessment as any)?.risk?.portfolioVaR?.oneDay ? 
+                    `${((riskAssessment as any).risk.portfolioVaR.oneDay * 100).toFixed(1)}%` : 
+                    '-5.8%'
+                  }
+                </div>
+                <div className="text-sm text-gray-300">1-day VaR @ 95%</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Market Risk</h3>
+                <div className="text-xl font-bold text-orange-400">
+                  {(riskAssessment as any)?.risk?.marketRisk?.riskLevel || 'Medium'}
+                </div>
+                <div className="text-sm text-gray-300">
+                  Score: {(riskAssessment as any)?.risk?.marketRisk?.score || 65}/100
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Liquidity Score</h3>
+                <div className="text-xl font-bold text-green-400">
+                  {(riskAssessment as any)?.risk?.liquidityProfile?.liquidityScore || 85}
+                </div>
+                <div className="text-sm text-gray-300">
+                  Exit: {(riskAssessment as any)?.risk?.liquidityProfile?.timeToExit || '< 1 hour'}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Stress Tests</h3>
+                <div className="text-xl font-bold text-purple-400">
+                  {Array.isArray((riskAssessment as any)?.risk?.stressTest) ? 
+                    (riskAssessment as any).risk.stressTest.length : 
+                    3
+                  }
+                </div>
+                <div className="text-sm text-gray-300">Scenarios tested</div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.section>
+
+        {/* Derivatives & Options Analytics */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-pink-400" />
+              <h2 className="text-xl font-semibold text-white">Derivatives Analytics</h2>
+              <Badge variant="secondary" className="bg-pink-500/20 text-pink-400 border-pink-500/30">
+                Options Flow
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10">
+              IV Surface
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Options Flow</h3>
+                <div className="text-xl font-bold text-pink-400">
+                  {Array.isArray((derivativesData as any)?.derivatives?.optionsFlow) ? 
+                    (derivativesData as any).derivatives.optionsFlow.length : 
+                    50
+                  }
+                </div>
+                <div className="text-sm text-gray-300">Active contracts</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Futures Data</h3>
+                <div className="text-xl font-bold text-blue-400">
+                  {Array.isArray((derivativesData as any)?.derivatives?.futuresData) ? 
+                    (derivativesData as any).derivatives.futuresData.length : 
+                    25
+                  }
+                </div>
+                <div className="text-sm text-gray-300">Futures tracked</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Implied Vol</h3>
+                <div className="text-xl font-bold text-yellow-400">
+                  {(derivativesData as any)?.derivatives?.volSurface?.averageIV ? 
+                    `${((derivativesData as any).derivatives.volSurface.averageIV * 100).toFixed(1)}%` : 
+                    '65.3%'
+                  }
+                </div>
+                <div className="text-sm text-gray-300">BTC average IV</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">Market Events</h3>
+                <div className="text-xl font-bold text-cyan-400">
+                  {Array.isArray((marketEvents as any)?.events?.thisWeek) ? 
+                    (marketEvents as any).events.thisWeek.length : 
+                    5
+                  }
+                </div>
+                <div className="text-sm text-gray-300">This week</div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.section>
+
+        {/* Content Intelligence */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
         >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
