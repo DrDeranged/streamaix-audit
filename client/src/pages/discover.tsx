@@ -3497,6 +3497,13 @@ export default function Discover() {
     retry: 1
   });
 
+  // M2 Money Supply tracking query
+  const { data: m2MoneySupply, isLoading: m2Loading } = useQuery({
+    queryKey: ['/api/fed/m2-money-supply'],
+    staleTime: 60 * 60 * 1000, // 1 hour (M2 updates monthly)
+    retry: 1
+  });
+
   // Derivatives analytics queries
   const { data: derivativesOverview, isLoading: derivativesOverviewLoading } = useQuery({
     queryKey: ['/api/derivatives/overview'],
