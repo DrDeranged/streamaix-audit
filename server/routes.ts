@@ -5868,7 +5868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const marketService = MarketDataService.getInstance();
-      const crossMarketService = CrossMarketSignalService.getInstance();
+      const crossMarketService = new CrossMarketSignalService();
       const patternService = PatternRecognitionService.getInstance();
       
       // Get comprehensive market data
@@ -5987,7 +5987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (clients.size === 0) return;
     
     try {
-      const volatilityService = VolatilityForecastingService.getInstance();
+      const volatilityService = new VolatilityForecastingService();
       const alerts = await volatilityService.getVolatilityAlerts();
       
       if (alerts && alerts.length > 0) {

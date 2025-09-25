@@ -5712,7 +5712,73 @@ export default function Discover() {
           )}
 
           {/* Main Fed Monitoring Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            {/* M2 Money Supply Tracker */}
+            <Card className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-green-500/30 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-green-300 flex items-center gap-2 text-sm">
+                  <DollarSign className="h-4 w-4" />
+                  M2 Money Supply
+                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+                    Live
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {m2Loading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-8 bg-gray-700 rounded"></div>
+                    <div className="h-4 bg-gray-700 rounded"></div>
+                  </div>
+                ) : m2MoneySupply?.success ? (
+                  <div className="space-y-3">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white">
+                        ${(m2MoneySupply.current / 1000).toFixed(1)}T
+                      </div>
+                      <div className="text-xs text-gray-400">Current M2 Stock</div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-300">YoY Change:</span>
+                      <span className={`text-sm font-semibold ${
+                        m2MoneySupply.yoyChange >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {m2MoneySupply.yoyChange >= 0 ? '+' : ''}{m2MoneySupply.yoyChange.toFixed(1)}%
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-300">3M Change:</span>
+                      <span className={`text-sm font-semibold ${
+                        m2MoneySupply.quarterlyChange >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {m2MoneySupply.quarterlyChange >= 0 ? '+' : ''}{m2MoneySupply.quarterlyChange.toFixed(1)}%
+                      </span>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-green-500/20">
+                      <div className="text-xs text-gray-400 mb-1">Market Impact:</div>
+                      <div className={`text-xs px-2 py-1 rounded ${
+                        m2MoneySupply.sentiment === 'expansionary' ? 'bg-orange-500/20 text-orange-300' :
+                        m2MoneySupply.sentiment === 'contractionary' ? 'bg-blue-500/20 text-blue-300' :
+                        'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {m2MoneySupply.sentiment === 'expansionary' ? '📈 Expansionary' :
+                         m2MoneySupply.sentiment === 'contractionary' ? '📉 Contractionary' :
+                         '📊 Neutral'}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-gray-400">
+                    <DollarSign className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs">M2 data unavailable</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
             
             {/* Recent Fed Communications */}
             <Card className="lg:col-span-2 bg-white/5 border-white/10 backdrop-blur-sm">
