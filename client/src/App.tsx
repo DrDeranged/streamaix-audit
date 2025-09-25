@@ -26,6 +26,7 @@ const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
 const ContentLibrary = React.lazy(() => import("@/pages/content-library"));
+const AnalyticsDiscovery = React.lazy(() => import("@/pages/analytics-discovery"));
 
 function Router() {
   return (
@@ -111,7 +112,11 @@ function Router() {
         </Suspense>
       </Route>
       
-      <Route path="/discover" component={Landing} />
+      <Route path="/discover">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <AnalyticsDiscovery />
+        </Suspense>
+      </Route>
       
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />
