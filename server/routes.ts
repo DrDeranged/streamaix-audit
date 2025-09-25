@@ -5869,7 +5869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const marketService = MarketDataService.getInstance();
       const crossMarketService = new CrossMarketSignalService();
-      const patternService = PatternRecognitionService.getInstance();
+      const patternService = new (await import('./services/patternRecognitionService')).PatternRecognitionService();
       
       // Get comprehensive market data
       const [stocks, cryptos, correlations, regime] = await Promise.allSettled([
