@@ -14,13 +14,12 @@ import { WalletSelectionModal } from '@/components/wallet/WalletSelectionModal';
 import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3, Wallet, Loader2, ExternalLink, Settings } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 
 export function Navigation() {
   const { theme, setTheme } = useTheme();
   const { user, isAuthenticated } = useAuth();
   const logoutMutation = useLogout();
-  const [, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   
@@ -71,12 +70,11 @@ export function Navigation() {
               >
                 Bounties
               </button>
-              <button 
-                onClick={() => setLocation('/discover')}
-                className="text-muted-foreground hover:text-indigo-500 transition-colors"
-              >
-                Discover
-              </button>
+              <Link href="/discover">
+                <button className="text-muted-foreground hover:text-indigo-500 transition-colors">
+                  Discover
+                </button>
+              </Link>
               
               {/* Authentication */}
               {isAuthenticated ? (
@@ -108,20 +106,10 @@ export function Navigation() {
                           Dashboard
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => {
-                          setLocation('/discover');
-                          // Wait for navigation, then scroll to Knowledge Avatars
-                          setTimeout(() => {
-                            const element = document.getElementById('profiles');
-                            if (element) {
-                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                          }, 100);
-                        }}
-                        className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
-                      >
-                        Discover
+                      <DropdownMenuItem asChild>
+                        <Link href="/discover" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                          Discover
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/wallet-dashboard" className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors">
