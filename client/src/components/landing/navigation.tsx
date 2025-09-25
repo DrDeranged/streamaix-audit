@@ -14,12 +14,13 @@ import { WalletSelectionModal } from '@/components/wallet/WalletSelectionModal';
 import { Moon, Sun, Sparkles, Menu, X, User, LogOut, BarChart3, Wallet, Loader2, ExternalLink, Settings } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export function Navigation() {
   const { theme, setTheme } = useTheme();
   const { user, isAuthenticated } = useAuth();
   const logoutMutation = useLogout();
+  const [, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   
@@ -71,7 +72,7 @@ export function Navigation() {
                 Bounties
               </button>
               <button 
-                onClick={() => window.location.href = '/discover'}
+                onClick={() => setLocation('/discover')}
                 className="text-muted-foreground hover:text-indigo-500 transition-colors"
               >
                 Discover
@@ -108,7 +109,7 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => window.location.href = '/discover'}
+                        onClick={() => setLocation('/discover')}
                         className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
                       >
                         Discover
