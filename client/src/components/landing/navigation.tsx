@@ -109,7 +109,16 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => setLocation('/discover')}
+                        onClick={() => {
+                          setLocation('/discover');
+                          // Wait for navigation, then scroll to Knowledge Avatars
+                          setTimeout(() => {
+                            const element = document.getElementById('profiles');
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                          }, 100);
+                        }}
                         className="cursor-pointer flex items-center px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
                       >
                         Discover
