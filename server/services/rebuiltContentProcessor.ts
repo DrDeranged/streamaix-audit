@@ -224,8 +224,8 @@ export class RebuiltContentProcessor {
               /"durationText":\{"simpleText":"([^"]+)"\}/,
               /"lengthText":\{"simpleText":"([^"]+)"\}/,
               /"detailText":"([^"]+)"/,
-              /videoDetails.*?"lengthSeconds":"(\d+)"/s,
-              /microformat.*?"lengthSeconds":"(\d+)"/s
+              /videoDetails[\s\S]*?"lengthSeconds":"(\d+)"/,
+              /microformat[\s\S]*?"lengthSeconds":"(\d+)"/
             ];
             
             console.log(`🔍 Searching for duration in HTML (${html.length} chars)...`);
@@ -285,7 +285,7 @@ export class RebuiltContentProcessor {
                     }
                   }
                 } catch (jsonError) {
-                  console.log(`⚠️ JSON-LD parsing failed:`, jsonError.message);
+                  console.log(`⚠️ JSON-LD parsing failed:`, (jsonError as Error).message);
                 }
               }
             }
@@ -303,7 +303,7 @@ export class RebuiltContentProcessor {
             }
           }
         } catch (pageError) {
-          console.log('⚠️ Could not extract additional metadata from page, using oEmbed data only:', pageError.message);
+          console.log('⚠️ Could not extract additional metadata from page, using oEmbed data only:', (pageError as Error).message);
         }
         
         // Final check: if we still have default duration, force it to a more reasonable value for this specific video
@@ -610,7 +610,7 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 
       // CRITICAL FIX: If AI didn't return proper chapters with real content, fail gracefully
       let chapters = result.chapters || [];
-      if (!chapters || chapters.length <= 1 || chapters.some(ch => ch.title.includes('Chapter') || ch.summary.includes('To be filled'))) {
+      if (!chapters || chapters.length <= 1 || chapters.some((ch: any) => ch.title.includes('Chapter') || ch.summary.includes('To be filled'))) {
         console.log(`⚠️ AI returned incomplete or generic chapters - this indicates the video content analysis failed`);
         // For now, return the basic structure but flag that real content extraction is needed
         chapters = [{
