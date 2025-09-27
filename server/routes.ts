@@ -1282,18 +1282,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get top crypto accounts with their highlight casts
+  // Get top crypto influencers with their recent tweets
   app.get('/api/top-accounts', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 6;
     
     try {
-      const { farcasterService } = await import('./services/farcaster.js');
-      const accountsWithHighlights = await farcasterService.getTopAccountsWithHighlights(limit);
+      const { twitterService } = await import('./services/twitterService');
+      const influencers = twitterService.getCryptoInfluencers().slice(0, limit);
+      
+      // Get recent tweets for each influencer
+      const accountsWithTweets = await Promise.all(
+        influencers.map(async (influencer) => {
+          const tweets = await twitterService.getUserTweets(influencer.username, 3);
+          const profile = await twitterService.getUserProfile(influencer.username);
+          
+          return {
+            username: influencer.username,
+            displayName: influencer.name,
+            category: influencer.category,
+            profile: profile,
+            recentTweets: tweets
+          };
+        })
+      );
       
       res.json({
         success: true,
-        accounts: accountsWithHighlights,
-        count: accountsWithHighlights.length
+        accounts: accountsWithTweets,
+        count: accountsWithTweets.length
       });
     } catch (error) {
       console.error('Failed to fetch top accounts:', error);
@@ -1304,27 +1320,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get conversation thread for a cast
-  app.get('/api/threads/:hash', asyncHandler(async (req: Request, res: Response) => {
-    const { hash } = req.params;
-    const depth = parseInt(req.query.depth as string) || 2;
+  // Get conversation thread for a tweet
+  app.get('/api/threads/:tweetId', asyncHandler(async (req: Request, res: Response) => {
+    const { tweetId } = req.params;
     
-    if (!hash) {
-      return res.status(400).json({ error: 'Cast hash required' });
+    if (!tweetId) {
+      return res.status(400).json({ error: 'Tweet ID required' });
     }
     
     try {
-      const { farcasterService } = await import('./services/farcaster.js');
-      const thread = await farcasterService.fetchCastThread(hash, depth);
-      
+      // Note: Twitter API v2 doesn't provide easy conversation threading
+      // For now, we'll return the original tweet with a note about limitations
       res.json({
         success: true,
-        root: thread.root,
-        replies: thread.replies,
-        count: thread.replies.length
+        root: { id: tweetId, note: 'Twitter conversation threading requires additional API access' },
+        replies: [],
+        count: 0,
+        message: 'Twitter conversation threading is limited in the current API access level'
       });
     } catch (error) {
-      console.error(`Failed to fetch thread for cast ${hash}:`, error);
+      console.error(`Failed to fetch thread for tweet ${tweetId}:`, error);
       res.status(500).json({ 
         error: 'Failed to fetch thread',
         message: error instanceof Error ? error.message : 'Unknown error'

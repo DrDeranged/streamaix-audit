@@ -1304,7 +1304,7 @@ interface TrendingStory {
   title: string;
   description: string;
   source: string;
-  sourceType: 'farcaster' | 'youtube' | 'news' | 'summary';
+  sourceType: 'twitter' | 'youtube' | 'news' | 'summary';
   engagement: {
     likes: number;
     comments: number;
@@ -3446,7 +3446,7 @@ export default function Discover() {
   const [, setLocation] = useLocation();
   const timeFilter = '24h'; // Fixed to 24h only
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
-  const [storyFilter, setStoryFilter] = useState<'all' | 'farcaster' | 'youtube' | 'news'>('all');
+  const [storyFilter, setStoryFilter] = useState<'all' | 'twitter' | 'youtube' | 'news'>('all');
   const [showInsights, setShowInsights] = useState<boolean>(false);
   const [selectedDerivativesAsset, setSelectedDerivativesAsset] = useState<string>('BTC');
   const pageStartTime = useRef<number>(Date.now());
@@ -6049,7 +6049,7 @@ export default function Discover() {
             <div className="flex gap-2 flex-wrap">
               {([
                 { key: 'all', label: 'All Sources', icon: Globe },
-                { key: 'farcaster', label: 'Social', icon: MessageSquare },
+                { key: 'twitter', label: 'Social', icon: MessageSquare },
                 { key: 'youtube', label: 'Videos', icon: Video },
                 { key: 'news', label: 'News', icon: Newspaper }
               ] as const).map(({ key, label, icon: Icon }) => (
@@ -6752,7 +6752,7 @@ export default function Discover() {
           </Button>
           
           <Button
-            onClick={() => setLocation('/farcaster-activity')}
+            onClick={() => setLocation('/twitter-activity')}
             variant="outline"
             className="border-white/20 text-white hover:bg-white/10"
             data-testid="button-social-activity"
