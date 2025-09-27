@@ -88,9 +88,11 @@ class MemoryCache {
 class TwitterRateLimiter {
   private tokens: number;
   private lastRefill: number;
-  private readonly capacity: number = 300; // Twitter API v2 allows 300 requests per 15 minutes
-  private readonly refillRate: number = 20; // 20 requests per minute
+  private readonly capacity: number = 75; // Conservative: 75 requests per 15 minutes
+  private readonly refillRate: number = 5; // 5 requests per minute
   private backoffUntil: number = 0;
+  private lastRequestTime: number = 0;
+  private readonly minInterval: number = 2000; // Minimum 2 seconds between requests
 
   constructor() {
     this.tokens = this.capacity;
@@ -109,7 +111,13 @@ class TwitterRateLimiter {
   canMakeRequest(): boolean {
     const now = Date.now();
     
+    // Check backoff period
     if (now < this.backoffUntil) {
+      return false;
+    }
+    
+    // Check minimum interval between requests
+    if (now - this.lastRequestTime < this.minInterval) {
       return false;
     }
     
@@ -123,16 +131,15 @@ class TwitterRateLimiter {
     }
     
     this.tokens -= 1;
+    this.lastRequestTime = Date.now();
     return true;
   }
 
   handle429Error(retryAfterSeconds?: number): void {
-    if (retryAfterSeconds) {
-      this.backoffUntil = Date.now() + (retryAfterSeconds * 1000);
-    } else {
-      this.backoffUntil = Date.now() + (15 * 60 * 1000); // 15 minutes default
-    }
+    const backoffTime = retryAfterSeconds ? retryAfterSeconds * 1000 : 15 * 60 * 1000; // Default 15 minutes
+    this.backoffUntil = Date.now() + backoffTime;
     this.tokens = 0;
+    console.log(`⏱️ Twitter API rate limit hit, backing off for ${backoffTime / 1000} seconds`);
   }
 }
 
