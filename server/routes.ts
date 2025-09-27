@@ -4970,30 +4970,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get social trending data
   app.get('/api/social/trending', asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { farcasterService } = await import('./services/farcaster');
+      const { twitterService } = await import('./services/twitterService');
       
-      // Get prominent crypto users and their recent activity
-      const [prominentUsers, trendingContent] = await Promise.all([
-        farcasterService.getProminentCryptoUsers(10),
-        farcasterService.getTrendingContent({ limit: 15, since: '6h' })
+      // Get prominent crypto users and their recent tweets
+      const [prominentUsers, trendingTweets] = await Promise.all([
+        Promise.resolve(twitterService.getCryptoInfluencers().slice(0, 10)),
+        twitterService.getCryptoInfluencerTweets()
       ]);
 
       // Calculate social metrics
       const socialMetrics = {
-        totalEngagement: trendingContent.reduce((sum: number, cast: any) => 
-          sum + (cast.likes || 0) + (cast.replies || 0) + (cast.recasts || 0), 0),
+        totalEngagement: trendingTweets.reduce((sum: number, tweet: any) => 
+          sum + (tweet.public_metrics?.like_count || 0) + (tweet.public_metrics?.reply_count || 0) + (tweet.public_metrics?.retweet_count || 0), 0),
         activeUsers: prominentUsers.length,
-        trending: trendingContent.slice(0, 5).map((cast: any) => ({
-          text: cast.text.slice(0, 80) + '...',
-          author: cast.author.username,
-          engagement: (cast.likes || 0) + (cast.replies || 0) + (cast.recasts || 0)
+        trending: trendingTweets.slice(0, 5).map((tweet: any) => ({
+          text: tweet.text.slice(0, 80) + '...',
+          author: tweet.author?.username || 'unknown',
+          engagement: (tweet.public_metrics?.like_count || 0) + (tweet.public_metrics?.reply_count || 0) + (tweet.public_metrics?.retweet_count || 0)
         }))
       };
 
       res.json({
         metrics: socialMetrics,
         prominentUsers: prominentUsers.slice(0, 5),
-        trendingContent: trendingContent.slice(0, 10),
+        trendingContent: trendingTweets.slice(0, 10),
         timestamp: new Date().toISOString()
       });
     } catch (error: any) {
