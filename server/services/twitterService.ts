@@ -88,11 +88,11 @@ class MemoryCache {
 class TwitterRateLimiter {
   private tokens: number;
   private lastRefill: number;
-  private readonly capacity: number = 75; // Conservative: 75 requests per 15 minutes
-  private readonly refillRate: number = 5; // 5 requests per minute
+  private readonly capacity: number = 150; // More reasonable: 150 requests per 15 minutes
+  private readonly refillRate: number = 10; // 10 requests per minute
   private backoffUntil: number = 0;
   private lastRequestTime: number = 0;
-  private readonly minInterval: number = 2000; // Minimum 2 seconds between requests
+  private readonly minInterval: number = 1000; // Minimum 1 second between requests
 
   constructor() {
     this.tokens = this.capacity;
@@ -122,7 +122,9 @@ class TwitterRateLimiter {
     }
     
     this.refillTokens();
-    return this.tokens >= 1;
+    
+    // More generous token check - allow requests if we have any tokens
+    return this.tokens >= 0.1;
   }
 
   consumeToken(): boolean {
@@ -179,7 +181,7 @@ export class TwitterService {
 
   private async makeRequest<T>(url: string, params?: Record<string, any>): Promise<T | null> {
     if (!this.bearerToken) {
-      console.log('⚠️ Twitter API not configured - returning null');
+      console.log('⚠️ Twitter API not configured');
       return null;
     }
 
@@ -189,20 +191,26 @@ export class TwitterService {
     }
 
     try {
+      console.log(`🐦 Making Twitter API request to: ${url}`);
       const response = await axios.get(url, {
         headers: this.getHeaders(),
         params,
-        timeout: 10000
+        timeout: 15000
       });
 
+      console.log(`✅ Twitter API request successful: ${response.status}`);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 429) {
         const retryAfter = parseInt(error.response.headers['retry-after']) || 900;
         this.rateLimiter.handle429Error(retryAfter);
         console.log(`⏱️ Twitter API rate limit hit, backing off for ${retryAfter} seconds`);
+      } else if (error.response?.status === 401) {
+        console.error('❌ Twitter API authentication failed - check Bearer Token');
+      } else if (error.response?.status === 403) {
+        console.error('❌ Twitter API forbidden - insufficient permissions');
       } else {
-        console.error('Twitter API error:', error.message);
+        console.error(`❌ Twitter API error (${error.response?.status}):`, error.message);
       }
       return null;
     }
@@ -276,53 +284,44 @@ export class TwitterService {
     const cached = this.cache.get<TwitterTweet[]>(cacheKey);
     if (cached) return cached;
 
-    // Always return demo content for now to bypass API issues
-    const demoTweets: TwitterTweet[] = [
-      {
-        id: 'demo_1',
-        text: 'Bitcoin ETFs are gaining massive institutional adoption. The future of crypto infrastructure is being built right now. 🚀',
-        author_id: 'demo_saylor',
-        created_at: new Date(Date.now() - 1800000).toISOString(),
-        public_metrics: { retweet_count: 847, like_count: 3291, reply_count: 156, quote_count: 78 },
-        author: { id: 'demo_saylor', username: 'saylor', name: 'Michael Saylor', verified: true }
-      },
-      {
-        id: 'demo_2', 
-        text: 'Ethereum Layer 2 solutions are processing over 10M transactions daily. The scaling narrative is playing out beautifully.',
-        author_id: 'demo_vitalik',
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        public_metrics: { retweet_count: 612, like_count: 2847, reply_count: 234, quote_count: 89 },
-        author: { id: 'demo_vitalik', username: 'VitalikButerin', name: 'Vitalik Buterin', verified: true }
-      },
-      {
-        id: 'demo_3',
-        text: 'The intersection of AI and crypto is where the next decade of innovation will happen. Building the future, one block at a time.',
-        author_id: 'demo_naval',
-        created_at: new Date(Date.now() - 7200000).toISOString(),
-        public_metrics: { retweet_count: 434, like_count: 1923, reply_count: 178, quote_count: 56 },
-        author: { id: 'demo_naval', username: 'naval', name: 'Naval', verified: true }
-      },
-      {
-        id: 'demo_4',
-        text: 'Major banks are finally embracing crypto custody. This is the institutional adoption phase we have been waiting for.',
-        author_id: 'demo_pomp',
-        created_at: new Date(Date.now() - 10800000).toISOString(),
-        public_metrics: { retweet_count: 298, like_count: 1456, reply_count: 89, quote_count: 34 },
-        author: { id: 'demo_pomp', username: 'AnthonyPompliano', name: 'Anthony Pompliano', verified: true }
-      },
-      {
-        id: 'demo_5',
-        text: 'DeFi TVL hitting new highs while maintaining decentralization. This is how you build sustainable financial infrastructure.',
-        author_id: 'demo_balaji',
-        created_at: new Date(Date.now() - 14400000).toISOString(),
-        public_metrics: { retweet_count: 187, like_count: 892, reply_count: 67, quote_count: 23 },
-        author: { id: 'demo_balaji', username: 'balajis', name: 'Balaji S.', verified: true }
-      }
-    ];
+    if (!this.bearerToken) {
+      console.log('⚠️ Twitter Bearer Token not configured');
+      return [];
+    }
 
-    this.cache.set(cacheKey, demoTweets, 300); // 5 minutes cache
-    console.log(`🐦 Using ${demoTweets.length} demo tweets for showcase`);
-    return demoTweets;
+    const allTweets: TwitterTweet[] = [];
+
+    // Get tweets from a smaller set of influencers to stay within rate limits
+    for (const influencer of this.cryptoInfluencers.slice(0, 2)) {
+      try {
+        const tweets = await this.getUserTweets(influencer.username, 3);
+        allTweets.push(...tweets);
+        
+        // Add delay between requests to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.log(`⚠️ Failed to fetch tweets for ${influencer.username}:`, error);
+      }
+    }
+
+    // If we have tweets, sort them by engagement
+    if (allTweets.length > 0) {
+      allTweets.sort((a, b) => {
+        const aEngagement = (a.public_metrics?.like_count || 0) + (a.public_metrics?.retweet_count || 0);
+        const bEngagement = (b.public_metrics?.like_count || 0) + (b.public_metrics?.retweet_count || 0);
+        return bEngagement - aEngagement;
+      });
+
+      const topTweets = allTweets.slice(0, 10);
+      this.cache.set(cacheKey, topTweets, 900); // 15 minutes cache
+      
+      console.log(`🐦 Fetched ${topTweets.length} real tweets from Twitter API`);
+      return topTweets;
+    }
+
+    // If no tweets available, return empty array (no demo data)
+    console.log('⚠️ No Twitter content available - rate limits or API issues');
+    return [];
   }
 
   // Get user's recent tweets
