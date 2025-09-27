@@ -1101,72 +1101,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // =============================================================================
-  // FARCASTER ACTIVITY ROUTES
+  // TWITTER/X SOCIAL ROUTES
   // =============================================================================
 
-  // Get user's Farcaster activity analytics
-  app.get('/api/farcaster/activity/:fid', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const fid = parseInt(req.params.fid);
-    
-    if (!fid || isNaN(fid)) {
-      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
-    }
-
-    try {
-      const { farcasterService } = await import('./services/farcaster');
-      const analytics = await farcasterService.getUserActivityAnalytics(fid);
-      
-      res.json({
-        success: true,
-        activity: analytics
-      });
-    } catch (error) {
-      console.error('Failed to fetch Farcaster activity:', error);
-      res.status(500).json({ 
-        error: 'Failed to fetch Farcaster activity',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }));
-
-  // Get user's recent casts
-  app.get('/api/farcaster/casts/:fid', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const fid = parseInt(req.params.fid);
+  // Get user's recent tweets
+  app.get('/api/twitter/tweets/:username', asyncHandler(async (req: Request, res: Response) => {
+    const { username } = req.params;
     const limit = parseInt(req.query.limit as string) || 25;
     
-    if (!fid || isNaN(fid)) {
-      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    if (!username) {
+      return res.status(400).json({ error: 'Valid Twitter username required' });
     }
 
     try {
-      const { farcasterService } = await import('./services/farcaster');
-      const casts = await farcasterService.getUserCasts(fid, limit);
+      const { twitterService } = await import('./services/twitterService');
+      const tweets = await twitterService.getUserTweets(username, limit);
       
       res.json({
         success: true,
-        casts: casts,
-        count: casts.length
+        tweets: tweets,
+        count: tweets.length
       });
     } catch (error) {
-      console.error('Failed to fetch user casts:', error);
+      console.error('Failed to fetch user tweets:', error);
       res.status(500).json({ 
-        error: 'Failed to fetch user casts',
+        error: 'Failed to fetch user tweets',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }));
 
-  // Get user profile information
-  app.get('/api/farcaster/profile/:fid', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const fid = parseInt(req.params.fid);
+  // Get user profile information  
+  app.get('/api/twitter/profile/:username', asyncHandler(async (req: Request, res: Response) => {
+    const { username } = req.params;
     
-    if (!fid || isNaN(fid)) {
-      return res.status(400).json({ error: 'Valid Farcaster ID (fid) required' });
+    if (!username) {
+      return res.status(400).json({ error: 'Valid Twitter username required' });
     }
 
     try {
-      const { farcasterService } = await import('./services/farcaster');
-      const profile = await farcasterService.getUserProfile(fid);
+      const { twitterService } = await import('./services/twitterService');
+      const profile = await twitterService.getUserProfile(username);
       
       res.json({
         success: true,
@@ -1181,63 +1156,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get trending content from Farcaster with recent activity filtering
-  app.get('/api/farcaster/trending', asyncHandler(async (req: Request, res: Response) => {
-    const validation = validateRequest<RecentActivityRequest>(recentActivitySchema, req.query);
-    if (!validation.success) {
-      return res.status(400).json({ error: validation.error });
-    }
-
-    const { since, order, limit } = validation.data!;
+  // Get trending crypto tweets
+  app.get('/api/twitter/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const query = req.query.q as string || 'crypto OR bitcoin OR ethereum';
     
     try {
-      const { farcasterService } = await import('./services/farcaster');
-      const trending = await farcasterService.getTrendingContent(limit, { since, order });
+      const { twitterService } = await import('./services/twitterService');
+      const trending = await twitterService.searchCryptoTweets(query, limit);
       
       res.json({
         success: true,
         trending: trending,
         count: trending.length,
-        filters: { since, order, limit }
+        query: query
       });
     } catch (error) {
-      console.error('Failed to fetch trending content:', error);
+      console.error('Failed to fetch trending tweets:', error);
       res.status(500).json({ 
-        error: 'Failed to fetch trending content',
+        error: 'Failed to fetch trending tweets',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }));
 
-  // Test Neynar API endpoints to see which ones work
-  app.get('/api/farcaster/test-endpoints', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  // Get trending crypto topics
+  app.get('/api/twitter/topics', asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { farcasterService } = await import('./services/farcaster');
-      const testResults = await farcasterService.testApiEndpoints();
+      const { twitterService } = await import('./services/twitterService');
+      const topics = await twitterService.getTrendingCryptoTopics();
       
       res.json({
         success: true,
-        testResults: testResults
+        topics: topics,
+        count: topics.length
       });
     } catch (error) {
-      console.error('Failed to test Farcaster endpoints:', error);
+      console.error('Failed to fetch trending topics:', error);
       res.status(500).json({ 
-        error: 'Failed to test Farcaster endpoints',
+        error: 'Failed to fetch trending topics',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }));
 
-  // Get prominent crypto users from Farcaster
-  app.get('/api/farcaster/prominent-users', asyncHandler(async (req: Request, res: Response) => {
+  // Get crypto influencer tweets
+  app.get('/api/twitter/influencers', asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { farcasterService } = await import('./services/farcaster');
-      const prominentUsers = await farcasterService.getProminentCryptoUsers();
+      const { twitterService } = await import('./services/twitterService');
+      const tweets = await twitterService.getCryptoInfluencerTweets();
       
       res.json({
         success: true,
-        users: prominentUsers,
-        count: prominentUsers.length,
+        tweets: tweets,
+        count: tweets.length,
+        message: 'Crypto influencer tweets fetched successfully'
+      });
+    } catch (error) {
+      console.error('Failed to fetch influencer tweets:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch influencer tweets',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }));
+
+  // Get crypto influencers list for discovery
+  app.get('/api/twitter/prominent-users', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { twitterService } = await import('./services/twitterService');
+      const influencers = twitterService.getCryptoInfluencers();
+      
+      res.json({
+        success: true,
+        users: influencers,
+        count: influencers.length,
         message: 'Prominent crypto users fetched successfully'
       });
     } catch (error) {
@@ -1253,30 +1246,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TRENDING CRYPTO CONTENT ROUTES
   // =============================================================================
 
-  // Get trending casts from top crypto accounts
+  // Get trending tweets from crypto influencers and topics
   app.get('/api/trending', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 20;
-    const fid = req.query.fid ? parseInt(req.query.fid as string) : undefined;
+    const username = req.query.username as string;
     
     try {
-      const { farcasterService } = await import('./services/farcaster.js');
-      const { getTopFids } = await import('./services/farcasterTopAccounts.js');
+      const { twitterService } = await import('./services/twitterService');
       
-      let trendingCasts;
-      if (fid) {
-        // Get casts from specific account
-        trendingCasts = await farcasterService.fetchUserRecent(fid, limit);
+      let trendingTweets;
+      if (username) {
+        // Get tweets from specific user
+        trendingTweets = await twitterService.getUserTweets(username, limit);
       } else {
-        // Get trending from all top accounts
-        const topFids = getTopFids(10);
-        trendingCasts = await farcasterService.aggregateTrendingFromFids(topFids, limit);
+        // Get trending from crypto influencers
+        trendingTweets = await twitterService.getCryptoInfluencerTweets();
+        trendingTweets = trendingTweets.slice(0, limit);
       }
+      
+      // Format for compatibility with existing frontend
+      const formattedTweets = twitterService.formatForDiscoverPage(trendingTweets);
       
       res.json({
         success: true,
-        items: trendingCasts,
-        count: trendingCasts.length,
-        fid: fid || null
+        items: formattedTweets,
+        count: formattedTweets.length,
+        username: username || null
       });
     } catch (error) {
       console.error('Failed to fetch trending content:', error);
