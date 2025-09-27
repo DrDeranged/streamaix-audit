@@ -199,8 +199,16 @@ export class TwitterService {
       });
 
       console.log(`✅ Twitter API request successful: ${response.status}`);
+      console.log(`📊 Response data:`, JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error: any) {
+      console.error(`❌ Twitter API Error Details:`, {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers
+      });
+      
       if (error.response?.status === 429) {
         const retryAfter = parseInt(error.response.headers['retry-after']) || 900;
         this.rateLimiter.handle429Error(retryAfter);
@@ -224,10 +232,10 @@ export class TwitterService {
 
     const url = `${this.baseUrl}/tweets/search/recent`;
     const params = {
-      query: `${query} -is:retweet lang:en`,
-      max_results: Math.min(maxResults, 100),
-      'tweet.fields': 'created_at,author_id,public_metrics,context_annotations,entities',
-      'user.fields': 'username,name,description,profile_image_url,public_metrics,verified',
+      query: query, // Simple query without complex operators to avoid 400 errors
+      max_results: Math.min(maxResults, 10), // Lower limit to respect rate limits
+      'tweet.fields': 'created_at,author_id,public_metrics',
+      'user.fields': 'username,name,verified',
       expansions: 'author_id'
     };
 
@@ -289,38 +297,49 @@ export class TwitterService {
       return [];
     }
 
-    const allTweets: TwitterTweet[] = [];
+    // Reset rate limiter to clear any existing backoff
+    this.rateLimiter = new TwitterRateLimiter();
 
-    // Get tweets from a smaller set of influencers to stay within rate limits
-    for (const influencer of this.cryptoInfluencers.slice(0, 2)) {
-      try {
-        const tweets = await this.getUserTweets(influencer.username, 3);
-        allTweets.push(...tweets);
-        
-        // Add delay between requests to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      } catch (error) {
-        console.log(`⚠️ Failed to fetch tweets for ${influencer.username}:`, error);
-      }
-    }
-
-    // If we have tweets, sort them by engagement
-    if (allTweets.length > 0) {
-      allTweets.sort((a, b) => {
-        const aEngagement = (a.public_metrics?.like_count || 0) + (a.public_metrics?.retweet_count || 0);
-        const bEngagement = (b.public_metrics?.like_count || 0) + (b.public_metrics?.retweet_count || 0);
-        return bEngagement - aEngagement;
-      });
-
-      const topTweets = allTweets.slice(0, 10);
-      this.cache.set(cacheKey, topTweets, 900); // 15 minutes cache
+    try {
+      // Use simple search with basic keywords - much more reliable
+      const cryptoTweets = await this.searchCryptoTweets('bitcoin', 15);
       
-      console.log(`🐦 Fetched ${topTweets.length} real tweets from Twitter API`);
-      return topTweets;
+      if (cryptoTweets.length > 0) {
+        // Sort by engagement
+        cryptoTweets.sort((a, b) => {
+          const aEngagement = (a.public_metrics?.like_count || 0) + (a.public_metrics?.retweet_count || 0);
+          const bEngagement = (b.public_metrics?.like_count || 0) + (b.public_metrics?.retweet_count || 0);
+          return bEngagement - aEngagement;
+        });
+
+        const topTweets = cryptoTweets.slice(0, 10);
+        this.cache.set(cacheKey, topTweets, 3600); // 1 hour cache - preserve data longer
+        
+        console.log(`🐦 Fetched ${topTweets.length} real tweets using search API`);
+        return topTweets;
+      }
+    } catch (error) {
+      console.log('⚠️ Bitcoin search failed, trying ethereum');
     }
 
-    // If no tweets available, return empty array (no demo data)
-    console.log('⚠️ No Twitter content available - rate limits or API issues');
+    // Fallback: try ethereum search if bitcoin search fails
+    try {
+      const ethTweets = await this.searchCryptoTweets('ethereum', 10);
+      
+      if (ethTweets.length > 0) {
+        const topTweets = ethTweets.slice(0, 8);
+        this.cache.set(cacheKey, topTweets, 1800); // 30 minutes cache for fallback
+        
+        console.log(`🐦 Fetched ${topTweets.length} crypto tweets using ethereum search`);
+        return topTweets;
+      }
+    } catch (error) {
+      console.log('⚠️ Ethereum search also failed');
+    }
+
+    // If all approaches fail, return empty array (no demo data)
+    console.log('⚠️ No Twitter content available - API rate limits exhausted (1 request per 15 minutes)');
+    console.log('💡 Twitter content will be available when rate limit resets');
     return [];
   }
 
