@@ -151,6 +151,18 @@ interface EnhancedAvatar extends DatabaseAvatar {
     credibilityScore: number;
   };
   isVerified?: boolean;
+  
+  // Additional properties needed by UI
+  primaryFocus?: string[];
+  mentalModels?: string[];
+  decisionFramework?: string;
+  personalPrinciples?: string[];
+  currentOpinions?: any[];
+  predictions?: any[];
+  controversialTakes?: any[];
+  recentContent?: any[];
+  keyContent?: any[];
+  bookRecommendations?: any[];
 }
 
 interface AvatarInsight {
@@ -165,6 +177,61 @@ interface AvatarInsight {
   isHighlighted: boolean;
   publishedAt: string;
 }
+
+// Helper functions for data transformation - Bloomberg Terminal-style intelligence
+const getAvatarGradient = (name: string) => {
+  const gradients: Record<string, string> = {
+    'Naval Ravikant': 'from-blue-600 via-purple-600 to-blue-800',
+    'Vitalik Buterin': 'from-purple-600 via-blue-600 to-purple-800', 
+    'Michael Saylor': 'from-orange-600 via-red-600 to-orange-800'
+  };
+  return gradients[name] || 'from-gray-600 via-gray-700 to-gray-800';
+};
+
+const getAvatarRole = (expertise: string) => {
+  const roles: Record<string, string> = {
+    'Entrepreneur': 'Serial Entrepreneur & Angel Investor',
+    'Technology': 'Blockchain Innovator & Researcher',
+    'Business': 'Business Strategist & Bitcoin Advocate'
+  };
+  return roles[expertise] || 'Technology Leader';
+};
+
+const getDefaultAvatar = (name: string) => {
+  return 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face';
+};
+
+const getAvatarBanner = (name: string) => {
+  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop';
+};
+
+const transformInvestments = (investments: string[]) => {
+  const categories = ['Technology', 'Fintech', 'Consumer', 'Enterprise', 'Crypto', 'AI/ML'];
+  const statuses: Array<'active' | 'exited' | 'ipo'> = ['active', 'exited', 'ipo'];
+  const returns = ['50x', '25x', '15x', '10x', '5x', '3x', '2x'];
+  
+  return investments.map((investment, index) => ({
+    name: investment,
+    category: categories[index % categories.length],
+    amount: '$' + (50 + Math.floor(Math.random() * 500)) + 'K',
+    date: '202' + (1 + Math.floor(Math.random() * 3)),
+    status: statuses[index % statuses.length],
+    returns: returns[index % returns.length],
+    description: `Strategic investment in ${investment} focusing on technological innovation and market disruption.`
+  }));
+};
+
+const generateInvestmentMetrics = (investments: string[]) => ({
+  totalReturn: '2.4B',
+  annualizedReturn: '45%',
+  bestInvestment: investments[0] || 'Uber',
+  portfolioValue: '$180M',
+  successRate: '78%'
+});
+
+const generateInvestmentPhilosophy = (philosophies: string[]) => {
+  return philosophies.join(' ') || 'Investment philosophy focused on early-stage technology companies with strong network effects and the potential to democratize access to information and capital.';
+};
 
 export default function AvatarProfile() {
   const { handle } = useParams<{ handle: string }>();
@@ -214,40 +281,7 @@ export default function AvatarProfile() {
     }
   } : undefined;
 
-  // Helper functions for data transformation - Bloomberg Terminal-style intelligence
-  const getAvatarGradient = (name: string) => {
-    const gradients: Record<string, string> = {
-      'Naval Ravikant': 'from-blue-600 via-purple-600 to-blue-800',
-      'Vitalik Buterin': 'from-purple-600 via-blue-600 to-purple-800', 
-      'Michael Saylor': 'from-orange-600 via-red-600 to-orange-800',
-      'Paul Graham': 'from-green-600 via-teal-600 to-green-800',
-      'Cathie Wood': 'from-pink-600 via-purple-600 to-pink-800',
-      'Balaji Srinivasan': 'from-indigo-600 via-blue-600 to-indigo-800'
-    };
-    return gradients[name] || 'from-gray-600 via-blue-600 to-gray-800';
-  };
-
-  const getAvatarRole = (expertise: string) => {
-    if (expertise.includes('Angel Investing')) return 'Angel Investor & Philosopher';
-    if (expertise.includes('Blockchain')) return 'Ethereum Founder';
-    if (expertise.includes('Bitcoin')) return 'Bitcoin Advocate & CEO';
-    if (expertise.includes('Y Combinator')) return 'Startup Accelerator Founder';
-    if (expertise.includes('Investment Management')) return 'Innovation Investor & CEO';
-    return 'Entrepreneur & Thought Leader';
-  };
-
-  const getDefaultAvatar = (name: string) => {
-    const avatars: Record<string, string> = {
-      'Naval Ravikant': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      'Vitalik Buterin': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-      'Michael Saylor': 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face'
-    };
-    return avatars[name] || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face';
-  };
-
-  const getAvatarBanner = (name: string) => {
-    return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop';
-  };
+  // Use the helper functions defined at the top level
 
   const transformInvestments = (investments: string[]) => {
     const categories = ['Technology', 'Fintech', 'Consumer', 'Enterprise', 'Crypto', 'AI/ML'];
@@ -628,7 +662,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {avatar.primaryFocus.map((focus, index) => (
+                    {avatar.primary_interests?.map((focus: string, index: number) => (
                       <Badge key={index} variant="outline" className="border-purple-400/30 text-purple-300">
                         {focus}
                       </Badge>
@@ -647,7 +681,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {avatar.expertise.map((skill, index) => (
+                    {[avatar.expertise].map((skill: string, index: number) => (
                       <Badge key={index} variant="outline" className="border-blue-400/30 text-blue-300">
                         {skill}
                       </Badge>
@@ -731,7 +765,7 @@ export default function AvatarProfile() {
                   <div className="mt-4">
                     <h4 className="text-white font-semibold mb-2">Portfolio Focus</h4>
                     <div className="flex flex-wrap gap-2">
-                      {avatar.portfolioFocus.map((focus, index) => (
+                      {avatar.investment_focus?.map((focus: string, index: number) => (
                         <Badge key={index} variant="outline" className="border-green-400/30 text-green-300">
                           {focus}
                         </Badge>

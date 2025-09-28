@@ -191,63 +191,26 @@ export const learningResources = pgTable("learning_resources", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Enhanced Knowledge Avatars System
+// Knowledge Avatars System - EXACT match to database structure
 export const knowledgeAvatars = pgTable("knowledge_avatars", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  handle: text("handle").notNull().unique(), // @naval.eth, @vitalik.lens
-  avatar: text("avatar").notNull(),
-  banner: text("banner"), // Header banner image
-  gradient: text("gradient").notNull(), // CSS gradient class
+  handle: text("handle").notNull().unique(),
   bio: text("bio"),
-  role: text("role"), // "Ethereum Founder", "Angel Investor", etc.
-  
-  // Core Interests & Expertise
-  primaryFocus: text("primary_focus").array(), // ["Web3", "Investing", "Philosophy"]
-  expertise: text("expertise").array(), // ["Blockchain", "Startups", "Philosophy"]
-  interests: jsonb("interests"), // { topics: [], industries: [], technologies: [] }
-  
-  // Investment Philosophy & Portfolio
-  investmentPhilosophy: text("investment_philosophy"),
-  portfolioFocus: text("portfolio_focus").array(), // ["Early Stage", "Crypto", "AI"]
-  publicInvestments: jsonb("public_investments"), // Array of investment objects
-  investmentReturns: jsonb("investment_returns"), // Performance data
-  
-  // Mindset & Worldview
-  coreBeliefs: text("core_beliefs").array(), // Key philosophical beliefs
-  mentalModels: text("mental_models").array(), // Thinking frameworks
-  decisionFramework: text("decision_framework"), // How they make decisions
-  personalPrinciples: text("personal_principles").array(), // Life principles
-  
-  // Current Opinions & Takes
-  currentOpinions: jsonb("current_opinions"), // Latest thoughts on topics
-  controversialTakes: text("controversial_takes").array(), // Bold opinions
-  predictions: jsonb("predictions"), // Future predictions with dates
-  
-  // Content & Activity
-  recentContent: jsonb("recent_content"), // Latest tweets, posts, articles
-  keyContent: jsonb("key_content"), // Essential content from this person
-  bookRecommendations: jsonb("book_recommendations"), // Book recs with reasons
-  
-  // Social & Network
-  followingCount: integer("following_count").default(0),
-  followerCount: integer("follower_count").default(0),
-  totalContent: integer("total_content").default(0),
-  engagementRate: real("engagement_rate").default(0),
-  
-  // Verification & Credibility
-  isVerified: boolean("is_verified").default(false),
-  credibilityScore: integer("credibility_score").default(50), // 0-100
-  expertise_level: text("expertise_level").default("expert"), // novice, intermediate, expert, guru
-  
-  // Platform presence
+  expertise: text("expertise"),
+  imageUrl: text("image_url"),
+  websiteUrl: text("website_url"),
   twitterHandle: text("twitter_handle"),
-  linkedinProfile: text("linkedin_profile"),
-  personalWebsite: text("personal_website"),
-  
-  // Metadata
+  linkedinUrl: text("linkedin_url"),
   isActive: boolean("is_active").default(true),
-  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  followerCount: integer("follower_count").default(0),
+  followingCount: integer("following_count").default(0),
+  verificationStatus: text("verification_status").default("unverified"),
+  primaryInterests: text("primary_interests").array(),
+  investmentFocus: text("investment_focus").array(),
+  notableInvestments: text("notable_investments").array(),
+  philosophicalViews: text("philosophical_views").array(),
+  recentThoughts: text("recent_thoughts").array(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -550,39 +513,21 @@ export const insertLearningResourceSchema = createInsertSchema(learningResources
 export const insertKnowledgeAvatarSchema = createInsertSchema(knowledgeAvatars).pick({
   name: true,
   handle: true,
-  avatar: true,
-  banner: true,
-  gradient: true,
   bio: true,
-  role: true,
-  primaryFocus: true,
   expertise: true,
-  interests: true,
-  investmentPhilosophy: true,
-  portfolioFocus: true,
-  publicInvestments: true,
-  investmentReturns: true,
-  coreBeliefs: true,
-  mentalModels: true,
-  decisionFramework: true,
-  personalPrinciples: true,
-  currentOpinions: true,
-  controversialTakes: true,
-  predictions: true,
-  recentContent: true,
-  keyContent: true,
-  bookRecommendations: true,
-  followingCount: true,
-  followerCount: true,
-  totalContent: true,
-  engagementRate: true,
-  isVerified: true,
-  credibilityScore: true,
-  expertise_level: true,
+  imageUrl: true,
+  websiteUrl: true,
   twitterHandle: true,
-  linkedinProfile: true,
-  personalWebsite: true,
+  linkedinUrl: true,
   isActive: true,
+  followerCount: true,
+  followingCount: true,
+  verificationStatus: true,
+  primaryInterests: true,
+  investmentFocus: true,
+  notableInvestments: true,
+  philosophicalViews: true,
+  recentThoughts: true,
 });
 
 export const insertAvatarFollowSchema = createInsertSchema(avatarFollows).pick({
