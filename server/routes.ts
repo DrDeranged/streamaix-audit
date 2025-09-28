@@ -661,6 +661,165 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // AVATAR ROUTES
+  // =============================================================================
+
+  // Get avatar by handle
+  app.get('/api/avatars/:handle', asyncHandler(async (req: Request, res: Response) => {
+    const { handle } = req.params;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatarByHandle(handle);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      res.json({ avatar });
+    } catch (error) {
+      console.error('Error fetching avatar:', error);
+      res.status(500).json({ error: 'Failed to fetch avatar' });
+    }
+  }));
+
+  // Get avatar insights
+  app.get('/api/avatars/:handle/insights', asyncHandler(async (req: Request, res: Response) => {
+    const { handle } = req.params;
+    const { category } = req.query;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatarByHandle(handle);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      const insights = await storage.getAvatarInsights(avatar.id, category as string);
+      res.json({ insights });
+    } catch (error) {
+      console.error('Error fetching avatar insights:', error);
+      res.status(500).json({ error: 'Failed to fetch avatar insights' });
+    }
+  }));
+
+  // Check follow status
+  app.get('/api/avatars/:handle/follow-status', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { handle } = req.params;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatarByHandle(handle);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      const isFollowing = await storage.isFollowingAvatar(req.user!.id, avatar.id);
+      
+      // Get follow details if following
+      let notificationsEnabled = false;
+      if (isFollowing) {
+        const followedAvatars = await storage.getUserFollowedAvatars(req.user!.id);
+        const followData = followedAvatars.find(f => f.avatarId === avatar.id);
+        notificationsEnabled = followData?.notificationsEnabled || false;
+      }
+
+      res.json({ 
+        isFollowing,
+        notificationsEnabled 
+      });
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+      res.status(500).json({ error: 'Failed to check follow status' });
+    }
+  }));
+
+  // Follow avatar
+  app.post('/api/avatars/:id/follow', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const { notificationsEnabled = true } = req.body;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatar(id);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      // Check if already following
+      const isAlreadyFollowing = await storage.isFollowingAvatar(req.user!.id, id);
+      if (isAlreadyFollowing) {
+        return res.status(409).json({ error: 'Already following this avatar' });
+      }
+
+      const follow = await storage.followAvatar(req.user!.id, id);
+      
+      res.status(201).json({
+        message: 'Successfully followed avatar',
+        follow
+      });
+    } catch (error) {
+      console.error('Error following avatar:', error);
+      res.status(500).json({ error: 'Failed to follow avatar' });
+    }
+  }));
+
+  // Unfollow avatar
+  app.delete('/api/avatars/:id/unfollow', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatar(id);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      // Check if following
+      const isFollowing = await storage.isFollowingAvatar(req.user!.id, id);
+      if (!isFollowing) {
+        return res.status(409).json({ error: 'Not following this avatar' });
+      }
+
+      const success = await storage.unfollowAvatar(req.user!.id, id);
+      
+      if (success) {
+        res.json({ message: 'Successfully unfollowed avatar' });
+      } else {
+        res.status(500).json({ error: 'Failed to unfollow avatar' });
+      }
+    } catch (error) {
+      console.error('Error unfollowing avatar:', error);
+      res.status(500).json({ error: 'Failed to unfollow avatar' });
+    }
+  }));
+
+  // Get user's followed avatars
+  app.get('/api/users/:id/followed-avatars', asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      const followedAvatars = await storage.getUserFollowedAvatars(id);
+      res.json({ followedAvatars });
+    } catch (error) {
+      console.error('Error fetching followed avatars:', error);
+      res.status(500).json({ error: 'Failed to fetch followed avatars' });
+    }
+  }));
+
+  // Get avatar followers
+  app.get('/api/avatars/:id/followers', asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatar(id);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      const followers = await storage.getAvatarFollowers(id);
+      res.json({ followers });
+    } catch (error) {
+      console.error('Error fetching avatar followers:', error);
+      res.status(500).json({ error: 'Failed to fetch avatar followers' });
+    }
+  }));
+
+  // =============================================================================
   // INTERACTION ROUTES
   // =============================================================================
 

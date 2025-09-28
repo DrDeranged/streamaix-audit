@@ -786,6 +786,187 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Knowledge Avatar implementations
+  async getKnowledgeAvatar(id: string): Promise<KnowledgeAvatar | undefined> {
+    const [avatar] = await db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, id));
+    return avatar || undefined;
+  }
+
+  async getKnowledgeAvatarByHandle(handle: string): Promise<KnowledgeAvatar | undefined> {
+    const [avatar] = await db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.handle, handle));
+    return avatar || undefined;
+  }
+
+  async getKnowledgeAvatars(limit = 50, offset = 0): Promise<KnowledgeAvatar[]> {
+    return await db
+      .select()
+      .from(knowledgeAvatars)
+      .where(eq(knowledgeAvatars.isActive, true))
+      .orderBy(desc(knowledgeAvatars.followerCount))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async createKnowledgeAvatar(insertAvatar: InsertKnowledgeAvatar): Promise<KnowledgeAvatar> {
+    const [avatar] = await db
+      .insert(knowledgeAvatars)
+      .values(insertAvatar)
+      .returning();
+    return avatar;
+  }
+
+  async updateKnowledgeAvatar(id: string, updates: Partial<InsertKnowledgeAvatar>): Promise<KnowledgeAvatar | undefined> {
+    const [avatar] = await db
+      .update(knowledgeAvatars)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(knowledgeAvatars.id, id))
+      .returning();
+    return avatar || undefined;
+  }
+
+  async deleteKnowledgeAvatar(id: string): Promise<boolean> {
+    const result = await db.delete(knowledgeAvatars).where(eq(knowledgeAvatars.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Avatar Following implementations
+  async followAvatar(userId: string, avatarId: string): Promise<AvatarFollow> {
+    const [follow] = await db
+      .insert(avatarFollows)
+      .values({
+        id: sql`gen_random_uuid()`,
+        userId,
+        avatarId,
+        notificationsEnabled: true,
+        followedAt: new Date()
+      })
+      .returning();
+    return follow;
+  }
+
+  async unfollowAvatar(userId: string, avatarId: string): Promise<boolean> {
+    const result = await db
+      .delete(avatarFollows)
+      .where(and(
+        eq(avatarFollows.userId, userId),
+        eq(avatarFollows.avatarId, avatarId)
+      ));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getUserFollowedAvatars(userId: string): Promise<(AvatarFollow & { avatar: KnowledgeAvatar })[]> {
+    return await db
+      .select({
+        id: avatarFollows.id,
+        userId: avatarFollows.userId,
+        avatarId: avatarFollows.avatarId,
+        notificationsEnabled: avatarFollows.notificationsEnabled,
+        followedAt: avatarFollows.followedAt,
+        avatar: knowledgeAvatars
+      })
+      .from(avatarFollows)
+      .innerJoin(knowledgeAvatars, eq(avatarFollows.avatarId, knowledgeAvatars.id))
+      .where(eq(avatarFollows.userId, userId))
+      .orderBy(desc(avatarFollows.followedAt));
+  }
+
+  async getAvatarFollowers(avatarId: string): Promise<(AvatarFollow & { user: User })[]> {
+    return await db
+      .select({
+        id: avatarFollows.id,
+        userId: avatarFollows.userId,
+        avatarId: avatarFollows.avatarId,
+        notificationsEnabled: avatarFollows.notificationsEnabled,
+        followedAt: avatarFollows.followedAt,
+        user: users
+      })
+      .from(avatarFollows)
+      .innerJoin(users, eq(avatarFollows.userId, users.id))
+      .where(eq(avatarFollows.avatarId, avatarId))
+      .orderBy(desc(avatarFollows.followedAt));
+  }
+
+  async isFollowingAvatar(userId: string, avatarId: string): Promise<boolean> {
+    const [follow] = await db
+      .select()
+      .from(avatarFollows)
+      .where(and(
+        eq(avatarFollows.userId, userId),
+        eq(avatarFollows.avatarId, avatarId)
+      ))
+      .limit(1);
+    return !!follow;
+  }
+
+  // Avatar Content & Interactions implementations
+  async createAvatarContentInteraction(interaction: InsertAvatarContentInteraction): Promise<AvatarContentInteraction> {
+    const [created] = await db
+      .insert(avatarContentInteractions)
+      .values(interaction)
+      .returning();
+    return created;
+  }
+
+  async getAvatarContentInteractions(avatarId: string, limit = 50): Promise<AvatarContentInteraction[]> {
+    return await db
+      .select()
+      .from(avatarContentInteractions)
+      .where(eq(avatarContentInteractions.avatarId, avatarId))
+      .orderBy(desc(avatarContentInteractions.createdAt))
+      .limit(limit);
+  }
+
+  async getUserAvatarInteractions(userId: string, limit = 50): Promise<AvatarContentInteraction[]> {
+    return await db
+      .select()
+      .from(avatarContentInteractions)
+      .where(eq(avatarContentInteractions.userId, userId))
+      .orderBy(desc(avatarContentInteractions.createdAt))
+      .limit(limit);
+  }
+
+  // Avatar Insights implementations
+  async getAvatarInsight(id: string): Promise<AvatarInsight | undefined> {
+    const [insight] = await db.select().from(avatarInsights).where(eq(avatarInsights.id, id));
+    return insight || undefined;
+  }
+
+  async getAvatarInsights(avatarId: string, category?: string): Promise<AvatarInsight[]> {
+    const conditions = [eq(avatarInsights.avatarId, avatarId)];
+    if (category) {
+      conditions.push(eq(avatarInsights.category, category));
+    }
+
+    return await db
+      .select()
+      .from(avatarInsights)
+      .where(and(...conditions))
+      .orderBy(desc(avatarInsights.publishedAt), desc(avatarInsights.confidence))
+      .limit(100);
+  }
+
+  async createAvatarInsight(insight: InsertAvatarInsight): Promise<AvatarInsight> {
+    const [created] = await db
+      .insert(avatarInsights)
+      .values(insight)
+      .returning();
+    return created;
+  }
+
+  async updateAvatarInsight(id: string, updates: Partial<InsertAvatarInsight>): Promise<AvatarInsight | undefined> {
+    const [insight] = await db
+      .update(avatarInsights)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(avatarInsights.id, id))
+      .returning();
+    return insight || undefined;
+  }
+
+  async deleteAvatarInsight(id: string): Promise<boolean> {
+    const result = await db.delete(avatarInsights).where(eq(avatarInsights.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
   // Pattern Recognition implementations
 
   // Chart Pattern operations
