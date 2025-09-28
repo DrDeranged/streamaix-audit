@@ -176,6 +176,12 @@ export default function Dashboard() {
     enabled: !!user?.id,
   });
 
+  // Fetch user's followed avatars
+  const { data: followedAvatarsData, isLoading: followedAvatarsLoading } = useQuery({
+    queryKey: [`/api/users/${user?.id}/followed-avatars`],
+    enabled: !!user?.id,
+  });
+
   // Supplemental market data (expanded for scrollable sections)
   const { data: cryptoData } = useQuery({
     queryKey: ['/api/market/crypto/BTC,ETH,SOL,BNB,XRP,ADA,AVAX,DOT,MATIC,LINK,LTC,BCH,UNI,ATOM,FTT,ALGO,XLM,VET,ICP,FIL,HBAR,ETC,XMR,EOS,BSV'],
@@ -572,10 +578,14 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5 bg-white/5 border border-white/20 touch-manipulation">
+                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-6 bg-white/5 border border-white/20 touch-manipulation">
                   <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
                     <FileText className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Summaries</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="avatars" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                    <Users className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">Avatars</span>
                   </TabsTrigger>
                   <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
                     <BookmarkPlus className="h-4 w-4 lg:mr-2" />
@@ -621,6 +631,127 @@ export default function Dashboard() {
                       </div>
                     </CardContent>
                   </Card>
+                </TabsContent>
+
+                <TabsContent value="avatars" className="space-y-4 mt-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <h2 className="text-white text-lg font-bold">
+                      Following ({(followedAvatarsData as any)?.followedAvatars?.length || 0})
+                    </h2>
+                    <Link to="/landing#knowledge-avatars">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-purple-300 bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20"
+                        data-testid="button-discover-avatars"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Discover More Avatars
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-4">
+                    {followedAvatarsLoading ? (
+                      <div className="text-center py-8">
+                        <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
+                      </div>
+                    ) : (followedAvatarsData as any)?.followedAvatars?.length > 0 ? (
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                        {((followedAvatarsData as any)?.followedAvatars || []).map((followData: any) => (
+                          <motion.div
+                            key={followData.avatarId}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
+                            data-testid={`followed-avatar-${followData.avatar.handle}`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
+                                  {followData.avatar.imageUrl ? (
+                                    <img 
+                                      src={followData.avatar.imageUrl} 
+                                      alt={followData.avatar.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <span className="text-white font-bold text-lg">
+                                      {followData.avatar.name?.charAt(0) || '?'}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <h3 className="text-white font-semibold text-base">
+                                      {followData.avatar.name}
+                                    </h3>
+                                    <p className="text-gray-400 text-sm">@{followData.avatar.handle}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs text-blue-400 border-blue-400/30">
+                                      {followData.avatar.expertise}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                
+                                <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                                  {followData.avatar.bio}
+                                </p>
+                                
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4 text-xs text-gray-400">
+                                    <span className="flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      {followData.avatar.followerCount?.toLocaleString() || 0} followers
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="h-3 w-3" />
+                                      Followed {new Date(followData.followedAt).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  
+                                  <Link to={`/avatar/${followData.avatar.handle}`}>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="text-white bg-white/10 border-white/30 hover:bg-white/20 px-3 py-1.5 text-xs"
+                                      data-testid={`button-view-avatar-${followData.avatar.handle}`}
+                                    >
+                                      View Profile
+                                    </Button>
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <Card className="bg-white/5 border-white/10 backdrop-blur-lg">
+                        <CardContent className="p-8 text-center">
+                          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-white text-lg font-semibold mb-2">No Avatars Followed Yet</h3>
+                          <p className="text-gray-400 mb-4">
+                            Start following knowledge avatars to see their latest insights and thoughts right here.
+                          </p>
+                          <Link to="/landing#knowledge-avatars">
+                            <Button 
+                              variant="outline" 
+                              className="text-purple-300 bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20"
+                              data-testid="button-discover-first-avatars"
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              Discover Knowledge Avatars
+                            </Button>
+                          </Link>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="summaries" className="space-y-4 mt-4">
