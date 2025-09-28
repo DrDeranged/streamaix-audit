@@ -666,6 +666,35 @@ export class TwitterService {
   getCryptoInfluencers() {
     return this.cryptoInfluencers;
   }
+
+  /**
+   * Get combined content from multiple sources for discover page
+   */
+  async getCombinedContent(): Promise<TwitterTweet[]> {
+    try {
+      console.log('🌐 Fetching combined content from multiple sources...');
+      
+      // Get content from multiple sources
+      const [cryptoNews, influencerTweets, redditContent] = await Promise.all([
+        this.getCryptoNewsContent().catch(() => []),
+        this.getCryptoInfluencerTweets().catch(() => []),
+        this.getRedditCryptoContent().catch(() => [])
+      ]);
+
+      // Combine all sources
+      const combinedContent = [
+        ...cryptoNews,
+        ...influencerTweets,
+        ...redditContent
+      ];
+
+      console.log(`🌐 Fetched ${combinedContent.length} combined items from multiple sources`);
+      return combinedContent;
+    } catch (error) {
+      console.error('❌ Failed to fetch combined content:', error);
+      return [];
+    }
+  }
 }
 
 // Export singleton instance
