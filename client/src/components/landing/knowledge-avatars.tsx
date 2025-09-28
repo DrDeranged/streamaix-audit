@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, Heart, Share2, Plus, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 import navalAvatar from "@/assets/naval-avatar.svg";
 import vitalikAvatar from "@/assets/vitalik-avatar.svg";
 
@@ -78,9 +79,11 @@ export function KnowledgeAvatars() {
                       <h3 className="text-xl font-semibold text-foreground">{profile.name}</h3>
                       <p className="text-muted-foreground">{profile.handle}</p>
                     </div>
-                    <Button className={`bg-gradient-to-r ${profile.gradient} hover:opacity-90 text-white`}>
-                      Follow Trail
-                    </Button>
+                    <Link href={`/avatar/${profile.handle.replace('@', '')}`}>
+                      <Button className={`bg-gradient-to-r ${profile.gradient} hover:opacity-90 text-white`} data-testid={`button-follow-${profile.name.toLowerCase().replace(' ', '-')}`}>
+                        Follow Trail
+                      </Button>
+                    </Link>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4 mb-6">

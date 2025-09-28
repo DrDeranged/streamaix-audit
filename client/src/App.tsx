@@ -27,6 +27,7 @@ const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
 const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
 const Discover = React.lazy(() => import("@/pages/discover"));
+const AvatarProfile = React.lazy(() => import("@/pages/avatar-profile"));
 
 function Router() {
   return (
@@ -92,6 +93,12 @@ function Router() {
       <Route path="/discover">
         <Suspense fallback={<DashboardSkeleton />}>
           <Discover />
+        </Suspense>
+      </Route>
+      
+      <Route path="/avatar/:handle">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <AvatarProfile />
         </Suspense>
       </Route>
       
