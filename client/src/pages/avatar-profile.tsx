@@ -205,10 +205,15 @@ const getAvatarBanner = (name: string) => {
   return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop';
 };
 
-const transformInvestments = (investments: string[]) => {
+const transformInvestments = (investments: string[] | undefined) => {
   const categories = ['Technology', 'Fintech', 'Consumer', 'Enterprise', 'Crypto', 'AI/ML'];
   const statuses: Array<'active' | 'exited' | 'ipo'> = ['active', 'exited', 'ipo'];
   const returns = ['50x', '25x', '15x', '10x', '5x', '3x', '2x'];
+  
+  // Handle undefined/null investments
+  if (!investments || investments.length === 0) {
+    return [];
+  }
   
   return investments.map((investment, index) => ({
     name: investment,
@@ -221,16 +226,16 @@ const transformInvestments = (investments: string[]) => {
   }));
 };
 
-const generateInvestmentMetrics = (investments: string[]) => ({
+const generateInvestmentMetrics = (investments: string[] | undefined) => ({
   totalReturn: '2.4B',
   annualizedReturn: '45%',
-  bestInvestment: investments[0] || 'Uber',
+  bestInvestment: investments?.[0] || 'Uber',
   portfolioValue: '$180M',
   successRate: '78%'
 });
 
-const generateInvestmentPhilosophy = (philosophies: string[]) => {
-  return philosophies.join(' ') || 'Investment philosophy focused on early-stage technology companies with strong network effects and the potential to democratize access to information and capital.';
+const generateInvestmentPhilosophy = (philosophies: string[] | undefined) => {
+  return philosophies?.join(' ') || 'Investment philosophy focused on early-stage technology companies with strong network effects and the potential to democratize access to information and capital.';
 };
 
 export default function AvatarProfile() {
