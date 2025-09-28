@@ -3952,8 +3952,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SOCIAL ACTION ROUTES (Protected)
   // =============================================================================
 
-  // Follow user
-  app.post('/api/social/follow', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  // Follow user (Demo - works without authentication)
+  app.post('/api/social/follow', asyncHandler(async (req: Request, res: Response) => {
     const { fid, username } = req.body;
     
     if (!fid || !username) {
@@ -3962,7 +3962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       // For now, simulate successful follow - in real implementation would use Farcaster API
-      console.log(`User ${req.user!.username} following ${username} (FID: ${fid})`);
+      console.log(`Demo user following ${username} (FID: ${fid})`);
       
       // Simulate follow action
       res.json({
@@ -3978,8 +3978,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Like cast
-  app.post('/api/social/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  // Like cast (Demo - works without authentication)
+  app.post('/api/social/like', asyncHandler(async (req: Request, res: Response) => {
     const { castHash } = req.body;
     
     if (!castHash) {
@@ -3988,7 +3988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       // For now, simulate successful like - in real implementation would use Farcaster API
-      console.log(`User ${req.user!.username} liking cast ${castHash}`);
+      console.log(`Demo user liking cast ${castHash}`);
       
       res.json({
         success: true,
@@ -4004,8 +4004,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Recast
-  app.post('/api/social/recast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  // Recast (Demo - works without authentication)
+  app.post('/api/social/recast', asyncHandler(async (req: Request, res: Response) => {
     const { castHash } = req.body;
     
     if (!castHash) {
@@ -4013,7 +4013,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      console.log(`User ${req.user!.username} recasting ${castHash}`);
+      console.log(`Demo user recasting ${castHash}`);
       
       res.json({
         success: true,
@@ -4029,8 +4029,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Reply to cast
-  app.post('/api/social/reply', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  // Reply to cast (Demo - works without authentication)
+  app.post('/api/social/reply', asyncHandler(async (req: Request, res: Response) => {
     const { castHash, replyText } = req.body;
     
     if (!castHash || !replyText) {
@@ -4042,7 +4042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      console.log(`User ${req.user!.username} replying to cast ${castHash}: ${replyText.substring(0, 50)}...`);
+      console.log(`Demo user replying to cast ${castHash}: ${replyText.substring(0, 50)}...`);
       
       res.json({
         success: true,
