@@ -6270,6 +6270,7 @@ export default function Discover() {
                       </div>
                     </CardContent>
                   </Card>
+                  </motion.div>
                 ))}
 
                 {/* Load more indicator */}
