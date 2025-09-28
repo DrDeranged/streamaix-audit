@@ -283,21 +283,7 @@ export default function AvatarProfile() {
 
   // Use the helper functions defined at the top level
 
-  const transformInvestments = (investments: string[]) => {
-    const categories = ['Technology', 'Fintech', 'Consumer', 'Enterprise', 'Crypto', 'AI/ML'];
-    const statuses: Array<'active' | 'exited' | 'ipo'> = ['active', 'exited', 'ipo'];
-    const returns = ['50x', '25x', '15x', '10x', '5x', '3x', '2x'];
-    
-    return investments.slice(0, 8).map((inv, idx) => ({
-      name: inv,
-      category: categories[idx % categories.length],
-      amount: idx < 3 ? '$500K' : idx < 6 ? '$250K' : '$100K',
-      date: `${2018 + idx}-Q${1 + (idx % 4)}`,
-      status: statuses[idx % statuses.length],
-      returns: idx < 3 ? returns[idx] : returns[3 + (idx % 4)],
-      description: `Strategic investment in ${inv} focusing on ${categories[idx % categories.length].toLowerCase()} innovation`
-    }));
-  };
+  // Function already defined at top level
 
   const generateInvestmentMetrics = (investments: string[]) => ({
     totalReturn: '2,400%',
