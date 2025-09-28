@@ -22,6 +22,15 @@ import {
   type UserPreferences,
   type InsertUserPreferences,
   type LeaderEducationData,
+  // Knowledge Avatar Types
+  type KnowledgeAvatar,
+  type InsertKnowledgeAvatar,
+  type AvatarFollow,
+  type InsertAvatarFollow,
+  type AvatarContentInteraction,
+  type InsertAvatarContentInteraction,
+  type AvatarInsight,
+  type InsertAvatarInsight,
   // Pattern Recognition Types
   type ChartPattern,
   type InsertChartPattern,
@@ -44,6 +53,11 @@ import {
   topicTags,
   learningResources,
   userPreferences,
+  // Knowledge Avatar Tables
+  knowledgeAvatars,
+  avatarFollows,
+  avatarContentInteractions,
+  avatarInsights,
   // Pattern Recognition Tables
   chartPatterns,
   trendAnalysis,
@@ -110,6 +124,33 @@ export interface IStorage {
     interactionsCount: number;
     stacksCount: number;
   }>;
+
+  // Knowledge Avatar operations
+  getKnowledgeAvatar(id: string): Promise<KnowledgeAvatar | undefined>;
+  getKnowledgeAvatarByHandle(handle: string): Promise<KnowledgeAvatar | undefined>;
+  getKnowledgeAvatars(limit?: number, offset?: number): Promise<KnowledgeAvatar[]>;
+  createKnowledgeAvatar(avatar: InsertKnowledgeAvatar): Promise<KnowledgeAvatar>;
+  updateKnowledgeAvatar(id: string, updates: Partial<InsertKnowledgeAvatar>): Promise<KnowledgeAvatar | undefined>;
+  deleteKnowledgeAvatar(id: string): Promise<boolean>;
+
+  // Avatar Following operations
+  followAvatar(userId: string, avatarId: string): Promise<AvatarFollow>;
+  unfollowAvatar(userId: string, avatarId: string): Promise<boolean>;
+  getUserFollowedAvatars(userId: string): Promise<(AvatarFollow & { avatar: KnowledgeAvatar })[]>;
+  getAvatarFollowers(avatarId: string): Promise<(AvatarFollow & { user: User })[]>;
+  isFollowingAvatar(userId: string, avatarId: string): Promise<boolean>;
+
+  // Avatar Content & Interactions
+  createAvatarContentInteraction(interaction: InsertAvatarContentInteraction): Promise<AvatarContentInteraction>;
+  getAvatarContentInteractions(avatarId: string, limit?: number): Promise<AvatarContentInteraction[]>;
+  getUserAvatarInteractions(userId: string, limit?: number): Promise<AvatarContentInteraction[]>;
+
+  // Avatar Insights operations
+  getAvatarInsight(id: string): Promise<AvatarInsight | undefined>;
+  getAvatarInsights(avatarId: string, category?: string): Promise<AvatarInsight[]>;
+  createAvatarInsight(insight: InsertAvatarInsight): Promise<AvatarInsight>;
+  updateAvatarInsight(id: string, updates: Partial<InsertAvatarInsight>): Promise<AvatarInsight | undefined>;
+  deleteAvatarInsight(id: string): Promise<boolean>;
 
   // Educational content operations
   getCryptoLeader(id: string): Promise<CryptoLeader | undefined>;

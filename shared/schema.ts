@@ -191,6 +191,109 @@ export const learningResources = pgTable("learning_resources", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Enhanced Knowledge Avatars System
+export const knowledgeAvatars = pgTable("knowledge_avatars", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  handle: text("handle").notNull().unique(), // @naval.eth, @vitalik.lens
+  avatar: text("avatar").notNull(),
+  banner: text("banner"), // Header banner image
+  gradient: text("gradient").notNull(), // CSS gradient class
+  bio: text("bio"),
+  role: text("role"), // "Ethereum Founder", "Angel Investor", etc.
+  
+  // Core Interests & Expertise
+  primaryFocus: text("primary_focus").array(), // ["Web3", "Investing", "Philosophy"]
+  expertise: text("expertise").array(), // ["Blockchain", "Startups", "Philosophy"]
+  interests: jsonb("interests"), // { topics: [], industries: [], technologies: [] }
+  
+  // Investment Philosophy & Portfolio
+  investmentPhilosophy: text("investment_philosophy"),
+  portfolioFocus: text("portfolio_focus").array(), // ["Early Stage", "Crypto", "AI"]
+  publicInvestments: jsonb("public_investments"), // Array of investment objects
+  investmentReturns: jsonb("investment_returns"), // Performance data
+  
+  // Mindset & Worldview
+  coreBeliefs: text("core_beliefs").array(), // Key philosophical beliefs
+  mentalModels: text("mental_models").array(), // Thinking frameworks
+  decisionFramework: text("decision_framework"), // How they make decisions
+  personalPrinciples: text("personal_principles").array(), // Life principles
+  
+  // Current Opinions & Takes
+  currentOpinions: jsonb("current_opinions"), // Latest thoughts on topics
+  controversialTakes: text("controversial_takes").array(), // Bold opinions
+  predictions: jsonb("predictions"), // Future predictions with dates
+  
+  // Content & Activity
+  recentContent: jsonb("recent_content"), // Latest tweets, posts, articles
+  keyContent: jsonb("key_content"), // Essential content from this person
+  bookRecommendations: jsonb("book_recommendations"), // Book recs with reasons
+  
+  // Social & Network
+  followingCount: integer("following_count").default(0),
+  followerCount: integer("follower_count").default(0),
+  totalContent: integer("total_content").default(0),
+  engagementRate: real("engagement_rate").default(0),
+  
+  // Verification & Credibility
+  isVerified: boolean("is_verified").default(false),
+  credibilityScore: integer("credibility_score").default(50), // 0-100
+  expertise_level: text("expertise_level").default("expert"), // novice, intermediate, expert, guru
+  
+  // Platform presence
+  twitterHandle: text("twitter_handle"),
+  linkedinProfile: text("linkedin_profile"),
+  personalWebsite: text("personal_website"),
+  
+  // Metadata
+  isActive: boolean("is_active").default(true),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Avatar Following System
+export const avatarFollows = pgTable("avatar_follows", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  followedAt: timestamp("followed_at").defaultNow(),
+  notificationsEnabled: boolean("notifications_enabled").default(true),
+  // Ensure unique user-avatar pairs
+}, (table) => ({
+  uniqueUserAvatar: {
+    name: "unique_user_avatar",
+    columns: [table.userId, table.avatarId],
+  },
+}));
+
+// Avatar Content Interactions
+export const avatarContentInteractions = pgTable("avatar_content_interactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  contentId: text("content_id").notNull(), // ID of specific content piece
+  interactionType: text("interaction_type").notNull(), // like, bookmark, share, comment
+  metadata: jsonb("metadata"), // Additional interaction data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Avatar Insights & Analytics
+export const avatarInsights = pgTable("avatar_insights", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  insightType: text("insight_type").notNull(), // thought, prediction, analysis, recommendation
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category"), // investing, technology, philosophy, etc.
+  tags: text("tags").array(),
+  sourceUrl: text("source_url"), // Original source if from external content
+  confidence: integer("confidence").default(50), // 0-100 confidence in insight
+  isHighlighted: boolean("is_highlighted").default(false), // Featured insight
+  publishedAt: timestamp("published_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
@@ -270,6 +373,42 @@ export const learningResourcesRelations = relations(learningResources, ({ one })
   leader: one(cryptoLeaders, {
     fields: [learningResources.leaderId],
     references: [cryptoLeaders.id],
+  }),
+}));
+
+// Knowledge Avatar Relations
+export const knowledgeAvatarsRelations = relations(knowledgeAvatars, ({ many }) => ({
+  followers: many(avatarFollows),
+  contentInteractions: many(avatarContentInteractions),
+  insights: many(avatarInsights),
+}));
+
+export const avatarFollowsRelations = relations(avatarFollows, ({ one }) => ({
+  user: one(users, {
+    fields: [avatarFollows.userId],
+    references: [users.id],
+  }),
+  avatar: one(knowledgeAvatars, {
+    fields: [avatarFollows.avatarId],
+    references: [knowledgeAvatars.id],
+  }),
+}));
+
+export const avatarContentInteractionsRelations = relations(avatarContentInteractions, ({ one }) => ({
+  user: one(users, {
+    fields: [avatarContentInteractions.userId],
+    references: [users.id],
+  }),
+  avatar: one(knowledgeAvatars, {
+    fields: [avatarContentInteractions.avatarId],
+    references: [knowledgeAvatars.id],
+  }),
+}));
+
+export const avatarInsightsRelations = relations(avatarInsights, ({ one }) => ({
+  avatar: one(knowledgeAvatars, {
+    fields: [avatarInsights.avatarId],
+    references: [knowledgeAvatars.id],
   }),
 }));
 
@@ -408,6 +547,71 @@ export const insertLearningResourceSchema = createInsertSchema(learningResources
   topics: true,
 });
 
+export const insertKnowledgeAvatarSchema = createInsertSchema(knowledgeAvatars).pick({
+  name: true,
+  handle: true,
+  avatar: true,
+  banner: true,
+  gradient: true,
+  bio: true,
+  role: true,
+  primaryFocus: true,
+  expertise: true,
+  interests: true,
+  investmentPhilosophy: true,
+  portfolioFocus: true,
+  publicInvestments: true,
+  investmentReturns: true,
+  coreBeliefs: true,
+  mentalModels: true,
+  decisionFramework: true,
+  personalPrinciples: true,
+  currentOpinions: true,
+  controversialTakes: true,
+  predictions: true,
+  recentContent: true,
+  keyContent: true,
+  bookRecommendations: true,
+  followingCount: true,
+  followerCount: true,
+  totalContent: true,
+  engagementRate: true,
+  isVerified: true,
+  credibilityScore: true,
+  expertise_level: true,
+  twitterHandle: true,
+  linkedinProfile: true,
+  personalWebsite: true,
+  isActive: true,
+});
+
+export const insertAvatarFollowSchema = createInsertSchema(avatarFollows).pick({
+  userId: true,
+  avatarId: true,
+  notificationsEnabled: true,
+});
+
+export const insertAvatarContentInteractionSchema = createInsertSchema(avatarContentInteractions).pick({
+  userId: true,
+  avatarId: true,
+  contentId: true,
+  interactionType: true,
+  metadata: true,
+});
+
+export const insertAvatarInsightSchema = createInsertSchema(avatarInsights).pick({
+  avatarId: true,
+  insightType: true,
+  title: true,
+  content: true,
+  category: true,
+  tags: true,
+  sourceUrl: true,
+  confidence: true,
+  isHighlighted: true,
+  publishedAt: true,
+});
+
 // Pattern Recognition Insert Schemas moved after table definitions
 
 // Types
@@ -443,6 +647,18 @@ export type TopicTag = typeof topicTags.$inferSelect;
 
 export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
 export type LearningResource = typeof learningResources.$inferSelect;
+
+export type InsertKnowledgeAvatar = z.infer<typeof insertKnowledgeAvatarSchema>;
+export type KnowledgeAvatar = typeof knowledgeAvatars.$inferSelect;
+
+export type InsertAvatarFollow = z.infer<typeof insertAvatarFollowSchema>;
+export type AvatarFollow = typeof avatarFollows.$inferSelect;
+
+export type InsertAvatarContentInteraction = z.infer<typeof insertAvatarContentInteractionSchema>;
+export type AvatarContentInteraction = typeof avatarContentInteractions.$inferSelect;
+
+export type InsertAvatarInsight = z.infer<typeof insertAvatarInsightSchema>;
+export type AvatarInsight = typeof avatarInsights.$inferSelect;
 
 // Cross-Market Signal Generation Types - Phase 3 Final Feature
 export type CrossMarketSignal = {
@@ -733,21 +949,7 @@ export type CrossMarketCorrelationData = {
   lastUpdated: string;
 };
 
-// Pattern Recognition Types
-export type InsertChartPattern = z.infer<typeof insertChartPatternSchema>;
-export type ChartPattern = typeof chartPatterns.$inferSelect;
-
-export type InsertTrendAnalysis = z.infer<typeof insertTrendAnalysisSchema>;
-export type TrendAnalysis = typeof trendAnalysis.$inferSelect;
-
-export type InsertMarketCycle = z.infer<typeof insertMarketCycleSchema>;
-export type MarketCycle = typeof marketCycles.$inferSelect;
-
-export type InsertPatternAlert = z.infer<typeof insertPatternAlertSchema>;
-export type PatternAlert = typeof patternAlerts.$inferSelect;
-
-export type InsertAiTradingSetup = z.infer<typeof insertAiTradingSetupSchema>;
-export type AiTradingSetup = typeof aiTradingSetups.$inferSelect;
+// Pattern Recognition Types (moved to avoid duplicates)
 
 // Educational response types
 export type LeaderEducationData = {
