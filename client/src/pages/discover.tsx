@@ -6045,27 +6045,37 @@ export default function Discover() {
               </Badge>
             </h2>
             
-            {/* Enhanced Story Type Filter */}
-            <div className="flex gap-2 flex-wrap">
+            {/* Enhanced Story Type Filter with Modern Design */}
+            <div className="flex gap-3 flex-wrap">
               {([
-                { key: 'all', label: 'All Sources', icon: Globe },
-                { key: 'twitter', label: 'Social', icon: MessageSquare },
-                { key: 'youtube', label: 'Videos', icon: Video },
-                { key: 'news', label: 'News', icon: Newspaper }
-              ] as const).map(({ key, label, icon: Icon }) => (
-                <button
+                { key: 'all', label: 'All Sources', icon: Globe, gradient: 'from-blue-500 to-cyan-500' },
+                { key: 'twitter', label: 'Social', icon: MessageSquare, gradient: 'from-purple-500 to-pink-500' },
+                { key: 'youtube', label: 'Videos', icon: Video, gradient: 'from-red-500 to-orange-500' },
+                { key: 'news', label: 'News', icon: Newspaper, gradient: 'from-green-500 to-emerald-500' }
+              ] as const).map(({ key, label, icon: Icon, gradient }) => (
+                <motion.button
                   key={key}
                   onClick={() => setStoryFilter(key)}
-                  className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 ${
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 backdrop-blur-sm border ${
                     storyFilter === key
-                      ? 'bg-orange-500/20 text-orange-300 border border-orange-400/30'
-                      : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                      ? `bg-gradient-to-r ${gradient} text-white shadow-lg shadow-${gradient.split('-')[1]}-500/25 border-white/20`
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white border-white/10 hover:border-white/20'
                   }`}
                   data-testid={`story-filter-${key}`}
                 >
                   <Icon className="h-4 w-4" />
-                  {label}
-                </button>
+                  <span>{label}</span>
+                  {storyFilter === key && (
+                    <motion.div 
+                      className="w-1.5 h-1.5 bg-white rounded-full"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.1 }}
+                    />
+                  )}
+                </motion.button>
               ))}
             </div>
           </div>
@@ -6100,57 +6110,81 @@ export default function Discover() {
             {/* Always show content - no more infinite loading */}
             {trendingStories.length > 0 ? (
               <>
-                {/* Story clusters with enhanced ranking */}
+                {/* Story clusters with modern glass morphism design */}
                 {trendingStories.slice(0, 12).map((story, index) => (
-                  <Card 
-                    key={story.id} 
-                    className={`bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer ${
-                      index < 3 ? 'ring-1 ring-orange-400/30' : ''
-                    }`}
-                    onClick={() => handleStoryClick(story, 'view')}
+                  <motion.div
+                    key={story.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    className="group"
                   >
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="flex gap-3 sm:gap-4">
-                        {story.thumbnail && (
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0">
-                            <img 
-                              src={story.thumbnail} 
-                              alt={story.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
+                    <Card 
+                      className={`relative overflow-hidden backdrop-blur-xl bg-gradient-to-br transition-all duration-500 cursor-pointer border-0 shadow-xl ${
+                        index < 3 
+                          ? 'from-orange-500/20 via-red-500/10 to-pink-500/20 shadow-orange-500/25 ring-1 ring-orange-400/30' 
+                          : 'from-white/10 via-white/5 to-white/10 hover:from-white/15 hover:via-white/10 hover:to-white/15 shadow-black/25'
+                      }`}
+                      onClick={() => handleStoryClick(story, 'view')}
+                    >
+                      {/* Glowing border effect for top stories */}
+                      {index < 3 && (
+                        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-orange-500/20 via-red-500/20 to-pink-500/20 blur-sm -z-10 scale-105" />
+                      )}
+                      
+                      <CardContent className="p-6 relative">
+                        <div className="flex gap-4">
+                          {story.thumbnail && (
+                            <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-700 to-gray-800 ring-1 ring-white/10">
+                              <img 
+                                src={story.thumbnail} 
+                                alt={story.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            </div>
+                          )}
                         
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              {/* Priority indicator for top stories */}
-                              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                {index < 3 && (
-                                  <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30">
-                                    <Flame className="h-3 w-3 mr-1" />
-                                    Hot Trend #{index + 1}
+                          <div className="flex-1 space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                {/* Modern priority indicators */}
+                                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                  {index < 3 && (
+                                    <motion.div
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{ delay: 0.2 + index * 0.1 }}
+                                    >
+                                      <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-lg">
+                                        <Flame className="h-3 w-3 mr-1" />
+                                        Trending #{index + 1}
+                                      </Badge>
+                                    </motion.div>
+                                  )}
+                                  <Badge className={`text-xs border-0 backdrop-blur-sm ${
+                                    (story as any).priority === 'critical' ? 'bg-red-500/30 text-red-200' :
+                                    (story as any).priority === 'high' ? 'bg-orange-500/30 text-orange-200' :
+                                    (story as any).priority === 'medium' ? 'bg-yellow-500/30 text-yellow-200' :
+                                    'bg-gray-500/30 text-gray-200'
+                                  }`}>
+                                    {(story as any).priority === 'critical' ? '🔥' :
+                                     (story as any).priority === 'high' ? '⚡' :
+                                     (story as any).priority === 'medium' ? '📈' : '📊'}
+                                    {((story as any).priority || 'low').toUpperCase()}
                                   </Badge>
-                                )}
-                                <Badge className={`text-xs border-0 ${
-                                  (story as any).priority === 'critical' ? 'bg-red-500/20 text-red-300' :
-                                  (story as any).priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
-                                  (story as any).priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                                  'bg-gray-500/20 text-gray-300'
-                                }`}>
-                                  {(story as any).priority === 'critical' ? '🔥' :
-                                   (story as any).priority === 'high' ? '⚡' :
-                                   (story as any).priority === 'medium' ? '📈' : '📊'}
-                                  {(story as any).priority || 'low'} Priority
-                                </Badge>
-                                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
-                                  <Star className="h-3 w-3 mr-1" />
-                                  AI Rank #{(story as any).aiRank || index + 1}
-                                </Badge>
-                              </div>
-                              
-                              <h3 className="text-white font-semibold text-base sm:text-lg line-clamp-2">{story.title}</h3>
-                              <p className="text-gray-300 text-xs sm:text-sm mt-1 line-clamp-2">{story.description}</p>
+                                  <Badge className="bg-gradient-to-r from-cyan-500/30 to-blue-500/30 text-cyan-200 border-cyan-400/30 text-xs backdrop-blur-sm">
+                                    <Star className="h-3 w-3 mr-1" />
+                                    Rank #{(story as any).aiRank || index + 1}
+                                  </Badge>
+                                </div>
+                                
+                                <h3 className="text-white font-bold text-lg leading-tight mb-2 group-hover:text-orange-100 transition-colors">
+                                  {story.title}
+                                </h3>
+                                <p className="text-gray-300 text-sm leading-relaxed line-clamp-2 group-hover:text-gray-200 transition-colors">
+                                  {story.description}
+                                </p>
                               
                               {/* Sector correlation indicator */}
                               {selectedSector && story.metadata.tags.some((tag: string) => 
