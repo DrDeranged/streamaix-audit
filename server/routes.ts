@@ -4361,7 +4361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return true; // 'all' filter
         })
         .map((item: any, index: number) => ({
-          id: item.id,
+          id: `${item.source || 'source'}_${item.id || index}_${Date.now()}_${index}`,
           title: item.text ? item.text.slice(0, 120) + (item.text.length > 120 ? '...' : '') : 
                 'Crypto News Update',
           description: item.text || item.description || '',

@@ -6113,7 +6113,7 @@ export default function Discover() {
                 {/* Story clusters with modern glass morphism design */}
                 {trendingStories.slice(0, 12).map((story, index) => (
                   <motion.div
-                    key={story.id}
+                    key={`story-${story.id}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
