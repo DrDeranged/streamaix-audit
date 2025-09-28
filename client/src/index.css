@@ -130,6 +130,10 @@
   .animate-fade-in {
     animation: fade-in 0.8s ease-out;
   }
+  
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
 }
 
 @keyframes float {
@@ -155,6 +159,11 @@
 @keyframes fade-in {
   0% { opacity: 0; }
   100% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* Hide scrollbars for horizontal scrolling sections */

@@ -45,6 +45,8 @@ interface TrendingCast {
     castId?: { fid: number; hash: string };
   }>;
   parentHash?: string;
+  isLiked?: boolean;
+  isRecasted?: boolean;
 }
 
 interface ProminentAccount {
@@ -79,10 +81,10 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
     <div className="flex gap-2 flex-wrap mb-6">
       <button
         onClick={() => onTopicSelect(null)}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+        className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 ${
           selectedTopic === null
-            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-            : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/60 border border-white/10'
+            ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+            : 'bg-gradient-to-r from-slate-800/60 to-slate-700/60 text-slate-300 hover:from-slate-700/70 hover:to-slate-600/70 border border-white/20 hover:border-white/30'
         }`}
         data-testid="topic-all"
       >
@@ -95,15 +97,16 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.05 }}
           onClick={() => onTopicSelect(trend.topic)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 relative overflow-hidden group ${
             selectedTopic === trend.topic
-              ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-              : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/60 border border-white/10'
+              ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+              : 'bg-gradient-to-r from-slate-800/60 to-slate-700/60 text-slate-300 hover:from-slate-700/70 hover:to-slate-600/70 border border-white/20 hover:border-white/30'
           }`}
           data-testid={`topic-${i}`}
         >
-          {trend.topic}
-          <span className="ml-2 text-xs opacity-70">{trend.mentions}</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-out" />
+          <span className="relative z-10">{trend.topic}</span>
+          <span className="ml-2 text-xs opacity-80 bg-white/20 px-2 py-1 rounded-full relative z-10">{trend.mentions}</span>
         </motion.button>
       ))}
     </div>
@@ -131,18 +134,19 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
     return (
       <div className="space-y-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 animate-pulse">
-            <div className="flex gap-3 mb-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700/40 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3 sm:h-4 bg-slate-700/40 rounded w-1/3" />
-                <div className="h-2 sm:h-3 bg-slate-800/30 rounded w-1/4" />
+          <div key={i} className="bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+            <div className="flex gap-4 mb-4 relative z-10">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-slate-700/40 to-slate-600/40 rounded-full border-2 border-white/20" />
+              <div className="flex-1 space-y-3">
+                <div className="h-4 bg-gradient-to-r from-slate-700/40 to-slate-600/40 rounded-full w-1/3" />
+                <div className="h-3 bg-gradient-to-r from-slate-800/30 to-slate-700/30 rounded-full w-1/4" />
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="h-3 sm:h-4 bg-slate-800/30 rounded w-full" />
-              <div className="h-3 sm:h-4 bg-slate-800/20 rounded w-4/5" />
-              <div className="h-2 sm:h-3 bg-slate-800/10 rounded w-2/3" />
+            <div className="space-y-3 relative z-10">
+              <div className="h-4 bg-gradient-to-r from-slate-800/30 to-slate-700/30 rounded-full w-full" />
+              <div className="h-4 bg-gradient-to-r from-slate-800/20 to-slate-700/20 rounded-full w-4/5" />
+              <div className="h-3 bg-gradient-to-r from-slate-800/10 to-slate-700/10 rounded-full w-2/3" />
             </div>
           </div>
         ))}
@@ -152,17 +156,23 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (error) {
     return (
-      <div className="text-center py-8 sm:py-12 bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl">
-        <p className="text-slate-400 mb-4 text-sm sm:text-base">Unable to load conversations</p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          variant="outline" 
-          size="sm"
-          className="border-white/20 text-slate-300 hover:bg-white/10"
-          data-testid="retry-feed"
-        >
-          Try again
-        </Button>
+      <div className="text-center py-12 sm:py-16 bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5" />
+        <div className="relative z-10">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
+            <ExternalLink className="w-8 h-8 text-red-400" />
+          </div>
+          <p className="text-slate-300 mb-6 text-base font-medium">Unable to load conversations</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="outline" 
+            size="lg"
+            className="border-white/30 text-slate-200 hover:bg-white/10 hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
+            data-testid="retry-feed"
+          >
+            Try again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -183,7 +193,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
           <Button
             onClick={() => setShowAll(true)}
             variant="outline"
-            className="w-full sm:w-auto bg-slate-900/50 border-white/20 text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all"
+            className="w-full sm:w-auto bg-gradient-to-r from-slate-800/60 to-slate-700/60 border-white/30 text-slate-200 hover:from-slate-700/70 hover:to-slate-600/70 hover:text-white hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg"
             data-testid="show-more-posts"
           >
             Show {casts.length - initialCount} more posts
@@ -203,7 +213,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
             onClick={() => setShowAll(false)}
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-slate-300"
+            className="text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
             data-testid="show-less-posts"
           >
             Show less
@@ -220,15 +230,27 @@ function DiscoverRightRail() {
   return (
     <div className="space-y-6 sticky top-6">
       {/* Trending Topics */}
-      <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-        <h3 className="text-lg font-semibold text-white mb-4">What's happening</h3>
-        <TrendingTopicsWidget />
+      <div className="bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-slate-900/70 backdrop-blur-xl border border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-5">
+            <TrendingUp className="w-5 h-5 text-blue-400" />
+            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">What's happening</h3>
+          </div>
+          <TrendingTopicsWidget />
+        </div>
       </div>
 
       {/* Who to follow */}
-      <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-        <h3 className="text-lg font-semibold text-white mb-4">Who to follow</h3>
-        <WhoToFollowWidget />
+      <div className="bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-slate-900/70 backdrop-blur-xl border border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-5">
+            <Users className="w-5 h-5 text-purple-400" />
+            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">Who to follow</h3>
+          </div>
+          <WhoToFollowWidget />
+        </div>
       </div>
     </div>
   );
@@ -469,15 +491,18 @@ function TrendingTopicsWidget() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="p-3 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+          className="p-4 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-300 cursor-pointer border border-transparent hover:border-white/20 group"
           data-testid={`trending-widget-${i}`}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">{trend.topic}</p>
-              <p className="text-slate-400 text-sm">{trend.mentions} posts</p>
+            <div className="flex-1">
+              <p className="text-white font-bold text-base group-hover:text-blue-300 transition-colors">{trend.topic}</p>
+              <p className="text-slate-400 text-sm mt-1">{trend.mentions} posts • Trending</p>
             </div>
-            <TrendingUp className="w-4 h-4 text-indigo-400" />
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <TrendingUp className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
+            </div>
           </div>
         </motion.div>
       ))}
@@ -519,24 +544,27 @@ function WhoToFollowWidget() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="flex items-center justify-between p-3 hover:bg-white/5 rounded-lg transition-colors"
+          className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 rounded-xl transition-all duration-300 border border-transparent hover:border-white/20 group"
           data-testid={`follow-suggestion-${i}`}
         >
           <div className="flex items-center gap-3">
-            <img
-              src={account.account.pfp_url}
-              alt={account.account.display_name}
-              className="w-10 h-10 rounded-full border border-white/20"
-            />
+            <div className="relative">
+              <img
+                src={account.account.pfp_url}
+                alt={account.account.display_name}
+                className="w-12 h-12 rounded-full border-2 border-white/30 group-hover:border-purple-400/50 transition-all duration-300 group-hover:scale-105"
+              />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-slate-900" />
+            </div>
             <div>
-              <p className="text-white font-medium text-sm">{account.account.display_name}</p>
-              <p className="text-slate-400 text-xs">@{account.account.username}</p>
+              <p className="text-white font-bold text-sm group-hover:text-purple-300 transition-colors">{account.account.display_name}</p>
+              <p className="text-slate-400 text-xs mt-0.5">@{account.account.username}</p>
             </div>
           </div>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs border-white/20 text-slate-300 hover:bg-white/10"
+            className="text-xs border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400/50 hover:text-white transition-all duration-300 hover:scale-105"
             data-testid={`follow-button-${i}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -548,7 +576,7 @@ function WhoToFollowWidget() {
             title={`Follow @${account.account.username}`}
             disabled={followMutation.isPending}
           >
-            {followedUsers.has(account.account.fid) ? 'Following' : 'Follow'}
+{Array.from(followedUsers).includes(account.account.fid) ? 'Following' : 'Follow'}
           </Button>
         </motion.div>
       ))}
@@ -614,34 +642,57 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-slate-900/70 transition-all cursor-pointer group"
+      className="bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl p-5 sm:p-7 hover:bg-gradient-to-br hover:from-slate-800/70 hover:via-slate-700/50 hover:to-slate-800/70 hover:border-white/30 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 cursor-pointer group relative overflow-hidden"
       data-testid={`feed-post-${index}`}
     >
+      {/* Animated gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
       {/* Header */}
-      <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <img
-          src={cast.author.pfpUrl}
-          alt={cast.author.displayName}
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20"
-        />
+      <div className="flex items-start gap-4 sm:gap-5 mb-4 sm:mb-5 relative z-10">
+        <div className="relative">
+          <img
+            src={cast.author.pfpUrl}
+            alt={cast.author.displayName}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/30 shadow-lg ring-2 ring-purple-500/20 transition-all duration-300 group-hover:ring-purple-500/40 group-hover:scale-105"
+          />
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-slate-900 animate-pulse" />
+        </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h4 className="text-white font-semibold text-sm sm:text-base truncate">{cast.author.displayName}</h4>
-            <span className="text-slate-400 text-xs sm:text-sm truncate">@{cast.author.username}</span>
-            <span className="text-slate-500 text-xs sm:text-sm hidden sm:inline">·</span>
-            <span className="text-slate-500 text-xs sm:text-sm">{formatTime(cast.timestamp)}</span>
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <h4 className="text-white font-bold text-base sm:text-lg bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent truncate">{cast.author.displayName}</h4>
+            <span className="text-slate-300 text-sm sm:text-base font-medium truncate">@{cast.author.username}</span>
+            <span className="text-slate-500 text-sm hidden sm:inline">·</span>
+            <span className="text-slate-400 text-sm bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{formatTime(cast.timestamp)}</span>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <div className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              <span>{(cast.author.followerCount || 0).toLocaleString()} followers</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Zap className="w-3 h-3 text-yellow-400" />
+              <span className="text-yellow-400 font-medium">Verified</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="mb-3 sm:mb-4">
-        <p className="text-slate-200 leading-relaxed text-sm sm:text-base">{cast.text}</p>
+      <div className="mb-5 sm:mb-6 relative z-10">
+        <p className="text-slate-100 leading-relaxed text-base sm:text-lg font-light tracking-wide">{cast.text}</p>
+        {cast.embeds && cast.embeds.length > 0 && (
+          <div className="mt-4 p-3 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl border border-blue-500/20">
+            <div className="flex items-center gap-2 text-blue-300 text-sm">
+              <ExternalLink className="w-4 h-4" />
+              <span>Contains {cast.embeds.length} embedded link{cast.embeds.length > 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Engagement */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/10">
-        <div className="flex items-center gap-4 sm:gap-6">
+      <div className="flex items-center justify-between pt-4 border-t border-gradient-to-r from-transparent via-white/20 to-transparent relative z-10">
+        <div className="flex items-center gap-6 sm:gap-8">
           <button 
             onClick={(e) => {
               e.stopPropagation();
@@ -650,13 +701,13 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
                 navigator.vibrate(50);
               }
             }}
-            className="flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-blue-400 transition-colors"
+            className="flex items-center gap-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
             data-testid={`reply-button-${cast.hash}`}
             title="Reply to this cast"
             disabled={replyMutation.isPending}
           >
-            <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">{cast.replies}</span>
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-sm font-medium">{cast.replies}</span>
           </button>
           <button 
             onClick={(e) => {
@@ -666,17 +717,17 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
                 navigator.vibrate(50);
               }
             }}
-            className={`flex items-center gap-1 sm:gap-2 transition-colors ${
-              recastedCasts.has(cast.hash) || cast.isRecasted
-                ? 'text-green-400' 
-                : 'text-slate-400 hover:text-green-400'
+            className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
+Array.from(recastedCasts).includes(cast.hash) || cast.isRecasted
+                ? 'text-green-400 bg-green-500/10' 
+                : 'text-slate-400 hover:text-green-400 hover:bg-green-500/10'
             }`}
             data-testid={`recast-button-${cast.hash}`}
             title="Recast this"
             disabled={recastMutation.isPending}
           >
-            <Repeat2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">{cast.recasts}</span>
+            <Repeat2 className="w-4 h-4" />
+            <span className="text-sm font-medium">{cast.recasts}</span>
           </button>
           <button 
             onClick={(e) => {
@@ -686,32 +737,36 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
                 navigator.vibrate(50);
               }
             }}
-            className={`flex items-center gap-1 sm:gap-2 transition-colors ${
-              likedCasts.has(cast.hash) || cast.isLiked
-                ? 'text-red-400' 
-                : 'text-slate-400 hover:text-red-400'
+            className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
+Array.from(likedCasts).includes(cast.hash) || cast.isLiked
+                ? 'text-red-400 bg-red-500/10' 
+                : 'text-slate-400 hover:text-red-400 hover:bg-red-500/10'
             }`}
             data-testid={`like-button-${cast.hash}`}
             title="Like this cast"
             disabled={likeMutation.isPending}
           >
-            <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">{cast.likes}</span>
+            <Heart className={`w-4 h-4 ${Array.from(likedCasts).includes(cast.hash) || cast.isLiked ? 'fill-current' : ''}`} />
+            <span className="text-sm font-medium">{cast.likes}</span>
           </button>
         </div>
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            // Open original cast in new tab
-            const farcasterUrl = `https://warpcast.com/~/conversations/${cast.hash}`;
-            window.open(farcasterUrl, '_blank', 'noopener,noreferrer');
-          }}
-          className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100 sm:group-hover:opacity-100"
-          data-testid={`external-link-${cast.hash}`}
-          title="View on Farcaster"
-        >
-          <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">
+            {cast.engagement} views
+          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              const farcasterUrl = `https://warpcast.com/~/conversations/${cast.hash}`;
+              window.open(farcasterUrl, '_blank', 'noopener,noreferrer');
+            }}
+            className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 sm:opacity-100 hover:scale-110"
+            data-testid={`external-link-${cast.hash}`}
+            title="View on Farcaster"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </motion.article>
   );
