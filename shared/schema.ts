@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -1552,25 +1552,7 @@ export type RiskMetrics = {
   calculatedAt: string;
 };
 
-export type StressTestScenario = {
-  name: string;
-  description: string;
-  scenarioType: 'market_crash' | 'crypto_winter' | 'correlation_breakdown' | 'liquidity_crisis' | 'inflation_spike' | 'black_swan';
-  severity: 'mild' | 'moderate' | 'severe' | 'extreme';
-  
-  // Asset-specific stress factors (multipliers applied to returns)
-  stressFactors: {
-    crypto: number; // e.g., -0.50 for 50% decline
-    stocks: number;
-    commodities: number;
-    correlationMultiplier: number; // how correlations change during stress
-  };
-  
-  // Expected timeline and recovery
-  durationDays: number;
-  recoveryMonths: number;
-  historicalPrecedent?: string;
-};
+// StressTestScenario type is defined later from schema inference
 
 export type StressTestResult = {
   scenario: StressTestScenario;
@@ -2103,9 +2085,9 @@ export type PatternRecognitionConfig = {
 };
 
 export type PatternDetectionResult = {
-  patterns: ChartPattern[];
-  trendAnalysis: TrendAnalysis[];
-  marketCycles: MarketCycle[];
+  patterns: (typeof chartPatterns.$inferSelect)[];
+  trendAnalysis: (typeof trendAnalysis.$inferSelect)[];
+  marketCycles: (typeof marketCycles.$inferSelect)[];
   confidence: number;
   processingTime: number;
   dataQuality: 'excellent' | 'good' | 'fair' | 'poor';
@@ -2297,7 +2279,7 @@ export type PatternAlertSummary = {
   totalAlerts: number;
   activeAlerts: number;
   criticalAlerts: number;
-  recentAlerts: PatternAlert[];
+  recentAlerts: (typeof patternAlerts.$inferSelect)[];
   alertsByType: { [type: string]: number };
   alertsBySeverity: { [severity: string]: number };
   averageAccuracy: number;
@@ -2316,11 +2298,11 @@ export type PatternRecognitionDashboard = {
     successRate: number;
     averageConfidence: number;
   };
-  recentPatterns: ChartPattern[];
-  topAlerts: PatternAlert[];
+  recentPatterns: (typeof chartPatterns.$inferSelect)[];
+  topAlerts: (typeof patternAlerts.$inferSelect)[];
   trendAnalysis: TrendAnalysisResult[];
   marketCycles: MarketCycleAnalysis[];
-  tradingSetups: AiTradingSetup[];
+  tradingSetups: (typeof aiTradingSetups.$inferSelect)[];
   performance: {
     dailySuccess: Array<{ date: string; rate: number }>;
     monthlyReturns: Array<{ month: string; returns: number }>;
@@ -2678,7 +2660,7 @@ export const patternAlerts = pgTable("pattern_alerts", {
   actualResult: text("actual_result"), // What actually happened
   
   // Follow-up Alerts
-  parentAlertId: varchar("parent_alert_id").references(() => patternAlerts.id), // Original alert this follows up
+  parentAlertId: varchar("parent_alert_id").references((): AnyPgColumn => patternAlerts.id), // Original alert this follows up
   childAlerts: text("child_alerts").array(), // Follow-up alert IDs
   alertSequence: integer("alert_sequence").default(1), // Position in alert sequence
   
