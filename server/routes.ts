@@ -664,6 +664,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AVATAR ROUTES
   // =============================================================================
 
+  // Get all avatars for landing page
+  app.get('/api/avatars', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const avatars = await storage.getKnowledgeAvatars(50, 0);
+      res.json({ avatars });
+    } catch (error) {
+      console.error('Error fetching avatars:', error);
+      res.status(500).json({ error: 'Failed to fetch avatars' });
+    }
+  }));
+
   // Get avatar by handle
   app.get('/api/avatars/:handle', asyncHandler(async (req: Request, res: Response) => {
     const { handle } = req.params;
