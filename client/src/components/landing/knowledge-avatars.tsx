@@ -236,6 +236,9 @@ const getRecentActivity = (name: string) => {
 export function KnowledgeAvatars() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -245,7 +248,20 @@ export function KnowledgeAvatars() {
   });
 
   const avatars = avatarsResponse?.avatars || [];
-  const itemsPerView = 4; // Show 4 cards at once for better information density
+  // Mobile-first responsive design
+  const itemsPerView = isMobile ? 1 : 4; // Show 1 card on mobile, 4 on desktop
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch social sentiment data for all avatars at top level
   const navalSentiment = useSocialSentiment('Naval Ravikant');
@@ -280,6 +296,32 @@ export function KnowledgeAvatars() {
 
   const prevSlide = () => {
     setCurrentIndex(prev => (prev <= 0 ? maxIndex : prev - 1));
+  };
+
+  // Touch handling for mobile swipe gestures
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentIndex < maxIndex) {
+      nextSlide();
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      prevSlide();
+    }
   };
 
   const handleFollow = async (avatarId: string) => {
@@ -354,29 +396,51 @@ export function KnowledgeAvatars() {
         
         {/* Enhanced Carousel Container */}
         <div className="relative max-w-[95vw] mx-auto">
-          {/* Premium Navigation Buttons */}
-          <Button
-            onClick={prevSlide}
-            size="icon"
-            variant="ghost"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black/90 text-white rounded-full w-12 h-12 shadow-2xl backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-110"
-            data-testid="button-carousel-prev"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
+          {/* Mobile-Optimized Navigation Buttons */}
+          {!isMobile && (
+            <>
+              <Button
+                onClick={prevSlide}
+                size="icon"
+                variant="ghost"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black/90 text-white rounded-full w-12 h-12 shadow-2xl backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-110"
+                data-testid="button-carousel-prev"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              
+              <Button
+                onClick={nextSlide}
+                size="icon"
+                variant="ghost"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black/90 text-white rounded-full w-12 h-12 shadow-2xl backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-110"
+                data-testid="button-carousel-next"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </Button>
+            </>
+          )}
           
-          <Button
-            onClick={nextSlide}
-            size="icon"
-            variant="ghost"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black/90 text-white rounded-full w-12 h-12 shadow-2xl backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-110"
-            data-testid="button-carousel-next"
+          {/* Mobile Touch-Friendly Carousel Content */}
+          <div 
+            className={`overflow-hidden ${isMobile ? 'px-4' : 'px-12'}`}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
-            <ChevronRight className="h-6 w-6" />
-          </Button>
-          
-          {/* Carousel Content with 4 cards */}
-          <div className="overflow-hidden px-12">
+            {/* Mobile Swipe Indicator */}
+            {isMobile && avatars.length > 1 && (
+              <div className="flex justify-center space-x-2 mb-4">
+                {avatars.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
             <motion.div
               className="flex gap-6 transition-transform duration-700 ease-out"
               style={{
@@ -394,12 +458,12 @@ export function KnowledgeAvatars() {
                 return (
                   <motion.div
                     key={avatar.id}
-                    className="flex-none w-1/4 px-2"
+                    className={`flex-none ${isMobile ? 'w-full' : 'w-1/4'} px-2`}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
-                    onHoverStart={() => setHoveredCard(avatar.id)}
-                    onHoverEnd={() => setHoveredCard(null)}
+                    onHoverStart={() => !isMobile && setHoveredCard(avatar.id)}
+                    onHoverEnd={() => !isMobile && setHoveredCard(null)}
                   >
                     <Dialog>
                       <DialogTrigger asChild>
@@ -631,8 +695,8 @@ export function KnowledgeAvatars() {
                             {/* Bio */}
                             <p className="text-muted-foreground mb-8 text-lg leading-relaxed">{avatar.bio}</p>
                             
-                            {/* Premium Analytics Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            {/* Mobile-Optimized Analytics Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                               <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/20">
                                 <div className="flex items-center justify-between mb-4">
                                   <div className="text-2xl font-bold text-foreground">
@@ -685,7 +749,7 @@ export function KnowledgeAvatars() {
                                   <Building2 className="h-6 w-6 mr-3 text-primary" />
                                   Investment Portfolio ({avatar.notableInvestments.length} Companies)
                                 </h4>
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                   {avatar.notableInvestments.slice(0, 12).map((investment, idx) => (
                                     <div key={idx} className="bg-muted/30 rounded-lg p-3 border border-muted/50 hover:border-primary/30 transition-colors">
                                       <div className="font-medium text-sm">{investment}</div>

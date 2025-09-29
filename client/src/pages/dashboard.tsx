@@ -578,22 +578,22 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-6 bg-white/5 border border-white/20 touch-manipulation">
-                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
-                    <FileText className="h-4 w-4 lg:mr-2" />
-                    <span className="hidden lg:inline">Summaries</span>
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 bg-white/5 border border-white/20 touch-manipulation">
+                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                    <FileText className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Summaries</span>
                   </TabsTrigger>
-                  <TabsTrigger value="avatars" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
-                    <Users className="h-4 w-4 lg:mr-2" />
-                    <span className="hidden lg:inline">Avatars</span>
+                  <TabsTrigger value="avatars" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                    <Users className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Avatars</span>
                   </TabsTrigger>
-                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
-                    <BookmarkPlus className="h-4 w-4 lg:mr-2" />
-                    <span className="hidden lg:inline">Notes</span>
+                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                    <BookmarkPlus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
-                    <Wallet className="h-4 w-4 lg:mr-2" />
-                    <span className="hidden lg:inline">Wallet</span>
+                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                    <Wallet className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Wallet</span>
                   </TabsTrigger>
                   <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
                     <Target className="h-4 w-4 lg:mr-2" />
@@ -1225,14 +1225,15 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent className="lg:space-y-1 lg:max-h-96 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
                     {/* Mobile: Horizontal scroll */}
-                    <div className="lg:hidden overflow-x-auto pb-2">
-                      <div className="flex space-x-3" style={{ width: 'max-content' }}>
-                        {displayStocks.length > 0 ? displayStocks.slice(0, 15).map((stock: any) => {
+                    <div className="lg:hidden">
+                      {/* Mobile: Vertical Grid for Better Usability */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {displayStocks.length > 0 ? displayStocks.slice(0, 9).map((stock: any) => {
                           const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
                           return (
                             <div
                               key={stock.symbol}
-                              className="min-w-[120px] bg-white/5 rounded-lg p-3 border border-white/10"
+                              className="bg-white/5 rounded-lg p-3 border border-white/10 touch-manipulation"
                               data-testid={`mobile-stock-${stock.symbol}`}
                             >
                               <div className="text-center">
