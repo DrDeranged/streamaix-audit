@@ -625,11 +625,11 @@ export function KnowledgeAvatars() {
               </div>
             )}
             <motion.div
-              className={`flex gap-6 transition-all duration-700 ease-out ${
+              className={`flex transition-all duration-700 ease-out ${
                 isSwipeActive ? 'transition-duration-200' : ''
-              }`}
+              } ${isMobile ? 'gap-0' : 'gap-6'}`}
               style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                transform: `translateX(-${currentIndex * (100 / (isMobile ? 1 : itemsPerView))}%)`,
                 filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)'
               }}
               animate={{
@@ -648,7 +648,7 @@ export function KnowledgeAvatars() {
                 return (
                   <motion.div
                     key={avatar.id}
-                    className={`flex-none ${isMobile ? 'w-full' : 'w-1/4'} px-2`}
+                    className={`flex-none ${isMobile ? 'w-full px-4' : 'w-1/4 px-2'}`}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -657,7 +657,7 @@ export function KnowledgeAvatars() {
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[540px]' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
+                        <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 ${!isMobile ? 'hover:scale-[1.02]' : ''} transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[600px] mx-2' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
                           {/* Premium Header with Enhanced Gradient */}
                           <div className="relative overflow-hidden">
                             <div className={`h-28 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden group-hover:h-32 transition-all duration-500`}>
@@ -698,7 +698,7 @@ export function KnowledgeAvatars() {
                             </div>
                           </div>
                           
-                          <CardContent className="pt-12 pb-6 px-5 space-y-4 flex-1 flex flex-col">
+                          <CardContent className={`pt-12 pb-6 ${isMobile ? 'px-6 space-y-6' : 'px-5 space-y-4'} flex-1 flex flex-col`}>
                             {/* Name and Handle */}
                             <div className="space-y-1.5">
                               <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 tracking-tight">
@@ -708,10 +708,10 @@ export function KnowledgeAvatars() {
                             </div>
                             
                             {/* Performance Metrics Grid */}
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 hover:scale-105 hover:shadow-lg transition-all duration-300 group-hover:animate-pulse">
+                            <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-2 gap-3'}`}>
+                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 ${!isMobile ? 'hover:scale-105' : ''} hover:shadow-lg transition-all duration-300 group-hover:animate-pulse`}>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">Portfolio ROI</span>
+                                  <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground group-hover:text-primary/80 transition-colors`}>Portfolio ROI</span>
                                   <div className="flex items-center gap-1">
                                     {performance.trend === 'up' ? (
                                       <ArrowUpRight className="h-3 w-3 text-green-500" />
@@ -721,27 +721,27 @@ export function KnowledgeAvatars() {
                                     <div className={`w-2 h-2 rounded-full ${performance.roi >= 0 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
                                   </div>
                                 </div>
-                                <div className={`text-lg font-bold transition-all duration-300 ${performance.roi >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'} group-hover:scale-110`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
+                                <div className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300 ${performance.roi >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'} ${!isMobile ? 'group-hover:scale-110' : ''}`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
                                   {performance.roi >= 0 ? '+' : ''}{performance.roi}%
                                 </div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 hover:scale-105 hover:shadow-lg transition-all duration-300 group-hover:animate-pulse">
+                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 ${!isMobile ? 'hover:scale-105' : ''} hover:shadow-lg transition-all duration-300 group-hover:animate-pulse`}>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">Prediction Accuracy</span>
+                                  <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground group-hover:text-primary/80 transition-colors`}>Prediction Accuracy</span>
                                   <div className={`w-2 h-2 rounded-full ${performance.accuracy >= 80 ? 'bg-green-500' : performance.accuracy >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} />
                                 </div>
-                                <div className={`text-lg font-bold transition-all duration-300 ${performance.accuracy >= 80 ? 'text-green-500 group-hover:text-green-400' : performance.accuracy >= 60 ? 'text-yellow-500 group-hover:text-yellow-400' : 'text-red-500 group-hover:text-red-400'} group-hover:scale-110`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
+                                <div className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300 ${performance.accuracy >= 80 ? 'text-green-500 group-hover:text-green-400' : performance.accuracy >= 60 ? 'text-yellow-500 group-hover:text-yellow-400' : 'text-red-500 group-hover:text-red-400'} ${!isMobile ? 'group-hover:scale-110' : ''}`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
                                   {performance.accuracy}%
                                 </div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 hover:scale-105 hover:shadow-lg transition-all duration-300 group-hover:animate-pulse">
-                                <span className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
+                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 ${!isMobile ? 'hover:scale-105' : ''} hover:shadow-lg transition-all duration-300 group-hover:animate-pulse`}>
+                                <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground group-hover:text-primary/80 transition-colors`}>
                                   {socialSentiment ? 'Real Influence' : 'Influence'}
                                 </span>
                                 <div className="flex items-center gap-1">
-                                  <div className="text-lg font-bold text-foreground">
+                                  <div className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold text-foreground`}>
                                     {Math.round(influenceScore)}
                                   </div>
                                   <Star className="h-3 w-3 text-yellow-500 fill-current" />
@@ -773,12 +773,12 @@ export function KnowledgeAvatars() {
                                 )}
                               </div>
                               
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
+                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300`}>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">AUM/Net Worth</span>
+                                  <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground`}>AUM/Net Worth</span>
                                   <DollarSign className="h-3 w-3 text-green-600" />
                                 </div>
-                                <div className="text-sm font-bold text-foreground truncate" title={`Assets Under Management / Net Worth: ${performance.portfolioValue}`}>
+                                <div className={`${isMobile ? 'text-base' : 'text-sm'} font-bold text-foreground truncate`} title={`Assets Under Management / Net Worth: ${performance.portfolioValue}`}>
                                   {performance.portfolioValue}
                                 </div>
                               </div>
