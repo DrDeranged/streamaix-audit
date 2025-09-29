@@ -63,18 +63,18 @@ interface DatabaseAvatar {
 
 const getAvatarGradient = (name: string) => {
   const gradients: Record<string, string> = {
-    'Naval Ravikant': 'from-blue-600 via-purple-600 to-indigo-800',
-    'Vitalik Buterin': 'from-purple-600 via-blue-600 to-cyan-800',
-    'Michael Saylor': 'from-orange-500 via-red-600 to-pink-700',
-    'Brian Armstrong': 'from-blue-500 via-cyan-600 to-teal-700',
-    'Changpeng Zhao': 'from-yellow-500 via-orange-500 to-red-600',
-    'Cathie Wood': 'from-pink-500 via-purple-600 to-indigo-700',
-    'Tyler Winklevoss': 'from-green-500 via-teal-600 to-blue-700',
-    'Cameron Winklevoss': 'from-indigo-500 via-purple-600 to-pink-700',
-    'Balaji Srinivasan': 'from-emerald-500 via-teal-600 to-cyan-700',
-    'Paul Graham': 'from-slate-600 via-gray-700 to-zinc-800'
+    'Naval Ravikant': 'from-slate-800 via-blue-900 to-indigo-950',
+    'Vitalik Buterin': 'from-indigo-900 via-purple-900 to-blue-950',
+    'Michael Saylor': 'from-slate-900 via-blue-900 to-cyan-950',
+    'Brian Armstrong': 'from-blue-900 via-cyan-900 to-teal-950',
+    'Changpeng Zhao': 'from-blue-950 via-indigo-950 to-purple-950',
+    'Cathie Wood': 'from-purple-900 via-indigo-900 to-blue-950',
+    'Tyler Winklevoss': 'from-teal-900 via-cyan-900 to-blue-950',
+    'Cameron Winklevoss': 'from-indigo-900 via-blue-900 to-cyan-950',
+    'Balaji Srinivasan': 'from-cyan-900 via-blue-900 to-indigo-950',
+    'Paul Graham': 'from-slate-900 via-gray-900 to-zinc-950'
   };
-  return gradients[name] || 'from-gray-600 via-slate-700 to-gray-800';
+  return gradients[name] || 'from-slate-900 via-gray-900 to-zinc-950';
 };
 
 const formatFollowerCount = (count: number) => {
@@ -557,27 +557,29 @@ export function KnowledgeAvatars() {
         
         {/* Enhanced Carousel Container */}
         <div className="relative max-w-[95vw] mx-auto">
-          {/* Mobile-Optimized Navigation Buttons */}
-          {!isMobile && (
+          {/* Professional Navigation Buttons */}
+          {!isMobile && avatars.length > itemsPerView && (
             <>
               <Button
                 onClick={prevSlide}
                 size="icon"
                 variant="ghost"
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black/90 text-white rounded-full w-12 h-12 shadow-2xl backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-110"
+                disabled={currentIndex === 0}
+                className="absolute -left-16 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-br from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                 data-testid="button-carousel-prev"
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-7 w-7" />
               </Button>
               
               <Button
                 onClick={nextSlide}
                 size="icon"
                 variant="ghost"
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black/90 text-white rounded-full w-12 h-12 shadow-2xl backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-110"
+                disabled={currentIndex >= maxIndex}
+                className="absolute -right-16 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-br from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                 data-testid="button-carousel-next"
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-7 w-7" />
               </Button>
             </>
           )}
@@ -657,14 +659,15 @@ export function KnowledgeAvatars() {
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 ${!isMobile ? 'hover:scale-[1.02]' : ''} transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[600px] mx-2' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
-                          {/* Premium Header with Refined Gradient */}
+                        <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-[1.02]' : ''} transition-all duration-500 overflow-hidden h-[640px] ${isMobile ? 'mx-2' : ''} ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
+                          {/* Professional Terminal-Style Header */}
                           <div className="relative overflow-hidden">
-                            <div className={`h-28 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden group-hover:h-32 transition-all duration-500`}>
-                              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-500" />
-                              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card via-card/60 to-transparent" />
-                              <div className="absolute top-3 right-3">
-                                <div className="w-2 h-2 bg-emerald-400/80 rounded-full" />
+                            <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
+                              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-transparent" />
+                              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+                              <div className="absolute top-4 right-4 flex items-center gap-2">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
+                                <span className="text-xs text-emerald-400 font-mono">LIVE</span>
                               </div>
                             </div>
                             <div className="absolute -bottom-10 left-4">
