@@ -753,8 +753,22 @@ export function KnowledgeAvatars() {
                                   )}
                                 </div>
                                 {socialSentiment && (
-                                  <div className="text-xs text-muted-foreground">
-                                    {formatFollowerCount(socialSentiment.profile.followers)} followers
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="text-xs text-muted-foreground">
+                                      {formatFollowerCount(socialSentiment.profile.followers)} followers
+                                    </div>
+                                    <div className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                                      socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-green-500/20 text-green-600' :
+                                      socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500/20 text-yellow-600' :
+                                      'bg-red-500/20 text-red-600'
+                                    }`}>
+                                      <div className={`w-1.5 h-1.5 rounded-full ${
+                                        socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-green-500' :
+                                        socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500' :
+                                        'bg-red-500'
+                                      } animate-pulse`} />
+                                      {Math.round(socialSentiment.sentiment.sentimentScore * 100)}% sentiment
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -788,21 +802,40 @@ export function KnowledgeAvatars() {
                               </div>
                             </div>
                             
-                            {/* Recent Activity Preview */}
+                            {/* Enhanced Recent Activity Preview */}
                             <div className="space-y-2">
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
-                                <Activity className="h-3 w-3 group-hover:text-primary transition-colors" />
-                                Recent Activity
-                                {!recentActivity[0] && (
-                                  <div className="animate-spin rounded-full h-2 w-2 border border-primary/50 border-t-primary ml-1" />
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
+                                  <Activity className="h-3 w-3 group-hover:text-primary transition-colors" />
+                                  Recent Activity
+                                  {!recentActivity[0] && (
+                                    <div className="animate-spin rounded-full h-2 w-2 border border-primary/50 border-t-primary ml-1" />
+                                  )}
+                                </div>
+                                {recentActivity[0] && (
+                                  <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                                    recentActivity[0].impact === 'high' ? 'bg-red-500' :
+                                    recentActivity[0].impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                  }`} />
                                 )}
                               </div>
                               <div className={`bg-muted/20 rounded-lg p-2 hover:bg-primary/10 hover:border hover:border-primary/20 transition-all duration-300 cursor-pointer ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
                                 <div className="text-xs text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors">
                                   {recentActivity[0]?.text || "Loading recent activity..."}
                                 </div>
-                                <div className="text-xs text-muted-foreground/70 mt-1 group-hover:text-muted-foreground transition-colors">
-                                  {recentActivity[0]?.time || "..."}
+                                <div className="flex items-center justify-between mt-1">
+                                  <div className="text-xs text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">
+                                    {recentActivity[0]?.time || "..."}
+                                  </div>
+                                  {recentActivity[0] && (
+                                    <div className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                      recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-600' :
+                                      recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-600' : 
+                                      'bg-green-500/20 text-green-600'
+                                    }`}>
+                                      {recentActivity[0].impact}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
