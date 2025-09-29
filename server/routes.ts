@@ -830,6 +830,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Social sentiment analysis endpoint for crypto entrepreneurs
+  app.get('/api/social-sentiment/:username', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { username } = req.params;
+      
+      // Map frontend names to actual Twitter usernames
+      const twitterUsernames: Record<string, string> = {
+        'Naval Ravikant': 'naval',
+        'Vitalik Buterin': 'VitalikButerin', 
+        'Michael Saylor': 'saylor',
+        'Brian Armstrong': 'brian_armstrong',
+        'Changpeng Zhao': 'cz_binance',
+        'Cathie Wood': 'CathieDWood',
+        'Tyler Winklevoss': 'tyler',
+        'Cameron Winklevoss': 'cameron',
+        'Balaji Srinivasan': 'balajis',
+        'Paul Graham': 'paulg'
+      };
+
+      const twitterUsername = twitterUsernames[username];
+      if (!twitterUsername) {
+        return res.status(404).json({ success: false, error: 'Entrepreneur not found' });
+      }
+
+      // Initialize Twitter service
+      const { TwitterService } = await import('./services/twitterService');
+      const twitterService = new TwitterService();
+
+      // Get user profile and recent tweets
+      const [profile, tweets] = await Promise.all([
+        twitterService.getUserProfile(twitterUsername),
+        twitterService.getUserTweets(twitterUsername, 20)
+      ]);
+
+      if (!profile) {
+        return res.status(404).json({ success: false, error: 'Twitter profile not found' });
+      }
+
+      // Calculate real sentiment metrics
+      const sentimentAnalysis = analyzeSentiment(tweets, profile);
+      
+      res.json({
+        success: true,
+        data: {
+          username: twitterUsername,
+          profile: {
+            name: profile.name,
+            followers: profile.public_metrics?.followers_count || 0,
+            verified: profile.verified || false,
+            description: profile.description || ''
+          },
+          sentiment: sentimentAnalysis,
+          lastUpdated: new Date().toISOString()
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching social sentiment:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch social sentiment data' });
+    }
+  }));
+
+  // Helper function for sentiment analysis
+  function analyzeSentiment(tweets: any[], profile: any) {
+    if (!tweets || tweets.length === 0) {
+      return {
+        influenceScore: Math.min((profile.public_metrics?.followers_count || 0) / 1000000 * 100, 100),
+        engagement: 0,
+        marketImpact: 'low',
+        recentActivity: 0,
+        positivity: 50
+      };
+    }
+
+    // Calculate engagement rate
+    const totalEngagement = tweets.reduce((sum: number, tweet: any) => {
+      const metrics = tweet.public_metrics || {};
+      return sum + (metrics.like_count || 0) + (metrics.retweet_count || 0) + (metrics.reply_count || 0);
+    }, 0);
+
+    const avgEngagement = totalEngagement / tweets.length;
+    const followerCount = profile.public_metrics?.followers_count || 1;
+    const engagementRate = (avgEngagement / followerCount) * 100;
+
+    // Analyze tweet content for sentiment
+    const cryptoKeywords = ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'blockchain', 'defi', 'nft'];
+    const positiveWords = ['bullish', 'up', 'good', 'great', 'positive', 'growth', 'success'];
+    const negativeWords = ['bearish', 'down', 'bad', 'crash', 'dump', 'negative', 'loss'];
+
+    let cryptoMentions = 0;
+    let positiveScore = 0;
+    let negativeScore = 0;
+
+    tweets.forEach((tweet: any) => {
+      const text = tweet.text.toLowerCase();
+      
+      cryptoKeywords.forEach(keyword => {
+        if (text.includes(keyword)) cryptoMentions++;
+      });
+      
+      positiveWords.forEach(word => {
+        if (text.includes(word)) positiveScore++;
+      });
+      
+      negativeWords.forEach(word => {
+        if (text.includes(word)) negativeScore++;
+      });
+    });
+
+    const positivity = positiveScore + negativeScore > 0 
+      ? (positiveScore / (positiveScore + negativeScore)) * 100 
+      : 50;
+
+    return {
+      influenceScore: Math.min((followerCount / 1000000) * 100, 100),
+      engagement: Math.min(engagementRate * 10, 100),
+      marketImpact: cryptoMentions > 3 ? 'high' : cryptoMentions > 1 ? 'medium' : 'low',
+      recentActivity: tweets.length,
+      positivity: Math.round(positivity)
+    };
+  }
+
   // =============================================================================
   // INTERACTION ROUTES
   // =============================================================================

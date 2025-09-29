@@ -19,6 +19,7 @@ interface TwitterTweet {
   text: string;
   author_id: string;
   created_at: string;
+  author?: TwitterUser; // Added optional author property for enriched tweets
   public_metrics?: {
     retweet_count: number;
     like_count: number;
@@ -245,7 +246,7 @@ export class TwitterService {
       const tweets: TwitterTweet[] = [];
       
       // Extract items from RSS
-      const itemMatches = rssContent.match(/<item>(.*?)<\/item>/gs) || [];
+      const itemMatches = rssContent.match(/<item>(.*?)<\/item>/g) || [];
       
       for (let i = 0; i < Math.min(itemMatches.length, 5); i++) {
         const item = itemMatches[i];
@@ -341,7 +342,7 @@ export class TwitterService {
 
           // Parse RSS content (basic parsing)
           const rssContent = response.data;
-          const itemMatches = rssContent.match(/<item>(.*?)<\/item>/gs) || [];
+          const itemMatches = rssContent.match(/<item>(.*?)<\/item>/g) || [];
           
           const newsItems = itemMatches.slice(0, 3).map((item: string, index: number) => {
             const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/);

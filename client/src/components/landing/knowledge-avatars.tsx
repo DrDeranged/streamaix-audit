@@ -83,6 +83,22 @@ const formatFollowerCount = (count: number) => {
   return count.toString();
 };
 
+// Hook to fetch real social sentiment data
+const useSocialSentiment = (name: string) => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['social-sentiment', name],
+    queryFn: () => fetch(`/api/social-sentiment/${encodeURIComponent(name)}`).then(res => res.json()),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  return {
+    sentiment: data?.success ? data.data : null,
+    isLoading,
+    error: !data?.success ? data?.error || error : null
+  };
+};
+
 const getInfluenceScore = (followerCount: number, investments: number) => {
   const followScore = Math.min(followerCount / 1000000 * 40, 40);
   const investScore = Math.min(investments * 3, 30);
@@ -343,7 +359,8 @@ export function KnowledgeAvatars() {
             >
               {avatars.map((avatar, index) => {
                 const performance = getPerformanceData(avatar.name);
-                const influenceScore = getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
+                const { sentiment: socialSentiment, isLoading: sentimentLoading } = useSocialSentiment(avatar.name);
+                const influenceScore = socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 const recentActivity = getRecentActivity(avatar.name);
                 
                 return (
@@ -425,11 +442,23 @@ export function KnowledgeAvatars() {
                               </div>
                               
                               <div className="bg-muted/30 rounded-lg p-3 space-y-1">
-                                <span className="text-xs text-muted-foreground">Influence</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {socialSentiment ? 'Real Influence' : 'Influence'}
+                                </span>
                                 <div className="flex items-center gap-1">
-                                  <div className="text-lg font-bold text-foreground">{influenceScore}</div>
+                                  <div className="text-lg font-bold text-foreground">
+                                    {Math.round(influenceScore)}
+                                  </div>
                                   <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                  {sentimentLoading && (
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
+                                  )}
                                 </div>
+                                {socialSentiment && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {formatFollowerCount(socialSentiment.profile.followers)} followers
+                                  </div>
+                                )}
                               </div>
                               
                               <div className="bg-muted/30 rounded-lg p-3 space-y-1">
