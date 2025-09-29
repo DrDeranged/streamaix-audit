@@ -509,7 +509,7 @@ export function KnowledgeAvatars() {
               Knowledge Avatars
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              <span className="animate-pulse">Loading crypto intelligence network...</span>
+              <span className="animate-pulse">Loading alpha network...</span>
             </p>
           </motion.div>
 
@@ -548,7 +548,7 @@ export function KnowledgeAvatars() {
           viewport={{ once: true }}
         >
           <h2 className="text-5xl md:text-6xl font-orbitron font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 bg-clip-text text-transparent">
-            Intelligence Network
+            Alpha Network
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Real-time intelligence on crypto's most influential minds. Track investments, predictions, and market impact with Bloomberg Terminal precision.
@@ -658,18 +658,14 @@ export function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 ${!isMobile ? 'hover:scale-[1.02]' : ''} transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[600px] mx-2' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
-                          {/* Premium Header with Enhanced Gradient */}
+                          {/* Premium Header with Refined Gradient */}
                           <div className="relative overflow-hidden">
                             <div className={`h-28 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden group-hover:h-32 transition-all duration-500`}>
-                              <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/30 group-hover:from-black/5 group-hover:to-black/20 transition-all duration-500" />
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:via-white/10 transition-all duration-500" />
-                              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-gradient-to-r from-primary/20 via-transparent to-secondary/20 transition-all duration-700" />
-                              <div className="absolute top-3 right-3 flex gap-1.5 group-hover:gap-2 transition-all duration-300">
-                                <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50 group-hover:w-3 group-hover:h-3 group-hover:shadow-xl transition-all duration-300" />
-                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse delay-300 shadow-lg shadow-blue-400/50 group-hover:w-3 group-hover:h-3 group-hover:shadow-xl transition-all duration-300" />
-                                <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-pulse delay-700 shadow-lg shadow-purple-400/50 group-hover:w-3 group-hover:h-3 group-hover:shadow-xl transition-all duration-300" />
+                              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-500" />
+                              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card via-card/60 to-transparent" />
+                              <div className="absolute top-3 right-3">
+                                <div className="w-2 h-2 bg-emerald-400/80 rounded-full" />
                               </div>
-                              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card/80 to-transparent" />
                             </div>
                             <div className="absolute -bottom-10 left-4">
                               <div className="relative">
@@ -882,9 +878,9 @@ export function KnowledgeAvatars() {
                         <div className="space-y-8">
                           {/* Premium Header */}
                           <div className="relative">
-                            <div className={`h-40 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-90 rounded-t-lg relative overflow-hidden`}>
-                              <div className="absolute inset-0 bg-black/20" />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                            <div className={`h-40 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-80 rounded-t-lg relative overflow-hidden`}>
+                              <div className="absolute inset-0 bg-black/40" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             </div>
                             <div className="absolute -bottom-12 left-8">
                               <Avatar className="w-24 h-24 ring-6 ring-card border-4 border-white/20 shadow-2xl">
@@ -926,7 +922,7 @@ export function KnowledgeAvatars() {
                                   data-testid={`button-follow-modal-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                                 >
                                   <UserPlus className="h-4 w-4 mr-2" />
-                                  Follow Intelligence
+                                  Follow
                                 </Button>
                                 <Link href={`/avatar/${avatar.handle}`}>
                                   <Button variant="outline" className="px-6" data-testid={`button-profile-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}>
