@@ -89,7 +89,7 @@ const useSocialSentiment = (name: string) => {
     queryKey: ['social-sentiment', name],
     queryFn: () => fetch(`/api/social-sentiment/${encodeURIComponent(name)}`).then(res => res.json()),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   return {
@@ -467,7 +467,7 @@ export function KnowledgeAvatars() {
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Card className={`group cursor-pointer bg-card/70 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 overflow-hidden h-[580px] ${hoveredCard === avatar.id ? 'ring-2 ring-primary/30' : ''}`}>
+                        <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[540px]' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
                           {/* Premium Header with Gradient */}
                           <div className="relative">
                             <div className={`h-24 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-90 relative overflow-hidden`}>
@@ -501,7 +501,7 @@ export function KnowledgeAvatars() {
                             </div>
                           </div>
                           
-                          <CardContent className="pt-10 pb-4 px-4 space-y-4">
+                          <CardContent className="pt-10 pb-6 px-4 space-y-4 flex-1 flex flex-col">
                             {/* Name and Handle */}
                             <div className="space-y-1">
                               <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
@@ -511,8 +511,8 @@ export function KnowledgeAvatars() {
                             </div>
                             
                             {/* Performance Metrics Grid */}
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-muted-foreground">Portfolio ROI</span>
                                   {performance.trend === 'up' ? (
@@ -521,19 +521,19 @@ export function KnowledgeAvatars() {
                                     <ArrowDownRight className="h-3 w-3 text-red-500" />
                                   )}
                                 </div>
-                                <div className="text-lg font-bold text-foreground">
-                                  +{performance.roi}%
+                                <div className={`text-lg font-bold ${performance.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                  {performance.roi >= 0 ? '+' : ''}{performance.roi}%
                                 </div>
                               </div>
                               
-                              <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
                                 <span className="text-xs text-muted-foreground">Accuracy</span>
                                 <div className="text-lg font-bold text-foreground">
                                   {performance.accuracy}%
                                 </div>
                               </div>
                               
-                              <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
                                 <span className="text-xs text-muted-foreground">
                                   {socialSentiment ? 'Real Influence' : 'Influence'}
                                 </span>
@@ -553,9 +553,9 @@ export function KnowledgeAvatars() {
                                 )}
                               </div>
                               
-                              <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
                                 <span className="text-xs text-muted-foreground">AUM</span>
-                                <div className="text-sm font-bold text-foreground">
+                                <div className="text-sm font-bold text-foreground truncate" title={performance.portfolioValue}>
                                   {performance.portfolioValue}
                                 </div>
                               </div>
@@ -605,7 +605,7 @@ export function KnowledgeAvatars() {
                             )}
                             
                             {/* Action Buttons */}
-                            <div className="flex gap-2 pt-2">
+                            <div className="flex gap-2 pt-2 mt-auto">
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
