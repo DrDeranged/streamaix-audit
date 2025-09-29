@@ -257,6 +257,45 @@ export const avatarInsights = pgTable("avatar_insights", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Entrepreneur predictions tracking table
+export const entrepreneurPredictions = pgTable("entrepreneur_predictions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entrepreneurId: varchar("entrepreneur_id").notNull(), // Links to knowledge_avatars
+  entrepreneurName: text("entrepreneur_name").notNull(), // Naval Ravikant, Vitalik Buterin, etc
+  
+  // Prediction details
+  predictionText: text("prediction_text").notNull(), // Original prediction content
+  predictionType: text("prediction_type").notNull(), // price_target, market_direction, adoption_timeline, regulatory_outcome
+  category: text("category").notNull(), // crypto, stocks, technology, regulation, market_timing
+  
+  // Target information
+  targetAsset: text("target_asset"), // BTC, ETH, TSLA, etc
+  targetPrice: real("target_price"), // Specific price target if applicable
+  targetTimeframe: text("target_timeframe").notNull(), // 1w, 1m, 3m, 6m, 1y, 2y
+  targetDate: timestamp("target_date"), // Specific date if mentioned
+  
+  // Source and credibility
+  sourceUrl: text("source_url"), // Tweet, interview, blog post URL
+  sourceType: text("source_type").notNull(), // twitter, interview, podcast, blog, conference
+  confidence: integer("confidence"), // Entrepreneur's stated confidence 0-100
+  
+  // Prediction tracking
+  status: text("status").notNull().default("active"), // active, expired, evaluated, invalidated
+  actualOutcome: text("actual_outcome"), // What actually happened
+  accuracyScore: integer("accuracy_score"), // 0-100 how accurate the prediction was
+  evaluatedAt: timestamp("evaluated_at"), // When we measured the outcome
+  
+  // Context and metadata
+  marketContext: jsonb("market_context"), // Market conditions when prediction was made
+  relatedEvents: jsonb("related_events"), // Events that may have influenced outcome
+  notes: text("notes"), // Additional evaluation notes
+  
+  // Timestamps
+  predictionMadeAt: timestamp("prediction_made_at").notNull(), // When they made the prediction
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
@@ -557,6 +596,23 @@ export const insertAvatarInsightSchema = createInsertSchema(avatarInsights).pick
   publishedAt: true,
 });
 
+export const insertEntrepreneurPredictionSchema = createInsertSchema(entrepreneurPredictions).pick({
+  entrepreneurId: true,
+  entrepreneurName: true,
+  predictionText: true,
+  predictionType: true,
+  category: true,
+  targetAsset: true,
+  targetPrice: true,
+  targetTimeframe: true,
+  targetDate: true,
+  sourceUrl: true,
+  sourceType: true,
+  confidence: true,
+  marketContext: true,
+  predictionMadeAt: true,
+});
+
 // Pattern Recognition Insert Schemas moved after table definitions
 
 // Types
@@ -604,6 +660,9 @@ export type AvatarContentInteraction = typeof avatarContentInteractions.$inferSe
 
 export type InsertAvatarInsight = z.infer<typeof insertAvatarInsightSchema>;
 export type AvatarInsight = typeof avatarInsights.$inferSelect;
+
+export type InsertEntrepreneurPrediction = z.infer<typeof insertEntrepreneurPredictionSchema>;
+export type EntrepreneurPrediction = typeof entrepreneurPredictions.$inferSelect;
 
 // Cross-Market Signal Generation Types - Phase 3 Final Feature
 export type CrossMarketSignal = {

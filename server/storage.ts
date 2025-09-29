@@ -31,6 +31,9 @@ import {
   type InsertAvatarContentInteraction,
   type AvatarInsight,
   type InsertAvatarInsight,
+  // Entrepreneur Predictions Types
+  type EntrepreneurPrediction,
+  type InsertEntrepreneurPrediction,
   // Pattern Recognition Types
   type ChartPattern,
   type InsertChartPattern,
@@ -58,6 +61,8 @@ import {
   avatarFollows,
   avatarContentInteractions,
   avatarInsights,
+  // Entrepreneur Predictions Tables
+  entrepreneurPredictions,
   // Pattern Recognition Tables
   chartPatterns,
   trendAnalysis,
@@ -252,6 +257,28 @@ export interface IStorage {
   createAiTradingSetup(setup: InsertAiTradingSetup): Promise<AiTradingSetup>;
   updateAiTradingSetup(id: string, updates: Partial<InsertAiTradingSetup>): Promise<AiTradingSetup | undefined>;
   deleteAiTradingSetup(id: string): Promise<boolean>;
+
+  // Entrepreneur prediction operations
+  getEntrepreneurPrediction(id: string): Promise<EntrepreneurPrediction | undefined>;
+  getEntrepreneurPredictions(options?: {
+    entrepreneurName?: string;
+    status?: string;
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<EntrepreneurPrediction[]>;
+  getActivePredictions(entrepreneurName?: string): Promise<EntrepreneurPrediction[]>;
+  getPredictionsByTimeframe(timeframe: string): Promise<EntrepreneurPrediction[]>;
+  createEntrepreneurPrediction(prediction: InsertEntrepreneurPrediction): Promise<EntrepreneurPrediction>;
+  updateEntrepreneurPrediction(id: string, updates: Partial<EntrepreneurPrediction>): Promise<EntrepreneurPrediction | undefined>;
+  evaluatePrediction(id: string, outcome: string, accuracyScore: number): Promise<EntrepreneurPrediction | undefined>;
+  getEntrepreneurAccuracyStats(entrepreneurName: string): Promise<{
+    totalPredictions: number;
+    evaluatedPredictions: number;
+    averageAccuracy: number;
+    accuracyByCategory: Record<string, number>;
+    recentAccuracy: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1412,6 +1439,142 @@ export class DatabaseStorage implements IStorage {
   async deleteAiTradingSetup(id: string): Promise<boolean> {
     const result = await db.delete(aiTradingSetups).where(eq(aiTradingSetups.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Entrepreneur prediction operations
+  async getEntrepreneurPrediction(id: string): Promise<EntrepreneurPrediction | undefined> {
+    const [prediction] = await db.select().from(entrepreneurPredictions).where(eq(entrepreneurPredictions.id, id));
+    return prediction || undefined;
+  }
+
+  async getEntrepreneurPredictions(options?: {
+    entrepreneurName?: string;
+    status?: string;
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<EntrepreneurPrediction[]> {
+    const conditions = [];
+    
+    if (options?.entrepreneurName) {
+      conditions.push(eq(entrepreneurPredictions.entrepreneurName, options.entrepreneurName));
+    }
+    if (options?.status) {
+      conditions.push(eq(entrepreneurPredictions.status, options.status));
+    }
+    if (options?.category) {
+      conditions.push(eq(entrepreneurPredictions.category, options.category));
+    }
+    
+    let query = db
+      .select()
+      .from(entrepreneurPredictions)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(entrepreneurPredictions.predictionMadeAt));
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+    
+    return await query;
+  }
+
+  async getActivePredictions(entrepreneurName?: string): Promise<EntrepreneurPrediction[]> {
+    const conditions = [eq(entrepreneurPredictions.status, 'active')];
+    
+    if (entrepreneurName) {
+      conditions.push(eq(entrepreneurPredictions.entrepreneurName, entrepreneurName));
+    }
+    
+    return await db.select().from(entrepreneurPredictions)
+      .where(and(...conditions))
+      .orderBy(desc(entrepreneurPredictions.predictionMadeAt));
+  }
+
+  async getPredictionsByTimeframe(timeframe: string): Promise<EntrepreneurPrediction[]> {
+    return await db.select().from(entrepreneurPredictions)
+      .where(eq(entrepreneurPredictions.targetTimeframe, timeframe))
+      .orderBy(desc(entrepreneurPredictions.predictionMadeAt));
+  }
+
+  async createEntrepreneurPrediction(prediction: InsertEntrepreneurPrediction): Promise<EntrepreneurPrediction> {
+    const [newPrediction] = await db.insert(entrepreneurPredictions).values(prediction).returning();
+    return newPrediction;
+  }
+
+  async updateEntrepreneurPrediction(id: string, updates: Partial<EntrepreneurPrediction>): Promise<EntrepreneurPrediction | undefined> {
+    const [updated] = await db.update(entrepreneurPredictions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(entrepreneurPredictions.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async evaluatePrediction(id: string, outcome: string, accuracyScore: number): Promise<EntrepreneurPrediction | undefined> {
+    const [updated] = await db.update(entrepreneurPredictions)
+      .set({
+        status: 'evaluated',
+        actualOutcome: outcome,
+        accuracyScore: accuracyScore,
+        evaluatedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(entrepreneurPredictions.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getEntrepreneurAccuracyStats(entrepreneurName: string): Promise<{
+    totalPredictions: number;
+    evaluatedPredictions: number;
+    averageAccuracy: number;
+    accuracyByCategory: Record<string, number>;
+    recentAccuracy: number;
+  }> {
+    // Get all predictions for this entrepreneur
+    const allPredictions = await db.select().from(entrepreneurPredictions)
+      .where(eq(entrepreneurPredictions.entrepreneurName, entrepreneurName));
+    
+    const evaluatedPredictions = allPredictions.filter(p => p.status === 'evaluated' && p.accuracyScore !== null);
+    
+    // Calculate average accuracy
+    const averageAccuracy = evaluatedPredictions.length > 0 
+      ? evaluatedPredictions.reduce((sum, p) => sum + (p.accuracyScore || 0), 0) / evaluatedPredictions.length
+      : 0;
+    
+    // Calculate accuracy by category
+    const accuracyByCategory: Record<string, number> = {};
+    const categorizedPredictions = evaluatedPredictions.reduce((acc, p) => {
+      if (!acc[p.category]) acc[p.category] = [];
+      acc[p.category].push(p);
+      return acc;
+    }, {} as Record<string, typeof evaluatedPredictions>);
+    
+    for (const [category, predictions] of Object.entries(categorizedPredictions)) {
+      accuracyByCategory[category] = predictions.reduce((sum, p) => sum + (p.accuracyScore || 0), 0) / predictions.length;
+    }
+    
+    // Calculate recent accuracy (last 10 evaluated predictions)
+    const recentPredictions = evaluatedPredictions
+      .sort((a, b) => new Date(b.evaluatedAt!).getTime() - new Date(a.evaluatedAt!).getTime())
+      .slice(0, 10);
+    
+    const recentAccuracy = recentPredictions.length > 0
+      ? recentPredictions.reduce((sum, p) => sum + (p.accuracyScore || 0), 0) / recentPredictions.length
+      : 0;
+    
+    return {
+      totalPredictions: allPredictions.length,
+      evaluatedPredictions: evaluatedPredictions.length,
+      averageAccuracy: Math.round(averageAccuracy),
+      accuracyByCategory: Object.fromEntries(
+        Object.entries(accuracyByCategory).map(([k, v]) => [k, Math.round(v)])
+      ),
+      recentAccuracy: Math.round(recentAccuracy)
+    };
   }
 }
 

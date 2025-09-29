@@ -246,6 +246,32 @@ export function KnowledgeAvatars() {
 
   const avatars = avatarsResponse?.avatars || [];
   const itemsPerView = 4; // Show 4 cards at once for better information density
+
+  // Fetch social sentiment data for all avatars at top level
+  const navalSentiment = useSocialSentiment('Naval Ravikant');
+  const vitalikSentiment = useSocialSentiment('Vitalik Buterin');
+  const saylorSentiment = useSocialSentiment('Michael Saylor');
+  const brianSentiment = useSocialSentiment('Brian Armstrong');
+  const czSentiment = useSocialSentiment('Changpeng Zhao');
+  const cathieSentiment = useSocialSentiment('Cathie Wood');
+  const tylerSentiment = useSocialSentiment('Tyler Winklevoss');
+  const cameronSentiment = useSocialSentiment('Cameron Winklevoss');
+  const balajiSentiment = useSocialSentiment('Balaji Srinivasan');
+  const paulSentiment = useSocialSentiment('Paul Graham');
+
+  // Map entrepreneur names to sentiment data
+  const sentimentMap: Record<string, ReturnType<typeof useSocialSentiment>> = {
+    'Naval Ravikant': navalSentiment,
+    'Vitalik Buterin': vitalikSentiment,
+    'Michael Saylor': saylorSentiment,
+    'Brian Armstrong': brianSentiment,
+    'Changpeng Zhao': czSentiment,
+    'Cathie Wood': cathieSentiment,
+    'Tyler Winklevoss': tylerSentiment,
+    'Cameron Winklevoss': cameronSentiment,
+    'Balaji Srinivasan': balajiSentiment,
+    'Paul Graham': paulSentiment,
+  };
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
   const nextSlide = () => {
@@ -359,7 +385,9 @@ export function KnowledgeAvatars() {
             >
               {avatars.map((avatar, index) => {
                 const performance = getPerformanceData(avatar.name);
-                const { sentiment: socialSentiment, isLoading: sentimentLoading } = useSocialSentiment(avatar.name);
+                const sentimentData = sentimentMap[avatar.name];
+                const socialSentiment = sentimentData?.sentiment;
+                const sentimentLoading = sentimentData?.isLoading;
                 const influenceScore = socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 const recentActivity = getRecentActivity(avatar.name);
                 
