@@ -360,12 +360,109 @@ export function KnowledgeAvatars() {
     return () => clearInterval(interval);
   }, [maxIndex]);
 
+  // Skeleton Card Component with Shimmer Effects
+  const SkeletonCard = () => (
+    <Card className="min-h-[600px] flex flex-col overflow-hidden bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 relative">
+      {/* Skeleton Header */}
+      <div className="relative overflow-hidden">
+        <div className="h-28 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+        </div>
+        <div className="absolute -bottom-10 left-4">
+          <div className="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
+        </div>
+        <div className="absolute top-3 left-4">
+          <div className="w-20 h-6 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
+        </div>
+        <div className="absolute top-3 right-3 flex gap-1.5">
+          <div className="w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
+          <div className="w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-200" />
+          <div className="w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-500" />
+        </div>
+      </div>
+      
+      <CardContent className="pt-12 pb-6 px-5 space-y-4 flex-1 flex flex-col">
+        {/* Name Skeleton */}
+        <div className="space-y-2">
+          <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse w-3/4" />
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse w-1/2" />
+        </div>
+        
+        {/* Metrics Grid Skeleton */}
+        <div className="grid grid-cols-2 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-gray-200/50 dark:bg-gray-700/50 rounded-xl p-3 space-y-2 relative overflow-hidden">
+              <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+              </div>
+              <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-1/2 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Key Metrics Skeleton */}
+        <div className="space-y-3">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3 animate-pulse" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4 animate-pulse" />
+            </div>
+          ))}
+        </div>
+        
+        {/* Activity Skeleton */}
+        <div className="space-y-2">
+          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/4 animate-pulse" />
+          <div className="bg-gray-200/50 dark:bg-gray-700/50 rounded-lg p-3 space-y-1 animate-pulse">
+            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-full" />
+            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4" />
+            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/4 mt-2" />
+          </div>
+        </div>
+        
+        {/* Button Skeleton */}
+        <div className="flex gap-3 pt-4 mt-auto">
+          <div className="flex-1 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse" />
+          <div className="w-12 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   if (isLoading) {
     return (
       <section id="profiles" className="py-20 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-6">
-          <div className="text-center">
-            <div className="animate-pulse text-xl text-muted-foreground">Loading crypto intelligence network...</div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
+              Knowledge Avatars
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <span className="animate-pulse">Loading crypto intelligence network...</span>
+            </p>
+          </motion.div>
+
+          {/* Skeleton Cards */}
+          <div className="overflow-hidden px-4 md:px-12">
+            <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>
+              {[...Array(isMobile ? 1 : 4)].map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <SkeletonCard />
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -555,7 +652,10 @@ export function KnowledgeAvatars() {
                                   </div>
                                   <Star className="h-3 w-3 text-yellow-500 fill-current" />
                                   {sentimentLoading && (
-                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
+                                    <div className="relative">
+                                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-primary/30 border-t-primary" />
+                                      <div className="absolute inset-0 rounded-full bg-primary/10 animate-pulse" />
+                                    </div>
                                   )}
                                 </div>
                                 {socialSentiment && (
@@ -599,13 +699,16 @@ export function KnowledgeAvatars() {
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Activity className="h-3 w-3" />
                                 Recent Activity
+                                {!recentActivity[0] && (
+                                  <div className="animate-spin rounded-full h-2 w-2 border border-primary/50 border-t-primary ml-1" />
+                                )}
                               </div>
-                              <div className="bg-muted/20 rounded-lg p-2">
+                              <div className={`bg-muted/20 rounded-lg p-2 ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
                                 <div className="text-xs text-muted-foreground line-clamp-2">
-                                  {recentActivity[0]?.text || "Market analysis posted"}
+                                  {recentActivity[0]?.text || "Loading recent activity..."}
                                 </div>
                                 <div className="text-xs text-muted-foreground/70 mt-1">
-                                  {recentActivity[0]?.time || "2h ago"}
+                                  {recentActivity[0]?.time || "..."}
                                 </div>
                               </div>
                             </div>
