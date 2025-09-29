@@ -670,167 +670,160 @@ export function KnowledgeAvatars() {
                                 <span className="text-xs text-emerald-400 font-mono">LIVE</span>
                               </div>
                             </div>
-                            <div className="absolute -bottom-10 left-4">
+                            <div className="absolute -bottom-12 left-5">
                               <div className="relative">
-                                <Avatar className="w-20 h-20 ring-4 ring-white/30 border-4 border-white/10 shadow-2xl shadow-black/40 backdrop-blur-sm group-hover:w-22 group-hover:h-22 group-hover:ring-6 group-hover:ring-primary/40 group-hover:shadow-3xl transition-all duration-500">
+                                <Avatar className="w-24 h-24 ring-4 ring-blue-500/40 border-4 border-slate-900 shadow-2xl shadow-blue-500/30 backdrop-blur-sm transition-all duration-500">
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
                                     className="object-cover"
                                   />
-                                  <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 text-white">
+                                  <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 text-white">
                                     {avatar.name.split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>
                                 </Avatar>
                                 {avatar.verificationStatus === 'verified' && (
-                                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full p-1.5 shadow-lg">
+                                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-2 shadow-lg">
                                     <CheckCircle className="h-4 w-4 text-white" />
                                   </div>
                                 )}
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent to-white/10 pointer-events-none" />
                               </div>
                             </div>
-                            <div className="absolute top-3 left-4">
-                              <Badge variant="secondary" className="bg-black/40 backdrop-blur-md text-white border-white/30 text-xs font-semibold px-3 py-1 shadow-lg">
+                            <div className="absolute top-4 left-5">
+                              <Badge variant="secondary" className="bg-slate-900/80 backdrop-blur-md text-blue-300 border-blue-500/40 text-xs font-mono font-semibold px-3 py-1.5 shadow-lg">
                                 {avatar.expertise}
                               </Badge>
                             </div>
                           </div>
                           
-                          <CardContent className={`pt-12 pb-6 ${isMobile ? 'px-6 space-y-6' : 'px-5 space-y-4'} flex-1 flex flex-col`}>
+                          <CardContent className={`pt-14 pb-6 ${isMobile ? 'px-6 space-y-5' : 'px-5 space-y-4'} flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-950/50`}>
                             {/* Name and Handle */}
-                            <div className="space-y-1.5">
-                              <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 tracking-tight">
+                            <div className="space-y-2 border-b border-blue-500/20 pb-4">
+                              <h3 className="text-xl font-bold text-blue-50 group-hover:text-blue-300 transition-colors line-clamp-1 tracking-tight font-mono">
                                 {avatar.name}
                               </h3>
-                              <p className="text-sm text-muted-foreground font-medium">@{avatar.handle}</p>
+                              <p className="text-sm text-blue-400/70 font-mono">@{avatar.handle}</p>
                             </div>
                             
-                            {/* Performance Metrics Grid */}
-                            <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-2 gap-3'}`}>
-                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 ${!isMobile ? 'hover:scale-105' : ''} hover:shadow-lg transition-all duration-300 group-hover:animate-pulse`}>
+                            {/* Bloomberg Terminal-Style Metrics Grid */}
+                            <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-2.5'}`}>
+                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground group-hover:text-primary/80 transition-colors`}>Portfolio ROI</span>
-                                  <div className="flex items-center gap-1">
+                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Portfolio ROI</span>
+                                  <div className="flex items-center gap-1.5">
                                     {performance.trend === 'up' ? (
-                                      <ArrowUpRight className="h-3 w-3 text-green-500" />
+                                      <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />
                                     ) : (
-                                      <ArrowDownRight className="h-3 w-3 text-red-500" />
+                                      <ArrowDownRight className="h-3.5 w-3.5 text-red-400" />
                                     )}
-                                    <div className={`w-2 h-2 rounded-full ${performance.roi >= 0 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+                                    <div className={`w-1.5 h-1.5 rounded-full ${performance.roi >= 0 ? 'bg-emerald-400' : 'bg-red-400'} animate-pulse`} />
                                   </div>
                                 </div>
-                                <div className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300 ${performance.roi >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'} ${!isMobile ? 'group-hover:scale-110' : ''}`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
+                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${performance.roi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
                                   {performance.roi >= 0 ? '+' : ''}{performance.roi}%
                                 </div>
                               </div>
                               
-                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 ${!isMobile ? 'hover:scale-105' : ''} hover:shadow-lg transition-all duration-300 group-hover:animate-pulse`}>
+                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground group-hover:text-primary/80 transition-colors`}>Prediction Accuracy</span>
-                                  <div className={`w-2 h-2 rounded-full ${performance.accuracy >= 80 ? 'bg-green-500' : performance.accuracy >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Accuracy</span>
+                                  <div className={`w-1.5 h-1.5 rounded-full ${performance.accuracy >= 80 ? 'bg-emerald-400' : performance.accuracy >= 60 ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`} />
                                 </div>
-                                <div className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300 ${performance.accuracy >= 80 ? 'text-green-500 group-hover:text-green-400' : performance.accuracy >= 60 ? 'text-yellow-500 group-hover:text-yellow-400' : 'text-red-500 group-hover:text-red-400'} ${!isMobile ? 'group-hover:scale-110' : ''}`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
+                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${performance.accuracy >= 80 ? 'text-emerald-400' : performance.accuracy >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
                                   {performance.accuracy}%
                                 </div>
                               </div>
                               
-                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 ${!isMobile ? 'hover:scale-105' : ''} hover:shadow-lg transition-all duration-300 group-hover:animate-pulse`}>
-                                <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground group-hover:text-primary/80 transition-colors`}>
-                                  {socialSentiment ? 'Real Influence' : 'Influence'}
-                                </span>
-                                <div className="flex items-center gap-1">
-                                  <div className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold text-foreground`}>
+                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
+                                <div className="flex items-center justify-between">
+                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>
+                                    Influence
+                                  </span>
+                                  <Star className="h-3.5 w-3.5 text-cyan-400" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono text-cyan-400`}>
                                     {Math.round(influenceScore)}
                                   </div>
-                                  <Star className="h-3 w-3 text-yellow-500 fill-current" />
                                   {sentimentLoading && (
-                                    <div className="relative">
-                                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-primary/30 border-t-primary" />
-                                      <div className="absolute inset-0 rounded-full bg-primary/10 animate-pulse" />
-                                    </div>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-cyan-400/30 border-t-cyan-400" />
                                   )}
                                 </div>
                                 {socialSentiment && (
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <div className="text-xs text-muted-foreground">
-                                      {formatFollowerCount(socialSentiment.profile.followers)} followers
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-[10px] text-blue-400/70 font-mono">
+                                      {formatFollowerCount(socialSentiment.profile.followers)}
                                     </div>
-                                    <div className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
-                                      socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-green-500/20 text-green-600' :
-                                      socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500/20 text-yellow-600' :
-                                      'bg-red-500/20 text-red-600'
+                                    <div className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                                      socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-emerald-500/20 text-emerald-400' :
+                                      socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500/20 text-yellow-400' :
+                                      'bg-red-500/20 text-red-400'
                                     }`}>
-                                      <div className={`w-1.5 h-1.5 rounded-full ${
-                                        socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-green-500' :
-                                        socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500' :
-                                        'bg-red-500'
-                                      } animate-pulse`} />
-                                      {Math.round(socialSentiment.sentiment.sentimentScore * 100)}% sentiment
+                                      {Math.round(socialSentiment.sentiment.sentimentScore * 100)}%
                                     </div>
                                   </div>
                                 )}
                               </div>
                               
-                              <div className={`bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl ${isMobile ? 'p-4' : 'p-3'} space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300`}>
+                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground`}>AUM/Net Worth</span>
-                                  <DollarSign className="h-3 w-3 text-green-600" />
+                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Net Worth</span>
+                                  <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                                 </div>
-                                <div className={`${isMobile ? 'text-base' : 'text-sm'} font-bold text-foreground truncate`} title={`Assets Under Management / Net Worth: ${performance.portfolioValue}`}>
+                                <div className={`${isMobile ? 'text-base' : 'text-sm'} font-bold font-mono text-emerald-400 truncate`} title={`Assets Under Management / Net Worth: ${performance.portfolioValue}`}>
                                   {performance.portfolioValue}
                                 </div>
                               </div>
                             </div>
                             
-                            {/* Key Metrics */}
-                            <div className="space-y-2">
+                            {/* Terminal-Style Key Metrics */}
+                            <div className="space-y-2 bg-slate-950/50 border border-blue-500/20 rounded-lg p-3">
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground flex items-center gap-1">
+                                <span className="text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
                                   <Users className="h-3 w-3" />
                                   Followers
                                 </span>
-                                <span className="font-semibold">{formatFollowerCount(avatar.followerCount)}</span>
+                                <span className="font-mono font-bold text-cyan-400">{formatFollowerCount(avatar.followerCount)}</span>
                               </div>
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground flex items-center gap-1">
+                                <span className="text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
                                   <Building2 className="h-3 w-3" />
                                   Investments
                                 </span>
-                                <span className="font-semibold">{avatar.notableInvestments?.length || 0}</span>
+                                <span className="font-mono font-bold text-cyan-400">{avatar.notableInvestments?.length || 0}</span>
                               </div>
                             </div>
                             
-                            {/* Enhanced Recent Activity Preview */}
+                            {/* Terminal Activity Feed */}
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
-                                  <Activity className="h-3 w-3 group-hover:text-primary transition-colors" />
-                                  Recent Activity
+                                <div className="flex items-center gap-1.5 text-xs text-blue-400/80 font-mono uppercase tracking-wider">
+                                  <Activity className="h-3 w-3" />
+                                  Live Feed
                                   {!recentActivity[0] && (
-                                    <div className="animate-spin rounded-full h-2 w-2 border border-primary/50 border-t-primary ml-1" />
+                                    <div className="animate-spin rounded-full h-2 w-2 border border-cyan-400/50 border-t-cyan-400 ml-1" />
                                   )}
                                 </div>
                                 {recentActivity[0] && (
                                   <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                                    recentActivity[0].impact === 'high' ? 'bg-red-500' :
-                                    recentActivity[0].impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                    recentActivity[0].impact === 'high' ? 'bg-red-400' :
+                                    recentActivity[0].impact === 'medium' ? 'bg-yellow-400' : 'bg-emerald-400'
                                   }`} />
                                 )}
                               </div>
-                              <div className={`bg-muted/20 rounded-lg p-2 hover:bg-primary/10 hover:border hover:border-primary/20 transition-all duration-300 cursor-pointer ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
-                                <div className="text-xs text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors">
+                              <div className={`bg-slate-950/60 border border-blue-500/30 rounded-lg p-3 hover:border-blue-400/50 hover:bg-slate-950/80 transition-all duration-300 cursor-pointer ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
+                                <div className="text-xs text-blue-200/90 line-clamp-2 font-medium">
                                   {recentActivity[0]?.text || "Loading recent activity..."}
                                 </div>
-                                <div className="flex items-center justify-between mt-1">
-                                  <div className="text-xs text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">
+                                <div className="flex items-center justify-between mt-2">
+                                  <div className="text-[10px] text-blue-400/60 font-mono">
                                     {recentActivity[0]?.time || "..."}
                                   </div>
                                   {recentActivity[0] && (
-                                    <div className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                      recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-600' :
-                                      recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-600' : 
-                                      'bg-green-500/20 text-green-600'
+                                    <div className={`text-[10px] px-2 py-0.5 rounded font-mono uppercase tracking-wider ${
+                                      recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-400' :
+                                      recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 
+                                      'bg-emerald-500/20 text-emerald-400'
                                     }`}>
                                       {recentActivity[0].impact}
                                     </div>
@@ -839,37 +832,37 @@ export function KnowledgeAvatars() {
                               </div>
                             </div>
                             
-                            {/* Recent Thought */}
+                            {/* Recent Insight */}
                             {avatar.recentThoughts && avatar.recentThoughts.length > 0 && (
-                              <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg p-2 border-l-2 border-primary/30">
-                                <p className="text-xs text-muted-foreground italic line-clamp-2">
+                              <div className="bg-slate-950/60 border-l-2 border-cyan-400 rounded-lg p-3">
+                                <p className="text-xs text-blue-200/80 italic line-clamp-2 font-medium">
                                   "{avatar.recentThoughts[0]}"
                                 </p>
                               </div>
                             )}
                             
-                            {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4 mt-auto">
+                            {/* Professional Action Buttons */}
+                            <div className="flex gap-2 pt-3 mt-auto border-t border-blue-500/20">
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleFollow(avatar.id);
                                 }}
                                 size="sm"
-                                className={`flex-1 bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 hover:scale-110 text-white transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-2xl hover:shadow-primary/30 group-hover:animate-pulse group-hover:brightness-110`}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white transition-all duration-300 text-xs font-mono font-semibold shadow-lg hover:shadow-blue-500/40 uppercase tracking-wider"
                                 data-testid={`button-follow-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                               >
-                                <UserPlus className="h-3 w-3 mr-1" />
-                                Follow
+                                <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                                Track
                               </Button>
                               <Button
                                 onClick={(e) => e.stopPropagation()}
                                 size="sm"
                                 variant="outline"
-                                className="px-4 text-sm border-white/20 bg-white/5 hover:bg-primary/20 hover:border-primary/50 backdrop-blur-sm hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group-hover:animate-pulse"
+                                className="px-4 text-xs font-mono border-blue-500/40 bg-slate-900/60 text-blue-300 hover:bg-blue-950/80 hover:border-blue-400/60 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
                                 data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                               >
-                                <Eye className="h-3 w-3" />
+                                <Eye className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                           </CardContent>
