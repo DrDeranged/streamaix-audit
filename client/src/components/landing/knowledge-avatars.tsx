@@ -515,20 +515,26 @@ export function KnowledgeAvatars() {
                               <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-muted-foreground">Portfolio ROI</span>
-                                  {performance.trend === 'up' ? (
-                                    <ArrowUpRight className="h-3 w-3 text-green-500" />
-                                  ) : (
-                                    <ArrowDownRight className="h-3 w-3 text-red-500" />
-                                  )}
+                                  <div className="flex items-center gap-1">
+                                    {performance.trend === 'up' ? (
+                                      <ArrowUpRight className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <ArrowDownRight className="h-3 w-3 text-red-500" />
+                                    )}
+                                    <div className={`w-2 h-2 rounded-full ${performance.roi >= 0 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+                                  </div>
                                 </div>
-                                <div className={`text-lg font-bold ${performance.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                <div className={`text-lg font-bold ${performance.roi >= 0 ? 'text-green-500' : 'text-red-500'}`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
                                   {performance.roi >= 0 ? '+' : ''}{performance.roi}%
                                 </div>
                               </div>
                               
                               <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
-                                <span className="text-xs text-muted-foreground">Accuracy</span>
-                                <div className="text-lg font-bold text-foreground">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">Prediction Accuracy</span>
+                                  <div className={`w-2 h-2 rounded-full ${performance.accuracy >= 80 ? 'bg-green-500' : performance.accuracy >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                                </div>
+                                <div className={`text-lg font-bold ${performance.accuracy >= 80 ? 'text-green-500' : performance.accuracy >= 60 ? 'text-yellow-500' : 'text-red-500'}`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
                                   {performance.accuracy}%
                                 </div>
                               </div>
@@ -554,8 +560,11 @@ export function KnowledgeAvatars() {
                               </div>
                               
                               <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
-                                <span className="text-xs text-muted-foreground">AUM</span>
-                                <div className="text-sm font-bold text-foreground truncate" title={performance.portfolioValue}>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">AUM/Net Worth</span>
+                                  <DollarSign className="h-3 w-3 text-green-600" />
+                                </div>
+                                <div className="text-sm font-bold text-foreground truncate" title={`Assets Under Management / Net Worth: ${performance.portfolioValue}`}>
                                   {performance.portfolioValue}
                                 </div>
                               </div>
