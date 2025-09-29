@@ -565,10 +565,10 @@ export function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={currentIndex === 0}
-                className="absolute -left-16 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-br from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-12 h-12 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
                 data-testid="button-carousel-prev"
               >
-                <ChevronLeft className="h-7 w-7" />
+                <ChevronLeft className="h-6 w-6" />
               </Button>
               
               <Button
@@ -576,10 +576,10 @@ export function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={currentIndex >= maxIndex}
-                className="absolute -right-16 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-br from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-12 h-12 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
                 data-testid="button-carousel-next"
               >
-                <ChevronRight className="h-7 w-7" />
+                <ChevronRight className="h-6 w-6" />
               </Button>
             </>
           )}
@@ -659,7 +659,7 @@ export function KnowledgeAvatars() {
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-[1.02]' : ''} transition-all duration-500 overflow-hidden h-[640px] ${isMobile ? 'mx-2' : ''} ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
+                        <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden h-[640px] ${isMobile ? 'mx-2' : ''} ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
                           {/* Professional Terminal-Style Header */}
                           <div className="relative overflow-hidden">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
