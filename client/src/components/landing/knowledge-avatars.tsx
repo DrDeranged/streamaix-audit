@@ -365,7 +365,14 @@ export function KnowledgeAvatars() {
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) {
+    if (!touchStart) {
+      setIsSwipeActive(false);
+      setSwipeDirection(null);
+      return;
+    }
+    
+    // If touchEnd is null, it means no movement occurred (just a tap)
+    if (!touchEnd) {
       setIsSwipeActive(false);
       setSwipeDirection(null);
       return;
@@ -375,17 +382,18 @@ export function KnowledgeAvatars() {
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
+    // Only trigger slide if it was an actual swipe (not just a small movement)
     if (isLeftSwipe && currentIndex < maxIndex) {
       nextSlide();
     } else if (isRightSwipe && currentIndex > 0) {
       prevSlide();
     }
     
-    // Reset swipe state with small delay for smooth animation
-    setTimeout(() => {
-      setIsSwipeActive(false);
-      setSwipeDirection(null);
-    }, 200);
+    // Reset swipe state
+    setIsSwipeActive(false);
+    setSwipeDirection(null);
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   const handleFollow = async (avatarId: string) => {
@@ -586,15 +594,12 @@ export function KnowledgeAvatars() {
           
           {/* Enhanced Mobile Touch-Friendly Carousel Content */}
           <div 
-            className={`overflow-hidden ${isMobile ? 'px-4' : 'px-12'} ${
-              isSwipeActive ? 'cursor-grabbing' : 'cursor-grab'
-            } relative`}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
+            className={`overflow-hidden ${isMobile ? 'px-4' : 'px-12'} relative`}
+            onTouchStart={isMobile ? onTouchStart : undefined}
+            onTouchMove={isMobile ? onTouchMove : undefined}
+            onTouchEnd={isMobile ? onTouchEnd : undefined}
             style={{
-              touchAction: 'pan-x',
-              userSelect: 'none'
+              touchAction: isMobile ? 'pan-x' : 'auto'
             }}
           >
             {/* Enhanced Mobile Swipe Indicators */}
@@ -650,16 +655,18 @@ export function KnowledgeAvatars() {
                 return (
                   <motion.div
                     key={avatar.id}
-                    className={`flex-none ${isMobile ? 'w-full px-4' : 'w-1/4 px-2'}`}
+                    className={`flex-none ${isMobile ? 'w-full px-4' : 'w-1/4 px-2'} relative z-10`}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     onHoverStart={() => !isMobile && setHoveredCard(avatar.id)}
                     onHoverEnd={() => !isMobile && setHoveredCard(null)}
+                    style={{ pointerEvents: 'auto' }}
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden h-[640px] ${isMobile ? 'mx-2' : ''} ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
+                        <div className="w-full" style={{ pointerEvents: 'auto' }}>
+                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden h-[640px] ${isMobile ? 'mx-2' : ''} ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
                           {/* Professional Terminal-Style Header */}
                           <div className="relative overflow-hidden">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
@@ -867,6 +874,7 @@ export function KnowledgeAvatars() {
                             </div>
                           </CardContent>
                         </Card>
+                        </div>
                       </DialogTrigger>
                       
                       {/* Enhanced Popup Modal Content */}
