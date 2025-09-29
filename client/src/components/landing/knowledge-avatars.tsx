@@ -468,51 +468,57 @@ export function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[540px]' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
-                          {/* Premium Header with Gradient */}
-                          <div className="relative">
-                            <div className={`h-24 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-90 relative overflow-hidden`}>
-                              <div className="absolute inset-0 bg-black/20" />
-                              <div className="absolute top-3 right-3 flex gap-1">
-                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-200" />
-                                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-500" />
+                          {/* Premium Header with Enhanced Gradient */}
+                          <div className="relative overflow-hidden">
+                            <div className={`h-28 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden`}>
+                              <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/30" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                              <div className="absolute top-3 right-3 flex gap-1.5">
+                                <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse delay-300 shadow-lg shadow-blue-400/50" />
+                                <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-pulse delay-700 shadow-lg shadow-purple-400/50" />
+                              </div>
+                              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card/80 to-transparent" />
+                            </div>
+                            <div className="absolute -bottom-10 left-4">
+                              <div className="relative">
+                                <Avatar className="w-20 h-20 ring-4 ring-white/30 border-4 border-white/10 shadow-2xl shadow-black/40 backdrop-blur-sm">
+                                  <AvatarImage 
+                                    src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
+                                    alt={`${avatar.name} avatar`}
+                                    className="object-cover"
+                                  />
+                                  <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 text-white">
+                                    {avatar.name.split(' ').map(n => n[0]).join('')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {avatar.verificationStatus === 'verified' && (
+                                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full p-1.5 shadow-lg">
+                                    <CheckCircle className="h-4 w-4 text-white" />
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent to-white/10 pointer-events-none" />
                               </div>
                             </div>
-                            <div className="absolute -bottom-8 left-4">
-                              <Avatar className="w-16 h-16 ring-4 ring-card border-2 border-white/20 shadow-xl">
-                                <AvatarImage 
-                                  src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
-                                  alt={`${avatar.name} avatar`}
-                                />
-                                <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                                  {avatar.name.split(' ').map(n => n[0]).join('')}
-                                </AvatarFallback>
-                              </Avatar>
-                              {avatar.verificationStatus === 'verified' && (
-                                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                                  <CheckCircle className="h-3 w-3 text-white" />
-                                </div>
-                              )}
-                            </div>
                             <div className="absolute top-3 left-4">
-                              <Badge variant="secondary" className="bg-black/30 text-white border-white/20 text-xs font-medium">
+                              <Badge variant="secondary" className="bg-black/40 backdrop-blur-md text-white border-white/30 text-xs font-semibold px-3 py-1 shadow-lg">
                                 {avatar.expertise}
                               </Badge>
                             </div>
                           </div>
                           
-                          <CardContent className="pt-10 pb-6 px-4 space-y-4 flex-1 flex flex-col">
+                          <CardContent className="pt-12 pb-6 px-5 space-y-4 flex-1 flex flex-col">
                             {/* Name and Handle */}
-                            <div className="space-y-1">
-                              <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                            <div className="space-y-1.5">
+                              <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 tracking-tight">
                                 {avatar.name}
                               </h3>
-                              <p className="text-sm text-muted-foreground">@{avatar.handle}</p>
+                              <p className="text-sm text-muted-foreground font-medium">@{avatar.handle}</p>
                             </div>
                             
                             {/* Performance Metrics Grid */}
-                            <div className="grid grid-cols-2 gap-2.5">
-                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-muted-foreground">Portfolio ROI</span>
                                   <div className="flex items-center gap-1">
@@ -529,7 +535,7 @@ export function KnowledgeAvatars() {
                                 </div>
                               </div>
                               
-                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-muted-foreground">Prediction Accuracy</span>
                                   <div className={`w-2 h-2 rounded-full ${performance.accuracy >= 80 ? 'bg-green-500' : performance.accuracy >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} />
@@ -539,7 +545,7 @@ export function KnowledgeAvatars() {
                                 </div>
                               </div>
                               
-                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
                                 <span className="text-xs text-muted-foreground">
                                   {socialSentiment ? 'Real Influence' : 'Influence'}
                                 </span>
@@ -559,7 +565,7 @@ export function KnowledgeAvatars() {
                                 )}
                               </div>
                               
-                              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-muted-foreground">AUM/Net Worth</span>
                                   <DollarSign className="h-3 w-3 text-green-600" />
@@ -614,14 +620,14 @@ export function KnowledgeAvatars() {
                             )}
                             
                             {/* Action Buttons */}
-                            <div className="flex gap-2 pt-2 mt-auto">
+                            <div className="flex gap-3 pt-4 mt-auto">
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleFollow(avatar.id);
                                 }}
                                 size="sm"
-                                className={`flex-1 bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white transition-all duration-300 text-xs font-medium`}
+                                className={`flex-1 bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 hover:scale-105 text-white transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl`}
                                 data-testid={`button-follow-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                               >
                                 <UserPlus className="h-3 w-3 mr-1" />
@@ -631,7 +637,7 @@ export function KnowledgeAvatars() {
                                 onClick={(e) => e.stopPropagation()}
                                 size="sm"
                                 variant="outline"
-                                className="px-3 text-xs"
+                                className="px-4 text-sm border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-sm hover:scale-105 transition-all duration-300"
                                 data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                               >
                                 <Eye className="h-3 w-3" />
