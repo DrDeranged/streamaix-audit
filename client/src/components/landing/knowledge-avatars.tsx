@@ -239,6 +239,8 @@ export function KnowledgeAvatars() {
   const [isMobile, setIsMobile] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isSwipeActive, setIsSwipeActive] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -300,28 +302,51 @@ export function KnowledgeAvatars() {
 
   // Touch handling for mobile swipe gestures
   const minSwipeDistance = 50;
+  const previewDistance = 15; // Visual feedback threshold
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    setIsSwipeActive(true);
+    setSwipeDirection(null);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (!touchStart) return;
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    
+    // Provide visual feedback during swipe
+    const distance = touchStart - currentX;
+    if (Math.abs(distance) > previewDistance) {
+      setSwipeDirection(distance > 0 ? 'left' : 'right');
+    } else {
+      setSwipeDirection(null);
+    }
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd) {
+      setIsSwipeActive(false);
+      setSwipeDirection(null);
+      return;
+    }
+    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe && currentIndex < maxIndex) {
       nextSlide();
-    }
-    if (isRightSwipe && currentIndex > 0) {
+    } else if (isRightSwipe && currentIndex > 0) {
       prevSlide();
     }
+    
+    // Reset swipe state with small delay for smooth animation
+    setTimeout(() => {
+      setIsSwipeActive(false);
+      setSwipeDirection(null);
+    }, 200);
   };
 
   const handleFollow = async (avatarId: string) => {
@@ -518,30 +543,59 @@ export function KnowledgeAvatars() {
             </>
           )}
           
-          {/* Mobile Touch-Friendly Carousel Content */}
+          {/* Enhanced Mobile Touch-Friendly Carousel Content */}
           <div 
-            className={`overflow-hidden ${isMobile ? 'px-4' : 'px-12'}`}
+            className={`overflow-hidden ${isMobile ? 'px-4' : 'px-12'} ${
+              isSwipeActive ? 'cursor-grabbing' : 'cursor-grab'
+            } relative`}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
+            style={{
+              touchAction: 'pan-x',
+              userSelect: 'none'
+            }}
           >
-            {/* Mobile Swipe Indicator */}
+            {/* Enhanced Mobile Swipe Indicators */}
             {isMobile && avatars.length > 1 && (
-              <div className="flex justify-center space-x-2 mb-4">
+              <div className="flex justify-center items-center space-x-3 mb-6">
                 {avatars.map((_, index) => (
-                  <div
+                  <button
                     key={index}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                    onClick={() => setCurrentIndex(index)}
+                    className={`transition-all duration-300 hover:scale-110 ${
+                      index === currentIndex 
+                        ? 'w-6 h-2 bg-primary rounded-full shadow-lg shadow-primary/30' 
+                        : 'w-2 h-2 bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50'
                     }`}
+                    data-testid={`carousel-indicator-${index}`}
                   />
                 ))}
+                {/* Swipe Hint Animation */}
+                {isSwipeActive && (
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-8">
+                    <div className={`text-xs text-muted-foreground flex items-center gap-1 transition-all duration-200 ${
+                      swipeDirection === 'left' ? 'animate-pulse text-primary' : 
+                      swipeDirection === 'right' ? 'animate-pulse text-primary' : ''
+                    }`}>
+                      {swipeDirection === 'left' && currentIndex < maxIndex && '← Next'}
+                      {swipeDirection === 'right' && currentIndex > 0 && 'Previous →'}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             <motion.div
-              className="flex gap-6 transition-transform duration-700 ease-out"
+              className={`flex gap-6 transition-all duration-700 ease-out ${
+                isSwipeActive ? 'transition-duration-200' : ''
+              }`}
               style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`
+                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)'
+              }}
+              animate={{
+                scale: isSwipeActive ? 0.98 : 1,
+                transition: { duration: 0.2 }
               }}
             >
               {avatars.map((avatar, index) => {
