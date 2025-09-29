@@ -621,19 +621,20 @@ export function KnowledgeAvatars() {
                         <Card className={`group cursor-pointer bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-500 overflow-hidden ${isMobile ? 'min-h-[540px]' : 'min-h-[600px]'} ${hoveredCard === avatar.id ? 'ring-2 ring-primary/50 shadow-2xl shadow-primary/20' : ''} flex flex-col`}>
                           {/* Premium Header with Enhanced Gradient */}
                           <div className="relative overflow-hidden">
-                            <div className={`h-28 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden`}>
-                              <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/30" />
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                              <div className="absolute top-3 right-3 flex gap-1.5">
-                                <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
-                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse delay-300 shadow-lg shadow-blue-400/50" />
-                                <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-pulse delay-700 shadow-lg shadow-purple-400/50" />
+                            <div className={`h-28 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden group-hover:h-32 transition-all duration-500`}>
+                              <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/30 group-hover:from-black/5 group-hover:to-black/20 transition-all duration-500" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:via-white/10 transition-all duration-500" />
+                              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-gradient-to-r from-primary/20 via-transparent to-secondary/20 transition-all duration-700" />
+                              <div className="absolute top-3 right-3 flex gap-1.5 group-hover:gap-2 transition-all duration-300">
+                                <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50 group-hover:w-3 group-hover:h-3 group-hover:shadow-xl transition-all duration-300" />
+                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse delay-300 shadow-lg shadow-blue-400/50 group-hover:w-3 group-hover:h-3 group-hover:shadow-xl transition-all duration-300" />
+                                <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-pulse delay-700 shadow-lg shadow-purple-400/50 group-hover:w-3 group-hover:h-3 group-hover:shadow-xl transition-all duration-300" />
                               </div>
                               <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card/80 to-transparent" />
                             </div>
                             <div className="absolute -bottom-10 left-4">
                               <div className="relative">
-                                <Avatar className="w-20 h-20 ring-4 ring-white/30 border-4 border-white/10 shadow-2xl shadow-black/40 backdrop-blur-sm">
+                                <Avatar className="w-20 h-20 ring-4 ring-white/30 border-4 border-white/10 shadow-2xl shadow-black/40 backdrop-blur-sm group-hover:w-22 group-hover:h-22 group-hover:ring-6 group-hover:ring-primary/40 group-hover:shadow-3xl transition-all duration-500">
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
@@ -669,9 +670,9 @@ export function KnowledgeAvatars() {
                             
                             {/* Performance Metrics Grid */}
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 hover:scale-105 hover:shadow-lg transition-all duration-300 group-hover:animate-pulse">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">Portfolio ROI</span>
+                                  <span className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">Portfolio ROI</span>
                                   <div className="flex items-center gap-1">
                                     {performance.trend === 'up' ? (
                                       <ArrowUpRight className="h-3 w-3 text-green-500" />
@@ -681,23 +682,23 @@ export function KnowledgeAvatars() {
                                     <div className={`w-2 h-2 rounded-full ${performance.roi >= 0 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
                                   </div>
                                 </div>
-                                <div className={`text-lg font-bold ${performance.roi >= 0 ? 'text-green-500' : 'text-red-500'}`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
+                                <div className={`text-lg font-bold transition-all duration-300 ${performance.roi >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'} group-hover:scale-110`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
                                   {performance.roi >= 0 ? '+' : ''}{performance.roi}%
                                 </div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 hover:scale-105 hover:shadow-lg transition-all duration-300 group-hover:animate-pulse">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">Prediction Accuracy</span>
+                                  <span className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">Prediction Accuracy</span>
                                   <div className={`w-2 h-2 rounded-full ${performance.accuracy >= 80 ? 'bg-green-500' : performance.accuracy >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} />
                                 </div>
-                                <div className={`text-lg font-bold ${performance.accuracy >= 80 ? 'text-green-500' : performance.accuracy >= 60 ? 'text-yellow-500' : 'text-red-500'}`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
+                                <div className={`text-lg font-bold transition-all duration-300 ${performance.accuracy >= 80 ? 'text-green-500 group-hover:text-green-400' : performance.accuracy >= 60 ? 'text-yellow-500 group-hover:text-yellow-400' : 'text-red-500 group-hover:text-red-400'} group-hover:scale-110`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
                                   {performance.accuracy}%
                                 </div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300">
-                                <span className="text-xs text-muted-foreground">
+                              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-xl p-3 space-y-1.5 border border-white/10 backdrop-blur-sm hover:border-primary/30 hover:from-primary/10 hover:to-secondary/10 hover:scale-105 hover:shadow-lg transition-all duration-300 group-hover:animate-pulse">
+                                <span className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
                                   {socialSentiment ? 'Real Influence' : 'Influence'}
                                 </span>
                                 <div className="flex items-center gap-1">
@@ -750,18 +751,18 @@ export function KnowledgeAvatars() {
                             
                             {/* Recent Activity Preview */}
                             <div className="space-y-2">
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Activity className="h-3 w-3" />
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
+                                <Activity className="h-3 w-3 group-hover:text-primary transition-colors" />
                                 Recent Activity
                                 {!recentActivity[0] && (
                                   <div className="animate-spin rounded-full h-2 w-2 border border-primary/50 border-t-primary ml-1" />
                                 )}
                               </div>
-                              <div className={`bg-muted/20 rounded-lg p-2 ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
-                                <div className="text-xs text-muted-foreground line-clamp-2">
+                              <div className={`bg-muted/20 rounded-lg p-2 hover:bg-primary/10 hover:border hover:border-primary/20 transition-all duration-300 cursor-pointer ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
+                                <div className="text-xs text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors">
                                   {recentActivity[0]?.text || "Loading recent activity..."}
                                 </div>
-                                <div className="text-xs text-muted-foreground/70 mt-1">
+                                <div className="text-xs text-muted-foreground/70 mt-1 group-hover:text-muted-foreground transition-colors">
                                   {recentActivity[0]?.time || "..."}
                                 </div>
                               </div>
@@ -784,7 +785,7 @@ export function KnowledgeAvatars() {
                                   handleFollow(avatar.id);
                                 }}
                                 size="sm"
-                                className={`flex-1 bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 hover:scale-105 text-white transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl`}
+                                className={`flex-1 bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 hover:scale-110 text-white transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-2xl hover:shadow-primary/30 group-hover:animate-pulse group-hover:brightness-110`}
                                 data-testid={`button-follow-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                               >
                                 <UserPlus className="h-3 w-3 mr-1" />
@@ -794,7 +795,7 @@ export function KnowledgeAvatars() {
                                 onClick={(e) => e.stopPropagation()}
                                 size="sm"
                                 variant="outline"
-                                className="px-4 text-sm border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-sm hover:scale-105 transition-all duration-300"
+                                className="px-4 text-sm border-white/20 bg-white/5 hover:bg-primary/20 hover:border-primary/50 backdrop-blur-sm hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group-hover:animate-pulse"
                                 data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
                               >
                                 <Eye className="h-3 w-3" />
