@@ -42,6 +42,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { EntrepreneurAnalytics } from "@/components/avatars/entrepreneur-analytics";
+import { ComparativeDashboard } from "@/components/avatars/comparative-dashboard";
 
 interface DatabaseAvatar {
   id: string;
@@ -230,6 +231,7 @@ export function KnowledgeAvatars() {
   const isTransitioningRef = useRef(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
 
   // Fetch real avatars from API
   const { data: avatarsResponse, isLoading } = useQuery<{ avatars: DatabaseAvatar[] }>({
@@ -398,6 +400,41 @@ export function KnowledgeAvatars() {
       });
     }
   };
+
+  const toggleComparison = (avatarId: string) => {
+    setSelectedForComparison(prev => {
+      if (prev.includes(avatarId)) {
+        return prev.filter(id => id !== avatarId);
+      } else {
+        if (prev.length >= 6) {
+          toast({ 
+            title: "Maximum reached", 
+            description: "You can compare up to 6 entrepreneurs at once",
+            variant: "destructive"
+          });
+          return prev;
+        }
+        return [...prev, avatarId];
+      }
+    });
+  };
+
+  const removeFromComparison = (avatarId: string) => {
+    setSelectedForComparison(prev => prev.filter(id => id !== avatarId));
+  };
+
+  const selectedEntrepreneurs = avatars.filter(a => selectedForComparison.includes(a.id)).map(e => ({
+    id: e.id,
+    name: e.name,
+    category: e.category || 'General',
+    riskScore: e.riskScore || 50,
+    volatility: e.volatility || 50,
+    portfolioRoi: e.portfolioRoi || 0,
+    accuracyPercentage: e.accuracyPercentage || 0,
+    netWorth: e.netWorth || 'N/A',
+    bestCalls: e.bestCalls || [],
+    worstCalls: e.worstCalls || []
+  }));
 
 
   // Skeleton Card Component with Shimmer Effects
@@ -845,6 +882,22 @@ export function KnowledgeAvatars() {
                                 Track
                               </Button>
                               <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleComparison(avatar.id);
+                                }}
+                                size="sm"
+                                variant={selectedForComparison.includes(avatar.id) ? "default" : "outline"}
+                                className={`px-4 text-xs font-mono transition-all duration-300 ${
+                                  selectedForComparison.includes(avatar.id) 
+                                    ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/40' 
+                                    : 'border-blue-500/40 bg-slate-900/60 text-blue-300 hover:bg-blue-950/80 hover:border-blue-400/60'
+                                } backdrop-blur-sm hover:shadow-lg hover:shadow-blue-500/20`}
+                                data-testid={`button-compare-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
+                              >
+                                <BarChart3 className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
                                 onClick={(e) => e.stopPropagation()}
                                 size="sm"
                                 variant="outline"
@@ -1145,6 +1198,22 @@ export function KnowledgeAvatars() {
             />
           ))}
         </div>
+
+        {/* Comparative Analysis Dashboard */}
+        {selectedForComparison.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
+            className="mt-12"
+          >
+            <ComparativeDashboard 
+              entrepreneurs={selectedEntrepreneurs}
+              onRemove={removeFromComparison}
+            />
+          </motion.div>
+        )}
       </div>
     </section>
   );
