@@ -211,6 +211,11 @@ export const knowledgeAvatars = pgTable("knowledge_avatars", {
   notableInvestments: text("notable_investments").array(),
   philosophicalViews: text("philosophical_views").array(),
   recentThoughts: text("recent_thoughts").array(),
+  netWorth: text("net_worth"),
+  portfolioRoi: real("portfolio_roi"),
+  accuracyPercentage: real("accuracy_percentage"),
+  influenceScore: real("influence_score"),
+  investmentCount: integer("investment_count"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
