@@ -191,7 +191,7 @@ export const learningResources = pgTable("learning_resources", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Knowledge Avatars System - EXACT match to database structure
+// Knowledge Avatars System - Enhanced with Deep Alpha Intelligence
 export const knowledgeAvatars = pgTable("knowledge_avatars", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -216,6 +216,17 @@ export const knowledgeAvatars = pgTable("knowledge_avatars", {
   accuracyPercentage: real("accuracy_percentage"),
   influenceScore: real("influence_score"),
   investmentCount: integer("investment_count"),
+  // Deep Alpha Intelligence Fields
+  investmentThesis: text("investment_thesis"), // core investment philosophy
+  bestCalls: jsonb("best_calls"), // [{name, date, entry, exit, roi, outcome}]
+  worstCalls: jsonb("worst_calls"), // [{name, date, entry, exit, roi, outcome}]
+  investmentHistory: jsonb("investment_history"), // comprehensive timeline
+  recentActivity: jsonb("recent_activity"), // latest moves [{date, action, details}]
+  category: text("category"), // DeFi, L1/L2, VC, Trading, Infrastructure
+  riskScore: real("risk_score"), // portfolio risk profile 0-100
+  volatility: real("volatility"), // portfolio volatility percentage
+  performanceHistory: jsonb("performance_history"), // [{year, roi, highlights}]
+  marketOutlook: text("market_outlook"), // current market view/thesis
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
