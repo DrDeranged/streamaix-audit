@@ -575,7 +575,7 @@ export function KnowledgeAvatars() {
         </motion.div>
         
         {/* Enhanced Carousel Container */}
-        <div className="relative max-w-[95vw] mx-auto">
+        <div className="relative max-w-[95vw] mx-auto" style={{ isolation: 'isolate' }}>
           {/* Professional Navigation Buttons - Fixed positioning */}
           {!isMobile && avatars.length > itemsPerView && (
             <>
@@ -585,6 +585,7 @@ export function KnowledgeAvatars() {
                 variant="ghost"
                 disabled={currentIndex === 0}
                 className="absolute -left-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                style={{ pointerEvents: 'auto' }}
                 data-testid="button-carousel-prev"
               >
                 <ChevronLeft className="h-7 w-7" />
@@ -596,6 +597,7 @@ export function KnowledgeAvatars() {
                 variant="ghost"
                 disabled={currentIndex >= maxIndex}
                 className="absolute -right-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                style={{ pointerEvents: 'auto' }}
                 data-testid="button-carousel-next"
               >
                 <ChevronRight className="h-7 w-7" />
@@ -611,7 +613,8 @@ export function KnowledgeAvatars() {
             onTouchEnd={isMobile ? onTouchEnd : undefined}
             style={{
               touchAction: isMobile ? 'pan-x' : 'auto',
-              padding: isMobile ? '0 1rem' : '0 3rem'
+              padding: isMobile ? '0 1rem' : '0 3rem',
+              pointerEvents: 'none'
             }}
           >
             {/* Enhanced Mobile Swipe Indicators */}
@@ -648,7 +651,8 @@ export function KnowledgeAvatars() {
               style={{
                 transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem))`,
                 filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
-                gap: isMobile ? '0' : '1.5rem'
+                gap: isMobile ? '0' : '1.5rem',
+                pointerEvents: 'auto'
               }}
               animate={{
                 scale: isSwipeActive ? 0.98 : 1,
