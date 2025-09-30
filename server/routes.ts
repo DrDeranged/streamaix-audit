@@ -23,6 +23,7 @@ import { CrossMarketSignalService } from "./services/crossMarketSignalService";
 import { VolatilityForecastingService } from "./services/volatilityForecastingService";
 import { marketEventModelingService } from "./services/marketEventModelingService";
 import { patternRecognitionService } from "./services/patternRecognitionService";
+import { RecommendationEngine } from "./recommendation-engine";
 import passport from "passport";
 
 // Initialize services
@@ -30,6 +31,7 @@ const marketDataService = MarketDataService.getInstance();
 const correlationAnalysisService = CorrelationAnalysisService.getInstance();
 const riskAssessmentService = RiskAssessmentService.getInstance();
 const predictiveAnalyticsService = new PredictiveAnalyticsService(storage as DatabaseStorage);
+const recommendationEngine = new RecommendationEngine(storage as DatabaseStorage);
 import session from "express-session";
 import { 
   loginSchema, 
@@ -861,6 +863,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching avatar analytics:', error);
       res.status(500).json({ error: 'Failed to fetch avatar analytics' });
+    }
+  }));
+
+  // Get personalized avatar recommendations
+  app.get('/api/avatars/recommendations/:userId', asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 5;
+    
+    try {
+      const recommendations = await recommendationEngine.generateRecommendations(userId, limit);
+      
+      // Enrich with avatar data
+      const enriched = await Promise.all(
+        recommendations.map(async (rec) => {
+          const avatar = await storage.getKnowledgeAvatar(rec.avatarId);
+          return {
+            ...rec,
+            avatar
+          };
+        })
+      );
+      
+      res.json({ recommendations: enriched });
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+      res.status(500).json({ error: 'Failed to generate recommendations' });
+    }
+  }));
+
+  // Get similar avatars
+  app.get('/api/avatars/:id/similar', asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit as string) || 4;
+    
+    try {
+      const similar = await recommendationEngine.getSimilarAvatars(id, limit);
+      
+      // Enrich with avatar data
+      const enriched = await Promise.all(
+        similar.map(async (rec) => {
+          const avatar = await storage.getKnowledgeAvatar(rec.avatarId);
+          return {
+            ...rec,
+            avatar
+          };
+        })
+      );
+      
+      res.json({ similar: enriched });
+    } catch (error) {
+      console.error('Error fetching similar avatars:', error);
+      res.status(500).json({ error: 'Failed to fetch similar avatars' });
+    }
+  }));
+
+  // Get trending avatars
+  app.get('/api/avatars/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 6;
+    
+    try {
+      const trendingIds = await recommendationEngine.getTrendingAvatars(limit);
+      
+      // Fetch full avatar data
+      const trending = await Promise.all(
+        trendingIds.map(id => storage.getKnowledgeAvatar(id))
+      );
+      
+      res.json({ trending: trending.filter(Boolean) });
+    } catch (error) {
+      console.error('Error fetching trending avatars:', error);
+      res.status(500).json({ error: 'Failed to fetch trending avatars' });
     }
   }));
 
