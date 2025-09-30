@@ -38,7 +38,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -280,7 +280,7 @@ export function KnowledgeAvatars() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const isTransitioningRef = useRef(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -344,23 +344,27 @@ export function KnowledgeAvatars() {
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
   const nextSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
     setCurrentIndex(prev => {
       const nextIndex = prev >= maxIndex ? 0 : prev + 1;
       return nextIndex;
     });
-    setTimeout(() => setIsTransitioning(false), 500);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 600);
   };
 
   const prevSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
     setCurrentIndex(prev => {
       const prevIndex = prev <= 0 ? maxIndex : prev - 1;
       return prevIndex;
     });
-    setTimeout(() => setIsTransitioning(false), 500);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 600);
   };
 
   // Touch handling for mobile swipe gestures
@@ -660,12 +664,11 @@ export function KnowledgeAvatars() {
                 x: isMobile 
                   ? `${-currentIndex * 100}%`
                   : `calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem)`,
-                scale: isSwipeActive ? 0.98 : 1,
-                filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
+                scale: 1,
               }}
               transition={{ 
-                duration: 0.7,
-                ease: "easeOut"
+                duration: 0.5,
+                ease: [0.4, 0, 0.2, 1]
               }}
             >
               {avatars.map((avatar, index) => {
