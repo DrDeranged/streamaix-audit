@@ -343,11 +343,11 @@ export function KnowledgeAvatars() {
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
   const nextSlide = () => {
-    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+    setCurrentIndex(prev => prev >= maxIndex ? 0 : prev + 1);
   };
 
   const prevSlide = () => {
-    setCurrentIndex(prev => Math.max(prev - 1, 0));
+    setCurrentIndex(prev => prev <= 0 ? maxIndex : prev - 1);
   };
 
   // Touch handling for mobile swipe gestures
@@ -394,9 +394,9 @@ export function KnowledgeAvatars() {
     const isRightSwipe = distance < -minSwipeDistance;
 
     // Only trigger slide if it was an actual swipe (not just a small movement)
-    if (isLeftSwipe && currentIndex < maxIndex) {
+    if (isLeftSwipe) {
       nextSlide();
-    } else if (isRightSwipe && currentIndex > 0) {
+    } else if (isRightSwipe) {
       prevSlide();
     }
     
@@ -435,13 +435,6 @@ export function KnowledgeAvatars() {
     }
   };
 
-  // Auto-scroll carousel every 8 seconds (loops back to start)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => prev < maxIndex ? prev + 1 : 0);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [maxIndex]);
 
   // Skeleton Card Component with Shimmer Effects
   const SkeletonCard = () => (
@@ -583,8 +576,7 @@ export function KnowledgeAvatars() {
                 onClick={prevSlide}
                 size="icon"
                 variant="ghost"
-                disabled={currentIndex === 0}
-                className="absolute -left-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="absolute -left-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
                 style={{ pointerEvents: 'auto' }}
                 data-testid="button-carousel-prev"
               >
@@ -595,8 +587,7 @@ export function KnowledgeAvatars() {
                 onClick={nextSlide}
                 size="icon"
                 variant="ghost"
-                disabled={currentIndex >= maxIndex}
-                className="absolute -right-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="absolute -right-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
                 style={{ pointerEvents: 'auto' }}
                 data-testid="button-carousel-next"
               >
@@ -639,8 +630,8 @@ export function KnowledgeAvatars() {
                       swipeDirection === 'left' ? 'animate-pulse text-primary' : 
                       swipeDirection === 'right' ? 'animate-pulse text-primary' : ''
                     }`}>
-                      {swipeDirection === 'left' && currentIndex < maxIndex && '← Next'}
-                      {swipeDirection === 'right' && currentIndex > 0 && 'Previous →'}
+                      {swipeDirection === 'left' && '← Next'}
+                      {swipeDirection === 'right' && 'Previous →'}
                     </div>
                   </div>
                 )}
