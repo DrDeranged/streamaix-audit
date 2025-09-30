@@ -280,6 +280,7 @@ export function KnowledgeAvatars() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -343,11 +344,23 @@ export function KnowledgeAvatars() {
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
   const nextSlide = () => {
-    setCurrentIndex(prev => prev >= maxIndex ? 0 : prev + 1);
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex(prev => {
+      const nextIndex = prev >= maxIndex ? 0 : prev + 1;
+      return nextIndex;
+    });
+    setTimeout(() => setIsTransitioning(false), 500);
   };
 
   const prevSlide = () => {
-    setCurrentIndex(prev => prev <= 0 ? maxIndex : prev - 1);
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex(prev => {
+      const prevIndex = prev <= 0 ? maxIndex : prev - 1;
+      return prevIndex;
+    });
+    setTimeout(() => setIsTransitioning(false), 500);
   };
 
   // Touch handling for mobile swipe gestures
