@@ -12,10 +12,14 @@ import {
   ChevronRight,
   Star,
   Zap,
-  Brain
+  Brain,
+  Lock,
+  ArrowRight
 } from 'lucide-react';
 import { useState } from 'react';
 import { queryClient } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'wouter';
 
 interface RecommendationScore {
   id: string;
@@ -32,11 +36,13 @@ interface RecommendationsData {
 }
 
 export function AIRecommendations() {
+  const { user } = useAuth();
   const [expandedAvatar, setExpandedAvatar] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<RecommendationsData>({
     queryKey: ['/api/recommendations/mixed'],
     refetchInterval: 60000, // Refresh every minute
+    enabled: !!user,
   });
 
   const trackClickMutation = useMutation({
@@ -62,6 +68,92 @@ export function AIRecommendations() {
   const handleContentClick = (contentId: string) => {
     trackClickMutation.mutate({ recommendationId: contentId, recommendationType: 'content' });
   };
+
+  if (!user) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-cyan-500/5" />
+        
+        <div className="container mx-auto px-6 relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <Card className="bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-purple-950/90 backdrop-blur-xl border-2 border-blue-500/30 shadow-2xl shadow-blue-500/20 overflow-hidden">
+              <CardContent className="p-12 text-center">
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="mb-8"
+                >
+                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/40 mb-6">
+                    <Lock className="w-12 h-12 text-blue-400" />
+                  </div>
+                  
+                  <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    Unlock AI-Powered Recommendations
+                  </h2>
+                  
+                  <p className="text-xl text-blue-200/80 max-w-2xl mx-auto leading-relaxed mb-8">
+                    Get personalized insights tailored to your interests. Our AI analyzes your behavior to recommend the most relevant influencers, content, and trending topics just for you.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  viewport={{ once: true }}
+                  className="space-y-4"
+                >
+                  <div className="grid md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 backdrop-blur-sm">
+                      <Brain className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                      <h3 className="font-semibold text-blue-100 mb-1">Smart Curation</h3>
+                      <p className="text-sm text-blue-300/70">AI-powered content matching</p>
+                    </div>
+                    
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm">
+                      <Users className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                      <h3 className="font-semibold text-purple-100 mb-1">Top Influencers</h3>
+                      <p className="text-sm text-purple-300/70">Follow thought leaders</p>
+                    </div>
+                    
+                    <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm">
+                      <TrendingUp className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                      <h3 className="font-semibold text-cyan-100 mb-1">Trending Topics</h3>
+                      <p className="text-sm text-cyan-300/70">Stay ahead of the curve</p>
+                    </div>
+                  </div>
+
+                  <Link href="/auth">
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-lg px-8 py-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 group"
+                      data-testid="button-login-recommendations"
+                    >
+                      <Lock className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                      Sign In to See Your Recommendations
+                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                  
+                  <p className="text-sm text-blue-300/60 mt-4">
+                    Don't have an account? <Link href="/auth"><span className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer font-semibold">Sign up for free</span></Link>
+                  </p>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
 
   if (isLoading) {
     return (

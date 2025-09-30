@@ -289,19 +289,30 @@ export function KnowledgeAvatars() {
   });
 
   const avatars = avatarsResponse?.avatars || [];
-  // Mobile-first responsive design
-  const itemsPerView = isMobile ? 1 : 4; // Show 1 card on mobile, 4 on desktop
+  
+  // Enhanced responsive design: mobile (1), tablet (2-3), desktop (4)
+  const getItemsPerView = () => {
+    if (typeof window === 'undefined') return 4;
+    const width = window.innerWidth;
+    if (width < 768) return 1; // Mobile
+    if (width < 1024) return 2; // Tablet
+    if (width < 1280) return 3; // Small desktop
+    return 4; // Full desktop
+  };
+  
+  const [itemsPerView, setItemsPerView] = useState(getItemsPerView());
 
-  // Detect mobile screen size
+  // Detect screen size and update responsive behavior
   useEffect(() => {
-    const checkMobile = () => {
+    const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
+      setItemsPerView(getItemsPerView());
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    handleResize();
+    window.addEventListener('resize', handleResize);
     
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Fetch social sentiment data for all avatars at top level
@@ -565,7 +576,7 @@ export function KnowledgeAvatars() {
         
         {/* Enhanced Carousel Container */}
         <div className="relative max-w-[95vw] mx-auto">
-          {/* Professional Navigation Buttons */}
+          {/* Professional Navigation Buttons - Fixed positioning */}
           {!isMobile && avatars.length > itemsPerView && (
             <>
               <Button
@@ -573,10 +584,10 @@ export function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={currentIndex === 0}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-12 h-12 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="absolute -left-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
                 data-testid="button-carousel-prev"
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-7 w-7" />
               </Button>
               
               <Button
@@ -584,22 +595,23 @@ export function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={currentIndex >= maxIndex}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-12 h-12 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="absolute -right-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
                 data-testid="button-carousel-next"
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-7 w-7" />
               </Button>
             </>
           )}
           
           {/* Enhanced Mobile Touch-Friendly Carousel Content */}
           <div 
-            className={`overflow-hidden ${isMobile ? 'px-4' : 'px-12'} relative`}
+            className="overflow-hidden relative"
             onTouchStart={isMobile ? onTouchStart : undefined}
             onTouchMove={isMobile ? onTouchMove : undefined}
             onTouchEnd={isMobile ? onTouchEnd : undefined}
             style={{
-              touchAction: isMobile ? 'pan-x' : 'auto'
+              touchAction: isMobile ? 'pan-x' : 'auto',
+              padding: isMobile ? '0 1rem' : '0 3rem'
             }}
           >
             {/* Enhanced Mobile Swipe Indicators */}
@@ -632,12 +644,11 @@ export function KnowledgeAvatars() {
               </div>
             )}
             <motion.div
-              className={`flex transition-all duration-700 ease-out ${
-                isSwipeActive ? 'transition-duration-200' : ''
-              } ${isMobile ? 'gap-0' : 'gap-6'}`}
+              className="flex transition-all duration-700 ease-out"
               style={{
-                transform: `translateX(-${currentIndex * (100 / (isMobile ? 1 : itemsPerView))}%)`,
-                filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)'
+                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
+                gap: isMobile ? '0' : '1.5rem'
               }}
               animate={{
                 scale: isSwipeActive ? 0.98 : 1,
@@ -655,18 +666,21 @@ export function KnowledgeAvatars() {
                 return (
                   <motion.div
                     key={avatar.id}
-                    className={`flex-none ${isMobile ? 'w-full px-4' : 'w-1/4 px-2'} relative z-10`}
+                    className="flex-none relative z-10"
+                    style={{
+                      width: isMobile ? '100%' : `calc(${100 / itemsPerView}% - ${(1.5 * (itemsPerView - 1)) / itemsPerView}rem)`,
+                      pointerEvents: 'auto'
+                    }}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     onHoverStart={() => !isMobile && setHoveredCard(avatar.id)}
                     onHoverEnd={() => !isMobile && setHoveredCard(null)}
-                    style={{ pointerEvents: 'auto' }}
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <div className="w-full" style={{ pointerEvents: 'auto' }}>
-                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden h-[640px] ${isMobile ? 'mx-2' : ''} ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
+                        <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
+                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden h-[640px] ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
                           {/* Professional Terminal-Style Header */}
                           <div className="relative overflow-hidden">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
