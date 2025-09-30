@@ -830,6 +830,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get detailed analytics for avatar
+  app.get('/api/avatars/:id/analytics', asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatar(id);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      // Return detailed analytics data
+      res.json({
+        id: avatar.id,
+        name: avatar.name,
+        handle: avatar.handle,
+        bio: avatar.bio,
+        netWorth: avatar.netWorth,
+        portfolioRoi: avatar.portfolioRoi,
+        investmentThesis: avatar.investmentThesis,
+        bestCalls: avatar.bestCalls,
+        worstCalls: avatar.worstCalls,
+        recentActivity: avatar.recentActivity,
+        category: avatar.category,
+        riskScore: avatar.riskScore,
+        volatility: avatar.volatility,
+        marketOutlook: avatar.marketOutlook,
+        performanceHistory: avatar.performanceHistory
+      });
+    } catch (error) {
+      console.error('Error fetching avatar analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch avatar analytics' });
+    }
+  }));
+
   // Social sentiment analysis endpoint for crypto entrepreneurs
   app.get('/api/social-sentiment/:username', asyncHandler(async (req: Request, res: Response) => {
     try {

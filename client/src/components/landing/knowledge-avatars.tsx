@@ -41,6 +41,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { EntrepreneurAnalytics } from "@/components/avatars/entrepreneur-analytics";
 
 interface DatabaseAvatar {
   id: string;
@@ -64,6 +65,14 @@ interface DatabaseAvatar {
   accuracyPercentage: number | null;
   influenceScore: number | null;
   investmentCount: number | null;
+  investmentThesis?: string | null;
+  bestCalls?: any[];
+  worstCalls?: any[];
+  recentActivity?: any[];
+  category?: string | null;
+  riskScore?: number | null;
+  volatility?: number | null;
+  marketOutlook?: string | null;
 }
 
 const getAvatarGradient = (name: string) => {
@@ -965,6 +974,27 @@ export function KnowledgeAvatars() {
                               </div>
                             </div>
                             </div>
+                            
+                            {/* Bloomberg Terminal-Style Deep Analytics */}
+                            {avatar.investmentThesis && avatar.bestCalls && avatar.bestCalls.length > 0 && (
+                              <div className="mb-8">
+                                <EntrepreneurAnalytics 
+                                  entrepreneur={{
+                                    name: avatar.name,
+                                    investmentThesis: avatar.investmentThesis || '',
+                                    bestCalls: avatar.bestCalls || [],
+                                    worstCalls: avatar.worstCalls || [],
+                                    recentActivity: avatar.recentActivity || [],
+                                    category: avatar.category || '',
+                                    riskScore: avatar.riskScore || 50,
+                                    volatility: avatar.volatility || 50,
+                                    marketOutlook: avatar.marketOutlook || '',
+                                    netWorth: netWorth,
+                                    portfolioRoi: portfolioRoi
+                                  }}
+                                />
+                              </div>
+                            )}
                             
                             {/* Enhanced Investment Portfolio Section */}
                             {avatar.notableInvestments && avatar.notableInvestments.length > 0 && (
