@@ -342,14 +342,6 @@ export function KnowledgeAvatars() {
   };
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('✅ Avatars loaded:', avatars.length, 'avatars');
-    console.log('📱 Items per view:', itemsPerView);
-    console.log('📍 Current index:', currentIndex);
-    console.log('🔢 Max index:', maxIndex);
-  }, [avatars.length, itemsPerView, currentIndex, maxIndex]);
-
   const nextSlide = () => {
     setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
   };
@@ -621,7 +613,8 @@ export function KnowledgeAvatars() {
             onTouchEnd={isMobile ? onTouchEnd : undefined}
             style={{
               touchAction: isMobile ? 'pan-x' : 'auto',
-              padding: isMobile ? '0 1rem' : '0 3rem'
+              padding: isMobile ? '0 1rem' : '0 3rem',
+              minHeight: '660px'
             }}
           >
             {/* Enhanced Mobile Swipe Indicators */}
@@ -660,7 +653,9 @@ export function KnowledgeAvatars() {
                 pointerEvents: 'auto'
               }}
               animate={{
-                x: `calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem)`,
+                x: isMobile 
+                  ? `${-currentIndex * 100}%`
+                  : `calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem)`,
                 scale: isSwipeActive ? 0.98 : 1,
                 filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
               }}
