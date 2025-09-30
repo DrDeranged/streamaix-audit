@@ -150,73 +150,6 @@ const getInfluenceScore = (followerCount: number, investments: number) => {
   return Math.round(followScore + investScore + baseScore);
 };
 
-const getPerformanceData = (name: string) => {
-  // Real performance data based on public disclosures and verified sources
-  const performanceMap: Record<string, { roi: number, accuracy: number, trend: 'up' | 'down', portfolioValue: string }> = {
-    'Naval Ravikant': { 
-      roi: 127, // Realistic angel investing returns based on disclosed Twitter, Uber early investments
-      accuracy: 73, // Public prediction tracking shows ~73% accuracy on major calls
-      trend: 'up', 
-      portfolioValue: 'Undisclosed' // Angel investor, portfolio value not publicly disclosed
-    },
-    'Vitalik Buterin': { 
-      roi: 0, // Founder wealth, not investment ROI - inappropriate metric
-      accuracy: 89, // High accuracy on Ethereum roadmap predictions and technical forecasts
-      trend: 'up', 
-      portfolioValue: '~$400M' // ETH holdings estimated based on known addresses
-    },
-    'Michael Saylor': { 
-      roi: -23, // MicroStrategy Bitcoin strategy down ~23% from average cost basis as of Sept 2024
-      accuracy: 68, // Bitcoin predictions mixed - strong long-term but timing often off
-      trend: 'down', 
-      portfolioValue: '$6.8B' // MicroStrategy market cap, public company
-    },
-    'Brian Armstrong': { 
-      roi: 45, // Coinbase stock performance since direct listing in 2021
-      accuracy: 79, // Good track record on crypto adoption predictions
-      trend: 'up', 
-      portfolioValue: '$2.2B' // Net worth based on Coinbase stake + disclosed holdings
-    },
-    'Changpeng Zhao': { 
-      roi: 156, // Binance growth since 2017, estimated from public statements
-      accuracy: 81, // Strong track record on market timing and regulatory predictions
-      trend: 'up', 
-      portfolioValue: '$10.2B' // Forbes estimate, largely Binance equity
-    },
-    'Cathie Wood': { 
-      roi: -34, // ARK Innovation ETF performance since peak, public fund data
-      accuracy: 42, // Poor track record on Tesla, genomics, and tech timing
-      trend: 'down', 
-      portfolioValue: '$250M' // ARK Invest AUM-based compensation disclosed
-    },
-    'Tyler Winklevoss': { 
-      roi: 89, // Bitcoin holdings since 2013 + Gemini growth
-      accuracy: 76, // Good Bitcoin advocacy, mixed on timing
-      trend: 'up', 
-      portfolioValue: '$1.4B' // Bitcoin holdings + Gemini valuation estimates
-    },
-    'Cameron Winklevoss': { 
-      roi: 87, // Similar to Tyler, joint Bitcoin/Gemini positions
-      accuracy: 76, // Similar prediction track record to Tyler
-      trend: 'up', 
-      portfolioValue: '$1.4B' // Similar holdings to Tyler
-    },
-    'Balaji Srinivasan': { 
-      roi: 73, // Tech investments + crypto early adoption
-      accuracy: 82, // Strong track record on remote work, crypto adoption predictions
-      trend: 'up', 
-      portfolioValue: 'Undisclosed' // Private investments, no public disclosure
-    },
-    'Paul Graham': { 
-      roi: 78, // Y Combinator returns, Airbnb/Dropbox early investments
-      accuracy: 88, // Excellent long-term tech trend predictions
-      trend: 'up', 
-      portfolioValue: 'Undisclosed' // YC founder, private wealth
-    }
-  };
-  return performanceMap[name] || { roi: 0, accuracy: 50, trend: 'up', portfolioValue: 'Unknown' };
-};
-
 const getRecentActivity = (name: string) => {
   // Real recent activities based on actual news and verified public statements
   const activities: Record<string, Array<{type: string, text: string, time: string, impact: 'high' | 'medium' | 'low'}>> = {
@@ -598,8 +531,8 @@ export function KnowledgeAvatars() {
                 onClick={prevSlide}
                 size="icon"
                 variant="ghost"
-                className="absolute -left-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
-                style={{ pointerEvents: 'auto' }}
+                className="absolute -left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
+                style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-prev"
               >
                 <ChevronLeft className="h-7 w-7" />
@@ -609,8 +542,8 @@ export function KnowledgeAvatars() {
                 onClick={nextSlide}
                 size="icon"
                 variant="ghost"
-                className="absolute -right-6 top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
-                style={{ pointerEvents: 'auto' }}
+                className="absolute -right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
+                style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-next"
               >
                 <ChevronRight className="h-7 w-7" />
@@ -706,7 +639,7 @@ export function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
-                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden h-[640px] ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
+                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden min-h-[720px] ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
                           {/* Professional Terminal-Style Header */}
                           <div className="relative overflow-hidden">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
@@ -1000,8 +933,8 @@ export function KnowledgeAvatars() {
                               
                               <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-6 border border-green-500/20">
                                 <div className="flex items-center justify-between mb-4">
-                                  <div className="text-2xl font-bold text-foreground">
-                                    +{performance.roi}%
+                                  <div className={`text-2xl font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                   </div>
                                   <TrendingUp className="h-6 w-6 text-green-500" />
                                 </div>
@@ -1012,7 +945,7 @@ export function KnowledgeAvatars() {
                               <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-500/20">
                                 <div className="flex items-center justify-between mb-4">
                                   <div className="text-2xl font-bold text-foreground">
-                                    {performance.accuracy}%
+                                    {accuracyPercentage}%
                                   </div>
                                   <Target className="h-6 w-6 text-purple-500" />
                                 </div>
