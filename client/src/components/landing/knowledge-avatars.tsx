@@ -647,16 +647,19 @@ export function KnowledgeAvatars() {
               </div>
             )}
             <motion.div
-              className="flex transition-all duration-700 ease-out"
+              className="flex"
               style={{
-                transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem))`,
-                filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
                 gap: isMobile ? '0' : '1.5rem',
                 pointerEvents: 'auto'
               }}
               animate={{
+                x: `calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem)`,
                 scale: isSwipeActive ? 0.98 : 1,
-                transition: { duration: 0.2 }
+                filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
+              }}
+              transition={{ 
+                duration: 0.7,
+                ease: "easeOut"
               }}
             >
               {avatars.map((avatar, index) => {
