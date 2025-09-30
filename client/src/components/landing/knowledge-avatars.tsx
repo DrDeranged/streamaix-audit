@@ -646,7 +646,7 @@ export function KnowledgeAvatars() {
             <motion.div
               className="flex transition-all duration-700 ease-out"
               style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem))`,
                 filter: isSwipeActive ? 'brightness(1.05)' : 'brightness(1)',
                 gap: isMobile ? '0' : '1.5rem'
               }}
@@ -668,7 +668,7 @@ export function KnowledgeAvatars() {
                     key={avatar.id}
                     className="flex-none relative z-10"
                     style={{
-                      width: isMobile ? '100%' : `calc(${100 / itemsPerView}% - ${(1.5 * (itemsPerView - 1)) / itemsPerView}rem)`,
+                      width: isMobile ? '100%' : `calc(100% / ${itemsPerView} - ${1.5 * (itemsPerView - 1) / itemsPerView}rem)`,
                       pointerEvents: 'auto'
                     }}
                     initial={{ opacity: 0, scale: 0.9 }}
