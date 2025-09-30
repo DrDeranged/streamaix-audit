@@ -343,11 +343,11 @@ export function KnowledgeAvatars() {
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
   const nextSlide = () => {
-    setCurrentIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
+    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
   };
 
   const prevSlide = () => {
-    setCurrentIndex(prev => (prev <= 0 ? maxIndex : prev - 1));
+    setCurrentIndex(prev => Math.max(prev - 1, 0));
   };
 
   // Touch handling for mobile swipe gestures
@@ -435,10 +435,10 @@ export function KnowledgeAvatars() {
     }
   };
 
-  // Auto-scroll carousel every 8 seconds
+  // Auto-scroll carousel every 8 seconds (stops at end)
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
+      setCurrentIndex(prev => prev < maxIndex ? prev + 1 : prev);
     }, 8000);
     return () => clearInterval(interval);
   }, [maxIndex]);
