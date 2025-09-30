@@ -443,10 +443,10 @@ export function KnowledgeAvatars() {
     }
   };
 
-  // Auto-scroll carousel every 8 seconds (stops at end)
+  // Auto-scroll carousel every 8 seconds (loops back to start)
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex(prev => prev < maxIndex ? prev + 1 : prev);
+      setCurrentIndex(prev => prev < maxIndex ? prev + 1 : 0);
     }, 8000);
     return () => clearInterval(interval);
   }, [maxIndex]);
@@ -580,10 +580,6 @@ export function KnowledgeAvatars() {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Real-time intelligence on crypto's most influential minds. Track investments, predictions, and market impact with Bloomberg Terminal precision.
           </p>
-          {/* Debug Info */}
-          <div className="mt-4 text-sm text-muted-foreground">
-            Debug: {avatars.length} avatars loaded | Items per view: {itemsPerView} | Max index: {maxIndex}
-          </div>
         </motion.div>
         
         {/* Enhanced Carousel Container */}
