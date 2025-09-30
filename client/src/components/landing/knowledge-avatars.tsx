@@ -59,6 +59,11 @@ interface DatabaseAvatar {
   notableInvestments: string[];
   philosophicalViews: string[];
   recentThoughts: string[];
+  netWorth: string | null;
+  portfolioRoi: number | null;
+  accuracyPercentage: number | null;
+  influenceScore: number | null;
+  investmentCount: number | null;
 }
 
 const getAvatarGradient = (name: string) => {
@@ -672,11 +677,16 @@ export function KnowledgeAvatars() {
               }}
             >
               {avatars.map((avatar, index) => {
-                const performance = getPerformanceData(avatar.name);
+                // Use real database values instead of hardcoded data
+                const portfolioRoi = avatar.portfolioRoi ?? 0;
+                const accuracyPercentage = avatar.accuracyPercentage ?? 50;
+                const netWorth = avatar.netWorth || 'Undisclosed';
+                const trend = portfolioRoi >= 0 ? 'up' : 'down';
+                
                 const sentimentData = sentimentMap[avatar.name];
                 const socialSentiment = sentimentData?.sentiment;
                 const sentimentLoading = sentimentData?.isLoading;
-                const influenceScore = socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
+                const influenceScore = avatar.influenceScore || socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 const recentActivity = getRecentActivity(avatar.name);
                 
                 return (
@@ -748,26 +758,26 @@ export function KnowledgeAvatars() {
                                 <div className="flex items-center justify-between">
                                   <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Portfolio ROI</span>
                                   <div className="flex items-center gap-1.5">
-                                    {performance.trend === 'up' ? (
+                                    {trend === 'up' ? (
                                       <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />
                                     ) : (
                                       <ArrowDownRight className="h-3.5 w-3.5 text-red-400" />
                                     )}
-                                    <div className={`w-1.5 h-1.5 rounded-full ${performance.roi >= 0 ? 'bg-emerald-400' : 'bg-red-400'} animate-pulse`} />
+                                    <div className={`w-1.5 h-1.5 rounded-full ${portfolioRoi >= 0 ? 'bg-emerald-400' : 'bg-red-400'} animate-pulse`} />
                                   </div>
                                 </div>
-                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${performance.roi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${performance.roi >= 0 ? '+' : ''}${performance.roi}% total portfolio return`}>
-                                  {performance.roi >= 0 ? '+' : ''}{performance.roi}%
+                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${portfolioRoi >= 0 ? '+' : ''}${portfolioRoi}% total portfolio return`}>
+                                  {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                 </div>
                               </div>
                               
                               <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
                                 <div className="flex items-center justify-between">
                                   <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Accuracy</span>
-                                  <div className={`w-1.5 h-1.5 rounded-full ${performance.accuracy >= 80 ? 'bg-emerald-400' : performance.accuracy >= 60 ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`} />
+                                  <div className={`w-1.5 h-1.5 rounded-full ${accuracyPercentage >= 80 ? 'bg-emerald-400' : accuracyPercentage >= 60 ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`} />
                                 </div>
-                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${performance.accuracy >= 80 ? 'text-emerald-400' : performance.accuracy >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${performance.accuracy}% accuracy on public predictions and forecasts`}>
-                                  {performance.accuracy}%
+                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${accuracyPercentage}% accuracy on public predictions and forecasts`}>
+                                  {accuracyPercentage}%
                                 </div>
                               </div>
                               
@@ -807,8 +817,8 @@ export function KnowledgeAvatars() {
                                   <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Net Worth</span>
                                   <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                                 </div>
-                                <div className={`${isMobile ? 'text-base' : 'text-sm'} font-bold font-mono text-emerald-400 truncate`} title={`Assets Under Management / Net Worth: ${performance.portfolioValue}`}>
-                                  {performance.portfolioValue}
+                                <div className={`${isMobile ? 'text-base' : 'text-sm'} font-bold font-mono text-emerald-400 truncate`} title={`Assets Under Management / Net Worth: ${netWorth}`}>
+                                  {netWorth}
                                 </div>
                               </div>
                             </div>
@@ -1013,7 +1023,7 @@ export function KnowledgeAvatars() {
                               <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-6 border border-orange-500/20">
                                 <div className="flex items-center justify-between mb-4">
                                   <div className="text-2xl font-bold text-foreground">
-                                    {performance.portfolioValue}
+                                    {netWorth}
                                   </div>
                                   <PieChart className="h-6 w-6 text-orange-500" />
                                 </div>
