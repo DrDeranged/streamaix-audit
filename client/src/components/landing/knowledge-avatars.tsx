@@ -342,6 +342,14 @@ export function KnowledgeAvatars() {
   };
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('✅ Avatars loaded:', avatars.length, 'avatars');
+    console.log('📱 Items per view:', itemsPerView);
+    console.log('📍 Current index:', currentIndex);
+    console.log('🔢 Max index:', maxIndex);
+  }, [avatars.length, itemsPerView, currentIndex, maxIndex]);
+
   const nextSlide = () => {
     setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
   };
@@ -572,6 +580,10 @@ export function KnowledgeAvatars() {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Real-time intelligence on crypto's most influential minds. Track investments, predictions, and market impact with Bloomberg Terminal precision.
           </p>
+          {/* Debug Info */}
+          <div className="mt-4 text-sm text-muted-foreground">
+            Debug: {avatars.length} avatars loaded | Items per view: {itemsPerView} | Max index: {maxIndex}
+          </div>
         </motion.div>
         
         {/* Enhanced Carousel Container */}
@@ -613,8 +625,7 @@ export function KnowledgeAvatars() {
             onTouchEnd={isMobile ? onTouchEnd : undefined}
             style={{
               touchAction: isMobile ? 'pan-x' : 'auto',
-              padding: isMobile ? '0 1rem' : '0 3rem',
-              pointerEvents: 'none'
+              padding: isMobile ? '0 1rem' : '0 3rem'
             }}
           >
             {/* Enhanced Mobile Swipe Indicators */}
