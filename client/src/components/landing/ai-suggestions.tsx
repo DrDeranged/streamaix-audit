@@ -160,9 +160,9 @@ export function AISuggestions() {
   }
 
   // Split content into three categories for display
-  const suggestedContent = content.slice(0, 2);
-  const agentPicks = content.slice(2, 4);
-  const trendingContent = content.slice(4, 6);
+  const suggestedContent = content.slice(0, 4);
+  const agentPicks = content.slice(4, 8);
+  const trendingContent = content.slice(8, 12);
 
   const getTagColor = (tags: string[] | undefined) => {
     if (!tags || tags.length === 0) return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
