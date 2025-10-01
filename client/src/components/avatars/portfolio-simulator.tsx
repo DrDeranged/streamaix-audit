@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ interface PortfolioSimulatorProps {
   avatars: Avatar[];
 }
 
-export function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
+export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
   const [investmentAmount, setInvestmentAmount] = useState<number>(10000);
   const [timeHorizon, setTimeHorizon] = useState<number>(12);
   const [allocations, setAllocations] = useState<Record<string, number>>(() => {
@@ -326,4 +326,4 @@ export function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
       )}
     </div>
   );
-}
+});

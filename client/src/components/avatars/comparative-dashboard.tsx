@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ interface ComparativeDashboardProps {
   onRemove: (id: string) => void;
 }
 
-export function ComparativeDashboard({ entrepreneurs, onRemove }: ComparativeDashboardProps) {
+export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepreneurs, onRemove }: ComparativeDashboardProps) {
   if (entrepreneurs.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -278,4 +279,4 @@ export function ComparativeDashboard({ entrepreneurs, onRemove }: ComparativeDas
       </Card>
     </div>
   );
-}
+});

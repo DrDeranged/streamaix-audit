@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -222,7 +223,7 @@ const getRecentActivity = (name: string) => {
   ];
 };
 
-export function KnowledgeAvatars() {
+export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -1244,4 +1245,4 @@ export function KnowledgeAvatars() {
       </div>
     </section>
   );
-}
+});
