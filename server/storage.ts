@@ -141,6 +141,7 @@ export interface IStorage {
   // Avatar Following operations
   followAvatar(userId: string, avatarId: string): Promise<AvatarFollow>;
   unfollowAvatar(userId: string, avatarId: string): Promise<boolean>;
+  getAvatarFollowsByUserId(userId: string): Promise<AvatarFollow[]>;
   getUserFollowedAvatars(userId: string): Promise<(AvatarFollow & { avatar: KnowledgeAvatar })[]>;
   getAvatarFollowers(avatarId: string): Promise<(AvatarFollow & { user: User })[]>;
   isFollowingAvatar(userId: string, avatarId: string): Promise<boolean>;
@@ -879,6 +880,14 @@ export class DatabaseStorage implements IStorage {
         eq(avatarFollows.avatarId, avatarId)
       ));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getAvatarFollowsByUserId(userId: string): Promise<AvatarFollow[]> {
+    return await db
+      .select()
+      .from(avatarFollows)
+      .where(eq(avatarFollows.userId, userId))
+      .orderBy(desc(avatarFollows.followedAt));
   }
 
   async getUserFollowedAvatars(userId: string): Promise<(AvatarFollow & { avatar: KnowledgeAvatar })[]> {
