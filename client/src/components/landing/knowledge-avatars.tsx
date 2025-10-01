@@ -44,6 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { EntrepreneurAnalytics } from "@/components/avatars/entrepreneur-analytics";
 import { ComparativeDashboard } from "@/components/avatars/comparative-dashboard";
 import { FollowButton } from "@/components/avatars/follow-button";
+import { PortfolioSimulator } from "@/components/avatars/portfolio-simulator";
 
 interface DatabaseAvatar {
   id: string;
@@ -233,6 +234,7 @@ export function KnowledgeAvatars() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [showPortfolioSimulator, setShowPortfolioSimulator] = useState(false);
 
   // Fetch real avatars from API
   const { data: avatarsResponse, isLoading } = useQuery<{ avatars: DatabaseAvatar[] }>({
@@ -1191,6 +1193,24 @@ export function KnowledgeAvatars() {
           ))}
         </div>
 
+        {/* Action Buttons for Selected Entrepreneurs */}
+        {selectedForComparison.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 flex justify-center gap-4"
+          >
+            <Button
+              onClick={() => setShowPortfolioSimulator(true)}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white shadow-lg hover:shadow-green-500/40"
+              data-testid="button-open-portfolio-simulator"
+            >
+              <PieChart className="w-4 h-4 mr-2" />
+              Simulate Portfolio ({selectedForComparison.length})
+            </Button>
+          </motion.div>
+        )}
+
         {/* Comparative Analysis Dashboard */}
         {selectedForComparison.length > 0 && (
           <motion.div
@@ -1198,7 +1218,7 @@ export function KnowledgeAvatars() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.4 }}
-            className="mt-12"
+            className="mt-8"
           >
             <ComparativeDashboard 
               entrepreneurs={selectedEntrepreneurs}
@@ -1206,6 +1226,21 @@ export function KnowledgeAvatars() {
             />
           </motion.div>
         )}
+
+        {/* Portfolio Simulator Dialog */}
+        <Dialog open={showPortfolioSimulator} onOpenChange={setShowPortfolioSimulator}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-xl">
+            <PortfolioSimulator avatars={selectedEntrepreneurs.map(e => ({
+              id: e.id,
+              name: e.name,
+              handle: e.name.toLowerCase().replace(/\s+/g, '-'),
+              portfolioRoi: e.portfolioRoi,
+              riskScore: e.riskScore,
+              volatility: e.volatility,
+              accuracyPercentage: e.accuracyPercentage
+            }))} />
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
