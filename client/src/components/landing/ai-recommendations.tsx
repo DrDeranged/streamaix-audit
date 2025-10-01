@@ -83,7 +83,7 @@ export function AIRecommendations() {
             className="max-w-4xl mx-auto"
           >
             <Card className="bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-purple-950/90 backdrop-blur-xl border-2 border-blue-500/30 shadow-2xl shadow-blue-500/20 overflow-hidden">
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-6 sm:p-8 md:p-12 text-center">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   whileInView={{ scale: 1, opacity: 1 }}
@@ -91,15 +91,15 @@ export function AIRecommendations() {
                   viewport={{ once: true }}
                   className="mb-8"
                 >
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/40 mb-6">
-                    <Lock className="w-12 h-12 text-blue-400" />
+                  <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/40 mb-4 sm:mb-6">
+                    <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-blue-400" />
                   </div>
                   
-                  <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent px-2">
                     Unlock AI-Powered Recommendations
                   </h2>
                   
-                  <p className="text-xl text-blue-200/80 max-w-2xl mx-auto leading-relaxed mb-8">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-200/80 max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8 px-2">
                     Get personalized insights tailored to your interests. Our AI analyzes your behavior to recommend the most relevant influencers, content, and trending topics just for you.
                   </p>
                 </motion.div>
@@ -111,39 +111,39 @@ export function AIRecommendations() {
                   viewport={{ once: true }}
                   className="space-y-4"
                 >
-                  <div className="grid md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 backdrop-blur-sm">
-                      <Brain className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                      <h3 className="font-semibold text-blue-100 mb-1">Smart Curation</h3>
-                      <p className="text-sm text-blue-300/70">AI-powered content matching</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                      <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 mx-auto mb-2" />
+                      <h3 className="font-semibold text-sm sm:text-base text-blue-100 mb-1">Smart Curation</h3>
+                      <p className="text-xs sm:text-sm text-blue-300/70">AI-powered content matching</p>
                     </div>
                     
-                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm">
-                      <Users className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                      <h3 className="font-semibold text-purple-100 mb-1">Top Influencers</h3>
-                      <p className="text-sm text-purple-300/70">Follow thought leaders</p>
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 mx-auto mb-2" />
+                      <h3 className="font-semibold text-sm sm:text-base text-purple-100 mb-1">Top Influencers</h3>
+                      <p className="text-xs sm:text-sm text-purple-300/70">Follow thought leaders</p>
                     </div>
                     
-                    <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm">
-                      <TrendingUp className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                      <h3 className="font-semibold text-cyan-100 mb-1">Trending Topics</h3>
-                      <p className="text-sm text-cyan-300/70">Stay ahead of the curve</p>
+                    <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                      <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-400 mx-auto mb-2" />
+                      <h3 className="font-semibold text-sm sm:text-base text-cyan-100 mb-1">Trending Topics</h3>
+                      <p className="text-xs sm:text-sm text-cyan-300/70">Stay ahead of the curve</p>
                     </div>
                   </div>
 
                   <Link href="/auth">
                     <Button 
                       size="lg"
-                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-lg px-8 py-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 group"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 group"
                       data-testid="button-login-recommendations"
                     >
-                      <Lock className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                      Sign In to See Your Recommendations
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <Lock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform flex-shrink-0" />
+                      <span className="whitespace-nowrap">Sign In to See Your Recommendations</span>
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                     </Button>
                   </Link>
                   
-                  <p className="text-sm text-blue-300/60 mt-4">
+                  <p className="text-xs sm:text-sm text-blue-300/60 mt-3 sm:mt-4 px-2">
                     Don't have an account? <Link href="/auth"><span className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer font-semibold">Sign up for free</span></Link>
                   </p>
                 </motion.div>
