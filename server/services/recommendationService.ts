@@ -226,7 +226,7 @@ export class RecommendationService {
     limit: number = 5
   ): Promise<RecommendationScore[]> {
     const userProfile = await this.getUserProfile(userId);
-    const allAvatars = await this.storage.getAllKnowledgeAvatars();
+    const allAvatars = await this.storage.getKnowledgeAvatars(100);
 
     // Filter out already followed avatars
     const unfollowedAvatars = allAvatars.filter(
@@ -249,7 +249,7 @@ export class RecommendationService {
     limit: number = 10
   ): Promise<RecommendationScore[]> {
     const userProfile = await this.getUserProfile(userId);
-    const recentContent = await this.storage.getRecentSummaries(50);
+    const recentContent = await this.storage.getSummaries(50, 0);
 
     // Filter out already interacted content
     const newContent = recentContent.filter(
