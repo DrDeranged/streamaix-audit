@@ -67,10 +67,10 @@ export function ComparativeDashboard({ entrepreneurs, onRemove }: ComparativeDas
   const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
   return (
-    <div className="space-y-6 mt-8">
-      <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold text-foreground">Comparative Analysis</h3>
-        <Badge variant="secondary" className="text-sm">
+    <div className="space-y-4 md:space-y-6 mt-6 md:mt-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:gap-4">
+        <h3 className="text-xl md:text-2xl font-bold text-foreground">Comparative Analysis</h3>
+        <Badge variant="secondary" className="text-xs md:text-sm">
           Comparing {entrepreneurs.length} Entrepreneur{entrepreneurs.length > 1 ? 's' : ''}
         </Badge>
       </div>

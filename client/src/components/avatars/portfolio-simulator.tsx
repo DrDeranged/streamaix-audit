@@ -116,15 +116,15 @@ export function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
   }, [avatars, allocations, investmentAmount, timeHorizon]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Card className="bg-gradient-to-br from-slate-950/90 to-blue-950/90 backdrop-blur-xl border-blue-500/20">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <PieChart className="w-5 h-5 text-cyan-400" />
+        <CardHeader className="pb-4 md:pb-6">
+          <CardTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
+            <PieChart className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
             Portfolio Simulator
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6">
           {/* Investment Amount */}
           <div className="space-y-2">
             <Label className="text-blue-200">Investment Amount ($)</Label>
@@ -152,11 +152,11 @@ export function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
           </div>
 
           {/* Allocation Controls */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               onClick={autoAllocate}
               size="sm"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 w-full sm:w-auto"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Auto Allocate
@@ -165,7 +165,7 @@ export function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
               onClick={resetAllocations}
               size="sm"
               variant="outline"
-              className="border-blue-500/40 text-blue-300"
+              className="border-blue-500/40 text-blue-300 w-full sm:w-auto"
             >
               Reset
             </Button>
@@ -241,7 +241,7 @@ export function PortfolioSimulator({ avatars }: PortfolioSimulatorProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 <div className="bg-slate-950/60 rounded-lg p-4 border border-green-500/20">
                   <div className="flex items-center gap-2 mb-1">
                     <DollarSign className="w-4 h-4 text-green-400" />
