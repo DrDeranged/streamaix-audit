@@ -65,8 +65,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes for most queries
-      cacheTime: 10 * 60 * 1000, // 10 minutes in cache
+      staleTime: 10 * 60 * 1000, // 10 minutes - increased for better performance
+      gcTime: 30 * 60 * 1000, // 30 minutes garbage collection (renamed from cacheTime in v5)
       retry: (failureCount: number, error: any) => {
         // Don't retry on 4xx errors
         if (error?.message?.includes('4')) {

@@ -19,11 +19,12 @@ export default function LiveCryptoVideos() {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
-  // Fetch real YouTube crypto content with auto-refresh
+  // Fetch real YouTube crypto content with optimized caching
   const { data: youtubeData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['/api/youtube/crypto-content'],
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchInterval: false, // Disable auto-refresh to save API calls
+    staleTime: 15 * 60 * 1000, // 15 minutes - YouTube content doesn't change frequently
+    gcTime: 30 * 60 * 1000, // 30 minutes cache
     retry: 3
   });
 
