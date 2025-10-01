@@ -28,8 +28,8 @@ export default function LiveCryptoVideos() {
     retry: 3
   });
 
-  const videos = youtubeData?.videos || [];
-  const lastUpdated = youtubeData?.lastUpdated;
+  const videos = (youtubeData as any)?.videos || [];
+  const lastUpdated = (youtubeData as any)?.lastUpdated;
 
   // Scroll functions
   const scrollLeft = () => {

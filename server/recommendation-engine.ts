@@ -56,7 +56,7 @@ export class RecommendationEngine {
         // Score based on category similarity (memoized)
         const followedCategories = followedAvatars
           .map((f: any) => allAvatars.find((a: any) => a.id === f.avatarId)?.category)
-          .filter(Boolean);
+          .filter((cat): cat is string => Boolean(cat));
         
         if (avatar.category) {
           const categoryScore = this.calculateCategorySimilarity(avatar.category, followedCategories);
