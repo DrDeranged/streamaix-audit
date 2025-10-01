@@ -43,6 +43,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { EntrepreneurAnalytics } from "@/components/avatars/entrepreneur-analytics";
 import { ComparativeDashboard } from "@/components/avatars/comparative-dashboard";
+import { FollowButton } from "@/components/avatars/follow-button";
 
 interface DatabaseAvatar {
   id: string;
@@ -869,18 +870,12 @@ export function KnowledgeAvatars() {
                             
                             {/* Professional Action Buttons */}
                             <div className="flex gap-2 pt-3 mt-auto border-t border-blue-500/20">
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleFollow(avatar.id);
-                                }}
+                              <FollowButton
+                                avatarId={avatar.id}
+                                avatarName={avatar.name}
                                 size="sm"
                                 className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white transition-all duration-300 text-xs font-mono font-semibold shadow-lg hover:shadow-blue-500/40 uppercase tracking-wider"
-                                data-testid={`button-follow-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
-                              >
-                                <UserPlus className="h-3.5 w-3.5 mr-1.5" />
-                                Track
-                              </Button>
+                              />
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -955,14 +950,11 @@ export function KnowledgeAvatars() {
                                 </div>
                               </div>
                               <div className="flex gap-3">
-                                <Button
-                                  onClick={() => handleFollow(avatar.id)}
+                                <FollowButton
+                                  avatarId={avatar.id}
+                                  avatarName={avatar.name}
                                   className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white px-6`}
-                                  data-testid={`button-follow-modal-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                >
-                                  <UserPlus className="h-4 w-4 mr-2" />
-                                  Follow
-                                </Button>
+                                />
                                 <Link href={`/avatar/${avatar.handle}`}>
                                   <Button variant="outline" className="px-6" data-testid={`button-profile-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}>
                                     <ExternalLink className="h-4 w-4 mr-2" />

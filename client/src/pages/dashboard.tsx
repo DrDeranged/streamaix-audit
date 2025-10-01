@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import InvestmentJournal from '@/components/InvestmentJournal';
+import { FollowButton } from '@/components/avatars/follow-button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -180,6 +181,18 @@ export default function Dashboard() {
   const { data: followedAvatarsData, isLoading: followedAvatarsLoading } = useQuery({
     queryKey: [`/api/users/${user?.id}/followed-avatars`],
     enabled: !!user?.id,
+  });
+
+  // Fetch personalized avatar recommendations
+  const { data: recommendationsData, isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['/api/avatars/recommendations', user?.id],
+    enabled: !!user?.id,
+  });
+
+  // Fetch trending avatars
+  const { data: trendingData, isLoading: trendingLoading } = useQuery({
+    queryKey: ['/api/avatars/trending'],
+    refetchInterval: 300000, // Refresh every 5 minutes
   });
 
   // Supplemental market data (expanded for scrollable sections)
@@ -714,16 +727,26 @@ export default function Dashboard() {
                                     </span>
                                   </div>
                                   
-                                  <Link to={`/avatar/${followData.avatar.handle}`}>
-                                    <Button 
-                                      variant="outline" 
+                                  <div className="flex gap-2">
+                                    <Link to={`/avatar/${followData.avatar.handle}`}>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        className="text-white bg-white/10 border-white/30 hover:bg-white/20 px-3 py-1.5 text-xs"
+                                        data-testid={`button-view-avatar-${followData.avatar.handle}`}
+                                      >
+                                        View Profile
+                                      </Button>
+                                    </Link>
+                                    <FollowButton
+                                      avatarId={followData.avatar.id}
+                                      avatarName={followData.avatar.name}
                                       size="sm"
-                                      className="text-white bg-white/10 border-white/30 hover:bg-white/20 px-3 py-1.5 text-xs"
-                                      data-testid={`button-view-avatar-${followData.avatar.handle}`}
-                                    >
-                                      View Profile
-                                    </Button>
-                                  </Link>
+                                      variant="ghost"
+                                      className="text-xs px-3 py-1.5"
+                                      showIcon={false}
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -752,6 +775,120 @@ export default function Dashboard() {
                       </Card>
                     )}
                   </div>
+
+                  {/* Personalized Recommendations Section */}
+                  {!recommendationsLoading && (recommendationsData as any)?.recommendations?.length > 0 && (
+                    <div className="mt-8 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-white text-lg font-bold flex items-center gap-2">
+                          <Zap className="h-5 w-5 text-purple-400" />
+                          Recommended For You
+                        </h2>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {((recommendationsData as any)?.recommendations || []).slice(0, 4).map((rec: any) => (
+                          <motion.div
+                            key={rec.avatar.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="bg-gradient-to-br from-purple-950/40 to-blue-950/40 backdrop-blur-lg rounded-lg border border-purple-500/20 p-4"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center overflow-hidden">
+                                  {rec.avatar.imageUrl ? (
+                                    <img src={rec.avatar.imageUrl} alt={rec.avatar.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span className="text-white font-bold">{rec.avatar.name.charAt(0)}</span>
+                                  )}
+                                </div>
+                                <div>
+                                  <h3 className="text-white font-semibold text-sm">{rec.avatar.name}</h3>
+                                  <p className="text-purple-200/70 text-xs">@{rec.avatar.handle}</p>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
+                                {rec.score}% match
+                              </Badge>
+                            </div>
+
+                            <div className="space-y-1.5 mb-3">
+                              {rec.reasons.slice(0, 2).map((reason: string, idx: number) => (
+                                <div key={idx} className="flex items-start gap-2">
+                                  <Star className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />
+                                  <p className="text-purple-200/80 text-xs">{reason}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            <FollowButton
+                              avatarId={rec.avatar.id}
+                              avatarName={rec.avatar.name}
+                              size="sm"
+                              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs"
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trending Avatars Section */}
+                  {!trendingLoading && (trendingData as any)?.trending?.length > 0 && (
+                    <div className="mt-8 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-white text-lg font-bold flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5 text-green-400" />
+                          Trending Now
+                        </h2>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {((trendingData as any)?.trending || []).slice(0, 6).map((avatar: any, idx: number) => (
+                          <motion.div
+                            key={avatar.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="bg-gradient-to-br from-green-950/40 to-emerald-950/40 backdrop-blur-lg rounded-lg border border-green-500/20 p-3"
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="relative">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center overflow-hidden">
+                                  {avatar.imageUrl ? (
+                                    <img src={avatar.imageUrl} alt={avatar.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span className="text-white font-bold text-sm">{avatar.name.charAt(0)}</span>
+                                  )}
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                  {idx + 1}
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-white font-semibold text-sm truncate">{avatar.name}</h3>
+                                <p className="text-green-200/70 text-xs truncate">@{avatar.handle}</p>
+                              </div>
+                            </div>
+
+                            {avatar.portfolioRoi !== null && (
+                              <Badge variant="outline" className="bg-green-500/10 text-green-300 border-green-500/30 text-xs mb-2">
+                                {avatar.portfolioRoi > 0 ? '+' : ''}{avatar.portfolioRoi}% ROI
+                              </Badge>
+                            )}
+
+                            <FollowButton
+                              avatarId={avatar.id}
+                              avatarName={avatar.name}
+                              size="sm"
+                              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-xs"
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="summaries" className="space-y-4 mt-4">
