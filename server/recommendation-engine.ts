@@ -1,4 +1,5 @@
 import type { DatabaseStorage } from "./storage";
+import memoizee from "memoizee";
 
 interface AvatarRecommendation {
   avatarId: string;
@@ -7,7 +8,25 @@ interface AvatarRecommendation {
 }
 
 export class RecommendationEngine {
+  private similarityCache: Map<string, number> = new Map();
+  
   constructor(private storage: DatabaseStorage) {}
+  
+  // Memoized category similarity calculation
+  private calculateCategorySimilarity = memoizee(
+    (category: string, followedCategories: string[]): number => {
+      return followedCategories.includes(category) ? 30 : 0;
+    },
+    { maxAge: 5 * 60 * 1000 } // Cache for 5 minutes
+  );
+  
+  // Memoized investment focus overlap calculation
+  private calculateFocusOverlap = memoizee(
+    (avatarFocus: string[], followedFocus: string[]): string[] => {
+      return avatarFocus.filter(focus => followedFocus.includes(focus));
+    },
+    { maxAge: 5 * 60 * 1000, primitive: true }
+  );
 
   /**
    * Generate personalized avatar recommendations based on user behavior
@@ -34,23 +53,24 @@ export class RecommendationEngine {
         const reasons: string[] = [];
         let score = 0;
 
-        // Score based on category similarity
+        // Score based on category similarity (memoized)
         const followedCategories = followedAvatars
           .map((f: any) => allAvatars.find((a: any) => a.id === f.avatarId)?.category)
           .filter(Boolean);
         
-        if (avatar.category && followedCategories.includes(avatar.category)) {
-          score += 30;
-          reasons.push(`Similar category to your interests: ${avatar.category}`);
+        if (avatar.category) {
+          const categoryScore = this.calculateCategorySimilarity(avatar.category, followedCategories);
+          if (categoryScore > 0) {
+            score += categoryScore;
+            reasons.push(`Similar category to your interests: ${avatar.category}`);
+          }
         }
 
-        // Score based on investment focus overlap
+        // Score based on investment focus overlap (memoized)
         const followedInvestmentFocus = followedAvatars
           .flatMap((f: any) => allAvatars.find((a: any) => a.id === f.avatarId)?.investmentFocus || []);
         
-        const focusOverlap = (avatar.investmentFocus || []).filter(
-          (focus: string) => followedInvestmentFocus.includes(focus)
-        );
+        const focusOverlap = this.calculateFocusOverlap(avatar.investmentFocus || [], followedInvestmentFocus);
         
         if (focusOverlap.length > 0) {
           score += focusOverlap.length * 15;
