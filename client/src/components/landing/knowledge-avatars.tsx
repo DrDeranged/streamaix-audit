@@ -657,7 +657,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               animate={{
                 x: isMobile 
                   ? `${-currentIndex * 100}%`
-                  : `calc(-${currentIndex * 100}% - ${currentIndex * 1.5}rem)`,
+                  : `calc(-${(currentIndex * 100) / itemsPerView}% - ${currentIndex * 1.5}rem)`,
                 scale: 1,
               }}
               transition={{ 
@@ -676,15 +676,15 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 const socialSentiment = sentimentData?.sentiment;
                 const sentimentLoading = sentimentData?.isLoading;
                 const influenceScore = avatar.influenceScore || socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
-                const recentActivity = getRecentActivity(avatar.name);
                 
                 return (
                   <motion.div
                     key={avatar.id}
                     className="flex-none relative z-10"
                     style={{
-                      width: isMobile ? '100%' : `calc(100% / ${itemsPerView} - ${1.5 * (itemsPerView - 1) / itemsPerView}rem)`,
-                      pointerEvents: 'auto'
+                      width: isMobile ? '100%' : `calc((100% - ${1.5 * (itemsPerView - 1)}rem) / ${itemsPerView})`,
+                      pointerEvents: 'auto',
+                      minWidth: isMobile ? '100%' : `calc((100% - ${1.5 * (itemsPerView - 1)}rem) / ${itemsPerView})`
                     }}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -712,7 +712,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
-                                    className="object-contain scale-110"
+                                    className="object-cover"
                                   />
                                   <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 text-white">
                                     {avatar.name.split(' ').map(n => n[0]).join('')}
