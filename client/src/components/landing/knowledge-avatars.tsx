@@ -1139,36 +1139,38 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 </div>
                               )}
                               
-                              {/* Recent Activity */}
-                              <div>
-                                <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                                  <Activity className="h-5 w-5 mr-2 text-blue-500" />
-                                  Live Activity Feed
-                                </h4>
-                                <div className="space-y-3">
-                                  {recentActivity.map((activity, idx) => (
-                                    <div key={idx} className="flex items-start gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
-                                      <div className={`w-2 h-2 rounded-full mt-2 ${
-                                        activity.impact === 'high' ? 'bg-red-500' :
-                                        activity.impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                                      }`} />
-                                      <div className="flex-1">
-                                        <div className="text-sm font-medium text-foreground">{activity.text}</div>
-                                        <div className="flex items-center justify-between mt-1">
-                                          <div className="text-xs text-muted-foreground">{activity.time}</div>
-                                          <Badge variant="outline" className={`text-xs ${
-                                            activity.impact === 'high' ? 'border-red-500/30 text-red-600' :
-                                            activity.impact === 'medium' ? 'border-yellow-500/30 text-yellow-600' : 
-                                            'border-green-500/30 text-green-600'
-                                          }`}>
-                                            {activity.impact} impact
-                                          </Badge>
+                              {/* Recent Activity - Only show if exists */}
+                              {avatar.recentActivity && avatar.recentActivity.length > 0 && (
+                                <div>
+                                  <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                                    <Activity className="h-5 w-5 mr-2 text-blue-500" />
+                                    Live Activity Feed
+                                  </h4>
+                                  <div className="space-y-3">
+                                    {avatar.recentActivity.map((activity, idx) => (
+                                      <div key={idx} className="flex items-start gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
+                                        <div className={`w-2 h-2 rounded-full mt-2 ${
+                                          activity.impact === 'high' ? 'bg-red-500' :
+                                          activity.impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                        }`} />
+                                        <div className="flex-1">
+                                          <div className="text-sm font-medium text-foreground">{activity.text}</div>
+                                          <div className="flex items-center justify-between mt-1">
+                                            <div className="text-xs text-muted-foreground">{activity.time}</div>
+                                            <Badge variant="outline" className={`text-xs ${
+                                              activity.impact === 'high' ? 'border-red-500/30 text-red-600' :
+                                              activity.impact === 'medium' ? 'border-yellow-500/30 text-yellow-600' : 
+                                              'border-green-500/30 text-green-600'
+                                            }`}>
+                                              {activity.impact} impact
+                                            </Badge>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
+                              )}
                             </div>
                           </div>
                         </div>
