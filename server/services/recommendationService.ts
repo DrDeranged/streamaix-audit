@@ -27,7 +27,7 @@ export class RecommendationService {
   async getUserProfile(userId: string): Promise<UserProfile> {
     const [followedAvatars, recentInteractions, preferences] = await Promise.all([
       this.storage.getAvatarFollowsByUserId(userId),
-      this.storage.getUserInteractions(userId, 50),
+      this.storage.getUserInteractions(userId, { limit: 50 }),
       this.storage.getUserPreferences(userId)
     ]);
 
@@ -74,16 +74,13 @@ export class RecommendationService {
     }
 
     // 3. Performance metrics
-    const performance = avatar.performanceMetrics as any;
-    if (performance) {
-      if (performance.roi && performance.roi > 100) {
-        score += 20;
-        reasons.push(`Strong performance: +${performance.roi}% ROI`);
-      }
-      if (performance.accuracy && performance.accuracy > 80) {
-        score += 15;
-        reasons.push(`${performance.accuracy}% prediction accuracy`);
-      }
+    if (avatar.portfolioRoi && avatar.portfolioRoi > 100) {
+      score += 20;
+      reasons.push(`Strong performance: +${avatar.portfolioRoi}% ROI`);
+    }
+    if (avatar.accuracyPercentage && avatar.accuracyPercentage > 80) {
+      score += 15;
+      reasons.push(`${avatar.accuracyPercentage}% prediction accuracy`);
     }
 
     // 4. Influence and credibility
@@ -334,12 +331,8 @@ export class RecommendationService {
     let preferences = await this.storage.getUserPreferences(userId);
 
     if (!preferences) {
-      preferences = await this.storage.createUserPreferences({
-        userId,
-        interests: { topics: [], sectors: {}, contentTypes: {} },
-        timePreference: '24h',
-        contentPriority: 'engagement'
-      });
+      // User preferences don't exist yet, skip for now
+      return;
     }
 
     const interests = (preferences.interests as any) || { topics: [], sectors: {}, contentTypes: {} };
