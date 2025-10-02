@@ -695,9 +695,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
-                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 ${!isMobile ? 'hover:scale-105' : ''} transition-all duration-300 overflow-hidden min-h-[720px] ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/30' : ''} flex flex-col`}>
+                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/40' : ''} flex flex-col h-full`}>
                           {/* Professional Terminal-Style Header */}
-                          <div className="relative overflow-hidden">
+                          <div className="relative overflow-hidden flex-shrink-0">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
                               <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-transparent" />
                               <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
@@ -712,7 +712,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
-                                    className="object-cover"
+                                    className="object-cover object-center scale-110"
                                   />
                                   <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 text-white">
                                     {avatar.name.split(' ').map(n => n[0]).join('')}
@@ -732,9 +732,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                           </div>
                           
-                          <CardContent className={`pt-14 pb-6 ${isMobile ? 'px-6 space-y-5' : 'px-5 space-y-4'} flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-950/50`}>
+                          <CardContent className="pt-14 pb-6 px-5 space-y-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-950/50">
                             {/* Name and Handle */}
-                            <div className="space-y-2 border-b border-blue-500/20 pb-4">
+                            <div className="space-y-2 border-b border-blue-500/20 pb-4 flex-shrink-0">
                               <h3 className="text-xl font-bold text-blue-50 group-hover:text-blue-300 transition-colors line-clamp-1 tracking-tight font-mono">
                                 {avatar.name}
                               </h3>
@@ -742,10 +742,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                             
                             {/* Bloomberg Terminal-Style Metrics Grid */}
-                            <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-2.5'}`}>
-                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
+                            <div className="grid grid-cols-2 gap-3 flex-shrink-0">
+                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Portfolio ROI</span>
+                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Portfolio ROI</span>
                                   <div className="flex items-center gap-1.5">
                                     {trend === 'up' ? (
                                       <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />
@@ -755,30 +755,28 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     <div className={`w-1.5 h-1.5 rounded-full ${portfolioRoi >= 0 ? 'bg-emerald-400' : 'bg-red-400'} animate-pulse`} />
                                   </div>
                                 </div>
-                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${portfolioRoi >= 0 ? '+' : ''}${portfolioRoi}% total portfolio return`}>
+                                <div className={`text-xl font-bold font-mono transition-all duration-300 ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${portfolioRoi >= 0 ? '+' : ''}${portfolioRoi}% total portfolio return`}>
                                   {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                 </div>
                               </div>
                               
-                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
+                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Accuracy</span>
+                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Accuracy</span>
                                   <div className={`w-1.5 h-1.5 rounded-full ${accuracyPercentage >= 80 ? 'bg-emerald-400' : accuracyPercentage >= 60 ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`} />
                                 </div>
-                                <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono transition-all duration-300 ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${accuracyPercentage}% accuracy on public predictions and forecasts`}>
+                                <div className={`text-xl font-bold font-mono transition-all duration-300 ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${accuracyPercentage}% accuracy on public predictions and forecasts`}>
                                   {accuracyPercentage}%
                                 </div>
                               </div>
                               
-                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
+                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>
-                                    Influence
-                                  </span>
+                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Influence</span>
                                   <Star className="h-3.5 w-3.5 text-cyan-400" />
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <div className={`${isMobile ? 'text-2xl' : 'text-xl'} font-bold font-mono text-cyan-400`}>
+                                  <div className="text-xl font-bold font-mono text-cyan-400">
                                     {Math.round(influenceScore)}
                                   </div>
                                   {sentimentLoading && (
@@ -787,10 +785,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 </div>
                                 {socialSentiment && (
                                   <div className="flex items-center gap-2">
-                                    <div className="text-[10px] text-blue-400/70 font-mono">
+                                    <div className="text-xs text-blue-400/70 font-mono">
                                       {formatFollowerCount(socialSentiment.profile.followers)}
                                     </div>
-                                    <div className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                                    <div className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-mono ${
                                       socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-emerald-500/20 text-emerald-400' :
                                       socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500/20 text-yellow-400' :
                                       'bg-red-500/20 text-red-400'
@@ -801,38 +799,38 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 )}
                               </div>
                               
-                              <div className={`bg-slate-900/60 border border-blue-500/30 rounded-lg ${isMobile ? 'p-3.5' : 'p-3'} space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300`}>
+                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className={`${isMobile ? 'text-xs' : 'text-[11px]'} text-blue-400/80 font-mono uppercase tracking-wider`}>Net Worth</span>
+                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Net Worth</span>
                                   <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                                 </div>
-                                <div className={`${isMobile ? 'text-base' : 'text-sm'} font-bold font-mono text-emerald-400 truncate`} title={`Assets Under Management / Net Worth: ${netWorth}`}>
+                                <div className="text-sm font-bold font-mono text-emerald-400 truncate" title={`Assets Under Management / Net Worth: ${netWorth}`}>
                                   {netWorth}
                                 </div>
                               </div>
                             </div>
                             
                             {/* Terminal-Style Key Metrics */}
-                            <div className="space-y-2 bg-slate-950/50 border border-blue-500/20 rounded-lg p-3">
-                              <div className="flex items-center justify-between text-sm">
+                            <div className="space-y-2 bg-slate-950/50 border border-blue-500/20 rounded-lg p-3 flex-shrink-0">
+                              <div className="flex items-center justify-between">
                                 <span className="text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
                                   <Users className="h-3 w-3" />
                                   Followers
                                 </span>
-                                <span className="font-mono font-bold text-cyan-400">{formatFollowerCount(avatar.followerCount)}</span>
+                                <span className="font-mono font-bold text-cyan-400 text-sm">{formatFollowerCount(avatar.followerCount)}</span>
                               </div>
-                              <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center justify-between">
                                 <span className="text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
                                   <Building2 className="h-3 w-3" />
                                   Investments
                                 </span>
-                                <span className="font-mono font-bold text-cyan-400">{avatar.notableInvestments?.length || 0}</span>
+                                <span className="font-mono font-bold text-cyan-400 text-sm">{avatar.notableInvestments?.length || 0}</span>
                               </div>
                             </div>
                             
                             {/* Terminal Activity Feed - Only show if we have real activity data from DB */}
                             {avatar.recentActivity && avatar.recentActivity.length > 0 && (
-                              <div className="space-y-2">
+                              <div className="space-y-2 flex-shrink-0">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5 text-xs text-blue-400/80 font-mono uppercase tracking-wider">
                                     <Activity className="h-3 w-3" />
@@ -848,10 +846,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     {avatar.recentActivity[0].text}
                                   </div>
                                   <div className="flex items-center justify-between mt-2">
-                                    <div className="text-[10px] text-blue-400/60 font-mono">
+                                    <div className="text-xs text-blue-400/60 font-mono">
                                       {avatar.recentActivity[0].time}
                                     </div>
-                                    <div className={`text-[10px] px-2 py-0.5 rounded font-mono uppercase tracking-wider ${
+                                    <div className={`text-xs px-2 py-0.5 rounded font-mono uppercase tracking-wider ${
                                       avatar.recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-400' :
                                       avatar.recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 
                                       'bg-emerald-500/20 text-emerald-400'
@@ -865,7 +863,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             
                             {/* Recent Insight - Only show if from database */}
                             {avatar.recentThoughts && avatar.recentThoughts.length > 0 && avatar.recentThoughts[0] && avatar.recentThoughts[0].trim() && (
-                              <div className="bg-slate-950/60 border-l-2 border-cyan-400 rounded-lg p-3">
+                              <div className="bg-slate-950/60 border-l-2 border-cyan-400 rounded-lg p-3 flex-shrink-0">
                                 <p className="text-xs text-blue-200/80 italic line-clamp-2 font-medium">
                                   "{avatar.recentThoughts[0]}"
                                 </p>
