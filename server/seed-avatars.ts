@@ -271,6 +271,42 @@ const newEntrepreneurs = [
     alphaGenerated: 92.8,
     followerCount: 1500000,
     isActive: true
+  },
+  {
+    name: 'Katie Haun',
+    handle: 'katie_haun',
+    bio: 'Haun Ventures founder, former a16z GP. $1.5B crypto fund, Coinbase board member. Ex-federal prosecutor specializing in crypto.',
+    imageUrl: 'https://pbs.twimg.com/profile_images/1580265953881731075/YtlQDVmJ_400x400.jpg',
+    portfolioRoi: 38.0, // Haun Ventures portfolio performance estimate
+    riskScore: 48,
+    investmentFocus: ['Infrastructure', 'Consumer Crypto', 'DeFi', 'Web3'],
+    totalInvestments: 42,
+    successfulExits: 12,
+    activeProjects: 28,
+    accuracyPercentage: 72,
+    volatility: 52,
+    sharpeRatio: 1.6,
+    alphaGenerated: 25.8,
+    followerCount: 380000,
+    isActive: true
+  },
+  {
+    name: 'Adam Back',
+    handle: 'adam3us',
+    bio: 'Blockstream CEO, Hashcash inventor (Bitcoin PoW predecessor). Cited in Bitcoin whitepaper. Early Bitcoin adopter since 2013.',
+    imageUrl: 'https://pbs.twimg.com/profile_images/1592266468546756608/kQdQ8ZXw_400x400.jpg',
+    portfolioRoi: 125.0, // Bitcoin position performance estimate
+    riskScore: 38,
+    investmentFocus: ['Bitcoin Core', 'Layer-2', 'Sidechains', 'Mining'],
+    totalInvestments: 18,
+    successfulExits: 6,
+    activeProjects: 12,
+    accuracyPercentage: 82,
+    volatility: 42,
+    sharpeRatio: 2.1,
+    alphaGenerated: 95.2,
+    followerCount: 567000,
+    isActive: true
   }
 ];
 
