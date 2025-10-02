@@ -119,32 +119,24 @@ export function AISuggestions() {
                   <div className="flex justify-center">
                     <Link href="/auth">
                       <motion.button 
-                        className="relative px-12 py-5 bg-gradient-to-r from-cyan-500 via-purple-600 to-blue-500 text-white rounded-2xl font-bold text-lg overflow-hidden group"
-                        whileHover={{ scale: 1.08, y: -2 }}
+                        className="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-white/20 rounded-lg text-white text-sm font-medium overflow-hidden transition-all duration-300 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/25"
+                        whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         data-testid="button-signin"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                        </div>
+                        <Sparkles className="w-4 h-4 text-purple-300 relative z-10" />
+                        <span className="relative z-10">Sign In</span>
                         
-                        <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/20 transition-all duration-300" />
-                        
-                        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 rounded-2xl opacity-20 blur-lg group-hover:opacity-40 group-hover:blur-xl transition-all duration-300" />
-                        
-                        <span className="relative flex items-center gap-3 z-10">
-                          <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
-                          <span className="drop-shadow-lg">Sign In to Get Started</span>
-                          <motion.div
-                            className="ml-1"
-                            animate={{ x: [0, 4, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                          >
-                            →
-                          </motion.div>
-                        </span>
+                        <svg 
+                          className="w-4 h-4 text-purple-300 relative z-10 transition-transform duration-300 group-hover:translate-x-1" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </motion.button>
                     </Link>
                   </div>
