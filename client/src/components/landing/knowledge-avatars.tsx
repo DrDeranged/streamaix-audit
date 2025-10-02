@@ -695,7 +695,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
                           <Card className="group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
                           {/* Professional Terminal-Style Header */}
-                          <div className="relative overflow-hidden flex-shrink-0">
+                          <div className="relative flex-shrink-0">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
                               <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-transparent" />
                               <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
