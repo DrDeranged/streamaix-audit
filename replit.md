@@ -119,7 +119,17 @@ The application is currently in the MVP stage with a complete landing page showc
 
 ## Recent Updates
 
-### Professional Design with Fixed Images (Latest - July 28, 2025)
+### Alpha Network Avatar Card Consistency Fixes (Latest - October 2, 2025)
+- **Fixed Avatar Image Display**: Changed from object-cover to object-cover with object-center and scale-110 to prevent face cropping
+- **Standardized Card Heights**: Removed fixed min-h-[720px], now using flexible h-full with flexbox for consistent layouts
+- **Typography Standardization**: Unified all font sizes (headings: text-xl, labels: text-xs, metrics: text-xl, small text: text-sm)
+- **Layout Consistency**: Standardized padding (px-5), spacing (space-y-4), and metrics grid (grid-cols-2 gap-3 p-3) across all cards
+- **Hover Effect Fix**: Removed JavaScript hover handlers that caused ~44px layout shifts, now using pure CSS hover effects
+- **Visual Effects Only**: Hover now only changes border color (border-blue-500/30 → border-blue-400/60) and adds shadow (shadow-2xl)
+- **No Layout Shifts**: All hover effects are purely visual without affecting card positioning or dimensions
+- **Glassmorphism Theme**: Maintained cyan-purple-blue color scheme throughout with no orange tones
+
+### Professional Design with Fixed Images (July 28, 2025)
 - Fixed missing images in Knowledge Avatars, Summary Bounty Board, and Social + Ecosystem sections
 - Created professional SVG avatars for Naval, Vitalik, and other personas
 - Maintained sophisticated React design with Framer Motion animations
