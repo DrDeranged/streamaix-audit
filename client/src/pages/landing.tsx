@@ -8,6 +8,7 @@ import { TrendingSocialContent } from "@/components/landing/trending-social-cont
 
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
+import { AIRecommendations } from "@/components/landing/ai-recommendations";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
 import { Bounties } from "@/components/landing/bounties";
 import { SocialEcosystem } from "@/components/landing/social-ecosystem";
@@ -25,6 +26,7 @@ export default function Landing() {
       <TrendingSocialContent />
       <WhyBlockchain />
       <KnowledgeAvatars />
+      <AIRecommendations />
       <AISuggestions />
       <Bounties />
       <SocialEcosystem />

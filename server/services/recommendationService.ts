@@ -273,8 +273,8 @@ export class RecommendationService {
     trendingTopics: string[];
   }> {
     const [avatars, content, userProfile] = await Promise.all([
-      this.getPersonalizedAvatarRecommendations(userId, 5),
-      this.getPersonalizedContentRecommendations(userId, 12),
+      this.getPersonalizedAvatarRecommendations(userId, 3),
+      this.getPersonalizedContentRecommendations(userId, 6),
       this.getUserProfile(userId)
     ]);
 
