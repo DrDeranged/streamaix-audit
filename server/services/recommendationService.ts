@@ -155,35 +155,48 @@ export class RecommendationService {
       }
     }
 
-    // 2. Content type preference
-    if (userProfile.preferences?.contentPriority) {
-      if (userProfile.preferences.contentPriority === 'engagement') {
-        score += 10;
-        reasons.push('High engagement content');
-      }
+    // 2. Content type preference with enhanced podcast scoring
+    const isPodcast = content.contentType?.toLowerCase() === 'podcast' || content.platform?.toLowerCase().includes('podcast');
+    const isVideo = content.contentType?.toLowerCase() === 'video' || content.platform?.toLowerCase() === 'youtube';
+    
+    if (isPodcast) {
+      score += 8;
+      reasons.push('In-depth podcast discussion');
+    } else if (isVideo) {
+      score += 6;
+      reasons.push('Visual content with analysis');
     }
 
-    // 3. Recency
+    // 3. Recency with time-decay algorithm
     if (content.createdAt) {
       const ageInDays = (Date.now() - new Date(content.createdAt).getTime()) / (1000 * 60 * 60 * 24);
       if (ageInDays < 1) {
         score += 15;
         reasons.push('Fresh content from today');
+      } else if (ageInDays < 3) {
+        score += 12;
+        reasons.push('Recent content');
       } else if (ageInDays < 7) {
-        score += 10;
-        reasons.push('Recent content from this week');
+        score += 8;
+        reasons.push('From this week');
+      } else if (ageInDays < 30) {
+        score += 3;
       }
     }
 
-    // 4. Content quality indicators
+    // 4. Content quality indicators with weighted scoring
     if (content.accuracy && content.accuracy > 85) {
       score += 12;
-      reasons.push('High accuracy content');
+      reasons.push(`${content.accuracy}% accuracy rating`);
+    } else if (content.accuracy && content.accuracy > 70) {
+      score += 6;
     }
 
     if (content.sourceCredibility && ['A+', 'A'].includes(content.sourceCredibility)) {
       score += 10;
       reasons.push('From credible source');
+    } else if (content.sourceCredibility === 'B+' || content.sourceCredibility === 'B') {
+      score += 5;
     }
 
     if (content.expertCredibility && content.expertCredibility > 80) {
@@ -191,22 +204,44 @@ export class RecommendationService {
       reasons.push('Expert-level analysis');
     }
 
-    // 5. Market relevance
+    // 5. Market relevance and sentiment
     if (content.marketSentiment) {
       score += 5;
-      reasons.push('Includes market sentiment analysis');
+      const sentiment = content.marketSentiment.toLowerCase();
+      if (sentiment.includes('bullish') || sentiment.includes('optimistic')) {
+        score += 3;
+        reasons.push('Bullish market outlook');
+      } else if (sentiment.includes('bearish') || sentiment.includes('cautious')) {
+        score += 3;
+        reasons.push('Important risk analysis');
+      }
     }
 
-    // 6. Comprehensive analysis
+    // 6. Comprehensive analysis bonus
     if (content.keyInsights && content.chapters && content.actionItems) {
-      score += 8;
-      reasons.push('Comprehensive breakdown with actionable insights');
+      score += 10;
+      reasons.push('Complete breakdown with actionable insights');
+    } else if (content.keyInsights && content.chapters) {
+      score += 6;
     }
 
-    // 7. Platform and type matching
-    const preferredPlatforms = ['youtube', 'podcast', 'twitter'];
-    if (content.platform && preferredPlatforms.includes(content.platform.toLowerCase())) {
-      score += 5;
+    // 7. Content length optimization (favor substantial content)
+    if (content.originalDuration) {
+      const durationMinutes = content.originalDuration / 60;
+      if (durationMinutes >= 30 && durationMinutes <= 120) {
+        score += 5;
+        reasons.push('Perfect length for deep dive');
+      } else if (durationMinutes > 120) {
+        score += 3;
+      }
+    }
+
+    // 8. Interaction history bonus
+    const hasUserInteracted = userProfile.recentInteractions.some(
+      interaction => interaction.targetType === 'summary' && interaction.targetId === content.id
+    );
+    if (hasUserInteracted) {
+      score -= 50; // Strongly demote already-seen content
     }
 
     return {
