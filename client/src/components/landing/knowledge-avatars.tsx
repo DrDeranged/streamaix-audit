@@ -34,7 +34,10 @@ import {
   Lightbulb,
   Shield,
   Briefcase,
-  Award
+  Award,
+  Podcast,
+  BookOpen,
+  GraduationCap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -77,6 +80,9 @@ interface DatabaseAvatar {
   riskScore?: number | null;
   volatility?: number | null;
   marketOutlook?: string | null;
+  podcastAppearances?: any[];
+  recommendedBooks?: any[];
+  mentors?: any[];
 }
 
 const getAvatarGradient = (name: string) => {
@@ -1168,6 +1174,125 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 </div>
                               )}
                             </div>
+                            
+                            {/* Podcast Appearances */}
+                            {avatar.podcastAppearances && avatar.podcastAppearances.length > 0 && (
+                              <div className="bg-gradient-to-br from-card/50 to-muted/30 rounded-xl p-6 mb-8 border border-muted/30">
+                                <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                                  <Podcast className="h-5 w-5 mr-2 text-primary" />
+                                  Featured Podcast Appearances
+                                </h4>
+                                <div className="space-y-4">
+                                  {avatar.podcastAppearances.map((podcast: any, idx: number) => (
+                                    <a
+                                      key={idx}
+                                      href={podcast.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block p-4 bg-muted/30 rounded-lg border border-muted/40 hover:border-primary/40 hover:bg-muted/40 transition-all duration-300 hover:scale-[1.02] group"
+                                    >
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1">
+                                          <h5 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                            {podcast.name}
+                                          </h5>
+                                          <p className="text-sm text-muted-foreground mt-1">{podcast.episode}</p>
+                                        </div>
+                                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                                      </div>
+                                      <div className="flex items-center gap-4 text-xs text-muted-foreground/70 mb-2">
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-3 w-3" />
+                                          {podcast.duration}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Calendar className="h-3 w-3" />
+                                          {new Date(podcast.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-wrap gap-2 mt-2">
+                                        {podcast.keyTopics.map((topic: string, topicIdx: number) => (
+                                          <Badge key={topicIdx} variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                                            {topic}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Book Recommendations */}
+                            {avatar.recommendedBooks && avatar.recommendedBooks.length > 0 && (
+                              <div className="bg-gradient-to-br from-card/50 to-muted/30 rounded-xl p-6 mb-8 border border-muted/30">
+                                <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
+                                  Recommended Reading
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {avatar.recommendedBooks.map((book: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="p-4 bg-muted/30 rounded-lg border border-muted/40 hover:border-primary/40 hover:bg-muted/40 transition-all duration-300"
+                                    >
+                                      <div className="flex items-start gap-3">
+                                        <div className="w-12 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded flex items-center justify-center flex-shrink-0 border border-primary/20">
+                                          <BookOpen className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <div className="flex-1">
+                                          <h5 className="font-semibold text-foreground text-sm leading-tight mb-1">
+                                            {book.title}
+                                          </h5>
+                                          <p className="text-xs text-muted-foreground mb-2">by {book.author}</p>
+                                          <p className="text-xs text-muted-foreground/80 italic line-clamp-2">
+                                            "{book.reason}"
+                                          </p>
+                                          <Badge variant="outline" className="text-xs mt-2 bg-primary/10 text-primary border-primary/20">
+                                            {book.category}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Mentors & Influences */}
+                            {avatar.mentors && avatar.mentors.length > 0 && (
+                              <div className="bg-gradient-to-br from-card/50 to-muted/30 rounded-xl p-6 mb-8 border border-muted/30">
+                                <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                                  <GraduationCap className="h-5 w-5 mr-2 text-primary" />
+                                  Mentors & Influences
+                                </h4>
+                                <div className="space-y-3">
+                                  {avatar.mentors.map((mentor: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="p-4 bg-muted/30 rounded-lg border border-muted/40 hover:border-primary/40 hover:bg-muted/40 transition-all duration-300"
+                                    >
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <h5 className="font-semibold text-foreground">{mentor.name}</h5>
+                                          {mentor.active && (
+                                            <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                                              Active
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                                          {mentor.relationship}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-sm text-muted-foreground/80 italic">
+                                        "{mentor.influence}"
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </DialogContent>
