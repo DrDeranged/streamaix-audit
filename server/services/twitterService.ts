@@ -56,7 +56,7 @@ interface TwitterSearchResult {
   };
 }
 
-// Memory cache for API responses
+// Memory cache for API responses with stale-while-revalidate support
 class MemoryCache {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
 
@@ -73,9 +73,15 @@ class MemoryCache {
     if (!entry) return null;
     
     if (Date.now() - entry.timestamp > entry.ttl) {
-      this.cache.delete(key);
       return null;
     }
+    
+    return entry.data as T;
+  }
+
+  getStale<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
     
     return entry.data as T;
   }
@@ -555,7 +561,14 @@ export class TwitterService {
       }
     }
 
-    console.log('⚠️ No crypto social content available from any source');
+    // Stale-while-revalidate: Return stale cache if all sources fail
+    const staleCache = this.cache.getStale<TwitterTweet[]>(cacheKey);
+    if (staleCache && staleCache.length > 0) {
+      console.log(`🔄 Serving ${staleCache.length} stale cached items (all sources unavailable)`);
+      return staleCache;
+    }
+
+    console.log('⚠️ No crypto social content available from any source (including cache)');
     return [];
   }
 

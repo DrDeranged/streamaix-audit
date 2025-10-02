@@ -177,6 +177,46 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
     );
   }
 
+  if (!casts || casts.length === 0) {
+    return (
+      <div className="text-center py-12 sm:py-20 bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-cyan-500/5" />
+        <div className="relative z-10 px-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border-2 border-white/20"
+          >
+            <TrendingUp className="w-10 h-10 text-indigo-400" />
+          </motion.div>
+          <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
+            No Conversations Yet
+          </h3>
+          <p className="text-slate-400 mb-4 text-sm sm:text-base max-w-md mx-auto">
+            The crypto conversation space is temporarily quiet. Check back soon for the latest discussions and insights.
+          </p>
+          <p className="text-slate-500 text-xs sm:text-sm mb-6">
+            Social feeds are being refreshed. This happens when API sources are temporarily unavailable.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline" 
+              className="border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400/50 hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-medium"
+              data-testid="refresh-feed"
+            >
+              Refresh Feed
+            </Button>
+            <a href="/features" className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1">
+              Explore Features <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3 sm:space-y-4">
       {displayedCasts.map((cast, index) => (
