@@ -295,26 +295,22 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
     'Paul Graham': paulSentiment,
   };
   const maxIndex = Math.max(0, avatars.length - itemsPerView);
+  const canGoNext = currentIndex < maxIndex;
+  const canGoPrev = currentIndex > 0;
 
   const nextSlide = () => {
-    if (isTransitioningRef.current) return;
+    if (isTransitioningRef.current || !canGoNext) return;
     isTransitioningRef.current = true;
-    setCurrentIndex(prev => {
-      const nextIndex = prev >= maxIndex ? 0 : prev + 1;
-      return nextIndex;
-    });
+    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 600);
   };
 
   const prevSlide = () => {
-    if (isTransitioningRef.current) return;
+    if (isTransitioningRef.current || !canGoPrev) return;
     isTransitioningRef.current = true;
-    setCurrentIndex(prev => {
-      const prevIndex = prev <= 0 ? maxIndex : prev - 1;
-      return prevIndex;
-    });
+    setCurrentIndex(prev => Math.max(prev - 1, 0));
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 600);
@@ -364,9 +360,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
     const isRightSwipe = distance < -minSwipeDistance;
 
     // Only trigger slide if it was an actual swipe (not just a small movement)
-    if (isLeftSwipe) {
+    if (isLeftSwipe && canGoNext) {
       nextSlide();
-    } else if (isRightSwipe) {
+    } else if (isRightSwipe && canGoPrev) {
       prevSlide();
     }
     
@@ -581,7 +577,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 onClick={prevSlide}
                 size="icon"
                 variant="ghost"
-                className="absolute -left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
+                disabled={!canGoPrev}
+                className={`absolute -left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                  canGoPrev 
+                    ? 'hover:from-slate-800 hover:to-blue-900 hover:scale-110 hover:shadow-blue-500/30 cursor-pointer' 
+                    : 'opacity-40 cursor-not-allowed'
+                }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-prev"
               >
@@ -592,7 +593,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 onClick={nextSlide}
                 size="icon"
                 variant="ghost"
-                className="absolute -right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 hover:from-slate-800 hover:to-blue-900 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30"
+                disabled={!canGoNext}
+                className={`absolute -right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                  canGoNext 
+                    ? 'hover:from-slate-800 hover:to-blue-900 hover:scale-110 hover:shadow-blue-500/30 cursor-pointer' 
+                    : 'opacity-40 cursor-not-allowed'
+                }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-next"
               >
@@ -706,7 +712,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
-                                    className="object-cover"
+                                    className="object-contain scale-110"
                                   />
                                   <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 text-white">
                                     {avatar.name.split(' ').map(n => n[0]).join('')}
@@ -824,46 +830,41 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                               </div>
                             </div>
                             
-                            {/* Terminal Activity Feed */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 text-xs text-blue-400/80 font-mono uppercase tracking-wider">
-                                  <Activity className="h-3 w-3" />
-                                  Live Feed
-                                  {!recentActivity[0] && (
-                                    <div className="animate-spin rounded-full h-2 w-2 border border-cyan-400/50 border-t-cyan-400 ml-1" />
-                                  )}
-                                </div>
-                                {recentActivity[0] && (
-                                  <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                                    recentActivity[0].impact === 'high' ? 'bg-red-400' :
-                                    recentActivity[0].impact === 'medium' ? 'bg-yellow-400' : 'bg-emerald-400'
-                                  }`} />
-                                )}
-                              </div>
-                              <div className={`bg-slate-950/60 border border-blue-500/30 rounded-lg p-3 hover:border-blue-400/50 hover:bg-slate-950/80 transition-all duration-300 cursor-pointer ${!recentActivity[0] ? 'animate-pulse' : ''}`}>
-                                <div className="text-xs text-blue-200/90 line-clamp-2 font-medium">
-                                  {recentActivity[0]?.text || "Loading recent activity..."}
-                                </div>
-                                <div className="flex items-center justify-between mt-2">
-                                  <div className="text-[10px] text-blue-400/60 font-mono">
-                                    {recentActivity[0]?.time || "..."}
+                            {/* Terminal Activity Feed - Only show if we have real activity data from DB */}
+                            {avatar.recentActivity && avatar.recentActivity.length > 0 && (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5 text-xs text-blue-400/80 font-mono uppercase tracking-wider">
+                                    <Activity className="h-3 w-3" />
+                                    Live Feed
                                   </div>
-                                  {recentActivity[0] && (
+                                  <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                                    avatar.recentActivity[0].impact === 'high' ? 'bg-red-400' :
+                                    avatar.recentActivity[0].impact === 'medium' ? 'bg-yellow-400' : 'bg-emerald-400'
+                                  }`} />
+                                </div>
+                                <div className="bg-slate-950/60 border border-blue-500/30 rounded-lg p-3 hover:border-blue-400/50 hover:bg-slate-950/80 transition-all duration-300 cursor-pointer">
+                                  <div className="text-xs text-blue-200/90 line-clamp-2 font-medium">
+                                    {avatar.recentActivity[0].text}
+                                  </div>
+                                  <div className="flex items-center justify-between mt-2">
+                                    <div className="text-[10px] text-blue-400/60 font-mono">
+                                      {avatar.recentActivity[0].time}
+                                    </div>
                                     <div className={`text-[10px] px-2 py-0.5 rounded font-mono uppercase tracking-wider ${
-                                      recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-400' :
-                                      recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 
+                                      avatar.recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-400' :
+                                      avatar.recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 
                                       'bg-emerald-500/20 text-emerald-400'
                                     }`}>
-                                      {recentActivity[0].impact}
+                                      {avatar.recentActivity[0].impact}
                                     </div>
-                                  )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
                             
-                            {/* Recent Insight */}
-                            {avatar.recentThoughts && avatar.recentThoughts.length > 0 && (
+                            {/* Recent Insight - Only show if from database */}
+                            {avatar.recentThoughts && avatar.recentThoughts.length > 0 && avatar.recentThoughts[0] && avatar.recentThoughts[0].trim() && (
                               <div className="bg-slate-950/60 border-l-2 border-cyan-400 rounded-lg p-3">
                                 <p className="text-xs text-blue-200/80 italic line-clamp-2 font-medium">
                                   "{avatar.recentThoughts[0]}"
