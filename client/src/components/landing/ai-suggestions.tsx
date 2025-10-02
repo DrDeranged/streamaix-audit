@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, Brain, Users, Loader2 } from "lucide-react";
+import { Sparkles, Brain, TrendingUp, Loader2, Video, Mic, FileText, ExternalLink, Clock, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,11 +29,11 @@ export function AISuggestions() {
     gcTime: 10 * 60 * 1000,
   });
 
-  // Show nothing if user not authenticated
   if (!isAuthenticated || !user) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20">
-        <div className="container mx-auto px-4 sm:px-6">
+      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-12 sm:mb-16"
             initial={{ opacity: 0, y: 20 }}
@@ -41,15 +41,18 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
               Sign in to get personalized content recommendations based on your interests and followed avatars
             </p>
             <div className="mt-8">
               <Link href="/auth">
-                <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                <button 
+                  className="px-8 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-600 hover:via-purple-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/50"
+                  data-testid="button-signin"
+                >
                   Sign In to Get Started
                 </button>
               </Link>
@@ -60,11 +63,11 @@ export function AISuggestions() {
     );
   }
 
-  // Loading state
   if (isLoading) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20">
-        <div className="container mx-auto px-4 sm:px-6">
+      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-12 sm:mb-16"
             initial={{ opacity: 0, y: 20 }}
@@ -72,28 +75,28 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
               Intelligent content recommendations based on your interests and social graph
             </p>
           </motion.div>
           
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-            <span className="ml-3 text-muted-foreground">Loading personalized recommendations...</span>
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            <span className="ml-3 text-gray-400">Loading personalized recommendations...</span>
           </div>
         </div>
       </section>
     );
   }
 
-  // Error state
   if (error || !data?.success) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20">
-        <div className="container mx-auto px-4 sm:px-6">
+      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-12 sm:mb-16"
             initial={{ opacity: 0, y: 20 }}
@@ -101,15 +104,18 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
               Follow some knowledge avatars to get personalized recommendations
             </p>
             <div className="mt-8">
               <Link href="/discover">
-                <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                <button 
+                  className="px-8 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-600 hover:via-purple-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/50"
+                  data-testid="button-discover"
+                >
                   Discover Avatars
                 </button>
               </Link>
@@ -122,11 +128,11 @@ export function AISuggestions() {
 
   const { content, trendingTopics } = data;
 
-  // If no content available
   if (!content || content.length === 0) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20">
-        <div className="container mx-auto px-4 sm:px-6">
+      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-12 sm:mb-16"
             initial={{ opacity: 0, y: 20 }}
@@ -134,21 +140,25 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4 mb-6">
+            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4 mb-6">
               No recommendations yet. Process some content or follow knowledge avatars to get started!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/discover">
-                <button className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                <button 
+                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-600 hover:via-purple-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/50"
+                  data-testid="button-discover-avatars"
+                >
                   Discover Avatars
                 </button>
               </Link>
               <button 
                 onClick={() => document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto px-6 py-3 border-2 border-indigo-500 text-indigo-500 hover:bg-indigo-500/10 rounded-lg font-semibold transition-all duration-300"
+                className="w-full sm:w-auto px-8 py-3 backdrop-blur-xl bg-white/5 border-2 border-indigo-400/50 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 rounded-xl font-semibold transition-all duration-300"
+                data-testid="button-process-content"
               >
                 Process Content
               </button>
@@ -159,85 +169,99 @@ export function AISuggestions() {
     );
   }
 
-  // Split content into three categories for display
   const suggestedContent = content.slice(0, 4);
   const agentPicks = content.slice(4, 8);
   const trendingContent = content.slice(8, 12);
 
-  const getTagColor = (tags: string[] | undefined) => {
-    if (!tags || tags.length === 0) return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
+  const getContentTypeIcon = (summary: any) => {
+    const contentType = summary.contentType?.toLowerCase() || '';
+    const platform = summary.platform?.toLowerCase() || '';
     
-    const tag = tags[0].toLowerCase();
-    if (tag.includes('ai') || tag.includes('ml')) return "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300";
-    if (tag.includes('blockchain') || tag.includes('crypto')) return "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300";
-    if (tag.includes('defi') || tag.includes('finance')) return "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
-    if (tag.includes('web3') || tag.includes('nft')) return "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300";
-    if (tag.includes('quantum')) return "bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300";
-    return "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300";
+    if (contentType === 'podcast' || platform.includes('podcast') || platform.includes('spotify')) {
+      return Mic;
+    } else if (contentType === 'video' || platform === 'youtube') {
+      return Video;
+    }
+    return FileText;
+  };
+
+  const getContentTypeLabel = (summary: any) => {
+    const contentType = summary.contentType?.toLowerCase() || '';
+    const platform = summary.platform?.toLowerCase() || '';
+    
+    if (contentType === 'podcast' || platform.includes('podcast')) {
+      return 'Podcast';
+    } else if (contentType === 'video' || platform === 'youtube') {
+      return 'Video';
+    }
+    return 'Article';
   };
 
   const formatDuration = (summary: any) => {
     if (summary.duration) {
       const minutes = Math.round(summary.duration / 60);
-      return `${minutes}-min summary`;
+      return `${minutes} min`;
     }
-    return "Summary";
+    if (summary.originalDuration) {
+      const minutes = Math.round(summary.originalDuration / 60);
+      return `${minutes} min`;
+    }
+    return null;
+  };
+
+  const getThumbnail = (summary: any) => {
+    if (summary.thumbnailUrl) return summary.thumbnailUrl;
+    
+    const contentType = summary.contentType?.toLowerCase() || '';
+    if (contentType === 'podcast') {
+      return "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=200&fit=crop";
+    } else if (contentType === 'video') {
+      return "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=200&fit=crop";
+    }
+    return "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=200&fit=crop";
   };
 
   const suggestions = [
     {
       icon: Sparkles,
       title: "Suggested for You",
-      color: "text-indigo-400",
-      items: suggestedContent.map(rec => ({
-        id: rec.id,
-        image: rec.data.thumbnailUrl || "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop",
-        title: rec.data.title,
-        duration: formatDuration(rec.data),
-        source: rec.data.platform || rec.data.sourceUrl || "StreamAiX",
-        tag: rec.data.tags?.[0] || "Content",
-        tagColor: getTagColor(rec.data.tags),
-        match: `${Math.round(rec.score)}% match`,
-        reason: rec.reasons[0]
-      }))
+      gradientFrom: "from-indigo-500/20",
+      gradientTo: "to-purple-500/20",
+      borderColor: "border-indigo-500/30",
+      iconColor: "text-indigo-400",
+      badgeColor: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
+      items: suggestedContent
     },
     {
       icon: Brain,
       title: "Your AI Agent Recommends",
-      color: "text-purple-400",
-      items: agentPicks.map(rec => ({
-        id: rec.id,
-        image: rec.data.thumbnailUrl || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=200&fit=crop",
-        title: rec.data.title,
-        duration: formatDuration(rec.data),
-        source: rec.data.platform || rec.data.sourceUrl || "StreamAiX",
-        tag: rec.data.tags?.[0] || "AI Pick",
-        tagColor: getTagColor(rec.data.tags),
-        match: "Agent pick",
-        reason: rec.reasons[0]
-      }))
+      gradientFrom: "from-purple-500/20",
+      gradientTo: "to-pink-500/20",
+      borderColor: "border-purple-500/30",
+      iconColor: "text-purple-400",
+      badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+      items: agentPicks
     },
     {
-      icon: Users,
-      title: trendingTopics.length > 0 ? `Trending: ${trendingTopics[0]}` : "Trending Content",
-      color: "text-cyan-400",
-      items: trendingContent.map(rec => ({
-        id: rec.id,
-        image: rec.data.thumbnailUrl || "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=200&fit=crop",
-        title: rec.data.title,
-        duration: formatDuration(rec.data),
-        source: rec.data.platform || rec.data.sourceUrl || "StreamAiX",
-        tag: rec.data.tags?.[0] || "Trending",
-        tagColor: getTagColor(rec.data.tags),
-        match: "Trending",
-        reason: rec.reasons[0]
-      }))
+      icon: TrendingUp,
+      title: "Trending Content",
+      gradientFrom: "from-cyan-500/20",
+      gradientTo: "to-blue-500/20",
+      borderColor: "border-cyan-500/30",
+      iconColor: "text-cyan-400",
+      badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+      items: trendingContent
     }
   ];
 
   return (
-    <section id="suggestions" className="py-12 sm:py-16 md:py-20">
-      <div className="container mx-auto px-4 sm:px-6">
+    <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative overflow-hidden">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <motion.div 
           className="text-center mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -245,25 +269,35 @@ export function AISuggestions() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
             AI-Powered Suggestions
           </h2>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+          <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
             Intelligent content recommendations based on your interests and followed avatars
           </p>
           {trendingTopics.length > 0 && (
-            <div className="mt-4 flex flex-wrap justify-center gap-2 px-4">
-              <span className="text-sm text-muted-foreground">Trending:</span>
-              {trendingTopics.slice(0, 5).map(topic => (
-                <span key={topic} className="text-sm px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded-full">
+            <div className="mt-6 flex flex-wrap justify-center gap-2 px-4">
+              <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                <BarChart3 className="w-4 h-4 mr-1" />
+                Trending:
+              </span>
+              {trendingTopics.slice(0, 5).map((topic, idx) => (
+                <motion.span
+                  key={topic}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="text-xs px-3 py-1.5 backdrop-blur-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/30 text-indigo-300 rounded-full font-medium"
+                  data-testid={`tag-trending-${idx}`}
+                >
                   {topic}
-                </span>
+                </motion.span>
               ))}
             </div>
           )}
         </motion.div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
           {suggestions.map((section, sectionIndex) => (
             section.items.length > 0 && (
               <motion.div 
@@ -271,61 +305,90 @@ export function AISuggestions() {
                 className="space-y-6"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: sectionIndex * 0.2 }}
+                transition={{ duration: 0.6, delay: sectionIndex * 0.15 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground flex items-center">
-                  <section.icon className={`w-5 h-5 mr-2 ${section.color}`} />
-                  {section.title}
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={`p-2 rounded-lg backdrop-blur-xl bg-gradient-to-br ${section.gradientFrom} ${section.gradientTo} border ${section.borderColor}`}>
+                    <section.icon className={`w-5 h-5 ${section.iconColor}`} />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-orbitron font-bold text-white">
+                    {section.title}
+                  </h3>
+                </div>
                 
                 <div className="space-y-4">
-                  {section.items.map((item, itemIndex) => (
-                    <motion.div
-                      key={item.id}
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Link href={`/summary/${item.id}`}>
-                        <Card 
-                          className="bg-card border-glass-border hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 cursor-pointer"
-                          data-testid={`card-suggestion-${item.id}`}
-                        >
-                          <CardContent className="p-4">
-                            <img 
-                              src={item.image} 
-                              alt={item.title} 
-                              className="w-full h-24 object-cover rounded-lg mb-3"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop";
-                              }}
-                            />
-                            <h4 className="font-semibold text-foreground mb-2 line-clamp-2">{item.title}</h4>
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {item.duration} • {item.source}
-                            </p>
-                            {item.reason && (
-                              <p className="text-xs text-muted-foreground mb-2 italic line-clamp-1">
-                                {item.reason}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-between">
-                              <span className={`text-xs px-2 py-1 rounded ${item.tagColor}`}>
-                                {item.tag}
-                              </span>
-                              <span className={`text-xs ${
-                                section.title.includes("Agent") ? "text-purple-500" : 
-                                section.title.includes("Trending") ? "text-cyan-500" : 
-                                "text-indigo-500"
-                              } font-medium`}>
-                                {item.match}
-                              </span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </motion.div>
-                  ))}
+                  {section.items.map((rec, itemIndex) => {
+                    const ContentIcon = getContentTypeIcon(rec.data);
+                    const contentTypeLabel = getContentTypeLabel(rec.data);
+                    const duration = formatDuration(rec.data);
+                    const thumbnail = getThumbnail(rec.data);
+                    
+                    return (
+                      <motion.div
+                        key={rec.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: itemIndex * 0.1 }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                      >
+                        <Link href={`/summary/${rec.id}`}>
+                          <Card 
+                            className={`group backdrop-blur-xl bg-gradient-to-br ${section.gradientFrom} ${section.gradientTo} border ${section.borderColor} hover:border-opacity-60 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl`}
+                            data-testid={`card-suggestion-${rec.id}`}
+                          >
+                            <CardContent className="p-0">
+                              <div className="relative overflow-hidden">
+                                <img 
+                                  src={thumbnail} 
+                                  alt={rec.data.title} 
+                                  className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-110"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=200&fit=crop";
+                                  }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                
+                                {/* Content Type Badge */}
+                                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 backdrop-blur-xl bg-black/50 border border-white/20 rounded-full">
+                                  <ContentIcon className="w-3.5 h-3.5 text-white" />
+                                  <span className="text-xs font-medium text-white">{contentTypeLabel}</span>
+                                </div>
+                                
+                                {/* Duration */}
+                                {duration && (
+                                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 backdrop-blur-xl bg-black/50 border border-white/20 rounded-full">
+                                    <Clock className="w-3 h-3 text-white" />
+                                    <span className="text-xs font-medium text-white">{duration}</span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="p-4 space-y-3">
+                                <h4 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-indigo-200 transition-colors">
+                                  {rec.data.title}
+                                </h4>
+                                
+                                {rec.reasons[0] && (
+                                  <p className="text-xs text-gray-400 dark:text-gray-300 italic line-clamp-2 flex items-start gap-1.5">
+                                    <Sparkles className="w-3 h-3 mt-0.5 flex-shrink-0 text-indigo-400" />
+                                    <span>{rec.reasons[0]}</span>
+                                  </p>
+                                )}
+                                
+                                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                                  <span className={`text-xs px-2.5 py-1 rounded-full border ${section.badgeColor} font-medium`}>
+                                    {Math.round(rec.score)}% match
+                                  </span>
+                                  <ExternalLink className={`w-4 h-4 ${section.iconColor} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.div>
             )
