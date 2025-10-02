@@ -32,8 +32,8 @@ export function AISuggestions() {
   if (!isAuthenticated || !user) {
     return (
       <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/20 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent_50%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/15 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />
         
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
@@ -43,7 +43,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-orange-400 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
           </motion.div>
@@ -56,62 +56,62 @@ export function AISuggestions() {
             className="max-w-4xl mx-auto"
           >
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-orange-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/15 via-purple-500/15 to-blue-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500" />
               
-              <div className="relative bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-12 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-purple-500/5 to-orange-500/5" />
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-500/10 to-transparent rounded-full blur-3xl" />
+              <div className="relative bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-white/15 rounded-3xl p-8 sm:p-12 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/3 via-purple-500/4 to-blue-500/3" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/8 to-transparent rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-500/8 to-transparent rounded-full blur-3xl" />
                 
                 <div className="relative z-10">
                   <div className="flex justify-center mb-6">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-orange-500 rounded-2xl blur-lg opacity-50 animate-pulse" />
-                      <div className="relative bg-gradient-to-br from-purple-500/20 to-cyan-500/20 p-4 rounded-2xl border border-white/20">
-                        <Brain className="w-12 h-12 text-purple-300" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 rounded-2xl blur-lg opacity-30 animate-pulse" />
+                      <div className="relative bg-gradient-to-br from-purple-500/15 to-cyan-500/15 p-4 rounded-2xl border border-white/15">
+                        <Brain className="w-12 h-12 text-purple-200" />
                       </div>
                     </div>
                   </div>
 
-                  <h3 className="text-2xl sm:text-3xl font-bold text-center mb-4 bg-gradient-to-r from-white via-purple-100 to-cyan-100 bg-clip-text text-transparent">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-center mb-4 bg-gradient-to-r from-slate-100 via-purple-100 to-cyan-100 bg-clip-text text-transparent">
                     Unlock Personalized Recommendations
                   </h3>
                   
-                  <p className="text-base sm:text-lg text-gray-300 text-center mb-8 max-w-2xl mx-auto">
+                  <p className="text-base sm:text-lg text-gray-400 text-center mb-8 max-w-2xl mx-auto">
                     Sign in to get AI-powered content recommendations tailored to your interests, viewing history, and followed knowledge avatars
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                     <motion.div 
-                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-cyan-500/20 hover:bg-cyan-500/10 hover:border-cyan-500/40 transition-all duration-300"
+                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-cyan-500/15 hover:bg-cyan-500/8 hover:border-cyan-500/30 transition-all duration-300"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <Sparkles className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                      <Sparkles className="w-5 h-5 text-cyan-300 flex-shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-white text-sm mb-1">Smart Matching</div>
-                        <div className="text-xs text-gray-400">AI analyzes your preferences and behavior patterns</div>
+                        <div className="font-semibold text-slate-200 text-sm mb-1">Smart Matching</div>
+                        <div className="text-xs text-gray-500">AI analyzes your preferences and behavior patterns</div>
                       </div>
                     </motion.div>
                     
                     <motion.div 
-                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-purple-500/20 hover:bg-purple-500/10 hover:border-purple-500/40 transition-all duration-300"
+                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-purple-500/15 hover:bg-purple-500/8 hover:border-purple-500/30 transition-all duration-300"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <TrendingUp className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <TrendingUp className="w-5 h-5 text-purple-300 flex-shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-white text-sm mb-1">Trending Topics</div>
-                        <div className="text-xs text-gray-400">Stay updated with relevant content</div>
+                        <div className="font-semibold text-slate-200 text-sm mb-1">Trending Topics</div>
+                        <div className="text-xs text-gray-500">Stay updated with relevant content</div>
                       </div>
                     </motion.div>
                     
                     <motion.div 
-                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-orange-500/20 hover:bg-orange-500/10 hover:border-orange-500/40 transition-all duration-300"
+                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-blue-500/15 hover:bg-blue-500/8 hover:border-blue-500/30 transition-all duration-300"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <BarChart3 className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                      <BarChart3 className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-white text-sm mb-1">Deep Insights</div>
-                        <div className="text-xs text-gray-400">Discover content you'll love</div>
+                        <div className="font-semibold text-slate-200 text-sm mb-1">Deep Insights</div>
+                        <div className="text-xs text-gray-500">Discover content you'll love</div>
                       </div>
                     </motion.div>
                   </div>
@@ -119,12 +119,12 @@ export function AISuggestions() {
                   <div className="flex justify-center">
                     <Link href="/auth">
                       <motion.button 
-                        className="relative px-10 py-4 bg-gradient-to-r from-cyan-500 via-purple-500 to-orange-500 text-white rounded-xl font-bold text-lg shadow-xl shadow-purple-500/30 overflow-hidden group"
+                        className="relative px-10 py-4 bg-gradient-to-r from-cyan-600 via-purple-600 to-blue-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-purple-500/20 overflow-hidden group"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         data-testid="button-signin"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-purple-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <span className="relative flex items-center gap-2">
                           <Sparkles className="w-5 h-5" />
                           Sign In to Get Started
