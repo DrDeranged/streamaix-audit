@@ -710,7 +710,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
-                                    className="object-cover object-center scale-110"
+                                    className="object-cover object-top scale-110"
                                   />
                                   <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 text-white">
                                     {avatar.name.split(' ').map(n => n[0]).join('')}
