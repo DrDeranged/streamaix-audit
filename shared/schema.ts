@@ -227,6 +227,10 @@ export const knowledgeAvatars = pgTable("knowledge_avatars", {
   volatility: real("volatility"), // portfolio volatility percentage
   performanceHistory: jsonb("performance_history"), // [{year, roi, highlights}]
   marketOutlook: text("market_outlook"), // current market view/thesis
+  // Learning & Educational Content
+  podcastAppearances: jsonb("podcast_appearances"), // [{name, episode, url, date, duration, keyTopics: []}]
+  recommendedBooks: jsonb("recommended_books"), // [{title, author, reason, category, url}]
+  mentors: jsonb("mentors"), // [{name, relationship, influence, active: boolean}]
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
