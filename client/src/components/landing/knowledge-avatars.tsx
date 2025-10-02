@@ -695,7 +695,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
-                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden ${hoveredCard === avatar.id ? 'ring-2 ring-blue-400/50 shadow-2xl shadow-blue-500/40' : ''} flex flex-col h-full`}>
+                          <Card className={`group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 transition-all duration-300 overflow-hidden flex flex-col h-full ${hoveredCard === avatar.id ? 'border-blue-400/60 shadow-2xl shadow-blue-500/40' : 'border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30'}`}>
                           {/* Professional Terminal-Style Header */}
                           <div className="relative overflow-hidden flex-shrink-0">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
