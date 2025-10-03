@@ -438,6 +438,8 @@ export default function AvatarProfile() {
   const { data: insights = [] } = useQuery<AvatarInsight[]>({
     queryKey: ['/api/avatars', handle, 'insights'],
     enabled: !!handle,
+    retry: false,
+    throwOnError: false,
   });
 
   // Check if user is following this avatar
