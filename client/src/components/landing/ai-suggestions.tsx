@@ -1,9 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, Brain, TrendingUp, Loader2, Video, Mic, FileText, ExternalLink, Clock, BarChart3 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Sparkles, Brain, TrendingUp, Loader2, Video, Mic, FileText, Clock, Play } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import { useState } from "react";
 
 interface RecommendationScore {
   id: string;
@@ -21,6 +22,7 @@ interface MixedRecommendations {
 
 export function AISuggestions() {
   const { user, isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState<'suggested' | 'ai-picks' | 'trending'>('suggested');
 
   const { data, isLoading, error } = useQuery<{ success: boolean } & MixedRecommendations>({
     queryKey: ['/api/recommendations/mixed'],
@@ -31,19 +33,18 @@ export function AISuggestions() {
 
   if (!isAuthenticated || !user) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/15 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />
+      <section id="suggestions" className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent pointer-events-none" />
         
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
-            className="text-center mb-8 sm:mb-10"
+            className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
           </motion.div>
@@ -53,93 +54,37 @@ export function AISuggestions() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
+            className="max-w-3xl mx-auto"
           >
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/15 via-purple-500/15 to-blue-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-blue-500/20 rounded-3xl blur-2xl" />
               
-              <div className="relative bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-white/15 rounded-3xl p-8 sm:p-12 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/3 via-purple-500/4 to-blue-500/3" />
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/8 to-transparent rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-500/8 to-transparent rounded-full blur-3xl" />
+              <div className="relative glass-bg backdrop-blur-2xl border border-white/10 rounded-3xl p-12">
+                <div className="flex justify-center mb-8">
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10">
+                    <Brain className="w-14 h-14 text-purple-300" />
+                  </div>
+                </div>
+
+                <h3 className="text-3xl font-bold text-center mb-4 text-white">
+                  Unlock Personalized Recommendations
+                </h3>
                 
-                <div className="relative z-10">
-                  <div className="flex justify-center mb-6">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 rounded-2xl blur-lg opacity-30 animate-pulse" />
-                      <div className="relative bg-gradient-to-br from-purple-500/15 to-cyan-500/15 p-4 rounded-2xl border border-white/15">
-                        <Brain className="w-12 h-12 text-purple-200" />
-                      </div>
-                    </div>
-                  </div>
+                <p className="text-lg text-gray-400 text-center mb-10 max-w-xl mx-auto">
+                  Sign in to get AI-powered content recommendations tailored to your interests and followed avatars
+                </p>
 
-                  <h3 className="text-2xl sm:text-3xl font-bold text-center mb-4 bg-gradient-to-r from-slate-100 via-purple-100 to-cyan-100 bg-clip-text text-transparent">
-                    Unlock Personalized Recommendations
-                  </h3>
-                  
-                  <p className="text-base sm:text-lg text-gray-400 text-center mb-8 max-w-2xl mx-auto">
-                    Sign in to get AI-powered content recommendations tailored to your interests, viewing history, and followed knowledge avatars
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                    <motion.div 
-                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-cyan-500/15 hover:bg-cyan-500/8 hover:border-cyan-500/30 transition-all duration-300"
-                      whileHover={{ scale: 1.02 }}
+                <div className="flex justify-center">
+                  <Link href="/auth">
+                    <motion.button 
+                      className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-purple-500/30"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      data-testid="button-signin"
                     >
-                      <Sparkles className="w-5 h-5 text-cyan-300 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-semibold text-slate-200 text-sm mb-1">Smart Matching</div>
-                        <div className="text-xs text-gray-500">AI analyzes your preferences and behavior patterns</div>
-                      </div>
-                    </motion.div>
-                    
-                    <motion.div 
-                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-purple-500/15 hover:bg-purple-500/8 hover:border-purple-500/30 transition-all duration-300"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <TrendingUp className="w-5 h-5 text-purple-300 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-semibold text-slate-200 text-sm mb-1">Trending Topics</div>
-                        <div className="text-xs text-gray-500">Stay updated with relevant content</div>
-                      </div>
-                    </motion.div>
-                    
-                    <motion.div 
-                      className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-blue-500/15 hover:bg-blue-500/8 hover:border-blue-500/30 transition-all duration-300"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <BarChart3 className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-semibold text-slate-200 text-sm mb-1">Deep Insights</div>
-                        <div className="text-xs text-gray-500">Discover content you'll love</div>
-                      </div>
-                    </motion.div>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <Link href="/auth">
-                      <motion.button 
-                        className="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-white/20 rounded-lg text-white text-sm font-medium overflow-hidden transition-all duration-300 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/25"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        data-testid="button-signin"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        
-                        <Sparkles className="w-4 h-4 text-purple-300 relative z-10" />
-                        <span className="relative z-10">Sign In</span>
-                        
-                        <svg 
-                          className="w-4 h-4 text-purple-300 relative z-10 transition-transform duration-300 group-hover:translate-x-1" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </motion.button>
-                    </Link>
-                  </div>
+                      Sign In to Continue
+                    </motion.button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -151,27 +96,23 @@ export function AISuggestions() {
 
   if (isLoading) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+      <section id="suggestions" className="py-24 relative">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
-              Intelligent content recommendations based on your interests and social graph
-            </p>
           </motion.div>
           
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
-            <span className="ml-3 text-gray-400">Loading personalized recommendations...</span>
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-purple-400" />
+            <span className="ml-4 text-gray-400 text-lg">Loading your recommendations...</span>
           </div>
         </div>
       </section>
@@ -180,62 +121,58 @@ export function AISuggestions() {
 
   if (error || !data?.success) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+      <section id="suggestions" className="py-24 relative">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
               Follow some knowledge avatars to get personalized recommendations
             </p>
-            <div className="mt-8">
-              <Link href="/discover">
-                <button 
-                  className="px-8 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-600 hover:via-purple-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/50"
-                  data-testid="button-discover"
-                >
-                  Discover Avatars
-                </button>
-              </Link>
-            </div>
+            <Link href="/discover">
+              <button 
+                className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-purple-500/30"
+                data-testid="button-discover"
+              >
+                Discover Avatars
+              </button>
+            </Link>
           </motion.div>
         </div>
       </section>
     );
   }
 
-  const { content, trendingTopics } = data;
+  const { content } = data;
 
   if (!content || content.length === 0) {
     return (
-      <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+      <section id="suggestions" className="py-24 relative">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Suggestions
             </h2>
-            <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4 mb-6">
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
               No recommendations yet. Process some content or follow knowledge avatars to get started!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/discover">
                 <button 
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-600 hover:via-purple-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/50"
+                  className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-purple-500/30"
                   data-testid="button-discover-avatars"
                 >
                   Discover Avatars
@@ -243,7 +180,7 @@ export function AISuggestions() {
               </Link>
               <button 
                 onClick={() => document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto px-8 py-3 backdrop-blur-xl bg-white/5 border-2 border-indigo-400/50 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 rounded-xl font-semibold transition-all duration-300"
+                className="px-8 py-3.5 glass-bg backdrop-blur-xl border border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-400/60 rounded-xl font-semibold transition-all duration-300"
                 data-testid="button-process-content"
               >
                 Process Content
@@ -255,9 +192,9 @@ export function AISuggestions() {
     );
   }
 
-  const suggestedContent = content.slice(0, 4);
-  const agentPicks = content.slice(4, 8);
-  const trendingContent = content.slice(8, 12);
+  const suggestedContent = content.slice(0, 6);
+  const agentPicks = content.slice(6, 12);
+  const trendingContent = content.slice(12, 18);
 
   const getContentTypeIcon = (summary: any) => {
     const contentType = summary.contentType?.toLowerCase() || '';
@@ -300,186 +237,187 @@ export function AISuggestions() {
     
     const contentType = summary.contentType?.toLowerCase() || '';
     if (contentType === 'podcast') {
-      return "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=200&fit=crop";
+      return "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&h=400&fit=crop";
     } else if (contentType === 'video') {
-      return "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=200&fit=crop";
+      return "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&h=400&fit=crop";
     }
-    return "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=200&fit=crop";
+    return "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop";
   };
 
-  const suggestions = [
-    {
-      icon: Sparkles,
-      title: "Suggested for You",
-      gradientFrom: "from-indigo-500/20",
-      gradientTo: "to-purple-500/20",
-      borderColor: "border-indigo-500/30",
-      iconColor: "text-indigo-400",
-      badgeColor: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
-      items: suggestedContent
-    },
-    {
-      icon: Brain,
-      title: "Your AI Agent Recommends",
-      gradientFrom: "from-purple-500/20",
-      gradientTo: "to-pink-500/20",
-      borderColor: "border-purple-500/30",
-      iconColor: "text-purple-400",
-      badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/40",
-      items: agentPicks
-    },
-    {
-      icon: TrendingUp,
-      title: "Trending Content",
-      gradientFrom: "from-cyan-500/20",
-      gradientTo: "to-blue-500/20",
-      borderColor: "border-cyan-500/30",
-      iconColor: "text-cyan-400",
-      badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
-      items: trendingContent
-    }
+  const tabs = [
+    { id: 'suggested' as const, label: 'Suggested for You', icon: Sparkles, items: suggestedContent },
+    { id: 'ai-picks' as const, label: 'AI Agent Picks', icon: Brain, items: agentPicks },
+    { id: 'trending' as const, label: 'Trending Now', icon: TrendingUp, items: trendingContent }
   ];
 
+  const activeTabData = tabs.find(tab => tab.id === activeTab);
+  const currentItems = activeTabData?.items || [];
+
   return (
-    <section id="suggestions" className="py-12 sm:py-16 md:py-20 relative overflow-hidden">
-      {/* Ambient Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+    <section id="suggestions" className="py-24 relative overflow-hidden">
+      {/* Subtle background effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/5 to-transparent pointer-events-none" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        {/* Header */}
         <motion.div 
-          className="text-center mb-12 sm:mb-16"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
             AI-Powered Suggestions
           </h2>
-          <p className="text-lg sm:text-xl text-gray-400 dark:text-gray-300 max-w-2xl mx-auto px-4">
-            Intelligent content recommendations based on your interests and followed avatars
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Intelligent content recommendations based on your interests
           </p>
-          {trendingTopics.length > 0 && (
-            <div className="mt-6 flex flex-wrap justify-center gap-2 px-4">
-              <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                <BarChart3 className="w-4 h-4 mr-1" />
-                Trending:
-              </span>
-              {trendingTopics.slice(0, 5).map((topic, idx) => (
-                <motion.span
-                  key={topic}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="text-xs px-3 py-1.5 backdrop-blur-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/30 text-indigo-300 rounded-full font-medium"
-                  data-testid={`tag-trending-${idx}`}
-                >
-                  {topic}
-                </motion.span>
-              ))}
-            </div>
-          )}
         </motion.div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
-          {suggestions.map((section, sectionIndex) => (
-            section.items.length > 0 && (
-              <motion.div 
-                key={section.title}
-                className="space-y-6"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: sectionIndex * 0.15 }}
-                viewport={{ once: true }}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`p-2 rounded-lg backdrop-blur-xl bg-gradient-to-br ${section.gradientFrom} ${section.gradientTo} border ${section.borderColor}`}>
-                    <section.icon className={`w-5 h-5 ${section.iconColor}`} />
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-orbitron font-bold text-white">
-                    {section.title}
-                  </h3>
-                </div>
-                
-                <div className="space-y-4">
-                  {section.items.map((rec, itemIndex) => {
-                    const ContentIcon = getContentTypeIcon(rec.data);
-                    const contentTypeLabel = getContentTypeLabel(rec.data);
-                    const duration = formatDuration(rec.data);
-                    const thumbnail = getThumbnail(rec.data);
-                    
-                    return (
-                      <motion.div
-                        key={rec.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: itemIndex * 0.1 }}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                      >
-                        <Link href={`/summary/${rec.id}`}>
-                          <Card 
-                            className={`group backdrop-blur-xl bg-gradient-to-br ${section.gradientFrom} ${section.gradientTo} border ${section.borderColor} hover:border-opacity-60 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl`}
-                            data-testid={`card-suggestion-${rec.id}`}
-                          >
-                            <CardContent className="p-0">
-                              <div className="relative overflow-hidden">
-                                <img 
-                                  src={thumbnail} 
-                                  alt={rec.data.title} 
-                                  className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-110"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=200&fit=crop";
-                                  }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                                
-                                {/* Content Type Badge */}
-                                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 backdrop-blur-xl bg-black/50 border border-white/20 rounded-full">
-                                  <ContentIcon className="w-3.5 h-3.5 text-white" />
-                                  <span className="text-xs font-medium text-white">{contentTypeLabel}</span>
-                                </div>
-                                
-                                {/* Duration */}
-                                {duration && (
-                                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 backdrop-blur-xl bg-black/50 border border-white/20 rounded-full">
-                                    <Clock className="w-3 h-3 text-white" />
-                                    <span className="text-xs font-medium text-white">{duration}</span>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <div className="p-4 space-y-3">
-                                <h4 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-indigo-200 transition-colors">
-                                  {rec.data.title}
-                                </h4>
-                                
-                                {rec.reasons[0] && (
-                                  <p className="text-xs text-gray-400 dark:text-gray-300 italic line-clamp-2 flex items-start gap-1.5">
-                                    <Sparkles className="w-3 h-3 mt-0.5 flex-shrink-0 text-indigo-400" />
-                                    <span>{rec.reasons[0]}</span>
-                                  </p>
-                                )}
-                                
-                                <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                                  <span className={`text-xs px-2.5 py-1 rounded-full border ${section.badgeColor} font-medium`}>
-                                    {Math.round(rec.score)}% match
-                                  </span>
-                                  <ExternalLink className={`w-4 h-4 ${section.iconColor} opacity-0 group-hover:opacity-100 transition-opacity`} />
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )
-          ))}
-        </div>
+        {/* Modern Tab Navigation */}
+        <motion.div 
+          className="flex justify-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          viewport={{ once: true }}
+        >
+          <div className="inline-flex items-center gap-2 glass-bg backdrop-blur-xl border border-white/10 rounded-2xl p-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    isActive 
+                      ? 'text-white' 
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                  data-testid={`tab-${tab.id}`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-xl"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'text-cyan-300' : ''}`} />
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
+        
+        {/* Content Grid */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
+          >
+            {currentItems.map((rec, index) => {
+              const ContentIcon = getContentTypeIcon(rec.data);
+              const contentTypeLabel = getContentTypeLabel(rec.data);
+              const duration = formatDuration(rec.data);
+              const thumbnail = getThumbnail(rec.data);
+              
+              return (
+                <motion.div
+                  key={rec.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                >
+                  <Link href={`/summary/${rec.id}`}>
+                    <Card 
+                      className="group glass-bg backdrop-blur-xl border border-white/10 hover:border-cyan-400/40 transition-all duration-500 cursor-pointer overflow-hidden h-full"
+                      data-testid={`card-suggestion-${rec.id}`}
+                    >
+                      <CardContent className="p-0">
+                        {/* Large Thumbnail */}
+                        <div className="relative overflow-hidden aspect-video">
+                          <img 
+                            src={thumbnail} 
+                            alt={rec.data.title} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop";
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                          
+                          {/* Hover Play Button */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center">
+                              <Play className="w-7 h-7 text-white ml-1" />
+                            </div>
+                          </div>
+                          
+                          {/* Content Type Badge */}
+                          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 glass-bg backdrop-blur-xl border border-white/20 rounded-full">
+                            <ContentIcon className="w-3.5 h-3.5 text-cyan-300" />
+                            <span className="text-xs font-medium text-white">{contentTypeLabel}</span>
+                          </div>
+                          
+                          {/* Duration */}
+                          {duration && (
+                            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 glass-bg backdrop-blur-xl border border-white/20 rounded-full">
+                              <Clock className="w-3.5 h-3.5 text-white" />
+                              <span className="text-xs font-medium text-white">{duration}</span>
+                            </div>
+                          )}
+                          
+                          {/* Match Score */}
+                          <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-gradient-to-r from-cyan-500/90 to-purple-500/90 backdrop-blur-xl border border-white/20 rounded-full">
+                            <span className="text-xs font-bold text-white">{Math.round(rec.score)}% Match</span>
+                          </div>
+                        </div>
+                        
+                        {/* Content Info */}
+                        <div className="p-6 space-y-3">
+                          <h4 className="font-bold text-white text-lg leading-tight line-clamp-2 group-hover:text-cyan-300 transition-colors">
+                            {rec.data.title}
+                          </h4>
+                          
+                          {rec.reasons[0] && (
+                            <p className="text-sm text-gray-400 line-clamp-2 flex items-start gap-2">
+                              <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-purple-400" />
+                              <span>{rec.reasons[0]}</span>
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Empty State */}
+        {currentItems.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <div className="inline-flex p-6 rounded-2xl glass-bg backdrop-blur-xl border border-white/10 mb-6">
+              <Sparkles className="w-12 h-12 text-gray-500" />
+            </div>
+            <p className="text-xl text-gray-400">No recommendations available yet</p>
+            <p className="text-sm text-gray-500 mt-2">Process more content or follow avatars to get personalized suggestions</p>
+          </motion.div>
+        )}
       </div>
     </section>
   );
