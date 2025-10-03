@@ -308,8 +308,8 @@ export class RecommendationService {
     alignedAssets: Array<{symbol: string; name: string; reason: string; type: 'crypto' | 'stock'}>;
   }> {
     const [avatars, content, userProfile] = await Promise.all([
-      this.getPersonalizedAvatarRecommendations(userId, 5),
-      this.getPersonalizedContentRecommendations(userId, 12),
+      this.getPersonalizedAvatarRecommendations(userId, 15),
+      this.getPersonalizedContentRecommendations(userId, 24),
       this.getUserProfile(userId)
     ]);
 
@@ -360,12 +360,12 @@ export class RecommendationService {
       }
     }
 
-    // Deduplicate books by title and return top 6
+    // Deduplicate books by title and return top 12
     const uniqueBooks = Array.from(
       new Map(allBooks.map(book => [book.title, book])).values()
     );
 
-    return uniqueBooks.slice(0, 6);
+    return uniqueBooks.slice(0, 12);
   }
 
   private async getRecommendedPodcasts(userId: string): Promise<Array<{title: string; guest: string; avatarName: string; url?: string}>> {
@@ -393,8 +393,8 @@ export class RecommendationService {
       }
     }
 
-    // Return top 6 most recent/relevant podcasts
-    return allPodcasts.slice(0, 6);
+    // Return top 12 most recent/relevant podcasts
+    return allPodcasts.slice(0, 12);
   }
 
   private async getAlignedAssets(userId: string): Promise<Array<{symbol: string; name: string; reason: string; type: 'crypto' | 'stock'}>> {
@@ -434,7 +434,7 @@ export class RecommendationService {
     // Convert to array and sort by frequency
     const sortedAssets = Array.from(assetFrequency.entries())
       .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, 6)
+      .slice(0, 12)
       .map(([symbol, data]) => ({
         symbol,
         name: symbol,
