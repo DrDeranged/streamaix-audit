@@ -435,11 +435,12 @@ export default function AvatarProfile() {
   };
 
   // Fetch avatar insights  
-  const { data: insights = [] } = useQuery<AvatarInsight[]>({
+  const { data: insights = [], isError: insightsError } = useQuery<AvatarInsight[]>({
     queryKey: ['/api/avatars', handle, 'insights'],
     enabled: !!handle,
     retry: false,
     throwOnError: false,
+    suspense: false,
   });
 
   // Check if user is following this avatar
