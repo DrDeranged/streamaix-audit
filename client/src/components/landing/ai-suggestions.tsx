@@ -6,15 +6,13 @@ import {
   TrendingUp, 
   Loader2, 
   Video, 
-  Mic, 
-  FileText, 
   BookOpen,
   Users,
   Target,
-  Play,
   DollarSign,
-  ArrowRight,
-  ChevronRight
+  ChevronRight,
+  TrendingDown,
+  ArrowUpRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -36,13 +34,6 @@ interface Book {
   category?: string;
 }
 
-interface Podcast {
-  title: string;
-  guest: string;
-  avatarName: string;
-  url?: string;
-}
-
 interface AlignedAsset {
   symbol: string;
   name: string;
@@ -55,7 +46,7 @@ interface MixedRecommendations {
   content: RecommendationScore[];
   trendingTopics: string[];
   books: Book[];
-  podcasts: Podcast[];
+  podcasts: any[];
   alignedAssets: AlignedAsset[];
 }
 
@@ -188,31 +179,7 @@ export function AISuggestions() {
     );
   }
 
-  const { content, avatars, books, podcasts, alignedAssets, trendingTopics } = data;
-
-  const getContentTypeIcon = (summary: any) => {
-    const contentType = summary.contentType?.toLowerCase() || '';
-    const platform = summary.platform?.toLowerCase() || '';
-    
-    if (contentType === 'podcast' || platform.includes('podcast') || platform.includes('spotify')) {
-      return Mic;
-    } else if (contentType === 'video' || platform === 'youtube') {
-      return Video;
-    }
-    return FileText;
-  };
-
-  const getContentTypeLabel = (summary: any) => {
-    const contentType = summary.contentType?.toLowerCase() || '';
-    const platform = summary.platform?.toLowerCase() || '';
-    
-    if (contentType === 'podcast' || platform.includes('podcast') || platform.includes('spotify')) {
-      return 'Podcast';
-    } else if (contentType === 'video' || platform === 'youtube') {
-      return 'Video';
-    }
-    return 'Article';
-  };
+  const { content, avatars, books, alignedAssets, trendingTopics } = data;
 
   // Calculate real match score from recommendations
   const avgMatchScore = content.length > 0 
@@ -220,6 +187,18 @@ export function AISuggestions() {
     : avatars.length > 0 
       ? Math.round(avatars.reduce((acc, rec) => acc + rec.score, 0) / avatars.length)
       : 0;
+
+  // Get top 5 videos only
+  const topVideos = content.slice(0, 5);
+  
+  // Get top 3 leaders
+  const topLeaders = avatars.slice(0, 3);
+  
+  // Get top 3 books
+  const topBooks = books?.slice(0, 3) || [];
+  
+  // Get 3-5 investment opportunities
+  const topInvestments = alignedAssets?.slice(0, 5) || [];
 
   return (
     <section id="suggestions" className="py-20 relative overflow-hidden">
@@ -287,97 +266,97 @@ export function AISuggestions() {
               </div>
               <p className="text-gray-300 leading-relaxed bg-purple-500/5 border border-purple-500/20 rounded-xl p-4">
                 Based on your interests in <span className="text-purple-300 font-semibold">{trendingTopics?.slice(0, 3).join(', ') || 'technology and innovation'}</span>, 
-                our AI has identified <span className="text-cyan-300 font-semibold">{content.length} high-value content pieces</span>
-                {podcasts && podcasts.length > 0 && <>, <span className="text-blue-300 font-semibold">{podcasts.length} podcast episodes</span></>}
-                {books && books.length > 0 && <>, <span className="text-green-300 font-semibold">{books.length} recommended books</span></>}
-                {alignedAssets && alignedAssets.length > 0 && <>, and <span className="text-purple-300 font-semibold">{alignedAssets.length} aligned investment opportunities</span></>}
-                . Additionally, we've identified <span className="text-cyan-300 font-semibold">{avatars.length} thought leaders</span> whose perspectives align with your learning goals.
+                we've curated <span className="text-cyan-300 font-semibold">5 must-watch videos</span>, 
+                <span className="text-purple-300 font-semibold"> 3 key thought leaders</span> to follow, 
+                <span className="text-blue-300 font-semibold"> 3 essential books</span>, and 
+                <span className="text-green-300 font-semibold"> {topInvestments.length} market opportunities</span> aligned with current market conditions.
               </p>
             </div>
 
-            {/* Priority Content - Compact List */}
-            {content.length > 0 && (
+            {/* Top 5 Videos */}
+            {topVideos.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-xl font-bold text-white">Priority Content</h3>
+                    <Video className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-xl font-bold text-white">Top 5 Must-Watch Videos</h3>
                   </div>
-                  <span className="text-sm text-gray-500">{content.length} recommendations</span>
+                  <span className="text-sm text-gray-500">Highest priority content</span>
                 </div>
                 
-                <div className="space-y-2">
-                  {content.slice(0, 8).map((rec) => {
-                    const ContentIcon = getContentTypeIcon(rec.data);
-                    const contentType = getContentTypeLabel(rec.data);
-                    
-                    return (
-                      <Link key={rec.id} href={`/summary/${rec.id}`}>
-                        <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-xl border border-cyan-500/20 hover:border-cyan-400/50 rounded-xl p-4 transition-all duration-300 hover:scale-[1.02]">
-                          <div className="flex items-start gap-4">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 flex-shrink-0">
-                              <ContentIcon className="w-5 h-5 text-cyan-300" />
+                <div className="space-y-3">
+                  {topVideos.map((rec, index) => (
+                    <Link key={rec.id} href={`/summary/${rec.id}`}>
+                      <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-xl border border-cyan-500/20 hover:border-cyan-400/50 rounded-xl p-5 transition-all duration-300 hover:scale-[1.01]">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-400/50 flex items-center justify-center">
+                              <span className="text-xl font-bold text-cyan-300">#{index + 1}</span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-3 mb-2">
-                                <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors leading-snug line-clamp-2 flex-1">
-                                  {rec.data.title}
-                                </h4>
-                                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/50 text-xs font-bold font-mono px-2 py-1 flex-shrink-0">
-                                  {Math.round(rec.score)}%
-                                </Badge>
-                              </div>
-                              {rec.reasons[0] && (
-                                <p className="text-xs text-gray-400 line-clamp-1 mb-2">{rec.reasons[0]}</p>
-                              )}
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-slate-700/50 text-gray-300 border-slate-600/50 text-xs px-2 py-0.5">
-                                  {contentType}
-                                </Badge>
-                                {rec.data.platform && (
-                                  <span className="text-xs text-gray-500">via {rec.data.platform}</span>
-                                )}
-                              </div>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors leading-snug line-clamp-2">
+                                {rec.data.title}
+                              </h4>
+                              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/50 text-sm font-bold font-mono px-3 py-1 flex-shrink-0">
+                                {Math.round(rec.score)}%
+                              </Badge>
+                            </div>
+                            {rec.reasons[0] && (
+                              <p className="text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">{rec.reasons[0]}</p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-slate-700/50 text-gray-300 border-slate-600/50 text-xs px-2.5 py-1">
+                                <Video className="w-3 h-3 mr-1 inline" />
+                                Video
+                              </Badge>
+                              {rec.data.platform && (
+                                <span className="text-xs text-gray-500">via {rec.data.platform}</span>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-2" />
                         </div>
-                      </Link>
-                    );
-                  })}
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Recommended Thought Leaders */}
-            {avatars.length > 0 && (
+            {/* 3 Key Leaders */}
+            {topLeaders.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-xl font-bold text-white">Recommended Thought Leaders</h3>
+                    <h3 className="text-xl font-bold text-white">3 Key Thought Leaders</h3>
                   </div>
-                  <span className="text-sm text-gray-500">{avatars.length} aligned experts</span>
+                  <span className="text-sm text-gray-500">Most aligned experts</span>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {avatars.slice(0, 6).map((rec) => (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {topLeaders.map((rec, index) => (
                     <Link key={rec.id} href="/discover">
-                      <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-purple-900/20 to-slate-800/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 rounded-xl p-4 transition-all duration-300 hover:scale-[1.02]">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/40 to-blue-500/40 border-2 border-purple-400/50 flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-bold text-purple-200">
-                              {rec.data.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                            </span>
+                      <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-purple-900/20 to-slate-800/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 rounded-xl p-5 transition-all duration-300 hover:scale-[1.02]">
+                        <div className="text-center">
+                          <div className="relative inline-block mb-4">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/40 to-blue-500/40 border-3 border-purple-400/50 flex items-center justify-center mx-auto">
+                              <span className="text-2xl font-bold text-purple-200">
+                                {rec.data.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                              </span>
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 border-2 border-slate-900 flex items-center justify-center">
+                              <span className="text-xs font-bold text-white">#{index + 1}</span>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate">
-                              {rec.data.name}
-                            </h4>
-                            <p className="text-xs text-gray-500 truncate">@{rec.data.handle}</p>
-                          </div>
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/50 text-xs font-bold font-mono px-2.5 py-1 flex-shrink-0">
-                            {Math.round(rec.score)}%
+                          <h4 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
+                            {rec.data.name}
+                          </h4>
+                          <p className="text-xs text-gray-500 mb-3">@{rec.data.handle}</p>
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/50 text-sm font-bold font-mono px-3 py-1.5">
+                            {Math.round(rec.score)}% Match
                           </Badge>
                         </div>
                       </div>
@@ -387,98 +366,87 @@ export function AISuggestions() {
               </div>
             )}
 
-            {/* Two Column: Podcasts & Books */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Podcast Recommendations */}
-              {podcasts && podcasts.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Mic className="w-5 h-5 text-purple-400" />
-                      <h3 className="text-xl font-bold text-white">Audio Learning</h3>
-                    </div>
-                    <span className="text-sm text-gray-500">{podcasts.length} episodes</span>
+            {/* 3 Essential Books */}
+            {topBooks.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-xl font-bold text-white">3 Essential Books</h3>
                   </div>
-                  <div className="space-y-2">
-                    {podcasts.slice(0, 5).map((podcast, i) => (
-                      <div 
-                        key={i}
-                        className="group bg-gradient-to-br from-slate-800/60 via-purple-900/10 to-slate-800/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 rounded-lg p-3 transition-all duration-300 cursor-pointer"
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/40 flex-shrink-0 mt-0.5">
-                            <Play className="w-3.5 h-3.5 text-purple-300" />
+                  <span className="text-sm text-gray-500">Recommended reading</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {topBooks.map((book, i) => (
+                    <div 
+                      key={i}
+                      className="bg-gradient-to-br from-slate-800/60 via-blue-900/10 to-slate-800/60 backdrop-blur-xl border border-blue-500/20 hover:border-blue-400/50 rounded-xl p-5 transition-all duration-300"
+                    >
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/40">
+                          <BookOpen className="w-5 h-5 text-blue-300" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-white mb-2 line-clamp-2 leading-snug">
+                            {book.title}
+                          </h4>
+                          <p className="text-xs text-gray-400 mb-1">
+                            <span className="text-gray-500">by</span> <span className="text-gray-300">{book.author}</span>
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Recommended by {book.avatarName}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Market Opportunities - 3-5 suggestions */}
+            {topInvestments.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-400" />
+                    <h3 className="text-xl font-bold text-white">Market Opportunities</h3>
+                  </div>
+                  <span className="text-sm text-gray-500">{topInvestments.length} aligned positions</span>
+                </div>
+                <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+                  Based on current market conditions and your focus areas, these assets align with your interests:
+                </p>
+                <div className="space-y-3">
+                  {topInvestments.map((asset, i) => (
+                    <div 
+                      key={i}
+                      className="group bg-gradient-to-br from-slate-800/60 via-green-900/10 to-slate-800/60 backdrop-blur-xl border border-green-500/20 hover:border-green-400/50 rounded-xl p-5 transition-all duration-300"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500/30 to-cyan-500/30 border border-green-400/50 flex items-center justify-center">
+                            <DollarSign className="w-6 h-6 text-green-300" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-300 transition-colors leading-snug mb-1">
-                              {podcast.title}
-                            </h4>
-                            <p className="text-xs text-gray-400 truncate">
-                              <span className="text-gray-500">with</span> {podcast.guest}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div>
+                              <h4 className="text-lg font-bold text-white font-mono mb-1">{asset.symbol}</h4>
+                              <p className="text-sm text-gray-400">{asset.name}</p>
+                            </div>
+                            <Badge className="bg-green-500/20 text-green-300 border-green-400/50 text-xs font-bold px-3 py-1.5 flex-shrink-0">
+                              {asset.type.toUpperCase()}
+                            </Badge>
+                          </div>
+                          <div className="flex items-start gap-2 mt-3 p-3 bg-slate-900/60 border border-green-500/20 rounded-lg">
+                            <ArrowUpRight className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-gray-300 leading-relaxed">
+                              <span className="text-green-400 font-semibold">Why now:</span> {asset.reason}
                             </p>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Reading List */}
-              {books && books.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-blue-400" />
-                      <h3 className="text-xl font-bold text-white">Reading List</h3>
-                    </div>
-                    <span className="text-sm text-gray-500">{books.length} books</span>
-                  </div>
-                  <div className="space-y-2">
-                    {books.slice(0, 5).map((book, i) => (
-                      <div 
-                        key={i}
-                        className="bg-gradient-to-br from-slate-800/60 via-blue-900/10 to-slate-800/60 backdrop-blur-xl border border-blue-500/20 hover:border-blue-400/50 rounded-lg p-3 transition-all duration-300"
-                      >
-                        <h4 className="text-sm font-bold text-white mb-1.5 line-clamp-2 leading-snug">
-                          {book.title}
-                        </h4>
-                        <p className="text-xs text-gray-400">
-                          <span className="text-gray-500">by</span> <span className="text-gray-300">{book.author}</span>
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Investment Alignment */}
-            {alignedAssets && alignedAssets.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-xl font-bold text-white">Investment Alignment</h3>
-                  </div>
-                  <span className="text-sm text-gray-500">{alignedAssets.length} opportunities</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {alignedAssets.slice(0, 6).map((asset, i) => (
-                    <div 
-                      key={i}
-                      className="bg-gradient-to-br from-slate-800/60 via-cyan-900/10 to-slate-800/60 backdrop-blur-xl border border-cyan-500/20 rounded-xl p-3 hover:border-cyan-400/50 transition-all duration-300"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <DollarSign className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                        <h4 className="text-sm font-bold text-white font-mono truncate">{asset.symbol}</h4>
-                      </div>
-                      <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/50 text-xs mb-2 font-mono">
-                        {asset.type.toUpperCase()}
-                      </Badge>
-                      <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                        {asset.reason}
-                      </p>
                     </div>
                   ))}
                 </div>
@@ -488,7 +456,7 @@ export function AISuggestions() {
             {/* Report Footer */}
             <div className="pt-6 border-t border-cyan-500/20 flex items-center justify-between">
               <p className="text-xs text-gray-500">
-                This report is updated in real-time based on your activity and preferences
+                This report is updated in real-time based on your activity and market conditions
               </p>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
