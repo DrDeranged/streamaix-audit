@@ -11,14 +11,10 @@ import {
   BookOpen,
   Users,
   Target,
-  BarChart3,
   Play,
-  Star,
-  Eye,
-  ThumbsUp,
-  Bookmark,
   DollarSign,
-  ArrowRight
+  ArrowRight,
+  ChevronRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -206,10 +202,24 @@ export function AISuggestions() {
     return FileText;
   };
 
-  // Calculate engagement metrics
-  const totalViews = Math.floor(Math.random() * 50000) + 10000;
-  const avgAccuracy = 82 + Math.floor(Math.random() * 13);
-  const contentSaved = Math.floor(Math.random() * 100) + 20;
+  const getContentTypeLabel = (summary: any) => {
+    const contentType = summary.contentType?.toLowerCase() || '';
+    const platform = summary.platform?.toLowerCase() || '';
+    
+    if (contentType === 'podcast' || platform.includes('podcast') || platform.includes('spotify')) {
+      return 'Podcast';
+    } else if (contentType === 'video' || platform === 'youtube') {
+      return 'Video';
+    }
+    return 'Article';
+  };
+
+  // Calculate real match score from recommendations
+  const avgMatchScore = content.length > 0 
+    ? Math.round(content.reduce((acc, rec) => acc + rec.score, 0) / content.length)
+    : avatars.length > 0 
+      ? Math.round(avatars.reduce((acc, rec) => acc + rec.score, 0) / avatars.length)
+      : 0;
 
   return (
     <section id="suggestions" className="py-20 relative overflow-hidden">
@@ -243,15 +253,17 @@ export function AISuggestions() {
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
                   <span className="text-sm text-cyan-300 font-mono">{new Date().toLocaleDateString()}</span>
                 </div>
-                <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/50 px-3 py-1">
-                  {avgAccuracy}% Match Score
-                </Badge>
+                {avgMatchScore > 0 && (
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/50 px-3 py-1">
+                    {avgMatchScore}% Match Score
+                  </Badge>
+                )}
               </div>
             </div>
 
             {/* Interest Tags */}
             {trendingTopics && trendingTopics.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2">
                 <span className="text-xs text-gray-500 uppercase tracking-wider font-mono">Focus Areas:</span>
                 {trendingTopics.slice(0, 6).map((topic, i) => (
                   <Badge 
@@ -263,37 +275,6 @@ export function AISuggestions() {
                 ))}
               </div>
             )}
-
-            {/* Quick Stats Bar */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-cyan-500/20">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
-                  <Eye className="w-4 h-4 text-blue-300" />
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white">{(totalViews / 1000).toFixed(1)}K</div>
-                  <div className="text-xs text-gray-400">Content Views</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/30">
-                  <Bookmark className="w-4 h-4 text-cyan-300" />
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white">{contentSaved}</div>
-                  <div className="text-xs text-gray-400">Items Saved</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/20 border border-green-400/30">
-                  <Users className="w-4 h-4 text-green-300" />
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white">{avatars.length}</div>
-                  <div className="text-xs text-gray-400">Following</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Report Body */}
@@ -306,46 +287,60 @@ export function AISuggestions() {
               </div>
               <p className="text-gray-300 leading-relaxed bg-purple-500/5 border border-purple-500/20 rounded-xl p-4">
                 Based on your interests in <span className="text-purple-300 font-semibold">{trendingTopics?.slice(0, 3).join(', ') || 'technology and innovation'}</span>, 
-                our AI has identified <span className="text-cyan-300 font-semibold">{content.length} high-value content pieces</span>, 
-                <span className="text-blue-300 font-semibold"> {podcasts?.length || 0} podcast episodes</span>, 
-                <span className="text-green-300 font-semibold"> {books?.length || 0} recommended books</span>, and 
-                <span className="text-purple-300 font-semibold"> {alignedAssets?.length || 0} aligned investment opportunities</span>. 
-                Additionally, we've identified <span className="text-cyan-300 font-semibold">{avatars.length} thought leaders</span> whose perspectives align with your learning goals.
+                our AI has identified <span className="text-cyan-300 font-semibold">{content.length} high-value content pieces</span>
+                {podcasts && podcasts.length > 0 && <>, <span className="text-blue-300 font-semibold">{podcasts.length} podcast episodes</span></>}
+                {books && books.length > 0 && <>, <span className="text-green-300 font-semibold">{books.length} recommended books</span></>}
+                {alignedAssets && alignedAssets.length > 0 && <>, and <span className="text-purple-300 font-semibold">{alignedAssets.length} aligned investment opportunities</span></>}
+                . Additionally, we've identified <span className="text-cyan-300 font-semibold">{avatars.length} thought leaders</span> whose perspectives align with your learning goals.
               </p>
             </div>
 
-            {/* Priority Content */}
+            {/* Priority Content - Compact List */}
             {content.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-cyan-400" />
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
                     <h3 className="text-xl font-bold text-white">Priority Content</h3>
                   </div>
-                  <span className="text-sm text-gray-500">Top {Math.min(content.length, 12)} matches</span>
+                  <span className="text-sm text-gray-500">{content.length} recommendations</span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
-                  {content.slice(0, 12).map((rec) => {
+                
+                <div className="space-y-2">
+                  {content.slice(0, 8).map((rec) => {
                     const ContentIcon = getContentTypeIcon(rec.data);
+                    const contentType = getContentTypeLabel(rec.data);
+                    
                     return (
                       <Link key={rec.id} href={`/summary/${rec.id}`}>
-                        <div className="group cursor-pointer h-full bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 backdrop-blur-xl border border-cyan-500/30 hover:border-cyan-400/60 rounded-xl p-3 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="p-1.5 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/40">
-                              <ContentIcon className="w-3.5 h-3.5 text-cyan-300" />
+                        <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-xl border border-cyan-500/20 hover:border-cyan-400/50 rounded-xl p-4 transition-all duration-300 hover:scale-[1.02]">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 flex-shrink-0">
+                              <ContentIcon className="w-5 h-5 text-cyan-300" />
                             </div>
-                            <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/50 text-xs font-bold font-mono px-1.5 py-0.5">
-                              {Math.round(rec.score)}%
-                            </Badge>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-3 mb-2">
+                                <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors leading-snug line-clamp-2 flex-1">
+                                  {rec.data.title}
+                                </h4>
+                                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/50 text-xs font-bold font-mono px-2 py-1 flex-shrink-0">
+                                  {Math.round(rec.score)}%
+                                </Badge>
+                              </div>
+                              {rec.reasons[0] && (
+                                <p className="text-xs text-gray-400 line-clamp-1 mb-2">{rec.reasons[0]}</p>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-slate-700/50 text-gray-300 border-slate-600/50 text-xs px-2 py-0.5">
+                                  {contentType}
+                                </Badge>
+                                {rec.data.platform && (
+                                  <span className="text-xs text-gray-500">via {rec.data.platform}</span>
+                                )}
+                              </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                           </div>
-                          <h4 className="text-xs font-bold text-white mb-1.5 line-clamp-2 group-hover:text-cyan-300 transition-colors leading-snug">
-                            {rec.data.title}
-                          </h4>
-                          {rec.reasons[0] && (
-                            <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                              {rec.reasons[0]}
-                            </p>
-                          )}
                         </div>
                       </Link>
                     );
@@ -364,11 +359,11 @@ export function AISuggestions() {
                   </div>
                   <span className="text-sm text-gray-500">{avatars.length} aligned experts</span>
                 </div>
-                <p className="text-sm text-gray-400 mb-4">Based on your interests, these knowledge avatars offer perspectives that complement your current focus areas:</p>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {avatars.slice(0, 6).map((rec) => (
                     <Link key={rec.id} href="/discover">
-                      <div className="group cursor-pointer bg-gradient-to-br from-slate-800/80 via-purple-900/20 to-slate-800/80 backdrop-blur-xl border border-purple-500/30 hover:border-purple-400/60 rounded-xl p-4 transition-all duration-300 hover:scale-102 hover:shadow-lg hover:shadow-purple-500/20">
+                      <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-purple-900/20 to-slate-800/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 rounded-xl p-4 transition-all duration-300 hover:scale-[1.02]">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/40 to-blue-500/40 border-2 border-purple-400/50 flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-bold text-purple-200">
@@ -381,12 +376,9 @@ export function AISuggestions() {
                             </h4>
                             <p className="text-xs text-gray-500 truncate">@{rec.data.handle}</p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/50 text-xs font-bold font-mono px-2 py-1 flex-shrink-0">
-                              {Math.round(rec.score)}%
-                            </Badge>
-                            <ArrowRight className="w-4 h-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/50 text-xs font-bold font-mono px-2.5 py-1 flex-shrink-0">
+                            {Math.round(rec.score)}%
+                          </Badge>
                         </div>
                       </div>
                     </Link>
@@ -400,16 +392,18 @@ export function AISuggestions() {
               {/* Podcast Recommendations */}
               {podcasts && podcasts.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Mic className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-xl font-bold text-white">Audio Learning</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Mic className="w-5 h-5 text-purple-400" />
+                      <h3 className="text-xl font-bold text-white">Audio Learning</h3>
+                    </div>
+                    <span className="text-sm text-gray-500">{podcasts.length} episodes</span>
                   </div>
-                  <p className="text-sm text-gray-400 mb-4">Curated podcast episodes from your followed avatars:</p>
-                  <div className="space-y-2.5">
-                    {podcasts.slice(0, 6).map((podcast, i) => (
+                  <div className="space-y-2">
+                    {podcasts.slice(0, 5).map((podcast, i) => (
                       <div 
                         key={i}
-                        className="group bg-gradient-to-br from-slate-800/80 via-purple-900/10 to-slate-800/80 backdrop-blur-xl border border-purple-500/30 hover:border-purple-400/60 rounded-lg p-3 transition-all duration-300 cursor-pointer hover:scale-102"
+                        className="group bg-gradient-to-br from-slate-800/60 via-purple-900/10 to-slate-800/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 rounded-lg p-3 transition-all duration-300 cursor-pointer"
                       >
                         <div className="flex items-start gap-2.5">
                           <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/40 flex-shrink-0 mt-0.5">
@@ -419,10 +413,9 @@ export function AISuggestions() {
                             <h4 className="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-300 transition-colors leading-snug mb-1">
                               {podcast.title}
                             </h4>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-400 truncate">
                               <span className="text-gray-500">with</span> {podcast.guest}
                             </p>
-                            <p className="text-xs text-purple-400/70 font-mono mt-1">via {podcast.avatarName}</p>
                           </div>
                         </div>
                       </div>
@@ -434,31 +427,25 @@ export function AISuggestions() {
               {/* Reading List */}
               {books && books.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <BookOpen className="w-5 h-5 text-blue-400" />
-                    <h3 className="text-xl font-bold text-white">Recommended Reading</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-blue-400" />
+                      <h3 className="text-xl font-bold text-white">Reading List</h3>
+                    </div>
+                    <span className="text-sm text-gray-500">{books.length} books</span>
                   </div>
-                  <p className="text-sm text-gray-400 mb-4">Books recommended by thought leaders you follow:</p>
-                  <div className="space-y-2.5">
-                    {books.slice(0, 6).map((book, i) => (
+                  <div className="space-y-2">
+                    {books.slice(0, 5).map((book, i) => (
                       <div 
                         key={i}
-                        className="bg-gradient-to-br from-slate-800/80 via-blue-900/10 to-slate-800/80 backdrop-blur-xl border border-blue-500/30 hover:border-blue-400/60 rounded-lg p-3 transition-all duration-300 hover:scale-102"
+                        className="bg-gradient-to-br from-slate-800/60 via-blue-900/10 to-slate-800/60 backdrop-blur-xl border border-blue-500/20 hover:border-blue-400/50 rounded-lg p-3 transition-all duration-300"
                       >
                         <h4 className="text-sm font-bold text-white mb-1.5 line-clamp-2 leading-snug">
                           {book.title}
                         </h4>
-                        <p className="text-xs text-gray-400 mb-1.5">
+                        <p className="text-xs text-gray-400">
                           <span className="text-gray-500">by</span> <span className="text-gray-300">{book.author}</span>
                         </p>
-                        <div className="flex items-center justify-between">
-                          {book.category && (
-                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/50 text-xs font-mono px-2 py-0.5">
-                              {book.category}
-                            </Badge>
-                          )}
-                          <p className="text-xs text-blue-400/70 font-mono">via {book.avatarName}</p>
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -476,12 +463,11 @@ export function AISuggestions() {
                   </div>
                   <span className="text-sm text-gray-500">{alignedAssets.length} opportunities</span>
                 </div>
-                <p className="text-sm text-gray-400 mb-4">Assets aligned with the themes and strategies of thought leaders you follow:</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {alignedAssets.slice(0, 6).map((asset, i) => (
                     <div 
                       key={i}
-                      className="bg-gradient-to-br from-slate-800/80 via-cyan-900/10 to-slate-800/80 backdrop-blur-xl border border-cyan-500/30 rounded-xl p-3 hover:border-cyan-400/60 transition-all duration-300"
+                      className="bg-gradient-to-br from-slate-800/60 via-cyan-900/10 to-slate-800/60 backdrop-blur-xl border border-cyan-500/20 rounded-xl p-3 hover:border-cyan-400/50 transition-all duration-300"
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <DollarSign className="w-4 h-4 text-cyan-400 flex-shrink-0" />
