@@ -303,6 +303,9 @@ export class RecommendationService {
     avatars: RecommendationScore[];
     content: RecommendationScore[];
     trendingTopics: string[];
+    books: Array<{title: string; author: string; avatarName: string; category?: string}>;
+    podcasts: Array<{title: string; guest: string; avatarName: string; url?: string}>;
+    alignedAssets: Array<{symbol: string; name: string; reason: string; type: 'crypto' | 'stock'}>;
   }> {
     const [avatars, content, userProfile] = await Promise.all([
       this.getPersonalizedAvatarRecommendations(userId, 5),
@@ -313,11 +316,133 @@ export class RecommendationService {
     // Extract trending topics from user's recent interactions
     const trendingTopics = this.extractTrendingTopics(userProfile);
 
+    // Get books from followed avatars
+    const books = await this.getRecommendedBooks(userId);
+
+    // Get podcasts from followed avatars
+    const podcasts = await this.getRecommendedPodcasts(userId);
+
+    // Get aligned crypto/stock assets based on followed avatars' investment focus
+    const alignedAssets = await this.getAlignedAssets(userId);
+
     return {
       avatars,
       content,
-      trendingTopics
+      trendingTopics,
+      books,
+      podcasts,
+      alignedAssets
     };
+  }
+
+  private async getRecommendedBooks(userId: string): Promise<Array<{title: string; author: string; avatarName: string; category?: string}>> {
+    const followedAvatarIds = (await this.storage.getAvatarFollowsByUserId(userId)).map(f => f.avatarId);
+    
+    if (followedAvatarIds.length === 0) {
+      return [];
+    }
+
+    const avatars = await this.storage.getKnowledgeAvatars(100);
+    const followedAvatars = avatars.filter(a => followedAvatarIds.includes(a.id));
+
+    const allBooks: Array<{title: string; author: string; avatarName: string; category?: string}> = [];
+
+    for (const avatar of followedAvatars) {
+      if (avatar.recommendedBooks && Array.isArray(avatar.recommendedBooks)) {
+        avatar.recommendedBooks.forEach((book: any) => {
+          allBooks.push({
+            title: book.title,
+            author: book.author,
+            avatarName: avatar.name,
+            category: book.category
+          });
+        });
+      }
+    }
+
+    // Deduplicate books by title and return top 6
+    const uniqueBooks = Array.from(
+      new Map(allBooks.map(book => [book.title, book])).values()
+    );
+
+    return uniqueBooks.slice(0, 6);
+  }
+
+  private async getRecommendedPodcasts(userId: string): Promise<Array<{title: string; guest: string; avatarName: string; url?: string}>> {
+    const followedAvatarIds = (await this.storage.getAvatarFollowsByUserId(userId)).map(f => f.avatarId);
+    
+    if (followedAvatarIds.length === 0) {
+      return [];
+    }
+
+    const avatars = await this.storage.getKnowledgeAvatars(100);
+    const followedAvatars = avatars.filter(a => followedAvatarIds.includes(a.id));
+
+    const allPodcasts: Array<{title: string; guest: string; avatarName: string; url?: string}> = [];
+
+    for (const avatar of followedAvatars) {
+      if (avatar.podcastAppearances && Array.isArray(avatar.podcastAppearances)) {
+        avatar.podcastAppearances.forEach((podcast: any) => {
+          allPodcasts.push({
+            title: podcast.title,
+            guest: podcast.guest || avatar.name,
+            avatarName: avatar.name,
+            url: podcast.url
+          });
+        });
+      }
+    }
+
+    // Return top 6 most recent/relevant podcasts
+    return allPodcasts.slice(0, 6);
+  }
+
+  private async getAlignedAssets(userId: string): Promise<Array<{symbol: string; name: string; reason: string; type: 'crypto' | 'stock'}>> {
+    const followedAvatarIds = (await this.storage.getAvatarFollowsByUserId(userId)).map(f => f.avatarId);
+    
+    if (followedAvatarIds.length === 0) {
+      return [];
+    }
+
+    const avatars = await this.storage.getKnowledgeAvatars(100);
+    const followedAvatars = avatars.filter(a => followedAvatarIds.includes(a.id));
+
+    const assetFrequency = new Map<string, {count: number; avatars: string[]; type: 'crypto' | 'stock'}>();
+
+    for (const avatar of followedAvatars) {
+      if (avatar.investmentFocus && Array.isArray(avatar.investmentFocus)) {
+        avatar.investmentFocus.forEach((focus: string) => {
+          const isCrypto = ['DeFi', 'Layer 1', 'Layer 2', 'NFT', 'Web3', 'Bitcoin', 'Ethereum'].some(
+            keyword => focus.toLowerCase().includes(keyword.toLowerCase())
+          );
+          
+          const existing = assetFrequency.get(focus);
+          if (existing) {
+            existing.count++;
+            existing.avatars.push(avatar.name);
+          } else {
+            assetFrequency.set(focus, {
+              count: 1,
+              avatars: [avatar.name],
+              type: isCrypto ? 'crypto' : 'stock'
+            });
+          }
+        });
+      }
+    }
+
+    // Convert to array and sort by frequency
+    const sortedAssets = Array.from(assetFrequency.entries())
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 6)
+      .map(([symbol, data]) => ({
+        symbol,
+        name: symbol,
+        reason: `${data.count} of your followed investors focus on this`,
+        type: data.type
+      }));
+
+    return sortedAssets;
   }
 
   private extractTrendingTopics(userProfile: UserProfile): string[] {
