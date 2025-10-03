@@ -1,10 +1,28 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, Brain, TrendingUp, Loader2, Video, Mic, FileText, Clock, Play } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Sparkles, 
+  Brain, 
+  TrendingUp, 
+  Loader2, 
+  Video, 
+  Mic, 
+  FileText, 
+  Clock, 
+  BookOpen,
+  Users,
+  TrendingDown,
+  DollarSign,
+  ExternalLink,
+  BarChart3,
+  ArrowUpRight,
+  Star,
+  Play
+} from "lucide-react";
+import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
-import { useState } from "react";
 
 interface RecommendationScore {
   id: string;
@@ -14,15 +32,38 @@ interface RecommendationScore {
   data: any;
 }
 
+interface Book {
+  title: string;
+  author: string;
+  avatarName: string;
+  category?: string;
+}
+
+interface Podcast {
+  title: string;
+  guest: string;
+  avatarName: string;
+  url?: string;
+}
+
+interface AlignedAsset {
+  symbol: string;
+  name: string;
+  reason: string;
+  type: 'crypto' | 'stock';
+}
+
 interface MixedRecommendations {
   avatars: RecommendationScore[];
   content: RecommendationScore[];
   trendingTopics: string[];
+  books: Book[];
+  podcasts: Podcast[];
+  alignedAssets: AlignedAsset[];
 }
 
 export function AISuggestions() {
   const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<'suggested' | 'ai-picks' | 'trending'>('suggested');
 
   const { data, isLoading, error } = useQuery<{ success: boolean } & MixedRecommendations>({
     queryKey: ['/api/recommendations/mixed'],
@@ -112,7 +153,7 @@ export function AISuggestions() {
           
           <div className="flex justify-center items-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-purple-400" />
-            <span className="ml-4 text-gray-400 text-lg">Loading your recommendations...</span>
+            <span className="ml-4 text-gray-400 text-lg">Analyzing your preferences...</span>
           </div>
         </div>
       </section>
@@ -150,51 +191,7 @@ export function AISuggestions() {
     );
   }
 
-  const { content } = data;
-
-  if (!content || content.length === 0) {
-    return (
-      <section id="suggestions" className="py-24 relative">
-        <div className="container mx-auto px-4 sm:px-6 relative">
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
-              AI-Powered Suggestions
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-              No recommendations yet. Process some content or follow knowledge avatars to get started!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/discover">
-                <button 
-                  className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-purple-500/30"
-                  data-testid="button-discover-avatars"
-                >
-                  Discover Avatars
-                </button>
-              </Link>
-              <button 
-                onClick={() => document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-8 py-3.5 glass-bg backdrop-blur-xl border border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-400/60 rounded-xl font-semibold transition-all duration-300"
-                data-testid="button-process-content"
-              >
-                Process Content
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-    );
-  }
-
-  const suggestedContent = content.slice(0, 6);
-  const agentPicks = content.slice(6, 12);
-  const trendingContent = content.slice(12, 18);
+  const { content, avatars, books, podcasts, alignedAssets, trendingTopics } = data;
 
   const getContentTypeIcon = (summary: any) => {
     const contentType = summary.contentType?.toLowerCase() || '';
@@ -208,26 +205,14 @@ export function AISuggestions() {
     return FileText;
   };
 
-  const getContentTypeLabel = (summary: any) => {
-    const contentType = summary.contentType?.toLowerCase() || '';
-    const platform = summary.platform?.toLowerCase() || '';
-    
-    if (contentType === 'podcast' || platform.includes('podcast')) {
-      return 'Podcast';
-    } else if (contentType === 'video' || platform === 'youtube') {
-      return 'Video';
-    }
-    return 'Article';
-  };
-
   const formatDuration = (summary: any) => {
     if (summary.duration) {
       const minutes = Math.round(summary.duration / 60);
-      return `${minutes} min`;
+      return `${minutes}min`;
     }
     if (summary.originalDuration) {
       const minutes = Math.round(summary.originalDuration / 60);
-      return `${minutes} min`;
+      return `${minutes}min`;
     }
     return null;
   };
@@ -237,187 +222,310 @@ export function AISuggestions() {
     
     const contentType = summary.contentType?.toLowerCase() || '';
     if (contentType === 'podcast') {
-      return "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&h=400&fit=crop";
+      return "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=300&fit=crop";
     } else if (contentType === 'video') {
-      return "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&h=400&fit=crop";
+      return "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop";
     }
-    return "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop";
+    return "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop";
   };
 
-  const tabs = [
-    { id: 'suggested' as const, label: 'Suggested for You', icon: Sparkles, items: suggestedContent },
-    { id: 'ai-picks' as const, label: 'AI Agent Picks', icon: Brain, items: agentPicks },
-    { id: 'trending' as const, label: 'Trending Now', icon: TrendingUp, items: trendingContent }
-  ];
-
-  const activeTabData = tabs.find(tab => tab.id === activeTab);
-  const currentItems = activeTabData?.items || [];
+  const topContent = content.slice(0, 3);
+  const topAvatars = avatars.slice(0, 3);
 
   return (
     <section id="suggestions" className="py-24 relative overflow-hidden">
-      {/* Subtle background effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/5 to-transparent pointer-events-none" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Header */}
+        {/* Terminal-Style Header */}
         <motion.div 
-          className="text-center mb-16"
+          className="mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
-            AI-Powered Suggestions
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Intelligent content recommendations based on your interests
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
+            <h2 className="text-4xl md:text-5xl font-orbitron font-bold bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+              Personalized Intelligence Report
+            </h2>
+          </div>
+          <p className="text-lg text-gray-400 font-mono">
+            <span className="text-cyan-400">user:</span> {user.username} | <span className="text-purple-400">generated:</span> {new Date().toLocaleString()}
           </p>
         </motion.div>
-        
-        {/* Modern Tab Navigation */}
-        <motion.div 
-          className="flex justify-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          viewport={{ once: true }}
-        >
-          <div className="inline-flex items-center gap-2 glass-bg backdrop-blur-xl border border-white/10 rounded-2xl p-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                    isActive 
-                      ? 'text-white' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                  data-testid={`tab-${tab.id}`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-xl"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                  <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'text-cyan-300' : ''}`} />
-                  <span className="relative z-10">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-        
-        {/* Content Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
-          >
-            {currentItems.map((rec, index) => {
-              const ContentIcon = getContentTypeIcon(rec.data);
-              const contentTypeLabel = getContentTypeLabel(rec.data);
-              const duration = formatDuration(rec.data);
-              const thumbnail = getThumbnail(rec.data);
-              
-              return (
-                <motion.div
-                  key={rec.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.4 }}
-                >
-                  <Link href={`/summary/${rec.id}`}>
-                    <Card 
-                      className="group glass-bg backdrop-blur-xl border border-white/10 hover:border-cyan-400/40 transition-all duration-500 cursor-pointer overflow-hidden h-full"
-                      data-testid={`card-suggestion-${rec.id}`}
-                    >
-                      <CardContent className="p-0">
-                        {/* Large Thumbnail */}
-                        <div className="relative overflow-hidden aspect-video">
-                          <img 
-                            src={thumbnail} 
-                            alt={rec.data.title} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop";
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                          
-                          {/* Hover Play Button */}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center">
-                              <Play className="w-7 h-7 text-white ml-1" />
-                            </div>
-                          </div>
-                          
-                          {/* Content Type Badge */}
-                          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 glass-bg backdrop-blur-xl border border-white/20 rounded-full">
-                            <ContentIcon className="w-3.5 h-3.5 text-cyan-300" />
-                            <span className="text-xs font-medium text-white">{contentTypeLabel}</span>
-                          </div>
-                          
-                          {/* Duration */}
-                          {duration && (
-                            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 glass-bg backdrop-blur-xl border border-white/20 rounded-full">
-                              <Clock className="w-3.5 h-3.5 text-white" />
-                              <span className="text-xs font-medium text-white">{duration}</span>
-                            </div>
-                          )}
-                          
-                          {/* Match Score */}
-                          <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-gradient-to-r from-cyan-500/90 to-purple-500/90 backdrop-blur-xl border border-white/20 rounded-full">
-                            <span className="text-xs font-bold text-white">{Math.round(rec.score)}% Match</span>
-                          </div>
-                        </div>
-                        
-                        {/* Content Info */}
-                        <div className="p-6 space-y-3">
-                          <h4 className="font-bold text-white text-lg leading-tight line-clamp-2 group-hover:text-cyan-300 transition-colors">
-                            {rec.data.title}
-                          </h4>
-                          
-                          {rec.reasons[0] && (
-                            <p className="text-sm text-gray-400 line-clamp-2 flex items-start gap-2">
-                              <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-purple-400" />
-                              <span>{rec.reasons[0]}</span>
-                            </p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
 
-        {/* Empty State */}
-        {currentItems.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <div className="inline-flex p-6 rounded-2xl glass-bg backdrop-blur-xl border border-white/10 mb-6">
-              <Sparkles className="w-12 h-12 text-gray-500" />
+        <div className="space-y-8 max-w-7xl mx-auto">
+          {/* Top Recommended Content */}
+          {topContent.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="glass-bg backdrop-blur-xl border border-cyan-500/30 overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-6 border-b border-cyan-500/20 pb-4">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-400/30">
+                      <Sparkles className="w-5 h-5 text-cyan-300" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white font-mono">TOP RECOMMENDED CONTENT</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {topContent.map((rec, index) => {
+                      const ContentIcon = getContentTypeIcon(rec.data);
+                      const duration = formatDuration(rec.data);
+                      const thumbnail = getThumbnail(rec.data);
+                      
+                      return (
+                        <Link key={rec.id} href={`/summary/${rec.id}`}>
+                          <div className="group cursor-pointer">
+                            <div className="relative overflow-hidden rounded-lg mb-3 aspect-video">
+                              <img 
+                                src={thumbnail} 
+                                alt={rec.data.title} 
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop";
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                              <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 glass-bg backdrop-blur-xl border border-white/20 rounded-full">
+                                <ContentIcon className="w-3 h-3 text-cyan-300" />
+                                {duration && <span className="text-xs text-white font-mono">{duration}</span>}
+                              </div>
+                              <div className="absolute bottom-2 right-2 px-2 py-1 bg-cyan-500/90 rounded-full">
+                                <span className="text-xs font-bold text-white font-mono">{Math.round(rec.score)}%</span>
+                              </div>
+                            </div>
+                            <h4 className="text-sm font-bold text-white mb-2 line-clamp-2 group-hover:text-cyan-300 transition-colors">
+                              {rec.data.title}
+                            </h4>
+                            {rec.reasons[0] && (
+                              <p className="text-xs text-gray-400 line-clamp-1 font-mono">
+                                → {rec.reasons[0]}
+                              </p>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="space-y-8">
+              {/* Recommended Investors */}
+              {topAvatars.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="glass-bg backdrop-blur-xl border border-purple-500/30 h-full">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-6 border-b border-purple-500/20 pb-4">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-400/30">
+                          <Users className="w-5 h-5 text-purple-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white font-mono">RECOMMENDED INVESTORS</h3>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {topAvatars.map((rec) => (
+                          <Link key={rec.id} href={`/discover`}>
+                            <div className="group cursor-pointer bg-slate-900/60 border border-purple-500/20 hover:border-purple-400/50 rounded-lg p-4 transition-all duration-300">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-purple-400/40 flex items-center justify-center">
+                                  <span className="text-sm font-bold text-purple-300 font-mono">
+                                    {rec.data.name.split(' ').map((n: string) => n[0]).join('')}
+                                  </span>
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">
+                                    {rec.data.name}
+                                  </h4>
+                                  <p className="text-xs text-purple-400/70 font-mono">@{rec.data.handle}</p>
+                                </div>
+                                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs font-mono">
+                                  {Math.round(rec.score)}%
+                                </Badge>
+                              </div>
+                              {rec.reasons[0] && (
+                                <p className="text-xs text-gray-400 font-mono">→ {rec.reasons[0]}</p>
+                              )}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Recommended Books */}
+              {books && books.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="glass-bg backdrop-blur-xl border border-blue-500/30 h-full">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-6 border-b border-blue-500/20 pb-4">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30">
+                          <BookOpen className="w-5 h-5 text-blue-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white font-mono">RECOMMENDED READING</h3>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {books.slice(0, 4).map((book, index) => (
+                          <div 
+                            key={index}
+                            className="bg-slate-900/60 border border-blue-500/20 rounded-lg p-3"
+                          >
+                            <h4 className="text-sm font-bold text-white mb-1 line-clamp-1">
+                              {book.title}
+                            </h4>
+                            <p className="text-xs text-gray-400 mb-1 font-mono">by {book.author}</p>
+                            <p className="text-xs text-blue-400/70 font-mono">
+                              recommended by {book.avatarName}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
             </div>
-            <p className="text-xl text-gray-400">No recommendations available yet</p>
-            <p className="text-sm text-gray-500 mt-2">Process more content or follow avatars to get personalized suggestions</p>
-          </motion.div>
-        )}
+
+            {/* Right Column */}
+            <div className="space-y-8">
+              {/* Aligned Assets */}
+              {alignedAssets && alignedAssets.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="glass-bg backdrop-blur-xl border border-cyan-500/30 h-full">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-6 border-b border-cyan-500/20 pb-4">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-400/30">
+                          <BarChart3 className="w-5 h-5 text-cyan-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white font-mono">ALIGNED ASSETS</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        {alignedAssets.map((asset, index) => (
+                          <div 
+                            key={index}
+                            className="bg-slate-900/60 border border-cyan-500/20 rounded-lg p-3"
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <DollarSign className="w-4 h-4 text-cyan-400" />
+                              <h4 className="text-sm font-bold text-white font-mono">{asset.symbol}</h4>
+                            </div>
+                            <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-xs mb-2 font-mono">
+                              {asset.type.toUpperCase()}
+                            </Badge>
+                            <p className="text-xs text-gray-400 font-mono line-clamp-2">
+                              {asset.reason}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Recommended Podcasts */}
+              {podcasts && podcasts.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="glass-bg backdrop-blur-xl border border-purple-500/30 h-full">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-6 border-b border-purple-500/20 pb-4">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30">
+                          <Mic className="w-5 h-5 text-purple-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white font-mono">PODCAST EPISODES</h3>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {podcasts.slice(0, 4).map((podcast, index) => (
+                          <div 
+                            key={index}
+                            className="group bg-slate-900/60 border border-purple-500/20 hover:border-purple-400/50 rounded-lg p-3 transition-all duration-300 cursor-pointer"
+                          >
+                            <div className="flex items-start gap-2 mb-2">
+                              <Play className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                              <h4 className="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-300 transition-colors">
+                                {podcast.title}
+                              </h4>
+                            </div>
+                            <p className="text-xs text-gray-400 mb-1 font-mono">guest: {podcast.guest}</p>
+                            <p className="text-xs text-purple-400/70 font-mono">
+                              from {podcast.avatarName}'s list
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          {/* Trending Topics Footer */}
+          {trendingTopics && trendingTopics.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="glass-bg backdrop-blur-xl border border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-cyan-400" />
+                      <span className="text-sm text-gray-400 font-mono uppercase">Trending in your network:</span>
+                    </div>
+                    {trendingTopics.slice(0, 5).map((topic, index) => (
+                      <Badge 
+                        key={index}
+                        className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/30 text-cyan-300 font-mono"
+                      >
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
       </div>
     </section>
   );
