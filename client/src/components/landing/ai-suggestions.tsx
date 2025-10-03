@@ -338,7 +338,7 @@ export function AISuggestions() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {topLeaders.map((rec, index) => (
-                    <Link key={rec.id} href={`/avatar/${rec.id}`}>
+                    <Link key={rec.id} href={`/avatar/${rec.data.handle}`}>
                       <div className="group cursor-pointer bg-gradient-to-br from-slate-800/60 via-purple-900/20 to-slate-800/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 rounded-xl p-5 transition-all duration-300 hover:scale-[1.02]">
                         <div className="text-center">
                           <div className="relative inline-block mb-4">
