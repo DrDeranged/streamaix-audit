@@ -519,7 +519,7 @@ export default function AvatarProfile() {
       {/* Header Section */}
       <div className="relative">
         {/* Banner */}
-        <div className={`h-64 bg-gradient-to-r ${avatar.gradient} relative overflow-hidden`}>
+        <div className="h-64 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
           <Link href="/" className="absolute top-6 left-6 z-10">
             <Button variant="ghost" size="sm" className="text-white border-white/20 hover:bg-white/10">
@@ -534,11 +534,11 @@ export default function AvatarProfile() {
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 mb-8">
             <div className="relative">
               <img 
-                src={avatar.avatar} 
+                src={avatar.image_url || '/api/placeholder/128/128'} 
                 alt={`${avatar.name} avatar`}
                 className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-xl"
               />
-              {avatar.isVerified && (
+              {avatar.verification_status === 'verified' && (
                 <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-2">
                   <CheckCircle2 className="h-4 w-4 text-white" />
                 </div>
@@ -550,7 +550,7 @@ export default function AvatarProfile() {
                 <div>
                   <h1 className="text-4xl font-bold mb-2">{avatar.name}</h1>
                   <p className="text-xl text-white/80 mb-2">{avatar.handle}</p>
-                  <p className="text-lg text-white/70">{avatar.role}</p>
+                  <p className="text-lg text-white/70">{avatar.expertise}</p>
                   <p className="text-white/80 mt-3 max-w-2xl">{avatar.bio}</p>
                 </div>
 
@@ -582,7 +582,7 @@ export default function AvatarProfile() {
                       className={`${
                         isFollowing 
                           ? 'bg-white/10 text-white border-white/20' 
-                          : `bg-gradient-to-r ${avatar.gradient} text-white`
+                          : 'bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 text-white'
                       } hover:opacity-90`}
                       data-testid="button-follow-avatar"
                     >
