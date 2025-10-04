@@ -167,15 +167,15 @@ interface EnhancedAvatar extends DatabaseAvatar {
 
 interface AvatarInsight {
   id: string;
-  insightType: string;
+  insight_type: string;
   title: string;
   content: string;
   category: string;
   tags: string[];
-  sourceUrl?: string;
+  source_url?: string;
   confidence: number;
-  isHighlighted: boolean;
-  publishedAt: string;
+  is_highlighted: boolean;
+  published_at: string;
 }
 
 // Helper functions for data transformation - Bloomberg Terminal-style intelligence
@@ -512,7 +512,7 @@ export default function AvatarProfile() {
     return acc;
   }, {} as Record<string, AvatarInsight[]>);
 
-  const highlightedInsights = insights.filter(insight => insight.isHighlighted).slice(0, 3);
+  const highlightedInsights = insights.filter(insight => insight.is_highlighted).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -1157,7 +1157,7 @@ export default function AvatarProfile() {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <Badge variant="outline" className="text-xs border-purple-400/30 text-purple-300">
-                            {insight.insightType}
+                            {insight.insight_type}
                           </Badge>
                           <span className="text-xs text-gray-400">{insight.confidence}% confidence</span>
                         </div>
@@ -1171,8 +1171,8 @@ export default function AvatarProfile() {
                           ))}
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-400">{new Date(insight.publishedAt).toLocaleDateString()}</span>
-                          {insight.sourceUrl && (
+                          <span className="text-xs text-gray-400">{new Date(insight.published_at).toLocaleDateString()}</span>
+                          {insight.source_url && (
                             <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 p-0 h-auto">
                               <ExternalLink className="h-3 w-3 mr-1" />
                               Source
