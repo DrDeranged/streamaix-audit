@@ -380,12 +380,12 @@ export function getBaseScanTokenUrl(tokenAddress: string): string {
 // Estimate gas for Base network (Base has lower gas costs than Ethereum mainnet)
 export function estimateBaseGas(operationType: 'transfer' | 'approve' | 'bounty' | 'stake'): bigint {
   const gasEstimates = {
-    transfer: 50000n,
-    approve: 60000n,
-    bounty: 200000n,
-    stake: 150000n,
+    transfer: BigInt(50000),
+    approve: BigInt(60000),
+    bounty: BigInt(200000),
+    stake: BigInt(150000),
   };
-  return gasEstimates[operationType] || 100000n;
+  return gasEstimates[operationType] || BigInt(100000);
 }
 
 // Format Base network errors for user-friendly display
