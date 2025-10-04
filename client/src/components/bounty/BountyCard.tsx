@@ -21,12 +21,12 @@ export default function BountyCard({ bounty }: BountyCardProps) {
   const [tipAmount, setTipAmount] = useState('');
   const [showTipDialog, setShowTipDialog] = useState(false);
   
-  const isExpired = new Date(bounty.deadline) < new Date();
+  const isExpired = bounty.deadline ? new Date(bounty.deadline) < new Date() : false;
   const isOwner = wallet?.address?.toLowerCase() === bounty.creatorWallet?.toLowerCase();
   const isClaimer = wallet?.address?.toLowerCase() === bounty.claimerWallet?.toLowerCase();
   const canClaim = isConnected && !isOwner && !isClaimer && bounty.status === 'open' && !isExpired;
   
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     open: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400',
     claimed: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400',
     in_progress: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
@@ -127,12 +127,14 @@ export default function BountyCard({ bounty }: BountyCardProps) {
         </div>
 
         {/* Deadline */}
-        <div className="flex items-center gap-2 text-sm">
-          <Clock className={`w-4 h-4 ${isExpired ? 'text-red-400' : 'text-cyan-400'}`} />
-          <span className={isExpired ? 'text-red-400' : 'text-gray-400'} data-testid={`bounty-deadline-${bounty.id}`}>
-            {isExpired ? 'Expired' : formatDistanceToNow(new Date(bounty.deadline), { addSuffix: true })}
-          </span>
-        </div>
+        {bounty.deadline && (
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className={`w-4 h-4 ${isExpired ? 'text-red-400' : 'text-cyan-400'}`} />
+            <span className={isExpired ? 'text-red-400' : 'text-gray-400'} data-testid={`bounty-deadline-${bounty.id}`}>
+              {isExpired ? 'Expired' : formatDistanceToNow(new Date(bounty.deadline), { addSuffix: true })}
+            </span>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">

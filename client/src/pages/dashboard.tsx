@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import InvestmentJournal from '@/components/InvestmentJournal';
 import { FollowButton } from '@/components/avatars/follow-button';
+import BountyBoardSection from '@/components/bounty/BountyBoardSection';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -1121,54 +1122,7 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="bounties" className="space-y-6 mt-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-white text-xl font-bold">Active Bounties</h2>
-                    <Button className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30">
-                      <Target className="h-4 w-4 mr-2" />
-                      Create Bounty
-                    </Button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {bountiesLoading ? (
-                      <div className="text-center py-8">
-                        <RefreshCw className="h-8 w-8 animate-spin text-green-400 mx-auto" />
-                      </div>
-                    ) : bounties.length > 0 ? (
-                      bounties.map((bounty: Bounty) => (
-                        <Card key={bounty.id} className="bg-white/10 border-white/20 backdrop-blur-lg">
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                              <div>
-                                <h3 className="text-white text-lg font-semibold mb-2">{bounty.title}</h3>
-                                <p className="text-gray-300 text-sm mb-3">{bounty.description}</p>
-                                <div className="flex items-center gap-4 text-sm text-gray-400">
-                                  <span className="flex items-center gap-1">
-                                    <DollarSign className="h-4 w-4" />
-                                    {bounty.reward} STREAM
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Users className="h-4 w-4" />
-                                    {bounty.submissions} submissions
-                                  </span>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className={getStatusColor(bounty.status)}>
-                                {bounty.status}
-                              </Badge>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
-                      <Card className="bg-white/5 border-white/10">
-                        <CardContent className="p-8 text-center">
-                          <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-300">No active bounties. Create one to incentivize content creation!</p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
+                  <BountyBoardSection />
                 </TabsContent>
 
                 <TabsContent value="wallet" className="space-y-6 mt-6">
