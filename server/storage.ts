@@ -5,6 +5,8 @@ import {
   type InsertSummary,
   type Bounty, 
   type InsertBounty,
+  type TipContribution,
+  type InsertTipContribution,
   type UserInteraction,
   type InsertUserInteraction,
   type KnowledgeStack,
@@ -48,6 +50,7 @@ import {
   users,
   summaries,
   bounties,
+  tipContributions,
   userInteractions,
   knowledgeStacks,
   userNotes,
@@ -98,6 +101,10 @@ export interface IStorage {
   createBounty(bounty: InsertBounty): Promise<Bounty>;
   updateBounty(id: string, updates: Partial<InsertBounty>): Promise<Bounty | undefined>;
   deleteBounty(id: string): Promise<boolean>;
+
+  // Tip contribution operations
+  createTipContribution(tip: InsertTipContribution): Promise<TipContribution>;
+  getTipContributionsByBounty(bountyId: string): Promise<TipContribution[]>;
 
   // User interaction operations
   getUserInteractions(userId: string, options?: { summaryId?: string; limit?: number; targetType?: string; since?: Date }): Promise<UserInteraction[]>;
@@ -429,6 +436,23 @@ export class DatabaseStorage implements IStorage {
   async deleteBounty(id: string): Promise<boolean> {
     const result = await db.delete(bounties).where(eq(bounties.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Tip contribution operations
+  async createTipContribution(insertTip: InsertTipContribution): Promise<TipContribution> {
+    const [tip] = await db
+      .insert(tipContributions)
+      .values(insertTip)
+      .returning();
+    return tip;
+  }
+
+  async getTipContributionsByBounty(bountyId: string): Promise<TipContribution[]> {
+    return await db
+      .select()
+      .from(tipContributions)
+      .where(eq(tipContributions.bountyId, bountyId))
+      .orderBy(desc(tipContributions.createdAt));
   }
 
   // User interaction operations

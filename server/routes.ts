@@ -662,6 +662,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ bounties });
   }));
 
+  // Claim a bounty (Web3)
+  app.post('/api/bounties/:id/claim', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bounty = await storage.getBounty(req.params.id);
+    if (!bounty) {
+      return res.status(404).json({ error: 'Bounty not found' });
+    }
+
+    if (bounty.status !== 'open') {
+      return res.status(400).json({ error: 'Bounty is not available for claiming' });
+    }
+
+    const { claimerWallet, blockchainTxHash } = req.body;
+    if (!claimerWallet || !blockchainTxHash) {
+      return res.status(400).json({ error: 'Claimer wallet and transaction hash are required' });
+    }
+
+    const updatedBounty = await storage.updateBounty(req.params.id, {
+      assigneeId: req.user!.id,
+      claimerWallet,
+      status: 'claimed',
+      blockchainTxHash
+    });
+
+    res.json({
+      message: 'Bounty claimed successfully',
+      bounty: updatedBounty
+    });
+  }));
+
+  // Complete a bounty and trigger payout (Web3)
+  app.post('/api/bounties/:id/complete', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bounty = await storage.getBounty(req.params.id);
+    if (!bounty) {
+      return res.status(404).json({ error: 'Bounty not found' });
+    }
+
+    if (bounty.creatorId !== req.user!.id) {
+      return res.status(403).json({ error: 'Only bounty creator can mark as complete' });
+    }
+
+    if (bounty.status !== 'claimed' && bounty.status !== 'in_progress') {
+      return res.status(400).json({ error: 'Bounty is not in claimable/in-progress state' });
+    }
+
+    const { summaryId, completionTxHash } = req.body;
+    if (!summaryId || !completionTxHash) {
+      return res.status(400).json({ error: 'Summary ID and completion transaction hash are required' });
+    }
+
+    const updatedBounty = await storage.updateBounty(req.params.id, {
+      summaryId,
+      completionTxHash,
+      status: 'completed'
+    });
+
+    res.json({
+      message: 'Bounty completed and payout initiated',
+      bounty: updatedBounty
+    });
+  }));
+
+  // Add tip to bounty (Web3)
+  app.post('/api/bounties/:id/tip', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bounty = await storage.getBounty(req.params.id);
+    if (!bounty) {
+      return res.status(404).json({ error: 'Bounty not found' });
+    }
+
+    if (bounty.status === 'completed' || bounty.status === 'expired') {
+      return res.status(400).json({ error: 'Cannot tip a completed or expired bounty' });
+    }
+
+    const { tipperWallet, amount, blockchainTxHash } = req.body;
+    if (!tipperWallet || !amount || !blockchainTxHash) {
+      return res.status(400).json({ error: 'Tipper wallet, amount, and transaction hash are required' });
+    }
+
+    // Create tip contribution record
+    const tipContribution = await storage.createTipContribution({
+      bountyId: req.params.id,
+      tipperWallet,
+      amount: parseInt(amount),
+      blockchainTxHash
+    });
+
+    // Update bounty tip pool
+    const newTipPool = (bounty.tipPool || 0) + parseInt(amount);
+    const updatedBounty = await storage.updateBounty(req.params.id, {
+      tipPool: newTipPool
+    });
+
+    res.json({
+      message: 'Tip added successfully',
+      tipContribution,
+      bounty: updatedBounty
+    });
+  }));
+
+  // Get bounty statistics
+  app.get('/api/bounties/stats', asyncHandler(async (req: Request, res: Response) => {
+    const bounties = await storage.getBounties(1000, 0);
+    
+    const stats = {
+      activeBounties: bounties.filter(b => b.status === 'open' || b.status === 'claimed').length,
+      totalRewards: bounties.reduce((sum, b) => sum + b.reward + (b.tipPool || 0), 0),
+      summariesCreated: bounties.filter(b => b.status === 'completed').length,
+      avgCompletionTime: '24h' // TODO: Calculate from actual data
+    };
+
+    res.json({ stats });
+  }));
+
   // =============================================================================
   // AVATAR ROUTES
   // =============================================================================
