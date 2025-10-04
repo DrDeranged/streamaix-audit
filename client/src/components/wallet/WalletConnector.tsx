@@ -269,6 +269,50 @@ export function WalletConnector({
     );
   }
 
+  // Check if user is on wrong network (not Base - Chain ID 8453)
+  const isOnBaseNetwork = wallet?.chainId === 8453;
+  
+  if (!isOnBaseNetwork && wallet) {
+    return (
+      <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-white font-semibold mb-1">Wrong Network</h4>
+              <p className="text-gray-300 text-sm mb-3">
+                StreamAiX operates on Base network. Please switch to continue.
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => switchNetwork(8453)}
+                  className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                  data-testid="button-switch-to-base"
+                >
+                  Switch to Base
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisconnect}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Disconnect
+                </Button>
+              </div>
+              {showNetwork && networkInfo && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Currently connected to: {networkInfo.name}
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
       <CardContent className="p-4">

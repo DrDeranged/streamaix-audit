@@ -1,6 +1,24 @@
 import { Contract, Interface } from 'ethers';
 import { web3Manager, type WalletInfo } from './web3';
 
+// ═══════════════════════════════════════════════════════════════════════
+// DEPLOYMENT CONFIGURATION - Update after deploying contracts to Base
+// ═══════════════════════════════════════════════════════════════════════
+// 
+// After deploying your smart contracts to Base network, update the addresses below:
+// 1. Deploy STREAM token contract → Update VITE_BASE_STREAM_TOKEN
+// 2. Deploy SummaryNFT contract → Update VITE_BASE_SUMMARY_NFT
+// 3. Deploy Staking contract → Update VITE_BASE_STAKING
+// 4. Deploy BountyBoard contract → Update VITE_BASE_BOUNTY_BOARD
+//
+// Add these to your .env file:
+// VITE_BASE_STREAM_TOKEN=0xYourStreamTokenAddress
+// VITE_BASE_SUMMARY_NFT=0xYourSummaryNFTAddress
+// VITE_BASE_STAKING=0xYourStakingAddress
+// VITE_BASE_BOUNTY_BOARD=0xYourBountyBoardAddress
+//
+// ═══════════════════════════════════════════════════════════════════════
+
 // StreamAiX Token Contract ABI
 export const STREAM_TOKEN_ABI = [
   'function name() view returns (string)',
@@ -66,32 +84,47 @@ export const BOUNTY_BOARD_ABI = [
 ];
 
 // Contract addresses by network
+// Base network addresses can be overridden via environment variables
 export const CONTRACT_ADDRESSES = {
-  1: { // Ethereum Mainnet
+  1: { // Ethereum Mainnet (not used - Base is primary network)
     streamToken: '0x0000000000000000000000000000000000000001',
     summaryNFT: '0x0000000000000000000000000000000000000002',
     staking: '0x0000000000000000000000000000000000000003',
     bountyBoard: '0x0000000000000000000000000000000000000010',
   },
-  10: { // Optimism
+  10: { // Optimism (not used - Base is primary network)
     streamToken: '0x0000000000000000000000000000000000000004',
     summaryNFT: '0x0000000000000000000000000000000000000005',
     staking: '0x0000000000000000000000000000000000000006',
     bountyBoard: '0x0000000000000000000000000000000000000011',
   },
-  137: { // Polygon
+  137: { // Polygon (not used - Base is primary network)
     streamToken: '0x0000000000000000000000000000000000000007',
     summaryNFT: '0x0000000000000000000000000000000000000008',
     staking: '0x0000000000000000000000000000000000000009',
     bountyBoard: '0x0000000000000000000000000000000000000012',
   },
-  8453: { // Base
-    streamToken: '0x000000000000000000000000000000000000000A',
-    summaryNFT: '0x000000000000000000000000000000000000000B',
-    staking: '0x000000000000000000000000000000000000000C',
-    bountyBoard: '0x000000000000000000000000000000000000000D',
+  8453: { // Base - PRIMARY NETWORK FOR PRODUCTION
+    streamToken: import.meta.env.VITE_BASE_STREAM_TOKEN || '0x000000000000000000000000000000000000000A',
+    summaryNFT: import.meta.env.VITE_BASE_SUMMARY_NFT || '0x000000000000000000000000000000000000000B',
+    staking: import.meta.env.VITE_BASE_STAKING || '0x000000000000000000000000000000000000000C',
+    bountyBoard: import.meta.env.VITE_BASE_BOUNTY_BOARD || '0x000000000000000000000000000000000000000D',
   },
 };
+
+// Primary network for StreamAiX
+export const PRIMARY_CHAIN_ID = 8453; // Base network
+
+// Check if Base contracts are properly configured
+export function areContractsConfigured(): boolean {
+  const baseAddresses = CONTRACT_ADDRESSES[8453];
+  return Object.values(baseAddresses).every(addr => 
+    addr !== '0x000000000000000000000000000000000000000A' &&
+    addr !== '0x000000000000000000000000000000000000000B' &&
+    addr !== '0x000000000000000000000000000000000000000C' &&
+    addr !== '0x000000000000000000000000000000000000000D'
+  );
+}
 
 export class ContractManager {
   private wallet: WalletInfo | null = null;
@@ -324,6 +357,60 @@ export const formatTokenAmount = (amount: string, decimals: number = 18): string
     return '0.0000';
   }
 };
+
+// ═══════════════════════════════════════════════════════════════════════
+// BASE NETWORK UTILITIES
+// ═══════════════════════════════════════════════════════════════════════
+
+// Get BaseScan transaction URL
+export function getBaseScanTxUrl(txHash: string): string {
+  return `https://basescan.org/tx/${txHash}`;
+}
+
+// Get BaseScan address URL
+export function getBaseScanAddressUrl(address: string): string {
+  return `https://basescan.org/address/${address}`;
+}
+
+// Get BaseScan token URL
+export function getBaseScanTokenUrl(tokenAddress: string): string {
+  return `https://basescan.org/token/${tokenAddress}`;
+}
+
+// Estimate gas for Base network (Base has lower gas costs than Ethereum mainnet)
+export function estimateBaseGas(operationType: 'transfer' | 'approve' | 'bounty' | 'stake'): bigint {
+  const gasEstimates = {
+    transfer: 50000n,
+    approve: 60000n,
+    bounty: 200000n,
+    stake: 150000n,
+  };
+  return gasEstimates[operationType] || 100000n;
+}
+
+// Format Base network errors for user-friendly display
+export function formatBaseNetworkError(error: any): string {
+  const errorMessage = error?.message || error?.toString() || 'Unknown error';
+  
+  // Common Base network errors
+  if (errorMessage.includes('insufficient funds')) {
+    return 'Insufficient ETH on Base network for gas fees. Please add ETH to your wallet.';
+  }
+  if (errorMessage.includes('user rejected')) {
+    return 'Transaction was rejected. Please try again.';
+  }
+  if (errorMessage.includes('nonce')) {
+    return 'Transaction nonce error. Try refreshing and attempting again.';
+  }
+  if (errorMessage.includes('gas')) {
+    return 'Gas estimation failed. The transaction may fail or network may be congested.';
+  }
+  if (errorMessage.includes('reverted')) {
+    return 'Transaction reverted. Check contract state and try again.';
+  }
+  
+  return errorMessage;
+}
 
 export const parseTokenAmount = (amount: string, decimals: number = 18): string => {
   try {
