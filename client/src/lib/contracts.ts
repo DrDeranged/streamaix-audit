@@ -47,27 +47,49 @@ export const STAKING_ABI = [
   'event RewardsClaimed(address indexed user, uint256 amount)',
 ];
 
+// BountyBoard Contract ABI
+export const BOUNTY_BOARD_ABI = [
+  'function createBounty(uint256 reward, uint256 deadline) returns (uint256)',
+  'function claimBounty(uint256 bountyId)',
+  'function completeBounty(uint256 bountyId)',
+  'function addTip(uint256 bountyId, uint256 amount)',
+  'function refund(uint256 bountyId)',
+  'function getBounty(uint256 bountyId) view returns (tuple(address creator, address claimer, uint256 reward, uint256 tipPool, uint256 deadline, uint8 status))',
+  'function getBountyCount() view returns (uint256)',
+  'function platformFee() view returns (uint256)',
+  'function platformFeeRecipient() view returns (address)',
+  'event BountyCreated(uint256 indexed bountyId, address indexed creator, uint256 reward, uint256 deadline)',
+  'event BountyClaimed(uint256 indexed bountyId, address indexed claimer)',
+  'event BountyCompleted(uint256 indexed bountyId, address indexed claimer, uint256 totalPayout)',
+  'event TipAdded(uint256 indexed bountyId, address indexed tipper, uint256 amount)',
+  'event BountyRefunded(uint256 indexed bountyId, address indexed creator, uint256 amount)',
+];
+
 // Contract addresses by network
 export const CONTRACT_ADDRESSES = {
   1: { // Ethereum Mainnet
     streamToken: '0x0000000000000000000000000000000000000001',
     summaryNFT: '0x0000000000000000000000000000000000000002',
     staking: '0x0000000000000000000000000000000000000003',
+    bountyBoard: '0x0000000000000000000000000000000000000010',
   },
   10: { // Optimism
     streamToken: '0x0000000000000000000000000000000000000004',
     summaryNFT: '0x0000000000000000000000000000000000000005',
     staking: '0x0000000000000000000000000000000000000006',
+    bountyBoard: '0x0000000000000000000000000000000000000011',
   },
   137: { // Polygon
     streamToken: '0x0000000000000000000000000000000000000007',
     summaryNFT: '0x0000000000000000000000000000000000000008',
     staking: '0x0000000000000000000000000000000000000009',
+    bountyBoard: '0x0000000000000000000000000000000000000012',
   },
   8453: { // Base
     streamToken: '0x000000000000000000000000000000000000000A',
     summaryNFT: '0x000000000000000000000000000000000000000B',
     staking: '0x000000000000000000000000000000000000000C',
+    bountyBoard: '0x000000000000000000000000000000000000000D',
   },
 };
 
@@ -206,6 +228,71 @@ export class ContractManager {
       apr: apr.toString(),
       totalStaked: totalStaked.toString(),
     };
+  }
+
+  // BountyBoard Methods
+  async getBountyBoardContract() {
+    if (!this.wallet) throw new Error('Wallet not connected');
+    const addresses = this.getContractAddresses(this.wallet.chainId);
+    if (!addresses || !addresses.bountyBoard) throw new Error('BountyBoard not deployed on this network');
+    
+    return this.createContract(addresses.bountyBoard, BOUNTY_BOARD_ABI);
+  }
+
+  async createBounty(reward: string, deadline: number): Promise<string> {
+    const contract = await this.getBountyBoardContract();
+    const tx = await contract.createBounty(reward, deadline);
+    return tx.hash;
+  }
+
+  async claimBounty(bountyId: number): Promise<string> {
+    const contract = await this.getBountyBoardContract();
+    const tx = await contract.claimBounty(bountyId);
+    return tx.hash;
+  }
+
+  async completeBounty(bountyId: number): Promise<string> {
+    const contract = await this.getBountyBoardContract();
+    const tx = await contract.completeBounty(bountyId);
+    return tx.hash;
+  }
+
+  async addTipToBounty(bountyId: number, amount: string): Promise<string> {
+    const contract = await this.getBountyBoardContract();
+    const tx = await contract.addTip(bountyId, amount);
+    return tx.hash;
+  }
+
+  async refundBounty(bountyId: number): Promise<string> {
+    const contract = await this.getBountyBoardContract();
+    const tx = await contract.refund(bountyId);
+    return tx.hash;
+  }
+
+  async getBountyFromChain(bountyId: number): Promise<{
+    creator: string;
+    claimer: string;
+    reward: string;
+    tipPool: string;
+    deadline: string;
+    status: number;
+  }> {
+    const contract = await this.getBountyBoardContract();
+    const bounty = await contract.getBounty(bountyId);
+    return {
+      creator: bounty[0],
+      claimer: bounty[1],
+      reward: bounty[2].toString(),
+      tipPool: bounty[3].toString(),
+      deadline: bounty[4].toString(),
+      status: bounty[5],
+    };
+  }
+
+  async getBountyCount(): Promise<number> {
+    const contract = await this.getBountyBoardContract();
+    const count = await contract.getBountyCount();
+    return count.toNumber();
   }
 
   // Utility Methods
