@@ -73,15 +73,29 @@ export const bounties = pgTable("bounties", {
   description: text("description").notNull(),
   contentUrl: text("content_url").notNull(),
   reward: integer("reward").notNull(), // in $STREAM tokens
-  tipPool: integer("tip_pool").default(0), // additional tips in cents
+  tipPool: integer("tip_pool").default(0), // additional tips from community
   deadline: timestamp("deadline"),
   tags: text("tags").array(),
   creatorId: varchar("creator_id").references(() => users.id),
+  creatorWallet: text("creator_wallet").notNull(), // blockchain wallet address
   assigneeId: varchar("assignee_id").references(() => users.id),
+  claimerWallet: text("claimer_wallet"), // blockchain wallet of claimer
   summaryId: varchar("summary_id").references(() => summaries.id),
-  status: text("status").notNull().default("open"), // open, claimed, in_progress, completed, expired
+  status: text("status").notNull().default("open"), // open, claimed, in_progress, completed, expired, cancelled
+  contractBountyId: integer("contract_bounty_id"), // on-chain bounty ID from smart contract
+  blockchainTxHash: text("blockchain_tx_hash"), // transaction hash for bounty creation
+  completionTxHash: text("completion_tx_hash"), // transaction hash for bounty completion
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const tipContributions = pgTable("tip_contributions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
+  tipperWallet: text("tipper_wallet").notNull(),
+  amount: integer("amount").notNull(), // tip amount in $STREAM tokens
+  blockchainTxHash: text("blockchain_tx_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const userInteractions = pgTable("user_interactions", {
@@ -480,6 +494,16 @@ export const insertBountySchema = createInsertSchema(bounties).pick({
   deadline: true,
   tags: true,
   creatorId: true,
+  creatorWallet: true,
+  contractBountyId: true,
+  blockchainTxHash: true,
+});
+
+export const insertTipContributionSchema = createInsertSchema(tipContributions).pick({
+  bountyId: true,
+  tipperWallet: true,
+  amount: true,
+  blockchainTxHash: true,
 });
 
 export const insertUserInteractionSchema = createInsertSchema(userInteractions).pick({
@@ -644,6 +668,9 @@ export type Summary = typeof summaries.$inferSelect;
 
 export type InsertBounty = z.infer<typeof insertBountySchema>;
 export type Bounty = typeof bounties.$inferSelect;
+
+export type InsertTipContribution = z.infer<typeof insertTipContributionSchema>;
+export type TipContribution = typeof tipContributions.$inferSelect;
 
 export type InsertUserInteraction = z.infer<typeof insertUserInteractionSchema>;
 export type UserInteraction = typeof userInteractions.$inferSelect;
