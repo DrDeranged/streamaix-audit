@@ -63,6 +63,8 @@ export const summaries = pgTable("summaries", {
   marketOutlook: text("market_outlook"), // overall outlook assessment
   arweaveId: text("arweave_id"), // decentralized storage reference
   ipfsHash: text("ipfs_hash"), // alternative decentralized storage
+  nftTokenId: text("nft_token_id"), // NFT token ID if minted
+  nftTxHash: text("nft_tx_hash"), // NFT minting transaction hash
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

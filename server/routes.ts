@@ -24,6 +24,7 @@ import { VolatilityForecastingService } from "./services/volatilityForecastingSe
 import { marketEventModelingService } from "./services/marketEventModelingService";
 import { patternRecognitionService } from "./services/patternRecognitionService";
 import { RecommendationEngine } from "./recommendation-engine";
+import { registerWeb3Routes } from "./web3Routes";
 import passport from "passport";
 
 // Initialize services
@@ -6311,6 +6312,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   const httpServer = createServer(app);
+  
+  // =============================================================================
+  // WEB3 / BLOCKCHAIN ROUTES
+  // =============================================================================
+  registerWeb3Routes(app);
   
   // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
