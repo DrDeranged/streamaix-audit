@@ -1,5 +1,11 @@
 import { Contract, Interface } from 'ethers';
 import { web3Manager, type WalletInfo } from './web3';
+import { 
+  STREAM_TOKEN_ABI, 
+  BOUNTY_BOARD_ABI, 
+  SUMMARY_NFT_ABI, 
+  STAKING_ABI 
+} from '@shared/contractABIs';
 
 // ═══════════════════════════════════════════════════════════════════════
 // DEPLOYMENT CONFIGURATION - Update after deploying contracts to Base
@@ -19,69 +25,8 @@ import { web3Manager, type WalletInfo } from './web3';
 //
 // ═══════════════════════════════════════════════════════════════════════
 
-// StreamAiX Token Contract ABI
-export const STREAM_TOKEN_ABI = [
-  'function name() view returns (string)',
-  'function symbol() view returns (string)',
-  'function decimals() view returns (uint8)',
-  'function totalSupply() view returns (uint256)',
-  'function balanceOf(address owner) view returns (uint256)',
-  'function transfer(address to, uint256 amount) returns (bool)',
-  'function approve(address spender, uint256 amount) returns (bool)',
-  'function allowance(address owner, address spender) view returns (uint256)',
-  'function mint(address to, uint256 amount) returns (bool)',
-  'function burn(uint256 amount) returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint256 value)',
-  'event Approval(address indexed owner, address indexed spender, uint256 value)',
-];
-
-// StreamAiX Summary NFT Contract ABI
-export const SUMMARY_NFT_ABI = [
-  'function name() view returns (string)',
-  'function symbol() view returns (string)',
-  'function tokenURI(uint256 tokenId) view returns (string)',
-  'function balanceOf(address owner) view returns (uint256)',
-  'function ownerOf(uint256 tokenId) view returns (address)',
-  'function mintSummaryNFT(address to, string memory ipfsHash, string memory arweaveId) returns (uint256)',
-  'function getSummaryData(uint256 tokenId) view returns (string memory ipfsHash, string memory arweaveId, uint256 timestamp)',
-  'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
-  'function approve(address to, uint256 tokenId)',
-  'function transferFrom(address from, address to, uint256 tokenId)',
-  'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
-  'event SummaryMinted(uint256 indexed tokenId, address indexed owner, string ipfsHash)',
-];
-
-// Staking Contract ABI
-export const STAKING_ABI = [
-  'function stake(uint256 amount)',
-  'function unstake(uint256 amount)',
-  'function claimRewards()',
-  'function getStakedAmount(address user) view returns (uint256)',
-  'function getPendingRewards(address user) view returns (uint256)',
-  'function getAPR() view returns (uint256)',
-  'function totalStaked() view returns (uint256)',
-  'event Staked(address indexed user, uint256 amount)',
-  'event Unstaked(address indexed user, uint256 amount)',
-  'event RewardsClaimed(address indexed user, uint256 amount)',
-];
-
-// BountyBoard Contract ABI
-export const BOUNTY_BOARD_ABI = [
-  'function createBounty(uint256 reward, uint256 deadline) returns (uint256)',
-  'function claimBounty(uint256 bountyId)',
-  'function completeBounty(uint256 bountyId)',
-  'function addTip(uint256 bountyId, uint256 amount)',
-  'function refund(uint256 bountyId)',
-  'function getBounty(uint256 bountyId) view returns (tuple(address creator, address claimer, uint256 reward, uint256 tipPool, uint256 deadline, uint8 status))',
-  'function getBountyCount() view returns (uint256)',
-  'function platformFee() view returns (uint256)',
-  'function platformFeeRecipient() view returns (address)',
-  'event BountyCreated(uint256 indexed bountyId, address indexed creator, uint256 reward, uint256 deadline)',
-  'event BountyClaimed(uint256 indexed bountyId, address indexed claimer)',
-  'event BountyCompleted(uint256 indexed bountyId, address indexed claimer, uint256 totalPayout)',
-  'event TipAdded(uint256 indexed bountyId, address indexed tipper, uint256 amount)',
-  'event BountyRefunded(uint256 indexed bountyId, address indexed creator, uint256 amount)',
-];
+// Re-export ABIs for backwards compatibility
+export { STREAM_TOKEN_ABI, BOUNTY_BOARD_ABI, SUMMARY_NFT_ABI, STAKING_ABI };
 
 // Contract addresses by network
 // Base network addresses can be overridden via environment variables

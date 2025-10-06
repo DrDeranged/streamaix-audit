@@ -1,5 +1,5 @@
 import { ethers, Contract } from 'ethers';
-import { STREAM_TOKEN_ABI, SUMMARY_NFT_ABI, STAKING_ABI, BOUNTY_BOARD_ABI } from '../../client/src/lib/contracts';
+import { STREAM_TOKEN_ABI, SUMMARY_NFT_ABI, STAKING_ABI, BOUNTY_BOARD_ABI } from '../../shared/contractABIs';
 
 interface ContractAddresses {
   streamToken: string;
