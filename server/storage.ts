@@ -7,6 +7,12 @@ import {
   type InsertBounty,
   type TipContribution,
   type InsertTipContribution,
+  type BountyHunter,
+  type InsertBountyHunter,
+  type BountyQualityScore,
+  type InsertBountyQualityScore,
+  type BountyEngagement,
+  type InsertBountyEngagement,
   type UserInteraction,
   type InsertUserInteraction,
   type KnowledgeStack,
@@ -51,6 +57,9 @@ import {
   summaries,
   bounties,
   tipContributions,
+  bountyHunters,
+  bountyQualityScores,
+  bountyEngagements,
   userInteractions,
   knowledgeStacks,
   userNotes,
@@ -105,6 +114,24 @@ export interface IStorage {
   // Tip contribution operations
   createTipContribution(tip: InsertTipContribution): Promise<TipContribution>;
   getTipContributionsByBounty(bountyId: string): Promise<TipContribution[]>;
+
+  // Bounty hunter operations
+  getBountyHunter(id: string): Promise<BountyHunter | undefined>;
+  getBountyHunterByUserId(userId: string): Promise<BountyHunter | undefined>;
+  getBountyHunterByWallet(walletAddress: string): Promise<BountyHunter | undefined>;
+  createBountyHunter(hunter: InsertBountyHunter): Promise<BountyHunter>;
+  updateBountyHunter(id: string, updates: Partial<InsertBountyHunter>): Promise<BountyHunter | undefined>;
+  getAllBountyHunters(limit?: number, offset?: number): Promise<BountyHunter[]>;
+
+  // Bounty quality score operations
+  getBountyQualityScore(bountyId: string): Promise<BountyQualityScore | undefined>;
+  createBountyQualityScore(score: InsertBountyQualityScore): Promise<BountyQualityScore>;
+  updateBountyQualityScore(bountyId: string, updates: Partial<InsertBountyQualityScore>): Promise<BountyQualityScore | undefined>;
+
+  // Bounty engagement operations
+  createBountyEngagement(engagement: InsertBountyEngagement): Promise<BountyEngagement>;
+  getBountyEngagements(bountyId: string): Promise<BountyEngagement[]>;
+  getBountyEngagementStats(bountyId: string): Promise<{ views: number; shares: number; likes: number; comments: number }>;
 
   // User interaction operations
   getUserInteractions(userId: string, options?: { summaryId?: string; limit?: number; targetType?: string; since?: Date }): Promise<UserInteraction[]>;
@@ -453,6 +480,111 @@ export class DatabaseStorage implements IStorage {
       .from(tipContributions)
       .where(eq(tipContributions.bountyId, bountyId))
       .orderBy(desc(tipContributions.createdAt));
+  }
+
+  // Bounty hunter operations
+  async getBountyHunter(id: string): Promise<BountyHunter | undefined> {
+    const [hunter] = await db
+      .select()
+      .from(bountyHunters)
+      .where(eq(bountyHunters.id, id));
+    return hunter || undefined;
+  }
+
+  async getBountyHunterByUserId(userId: string): Promise<BountyHunter | undefined> {
+    const [hunter] = await db
+      .select()
+      .from(bountyHunters)
+      .where(eq(bountyHunters.userId, userId));
+    return hunter || undefined;
+  }
+
+  async getBountyHunterByWallet(walletAddress: string): Promise<BountyHunter | undefined> {
+    const [hunter] = await db
+      .select()
+      .from(bountyHunters)
+      .where(eq(bountyHunters.walletAddress, walletAddress));
+    return hunter || undefined;
+  }
+
+  async createBountyHunter(hunter: InsertBountyHunter): Promise<BountyHunter> {
+    const [newHunter] = await db
+      .insert(bountyHunters)
+      .values(hunter)
+      .returning();
+    return newHunter;
+  }
+
+  async updateBountyHunter(id: string, updates: Partial<InsertBountyHunter>): Promise<BountyHunter | undefined> {
+    const [hunter] = await db
+      .update(bountyHunters)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(bountyHunters.id, id))
+      .returning();
+    return hunter || undefined;
+  }
+
+  async getAllBountyHunters(limit: number = 100, offset: number = 0): Promise<BountyHunter[]> {
+    return await db
+      .select()
+      .from(bountyHunters)
+      .orderBy(desc(bountyHunters.reputation))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  // Bounty quality score operations
+  async getBountyQualityScore(bountyId: string): Promise<BountyQualityScore | undefined> {
+    const [score] = await db
+      .select()
+      .from(bountyQualityScores)
+      .where(eq(bountyQualityScores.bountyId, bountyId));
+    return score || undefined;
+  }
+
+  async createBountyQualityScore(score: InsertBountyQualityScore): Promise<BountyQualityScore> {
+    const [newScore] = await db
+      .insert(bountyQualityScores)
+      .values(score)
+      .returning();
+    return newScore;
+  }
+
+  async updateBountyQualityScore(bountyId: string, updates: Partial<InsertBountyQualityScore>): Promise<BountyQualityScore | undefined> {
+    const [score] = await db
+      .update(bountyQualityScores)
+      .set(updates)
+      .where(eq(bountyQualityScores.bountyId, bountyId))
+      .returning();
+    return score || undefined;
+  }
+
+  // Bounty engagement operations
+  async createBountyEngagement(engagement: InsertBountyEngagement): Promise<BountyEngagement> {
+    const [newEngagement] = await db
+      .insert(bountyEngagements)
+      .values(engagement)
+      .returning();
+    return newEngagement;
+  }
+
+  async getBountyEngagements(bountyId: string): Promise<BountyEngagement[]> {
+    return await db
+      .select()
+      .from(bountyEngagements)
+      .where(eq(bountyEngagements.bountyId, bountyId))
+      .orderBy(desc(bountyEngagements.createdAt));
+  }
+
+  async getBountyEngagementStats(bountyId: string): Promise<{ views: number; shares: number; likes: number; comments: number }> {
+    const engagements = await this.getBountyEngagements(bountyId);
+    
+    return {
+      views: engagements.filter(e => e.engagementType === 'view').length,
+      shares: engagements.filter(e => e.engagementType === 'share').length,
+      likes: engagements.filter(e => e.engagementType === 'like').length,
+      comments: engagements.filter(e => e.engagementType === 'comment').length,
+    };
   }
 
   // User interaction operations
