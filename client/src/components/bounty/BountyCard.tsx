@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle } from 'lucide-react';
+import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,18 @@ export default function BountyCard({ bounty }: BountyCardProps) {
   const isOwner = wallet?.address?.toLowerCase() === bounty.creatorWallet?.toLowerCase();
   const isClaimer = wallet?.address?.toLowerCase() === bounty.claimerWallet?.toLowerCase();
   const canClaim = isConnected && !isOwner && !isClaimer && bounty.status === 'open' && !isExpired;
+
+  // Fetch quality score for completed bounties
+  const { data: qualityData } = useQuery<{ score: number; breakdown: any }>({
+    queryKey: ['/api/bounties', bounty.id, 'quality'],
+    enabled: bounty.status === 'completed',
+  });
+
+  // Fetch engagement stats
+  const { data: engagementData } = useQuery<{ views: number; shares: number; likes: number }>({
+    queryKey: ['/api/bounties', bounty.id, 'engagement'],
+    enabled: bounty.status === 'completed',
+  });
   
   const statusColors: Record<string, string> = {
     open: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400',
@@ -133,6 +146,60 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             <span className={isExpired ? 'text-red-400' : 'text-gray-400'} data-testid={`bounty-deadline-${bounty.id}`}>
               {isExpired ? 'Expired' : formatDistanceToNow(new Date(bounty.deadline), { addSuffix: true })}
             </span>
+          </div>
+        )}
+
+        {/* Quality Score & Engagement (for completed bounties) */}
+        {bounty.status === 'completed' && (qualityData || engagementData) && (
+          <div className="space-y-2">
+            {qualityData && (
+              <div className="flex items-center gap-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                <Star className="w-5 h-5 text-purple-400" />
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400">Quality Score</p>
+                  <p className="text-lg font-bold text-purple-400" data-testid={`bounty-quality-${bounty.id}`}>
+                    {qualityData.score}/100
+                  </p>
+                </div>
+                {qualityData.score >= 95 && (
+                  <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-xs">
+                    🏆 Excellent
+                  </Badge>
+                )}
+              </div>
+            )}
+            
+            {engagementData && (
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
+                  <Eye className="w-4 h-4 text-cyan-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Views</p>
+                    <p className="text-sm font-semibold text-white" data-testid={`bounty-views-${bounty.id}`}>
+                      {engagementData.views || 0}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
+                  <Heart className="w-4 h-4 text-pink-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Likes</p>
+                    <p className="text-sm font-semibold text-white" data-testid={`bounty-likes-${bounty.id}`}>
+                      {engagementData.likes || 0}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-green-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Shares</p>
+                    <p className="text-sm font-semibold text-white" data-testid={`bounty-shares-${bounty.id}`}>
+                      {engagementData.shares || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
