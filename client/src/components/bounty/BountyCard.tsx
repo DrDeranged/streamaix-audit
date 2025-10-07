@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart } from 'lucide-react';
+import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart, Share2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useBounties } from '@/hooks/useBounties';
+import { useEngagement } from '@/hooks/useEngagement';
 import { formatTokenAmount } from '@/lib/contracts';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { Bounty } from '@shared/schema';
@@ -19,6 +20,7 @@ interface BountyCardProps {
 export default function BountyCard({ bounty }: BountyCardProps) {
   const { wallet, isConnected } = useWeb3();
   const { claimBounty, addTip } = useBounties();
+  const { trackLike, trackShare } = useEngagement(bounty.id);
   const [tipAmount, setTipAmount] = useState('');
   const [showTipDialog, setShowTipDialog] = useState(false);
   
@@ -36,7 +38,6 @@ export default function BountyCard({ bounty }: BountyCardProps) {
   // Fetch engagement stats
   const { data: engagementData } = useQuery<{ views: number; shares: number; likes: number }>({
     queryKey: ['/api/bounties', bounty.id, 'engagement'],
-    enabled: bounty.status === 'completed',
   });
   
   const statusColors: Record<string, string> = {
@@ -170,33 +171,60 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             )}
             
             {engagementData && (
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
-                  <Eye className="w-4 h-4 text-cyan-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Views</p>
-                    <p className="text-sm font-semibold text-white" data-testid={`bounty-views-${bounty.id}`}>
-                      {engagementData.views || 0}
-                    </p>
+              <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
+                    <Eye className="w-4 h-4 text-cyan-400" />
+                    <div>
+                      <p className="text-xs text-gray-500">Views</p>
+                      <p className="text-sm font-semibold text-white" data-testid={`bounty-views-${bounty.id}`}>
+                        {engagementData.views || 0}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
+                    <Heart className="w-4 h-4 text-pink-400" />
+                    <div>
+                      <p className="text-xs text-gray-500">Likes</p>
+                      <p className="text-sm font-semibold text-white" data-testid={`bounty-likes-${bounty.id}`}>
+                        {engagementData.likes || 0}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
+                    <Share2 className="w-4 h-4 text-green-400" />
+                    <div>
+                      <p className="text-xs text-gray-500">Shares</p>
+                      <p className="text-sm font-semibold text-white" data-testid={`bounty-shares-${bounty.id}`}>
+                        {engagementData.shares || 0}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
-                  <Heart className="w-4 h-4 text-pink-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Likes</p>
-                    <p className="text-sm font-semibold text-white" data-testid={`bounty-likes-${bounty.id}`}>
-                      {engagementData.likes || 0}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 p-2 bg-slate-800/50 rounded-lg">
-                  <DollarSign className="w-4 h-4 text-green-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Shares</p>
-                    <p className="text-sm font-semibold text-white" data-testid={`bounty-shares-${bounty.id}`}>
-                      {engagementData.shares || 0}
-                    </p>
-                  </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => trackLike.mutate()}
+                    disabled={trackLike.isPending}
+                    className="flex-1 border-pink-500/30 hover:bg-pink-500/10"
+                    data-testid={`button-like-${bounty.id}`}
+                  >
+                    <Heart className="w-4 h-4 mr-1" />
+                    {trackLike.isPending ? 'Liking...' : 'Like'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => trackShare.mutate()}
+                    disabled={trackShare.isPending}
+                    className="flex-1 border-green-500/30 hover:bg-green-500/10"
+                    data-testid={`button-share-${bounty.id}`}
+                  >
+                    <Share2 className="w-4 h-4 mr-1" />
+                    {trackShare.isPending ? 'Sharing...' : 'Share'}
+                  </Button>
                 </div>
               </div>
             )}
