@@ -26,6 +26,9 @@ import { patternRecognitionService } from "./services/patternRecognitionService"
 import { RecommendationEngine } from "./recommendation-engine";
 import { registerWeb3Routes } from "./web3Routes";
 import socialTradingRoutes from "./socialTradingRoutes";
+import { bountyHunterService } from "./services/bountyHunterService";
+import { qualityScorerService } from "./services/qualityScorerService";
+import { trendingService } from "./services/trendingService";
 import passport from "passport";
 
 // Initialize services
@@ -773,6 +776,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       avgCompletionTime: '24h' // TODO: Calculate from actual data
     };
 
+    res.json({ stats });
+  }));
+
+  // Get trending bounties
+  app.get('/api/bounties/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const trendingBounties = await trendingService.getTrendingBounties(limit);
+    res.json({ bounties: trendingBounties });
+  }));
+
+  // Get hot bounties (recent + high reward)
+  app.get('/api/bounties/hot', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 5;
+    const hotBounties = await trendingService.getHotBounties(limit);
+    res.json({ bounties: hotBounties });
+  }));
+
+  // Get urgent bounties (deadline < 24 hours)
+  app.get('/api/bounties/urgent', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 5;
+    const urgentBounties = await trendingService.getUrgentBounties(limit);
+    res.json({ bounties: urgentBounties });
+  }));
+
+  // Get trending categories
+  app.get('/api/bounties/trending/categories', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 5;
+    const categories = await trendingService.getTrendingCategories(limit);
+    res.json({ categories });
+  }));
+
+  // Track bounty engagement
+  app.post('/api/bounties/:id/track', optionalAuth, asyncHandler(async (req: any, res: Response) => {
+    const { engagementType, metadata } = req.body;
+    const userId = req.user?.id || null;
+    const ipAddress = req.ip;
+
+    await trendingService.trackEngagement(
+      req.params.id,
+      userId,
+      engagementType,
+      metadata,
+      ipAddress
+    );
+
+    res.json({ success: true });
+  }));
+
+  // Get bounty engagement stats
+  app.get('/api/bounties/:id/engagement', asyncHandler(async (req: Request, res: Response) => {
+    const stats = await trendingService.getEngagementStats(req.params.id);
+    res.json({ stats });
+  }));
+
+  // Get bounty quality score
+  app.get('/api/bounties/:id/quality', asyncHandler(async (req: Request, res: Response) => {
+    const qualityScore = await qualityScorerService.getQualityScore(req.params.id);
+    if (!qualityScore) {
+      return res.status(404).json({ error: 'Quality score not found' });
+    }
+    res.json({ qualityScore });
+  }));
+
+  // Get bounty hunter leaderboard
+  app.get('/api/leaderboard', asyncHandler(async (req: Request, res: Response) => {
+    const sortBy = (req.query.sortBy as 'reputation' | 'totalEarned' | 'completionRate' | 'averageQuality') || 'reputation';
+    const limit = parseInt(req.query.limit as string) || 10;
+    const leaderboard = await bountyHunterService.getLeaderboard(sortBy, limit);
+    res.json({ leaderboard });
+  }));
+
+  // Get bounty hunter profile
+  app.get('/api/bounty-hunters/:id', asyncHandler(async (req: Request, res: Response) => {
+    const stats = await bountyHunterService.getHunterStats(req.params.id);
+    res.json({ hunter: stats });
+  }));
+
+  // Get quality stats
+  app.get('/api/quality-stats', asyncHandler(async (req: Request, res: Response) => {
+    const stats = await qualityScorerService.getQualityStats();
     res.json({ stats });
   }));
 
