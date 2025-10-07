@@ -25,6 +25,7 @@ import { marketEventModelingService } from "./services/marketEventModelingServic
 import { patternRecognitionService } from "./services/patternRecognitionService";
 import { RecommendationEngine } from "./recommendation-engine";
 import { registerWeb3Routes } from "./web3Routes";
+import socialTradingRoutes from "./socialTradingRoutes";
 import passport from "passport";
 
 // Initialize services
@@ -6317,6 +6318,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WEB3 / BLOCKCHAIN ROUTES
   // =============================================================================
   registerWeb3Routes(app);
+  
+  // =============================================================================
+  // SOCIAL TRADING PLATFORM ROUTES
+  // =============================================================================
+  app.use(socialTradingRoutes);
   
   // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
