@@ -687,12 +687,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       assigneeId: req.user!.id,
       claimerWallet,
       status: 'claimed',
-      blockchainTxHash
+      blockchainTxHash,
+      claimedAt: new Date()
+    });
+
+    // Create or get hunter profile
+    let hunter = await storage.getBountyHunterByUserId(req.user!.id);
+    if (!hunter) {
+      hunter = await storage.createBountyHunter({
+        userId: req.user!.id,
+        walletAddress: claimerWallet,
+        displayName: req.user!.username,
+        level: 1,
+        reputation: 0,
+        totalBounties: 1,
+      });
+    } else {
+      // Update total bounties claimed
+      await storage.updateBountyHunter(hunter.id, {
+        totalBounties: (hunter.totalBounties || 0) + 1,
+      });
+    }
+
+    // Track engagement (bounty claim is a type of engagement)
+    await storage.createBountyEngagement({
+      bountyId: req.params.id,
+      userId: req.user!.id,
+      engagementType: 'claim',
+      metadata: { wallet: claimerWallet, txHash: blockchainTxHash },
     });
 
     res.json({
       message: 'Bounty claimed successfully',
-      bounty: updatedBounty
+      bounty: updatedBounty,
+      hunter
     });
   }));
 
@@ -719,13 +747,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const updatedBounty = await storage.updateBounty(req.params.id, {
       summaryId,
       completionTxHash,
-      status: 'completed'
+      status: 'completed',
+      completedAt: new Date()
     });
 
-    res.json({
-      message: 'Bounty completed and payout initiated',
-      bounty: updatedBounty
-    });
+    // Get the hunter profile
+    if (bounty.assigneeId) {
+      const hunter = await storage.getBountyHunterByUserId(bounty.assigneeId);
+      
+      if (hunter) {
+        // Calculate quality score for the submitted summary
+        const qualityScore = await qualityScorerService.calculateQualityScore(
+          req.params.id,
+          summaryId
+        );
+
+        // Update hunter reputation with quality bonus
+        await bountyHunterService.updateAfterCompletion(
+          hunter.id,
+          req.params.id,
+          qualityScore.overallScore || 70
+        );
+
+        // Track engagement for completion
+        await storage.createBountyEngagement({
+          bountyId: req.params.id,
+          userId: bounty.assigneeId,
+          engagementType: 'complete',
+          metadata: { summaryId, txHash: completionTxHash, qualityScore: qualityScore.overallScore },
+        });
+
+        res.json({
+          message: 'Bounty completed and payout initiated',
+          bounty: updatedBounty,
+          qualityScore,
+          hunterUpdated: true
+        });
+      } else {
+        res.json({
+          message: 'Bounty completed and payout initiated',
+          bounty: updatedBounty
+        });
+      }
+    } else {
+      res.json({
+        message: 'Bounty completed and payout initiated',
+        bounty: updatedBounty
+      });
+    }
   }));
 
   // Add tip to bounty (Web3)
