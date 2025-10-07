@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -57,8 +57,41 @@ export default function BountyBoard() {
     },
   });
 
+  // Fetch trending bounties
+  const { data: trendingData } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties/trending'],
+    queryFn: async () => {
+      const response = await fetch('/api/bounties/trending?limit=6');
+      if (!response.ok) throw new Error('Failed to fetch trending bounties');
+      return response.json();
+    },
+  });
+
+  // Fetch hot bounties
+  const { data: hotData } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties/hot'],
+    queryFn: async () => {
+      const response = await fetch('/api/bounties/hot?limit=3');
+      if (!response.ok) throw new Error('Failed to fetch hot bounties');
+      return response.json();
+    },
+  });
+
+  // Fetch urgent bounties
+  const { data: urgentData } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties/urgent'],
+    queryFn: async () => {
+      const response = await fetch('/api/bounties/urgent?limit=3');
+      if (!response.ok) throw new Error('Failed to fetch urgent bounties');
+      return response.json();
+    },
+  });
+
   const bounties = bountiesData?.bounties || [];
   const stats = statsData?.stats;
+  const trendingBounties = trendingData?.bounties || [];
+  const hotBounties = hotData?.bounties || [];
+  const urgentBounties = urgentData?.bounties || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
@@ -169,6 +202,102 @@ export default function BountyBoard() {
             </div>
           </Card>
         </motion.div>
+
+        {/* Trending Section */}
+        {(trendingBounties.length > 0 || hotBounties.length > 0 || urgentBounties.length > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Trending */}
+              {trendingBounties.length > 0 && (
+                <Card className="bg-gradient-to-br from-cyan-900/20 to-purple-900/20 border-cyan-500/30 backdrop-blur-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-lg font-semibold text-cyan-300">Trending</h3>
+                    <Badge variant="outline" className="ml-auto border-cyan-500/50 text-cyan-400 text-xs">
+                      {trendingBounties.length}
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {trendingBounties.slice(0, 3).map((bounty) => (
+                      <div
+                        key={bounty.id}
+                        className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer"
+                        data-testid={`trending-bounty-${bounty.id}`}
+                      >
+                        <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-cyan-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Hot */}
+              {hotBounties.length > 0 && (
+                <Card className="bg-gradient-to-br from-orange-900/20 to-red-900/20 border-orange-500/30 backdrop-blur-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Flame className="w-5 h-5 text-orange-400" />
+                    <h3 className="text-lg font-semibold text-orange-300">Hot</h3>
+                    <Badge variant="outline" className="ml-auto border-orange-500/50 text-orange-400 text-xs">
+                      {hotBounties.length}
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {hotBounties.map((bounty) => (
+                      <div
+                        key={bounty.id}
+                        className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer"
+                        data-testid={`hot-bounty-${bounty.id}`}
+                      >
+                        <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-orange-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Urgent */}
+              {urgentBounties.length > 0 && (
+                <Card className="bg-gradient-to-br from-yellow-900/20 to-red-900/20 border-yellow-500/30 backdrop-blur-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <AlertCircle className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-lg font-semibold text-yellow-300">Urgent</h3>
+                    <Badge variant="outline" className="ml-auto border-yellow-500/50 text-yellow-400 text-xs">
+                      {urgentBounties.length}
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {urgentBounties.map((bounty) => (
+                      <div
+                        key={bounty.id}
+                        className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer"
+                        data-testid={`urgent-bounty-${bounty.id}`}
+                      >
+                        <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-yellow-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-gray-400">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Filters */}
         <motion.div
