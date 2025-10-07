@@ -332,6 +332,221 @@ export const entrepreneurPredictions = pgTable("entrepreneur_predictions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ====================
+// SOCIAL TRADING PLATFORM TABLES
+// ====================
+
+// Trader Profiles - Extended user data for trading platform
+export const traders = pgTable("traders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  walletAddress: text("wallet_address").notNull().unique(),
+  
+  // Trader Identity
+  displayName: text("display_name").notNull(),
+  avatar: text("avatar"),
+  bio: text("bio"),
+  isVerified: boolean("is_verified").default(false),
+  tradingStyle: text("trading_style"), // swing, day, scalp, position, algorithmic
+  
+  // Performance Metrics
+  totalTrades: integer("total_trades").default(0),
+  winRate: real("win_rate").default(0), // 0-100
+  totalPnl: real("total_pnl").default(0), // Total profit/loss in USD
+  roi: real("roi").default(0), // Return on investment percentage
+  sharpeRatio: real("sharpe_ratio"), // Risk-adjusted return
+  maxDrawdown: real("max_drawdown"), // Maximum drawdown percentage
+  
+  // Trading Activity
+  avgHoldTime: integer("avg_hold_time"), // Average position hold time in hours
+  avgPositionSize: real("avg_position_size"), // Average position size in USD
+  totalVolume: real("total_volume").default(0), // Total trading volume in USD
+  
+  // Social Metrics
+  followers: integer("followers").default(0),
+  copiers: integer("copiers").default(0), // Active copy traders
+  totalCopied: integer("total_copied").default(0), // Lifetime copy count
+  reputation: integer("reputation").default(50), // 0-100 reputation score
+  
+  // Trader Settings
+  isPublic: boolean("is_public").default(true), // Public or private profile
+  allowCopyTrading: boolean("allow_copy_trading").default(true),
+  minCopyAmount: real("min_copy_amount").default(100), // Minimum USD to copy
+  maxCopiers: integer("max_copiers").default(1000), // Max simultaneous copiers
+  
+  // Risk Profile
+  riskLevel: text("risk_level").notNull().default("medium"), // low, medium, high, extreme
+  preferredAssets: text("preferred_assets").array(), // BTC, ETH, SOL, etc.
+  tradingPairs: text("trading_pairs").array(), // BTC/USD, ETH/USD, etc.
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastTradeAt: timestamp("last_trade_at"),
+});
+
+// Trading Signals - Individual signals posted by traders
+export const tradingSignals = pgTable("trading_signals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  traderId: varchar("trader_id").references(() => traders.id).notNull(),
+  
+  // Signal Details
+  asset: text("asset").notNull(), // BTC, ETH, SOL
+  pair: text("pair").notNull(), // BTC/USD, ETH/USD
+  direction: text("direction").notNull(), // long, short
+  signalType: text("signal_type").notNull(), // entry, exit, take_profit, stop_loss
+  
+  // Price Targets
+  entryPrice: real("entry_price").notNull(),
+  targetPrice: real("target_price"),
+  stopLoss: real("stop_loss"),
+  currentPrice: real("current_price"),
+  
+  // Position Details
+  leverage: integer("leverage").default(1), // 1x, 5x, 10x, etc.
+  positionSize: real("position_size"), // USD value
+  confidence: integer("confidence").default(75), // 0-100
+  timeframe: text("timeframe").notNull(), // 5m, 15m, 1h, 4h, 1d, 1w
+  
+  // Analysis
+  reasoning: text("reasoning"), // Why this signal
+  technicalIndicators: jsonb("technical_indicators"), // RSI, MACD, etc.
+  tags: text("tags").array(), // breakout, reversal, trend_continuation
+  
+  // Performance Tracking
+  status: text("status").notNull().default("active"), // active, closed, stopped_out, target_hit
+  pnl: real("pnl"), // Actual profit/loss when closed
+  pnlPercentage: real("pnl_percentage"), // P/L as percentage
+  closePrice: real("close_price"),
+  closedAt: timestamp("closed_at"),
+  
+  // Social Engagement
+  views: integer("views").default(0),
+  likes: integer("likes").default(0),
+  copies: integer("copies").default(0), // How many copied this signal
+  comments: integer("comments").default(0),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  expiresAt: timestamp("expires_at"), // Signal expiration time
+});
+
+// Copy Trading Positions - Active copy trading relationships
+export const copyTradingPositions = pgTable("copy_trading_positions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Participants
+  copierId: varchar("copier_id").references(() => users.id).notNull(),
+  traderId: varchar("trader_id").references(() => traders.id).notNull(),
+  signalId: varchar("signal_id").references(() => tradingSignals.id),
+  
+  // Position Details
+  asset: text("asset").notNull(),
+  pair: text("pair").notNull(),
+  direction: text("direction").notNull(), // long, short
+  
+  // Entry Information
+  entryPrice: real("entry_price").notNull(),
+  positionSize: real("position_size").notNull(), // USD value
+  leverage: integer("leverage").default(1),
+  
+  // Exit Information
+  currentPrice: real("current_price"),
+  exitPrice: real("exit_price"),
+  stopLoss: real("stop_loss"),
+  takeProfit: real("take_profit"),
+  
+  // Performance
+  unrealizedPnl: real("unrealized_pnl"),
+  realizedPnl: real("realized_pnl"),
+  pnlPercentage: real("pnl_percentage"),
+  fees: real("fees").default(0),
+  
+  // Status
+  status: text("status").notNull().default("open"), // open, closed, liquidated
+  
+  // Risk Management
+  initialRisk: real("initial_risk"), // % of portfolio risked
+  maxDrawdown: real("max_drawdown"),
+  
+  // Timestamps
+  openedAt: timestamp("opened_at").defaultNow(),
+  closedAt: timestamp("closed_at"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Trader Performance History - Time-series performance data
+export const traderPerformance = pgTable("trader_performance", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  traderId: varchar("trader_id").references(() => traders.id).notNull(),
+  
+  // Time Period
+  period: text("period").notNull(), // daily, weekly, monthly
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Performance Metrics
+  trades: integer("trades").default(0),
+  wins: integer("wins").default(0),
+  losses: integer("losses").default(0),
+  winRate: real("win_rate").default(0),
+  
+  // Financial Metrics
+  totalPnl: real("total_pnl").default(0),
+  totalVolume: real("total_volume").default(0),
+  roi: real("roi").default(0),
+  sharpeRatio: real("sharpe_ratio"),
+  
+  // Risk Metrics
+  maxDrawdown: real("max_drawdown"),
+  avgRiskPerTrade: real("avg_risk_per_trade"),
+  volatility: real("volatility"),
+  
+  // Social Metrics
+  newFollowers: integer("new_followers").default(0),
+  newCopiers: integer("new_copiers").default(0),
+  totalFollowers: integer("total_followers").default(0),
+  totalCopiers: integer("total_copiers").default(0),
+  
+  // Engagement
+  signalsPosted: integer("signals_posted").default(0),
+  totalViews: integer("total_views").default(0),
+  totalLikes: integer("total_likes").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Trading Alerts - User alert configurations
+export const tradingAlerts = pgTable("trading_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  traderId: varchar("trader_id").references(() => traders.id), // Alert for specific trader
+  
+  // Alert Configuration
+  alertType: text("alert_type").notNull(), // new_signal, position_closed, price_target, stop_loss
+  asset: text("asset"), // BTC, ETH, etc. (null for all)
+  direction: text("direction"), // long, short (null for both)
+  
+  // Conditions
+  minConfidence: integer("min_confidence"), // Minimum signal confidence
+  minWinRate: real("min_win_rate"), // Minimum trader win rate
+  priceThreshold: real("price_threshold"), // Alert when price crosses
+  
+  // Notification Settings
+  notifyEmail: boolean("notify_email").default(false),
+  notifyPush: boolean("notify_push").default(true),
+  notifyInApp: boolean("notify_in_app").default(true),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  triggeredCount: integer("triggered_count").default(0),
+  lastTriggered: timestamp("last_triggered"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
@@ -659,6 +874,73 @@ export const insertEntrepreneurPredictionSchema = createInsertSchema(entrepreneu
   predictionMadeAt: true,
 });
 
+// Social Trading Insert Schemas
+export const insertTraderSchema = createInsertSchema(traders).pick({
+  userId: true,
+  walletAddress: true,
+  displayName: true,
+  avatar: true,
+  bio: true,
+  tradingStyle: true,
+  isPublic: true,
+  allowCopyTrading: true,
+  minCopyAmount: true,
+  maxCopiers: true,
+  riskLevel: true,
+  preferredAssets: true,
+  tradingPairs: true,
+});
+
+export const insertTradingSignalSchema = createInsertSchema(tradingSignals).pick({
+  traderId: true,
+  asset: true,
+  pair: true,
+  direction: true,
+  signalType: true,
+  entryPrice: true,
+  targetPrice: true,
+  stopLoss: true,
+  currentPrice: true,
+  leverage: true,
+  positionSize: true,
+  confidence: true,
+  timeframe: true,
+  reasoning: true,
+  technicalIndicators: true,
+  tags: true,
+  expiresAt: true,
+});
+
+export const insertCopyTradingPositionSchema = createInsertSchema(copyTradingPositions).pick({
+  copierId: true,
+  traderId: true,
+  signalId: true,
+  asset: true,
+  pair: true,
+  direction: true,
+  entryPrice: true,
+  positionSize: true,
+  leverage: true,
+  stopLoss: true,
+  takeProfit: true,
+  initialRisk: true,
+});
+
+export const insertTradingAlertSchema = createInsertSchema(tradingAlerts).pick({
+  userId: true,
+  traderId: true,
+  alertType: true,
+  asset: true,
+  direction: true,
+  minConfidence: true,
+  minWinRate: true,
+  priceThreshold: true,
+  notifyEmail: true,
+  notifyPush: true,
+  notifyInApp: true,
+  isActive: true,
+});
+
 // Pattern Recognition Insert Schemas moved after table definitions
 
 // Types
@@ -712,6 +994,21 @@ export type AvatarInsight = typeof avatarInsights.$inferSelect;
 
 export type InsertEntrepreneurPrediction = z.infer<typeof insertEntrepreneurPredictionSchema>;
 export type EntrepreneurPrediction = typeof entrepreneurPredictions.$inferSelect;
+
+export type InsertTrader = z.infer<typeof insertTraderSchema>;
+export type Trader = typeof traders.$inferSelect;
+
+export type InsertTradingSignal = z.infer<typeof insertTradingSignalSchema>;
+export type DbTradingSignal = typeof tradingSignals.$inferSelect;
+
+export type InsertCopyTradingPosition = z.infer<typeof insertCopyTradingPositionSchema>;
+export type CopyTradingPosition = typeof copyTradingPositions.$inferSelect;
+
+export type InsertTraderPerformance = typeof traderPerformance.$inferSelect;
+export type TraderPerformance = typeof traderPerformance.$inferSelect;
+
+export type InsertTradingAlert = z.infer<typeof insertTradingAlertSchema>;
+export type TradingAlert = typeof tradingAlerts.$inferSelect;
 
 // Cross-Market Signal Generation Types - Phase 3 Final Feature
 export type CrossMarketSignal = {
