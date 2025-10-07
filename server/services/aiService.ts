@@ -28,11 +28,63 @@ export class AIService {
     language: string;
   }> {
     try {
-      // For now, return mock data structure with error message
-      // This would integrate with video-to-audio extraction service
-      throw new Error('Video transcription requires additional audio processing service');
+      console.log('🎬 Extracting audio from URL:', videoUrl);
+      
+      // Step 1: Extract audio using ContentExtractor
+      const extractedContent = await ContentExtractor.extractContent(videoUrl);
+      console.log('✅ Audio extracted:', extractedContent.audioPath);
+      
+      // Step 2: Transcribe audio using OpenAI Whisper
+      const transcript = await this.transcribeAudioFile(extractedContent.audioPath);
+      console.log('✅ Transcription complete, length:', transcript.text.length, 'chars');
+      
+      // Step 3: Clean up temporary audio file
+      try {
+        await fs.unlink(extractedContent.audioPath);
+        console.log('🗑️ Cleaned up temp file:', extractedContent.audioPath);
+      } catch (cleanupError) {
+        console.warn('Failed to cleanup temp file:', cleanupError);
+      }
+      
+      return {
+        transcript: transcript.text,
+        duration: extractedContent.duration,
+        language: transcript.language || 'en'
+      };
     } catch (error) {
+      console.error('❌ Transcription failed:', error);
       throw new Error(`Transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Transcribe audio file using OpenAI Whisper
+   */
+  static async transcribeAudioFile(audioPath: string): Promise<{
+    text: string;
+    language: string;
+  }> {
+    const client = this.getClient();
+    
+    console.log('🎙️ Transcribing audio file with Whisper...');
+    
+    try {
+      const audioStream = createReadStream(audioPath);
+      
+      const transcription = await client.audio.transcriptions.create({
+        file: audioStream,
+        model: 'whisper-1',
+        language: 'en', // Auto-detect or specify language
+        response_format: 'verbose_json'
+      });
+      
+      return {
+        text: transcription.text,
+        language: transcription.language || 'en'
+      };
+    } catch (error) {
+      console.error('Whisper API error:', error);
+      throw new Error(`Whisper transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
