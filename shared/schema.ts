@@ -74,9 +74,13 @@ export const bounties = pgTable("bounties", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   contentUrl: text("content_url").notNull(),
-  reward: integer("reward").notNull(), // in $STREAM tokens
+  reward: integer("reward").notNull(), // reward amount in smallest unit
+  tokenType: text("token_type").notNull().default("STREAM"), // STREAM, ETH, USDC
+  tokenAddress: text("token_address"), // contract address for the token
   tipPool: integer("tip_pool").default(0), // additional tips from community
   deadline: timestamp("deadline"),
+  difficulty: text("difficulty").default("medium"), // easy, medium, hard, expert
+  category: text("category"), // DeFi, NFT, Layer2, etc
   tags: text("tags").array(),
   creatorId: varchar("creator_id").references(() => users.id),
   creatorWallet: text("creator_wallet").notNull(), // blockchain wallet address
@@ -87,6 +91,8 @@ export const bounties = pgTable("bounties", {
   contractBountyId: integer("contract_bounty_id"), // on-chain bounty ID from smart contract
   blockchainTxHash: text("blockchain_tx_hash"), // transaction hash for bounty creation
   completionTxHash: text("completion_tx_hash"), // transaction hash for bounty completion
+  claimedAt: timestamp("claimed_at"),
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -94,9 +100,61 @@ export const bounties = pgTable("bounties", {
 export const tipContributions = pgTable("tip_contributions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
+  tipperId: varchar("tipper_id").references(() => users.id),
   tipperWallet: text("tipper_wallet").notNull(),
-  amount: integer("amount").notNull(), // tip amount in $STREAM tokens
+  amount: integer("amount").notNull(), // tip amount in smallest unit
+  tokenType: text("token_type").notNull().default("STREAM"), // STREAM, ETH, USDC
   blockchainTxHash: text("blockchain_tx_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const bountyHunters = pgTable("bounty_hunters", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  walletAddress: text("wallet_address").notNull(),
+  displayName: text("display_name"),
+  bio: text("bio"),
+  level: integer("level").default(1), // 1-10 levels
+  reputation: integer("reputation").default(0), // 0-1000 points
+  currentStreak: integer("current_streak").default(0), // consecutive completions
+  longestStreak: integer("longest_streak").default(0),
+  totalEarned: integer("total_earned").default(0), // total rewards in wei
+  totalBounties: integer("total_bounties").default(0),
+  completedBounties: integer("completed_bounties").default(0),
+  completionRate: real("completion_rate").default(0), // 0-100%
+  averageQuality: real("average_quality").default(0), // 0-100
+  averageCompletionTime: integer("average_completion_time"), // in hours
+  badges: text("badges").array(), // ["speed_demon", "quality_master", "first_bounty"]
+  specializations: text("specializations").array(), // ["DeFi", "NFT", "Layer2"]
+  isActive: boolean("is_active").default(true),
+  lastCompletedAt: timestamp("last_completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const bountyQualityScores = pgTable("bounty_quality_scores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bountyId: varchar("bounty_id").references(() => bounties.id).notNull().unique(),
+  summaryId: varchar("summary_id").references(() => summaries.id),
+  aiScore: integer("ai_score"), // 0-100 from GPT-4o analysis
+  humanScore: integer("human_score"), // 0-100 from community voting (future)
+  plagiarismScore: integer("plagiarism_score"), // 0-100, higher = more unique
+  accuracyScore: integer("accuracy_score"), // 0-100 content accuracy
+  completenessScore: integer("completeness_score"), // 0-100 how complete
+  readabilityScore: integer("readability_score"), // 0-100 ease of reading
+  overallScore: integer("overall_score"), // weighted average
+  feedback: text("feedback"), // AI-generated feedback
+  metadata: jsonb("metadata"), // additional scoring details
+  scoredAt: timestamp("scored_at").defaultNow(),
+});
+
+export const bountyEngagements = pgTable("bounty_engagements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  engagementType: text("engagement_type").notNull(), // view, share, comment, like, bookmark
+  metadata: jsonb("metadata"), // platform for share, comment text, etc
+  ipAddress: text("ip_address"), // for anonymous tracking
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -708,7 +766,11 @@ export const insertBountySchema = createInsertSchema(bounties).pick({
   description: true,
   contentUrl: true,
   reward: true,
+  tokenType: true,
+  tokenAddress: true,
   deadline: true,
+  difficulty: true,
+  category: true,
   tags: true,
   creatorId: true,
   creatorWallet: true,
@@ -718,9 +780,43 @@ export const insertBountySchema = createInsertSchema(bounties).pick({
 
 export const insertTipContributionSchema = createInsertSchema(tipContributions).pick({
   bountyId: true,
+  tipperId: true,
   tipperWallet: true,
   amount: true,
+  tokenType: true,
   blockchainTxHash: true,
+});
+
+export const insertBountyHunterSchema = createInsertSchema(bountyHunters).pick({
+  userId: true,
+  walletAddress: true,
+  displayName: true,
+  bio: true,
+  level: true,
+  reputation: true,
+  specializations: true,
+});
+
+export const insertBountyQualityScoreSchema = createInsertSchema(bountyQualityScores).pick({
+  bountyId: true,
+  summaryId: true,
+  aiScore: true,
+  humanScore: true,
+  plagiarismScore: true,
+  accuracyScore: true,
+  completenessScore: true,
+  readabilityScore: true,
+  overallScore: true,
+  feedback: true,
+  metadata: true,
+});
+
+export const insertBountyEngagementSchema = createInsertSchema(bountyEngagements).pick({
+  bountyId: true,
+  userId: true,
+  engagementType: true,
+  metadata: true,
+  ipAddress: true,
 });
 
 export const insertUserInteractionSchema = createInsertSchema(userInteractions).pick({
@@ -955,6 +1051,15 @@ export type Bounty = typeof bounties.$inferSelect;
 
 export type InsertTipContribution = z.infer<typeof insertTipContributionSchema>;
 export type TipContribution = typeof tipContributions.$inferSelect;
+
+export type InsertBountyHunter = z.infer<typeof insertBountyHunterSchema>;
+export type BountyHunter = typeof bountyHunters.$inferSelect;
+
+export type InsertBountyQualityScore = z.infer<typeof insertBountyQualityScoreSchema>;
+export type BountyQualityScore = typeof bountyQualityScores.$inferSelect;
+
+export type InsertBountyEngagement = z.infer<typeof insertBountyEngagementSchema>;
+export type BountyEngagement = typeof bountyEngagements.$inferSelect;
 
 export type InsertUserInteraction = z.infer<typeof insertUserInteractionSchema>;
 export type UserInteraction = typeof userInteractions.$inferSelect;
