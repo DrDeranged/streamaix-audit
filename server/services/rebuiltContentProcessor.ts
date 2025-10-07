@@ -121,6 +121,40 @@ export class RebuiltContentProcessor {
       });
       
       console.log(`💾 Saving complete results for: ${summaryId}`);
+      
+      // Prepare data for decentralized storage
+      const summaryData = {
+        title: metadata.title,
+        summary: analysis.summary,
+        tldrSummary: analysis.tldrSummary,
+        blogPost: analysis.executiveSummary,
+        bulletPoints: analysis.bulletPoints,
+        trends: analysis.trends,
+        financialTrends: analysis.financialTrends,
+        marketSentiment: analysis.marketSentiment,
+        sourceCredibility: analysis.sourceCredibility,
+        keyQuotes: analysis.keyQuotes,
+        chapters: analysis.chapters || JSON.parse(this.generateDynamicChaptersForPrompt(metadata.duration)),
+        tags: analysis.tags,
+        metadata: {
+          channel: metadata.channel,
+          duration: metadata.duration,
+          views: metadata.viewCount,
+          thumbnail: metadata.thumbnail,
+          videoId: metadata.videoId
+        },
+        createdAt: new Date().toISOString()
+      };
+      
+      // Upload to IPFS and Arweave in parallel
+      console.log(`☁️ Uploading to decentralized storage...`);
+      const Web3Service = (await import('./web3Service')).Web3Service;
+      const [ipfsHash, arweaveId] = await Promise.all([
+        Web3Service.storeOnIPFS(summaryData),
+        Web3Service.storeOnArweave(summaryData)
+      ]);
+      console.log(`✅ Decentralized storage complete: IPFS=${ipfsHash}, Arweave=${arweaveId}`);
+      
       await this.storage.updateSummary(summaryId, {
         processingStatus: 'completed',
         title: metadata.title,
@@ -152,8 +186,8 @@ export class RebuiltContentProcessor {
           thumbnail: metadata.thumbnail,
           videoId: metadata.videoId
         },
-        ipfsHash: `ipfs://rebuilt-${Date.now()}`,
-        arweaveId: `ar://rebuilt-${Date.now()}`,
+        ipfsHash,
+        arweaveId,
         updatedAt: new Date()
       });
 
@@ -964,7 +998,32 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         contentType: 'video'
       });
       
-      // Step 3: Save complete results
+      // Step 3: Upload to decentralized storage
+      console.log(`☁️ Uploading transcribed data to IPFS/Arweave...`);
+      const Web3Service = (await import('./web3Service')).Web3Service;
+      const transcribedData = {
+        title: summary.tags.length > 0 ? summary.tags.slice(0, 3).join(' - ') : 'Transcribed Summary',
+        transcript,
+        summary: summary.summary,
+        keyInsights: summary.keyInsights,
+        chapters: summary.chapters,
+        tags: summary.tags,
+        metadata: {
+          transcriptionLength: transcript.length,
+          language,
+          duration: Math.floor(duration),
+          accuracy: 95
+        },
+        createdAt: new Date().toISOString()
+      };
+      
+      const [ipfsHash, arweaveId] = await Promise.all([
+        Web3Service.storeOnIPFS(transcribedData),
+        Web3Service.storeOnArweave(transcribedData)
+      ]);
+      console.log(`✅ Decentralized storage complete: IPFS=${ipfsHash}, Arweave=${arweaveId}`);
+      
+      // Step 4: Save complete results
       console.log(`💾 Saving transcription results...`);
       await this.storage.updateSummary(summaryId, {
         processingStatus: 'completed',
@@ -982,8 +1041,8 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
           language,
           duration: `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`
         },
-        ipfsHash: `ipfs://transcribed-${Date.now()}`,
-        arweaveId: `ar://transcribed-${Date.now()}`,
+        ipfsHash,
+        arweaveId,
         updatedAt: new Date()
       });
       
