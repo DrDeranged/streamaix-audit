@@ -25,6 +25,7 @@ const GovernancePage = React.lazy(() => import("@/pages/governance"));
 const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const BountyBoard = React.lazy(() => import("@/pages/bounty-board"));
 const Leaderboard = React.lazy(() => import("@/pages/leaderboard"));
+const HunterProfile = React.lazy(() => import("@/pages/hunter-profile"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
 const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
@@ -95,6 +96,12 @@ function Router() {
       <Route path="/leaderboard">
         <Suspense fallback={<DashboardSkeleton />}>
           <Leaderboard />
+        </Suspense>
+      </Route>
+      
+      <Route path="/hunter/:id">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <HunterProfile />
         </Suspense>
       </Route>
       

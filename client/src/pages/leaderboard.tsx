@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Star, TrendingUp, Target, Zap, Award, Crown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -56,6 +57,7 @@ const BADGE_ICONS: Record<string, { icon: any; color: string }> = {
 
 export default function Leaderboard() {
   const [sortBy, setSortBy] = useState<string>('reputation');
+  const [, setLocation] = useLocation();
 
   const { data, isLoading } = useQuery<{ hunters: BountyHunter[] }>({
     queryKey: ['/api/leaderboard', sortBy],
@@ -345,6 +347,7 @@ export default function Leaderboard() {
                           variant="outline"
                           size="sm"
                           className="border-cyan-500/30 hover:bg-cyan-500/10"
+                          onClick={() => setLocation(`/hunter/${hunter.id}`)}
                           data-testid={`button-view-profile-${hunter.id}`}
                         >
                           View Profile
