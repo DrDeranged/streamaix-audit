@@ -10,6 +10,7 @@ import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
 import { Bounties } from "@/components/landing/bounties";
+import { BountyFeed } from "@/components/landing/bounty-feed";
 import { SocialEcosystem } from "@/components/landing/social-ecosystem";
 import { Footer } from "@/components/landing/footer";
 
@@ -26,7 +27,7 @@ export default function Landing() {
       <WhyBlockchain />
       <KnowledgeAvatars />
       <AISuggestions />
-      <Bounties />
+      <BountyFeed />
       <SocialEcosystem />
       <Footer />
     </div>
