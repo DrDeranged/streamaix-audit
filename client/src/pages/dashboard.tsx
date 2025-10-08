@@ -17,6 +17,7 @@ import { apiRequest } from '@/lib/queryClient';
 import InvestmentJournal from '@/components/InvestmentJournal';
 import { FollowButton } from '@/components/avatars/follow-button';
 import BountyBoardSection from '@/components/bounty/BountyBoardSection';
+import RelatedBountiesWidget from '@/components/bounty/RelatedBountiesWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -897,13 +898,14 @@ export default function Dashboard() {
                     <h2 className="text-white text-lg font-bold">Recent Summaries ({recentSummaries.length})</h2>
                   </div>
 
-                  <div className="space-y-4">
-                    {summariesLoading ? (
-                      <div className="text-center py-8">
-                        <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
-                      </div>
-                    ) : recentSummaries.length > 0 ? (
-                      <>
+                  {summariesLoading ? (
+                    <div className="text-center py-8">
+                      <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
+                    </div>
+                  ) : recentSummaries.length > 0 ? (
+                    <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+                      {/* Summaries Column - 2/3 width on desktop */}
+                      <div className="lg:col-span-2 space-y-4">
                         {/* Mobile View: Show only 5 most recent summaries */}
                         <div className="lg:hidden space-y-4">
                           {recentSummaries.map((summary: Summary) => (
@@ -1005,14 +1007,14 @@ export default function Dashboard() {
                           )}
                         </div>
 
-                        {/* Desktop View: Show recent 5 summaries */}
+                        {/* Desktop View: Integrated view with related bounties */}
                         <div className="hidden lg:block space-y-4">
                           {recentSummaries.map((summary: Summary) => (
                             <motion.div
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
+                              className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4"
                               data-testid={`summary-${summary.id}`}
                             >
                               <div className="space-y-3">
@@ -1105,16 +1107,33 @@ export default function Dashboard() {
                             </motion.div>
                           ))}
                         </div>
-                      </>
-                    ) : (
-                      <Card className="bg-white/5 border-white/10">
-                        <CardContent className="p-8 text-center">
-                          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-300">No summaries yet. Create your first AI-powered summary!</p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
+                      </div>
+
+                      {/* Related Bounties Column - 1/3 width on desktop, hidden on mobile */}
+                      <div className="hidden lg:block lg:col-span-1">
+                        <div className="sticky top-4">
+                          <h3 className="text-white text-base font-bold mb-4 flex items-center gap-2">
+                            <Trophy className="h-4 w-4 text-cyan-400" />
+                            Related Bounties
+                          </h3>
+                          {recentSummaries.length > 0 && (
+                            <RelatedBountiesWidget 
+                              tags={recentSummaries[0]?.tags || []} 
+                              category={recentSummaries[0]?.category} 
+                              limit={5}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <Card className="bg-white/5 border-white/10">
+                      <CardContent className="p-8 text-center">
+                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-300">No summaries yet. Create your first AI-powered summary!</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="notes" className="space-y-6 mt-6">
