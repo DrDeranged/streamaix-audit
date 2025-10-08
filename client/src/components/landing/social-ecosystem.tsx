@@ -66,7 +66,7 @@ export function SocialEcosystem() {
         </motion.div>
         
         {/* Platform Logos */}
-        <div className="flex justify-center items-center flex-wrap gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-16 px-4">
+        <div className="flex justify-center items-center flex-wrap gap-4 sm:gap-6 lg:gap-8 mb-6 px-4">
           {platforms.map((platform, index) => (
             <motion.div 
               key={platform.name}
@@ -89,90 +89,6 @@ export function SocialEcosystem() {
               <span className="text-sm sm:text-lg font-semibold text-foreground text-center sm:text-left">{platform.name}</span>
             </motion.div>
           ))}
-        </div>
-        
-        {/* Mock Social Feeds */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
-          {/* Farcaster Feed */}
-          <motion.div 
-            className="glass-bg glass-border rounded-2xl p-4 sm:p-6"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground">Farcaster Activity</h3>
-            </div>
-            
-            <div className="space-y-3 sm:space-y-4">
-              {farcasterFeed.map((post, index) => (
-                <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4">
-                  <div className="flex items-start space-x-2 sm:space-x-3">
-                    <img src={post.avatar} alt="User avatar" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                        <span className="font-medium text-foreground text-sm sm:text-base">{post.user}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{post.time}</span>
-                      </div>
-                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{post.content}</p>
-                      <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
-                        <span>↗️ {post.engagement.shares}</span>
-                        <span>❤️ {post.engagement.likes}</span>
-                        <span>💬 {post.engagement.replies}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-          
-          {/* Lens Feed */}
-          <motion.div 
-            className="glass-bg glass-border rounded-2xl p-4 sm:p-6"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground">Lens Activity</h3>
-            </div>
-            
-            <div className="space-y-3 sm:space-y-4">
-              {lensFeed.map((post, index) => (
-                <div key={index} className="bg-card border-glass-border rounded-lg p-3 sm:p-4">
-                  <div className="flex items-start space-x-2 sm:space-x-3">
-                    <img src={post.avatar} alt="User avatar" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                        <span className="font-medium text-foreground text-sm sm:text-base">{post.user}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{post.time}</span>
-                      </div>
-                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{post.content}</p>
-                      {post.summary && (
-                        <div className="bg-muted rounded-lg p-2 mt-2">
-                          <div className="text-xs text-muted-foreground">🎯 {post.summary}</div>
-                        </div>
-                      )}
-                      <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs text-muted-foreground flex-wrap gap-1">
-                        <span>🔄 {post.engagement.mirrors}</span>
-                        <span>🎨 {post.engagement.collects}</span>
-                        <span>💬 {post.engagement.comments}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
         </div>
         
         {/* Social Sharing Animation */}
