@@ -34,7 +34,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-12 relative">
+    <section id="how-it-works" className="py-20 relative overflow-hidden">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-10"
@@ -51,41 +51,42 @@ export function HowItWorks() {
           </p>
         </motion.div>
         
-        <div className="flex justify-center gap-6 md:gap-12 max-w-4xl mx-auto">
+        <div className="flex justify-center gap-8 md:gap-16 max-w-5xl mx-auto relative">
           {steps.map((step, index) => (
-            <HoverCard key={step.number} openDelay={200} closeDelay={100}>
-              <HoverCardTrigger asChild>
-                <motion.div 
-                  className="text-center group cursor-pointer"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  viewport={{ once: true }}
-                  data-testid={`step-${step.number}`}
-                >
-                  <div className="relative mb-4">
-                    <motion.div 
-                      className={`w-16 h-16 md:w-20 md:h-20 mx-auto bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center`}
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <step.icon className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                    </motion.div>
-                    <div className={`absolute -top-2 -right-2 w-6 h-6 ${step.badgeColor} rounded-full flex items-center justify-center text-xs font-bold text-white`}>
-                      {step.number}
+            <div key={step.number} className="relative">
+              <HoverCard openDelay={200} closeDelay={100}>
+                <HoverCardTrigger asChild>
+                  <motion.div 
+                    className="text-center group cursor-pointer"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.15 }}
+                    viewport={{ once: true }}
+                    data-testid={`step-${step.number}`}
+                  >
+                    <div className="relative mb-6">
+                      <motion.div 
+                        className={`w-20 h-20 md:w-24 md:h-24 mx-auto bg-gradient-to-br ${step.color} rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-purple-500/50 transition-shadow duration-300`}
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        <step.icon className="w-10 h-10 md:w-12 md:h-12 text-white" />
+                      </motion.div>
+                      <div className={`absolute -top-3 -right-3 w-8 h-8 ${step.badgeColor} rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg ring-4 ring-background`}>
+                        {step.number}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <h3 className="text-base md:text-lg font-semibold text-foreground group-hover:text-indigo-500 transition-colors">
-                    {step.title}
-                  </h3>
-                </motion.div>
-              </HoverCardTrigger>
-              <HoverCardContent 
-                className="w-80 glass-bg glass-border" 
-                side="bottom"
-                data-testid={`step-${step.number}-details`}
-              >
+                    
+                    <h3 className="text-base md:text-lg font-bold text-foreground group-hover:text-indigo-500 transition-all duration-300">
+                      {step.title}
+                    </h3>
+                  </motion.div>
+                </HoverCardTrigger>
+                <HoverCardContent 
+                  className="w-80 glass-bg glass-border shadow-2xl" 
+                  side="bottom"
+                  data-testid={`step-${step.number}-details`}
+                >
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 bg-gradient-to-br ${step.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
@@ -111,9 +112,10 @@ export function HowItWorks() {
                       </span>
                     ))}
                   </div>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            </div>
           ))}
         </div>
       </div>
