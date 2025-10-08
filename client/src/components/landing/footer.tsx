@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export function Footer() {
   return (
-    <footer className="py-20 bg-gray-900 dark:bg-black text-white relative overflow-hidden">
+    <footer className="py-20 bg-gradient-to-b from-gray-900 to-black dark:from-black dark:to-gray-950 text-white relative overflow-hidden border-t border-gray-800">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <motion.div 
