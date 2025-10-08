@@ -612,6 +612,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Get bounty statistics
+  app.get('/api/bounties/stats', asyncHandler(async (req: Request, res: Response) => {
+    const bounties = await storage.getBounties(1000, 0);
+    
+    const stats = {
+      activeBounties: bounties.filter(b => b.status === 'open' || b.status === 'claimed').length,
+      totalRewards: bounties.reduce((sum, b) => sum + b.reward + (b.tipPool || 0), 0),
+      summariesCreated: bounties.filter(b => b.status === 'completed').length,
+      avgCompletionTime: '24h' // TODO: Calculate from actual data
+    };
+
+    res.json({ stats });
+  }));
+
+  // Get trending bounties
+  app.get('/api/bounties/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const trendingBounties = await trendingService.getTrendingBounties(limit);
+    res.json({ bounties: trendingBounties });
+  }));
+
+  // Get hot bounties (recent + high reward)
+  app.get('/api/bounties/hot', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 5;
+    const hotBounties = await trendingService.getHotBounties(limit);
+    res.json({ bounties: hotBounties });
+  }));
+
+  // Get urgent bounties (deadline < 24 hours)
+  app.get('/api/bounties/urgent', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 5;
+    const urgentBounties = await trendingService.getUrgentBounties(limit);
+    res.json({ bounties: urgentBounties });
+  }));
+
+  // Get trending categories
+  app.get('/api/bounties/trending/categories', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 5;
+    const categories = await trendingService.getTrendingCategories(limit);
+    res.json({ categories });
+  }));
+
   // Get bounty by ID
   app.get('/api/bounties/:id', asyncHandler(async (req: Request, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
@@ -832,48 +874,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       tipContribution,
       bounty: updatedBounty
     });
-  }));
-
-  // Get bounty statistics
-  app.get('/api/bounties/stats', asyncHandler(async (req: Request, res: Response) => {
-    const bounties = await storage.getBounties(1000, 0);
-    
-    const stats = {
-      activeBounties: bounties.filter(b => b.status === 'open' || b.status === 'claimed').length,
-      totalRewards: bounties.reduce((sum, b) => sum + b.reward + (b.tipPool || 0), 0),
-      summariesCreated: bounties.filter(b => b.status === 'completed').length,
-      avgCompletionTime: '24h' // TODO: Calculate from actual data
-    };
-
-    res.json({ stats });
-  }));
-
-  // Get trending bounties
-  app.get('/api/bounties/trending', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 10;
-    const trendingBounties = await trendingService.getTrendingBounties(limit);
-    res.json({ bounties: trendingBounties });
-  }));
-
-  // Get hot bounties (recent + high reward)
-  app.get('/api/bounties/hot', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 5;
-    const hotBounties = await trendingService.getHotBounties(limit);
-    res.json({ bounties: hotBounties });
-  }));
-
-  // Get urgent bounties (deadline < 24 hours)
-  app.get('/api/bounties/urgent', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 5;
-    const urgentBounties = await trendingService.getUrgentBounties(limit);
-    res.json({ bounties: urgentBounties });
-  }));
-
-  // Get trending categories
-  app.get('/api/bounties/trending/categories', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 5;
-    const categories = await trendingService.getTrendingCategories(limit);
-    res.json({ categories });
   }));
 
   // Track bounty engagement
