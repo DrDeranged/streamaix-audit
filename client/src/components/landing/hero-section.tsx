@@ -54,11 +54,11 @@ export function HeroSection() {
           transition={{ duration: 0.6 }}
         >
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-orbitron font-light mb-6 tracking-tight leading-none">
-            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
+            <span className="gradient-text-primary animate-gradient font-bold">
               Stream the Noise.
             </span>
             <br />
-            <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent font-bold">
+            <span className="gradient-text-secondary font-bold">
               Capture the Signal.
             </span>
           </h1>
@@ -72,9 +72,10 @@ export function HeroSection() {
             <Button 
               size="lg"
               onClick={scrollToProcessor}
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 active:translate-y-[-2px] transition-all duration-300 animate-pulse-glow"
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-gradient-to-r from-indigo-500 via-purple-600 to-cyan-500 hover:from-indigo-600 hover:via-purple-700 hover:to-cyan-600 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-gradient"
+              data-testid="button-try-ai"
             >
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              <Play className="w-5 h-5 mr-2" />
               Try AI Analysis
             </Button>
             
@@ -82,9 +83,10 @@ export function HeroSection() {
               size="lg"
               variant="outline"
               onClick={() => window.location.href = 'mailto:arslandin.founder@streamaix.com?subject=StreamAiX Waitlist&body=Hi! I would like to join the StreamAiX waitlist.'}
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base glass-bg glass-border hover:bg-muted transform hover:scale-105 transition-all duration-300"
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-white/20 dark:hover:bg-white/10 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+              data-testid="button-join-waitlist"
             >
-              <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              <Mail className="w-5 h-5 mr-2" />
               Join Waitlist
             </Button>
           </div>
