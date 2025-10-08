@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { getAuthToken } from '@/lib/auth';
 
 interface ChatMessage {
   id: string;
@@ -21,6 +22,14 @@ export function ChatWidget() {
   const [inputMessage, setInputMessage] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  
+  // Only show chat widget if user is authenticated
+  const isAuthenticated = !!getAuthToken();
+  
+  // Don't render anything if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Fetch chat history
   const { data: chatHistory, isLoading } = useQuery<{ messages: ChatMessage[] }>({
