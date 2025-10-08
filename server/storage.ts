@@ -19,6 +19,8 @@ import {
   type InsertKnowledgeStack,
   type UserNote,
   type InsertUserNote,
+  type ChatMessage,
+  type InsertChatMessage,
   type CryptoLeader,
   type InsertCryptoLeader,
   type CuratedCast,
@@ -63,6 +65,7 @@ import {
   userInteractions,
   knowledgeStacks,
   userNotes,
+  chatMessages,
   cryptoLeaders,
   curatedCasts,
   topicTags,
@@ -153,6 +156,10 @@ export interface IStorage {
   createUserNote(note: InsertUserNote): Promise<UserNote>;
   updateUserNote(id: string, updates: Partial<InsertUserNote>): Promise<UserNote | undefined>;
   deleteUserNote(id: string): Promise<boolean>;
+
+  // Chat message operations
+  getChatMessages(userId: string, limit?: number): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 
   // Analytics and search
   getTrendingSummaries(limit?: number): Promise<Summary[]>;
@@ -834,6 +841,24 @@ export class DatabaseStorage implements IStorage {
   async deleteUserNote(id: string): Promise<boolean> {
     const result = await db.delete(userNotes).where(eq(userNotes.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // Chat message operations
+  async getChatMessages(userId: string, limit = 50): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.userId, userId))
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(limit);
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [chatMessage] = await db
+      .insert(chatMessages)
+      .values(message)
+      .returning();
+    return chatMessage;
   }
 
   // Educational content operations

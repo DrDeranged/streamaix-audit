@@ -1583,6 +1583,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // CHAT ROUTES
+  // =============================================================================
+
+  // Get chat history
+  app.get('/api/chat/history', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const messages = await storage.getChatMessages(req.user!.id, limit);
+    res.json({ messages: messages.reverse() }); // Reverse to show oldest first
+  }));
+
+  // Send chat message
+  app.post('/api/chat', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { message } = req.body;
+    
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Save user message
+    await storage.createChatMessage({
+      userId: req.user!.id,
+      message: message.trim(),
+      role: 'user',
+    });
+
+    // Get recent chat history for context
+    const recentMessages = await storage.getChatMessages(req.user!.id, 10);
+    
+    // Get user context
+    const userStats = await storage.getUserStats(req.user!.id);
+    
+    // Import chat service
+    const { generateChatResponse } = await import('./services/chatService');
+    
+    // Convert to chat format
+    const chatHistory = recentMessages.reverse().map(msg => ({
+      role: msg.role as 'user' | 'assistant',
+      content: msg.message,
+    }));
+
+    // Generate AI response
+    const aiResponse = await generateChatResponse(chatHistory, {
+      summariesCount: userStats.summariesCount,
+      bountiesCount: userStats.bountiesCount,
+      walletBalance: 0, // TODO: Get actual wallet balance
+    });
+
+    // Save AI response
+    const savedResponse = await storage.createChatMessage({
+      userId: req.user!.id,
+      message: aiResponse,
+      role: 'assistant',
+    });
+
+    res.json({ 
+      response: aiResponse,
+      message: savedResponse
+    });
+  }));
+
+  // =============================================================================
   // STREAM PROCESSING ROUTES
   // =============================================================================
 
