@@ -654,6 +654,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ categories });
   }));
 
+  // Get related bounties by tags/categories
+  app.get('/api/bounties/related', asyncHandler(async (req: Request, res: Response) => {
+    const tags = req.query.tags as string;
+    const category = req.query.category as string;
+    const limit = parseInt(req.query.limit as string) || 3;
+
+    if (!tags && !category) {
+      return res.status(400).json({ error: 'Either tags or category parameter is required' });
+    }
+
+    const allBounties = await storage.getBounties(100, 0);
+    const tagArray = tags ? tags.split(',').map(t => t.trim().toLowerCase()) : [];
+    const categoryLower = category?.toLowerCase();
+
+    // Filter bounties by matching tags or category
+    const relatedBounties = allBounties
+      .filter(bounty => {
+        const bountyTags = (bounty.tags || []).map(t => t.toLowerCase());
+        const bountyCategory = bounty.category?.toLowerCase();
+        
+        // Match if category matches or if any tag matches
+        const categoryMatch = categoryLower && bountyCategory === categoryLower;
+        const tagMatch = tagArray.some(tag => bountyTags.includes(tag));
+        
+        return categoryMatch || tagMatch;
+      })
+      .filter(bounty => bounty.status === 'open')
+      .sort((a, b) => {
+        // Sort by reward amount (highest first)
+        const rewardA = a.reward + (a.tipPool || 0);
+        const rewardB = b.reward + (b.tipPool || 0);
+        return rewardB - rewardA;
+      })
+      .slice(0, limit);
+
+    res.json({ bounties: relatedBounties });
+  }));
+
   // Get bounty by ID
   app.get('/api/bounties/:id', asyncHandler(async (req: Request, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
