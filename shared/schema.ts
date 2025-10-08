@@ -206,6 +206,15 @@ export const userNotes = pgTable("user_notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  message: text("message").notNull(),
+  role: text("role").notNull(), // 'user' or 'assistant'
+  metadata: jsonb("metadata"), // optional context data (e.g., market data referenced, bounties discussed)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const cryptoLeaders = pgTable("crypto_leaders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   fid: integer("fid").notNull().unique(), // Farcaster ID
@@ -856,6 +865,11 @@ export const insertUserNoteSchema = createInsertSchema(userNotes).pick({
   isPrivate: true,
 });
 
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertCryptoLeaderSchema = createInsertSchema(cryptoLeaders).pick({
   fid: true,
   username: true,
@@ -1072,6 +1086,9 @@ export type KnowledgeStack = typeof knowledgeStacks.$inferSelect;
 
 export type InsertUserNote = z.infer<typeof insertUserNoteSchema>;
 export type UserNote = typeof userNotes.$inferSelect;
+
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
 
 export type InsertCryptoLeader = z.infer<typeof insertCryptoLeaderSchema>;
 export type CryptoLeader = typeof cryptoLeaders.$inferSelect;
