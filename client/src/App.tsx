@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DashboardSkeleton, TradingSkeleton } from "@/components/LazyWrapper";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 // Immediate load for critical pages
 import Landing from "@/pages/landing";
@@ -159,6 +160,7 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Router />
+            <ChatWidget />
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
