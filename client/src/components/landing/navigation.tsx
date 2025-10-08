@@ -45,7 +45,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass-bg border-b glass-border transition-all duration-300">
+    <nav className="fixed top-0 w-full z-50 glass-bg border-b glass-border transition-all duration-300 shadow-lg">
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -236,8 +236,8 @@ export function Navigation() {
               initial={{ opacity: 0, height: 0, y: -10 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -10 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden mt-4 py-4 border-t border-border/60 bg-background/95 backdrop-blur-md"
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="md:hidden mt-4 py-4 border-t border-border/60 glass-bg rounded-lg mx-2"
             >
               <div className="flex flex-col space-y-1 px-4">
                 <button 
