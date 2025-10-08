@@ -1,68 +1,94 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import navalAvatar from "@/assets/naval-avatar.svg";
-import vitalikAvatar from "@/assets/vitalik-avatar.svg";
-import lexAvatar from "@/assets/lex-avatar.svg";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { Loader2, Clock, TrendingUp } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import type { Bounty } from "@shared/schema";
+
+const getCategoryColor = (category?: string) => {
+  const colors: Record<string, string> = {
+    crypto: "from-green-500 to-teal-500",
+    tech: "from-purple-500 to-pink-500",
+    business: "from-cyan-500 to-blue-500",
+  };
+  return colors[category || ""] || "from-indigo-500 to-purple-600";
+};
+
+const getDifficultyBadge = (difficulty?: string) => {
+  const badges: Record<string, { label: string; className: string }> = {
+    easy: { label: "Easy", className: "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300" },
+    medium: { label: "Medium", className: "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300" },
+    hard: { label: "Hard", className: "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300" },
+  };
+  return badges[difficulty || "medium"] || badges.medium;
+};
+
+const getCategoryBadge = (category?: string) => {
+  const badges: Record<string, string> = {
+    crypto: "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300",
+    tech: "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
+    business: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+  };
+  return badges[category || ""] || "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
+};
+
+const formatReward = (reward: number, tokenType?: string) => {
+  const displayToken = tokenType || "STREAM";
+  if (displayToken === "ETH") {
+    return `${(reward / 1e18).toFixed(4)} ETH`;
+  } else if (displayToken === "USDC") {
+    return `${reward} USDC`;
+  } else {
+    return `${reward} $STREAM`;
+  }
+};
+
+const formatTimeLeft = (deadline?: Date | string | null) => {
+  if (!deadline) return "No deadline";
+  const deadlineDate = typeof deadline === 'string' ? new Date(deadline) : deadline;
+  const now = new Date();
+  const diffMs = deadlineDate.getTime() - now.getTime();
+  
+  if (diffMs < 0) return "Expired";
+  
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+  
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} left`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} left`;
+  return "< 1 hour left";
+};
 
 export function Bounties() {
-  const bounties = [
-    {
-      creator: {
-        name: "@naval.eth",
-        avatar: navalAvatar,
-        postedTime: "2h ago"
-      },
-      title: "Summarize ETH Global Keynote",
-      description: "Create a comprehensive summary of Vitalik's keynote on blockchain scalability (2h 15min video)",
-      reward: "25 $STREAM",
-      rewardColor: "from-green-500 to-teal-500",
-      timeLeft: "3 days left",
-      tipPool: "$127",
-      tags: ["Blockchain", "Technical"],
-      tagColors: ["bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300", "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"],
-      buttonColor: "from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+  const { data: bountiesData, isLoading: bountiesLoading } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties/trending'],
+    queryFn: async () => {
+      const response = await fetch('/api/bounties/trending?limit=3');
+      if (!response.ok) throw new Error('Failed to fetch bounties');
+      return response.json();
     },
-    {
-      creator: {
-        name: "@vitalik.lens",
-        avatar: vitalikAvatar,
-        postedTime: "5h ago"
-      },
-      title: "AI Safety Research Panel",
-      description: "Summarize the Stanford AI Safety panel with key insights and actionable takeaways",
-      reward: "40 $STREAM",
-      rewardColor: "from-purple-500 to-pink-500",
-      timeLeft: "5 days left",
-      tipPool: "$203",
-      tags: ["AI Safety", "Research"],
-      tagColors: ["bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300", "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"],
-      buttonColor: "from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-    },
-    {
-      creator: {
-        name: "@balajis.eth",
-        avatar: lexAvatar,
-        postedTime: "1d ago"
-      },
-      title: "DeFi Protocols Deep Dive",
-      description: "Break down the latest DeFi innovations and protocols in an accessible summary",
-      reward: "15 $STREAM",
-      rewardColor: "from-cyan-500 to-blue-500",
-      timeLeft: "2 days left",
-      tipPool: "$89",
-      tags: ["DeFi", "Finance"],
-      tagColors: ["bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300", "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300"],
-      buttonColor: "from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
-    }
-  ];
+  });
 
-  const stats = [
-    { value: "1,247", label: "Active Bounties", color: "text-indigo-500" },
-    { value: "$52.8k", label: "Total Rewards", color: "text-purple-500" },
-    { value: "3,892", label: "Summaries Created", color: "text-cyan-500" },
-    { value: "24h", label: "Avg Completion", color: "text-green-500" }
-  ];
+  const { data: statsData, isLoading: statsLoading } = useQuery<{
+    stats: {
+      activeBounties: number;
+      totalRewards: number;
+      summariesCreated: number;
+      avgCompletionTime: string;
+    };
+  }>({
+    queryKey: ['/api/bounties/stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/bounties/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    },
+  });
+
+  const bounties = bountiesData?.bounties || [];
+  const stats = statsData?.stats;
 
   return (
     <section id="bounties" className="py-20 bg-gray-100 dark:bg-gray-900">
@@ -82,69 +108,105 @@ export function Bounties() {
           </p>
         </motion.div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-          {bounties.map((bounty, index) => (
-            <motion.div
-              key={bounty.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="bg-card border-glass-border shadow-xl hover:shadow-2xl transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <img 
-                        src={bounty.creator.avatar} 
-                        alt="Creator avatar" 
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{bounty.creator.name}</p>
-                        <p className="text-xs text-muted-foreground">{bounty.creator.postedTime}</p>
+        {bountiesLoading ? (
+          <div className="flex justify-center items-center min-h-[300px]">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          </div>
+        ) : bounties.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">No bounties available yet</p>
+            <Link href="/bounties">
+              <Button className="mt-4 bg-gradient-to-r from-indigo-500 to-purple-600">
+                Create the first bounty
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+            {bounties.slice(0, 3).map((bounty, index) => {
+              const rewardColor = getCategoryColor(bounty.category || undefined);
+              const difficultyBadge = getDifficultyBadge(bounty.difficulty || undefined);
+              const categoryBadge = getCategoryBadge(bounty.category || undefined);
+
+              return (
+                <motion.div
+                  key={bounty.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Card className="bg-card border-glass-border shadow-xl hover:shadow-2xl transition-all duration-300 h-full">
+                    <CardContent className="p-6 flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+                            {bounty.creatorWallet?.slice(2, 4).toUpperCase() || "??"}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">
+                              {bounty.creatorWallet?.slice(0, 6)}...{bounty.creatorWallet?.slice(-4)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {bounty.createdAt ? formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true }) : "recently"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={`bg-gradient-to-r ${rewardColor} text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap`}>
+                          {formatReward(bounty.reward, bounty.tokenType)}
+                        </div>
                       </div>
-                    </div>
-                    <div className={`bg-gradient-to-r ${bounty.rewardColor} text-white px-3 py-1 rounded-full text-sm font-bold`}>
-                      {bounty.reward}
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
-                    {bounty.title}
-                  </h3>
-                  
-                  <p className="text-muted-foreground text-sm mb-4">
-                    {bounty.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                    <span>⏰ {bounty.timeLeft}</span>
-                    <span>💰 Tip Pool: {bounty.tipPool}</span>
-                  </div>
-                  
-                  <div className="flex space-x-2 mb-4 flex-wrap gap-2">
-                    {bounty.tags.map((tag, tagIndex) => (
-                      <span 
-                        key={tag}
-                        className={`text-xs px-2 py-1 rounded ${bounty.tagColors[tagIndex]}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <Button 
-                    className={`w-full bg-gradient-to-r ${bounty.buttonColor} text-white transition-all duration-300`}
-                  >
-                    Claim Bounty
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                      
+                      <h3 className="text-lg font-semibold text-foreground mb-3 line-clamp-2">
+                        {bounty.title}
+                      </h3>
+                      
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-grow">
+                        {bounty.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {formatTimeLeft(bounty.deadline)}
+                        </span>
+                        {bounty.tipPool && bounty.tipPool > 0 && (
+                          <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <TrendingUp className="w-4 h-4" />
+                            +{bounty.tipPool} tips
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex space-x-2 mb-4 flex-wrap gap-2">
+                        {bounty.category && (
+                          <span className={`text-xs px-2 py-1 rounded ${getCategoryBadge(bounty.category || undefined)}`}>
+                            {bounty.category}
+                          </span>
+                        )}
+                        {bounty.difficulty && (
+                          <span className={`text-xs px-2 py-1 rounded ${getDifficultyBadge(bounty.difficulty || undefined).className}`}>
+                            {getDifficultyBadge(bounty.difficulty || undefined).label}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <Link href={`/bounties/${bounty.id}`}>
+                        <Button 
+                          className={`w-full bg-gradient-to-r ${rewardColor} hover:opacity-90 text-white transition-all duration-300`}
+                          data-testid={`button-view-bounty-${bounty.id}`}
+                        >
+                          View Bounty
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
         
         {/* Stats Section */}
         <motion.div 
@@ -154,12 +216,32 @@ export function Bounties() {
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          {stats.map((stat, index) => (
-            <div key={stat.label} className="text-center">
-              <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
-              <div className="text-muted-foreground">{stat.label}</div>
+          {statsLoading ? (
+            <div className="col-span-4 flex justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
             </div>
-          ))}
+          ) : stats ? (
+            <>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-indigo-500">{stats.activeBounties}</div>
+                <div className="text-muted-foreground">Active Bounties</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-500">
+                  ${(stats.totalRewards / 1000).toFixed(1)}k
+                </div>
+                <div className="text-muted-foreground">Total Rewards</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-cyan-500">{stats.summariesCreated}</div>
+                <div className="text-muted-foreground">Summaries Created</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500">{stats.avgCompletionTime}</div>
+                <div className="text-muted-foreground">Avg Completion</div>
+              </div>
+            </>
+          ) : null}
         </motion.div>
       </div>
     </section>
