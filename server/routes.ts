@@ -6904,6 +6904,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(socialTradingRoutes);
   
   // =============================================================================
+  // PREDICTION MARKETS ROUTES
+  // =============================================================================
+  
+  const { predictionMarketService } = await import('./services/predictionMarketService');
+  const { ammService } = await import('./services/ammService');
+  const { resolutionService } = await import('./services/resolutionService');
+  
+  // Get all active markets
+  app.get("/api/prediction-markets", asyncHandler(async (req: Request, res: Response) => {
+    const category = req.query.category as string | undefined;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const markets = await predictionMarketService.getActiveMarkets({ category, limit, offset });
+    
+    res.json({
+      success: true,
+      markets,
+      count: markets.length
+    });
+  }));
+  
+  // Get trending markets
+  app.get("/api/prediction-markets/trending", asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const markets = await predictionMarketService.getTrendingMarkets(limit);
+    
+    res.json({
+      success: true,
+      markets,
+      count: markets.length
+    });
+  }));
+  
+  // Get single market details
+  app.get("/api/prediction-markets/:marketId", asyncHandler(async (req: Request, res: Response) => {
+    const market = await predictionMarketService.getMarket(req.params.marketId);
+    
+    if (!market) {
+      return res.status(404).json({ error: "Market not found" });
+    }
+    
+    res.json({
+      success: true,
+      market
+    });
+  }));
+  
+  // Create new market
+  app.post("/api/prediction-markets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags, privateKey } = req.body;
+    
+    if (!question || !deadline || !initialLiquidity || !privateKey) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    const market = await predictionMarketService.createMarket({
+      question,
+      description,
+      category,
+      creatorId: req.user!.id,
+      creatorWallet: req.user!.walletAddress || "",
+      deadline: new Date(deadline),
+      initialLiquidity,
+      resolutionSource,
+      imageUrl,
+      tags,
+      privateKey
+    });
+    
+    res.json({
+      success: true,
+      market
+    });
+  }));
+  
+  // Calculate buy quote
+  app.post("/api/prediction-markets/:marketId/quote-buy", asyncHandler(async (req: Request, res: Response) => {
+    const { amountIn, isYes } = req.body;
+    const market = await predictionMarketService.getMarket(req.params.marketId);
+    
+    if (!market) {
+      return res.status(404).json({ error: "Market not found" });
+    }
+    
+    const quote = ammService.calculateBuyTokens(
+      amountIn,
+      isYes,
+      market.yesLiquidity,
+      market.noLiquidity
+    );
+    
+    res.json({
+      success: true,
+      quote: {
+        ...quote,
+        currentYesPrice: market.yesPrice,
+        currentNoPrice: market.noPrice
+      }
+    });
+  }));
+  
+  // Get user positions
+  app.get("/api/prediction-markets/positions/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const positions = await predictionMarketService.getUserPositions(req.user!.id);
+    
+    res.json({
+      success: true,
+      positions,
+      count: positions.length
+    });
+  }));
+  
+  // Get user trades
+  app.get("/api/prediction-markets/trades/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const trades = await predictionMarketService.getUserTrades(req.user!.id);
+    
+    res.json({
+      success: true,
+      trades,
+      count: trades.length
+    });
+  }));
+  
+  // Get market statistics
+  app.get("/api/prediction-markets/stats", asyncHandler(async (req: Request, res: Response) => {
+    const stats = await predictionMarketService.getMarketStats();
+    
+    res.json({
+      success: true,
+      stats
+    });
+  }));
+  
+  // Get leaderboard
+  app.get("/api/prediction-markets/leaderboard", asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const leaderboard = await predictionMarketService.getLeaderboard(limit);
+    
+    res.json({
+      success: true,
+      leaderboard,
+      count: leaderboard.length
+    });
+  }));
+  
+  // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
   // =============================================================================
   
