@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { duneAnalyticsService } from './duneAnalyticsService';
+import { duneService } from './duneService';
 
 export interface CryptoQuote {
   symbol: string;
@@ -111,8 +112,9 @@ export class MarketDataService {
     console.log(`  - Alpha Vantage: ${this.alphaVantageApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Finnhub: ${this.finnhubApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - FRED (Economic Data): ${this.fredApiKey ? '✅ Available' : '❌ Missing'}`);
+    console.log(`  - Dune Analytics: ${duneService.isAvailable() ? '✅ Available' : '❌ Missing'}`);
     
-    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey && !this.finnhubApiKey) {
+    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey && !this.finnhubApiKey && !duneService.isAvailable()) {
       console.warn('⚠️ No market data API keys found - using fallback data');
     }
   }
@@ -141,14 +143,14 @@ export class MarketDataService {
 
 
   /**
-   * Get live cryptocurrency data by symbols using CoinGecko (with CoinMarketCap fallback)
+   * Get live cryptocurrency data by symbols using 3-tier fallback: CoinGecko → CoinMarketCap → Dune
    */
   async getCryptoQuotes(symbols: string[]): Promise<CryptoQuote[]> {
     const cacheKey = `crypto_${symbols.join(',').toUpperCase()}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
-    // Try CoinGecko first (better free tier)
+    // Tier 1: Try CoinGecko first (better free tier)
     if (this.coingeckoApiKey) {
       try {
         return await this.getCryptoQuotesFromCoinGecko(symbols);
@@ -157,17 +159,51 @@ export class MarketDataService {
       }
     }
 
-    // Fallback to CoinMarketCap
+    // Tier 2: Fallback to CoinMarketCap
     if (this.cmcApiKey) {
       try {
         return await this.getCryptoQuotesFromCMC(symbols);
       } catch (error) {
-        console.error('❌ Both APIs failed, using empty data');
+        console.warn('⚠️ CoinMarketCap failed, trying Dune Analytics fallback');
+      }
+    }
+
+    // Tier 3: Final fallback to Dune Analytics
+    if (duneService.isAvailable()) {
+      try {
+        console.log('🔮 Using Dune Analytics as final fallback for crypto prices');
+        const duneQuotes: CryptoQuote[] = [];
+        
+        for (const symbol of symbols) {
+          const price = await duneService.getTokenPrice(symbol);
+          if (price) {
+            duneQuotes.push({
+              symbol: symbol.toUpperCase(),
+              name: symbol,
+              price,
+              percentChange24h: 0, // Dune doesn't provide this easily
+              percentChange7d: 0,
+              percentChange30d: 0,
+              marketCap: 0,
+              volume24h: 0,
+              rank: 0,
+              lastUpdated: new Date().toISOString()
+            });
+          }
+        }
+        
+        if (duneQuotes.length > 0) {
+          this.setCacheWithTimeout(cacheKey, duneQuotes);
+          console.log(`🔮 Fetched ${duneQuotes.length} prices from Dune Analytics`);
+          return duneQuotes;
+        }
+      } catch (error) {
+        console.error('❌ Dune Analytics fallback failed:', error);
       }
     }
 
     // No APIs available
-    console.warn('⚠️ No market data APIs available');
+    console.warn('⚠️ All crypto data APIs failed (CoinGecko, CoinMarketCap, Dune)');
     return [];
   }
 
