@@ -14,8 +14,8 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
 - **Frontend**: React 18, TypeScript, TailwindCSS, shadcn/ui, Radix UI, TanStack React Query for state management, wouter for routing, Framer Motion for animations.
 - **Backend**: Node.js with Express.js and TypeScript, built with Vite for development and esbuild for production.
 - **Content Processing**: Utilizes OpenAI Whisper for transcription and GPT-4o for AI analysis, summary generation, and chapter creation. Audio extraction uses yt-dlp and ffmpeg.
-- **Web3 Integration**: Full PostgreSQL database with Drizzle ORM, JWT and Web3 wallet authentication, a bounty board, and decentralized storage integration (mocked for IPFS/Arweave). Configured for Base network deployment with smart contract ABIs for BountyBoard, STREAM ERC-20, SummaryNFT, and Staking.
-- **Database**: PostgreSQL with Drizzle ORM and Neon serverless, managing schemas for Users, Summaries, Bounties, User Interactions, and Knowledge Stacks.
+- **Web3 Integration**: Full PostgreSQL database with Drizzle ORM, JWT and Web3 wallet authentication, a bounty board, prediction markets, and decentralized storage integration (mocked for IPFS/Arweave). Configured for Base network deployment with smart contract ABIs for BountyBoard, STREAM ERC-20, SummaryNFT, Staking, ConditionalTokens (ERC-1155), and PredictionMarketFactory.
+- **Database**: PostgreSQL with Drizzle ORM and Neon serverless, managing schemas for Users, Summaries, Bounties, User Interactions, Knowledge Stacks, Prediction Markets, Market Positions, Market Trades, Market Resolutions, Liquidity Providers, and Market Predictors.
 - **Core Features**:
     - **Authentication**: Local login, Web3 wallet authentication, Twitter OAuth.
     - **AI Chatbot**: GPT-4o-powered assistant for platform help and investment insights.
@@ -28,6 +28,17 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
     - **Smart Insights Dashboard**: AI-powered market intelligence, trading signals, sentiment analysis, confidence scoring.
     - **Analytics Dashboard**: Platform-wide engagement metrics, activity trends, category distribution, reward distribution.
     - **User Onboarding**: Interactive 6-step tutorial tour for new users featuring platform introduction, key features walkthrough, animated modal with progress tracking, localStorage-based completion tracking, and manual replay option.
+    - **Prediction Markets**: Full-featured binary YES/NO prediction market platform (Polymarket-inspired) with:
+        - **Smart Contracts**: ERC-1155 conditional tokens, AMM-based pricing, on-chain settlement on Base network
+        - **Market Types**: Crypto predictions, DeFi events, bounty outcomes, real-world events, community predictions
+        - **Trading Features**: Buy/sell positions, real-time pricing with constant product AMM (x*y=k), slippage protection, price impact calculation
+        - **Economic Model**: 0.5% platform fee, 100 STREAM market creation deposit, liquidity mining rewards
+        - **Resolution System**: UMA Optimistic Oracle integration, automated settlement, manual admin resolution, predictor stats tracking
+        - **Leaderboard**: User rankings by accuracy rate, profit/loss tracking, achievement badges, streak tracking
+        - **Landing Page Section**: Featured markets showcase between BountyFeed and SocialEcosystem sections
+        - **Full Pages**: `/markets` listing page with category filters, `/markets/:id` detail page with trading interface
+        - **Backend Services**: predictionMarketService, ammService, resolutionService with comprehensive API routes
+        - **Database Schema**: predictionMarkets, marketPositions, marketTrades, marketResolutions, liquidityProviders, marketPredictors tables
 
 ## External Dependencies
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless
