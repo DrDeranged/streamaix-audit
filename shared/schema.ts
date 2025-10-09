@@ -4341,3 +4341,163 @@ export type VolatilityForecastingDashboard = {
   
   lastUpdated: string;
 };
+
+// =============================================================================
+// PREDICTION MARKETS
+// =============================================================================
+
+export const predictionMarkets = pgTable("prediction_markets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractMarketId: integer("contract_market_id").notNull().unique(),
+  question: text("question").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  creatorId: varchar("creator_id").references(() => users.id),
+  creatorWallet: text("creator_wallet").notNull(),
+  deadline: timestamp("deadline").notNull(),
+  resolutionSource: text("resolution_source"),
+  status: text("status").notNull().default("active"),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  totalVolume: integer("total_volume").default(0),
+  totalTrades: integer("total_trades").default(0),
+  yesPrice: integer("yes_price").default(5000),
+  noPrice: integer("no_price").default(5000),
+  yesLiquidity: integer("yes_liquidity").default(0),
+  noLiquidity: integer("no_liquidity").default(0),
+  initialLiquidity: integer("initial_liquidity").notNull(),
+  blockchainTxHash: text("blockchain_tx_hash"),
+  resolutionTxHash: text("resolution_tx_hash"),
+  imageUrl: text("image_url"),
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const marketPositions = pgTable("market_positions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  userWallet: text("user_wallet").notNull(),
+  outcome: text("outcome").notNull(),
+  shares: integer("shares").notNull(),
+  averagePrice: integer("average_price").notNull(),
+  totalInvested: integer("total_invested").notNull(),
+  currentValue: integer("current_value").default(0),
+  realizedPnl: integer("realized_pnl").default(0),
+  unrealizedPnl: integer("unrealized_pnl").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const marketTrades = pgTable("market_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  userWallet: text("user_wallet").notNull(),
+  tradeType: text("trade_type").notNull(),
+  outcome: text("outcome").notNull(),
+  shares: integer("shares").notNull(),
+  price: integer("price").notNull(),
+  streamAmount: integer("stream_amount").notNull(),
+  fee: integer("fee").notNull(),
+  blockchainTxHash: text("blockchain_tx_hash"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const marketResolutions = pgTable("market_resolutions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  resolution: text("resolution").notNull(),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolutionSource: text("resolution_source").notNull(),
+  resolutionData: jsonb("resolution_data"),
+  disputePeriodEnd: timestamp("dispute_period_end"),
+  disputeCount: integer("dispute_count").default(0),
+  blockchainTxHash: text("blockchain_tx_hash"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const liquidityProviders = pgTable("liquidity_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  userWallet: text("user_wallet").notNull(),
+  shares: integer("shares").notNull(),
+  streamProvided: integer("stream_provided").notNull(),
+  feesEarned: integer("fees_earned").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const marketPredictors = pgTable("market_predictors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  walletAddress: text("wallet_address").notNull(),
+  totalPredictions: integer("total_predictions").default(0),
+  correctPredictions: integer("correct_predictions").default(0),
+  accuracyRate: real("accuracy_rate").default(0),
+  totalVolume: integer("total_volume").default(0),
+  totalProfit: integer("total_profit").default(0),
+  totalLoss: integer("total_loss").default(0),
+  netProfit: integer("net_profit").default(0),
+  roi: real("roi").default(0),
+  rank: integer("rank"),
+  badges: jsonb("badges"),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPredictionMarketSchema = createInsertSchema(predictionMarkets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMarketPositionSchema = createInsertSchema(marketPositions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMarketTradeSchema = createInsertSchema(marketTrades).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMarketResolutionSchema = createInsertSchema(marketResolutions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLiquidityProviderSchema = createInsertSchema(liquidityProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMarketPredictorSchema = createInsertSchema(marketPredictors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPredictionMarket = z.infer<typeof insertPredictionMarketSchema>;
+export type PredictionMarket = typeof predictionMarkets.$inferSelect;
+
+export type InsertMarketPosition = z.infer<typeof insertMarketPositionSchema>;
+export type MarketPosition = typeof marketPositions.$inferSelect;
+
+export type InsertMarketTrade = z.infer<typeof insertMarketTradeSchema>;
+export type MarketTrade = typeof marketTrades.$inferSelect;
+
+export type InsertMarketResolution = z.infer<typeof insertMarketResolutionSchema>;
+export type MarketResolution = typeof marketResolutions.$inferSelect;
+
+export type InsertLiquidityProvider = z.infer<typeof insertLiquidityProviderSchema>;
+export type LiquidityProvider = typeof liquidityProviders.$inferSelect;
+
+export type InsertMarketPredictor = z.infer<typeof insertMarketPredictorSchema>;
+export type MarketPredictor = typeof marketPredictors.$inferSelect;
