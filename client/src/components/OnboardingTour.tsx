@@ -337,18 +337,18 @@ export function OnboardingTour() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
             onClick={handleSkip}
-          />
-
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-3xl max-h-[80vh] overflow-hidden"
           >
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 border-2 border-white/20 rounded-3xl shadow-2xl overflow-hidden">
               {/* Animated gradient overlay */}
               <div className={`absolute inset-0 bg-gradient-to-br ${currentStepData.gradient} opacity-5 pointer-events-none`} />
@@ -363,7 +363,7 @@ export function OnboardingTour() {
               </button>
 
               {/* Content Container */}
-              <div className="overflow-y-auto max-h-[65vh] custom-scrollbar">
+              <div className="overflow-y-auto max-h-[75vh] custom-scrollbar">
                 {/* Header */}
                 <div className="relative p-8 pb-6">
                   <div className="flex items-start gap-6 mb-6">
@@ -541,6 +541,7 @@ export function OnboardingTour() {
                 </div>
               </div>
             </div>
+            </motion.div>
           </motion.div>
 
           {/* Custom scrollbar styles */}
