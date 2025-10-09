@@ -24,8 +24,8 @@ interface OnboardingStep {
 const steps: OnboardingStep[] = [
   {
     title: "Welcome to StreamAiX",
-    subtitle: "Your Decentralized AI Knowledge Platform",
-    description: "Transform long-form content into ownable, monetizable knowledge assets. StreamAiX combines cutting-edge AI with Web3 technology on the Base network to create the future of content monetization.",
+    subtitle: "Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence",
+    description: "StreamAiX is your all-in-one platform combining AI-powered content processing, gamified bounty rewards, institutional-grade analytics, and Web3 integration on the Base network. Earn tokens, access real-time market data, and own your digital assets on-chain.",
     icon: Sparkles,
     gradient: "from-purple-500 via-pink-500 to-red-500",
     instructions: [
@@ -95,59 +95,22 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Advanced Analytics",
-    subtitle: "Institutional-Grade Market Intelligence",
-    description: "Access the Discover page for powerful analytics across 9 categories with 67+ live endpoints. Get volatility forecasting, pattern recognition, and real-time cross-market signals.",
+    title: "Advanced Market Analytics",
+    subtitle: "Institutional-Grade Intelligence & AI Insights",
+    description: "Access the Discover page for comprehensive market analytics with 9 categories, 67+ live endpoints, AI trading signals, and a 3-tier API fallback system (CoinGecko → CoinMarketCap → Dune Analytics) ensuring uninterrupted data flow.",
     icon: TrendingUp,
     gradient: "from-blue-500 via-purple-500 to-pink-500",
     instructions: [
       "Click below to open the Analytics Dashboard",
-      "Explore 9 analytics categories on the left sidebar",
-      "View real-time charts for stocks and crypto",
-      "Check volatility forecasting and risk metrics",
-      "Analyze cross-market correlations and patterns",
-      "Get AI-powered trading signals and alerts"
+      "Explore 9 analytics categories: volatility, patterns, derivatives & more",
+      "View AI-powered Smart Insights with confidence scores",
+      "Check real-time charts, trading signals, and sentiment analysis",
+      "Analyze cross-market correlations and risk metrics",
+      "Experience seamless data from our 3-tier API fallback system",
+      "Get personalized recommendations based on your activity"
     ],
     action: {
-      label: "Open Analytics →",
-      path: "/discover"
-    }
-  },
-  {
-    title: "Smart Insights Dashboard",
-    subtitle: "AI-Powered Market Intelligence",
-    description: "Within the Discover page, access the Smart Insights section for AI trading signals, multi-source sentiment analysis, confidence scoring, and personalized recommendations.",
-    icon: LineChart,
-    gradient: "from-indigo-500 via-blue-500 to-cyan-500",
-    instructions: [
-      "Navigate to Discover page (click below)",
-      "Scroll to 'Smart Insights' section",
-      "View AI-generated trading signals in real-time",
-      "Check sentiment analysis from multiple sources",
-      "See confidence scores for each prediction",
-      "Get personalized investment recommendations"
-    ],
-    action: {
-      label: "View Smart Insights →",
-      path: "/discover"
-    }
-  },
-  {
-    title: "3-Tier API Reliability",
-    subtitle: "Never Miss Market Data",
-    description: "Our analytics use a sophisticated 3-tier fallback system: CoinGecko → CoinMarketCap → Dune Analytics. Experience uninterrupted data flow even when APIs fail.",
-    icon: Shield,
-    gradient: "from-purple-500 via-violet-500 to-fuchsia-500",
-    instructions: [
-      "Visit the Discover page to see live data",
-      "Notice the seamless data flow from multiple sources",
-      "Primary API: CoinGecko for real-time prices",
-      "Fallback: CoinMarketCap when primary is down",
-      "Final fallback: Dune Analytics for blockchain data",
-      "TTL-based caching prevents rate limit issues"
-    ],
-    action: {
-      label: "See Live Data →",
+      label: "Explore Analytics →",
       path: "/discover"
     }
   },

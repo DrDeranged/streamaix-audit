@@ -64,8 +64,10 @@ export function HeroSection() {
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
-            Powered by <span className="text-indigo-400 font-semibold">OpenAI Whisper & GPT-4o</span> - Process any video or podcast URL with real AI transcription and analysis. 
-            <span className="text-indigo-500 font-semibold"> Decentralized. Monetizable. Ownable.</span>
+            <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence</span>
+            <br/>
+            <span className="text-indigo-400 font-semibold mt-2 inline-block">Powered by OpenAI, Base Network & Real-Time Analytics</span>
+            <span className="text-indigo-500 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 px-4">
