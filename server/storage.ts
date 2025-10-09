@@ -94,7 +94,11 @@ import {
   referralSignups,
   // Collaboration Tables
   bountyCollaborators,
-  collaborationSessions
+  collaborationSessions,
+  // Bounty Templates
+  bountyTemplates,
+  type BountyTemplate,
+  type InsertBountyTemplate
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -352,6 +356,14 @@ export interface IStorage {
   updateCollaborationSession(data: { bountyId: string; activeUsers: any[]; contentSnapshot: string; lastActivity: Date }): Promise<any>;
   getCollaborationSession(bountyId: string): Promise<any>;
   getCollaborators(bountyId: string): Promise<any[]>;
+
+  // Bounty Template operations
+  getBountyTemplate(id: string): Promise<BountyTemplate | undefined>;
+  getBountyTemplates(options?: { category?: string; difficulty?: string; limit?: number }): Promise<BountyTemplate[]>;
+  createBountyTemplate(template: InsertBountyTemplate): Promise<BountyTemplate>;
+  updateBountyTemplate(id: string, updates: Partial<InsertBountyTemplate>): Promise<BountyTemplate | undefined>;
+  deleteBountyTemplate(id: string): Promise<boolean>;
+  incrementTemplateUsage(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

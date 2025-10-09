@@ -520,6 +520,28 @@ export const traders = pgTable("traders", {
   lastTradeAt: timestamp("last_trade_at"),
 });
 
+// Bounty Templates - Pre-made bounty templates for quick creation
+export const bountyTemplates = pgTable("bounty_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // DeFi, NFT, Layer2, Gaming, Infrastructure
+  difficulty: text("difficulty").notNull().default("medium"), // easy, medium, hard, expert
+  suggestedReward: integer("suggested_reward"), // suggested reward amount
+  suggestedTokenType: text("suggested_token_type").default("STREAM"), // STREAM, ETH, USDC
+  tags: text("tags").array(),
+  contentType: text("content_type"), // podcast, video, livestream, article
+  platform: text("platform"), // youtube, spotify, twitch, etc
+  requirements: jsonb("requirements"), // array of requirement strings
+  deliverables: jsonb("deliverables"), // array of deliverable strings
+  exampleUrls: text("example_urls").array(), // example content URLs
+  isPublic: boolean("is_public").default(true),
+  usageCount: integer("usage_count").default(0),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Trading Signals - Individual signals posted by traders
 export const tradingSignals = pgTable("trading_signals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -904,6 +926,23 @@ export const insertBountyEngagementSchema = createInsertSchema(bountyEngagements
   ipAddress: true,
 });
 
+export const insertBountyTemplateSchema = createInsertSchema(bountyTemplates).pick({
+  name: true,
+  description: true,
+  category: true,
+  difficulty: true,
+  suggestedReward: true,
+  suggestedTokenType: true,
+  tags: true,
+  contentType: true,
+  platform: true,
+  requirements: true,
+  deliverables: true,
+  exampleUrls: true,
+  isPublic: true,
+  createdBy: true,
+});
+
 export const insertUserInteractionSchema = createInsertSchema(userInteractions).pick({
   userId: true,
   summaryId: true,
@@ -1197,6 +1236,9 @@ export type BountyQualityScore = typeof bountyQualityScores.$inferSelect;
 
 export type InsertBountyEngagement = z.infer<typeof insertBountyEngagementSchema>;
 export type BountyEngagement = typeof bountyEngagements.$inferSelect;
+
+export type InsertBountyTemplate = z.infer<typeof insertBountyTemplateSchema>;
+export type BountyTemplate = typeof bountyTemplates.$inferSelect;
 
 export type InsertUserInteraction = z.infer<typeof insertUserInteractionSchema>;
 export type UserInteraction = typeof userInteractions.$inferSelect;
