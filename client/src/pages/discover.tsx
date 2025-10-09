@@ -3466,7 +3466,7 @@ export default function Discover() {
   });
 
   const { data: sectorPredictions, isLoading: predictionsLoading } = useQuery({
-    queryKey: ['/api/analytics/sector-trends', selectedSector || 'DeFi'],
+    queryKey: [`/api/analytics/sector-trends/${selectedSector || 'DeFi'}`],
     enabled: !!selectedSector,
     staleTime: 10 * 60 * 1000, // 10 minutes
     retry: 1
