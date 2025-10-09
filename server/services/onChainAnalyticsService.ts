@@ -79,8 +79,8 @@ export class OnChainAnalyticsService {
     if (cached) return cached;
 
     if (!this.etherscanApiKey) {
-      console.log('⚠️ Etherscan API key not available - using mock data');
-      return this.generateMockWhaleData();
+      console.log('⚠️ Etherscan API key not available - no whale data available');
+      return []; // Return empty array instead of mock data
     }
 
     try {
@@ -141,7 +141,7 @@ export class OnChainAnalyticsService {
 
     } catch (error) {
       console.error('❌ Failed to fetch real-time whale movements:', error);
-      return this.generateMockWhaleData();
+      return []; // Return empty array instead of mock data
     }
   }
 
@@ -185,27 +185,7 @@ export class OnChainAnalyticsService {
       }
     }
 
-    // Add mock data for other networks if no API keys
-    networkStatuses.push(
-      {
-        network: 'Bitcoin',
-        gasPrice: { slow: 1, standard: 5, fast: 10 },
-        blockTime: 600, // 10 minutes
-        hashRate: 0,
-        difficulty: '0',
-        lastBlock: 0,
-        congestionLevel: 'low'
-      },
-      {
-        network: 'Binance Smart Chain',
-        gasPrice: { slow: 5, standard: 10, fast: 15 },
-        blockTime: 3,
-        hashRate: 0,
-        difficulty: '0',
-        lastBlock: 0,
-        congestionLevel: 'low'
-      }
-    );
+    // Removed: Mock Bitcoin and BSC network data - only show real Ethereum data when available
 
     this.setCache(cacheKey, networkStatuses);
     return networkStatuses;
@@ -230,7 +210,8 @@ export class OnChainAnalyticsService {
     const alerts: RealTimeAlert[] = [];
 
     if (!this.etherscanApiKey) {
-      return this.generateMockExchangeAlerts();
+      console.log('⚠️ Etherscan API key not available - no exchange alerts available');
+      return []; // Return empty array instead of mock data
     }
 
     try {
@@ -283,7 +264,7 @@ export class OnChainAnalyticsService {
 
     } catch (error) {
       console.error('Failed to fetch exchange flow alerts:', error);
-      return this.generateMockExchangeAlerts();
+      return []; // Return empty array instead of mock data
     }
   }
 
@@ -402,58 +383,14 @@ export class OnChainAnalyticsService {
     return `$${value.toFixed(0)}`;
   }
 
-  // Mock data methods for fallback when APIs are not available
+  // Removed: Mock data methods - these generated fake whale movements and exchange alerts
+  // Now returns empty arrays to avoid showing misleading information
   private generateMockWhaleData(): any[] {
-    const mockData = [];
-    const tokens = ['ETH', 'BTC', 'USDT', 'USDC'];
-    
-    for (let i = 0; i < 5; i++) {
-      const token = tokens[Math.floor(Math.random() * tokens.length)];
-      const valueUsd = Math.random() * 10000000 + 1000000; // $1M - $11M
-      
-      mockData.push({
-        hash: '0x' + Math.random().toString(16).substr(2, 64),
-        from: '0x' + Math.random().toString(16).substr(2, 40),
-        to: '0x' + Math.random().toString(16).substr(2, 40),
-        valueEth: token === 'ETH' ? valueUsd / 3000 : 0,
-        valueUsd: valueUsd,
-        gasPrice: Math.random() * 50 + 20,
-        blockNumber: Math.floor(Math.random() * 1000000),
-        timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-        isWhale: true,
-        token_symbol: token,
-        whale_tier: valueUsd >= 10000000 ? 'mega' : valueUsd >= 5000000 ? 'large' : 'medium'
-      });
-    }
-    
-    return mockData;
+    return [];
   }
 
   private generateMockExchangeAlerts(): RealTimeAlert[] {
-    const exchanges = ['Binance', 'Coinbase', 'Kraken', 'Bitfinex'];
-    const alerts: RealTimeAlert[] = [];
-    
-    for (let i = 0; i < 3; i++) {
-      const exchange = exchanges[Math.floor(Math.random() * exchanges.length)];
-      const valueUsd = Math.random() * 5000000 + 2000000; // $2M - $7M
-      const isDeposit = Math.random() > 0.5;
-      
-      alerts.push({
-        id: `mock_exchange_${exchange}_${i}`,
-        type: 'exchange_deposit',
-        title: `🏦 Large ${exchange} ${isDeposit ? 'Deposit' : 'Withdrawal'}`,
-        message: `${this.formatNumber(valueUsd)} USD ${isDeposit ? 'deposited to' : 'withdrawn from'} ${exchange}`,
-        severity: valueUsd >= 5000000 ? 'critical' : 'warning',
-        timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-        data: {
-          exchange,
-          amount_usd: valueUsd,
-          is_deposit: isDeposit
-        }
-      });
-    }
-    
-    return alerts;
+    return [];
   }
 }
 
