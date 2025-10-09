@@ -3922,6 +3922,59 @@ export default function Discover() {
     return `${Math.floor(diffMins / 1440)}d`;
   };
 
+  // Check if all critical APIs have failed
+  const hasAnyData = recommendations || marketAlerts || derivativesOverview || riskDashboard;
+  
+  // Show fallback UI when APIs are unavailable
+  if (!hasAnyData && !recommendationsLoading && !alertsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
+        <Card className="bg-white/10 border-purple-500/30 backdrop-blur-lg max-w-2xl w-full">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-purple-400" />
+            </div>
+            <CardTitle className="text-2xl text-white mb-2">Market Data Temporarily Unavailable</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-300 text-center">
+              Our market data providers are currently at capacity. This is a temporary issue that typically resolves within an hour.
+            </p>
+            
+            <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-purple-300 mb-2">What's happening?</h3>
+              <ul className="text-sm text-gray-300 space-y-1">
+                <li>• API rate limits have been reached across providers</li>
+                <li>• CoinGecko, CoinMarketCap, and Dune Analytics are temporarily paused</li>
+                <li>• Data will resume automatically when limits reset</li>
+              </ul>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => window.location.reload()}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+              
+              <Link to="/" className="flex-1">
+                <Button 
+                  variant="outline"
+                  className="w-full border-white/20 text-white hover:bg-white/5"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Go Home
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Enhanced Navigation Header */}
