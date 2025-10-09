@@ -76,6 +76,10 @@ export class PredictionMarketService {
         log.topics[0] === factoryContract.interface.getEvent('MarketCreatedWithLiquidity').topicHash
       );
       
+      if (!event) {
+        throw new Error('Market creation event not found in transaction logs');
+      }
+      
       const marketId = parseInt(event.topics[1], 16);
       
       // Store in database
@@ -113,19 +117,19 @@ export class PredictionMarketService {
     offset?: number;
   }): Promise<PredictionMarket[]> {
     try {
-      let query = db
-        .select()
-        .from(predictionMarkets)
-        .where(and(
-          eq(predictionMarkets.status, 'active'),
-          gte(predictionMarkets.deadline, new Date())
-        ));
+      const conditions = [
+        eq(predictionMarkets.status, 'active'),
+        gte(predictionMarkets.deadline, new Date())
+      ];
       
       if (filters?.category) {
-        query = query.where(eq(predictionMarkets.category, filters.category));
+        conditions.push(eq(predictionMarkets.category, filters.category));
       }
       
-      const markets = await query
+      const markets = await db
+        .select()
+        .from(predictionMarkets)
+        .where(and(...conditions))
         .orderBy(desc(predictionMarkets.totalVolume))
         .limit(filters?.limit || 20)
         .offset(filters?.offset || 0);
@@ -181,16 +185,18 @@ export class PredictionMarketService {
    */
   async getUserPositions(userId: string, marketId?: string): Promise<MarketPosition[]> {
     try {
-      let query = db
-        .select()
-        .from(marketPositions)
-        .where(eq(marketPositions.userId, userId));
+      const conditions = [eq(marketPositions.userId, userId)];
       
       if (marketId) {
-        query = query.where(eq(marketPositions.marketId, marketId));
+        conditions.push(eq(marketPositions.marketId, marketId));
       }
       
-      const positions = await query.orderBy(desc(marketPositions.createdAt));
+      const positions = await db
+        .select()
+        .from(marketPositions)
+        .where(and(...conditions))
+        .orderBy(desc(marketPositions.createdAt));
+      
       return positions;
     } catch (error: any) {
       console.error('❌ Error fetching user positions:', error);
@@ -203,16 +209,18 @@ export class PredictionMarketService {
    */
   async getUserTrades(userId: string, marketId?: string): Promise<MarketTrade[]> {
     try {
-      let query = db
-        .select()
-        .from(marketTrades)
-        .where(eq(marketTrades.userId, userId));
+      const conditions = [eq(marketTrades.userId, userId)];
       
       if (marketId) {
-        query = query.where(eq(marketTrades.marketId, marketId));
+        conditions.push(eq(marketTrades.marketId, marketId));
       }
       
-      const trades = await query.orderBy(desc(marketTrades.createdAt));
+      const trades = await db
+        .select()
+        .from(marketTrades)
+        .where(and(...conditions))
+        .orderBy(desc(marketTrades.createdAt));
+      
       return trades;
     } catch (error: any) {
       console.error('❌ Error fetching user trades:', error);
@@ -303,7 +311,7 @@ export class PredictionMarketService {
             .update(marketPositions)
             .set({
               shares: newShares,
-              realizedPnl: existing.realizedPnl + pnl,
+              realizedPnl: (existing.realizedPnl || 0) + pnl,
               updatedAt: new Date()
             })
             .where(eq(marketPositions.id, existing.id));
