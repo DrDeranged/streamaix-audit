@@ -312,7 +312,7 @@ const VolatilityForecastingSection = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {volatilityAnalysis.volatilityHeatmap.map((asset: any, index: number) => (
+                  {(volatilityAnalysis?.volatilityHeatmap ?? []).map((asset: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-red-500/20">
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${getVolatilityIcon(asset.regime) ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
@@ -320,17 +320,17 @@ const VolatilityForecastingSection = () => {
                         </div>
                         <div>
                           <span className="text-white font-medium">{asset.symbol}</span>
-                          <p className="text-gray-400 text-xs">Current: {asset.currentVol.toFixed(1)}%</p>
+                          <p className="text-gray-400 text-xs">Current: {(asset?.currentVol ?? 0).toFixed(1)}%</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className={`font-medium ${
-                          asset.change > 0 ? 'text-red-400' : 'text-green-400'
+                          (asset?.change ?? 0) > 0 ? 'text-red-400' : 'text-green-400'
                         }`}>
-                          {asset.forecastVol.toFixed(1)}%
+                          {(asset?.forecastVol ?? 0).toFixed(1)}%
                         </p>
                         <p className="text-gray-400 text-xs">
-                          {asset.change > 0 ? '+' : ''}{asset.change.toFixed(1)}%
+                          {(asset?.change ?? 0) > 0 ? '+' : ''}{(asset?.change ?? 0).toFixed(1)}%
                         </p>
                       </div>
                     </div>
@@ -2326,7 +2326,7 @@ const HistoricalAnalysisCard = () => {
               <div className="bg-black/20 rounded-lg p-2">
                 <div className="text-xs text-gray-400">Average Impact</div>
                 <div className="text-blue-400 font-bold text-lg">
-                  {historicalData.analysis.averageImpact.oneDay.toFixed(1)}%
+                  {(historicalData.analysis?.averageImpact?.oneDay ?? 0).toFixed(1)}%
                 </div>
                 <div className="text-xs text-gray-500">24h timeframe</div>
               </div>
@@ -2374,11 +2374,11 @@ const HistoricalAnalysisCard = () => {
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="text-green-400">Bull Market:</span>
-                  <span className="text-white">{historicalData.analysis.regimeAnalysis.bullMarket.averageImpact.toFixed(1)}%</span>
+                  <span className="text-white">{(historicalData.analysis?.regimeAnalysis?.bullMarket?.averageImpact ?? 0).toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-red-400">Bear Market:</span>
-                  <span className="text-white">{historicalData.analysis.regimeAnalysis.bearMarket.averageImpact.toFixed(1)}%</span>
+                  <span className="text-white">{(historicalData.analysis?.regimeAnalysis?.bearMarket?.averageImpact ?? 0).toFixed(1)}%</span>
                 </div>
               </div>
             </div>
