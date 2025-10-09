@@ -292,15 +292,13 @@ export function OnboardingTour() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('streamaix_onboarding_completed');
-    if (!hasSeenOnboarding) {
-      setTimeout(() => setIsOpen(true), 1000);
-    }
+    // Show onboarding on every app load
+    setTimeout(() => setIsOpen(true), 1000);
   }, []);
 
   const handleClose = () => {
+    // Just close the modal, don't save to localStorage
     setIsOpen(false);
-    localStorage.setItem('streamaix_onboarding_completed', 'true');
   };
 
   const handleNext = () => {
@@ -569,11 +567,11 @@ export function OnboardingTour() {
 }
 
 // Manual trigger button for users who want to replay the tour
+// Note: Tour now shows on every app load, so this just reloads the page
 export function OnboardingTrigger() {
   const [, setLocation] = useLocation();
 
   const restartTour = () => {
-    localStorage.removeItem('streamaix_onboarding_completed');
     setLocation('/');
     window.location.reload();
   };
