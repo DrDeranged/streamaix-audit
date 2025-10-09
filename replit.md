@@ -22,19 +22,21 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
     - **Referral System**: Unique code generation, signup tracking, token rewards, leaderboard.
     - **Real-Time Collaboration**: WebSocket-powered multi-user bounty editing, live cursors, and reward distribution.
     - **PWA Support**: Manifest, service worker, offline capability, push notifications, mobile install prompts.
-    - **Advanced Analytics**: Comprehensive `/discover` page with 9 categories of analytics (e.g., volatility forecasting, pattern recognition), 67+ live API endpoints, real-time data flow for stocks and cryptocurrencies, market regime detection. Includes a generic TTL-based in-memory cache for API rate limit prevention and cost reduction.
+    - **Advanced Analytics**: Comprehensive `/discover` page with 9 categories of analytics (e.g., volatility forecasting, pattern recognition), 67+ live API endpoints, real-time data flow for stocks and cryptocurrencies, market regime detection. Includes a generic TTL-based in-memory cache for API rate limit prevention and cost reduction. **3-tier API fallback system**: CoinGecko → CoinMarketCap → Dune Analytics for reliable crypto data.
     - **Bounty System**: Gamified with reputation, leveling, badges, streaks, and AI-powered quality scoring. Supports multi-token bounties and a template system for easy creation.
     - **AI Discovery**: Personalized content recommendations, trending bounties, "For You" feed.
     - **Smart Insights Dashboard**: AI-powered market intelligence, trading signals, sentiment analysis, confidence scoring.
     - **Analytics Dashboard**: Platform-wide engagement metrics, activity trends, category distribution, reward distribution.
+    - **User Onboarding**: Interactive 6-step tutorial tour for new users featuring platform introduction, key features walkthrough, animated modal with progress tracking, localStorage-based completion tracking, and manual replay option.
 
 ## External Dependencies
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless
 - **AI Services**: OpenAI API (GPT-4o for chatbot, quality scoring, content analysis, Whisper for transcription)
 - **Financial Data APIs**:
     - Finnhub API: Real-time stock and forex data.
-    - CoinMarketCap API: Crypto prices and market data (fallback).
-    - CoinGecko API: Crypto prices (currently rate-limited).
+    - CoinGecko API: Crypto prices (primary, currently rate-limited).
+    - CoinMarketCap API: Crypto prices and market data (secondary fallback).
+    - Dune Analytics API: Blockchain data and on-chain metrics (tertiary fallback, 2,500 credits/month free tier).
 - **Web3 Technologies**: Arweave/IPFS (decentralized storage), Lens Protocol, Farcaster (social), Optimism/Layer 2 solutions, Ethers.js v6.
 - **Build & UI Tools**: Vite, esbuild, Radix UI, shadcn/ui, TailwindCSS, Framer Motion, Google Fonts (Inter, Orbitron).
 - **Audio/Video Processing**: yt-dlp, ffmpeg.
