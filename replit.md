@@ -34,9 +34,9 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
 - **AI Services**: OpenAI API (GPT-4o for chatbot, quality scoring, content analysis, Whisper for transcription)
 - **Financial Data APIs**:
     - Finnhub API: Real-time stock and forex data.
-    - CoinGecko API: Crypto prices (primary, currently rate-limited).
-    - CoinMarketCap API: Crypto prices and market data (secondary fallback).
-    - Dune Analytics API: Blockchain data and on-chain metrics (tertiary fallback, 2,500 credits/month free tier).
+    - CoinGecko API: Crypto prices (primary, rate-limited at 10K calls).
+    - CoinMarketCap API: Crypto prices and market data (secondary fallback, monthly credit limit reached).
+    - Dune Analytics API: **Fully implemented** blockchain data and on-chain DEX price queries (tertiary fallback). Queries 15+ ERC-20 tokens using contract addresses, tries 4 different public query IDs for maximum coverage. Free tier rate-limited at ~2,500 credits/month.
 - **Web3 Technologies**: Arweave/IPFS (decentralized storage), Lens Protocol, Farcaster (social), Optimism/Layer 2 solutions, Ethers.js v6.
 - **Build & UI Tools**: Vite, esbuild, Radix UI, shadcn/ui, TailwindCSS, Framer Motion, Google Fonts (Inter, Orbitron).
 - **Audio/Video Processing**: yt-dlp, ffmpeg.
