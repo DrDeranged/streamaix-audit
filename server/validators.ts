@@ -9,6 +9,8 @@ export const registerSchema = z.object({
   ensName: z.string().optional().or(z.literal('').transform(() => undefined)),
   avatar: z.string().url().optional().or(z.literal('').transform(() => undefined)),
   bio: z.string().max(500).optional().or(z.literal('').transform(() => undefined)),
+  // Referral code
+  referralCode: z.string().optional().or(z.literal('').transform(() => undefined)),
   // Twitter fields
   twitterId: z.string().optional(),
   twitterUsername: z.string().optional(),

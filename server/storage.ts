@@ -55,6 +55,11 @@ import {
   type InsertPatternAlert,
   type AiTradingSetup,
   type InsertAiTradingSetup,
+  // Referral System Types
+  type ReferralCode,
+  type InsertReferralCode,
+  type ReferralSignup,
+  type InsertReferralSignup,
   users,
   summaries,
   bounties,
@@ -83,10 +88,14 @@ import {
   trendAnalysis,
   marketCycles,
   patternAlerts,
-  aiTradingSetups
+  aiTradingSetups,
+  // Referral System Tables
+  referralCodes,
+  referralSignups
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
+import { customAlphabet } from 'nanoid';
 
 export interface IStorage {
   // User operations
@@ -321,6 +330,18 @@ export interface IStorage {
     accuracyByCategory: Record<string, number>;
     recentAccuracy: number;
   }>;
+
+  // Referral System operations
+  generateUniqueReferralCode(): Promise<string>;
+  createReferralCode(code: InsertReferralCode): Promise<ReferralCode>;
+  getReferralCode(code: string): Promise<ReferralCode | undefined>;
+  getReferralCodesByUser(userId: string): Promise<ReferralCode[]>;
+  updateReferralCode(id: string, updates: Partial<ReferralCode>): Promise<ReferralCode | undefined>;
+  
+  createReferralSignup(signup: InsertReferralSignup): Promise<ReferralSignup>;
+  getReferralSignups(referrerId: string): Promise<ReferralSignup[]>;
+  claimReferralReward(signupId: string): Promise<ReferralSignup | undefined>;
+  getReferralLeaderboard(limit?: number): Promise<Array<{ userId: string; username: string; totalRewardsEarned: number; totalSignups: number }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1765,6 +1786,87 @@ export class DatabaseStorage implements IStorage {
       ),
       recentAccuracy: Math.round(recentAccuracy)
     };
+  }
+
+  // Referral System operations
+  async generateUniqueReferralCode(): Promise<string> {
+    const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
+    let code: string;
+    let exists = true;
+
+    while (exists) {
+      code = `STREAM${nanoid()}`;
+      const existing = await this.getReferralCode(code);
+      exists = !!existing;
+    }
+
+    return code!;
+  }
+
+  async createReferralCode(referralCode: InsertReferralCode): Promise<ReferralCode> {
+    const [newCode] = await db.insert(referralCodes).values(referralCode).returning();
+    return newCode;
+  }
+
+  async getReferralCode(code: string): Promise<ReferralCode | undefined> {
+    const [referralCode] = await db.select().from(referralCodes).where(eq(referralCodes.code, code));
+    return referralCode || undefined;
+  }
+
+  async getReferralCodesByUser(userId: string): Promise<ReferralCode[]> {
+    return await db.select().from(referralCodes)
+      .where(eq(referralCodes.userId, userId))
+      .orderBy(desc(referralCodes.createdAt));
+  }
+
+  async updateReferralCode(id: string, updates: Partial<ReferralCode>): Promise<ReferralCode | undefined> {
+    const [updated] = await db.update(referralCodes)
+      .set(updates as any)
+      .where(eq(referralCodes.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async createReferralSignup(signup: InsertReferralSignup): Promise<ReferralSignup> {
+    const [newSignup] = await db.insert(referralSignups).values(signup).returning();
+    return newSignup;
+  }
+
+  async getReferralSignups(referrerId: string): Promise<ReferralSignup[]> {
+    return await db.select().from(referralSignups)
+      .where(eq(referralSignups.referrerId, referrerId))
+      .orderBy(desc(referralSignups.createdAt));
+  }
+
+  async claimReferralReward(signupId: string): Promise<ReferralSignup | undefined> {
+    const [updated] = await db.update(referralSignups)
+      .set({ rewardClaimed: true })
+      .where(and(
+        eq(referralSignups.id, signupId),
+        eq(referralSignups.rewardClaimed, false)
+      ))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getReferralLeaderboard(limit: number = 10): Promise<Array<{ userId: string; username: string; totalRewardsEarned: number; totalSignups: number }>> {
+    const leaderboard = await db.select({
+      userId: referralCodes.userId,
+      username: users.username,
+      totalRewardsEarned: referralCodes.totalRewardsEarned,
+      totalSignups: referralCodes.totalSignups
+    })
+    .from(referralCodes)
+    .innerJoin(users, eq(referralCodes.userId, users.id))
+    .orderBy(desc(referralCodes.totalRewardsEarned))
+    .limit(limit);
+
+    return leaderboard.map(row => ({
+      userId: row.userId,
+      username: row.username,
+      totalRewardsEarned: row.totalRewardsEarned || 0,
+      totalSignups: row.totalSignups || 0
+    }));
   }
 }
 

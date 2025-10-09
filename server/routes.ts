@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: validation.error });
     }
 
-    const { username, password, email, walletAddress, ensName, avatar, bio } = validation.data!;
+    const { username, password, email, walletAddress, ensName, avatar, bio, referralCode } = validation.data!;
 
     try {
       // Check if user already exists
@@ -134,6 +134,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Validate referral code if provided
+      let referralCodeRecord = null;
+      if (referralCode) {
+        referralCodeRecord = await storage.getReferralCode(referralCode);
+        if (!referralCodeRecord) {
+          return res.status(400).json({ error: 'Invalid referral code' });
+        }
+        if (!referralCodeRecord.isActive) {
+          return res.status(400).json({ error: 'Referral code is inactive' });
+        }
+      }
+
       // Hash password and create user
       const hashedPassword = await AuthService.hashPassword(password);
       const user = await storage.createUser({
@@ -145,6 +157,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avatar,
         bio
       });
+
+      // Create referral signup record if referral code was used
+      if (referralCodeRecord) {
+        const rewardAmount = 100; // 100 STREAM tokens per signup
+        
+        await storage.createReferralSignup({
+          referralCodeId: referralCodeRecord.id,
+          referrerId: referralCodeRecord.userId,
+          referredUserId: user.id,
+          rewardAmount
+        });
+
+        // Update referral code stats
+        await storage.updateReferralCode(referralCodeRecord.id, {
+          totalSignups: (referralCodeRecord.totalSignups || 0) + 1,
+          totalRewardsEarned: (referralCodeRecord.totalRewardsEarned || 0) + rewardAmount
+        });
+      }
 
       // Generate token
       const token = AuthService.generateToken({
@@ -590,7 +620,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ summaries: enrichedSummaries });
   }));
 
+  // =============================================================================
+  // REFERRAL SYSTEM ROUTES
+  // =============================================================================
 
+  // Generate new referral code for authenticated user
+  app.post('/api/referrals/generate', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+
+    try {
+      // Generate unique referral code
+      const code = await storage.generateUniqueReferralCode();
+
+      // Create referral code record
+      const referralCode = await storage.createReferralCode({
+        userId,
+        code
+      });
+
+      res.status(201).json({
+        message: 'Referral code generated successfully',
+        referralCode: {
+          id: referralCode.id,
+          code: referralCode.code,
+          totalSignups: referralCode.totalSignups,
+          totalRewardsEarned: referralCode.totalRewardsEarned,
+          isActive: referralCode.isActive,
+          createdAt: referralCode.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Error generating referral code:', error);
+      return res.status(500).json({ error: 'Failed to generate referral code' });
+    }
+  }));
+
+  // Get user's referral codes with stats
+  app.get('/api/referrals/my-codes', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+
+    try {
+      const referralCodes = await storage.getReferralCodesByUser(userId);
+      
+      res.json({
+        referralCodes: referralCodes.map(code => ({
+          id: code.id,
+          code: code.code,
+          totalSignups: code.totalSignups || 0,
+          totalRewardsEarned: code.totalRewardsEarned || 0,
+          isActive: code.isActive,
+          createdAt: code.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching referral codes:', error);
+      return res.status(500).json({ error: 'Failed to fetch referral codes' });
+    }
+  }));
+
+  // Get referral stats (earnings, signups, unclaimed rewards)
+  app.get('/api/referrals/stats', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+
+    try {
+      const referralCodes = await storage.getReferralCodesByUser(userId);
+      const referralSignups = await storage.getReferralSignups(userId);
+
+      const totalEarnings = referralCodes.reduce((sum, code) => sum + (code.totalRewardsEarned || 0), 0);
+      const totalSignups = referralCodes.reduce((sum, code) => sum + (code.totalSignups || 0), 0);
+      const unclaimedRewards = referralSignups
+        .filter(signup => !signup.rewardClaimed)
+        .reduce((sum, signup) => sum + (signup.rewardAmount || 0), 0);
+      const claimedRewards = referralSignups
+        .filter(signup => signup.rewardClaimed)
+        .reduce((sum, signup) => sum + (signup.rewardAmount || 0), 0);
+
+      res.json({
+        stats: {
+          totalEarnings,
+          totalSignups,
+          unclaimedRewards,
+          claimedRewards,
+          activeReferrals: referralSignups.filter(s => !s.rewardClaimed).length
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching referral stats:', error);
+      return res.status(500).json({ error: 'Failed to fetch referral stats' });
+    }
+  }));
+
+  // Claim STREAM reward for referral
+  app.post('/api/referrals/claim/:signupId', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const { signupId } = req.params;
+
+    try {
+      // Get the referral signup to verify ownership
+      const referralSignups = await storage.getReferralSignups(userId);
+      const signup = referralSignups.find(s => s.id === signupId);
+
+      if (!signup) {
+        return res.status(404).json({ error: 'Referral signup not found' });
+      }
+
+      if (signup.rewardClaimed) {
+        return res.status(400).json({ error: 'Reward already claimed' });
+      }
+
+      // Claim the reward
+      const claimedSignup = await storage.claimReferralReward(signupId);
+
+      if (!claimedSignup) {
+        return res.status(400).json({ error: 'Failed to claim reward' });
+      }
+
+      res.json({
+        message: 'Reward claimed successfully',
+        reward: {
+          amount: claimedSignup.rewardAmount,
+          signupId: claimedSignup.id,
+          claimedAt: new Date()
+        }
+      });
+    } catch (error) {
+      console.error('Error claiming referral reward:', error);
+      return res.status(500).json({ error: 'Failed to claim reward' });
+    }
+  }));
+
+  // Get referral leaderboard - top referrers by total rewards earned
+  app.get('/api/referrals/leaderboard', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    try {
+      const leaderboard = await storage.getReferralLeaderboard(limit);
+
+      res.json({
+        leaderboard: leaderboard.map((entry, index) => ({
+          rank: index + 1,
+          userId: entry.userId,
+          username: entry.username,
+          totalRewardsEarned: entry.totalRewardsEarned,
+          totalSignups: entry.totalSignups
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching referral leaderboard:', error);
+      return res.status(500).json({ error: 'Failed to fetch leaderboard' });
+    }
+  }));
 
   // =============================================================================
   // BOUNTY ROUTES

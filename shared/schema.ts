@@ -215,6 +215,74 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Referral System
+export const referralCodes = pgTable("referral_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  code: text("code").notNull().unique(),
+  totalSignups: integer("total_signups").default(0),
+  totalRewardsEarned: real("total_rewards_earned").default(0), // STREAM tokens
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const referralSignups = pgTable("referral_signups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralCodeId: varchar("referral_code_id").references(() => referralCodes.id).notNull(),
+  referrerId: varchar("referrer_id").references(() => users.id).notNull(),
+  referredUserId: varchar("referred_user_id").references(() => users.id).notNull(),
+  rewardAmount: real("reward_amount").default(100), // 100 STREAM per signup
+  rewardClaimed: boolean("reward_claimed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Social Features
+export const userFollows = pgTable("user_follows", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  followerId: varchar("follower_id").references(() => users.id).notNull(),
+  followingId: varchar("following_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const summaryComments = pgTable("summary_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  summaryId: varchar("summary_id").references(() => summaries.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  parentCommentId: varchar("parent_comment_id").references((): AnyPgColumn => summaryComments.id), // for replies
+  likesCount: integer("likes_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const commentLikes = pgTable("comment_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  commentId: varchar("comment_id").references(() => summaryComments.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Real-time Collaboration
+export const bountyCollaborators = pgTable("bounty_collaborators", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  role: text("role").notNull(), // 'owner', 'collaborator'
+  rewardShare: real("reward_share").notNull(), // percentage (0-100)
+  status: text("status").notNull().default("active"), // 'active', 'pending', 'removed'
+  invitedBy: varchar("invited_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const collaborationSessions = pgTable("collaboration_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
+  activeUsers: jsonb("active_users"), // array of {userId, cursor, lastSeen}
+  contentSnapshot: text("content_snapshot"), // current working content
+  lastActivity: timestamp("last_activity").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const cryptoLeaders = pgTable("crypto_leaders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   fid: integer("fid").notNull().unique(), // Farcaster ID
@@ -621,6 +689,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   knowledgeStacks: many(knowledgeStacks),
   interactions: many(userInteractions),
   notes: many(userNotes),
+  referralCodes: many(referralCodes),
+  referredBy: many(referralSignups, { relationName: "referredUser" }),
+  referrals: many(referralSignups, { relationName: "referrer" }),
+  followers: many(userFollows, { relationName: "following" }),
+  following: many(userFollows, { relationName: "follower" }),
+  comments: many(summaryComments),
+  commentLikes: many(commentLikes),
+  bountyCollaborations: many(bountyCollaborators),
 }));
 
 export const summariesRelations = relations(summaries, ({ one, many }) => ({
@@ -870,6 +946,53 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+// Referral System Schemas
+export const insertReferralCodeSchema = createInsertSchema(referralCodes).pick({
+  userId: true,
+  code: true,
+});
+
+export const insertReferralSignupSchema = createInsertSchema(referralSignups).pick({
+  referralCodeId: true,
+  referrerId: true,
+  referredUserId: true,
+  rewardAmount: true,
+});
+
+// Social Features Schemas
+export const insertUserFollowSchema = createInsertSchema(userFollows).pick({
+  followerId: true,
+  followingId: true,
+});
+
+export const insertSummaryCommentSchema = createInsertSchema(summaryComments).pick({
+  summaryId: true,
+  userId: true,
+  content: true,
+  parentCommentId: true,
+});
+
+export const insertCommentLikeSchema = createInsertSchema(commentLikes).pick({
+  commentId: true,
+  userId: true,
+});
+
+// Collaboration Schemas
+export const insertBountyCollaboratorSchema = createInsertSchema(bountyCollaborators).pick({
+  bountyId: true,
+  userId: true,
+  role: true,
+  rewardShare: true,
+  status: true,
+  invitedBy: true,
+});
+
+export const insertCollaborationSessionSchema = createInsertSchema(collaborationSessions).pick({
+  bountyId: true,
+  activeUsers: true,
+  contentSnapshot: true,
+});
+
 export const insertCryptoLeaderSchema = createInsertSchema(cryptoLeaders).pick({
   fid: true,
   username: true,
@@ -1089,6 +1212,27 @@ export type UserNote = typeof userNotes.$inferSelect;
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+
+export type InsertReferralCode = z.infer<typeof insertReferralCodeSchema>;
+export type ReferralCode = typeof referralCodes.$inferSelect;
+
+export type InsertReferralSignup = z.infer<typeof insertReferralSignupSchema>;
+export type ReferralSignup = typeof referralSignups.$inferSelect;
+
+export type InsertUserFollow = z.infer<typeof insertUserFollowSchema>;
+export type UserFollow = typeof userFollows.$inferSelect;
+
+export type InsertSummaryComment = z.infer<typeof insertSummaryCommentSchema>;
+export type SummaryComment = typeof summaryComments.$inferSelect;
+
+export type InsertCommentLike = z.infer<typeof insertCommentLikeSchema>;
+export type CommentLike = typeof commentLikes.$inferSelect;
+
+export type InsertBountyCollaborator = z.infer<typeof insertBountyCollaboratorSchema>;
+export type BountyCollaborator = typeof bountyCollaborators.$inferSelect;
+
+export type InsertCollaborationSession = z.infer<typeof insertCollaborationSessionSchema>;
+export type CollaborationSession = typeof collaborationSessions.$inferSelect;
 
 export type InsertCryptoLeader = z.infer<typeof insertCryptoLeaderSchema>;
 export type CryptoLeader = typeof cryptoLeaders.$inferSelect;
