@@ -393,11 +393,11 @@ const VolatilityForecastingSection = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400 text-xs">Value:</span>
-                        <span className="text-white text-sm">{indicator.normalizedValue.toFixed(1)}</span>
+                        <span className="text-white text-sm">{(indicator?.normalizedValue ?? 0).toFixed(1)}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400 text-xs">Percentile:</span>
-                        <span className="text-gray-300 text-xs">{indicator.percentile.toFixed(0)}%</span>
+                        <span className="text-gray-300 text-xs">{(indicator?.percentile ?? 0).toFixed(0)}%</span>
                       </div>
                     </div>
                   ))}
@@ -439,9 +439,9 @@ const VolatilityForecastingSection = () => {
                         <p className="text-gray-400 text-xs">{pred.confidence}% confidence</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-white font-medium">{pred.expectedVolatility.toFixed(1)}%</p>
+                        <p className="text-white font-medium">{(pred?.expectedVolatility ?? 0).toFixed(1)}%</p>
                         <p className="text-gray-400 text-xs">
-                          {pred.range.lower.toFixed(1)}% - {pred.range.upper.toFixed(1)}%
+                          {(pred?.range?.lower ?? 0).toFixed(1)}% - {(pred?.range?.upper ?? 0).toFixed(1)}%
                         </p>
                       </div>
                     </div>
@@ -461,19 +461,19 @@ const VolatilityForecastingSection = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
                       <p className="text-gray-400 text-xs">VaR 95%</p>
-                      <p className="text-red-400 font-bold text-lg">{assetForecast.riskMetrics.var95.toFixed(1)}%</p>
+                      <p className="text-red-400 font-bold text-lg">{(assetForecast?.riskMetrics?.var95 ?? 0).toFixed(1)}%</p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400 text-xs">VaR 99%</p>
-                      <p className="text-red-400 font-bold text-lg">{assetForecast.riskMetrics.var99.toFixed(1)}%</p>
+                      <p className="text-red-400 font-bold text-lg">{(assetForecast?.riskMetrics?.var99 ?? 0).toFixed(1)}%</p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400 text-xs">Expected Shortfall</p>
-                      <p className="text-orange-400 font-bold text-lg">{assetForecast.riskMetrics.expectedShortfall.toFixed(1)}%</p>
+                      <p className="text-orange-400 font-bold text-lg">{(assetForecast?.riskMetrics?.expectedShortfall ?? 0).toFixed(1)}%</p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400 text-xs">Max Drawdown Risk</p>
-                      <p className="text-yellow-400 font-bold text-lg">{assetForecast.riskMetrics.maxDrawdownProbability.toFixed(0)}%</p>
+                      <p className="text-yellow-400 font-bold text-lg">{(assetForecast?.riskMetrics?.maxDrawdownProbability ?? 0).toFixed(0)}%</p>
                     </div>
                   </div>
                 </CardContent>
@@ -503,11 +503,11 @@ const VolatilityForecastingSection = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-300 text-sm">Value:</span>
-                      <span className="text-white font-medium">{indicator.normalizedValue.toFixed(1)}</span>
+                      <span className="text-white font-medium">{(indicator?.normalizedValue ?? 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-300 text-sm">Percentile:</span>
-                      <span className="text-gray-300">{indicator.percentile.toFixed(0)}%</span>
+                      <span className="text-gray-300">{(indicator?.percentile ?? 0).toFixed(0)}%</span>
                     </div>
                     <p className="text-gray-400 text-xs mt-2">{indicator.interpretation}</p>
                   </CardContent>
@@ -536,7 +536,7 @@ const VolatilityForecastingSection = () => {
                           indicator.probability > 40 ? 'bg-orange-500/30 text-orange-300' :
                           'bg-yellow-500/30 text-yellow-300'
                         }`}>
-                          {indicator.probability.toFixed(0)}%
+                          {(indicator?.probability ?? 0).toFixed(0)}%
                         </Badge>
                       </div>
                       <div className="space-y-2">
@@ -588,7 +588,7 @@ const VolatilityForecastingSection = () => {
                         )}
                         <p className="text-gray-400 text-xs">
                           Current: {alert.currentValue} | Threshold: {alert.thresholdValue} | 
-                          Deviation: {alert.deviationPercent > 0 ? '+' : ''}{alert.deviationPercent.toFixed(1)}%
+                          Deviation: {alert.deviationPercent > 0 ? '+' : ''}{(alert?.deviationPercent ?? 0).toFixed(1)}%
                         </p>
                       </div>
                       <Button
@@ -1140,7 +1140,7 @@ const PatternRecognitionSection = () => {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-cyan-300 text-xs font-medium">Risk/Reward Ratio</span>
                         <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
-                          1:{setup.riskReward.toFixed(1)}
+                          1:{(setup?.riskReward ?? 0).toFixed(1)}
                         </Badge>
                       </div>
                       <p className="text-gray-300 text-sm">{setup.rationale}</p>
@@ -1264,7 +1264,7 @@ const PatternRecognitionSection = () => {
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Avg Confidence</p>
-                <p className="text-blue-400 font-bold text-lg">{(patternSummary.data.overview.avgConfidence * 100).toFixed(0)}%</p>
+                <p className="text-blue-400 font-bold text-lg">{((patternSummary?.data?.overview?.avgConfidence ?? 0) * 100).toFixed(0)}%</p>
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Bullish</p>
@@ -1373,28 +1373,28 @@ const InstitutionalAnalyticsOverview = () => {
           <div className="text-center">
             <p className="text-gray-400 text-sm">Smart Money Volume 24h</p>
             <p className="text-white font-bold text-lg">
-              ${(smartMoneyVolume / 1e6).toFixed(1)}M
+              ${((smartMoneyVolume ?? 0) / 1e6).toFixed(1)}M
             </p>
             <p className="text-emerald-400 text-xs">{smartMoney.length} transactions</p>
           </div>
           <div className="text-center">
             <p className="text-gray-400 text-sm">Fund Flows 24h</p>
             <p className="text-white font-bold text-lg">
-              ${(totalFlowValue / 1e6).toFixed(1)}M
+              ${((totalFlowValue ?? 0) / 1e6).toFixed(1)}M
             </p>
             <p className="text-cyan-400 text-xs">{fundFlows.length} flows tracked</p>
           </div>
           <div className="text-center">
             <p className="text-gray-400 text-sm">Institutional Sentiment</p>
             <p className={`font-bold text-lg ${sentiment?.overall > 0 ? 'text-green-400' : sentiment?.overall < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-              {sentiment ? (sentiment.overall * 100).toFixed(1) : 'N/A'}%
+              {sentiment ? ((sentiment?.overall ?? 0) * 100).toFixed(1) : 'N/A'}%
             </p>
             <p className="text-gray-400 text-xs">{sentiment?.trend || 'Unknown'}</p>
           </div>
           <div className="text-center">
             <p className="text-gray-400 text-sm">Confidence Score</p>
             <p className="text-white font-bold text-lg">
-              {sentiment?.confidence?.toFixed(0) || 'N/A'}%
+              {(sentiment?.confidence ?? 0).toFixed(0)}%
             </p>
             <p className="text-purple-400 text-xs">Analysis strength</p>
           </div>
@@ -1461,7 +1461,7 @@ const SmartMoneyMovements = () => {
                       </Badge>
                     </div>
                     <p className="text-gray-300 text-xs mb-1">
-                      ${(tx.value / 1e6).toFixed(2)}M • {tx.strategy || 'Unknown Strategy'}
+                      ${((tx?.value ?? 0) / 1e6).toFixed(2)}M • {tx.strategy || 'Unknown Strategy'}
                     </p>
                     <p className="text-gray-500 text-xs">
                       {new Date(tx.timestamp).toLocaleTimeString()} • Confidence: {tx.confidence}%
@@ -1542,7 +1542,7 @@ const InstitutionalFundFlows = () => {
                       {flow.sourceExchange} → {flow.destinationExchange}
                     </p>
                     <p className="text-gray-300 text-xs mb-1">
-                      ${(flow.value / 1e6).toFixed(2)}M • {flow.amount.toLocaleString()} {flow.asset}
+                      ${((flow?.value ?? 0) / 1e6).toFixed(2)}M • {(flow?.amount ?? 0).toLocaleString()} {flow.asset}
                     </p>
                     <p className="text-gray-500 text-xs">
                       {new Date(flow.timestamp).toLocaleTimeString()} • Score: {flow.institutionalScore}%
@@ -1597,7 +1597,7 @@ const InstitutionalSentiment = () => {
                 sentimentData.sentiment.overall < -0.3 ? 'text-red-400' :
                 'text-gray-400'
               }`}>
-                {(sentimentData.sentiment.overall * 100).toFixed(1)}%
+                {((sentimentData?.sentiment?.overall ?? 0) * 100).toFixed(1)}%
               </div>
               <p className="text-gray-400 text-sm mb-1">Overall Sentiment</p>
               <Badge className={`text-xs ${
@@ -1707,12 +1707,12 @@ const InstitutionalPositioning = () => {
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-400">Net Flow 7d:</span>
                     <span className={pos.netFlow > 0 ? 'text-green-400' : pos.netFlow < 0 ? 'text-red-400' : 'text-gray-400'}>
-                      {pos.netFlow > 0 ? '+' : ''}${(pos.netFlow / 1e6).toFixed(1)}M
+                      {pos.netFlow > 0 ? '+' : ''}${((pos?.netFlow ?? 0) / 1e6).toFixed(1)}M
                     </span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-400">Flow 24h:</span>
-                    <span className="text-cyan-400">${(pos.flow24h / 1e6).toFixed(1)}M</span>
+                    <span className="text-cyan-400">${((pos?.flow24h ?? 0) / 1e6).toFixed(1)}M</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-400">Concentration:</span>
@@ -2067,7 +2067,7 @@ const EventPredictionsCard = () => {
                 ← Back to Events
               </button>
               <Badge className="bg-green-500/20 text-green-300 text-xs">
-                Avg Confidence: {predictions.averageConfidence?.toFixed(1)}%
+                Avg Confidence: {(predictions?.averageConfidence ?? 0).toFixed(1)}%
               </Badge>
             </div>
             
@@ -2088,7 +2088,7 @@ const EventPredictionsCard = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-white font-medium text-sm">
-                      {prediction.magnitude.expectedMove.toFixed(1)}%
+                      {(prediction?.magnitude?.expectedMove ?? 0).toFixed(1)}%
                     </div>
                     <div className="text-gray-400 text-xs">
                       Confidence: {prediction.confidence}%
@@ -2110,9 +2110,9 @@ const EventPredictionsCard = () => {
                       <span className="text-gray-300">{asset.symbol}</span>
                       <div className="flex items-center gap-2">
                         <span className={`${asset.predictedMove > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {asset.predictedMove > 0 ? '+' : ''}{asset.predictedMove.toFixed(1)}%
+                          {asset.predictedMove > 0 ? '+' : ''}{(asset?.predictedMove ?? 0).toFixed(1)}%
                         </span>
-                        <span className="text-gray-400">{asset.confidence.toFixed(0)}%</span>
+                        <span className="text-gray-400">{(asset?.confidence ?? 0).toFixed(0)}%</span>
                       </div>
                     </div>
                   ))}
@@ -2235,19 +2235,19 @@ const EventTradingSignalsCard = () => {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-gray-400">Entry:</span>
-                    <span className="text-white ml-1">${signal.entryPrice?.toFixed(2)}</span>
+                    <span className="text-white ml-1">${(signal?.entryPrice ?? 0).toFixed(2)}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Target:</span>
-                    <span className="text-green-400 ml-1">${signal.targetPrice?.toFixed(2)}</span>
+                    <span className="text-green-400 ml-1">${(signal?.targetPrice ?? 0).toFixed(2)}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Stop:</span>
-                    <span className="text-red-400 ml-1">${signal.stopLoss?.toFixed(2)}</span>
+                    <span className="text-red-400 ml-1">${(signal?.stopLoss ?? 0).toFixed(2)}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">R/R:</span>
-                    <span className="text-white ml-1">{signal.riskRewardRatio?.toFixed(1)}:1</span>
+                    <span className="text-white ml-1">{(signal?.riskRewardRatio ?? 0).toFixed(1)}:1</span>
                   </div>
                 </div>
                 
@@ -2431,7 +2431,7 @@ const ModelPerformanceCard = () => {
               <div className="bg-black/20 rounded-lg p-2">
                 <div className="text-xs text-gray-400">Avg Accuracy</div>
                 <div className="text-green-400 font-bold text-lg">
-                  {modelStatus.modelStatus.averageAccuracy.toFixed(1)}%
+                  {(modelStatus?.modelStatus?.averageAccuracy ?? 0).toFixed(1)}%
                 </div>
                 <div className="text-xs text-gray-500">Cross-validation</div>
               </div>
@@ -2445,7 +2445,7 @@ const ModelPerformanceCard = () => {
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-gray-300">Prediction Accuracy:</span>
-                <span className="text-green-400">{modelStatus.modelStatus.predictionAccuracy.toFixed(1)}%</span>
+                <span className="text-green-400">{(modelStatus?.modelStatus?.predictionAccuracy ?? 0).toFixed(1)}%</span>
               </div>
             </div>
 
@@ -2459,7 +2459,7 @@ const ModelPerformanceCard = () => {
                     }`}></div>
                     <span className="text-gray-300">{model.name.split(' ')[0]}</span>
                   </div>
-                  <span className="text-white">{model.accuracy.toFixed(1)}%</span>
+                  <span className="text-white">{(model?.accuracy ?? 0).toFixed(1)}%</span>
                 </div>
               ))}
             </div>
@@ -3296,7 +3296,7 @@ const CrossMarketSignalSection = () => {
                           <span className="text-white font-semibold text-sm">{corr.assetPair}</span>
                           <div className="flex items-center gap-2">
                             <span className={`text-sm font-bold ${corr.correlation > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              {(corr.correlation * 100).toFixed(1)}%
+                              {((corr?.correlation ?? 0) * 100).toFixed(1)}%
                             </span>
                             <Badge className={`${getSignalStrengthColor(100 - corr.breakdownRisk)} text-xs`}>
                               {corr.strength?.toUpperCase()}
@@ -4235,7 +4235,7 @@ export default function Discover() {
                     <div className="flex items-center justify-between">
                       <span className="text-white font-medium">{formatPrice(mover.price)}</span>
                       <span className={`font-medium ${getChangeColor(mover.changePercent)}`}>
-                        {mover.changePercent > 0 ? '+' : ''}{mover.changePercent.toFixed(2)}%
+                        {mover.changePercent > 0 ? '+' : ''}{(mover?.changePercent ?? 0).toFixed(2)}%
                       </span>
                     </div>
                     
@@ -4299,7 +4299,7 @@ export default function Discover() {
                          sector.trend === 'down' ? <ArrowDown className="h-4 w-4 text-red-400" /> :
                          <Activity className="h-4 w-4 text-gray-400" />}
                         <span className={`text-sm font-medium ${getChangeColor(sector.performance)}`}>
-                          {sector.performance > 0 ? '+' : ''}{sector.performance.toFixed(2)}%
+                          {sector.performance > 0 ? '+' : ''}{(sector?.performance ?? 0).toFixed(2)}%
                         </span>
                       </div>
                       <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
@@ -4493,20 +4493,20 @@ export default function Discover() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Long/Short Ratio</span>
                       <span className="text-white font-medium">
-                        {derivativesAnalytics.futures.positioning.longShortRatio.toFixed(2)}
+                        {(derivativesAnalytics?.futures?.positioning?.longShortRatio ?? 0).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Total OI</span>
                       <span className="text-white font-medium">
-                        ${((derivativesAnalytics.futures.positioning.totalLongOI + 
-                           derivativesAnalytics.futures.positioning.totalShortOI) / 1e6).toFixed(1)}M
+                        ${(((derivativesAnalytics?.futures?.positioning?.totalLongOI ?? 0) + 
+                           (derivativesAnalytics?.futures?.positioning?.totalShortOI ?? 0)) / 1e6).toFixed(1)}M
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Top Trader Long %</span>
                       <span className="text-white font-medium">
-                        {(derivativesAnalytics.futures.positioning.topTraderLongRatio * 100).toFixed(1)}%
+                        {((derivativesAnalytics?.futures?.positioning?.topTraderLongRatio ?? 0) * 100).toFixed(1)}%
                       </span>
                     </div>
                     
@@ -4518,7 +4518,7 @@ export default function Discover() {
                           derivativesAnalytics.futures.positioning.oiChange24h > 0 ? 'text-green-400' : 'text-red-400'
                         }`}>
                           {derivativesAnalytics.futures.positioning.oiChange24h > 0 ? '+' : ''}
-                          {derivativesAnalytics.futures.positioning.oiChange24h.toFixed(2)}%
+                          {(derivativesAnalytics?.futures?.positioning?.oiChange24h ?? 0).toFixed(2)}%
                         </span>
                       </div>
                     </div>
@@ -4582,7 +4582,7 @@ export default function Discover() {
                         {liquidationsData.liquidations.heatmap?.slice(0, 6).map((level: any, idx: number) => (
                           <div key={idx} className="flex items-center justify-between text-xs">
                             <span className="text-gray-300">
-                              ${level.price.toFixed(0)}
+                              ${(level?.price ?? 0).toFixed(0)}
                             </span>
                             <div className="flex items-center gap-2">
                               <div 
@@ -4595,7 +4595,7 @@ export default function Discover() {
                                 }}
                               />
                               <span className="text-white text-[10px] w-8">
-                                {level.intensity.toFixed(0)}
+                                {(level?.intensity ?? 0).toFixed(0)}
                               </span>
                             </div>
                           </div>
@@ -4634,7 +4634,7 @@ export default function Discover() {
                     <div className="bg-black/30 rounded-lg p-3">
                       <div className="text-xs text-gray-400 mb-1">Put/Call Ratio</div>
                       <div className="text-white font-bold">
-                        {derivativesAnalytics.options.sentiment.putCallRatio.volume.toFixed(2)}
+                        {(derivativesAnalytics?.options?.sentiment?.putCallRatio?.volume ?? 0).toFixed(2)}
                       </div>
                       <div className="text-xs text-gray-500">Volume Based</div>
                     </div>
@@ -4645,21 +4645,21 @@ export default function Discover() {
                         derivativesAnalytics.options.sentiment.flowSentiment.score < -20 ? 'text-red-400' :
                         'text-yellow-400'
                       }`}>
-                        {derivativesAnalytics.options.sentiment.flowSentiment.score.toFixed(0)}
+                        {(derivativesAnalytics?.options?.sentiment?.flowSentiment?.score ?? 0).toFixed(0)}
                       </div>
                       <div className="text-xs text-gray-500">-100 to +100</div>
                     </div>
                     <div className="bg-black/30 rounded-lg p-3">
                       <div className="text-xs text-gray-400 mb-1">Max Pain</div>
                       <div className="text-white font-bold">
-                        ${derivativesAnalytics.options.sentiment.maxPain.toFixed(0)}
+                        ${(derivativesAnalytics?.options?.sentiment?.maxPain ?? 0).toFixed(0)}
                       </div>
                       <div className="text-xs text-gray-500">Price Level</div>
                     </div>
                     <div className="bg-black/30 rounded-lg p-3">
                       <div className="text-xs text-gray-400 mb-1">Total Gamma</div>
                       <div className="text-white font-bold">
-                        {(derivativesAnalytics.options.sentiment.gexExposure.totalGamma / 1e6).toFixed(1)}M
+                        {((derivativesAnalytics?.options?.sentiment?.gexExposure?.totalGamma ?? 0) / 1e6).toFixed(1)}M
                       </div>
                       <div className="text-xs text-gray-500">Exposure</div>
                     </div>
@@ -4864,9 +4864,9 @@ export default function Discover() {
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-gray-400">Amount:</span>
                           <span className="text-white font-medium">
-                            {alert.amount_usd >= 1e9 ? `$${(alert.amount_usd / 1e9).toFixed(1)}B` :
-                             alert.amount_usd >= 1e6 ? `$${(alert.amount_usd / 1e6).toFixed(1)}M` :
-                             `$${(alert.amount_usd / 1e3).toFixed(1)}K`}
+                            {alert.amount_usd >= 1e9 ? `$${((alert?.amount_usd ?? 0) / 1e9).toFixed(1)}B` :
+                             alert.amount_usd >= 1e6 ? `$${((alert?.amount_usd ?? 0) / 1e6).toFixed(1)}M` :
+                             `$${((alert?.amount_usd ?? 0) / 1e3).toFixed(1)}K`}
                           </span>
                         </div>
                       )}
@@ -4950,7 +4950,7 @@ export default function Discover() {
                           <div className="text-right">
                             <div className="text-white font-bold text-sm">
                               {whale.amount_usd || whale.valueUsd ? 
-                                `$${((whale.amount_usd || whale.valueUsd) / 1e6).toFixed(1)}M` : 
+                                `$${(((whale?.amount_usd ?? whale?.valueUsd ?? 0)) / 1e6).toFixed(1)}M` : 
                                 'Unknown'}
                             </div>
                             <div className="text-xs text-gray-400">
@@ -5118,9 +5118,9 @@ export default function Discover() {
                             flow.net_flow_24h > 0 ? 'text-green-300' :
                             flow.net_flow_24h < 0 ? 'text-red-300' : 'text-white'
                           }`}>
-                            {flow.net_flow_24h >= 1e6 ? `$${(Math.abs(flow.net_flow_24h) / 1e6).toFixed(1)}M` :
-                             flow.net_flow_24h >= 1e3 ? `$${(Math.abs(flow.net_flow_24h) / 1e3).toFixed(1)}K` :
-                             `$${Math.abs(flow.net_flow_24h || 0).toFixed(0)}`}
+                            {flow.net_flow_24h >= 1e6 ? `$${(Math.abs(flow?.net_flow_24h ?? 0) / 1e6).toFixed(1)}M` :
+                             flow.net_flow_24h >= 1e3 ? `$${(Math.abs(flow?.net_flow_24h ?? 0) / 1e3).toFixed(1)}K` :
+                             `$${Math.abs(flow?.net_flow_24h ?? 0).toFixed(0)}`}
                           </span>
                         </div>
                         
@@ -5135,7 +5135,7 @@ export default function Discover() {
                             <span className={`${
                               flow.flow_change_percentage > 0 ? 'text-green-300' : 'text-red-300'
                             }`}>
-                              {flow.flow_change_percentage > 0 ? '+' : ''}{flow.flow_change_percentage.toFixed(1)}%
+                              {flow.flow_change_percentage > 0 ? '+' : ''}{(flow?.flow_change_percentage ?? 0).toFixed(1)}%
                             </span>
                           </div>
                         )}
@@ -5467,13 +5467,13 @@ export default function Discover() {
                       <div className="bg-black/30 rounded-lg p-3">
                         <div className="text-xs text-gray-400 mb-1">Crypto-Stock Correlation</div>
                         <div className="text-sm font-medium text-white">
-                          {(marketRegime.data.characteristics.cryptoTradStockCorr * 100).toFixed(1)}%
+                          {((marketRegime?.data?.characteristics?.cryptoTradStockCorr ?? 0) * 100).toFixed(1)}%
                         </div>
                       </div>
                       <div className="bg-black/30 rounded-lg p-3">
                         <div className="text-xs text-gray-400 mb-1">Risk Sentiment</div>
                         <div className="text-sm font-medium text-white">
-                          {marketRegime.data.characteristics.riskSentiment > 0 ? '+' : ''}{(marketRegime.data.characteristics.riskSentiment * 100).toFixed(1)}
+                          {marketRegime.data.characteristics.riskSentiment > 0 ? '+' : ''}{((marketRegime?.data?.characteristics?.riskSentiment ?? 0) * 100).toFixed(1)}
                         </div>
                       </div>
                     </div>
@@ -5530,7 +5530,7 @@ export default function Discover() {
                               : pair.correlation < -0.5 ? 'text-red-400' 
                               : 'text-yellow-400'
                             }`}>
-                              {pair.correlation > 0 ? '+' : ''}{(pair.correlation * 100).toFixed(1)}%
+                              {pair.correlation > 0 ? '+' : ''}{((pair?.correlation ?? 0) * 100).toFixed(1)}%
                             </div>
                             <div className="text-xs text-gray-500 capitalize">{pair.strength}</div>
                           </div>
@@ -5568,7 +5568,7 @@ export default function Discover() {
                                   : 'bg-gray-500/40'
                                 }`}
                                 style={{ opacity: Math.max(0.3, intensity) }}
-                                title={`${asset1.symbol} × ${asset2.symbol}: ${(corrValue * 100).toFixed(1)}%`}
+                                title={`${asset1.symbol} × ${asset2.symbol}: ${((corrValue ?? 0) * 100).toFixed(1)}%`}
                               >
                                 {Math.round(corrValue * 10)}
                               </div>
@@ -5788,7 +5788,7 @@ export default function Discover() {
                   <div className="space-y-3">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-white">
-                        ${(m2MoneySupply.current / 1000).toFixed(1)}T
+                        ${((m2MoneySupply?.current ?? 0) / 1000).toFixed(1)}T
                       </div>
                       <div className="text-xs text-gray-400">Current M2 Stock</div>
                     </div>
@@ -5798,7 +5798,7 @@ export default function Discover() {
                       <span className={`text-sm font-semibold ${
                         m2MoneySupply.yoyChange >= 0 ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {m2MoneySupply.yoyChange >= 0 ? '+' : ''}{m2MoneySupply.yoyChange.toFixed(1)}%
+                        {m2MoneySupply.yoyChange >= 0 ? '+' : ''}{(m2MoneySupply?.yoyChange ?? 0).toFixed(1)}%
                       </span>
                     </div>
                     
@@ -5807,7 +5807,7 @@ export default function Discover() {
                       <span className={`text-sm font-semibold ${
                         m2MoneySupply.quarterlyChange >= 0 ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {m2MoneySupply.quarterlyChange >= 0 ? '+' : ''}{m2MoneySupply.quarterlyChange.toFixed(1)}%
+                        {m2MoneySupply.quarterlyChange >= 0 ? '+' : ''}{(m2MoneySupply?.quarterlyChange ?? 0).toFixed(1)}%
                       </span>
                     </div>
                     
@@ -6395,7 +6395,7 @@ export default function Discover() {
                           ${riskDashboard.data.portfolio.totalValue.toLocaleString()}
                         </p>
                         <p className="text-emerald-400 text-xs">
-                          {riskDashboard.data.portfolio.totalAllocated.toFixed(1)}% allocated
+                          {(riskDashboard?.data?.portfolio?.totalAllocated ?? 0).toFixed(1)}% allocated
                         </p>
                       </div>
                       <DollarSign className="h-8 w-8 text-emerald-400" />
@@ -6410,7 +6410,7 @@ export default function Discover() {
                       <div>
                         <p className="text-red-300 text-sm font-medium">VaR (95% 1d)</p>
                         <p className="text-white text-xl font-bold">
-                          {riskDashboard.data.riskMetrics.var95_1d.toFixed(2)}%
+                          {(riskDashboard?.data?.riskMetrics?.var95_1d ?? 0).toFixed(2)}%
                         </p>
                         <p className="text-red-400 text-xs">
                           ${(riskDashboard.data.portfolio.totalValue * riskDashboard.data.riskMetrics.var95_1d / 100).toLocaleString()}
@@ -6428,7 +6428,7 @@ export default function Discover() {
                       <div>
                         <p className="text-blue-300 text-sm font-medium">Sharpe Ratio</p>
                         <p className="text-white text-xl font-bold">
-                          {riskDashboard.data.riskMetrics.sharpeRatio.toFixed(2)}
+                          {(riskDashboard?.data?.riskMetrics?.sharpeRatio ?? 0).toFixed(2)}
                         </p>
                         <p className={`text-xs ${
                           riskDashboard.data.riskMetrics.sharpeRatio > 1 ? 'text-green-400' :
@@ -6450,7 +6450,7 @@ export default function Discover() {
                       <div>
                         <p className="text-purple-300 text-sm font-medium">Diversification</p>
                         <p className="text-white text-xl font-bold">
-                          {riskDashboard.data.riskMetrics.diversificationScore.toFixed(0)}/100
+                          {(riskDashboard?.data?.riskMetrics?.diversificationScore ?? 0).toFixed(0)}/100
                         </p>
                         <p className={`text-xs ${
                           riskDashboard.data.riskMetrics.diversificationScore > 75 ? 'text-green-400' :
@@ -6539,7 +6539,7 @@ export default function Discover() {
                             <span className="text-white capitalize text-sm">{asset}</span>
                           </div>
                           <div className="text-right">
-                            <p className="text-white font-medium text-sm">{data.allocation.toFixed(1)}%</p>
+                            <p className="text-white font-medium text-sm">{(data?.allocation ?? 0).toFixed(1)}%</p>
                             <p className="text-gray-400 text-xs">${data.value.toLocaleString()}</p>
                           </div>
                         </div>
