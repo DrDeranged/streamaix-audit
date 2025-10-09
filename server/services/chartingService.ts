@@ -224,8 +224,8 @@ export class ChartingService {
     timeframe: string, 
     assetType: 'crypto' | 'stock' | 'bond' | 'commodity' | 'currency'
   ): Promise<ChartDataPoint[]> {
-    // For now, we'll generate realistic mock data based on current prices
-    // In a real implementation, this would fetch from various data providers
+    // Generate synthetic chart data based on real current prices
+    // Note: Historical data points are mathematically derived, not actual market data
     
     try {
       let currentPrice = 0;
@@ -241,13 +241,9 @@ export class ChartingService {
       }
 
       if (currentPrice === 0) {
-        // Use fallback prices for demo
-        const fallbackPrices: { [key: string]: number } = {
-          'BTC': 45000, 'ETH': 2800, 'SOL': 180, 'ADA': 0.45,
-          'AAPL': 175, 'GOOGL': 140, 'MSFT': 380, 'NVDA': 875,
-          'TSLA': 240, 'META': 520, 'AMZN': 160
-        };
-        currentPrice = fallbackPrices[symbol] || 100;
+        // No price data available - return empty chart data instead of mock
+        console.log(`⚠️ No price data available for ${symbol} - cannot generate chart`);
+        return [];
       }
 
       return this.generateHistoricalData(symbol, currentPrice, timeframe);

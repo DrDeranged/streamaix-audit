@@ -847,25 +847,16 @@ export class VolatilityForecastingService {
       const quotes = await this.marketDataService.getCryptoQuotes([symbol]);
       return quotes[0];
     } else {
-      // For stocks, generate mock data until proper stock quotes service is implemented
-      return {
-        symbol,
-        price: Math.random() * 1000 + 100, // Mock price between 100-1100
-        change24h: (Math.random() - 0.5) * 10, // Mock change between -5% and +5%
-        volume: Math.random() * 1000000000 // Mock volume
-      };
+      // For stocks, return null if no real data available
+      console.log(`⚠️ No stock data available for ${symbol}`);
+      return null;
     }
   }
 
   private async calculateHistoricalVolatility(symbol: string): Promise<any> {
-    // Calculate realized volatility over different periods
-    return {
-      realized1d: Math.random() * 50 + 20, // Mock: 20-70%
-      realized7d: Math.random() * 40 + 25, // Mock: 25-65%
-      realized30d: Math.random() * 35 + 30, // Mock: 30-65%
-      impliedVolatility: Math.random() * 45 + 25, // Mock: 25-70%
-      percentile: Math.floor(Math.random() * 100) // 0-100 percentile
-    };
+    // Without real historical price data, return null instead of mock values
+    console.log(`⚠️ No historical volatility data available for ${symbol}`);
+    return null;
   }
 
   private async getMarketContext(): Promise<any> {

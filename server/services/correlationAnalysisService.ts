@@ -218,19 +218,9 @@ export class CorrelationAnalysisService {
         });
       }
 
-      // Fetch stock data (simplified - using mock data for demo)
-      const allStocks = [...this.traditionalStocks, ...this.cryptoStocks, ...this.safeHavenAssets, ...this.commodityAssets];
-      for (const stock of allStocks) {
-        const mockPrice = 100 + Math.random() * 300;
-        const mockChange = (Math.random() - 0.5) * 10;
-        allAssets.push({
-          symbol: stock,
-          name: this.getAssetName(stock),
-          type: this.getAssetType(stock),
-          price: mockPrice,
-          change24h: mockChange
-        });
-      }
+      // Removed: Mock stock prices - only return real crypto data
+      // Stock data would require Finnhub or similar API with valid key
+      console.log(`⚠️ Stock price data not available - only showing crypto assets`);
 
     } catch (error) {
       console.error('❌ Error fetching asset prices for correlation:', error);

@@ -502,6 +502,30 @@ export class CrossMarketSignalService {
   ): Promise<CrossMarketSignal['tradingRecommendations']> {
     const currentPrice = await this.getCurrentPrice(symbol);
     
+    // If no price available, return conservative recommendations
+    if (currentPrice === null) {
+      return {
+        primaryAction: 'hold',
+        positionSizing: {
+          recommendedAllocation: 0,
+          maxRisk: 0,
+          diversificationAdvice: 'No price data available - avoid trading until data is restored'
+        },
+        entryStrategy: {
+          preferredEntry: 0,
+          entryRange: { lower: 0, upper: 0 },
+          timingAdvice: 'Wait for market data to become available'
+        },
+        riskManagement: {
+          stopLoss: 0,
+          takeProfit: 0,
+          trailingStop: 0,
+          positionAdjustment: 'No position recommended without price data'
+        },
+        timeHorizon: 'short_term'
+      };
+    }
+    
     // Determine primary action based on score and confidence
     let primaryAction: CrossMarketSignal['tradingRecommendations']['primaryAction'];
     if (overallScore >= 85 && confidence >= 80) {
@@ -732,10 +756,10 @@ export class CrossMarketSignalService {
         const quotes = await this.marketDataService.getCryptoQuotes([symbol]);
         return quotes[0]?.price || null;
       } else {
-        // For stocks, use getCryptoStocks or return mock data for now
+        // For stocks, try getCryptoStocks but return null if not available
         const cryptoStocks = await this.marketDataService.getCryptoStocks();
         const stockData = cryptoStocks.find(stock => stock.symbol === symbol);
-        return stockData?.price || this.getMockStockPrice(symbol);
+        return stockData?.price || null;
       }
     } catch (error) {
       console.error(`❌ Error getting price for ${symbol}:`, error);
@@ -743,18 +767,7 @@ export class CrossMarketSignalService {
     }
   }
 
-  private getMockStockPrice(symbol: string): number {
-    // Mock stock prices for demonstration - in production, integrate real stock API
-    const mockPrices: { [key: string]: number } = {
-      'SPY': 435.50, 'QQQ': 375.25, 'NVDA': 875.40, 'AAPL': 175.85,
-      'MSFT': 385.60, 'GOOGL': 142.30, 'TSLA': 245.75, 'AMZN': 155.90,
-      'META': 485.20, 'NFLX': 485.65, 'MSTR': 1850.30, 'COIN': 185.45,
-      'RIOT': 12.85, 'MARA': 18.75, 'CLSK': 15.25, 'HUT': 8.95,
-      'BITF': 3.85, 'GLD': 195.75, 'SLV': 22.45, 'USO': 68.30,
-      'UNG': 12.50, 'DBA': 18.95
-    };
-    return mockPrices[symbol] || 100.00;
-  }
+  // Removed: Mock stock price dictionary - was returning fake prices
 
   private determineSignalType(overallScore: number, confidence: number): CrossMarketSignal['signalType'] {
     if (confidence >= 85 && overallScore >= 80) return 'unified_trade_signal';
