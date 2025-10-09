@@ -32,6 +32,9 @@ const ProcessingResults = React.lazy(() => import("@/pages/processing-results"))
 const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
 const Discover = React.lazy(() => import("@/pages/discover"));
 const AvatarProfile = React.lazy(() => import("@/pages/avatar-profile"));
+const InsightsDashboard = React.lazy(() => import("@/pages/InsightsDashboard"));
+const AIDiscovery = React.lazy(() => import("@/pages/DiscoveryPage"));
+const AnalyticsDashboard = React.lazy(() => import("@/pages/AnalyticsDashboard"));
 
 function Router() {
   return (
@@ -121,6 +124,24 @@ function Router() {
       <Route path="/avatar/:handle">
         <Suspense fallback={<DashboardSkeleton />}>
           <AvatarProfile />
+        </Suspense>
+      </Route>
+      
+      <Route path="/insights">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <InsightsDashboard />
+        </Suspense>
+      </Route>
+      
+      <Route path="/ai-discovery">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <AIDiscovery />
+        </Suspense>
+      </Route>
+      
+      <Route path="/analytics">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <AnalyticsDashboard />
         </Suspense>
       </Route>
       
