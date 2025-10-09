@@ -1,4 +1,4 @@
-import { db } from "../storage";
+import { db } from "../db";
 import { predictionMarkets, marketResolutions, marketPositions, marketPredictors } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
