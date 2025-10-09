@@ -347,7 +347,7 @@ export function OnboardingTour() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-4xl mx-4 max-h-[85vh] overflow-hidden"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-3xl max-h-[80vh] overflow-hidden"
           >
             <div className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 border-2 border-white/20 rounded-3xl shadow-2xl overflow-hidden">
               {/* Animated gradient overlay */}
@@ -363,7 +363,7 @@ export function OnboardingTour() {
               </button>
 
               {/* Content Container */}
-              <div className="overflow-y-auto max-h-[70vh] custom-scrollbar">
+              <div className="overflow-y-auto max-h-[65vh] custom-scrollbar">
                 {/* Header */}
                 <div className="relative p-8 pb-6">
                   <div className="flex items-start gap-6 mb-6">
