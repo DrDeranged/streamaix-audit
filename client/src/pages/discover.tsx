@@ -134,37 +134,37 @@ const VolatilityForecastingSection = () => {
 
   // Volatility forecasting queries
   const { data: volatilityAnalysis, isLoading: volatilityLoading } = useQuery({
-    queryKey: ['/api/volatility-forecasting/discover-analysis'],
+    queryKey: [`/api/volatility-forecasting/discover-analysis`],
     staleTime: 60 * 1000, // 1 minute
     retry: 1
   });
 
   const { data: assetForecast, isLoading: forecastLoading } = useQuery({
-    queryKey: ['/api/volatility-forecasting/forecast', selectedAsset],
+    queryKey: [`/api/volatility-forecasting/forecast/${selectedAsset}`],
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1
   });
 
   const { data: stressIndicators, isLoading: stressLoading } = useQuery({
-    queryKey: ['/api/volatility-forecasting/stress-indicators'],
+    queryKey: [`/api/volatility-forecasting/stress-indicators`],
     staleTime: 30 * 1000, // 30 seconds
     retry: 1
   });
 
   const { data: riskRegime, isLoading: regimeLoading } = useQuery({
-    queryKey: ['/api/volatility-forecasting/risk-regime'],
+    queryKey: [`/api/volatility-forecasting/risk-regime`],
     staleTime: 60 * 1000, // 1 minute
     retry: 1
   });
 
   const { data: crisisIndicators, isLoading: crisisLoading } = useQuery({
-    queryKey: ['/api/volatility-forecasting/crisis-indicators'],
+    queryKey: [`/api/volatility-forecasting/crisis-indicators`],
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1
   });
 
   const { data: volatilityAlerts, isLoading: alertsLoading } = useQuery({
-    queryKey: ['/api/volatility-forecasting/alerts'],
+    queryKey: [`/api/volatility-forecasting/alerts`],
     staleTime: 30 * 1000, // 30 seconds
     retry: 1
   });
@@ -627,37 +627,37 @@ const PatternRecognitionSection = () => {
 
   // Pattern recognition queries
   const { data: patterns, isLoading: patternsLoading } = useQuery({
-    queryKey: ['/api/patterns/detect', selectedSymbol, selectedTimeframe],
+    queryKey: [`/api/patterns/detect/${selectedSymbol}?timeframe=${selectedTimeframe}`],
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1
   });
 
   const { data: trendAnalysis, isLoading: trendLoading } = useQuery({
-    queryKey: ['/api/patterns/trend', selectedSymbol, selectedTimeframe],
+    queryKey: [`/api/patterns/trend/${selectedSymbol}?timeframe=${selectedTimeframe}`],
     staleTime: 30 * 1000, // 30 seconds
     retry: 1
   });
 
   const { data: marketCycles, isLoading: cyclesLoading } = useQuery({
-    queryKey: ['/api/patterns/cycles', selectedSymbol],
+    queryKey: [`/api/patterns/cycles/${selectedSymbol}`],
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1
   });
 
   const { data: patternAlerts, isLoading: alertsLoading } = useQuery({
-    queryKey: ['/api/patterns/alerts'],
+    queryKey: [`/api/patterns/alerts`],
     staleTime: 30 * 1000, // 30 seconds
     retry: 1
   });
 
   const { data: tradingSetups, isLoading: setupsLoading } = useQuery({
-    queryKey: ['/api/patterns/setups', selectedSymbol, selectedTimeframe],
+    queryKey: [`/api/patterns/setups/${selectedSymbol}?timeframe=${selectedTimeframe}`],
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1
   });
 
   const { data: patternSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/patterns/summary'],
+    queryKey: [`/api/patterns/summary`],
     staleTime: 60 * 1000, // 1 minute
     retry: 1
   });
@@ -3512,19 +3512,19 @@ export default function Discover() {
   });
 
   const { data: derivativesAnalytics, isLoading: derivativesAnalyticsLoading } = useQuery({
-    queryKey: ['/api/derivatives/analytics', selectedDerivativesAsset],
+    queryKey: [`/api/derivatives/analytics/${selectedDerivativesAsset}`],
     staleTime: 30 * 1000, // 30 seconds for real-time data
     retry: 1
   });
 
   const { data: optionsFlow, isLoading: optionsFlowLoading } = useQuery({
-    queryKey: ['/api/derivatives/options-flow', selectedDerivativesAsset],
+    queryKey: [`/api/derivatives/options-flow/${selectedDerivativesAsset}`],
     staleTime: 60 * 1000, // 1 minute
     retry: 1
   });
 
   const { data: liquidationsData, isLoading: liquidationsLoading } = useQuery({
-    queryKey: ['/api/derivatives/liquidations', selectedDerivativesAsset],
+    queryKey: [`/api/derivatives/liquidations/${selectedDerivativesAsset}`],
     staleTime: 10 * 1000, // 10 seconds for liquidation data
     retry: 1
   });
