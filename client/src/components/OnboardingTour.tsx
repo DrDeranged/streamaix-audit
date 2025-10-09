@@ -594,7 +594,8 @@ export function OnboardingTour() {
               </div>
             </div>
             </motion.div>
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* Custom scrollbar styles */}
           <style>{`
