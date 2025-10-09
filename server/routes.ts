@@ -1215,6 +1215,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // BOUNTY TEMPLATE ROUTES
+  // =============================================================================
+
+  // Get all bounty templates
+  app.get('/api/bounty-templates', asyncHandler(async (req: Request, res: Response) => {
+    const category = req.query.category as string;
+    const difficulty = req.query.difficulty as string;
+    const limit = parseInt(req.query.limit as string) || 20;
+
+    const templates = await storage.getBountyTemplates({ category, difficulty, limit });
+    res.json({ templates });
+  }));
+
+  // Get a specific bounty template
+  app.get('/api/bounty-templates/:id', asyncHandler(async (req: Request, res: Response) => {
+    const template = await storage.getBountyTemplate(req.params.id);
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+    res.json({ template });
+  }));
+
+  // Create a new bounty template
+  app.post('/api/bounty-templates', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const templateData = {
+      ...req.body,
+      createdBy: req.user!.id
+    };
+
+    const template = await storage.createBountyTemplate(templateData);
+    res.status(201).json({ template });
+  }));
+
+  // Update a bounty template
+  app.patch('/api/bounty-templates/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const template = await storage.getBountyTemplate(req.params.id);
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+
+    // Only the creator can update the template
+    if (template.createdBy !== req.user!.id) {
+      return res.status(403).json({ error: 'Only template creator can update it' });
+    }
+
+    const updated = await storage.updateBountyTemplate(req.params.id, req.body);
+    res.json({ template: updated });
+  }));
+
+  // Delete a bounty template
+  app.delete('/api/bounty-templates/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const template = await storage.getBountyTemplate(req.params.id);
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+
+    // Only the creator can delete the template
+    if (template.createdBy !== req.user!.id) {
+      return res.status(403).json({ error: 'Only template creator can delete it' });
+    }
+
+    await storage.deleteBountyTemplate(req.params.id);
+    res.json({ message: 'Template deleted successfully' });
+  }));
+
+  // Use a template to create a bounty (increments usage count)
+  app.post('/api/bounty-templates/:id/use', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const template = await storage.getBountyTemplate(req.params.id);
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+
+    // Increment usage count
+    await storage.incrementTemplateUsage(req.params.id);
+
+    // Return template data for bounty creation
+    res.json({ template });
+  }));
+
+  // =============================================================================
   // AVATAR ROUTES
   // =============================================================================
 

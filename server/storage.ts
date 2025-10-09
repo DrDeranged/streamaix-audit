@@ -1948,6 +1948,65 @@ export class DatabaseStorage implements IStorage {
       .from(bountyCollaborators)
       .where(eq(bountyCollaborators.bountyId, bountyId));
   }
+
+  // Bounty Template operations
+  async getBountyTemplate(id: string): Promise<BountyTemplate | undefined> {
+    const [template] = await db.select()
+      .from(bountyTemplates)
+      .where(eq(bountyTemplates.id, id));
+    return template || undefined;
+  }
+
+  async getBountyTemplates(options?: { category?: string; difficulty?: string; limit?: number }): Promise<BountyTemplate[]> {
+    let query = db.select().from(bountyTemplates).where(eq(bountyTemplates.isPublic, true));
+
+    const conditions = [];
+    if (options?.category) {
+      conditions.push(eq(bountyTemplates.category, options.category));
+    }
+    if (options?.difficulty) {
+      conditions.push(eq(bountyTemplates.difficulty, options.difficulty));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+
+    query = query.orderBy(desc(bountyTemplates.usageCount)) as any;
+
+    if (options?.limit) {
+      query = query.limit(options.limit) as any;
+    }
+
+    return await query;
+  }
+
+  async createBountyTemplate(template: InsertBountyTemplate): Promise<BountyTemplate> {
+    const [newTemplate] = await db.insert(bountyTemplates)
+      .values(template as any)
+      .returning();
+    return newTemplate;
+  }
+
+  async updateBountyTemplate(id: string, updates: Partial<InsertBountyTemplate>): Promise<BountyTemplate | undefined> {
+    const [updated] = await db.update(bountyTemplates)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(eq(bountyTemplates.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteBountyTemplate(id: string): Promise<boolean> {
+    const result = await db.delete(bountyTemplates)
+      .where(eq(bountyTemplates.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async incrementTemplateUsage(id: string): Promise<void> {
+    await db.update(bountyTemplates)
+      .set({ usageCount: sql`${bountyTemplates.usageCount} + 1` })
+      .where(eq(bountyTemplates.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
