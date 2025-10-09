@@ -250,14 +250,14 @@ const VolatilityForecastingSection = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-300 text-sm font-medium">Crisis Risk</p>
-                  <p className="text-white text-2xl font-bold">{volatilityAnalysis.crisisWatch.highestProbability.toFixed(0)}%</p>
-                  <p className="text-gray-400 text-xs capitalize">{volatilityAnalysis.crisisWatch.timeframe}</p>
+                  <p className="text-white text-2xl font-bold">{(volatilityAnalysis?.crisisWatch?.highestProbability ?? 0).toFixed(0)}%</p>
+                  <p className="text-gray-400 text-xs capitalize">{volatilityAnalysis?.crisisWatch?.timeframe ?? 'unknown'}</p>
                 </div>
                 <div className={`p-3 rounded-full ${
-                  volatilityAnalysis.crisisWatch.highestProbability > 50 ? 'bg-red-500/20 border-red-400/30' : 'bg-purple-500/20 border-purple-400/30'
+                  (volatilityAnalysis?.crisisWatch?.highestProbability ?? 0) > 50 ? 'bg-red-500/20 border-red-400/30' : 'bg-purple-500/20 border-purple-400/30'
                 }`}>
                   <AlertTriangle className={`h-6 w-6 ${
-                    volatilityAnalysis.crisisWatch.highestProbability > 50 ? 'text-red-400' : 'text-purple-400'
+                    (volatilityAnalysis?.crisisWatch?.highestProbability ?? 0) > 50 ? 'text-red-400' : 'text-purple-400'
                   }`} />
                 </div>
               </div>
@@ -933,35 +933,35 @@ const PatternRecognitionSection = () => {
                     <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
                       <p className="text-gray-400 text-xs">RSI</p>
                       <p className={`font-bold text-lg ${
-                        trendAnalysis.data.technicalIndicators.rsi > 70 ? 'text-red-400' :
-                        trendAnalysis.data.technicalIndicators.rsi < 30 ? 'text-green-400' : 'text-yellow-400'
+                        (trendAnalysis.data?.technicalIndicators?.rsi ?? 50) > 70 ? 'text-red-400' :
+                        (trendAnalysis.data?.technicalIndicators?.rsi ?? 50) < 30 ? 'text-green-400' : 'text-yellow-400'
                       }`}>
-                        {trendAnalysis.data.technicalIndicators.rsi.toFixed(1)}
+                        {(trendAnalysis.data?.technicalIndicators?.rsi ?? 50).toFixed(1)}
                       </p>
                     </div>
                     <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
                       <p className="text-gray-400 text-xs">ADX</p>
                       <p className={`font-bold text-lg ${
-                        trendAnalysis.data.technicalIndicators.adx > 50 ? 'text-green-400' :
-                        trendAnalysis.data.technicalIndicators.adx > 25 ? 'text-yellow-400' : 'text-red-400'
+                        (trendAnalysis.data?.technicalIndicators?.adx ?? 0) > 50 ? 'text-green-400' :
+                        (trendAnalysis.data?.technicalIndicators?.adx ?? 0) > 25 ? 'text-yellow-400' : 'text-red-400'
                       }`}>
-                        {trendAnalysis.data.technicalIndicators.adx.toFixed(1)}
+                        {(trendAnalysis.data?.technicalIndicators?.adx ?? 0).toFixed(1)}
                       </p>
                     </div>
                     <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
                       <p className="text-gray-400 text-xs">MACD</p>
                       <p className={`font-bold text-lg ${
-                        trendAnalysis.data.technicalIndicators.macd.line > trendAnalysis.data.technicalIndicators.macd.signal ? 'text-green-400' : 'text-red-400'
+                        (trendAnalysis.data?.technicalIndicators?.macd?.line ?? 0) > (trendAnalysis.data?.technicalIndicators?.macd?.signal ?? 0) ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {trendAnalysis.data.technicalIndicators.macd.line.toFixed(2)}
+                        {(trendAnalysis.data?.technicalIndicators?.macd?.line ?? 0).toFixed(2)}
                       </p>
                     </div>
                     <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
                       <p className="text-gray-400 text-xs">Volume</p>
                       <p className={`font-bold text-lg ${
-                        trendAnalysis.data.technicalIndicators.volume.trend === 'increasing' ? 'text-green-400' : 'text-red-400'
+                        trendAnalysis.data?.technicalIndicators?.volume?.trend === 'increasing' ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {trendAnalysis.data.technicalIndicators.volume.strength}%
+                        {trendAnalysis.data?.technicalIndicators?.volume?.strength ?? 0}%
                       </p>
                     </div>
                   </div>
@@ -978,7 +978,7 @@ const PatternRecognitionSection = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {trendAnalysis.data.supportResistance.slice(0, 4).map((level: any, index: number) => (
+                    {(trendAnalysis.data?.supportResistance ?? []).slice(0, 4).map((level: any, index: number) => (
                       <div key={index} className={`p-3 rounded-lg border ${
                         level.type === 'support' ? 'bg-green-500/10 border-green-400/30' : 'bg-red-500/10 border-red-400/30'
                       }`}>
@@ -988,8 +988,8 @@ const PatternRecognitionSection = () => {
                             {(level.type || 'unknown').toUpperCase()}
                           </p>
                         </div>
-                        <p className="text-white font-bold">${level.level.toLocaleString()}</p>
-                        <p className="text-gray-400 text-xs">{level.strength}% strength</p>
+                        <p className="text-white font-bold">${(level.level ?? 0).toLocaleString()}</p>
+                        <p className="text-gray-400 text-xs">{level.strength ?? 0}% strength</p>
                       </div>
                     ))}
                   </div>
