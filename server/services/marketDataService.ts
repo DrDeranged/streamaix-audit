@@ -1248,179 +1248,39 @@ export class MarketDataService {
 
   /**
    * Get fallback economic events when APIs fail
+   * Returns empty array instead of mock data to avoid showing fake information
    */
   private getFallbackEconomicEvents(): EconomicEvent[] {
-    const now = new Date();
-    const events: EconomicEvent[] = [];
-
-    // Add FOMC meetings
-    events.push(...this.getFallbackFOMCMeetings());
-    
-    // Add CPI releases
-    events.push(...this.getFallbackInflationEvents());
-    
-    // Add employment data
-    events.push(...this.getFallbackEmploymentEvents());
-    
-    // Add GDP releases
-    events.push(...this.getFallbackGDPEvents());
-
-    return events;
+    console.log('⚠️ No real economic calendar data available - returning empty array');
+    return []; // No mock data - show empty state instead
   }
 
   /**
-   * Fallback FOMC meetings schedule
+   * Removed: Fallback FOMC meetings - these were showing fake event dates
    */
   private getFallbackFOMCMeetings(): EconomicEvent[] {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    
-    // Create future FOMC meeting dates
-    const fomcDate1 = new Date(now);
-    fomcDate1.setDate(now.getDate() + 7); // Next week
-    
-    const fomcDate2 = new Date(now);
-    fomcDate2.setDate(now.getDate() + 45); // Next month and a half
-
-    return [
-      {
-        id: 'fomc-upcoming-1',
-        title: 'FOMC Meeting Decision',
-        description: 'Federal Open Market Committee interest rate decision and policy statement',
-        eventType: 'fomc',
-        scheduledDate: fomcDate1.toISOString(),
-        impact: 'high',
-        country: 'US',
-        currency: 'USD',
-        source: 'Federal Reserve',
-        frequency: 'irregular',
-        category: 'monetary_policy',
-        marketRelevance: 95,
-        timeToEvent: 7,
-        isCompleted: false,
-        tags: ['fed', 'interest-rates', 'monetary-policy'],
-        relatedSymbols: ['SPY', 'QQQ', 'BTC', 'ETH', 'DXY'],
-        lastUpdated: now.toISOString()
-      },
-      {
-        id: 'fomc-upcoming-2',
-        title: 'FOMC Meeting Decision',
-        description: 'Federal Open Market Committee interest rate decision and policy statement',
-        eventType: 'fomc',
-        scheduledDate: fomcDate2.toISOString(),
-        impact: 'high',
-        country: 'US',
-        currency: 'USD',
-        source: 'Federal Reserve',
-        frequency: 'irregular',
-        category: 'monetary_policy',
-        marketRelevance: 95,
-        timeToEvent: 45,
-        isCompleted: false,
-        tags: ['fed', 'interest-rates', 'monetary-policy'],
-        relatedSymbols: ['SPY', 'QQQ', 'BTC', 'ETH', 'DXY'],
-        lastUpdated: now.toISOString()
-      }
-    ];
+    return [];
   }
 
   /**
-   * Fallback inflation events (CPI releases)
+   * Removed: Fallback inflation events - these were showing fake CPI data
    */
   private getFallbackInflationEvents(): EconomicEvent[] {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-
-    return [
-      {
-        id: 'cpi-2025-01',
-        title: 'US Consumer Price Index (CPI)',
-        description: 'Monthly inflation data from Bureau of Labor Statistics',
-        eventType: 'cpi',
-        scheduledDate: new Date(currentYear, 0, 15, 8, 30).toISOString(), // Jan 15
-        impact: 'high',
-        country: 'US',
-        currency: 'USD',
-        forecast: 2.7,
-        previous: 2.6,
-        unit: '%',
-        source: 'Bureau of Labor Statistics',
-        frequency: 'monthly',
-        category: 'inflation',
-        marketRelevance: 90,
-        timeToEvent: 0,
-        isCompleted: false,
-        tags: ['inflation', 'cpi', 'bls'],
-        relatedSymbols: ['SPY', 'TLT', 'BTC', 'GOLD'],
-        lastUpdated: now.toISOString()
-      }
-    ];
+    return [];
   }
 
   /**
-   * Fallback employment events
+   * Removed: Fallback employment events - these were showing fake jobs data
    */
   private getFallbackEmploymentEvents(): EconomicEvent[] {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-
-    return [
-      {
-        id: 'nfp-2025-01',
-        title: 'US Nonfarm Payrolls',
-        description: 'Monthly employment change excluding farm workers',
-        eventType: 'employment',
-        scheduledDate: new Date(currentYear, 0, 10, 8, 30).toISOString(), // First Friday
-        impact: 'high',
-        country: 'US',
-        currency: 'USD',
-        forecast: 160000,
-        previous: 227000,
-        unit: 'jobs',
-        source: 'Bureau of Labor Statistics',
-        frequency: 'monthly',
-        category: 'employment',
-        marketRelevance: 85,
-        timeToEvent: 0,
-        isCompleted: false,
-        tags: ['employment', 'nfp', 'jobs'],
-        relatedSymbols: ['SPY', 'USD', 'DXY'],
-        lastUpdated: now.toISOString()
-      }
-    ];
+    return [];
   }
 
   /**
-   * Fallback GDP events
+   * Removed: Fallback GDP events - these were showing fake economic data
    */
   private getFallbackGDPEvents(): EconomicEvent[] {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-
-    return [
-      {
-        id: 'gdp-2025-q4',
-        title: 'US GDP (Preliminary)',
-        description: 'Quarterly Gross Domestic Product preliminary release',
-        eventType: 'gdp',
-        scheduledDate: new Date(currentYear, 0, 30, 8, 30).toISOString(), // End of Jan
-        impact: 'high',
-        country: 'US',
-        currency: 'USD',
-        forecast: 2.3,
-        previous: 2.8,
-        unit: '% QoQ',
-        source: 'Bureau of Economic Analysis',
-        frequency: 'quarterly',
-        category: 'growth',
-        marketRelevance: 88,
-        timeToEvent: 0,
-        isCompleted: false,
-        tags: ['gdp', 'growth', 'bea'],
-        relatedSymbols: ['SPY', 'USD', 'DXY'],
-        lastUpdated: now.toISOString()
-      }
-    ];
+    return [];
   }
 
 }
