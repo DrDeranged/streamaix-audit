@@ -573,6 +573,12 @@ export class VolatilityForecastingService {
         this.getMarketContext()
       ]);
 
+      // If no historical volatility data available, return null forecast
+      if (!historicalVol) {
+        console.log(`⚠️ Cannot generate forecast for ${symbol} - no historical data available`);
+        throw new Error('No historical volatility data available');
+      }
+
       // Generate predictions using multiple models
       const predictions = await this.generateVolatilityPredictions(symbol, horizons, historicalVol, marketContext);
       
@@ -602,7 +608,8 @@ export class VolatilityForecastingService {
 
     } catch (error) {
       console.error(`❌ Failed to generate volatility forecast for ${symbol}:`, error);
-      return this.getMockVolatilityForecast(symbol);
+      // Return null instead of mock forecast when data is unavailable
+      throw error;
     }
   }
 
