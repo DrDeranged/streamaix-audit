@@ -251,6 +251,7 @@ const steps: OnboardingStep[] = [
 
 export function OnboardingTour() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [, setLocation] = useLocation();
 
@@ -262,6 +263,7 @@ export function OnboardingTour() {
   const handleClose = () => {
     // Just close the modal, don't save to localStorage
     setIsOpen(false);
+    setIsMinimized(false);
   };
 
   const handleNext = () => {
@@ -283,8 +285,27 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
-    handleClose();
+    // If on welcome step (step 0), just go to next step instead of navigating
+    if (currentStep === 0) {
+      handleNext();
+      return;
+    }
+    
+    // Minimize the tour and navigate to the page
+    setIsMinimized(true);
     setLocation(path);
+    
+    // Auto-expand after navigation to show next step
+    setTimeout(() => {
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+        setIsMinimized(false);
+      }
+    }, 1500);
+  };
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -295,14 +316,73 @@ export function OnboardingTour() {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
-            onClick={handleSkip}
-          >
+          {/* Minimized Floating Guide */}
+          {isMinimized && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 100 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 100 }}
+              className="fixed bottom-6 right-6 z-50"
+            >
+              <button
+                onClick={toggleMinimize}
+                className={`group relative p-4 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105`}
+                data-testid="button-tour-minimized"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-left pr-2">
+                    <p className="text-xs text-white/80 font-medium">Tour Active</p>
+                    <p className="text-sm text-white font-bold">Step {currentStep + 1}/{steps.length}</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <motion.div
+                      className="text-2xl"
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      👋
+                    </motion.div>
+                  </div>
+                </div>
+                
+                {/* Progress ring */}
+                <svg className="absolute -top-1 -right-1 w-8 h-8 transform -rotate-90">
+                  <circle
+                    cx="16"
+                    cy="16"
+                    r="14"
+                    stroke="rgba(255,255,255,0.3)"
+                    strokeWidth="2"
+                    fill="none"
+                  />
+                  <circle
+                    cx="16"
+                    cy="16"
+                    r="14"
+                    stroke="white"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 14}`}
+                    strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </motion.div>
+          )}
+
+          {/* Full Tour Modal (only show when not minimized) */}
+          {!isMinimized && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+              onClick={handleSkip}
+            >
             {/* Modal */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -323,6 +403,15 @@ export function OnboardingTour() {
                 data-testid="button-skip-onboarding"
               >
                 <X className="h-6 w-6" />
+              </button>
+              
+              {/* Minimize Button */}
+              <button
+                onClick={toggleMinimize}
+                className="absolute top-6 right-20 z-10 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                data-testid="button-minimize-tour"
+              >
+                <ChevronLeft className="h-6 w-6" />
               </button>
 
               {/* Content Container */}
