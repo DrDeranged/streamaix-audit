@@ -1146,6 +1146,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // COLLABORATION ROUTES
+  // =============================================================================
+
+  // Get collaborators for a bounty
+  app.get('/api/bounties/:id/collaborators', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const collaborators = await storage.getCollaborators(req.params.id);
+    res.json({ collaborators });
+  }));
+
+  // Get collaboration session for a bounty
+  app.get('/api/bounties/:id/collaboration-session', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const session = await storage.getCollaborationSession(req.params.id);
+    res.json({ session: session || null });
+  }));
+
+  // Add a collaborator to a bounty
+  app.post('/api/bounties/:id/collaborators', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bounty = await storage.getBounty(req.params.id);
+    if (!bounty) {
+      return res.status(404).json({ error: 'Bounty not found' });
+    }
+
+    // Only bounty creator can add collaborators
+    if (bounty.creatorId !== req.user!.id) {
+      return res.status(403).json({ error: 'Only bounty creator can add collaborators' });
+    }
+
+    const { userId, role, rewardShare } = req.body;
+    
+    if (!userId || !role || rewardShare === undefined) {
+      return res.status(400).json({ error: 'User ID, role, and reward share are required' });
+    }
+
+    const collaborator = await storage.addCollaborator({
+      bountyId: req.params.id,
+      userId,
+      role,
+      rewardShare,
+      status: 'active',
+      invitedBy: req.user!.id
+    });
+
+    res.json({ collaborator });
+  }));
+
+  // Update reward share for a collaborator
+  app.patch('/api/bounties/:id/collaborators/:userId/share', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bounty = await storage.getBounty(req.params.id);
+    if (!bounty) {
+      return res.status(404).json({ error: 'Bounty not found' });
+    }
+
+    // Only bounty creator can update shares
+    if (bounty.creatorId !== req.user!.id) {
+      return res.status(403).json({ error: 'Only bounty creator can update reward shares' });
+    }
+
+    const { rewardShare } = req.body;
+    
+    if (rewardShare === undefined || rewardShare < 0 || rewardShare > 100) {
+      return res.status(400).json({ error: 'Invalid reward share. Must be between 0 and 100' });
+    }
+
+    const updated = await storage.updateCollaboratorShare(req.params.id, req.params.userId, rewardShare);
+
+    res.json({ collaborator: updated });
+  }));
+
+  // =============================================================================
   // AVATAR ROUTES
   // =============================================================================
 
@@ -7019,6 +7088,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       message: "Click tracked successfully"
     });
   }));
+
+  // =============================================================================
+  // COLLABORATION WEBSOCKET SERVER
+  // =============================================================================
+  
+  const collaborationWss = new WebSocketServer({ server: httpServer, path: '/ws/collaborate' });
+  const { CollaborationService } = await import('./services/collaborationService');
+  const collaborationService = new CollaborationService(storage as DatabaseStorage);
+  
+  collaborationWss.on('connection', (ws: WebSocket, req) => {
+    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    const bountyId = url.searchParams.get('bountyId');
+    const userId = url.searchParams.get('userId');
+    const username = url.searchParams.get('username');
+    const avatar = url.searchParams.get('avatar');
+    
+    if (!bountyId || !userId || !username) {
+      ws.close(1008, 'Missing required parameters');
+      return;
+    }
+    
+    console.log(`🤝 Collaboration connection for bounty ${bountyId} by user ${username}`);
+    
+    collaborationService.handleConnection(
+      ws,
+      userId,
+      bountyId,
+      username,
+      avatar || undefined
+    );
+  });
 
   // Start enhanced real-time updates with multiple intervals
   const marketUpdateInterval = setInterval(broadcastMarketUpdates, 15000); // Every 15 seconds for comprehensive data

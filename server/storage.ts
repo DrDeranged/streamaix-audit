@@ -91,7 +91,10 @@ import {
   aiTradingSetups,
   // Referral System Tables
   referralCodes,
-  referralSignups
+  referralSignups,
+  // Collaboration Tables
+  bountyCollaborators,
+  collaborationSessions
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -342,6 +345,13 @@ export interface IStorage {
   getReferralSignups(referrerId: string): Promise<ReferralSignup[]>;
   claimReferralReward(signupId: string): Promise<ReferralSignup | undefined>;
   getReferralLeaderboard(limit?: number): Promise<Array<{ userId: string; username: string; totalRewardsEarned: number; totalSignups: number }>>;
+
+  // Collaboration operations
+  addCollaborator(data: { bountyId: string; userId: string; role: string; rewardShare: number; status: string; invitedBy: string }): Promise<any>;
+  updateCollaboratorShare(bountyId: string, userId: string, rewardShare: number): Promise<any>;
+  updateCollaborationSession(data: { bountyId: string; activeUsers: any[]; contentSnapshot: string; lastActivity: Date }): Promise<any>;
+  getCollaborationSession(bountyId: string): Promise<any>;
+  getCollaborators(bountyId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1867,6 +1877,64 @@ export class DatabaseStorage implements IStorage {
       totalRewardsEarned: row.totalRewardsEarned || 0,
       totalSignups: row.totalSignups || 0
     }));
+  }
+
+  // Collaboration operations
+  async addCollaborator(data: { bountyId: string; userId: string; role: string; rewardShare: number; status: string; invitedBy: string }) {
+    const [collaborator] = await db.insert(bountyCollaborators)
+      .values(data as any)
+      .returning();
+    return collaborator;
+  }
+
+  async updateCollaboratorShare(bountyId: string, userId: string, rewardShare: number) {
+    const [updated] = await db.update(bountyCollaborators)
+      .set({ rewardShare })
+      .where(and(
+        eq(bountyCollaborators.bountyId, bountyId),
+        eq(bountyCollaborators.userId, userId)
+      ))
+      .returning();
+    return updated;
+  }
+
+  async updateCollaborationSession(data: { bountyId: string; activeUsers: any[]; contentSnapshot: string; lastActivity: Date }) {
+    const existing = await this.getCollaborationSession(data.bountyId);
+    
+    if (existing) {
+      const [updated] = await db.update(collaborationSessions)
+        .set({
+          activeUsers: data.activeUsers as any,
+          contentSnapshot: data.contentSnapshot,
+          lastActivity: data.lastActivity
+        })
+        .where(eq(collaborationSessions.bountyId, data.bountyId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(collaborationSessions)
+        .values({
+          bountyId: data.bountyId,
+          activeUsers: data.activeUsers as any,
+          contentSnapshot: data.contentSnapshot,
+          lastActivity: data.lastActivity
+        })
+        .returning();
+      return created;
+    }
+  }
+
+  async getCollaborationSession(bountyId: string) {
+    const [session] = await db.select()
+      .from(collaborationSessions)
+      .where(eq(collaborationSessions.bountyId, bountyId));
+    return session || undefined;
+  }
+
+  async getCollaborators(bountyId: string) {
+    return await db.select()
+      .from(bountyCollaborators)
+      .where(eq(bountyCollaborators.bountyId, bountyId));
   }
 }
 
