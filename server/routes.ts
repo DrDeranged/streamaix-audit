@@ -7039,7 +7039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
   
   // Extract predictions from summary content
-  app.post("/api/summaries/:summaryId/extract-predictions", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/summaries/:summaryId/extract-predictions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { extractPredictionsFromSummary } = await import('./services/predictionExtractionService');
     
     const summary = await storage.getSummary(req.params.summaryId);
