@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, TrendingUp, Filter, Search } from "lucide-react";
+import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +26,11 @@ interface PredictionMarket {
   totalTrades: number;
   imageUrl?: string;
   tags?: string[];
+  sourceContentId?: string;
+  sourceSummary?: {
+    id: string;
+    title: string;
+  };
 }
 
 const MarketCard = ({ market }: { market: PredictionMarket }) => {
@@ -54,15 +59,32 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
           
           <CardContent className="p-4 space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded border border-purple-500/30">
-                {market.category.replace('_', ' ').toUpperCase()}
-              </span>
+              <div className="flex gap-2 flex-wrap">
+                <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded border border-purple-500/30">
+                  {market.category.replace('_', ' ').toUpperCase()}
+                </span>
+                {market.sourceContentId && (
+                  <span className="px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 text-xs rounded border border-cyan-500/30 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    AI-Generated
+                  </span>
+                )}
+              </div>
               <span className="text-xs text-slate-400">{daysLeft}d left</span>
             </div>
 
             <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug">
               {market.question}
             </h3>
+            
+            {market.sourceSummary && (
+              <Link href={`/summary/${market.sourceContentId}`}>
+                <div className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+                  <ExternalLink className="w-3 h-3" />
+                  <span className="line-clamp-1">{market.sourceSummary.title}</span>
+                </div>
+              </Link>
+            )}
 
             <div className="flex gap-2">
               <div className="flex-1 bg-green-500/20 rounded p-2 border border-green-500/30">
@@ -89,6 +111,7 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
 export default function Markets() {
   const [category, setCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
 
   const { data: marketsData, isLoading } = useQuery<{ markets: PredictionMarket[] }>({
     queryKey: category === "all" ? ["/api/prediction-markets"] : ["/api/prediction-markets", { category }],
@@ -101,9 +124,13 @@ export default function Markets() {
   const markets = marketsData?.markets || [];
   const stats = statsData?.stats;
 
-  const filteredMarkets = markets.filter((market) =>
-    searchQuery === "" || market.question.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMarkets = markets.filter((market) => {
+    const matchesSearch = searchQuery === "" || market.question.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSource = sourceFilter === "all" || 
+      (sourceFilter === "ai" && market.sourceContentId) || 
+      (sourceFilter === "community" && !market.sourceContentId);
+    return matchesSearch && matchesSource;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-8">
@@ -176,6 +203,17 @@ export default function Markets() {
               <SelectItem value="defi">DeFi</SelectItem>
               <SelectItem value="real_world">Real World</SelectItem>
               <SelectItem value="community">Community</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sourceFilter} onValueChange={setSourceFilter}>
+            <SelectTrigger className="w-full md:w-48 bg-slate-900/50 border-slate-700 text-white" data-testid="select-source">
+              <Sparkles className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-900 border-slate-700">
+              <SelectItem value="all">All Markets</SelectItem>
+              <SelectItem value="ai">AI-Generated</SelectItem>
+              <SelectItem value="community">Community Created</SelectItem>
             </SelectContent>
           </Select>
         </div>
