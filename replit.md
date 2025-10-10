@@ -39,6 +39,7 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
         - **Full Pages**: `/markets` listing page with category filters, `/markets/:id` detail page with trading interface
         - **Backend Services**: predictionMarketService, ammService, resolutionService with comprehensive API routes
         - **Database Schema**: predictionMarkets, marketPositions, marketTrades, marketResolutions, liquidityProviders, marketPredictors tables
+        - **AI Content-to-Market Pipeline**: Automated prediction extraction from summaries using GPT-4, AI-suggested markets on summary pages, one-click market creation from content analysis, bidirectional linking between summaries and markets via `linkedSummaryId`
 
 ## External Dependencies
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless
