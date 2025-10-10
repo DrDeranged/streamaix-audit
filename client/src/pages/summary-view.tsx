@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { getAuthHeaders } from '@/lib/auth';
+import { MarketSuggestions } from '@/components/MarketSuggestions';
 import { 
   ArrowLeft,
   Clock,
@@ -443,12 +444,16 @@ export default function SummaryView() {
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardContent className="p-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-slate-800/30 border border-slate-600/30 h-auto p-1 gap-1 rounded-lg backdrop-blur-sm">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 bg-slate-800/30 border border-slate-600/30 h-auto p-1 gap-1 rounded-lg backdrop-blur-sm">
                     <TabsTrigger value="summary" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:border-blue-400/30 data-[state=active]:text-blue-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
                       Summary
                     </TabsTrigger>
                     <TabsTrigger value="insights" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:border-purple-400/30 data-[state=active]:text-purple-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
                       Insights
+                    </TabsTrigger>
+                    <TabsTrigger value="markets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border-violet-400/30 data-[state=active]:text-violet-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      Markets
                     </TabsTrigger>
                     <TabsTrigger value="market" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:border-green-400/30 data-[state=active]:text-green-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent col-span-2 sm:col-span-1">
                       Market Intel
@@ -588,6 +593,26 @@ export default function SummaryView() {
                         </div>
                       </div>
                     )}
+                  </TabsContent>
+
+                  {/* PREDICTION MARKETS TAB */}
+                  <TabsContent value="markets" className="space-y-4 mt-4">
+                    <MarketSuggestions 
+                      summaryId={summaryId!}
+                      onCreateMarket={(prediction) => {
+                        // Navigate to create market with pre-filled data
+                        const params = new URLSearchParams({
+                          question: prediction.question,
+                          description: prediction.description,
+                          category: prediction.category,
+                          deadline: prediction.deadline,
+                          resolutionSource: prediction.resolutionSource,
+                          sourceContentId: summaryId!,
+                          tags: prediction.tags.join(',')
+                        });
+                        window.location.href = `/markets/create?${params.toString()}`;
+                      }}
+                    />
                   </TabsContent>
 
                   {/* MARKET INTEL TAB */}
