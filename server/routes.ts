@@ -7082,6 +7082,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       count: markets.length
     });
   }));
+
+  // Get AI-generated market analytics
+  app.get("/api/prediction-markets/ai-analytics", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      // Count total markets
+      const allMarkets = await db.select().from(predictionMarkets);
+      const aiGeneratedMarkets = allMarkets.filter(m => m.sourceContentId);
+      const totalMarkets = allMarkets.length;
+      const aiMarkets = aiGeneratedMarkets.length;
+      const communityMarkets = totalMarkets - aiMarkets;
+
+      // Calculate AI market performance metrics
+      const aiVolume = aiGeneratedMarkets.reduce((sum, m) => sum + (m.totalVolume || 0), 0);
+      const aiTrades = aiGeneratedMarkets.reduce((sum, m) => sum + (m.totalTrades || 0), 0);
+      const totalVolume = allMarkets.reduce((sum, m) => sum + (m.totalVolume || 0), 0);
+      const totalTrades = allMarkets.reduce((sum, m) => sum + (m.totalTrades || 0), 0);
+
+      // Get top performing AI markets by volume
+      const topAiMarkets = aiGeneratedMarkets
+        .sort((a, b) => (b.totalVolume || 0) - (a.totalVolume || 0))
+        .slice(0, 5)
+        .map(m => ({
+          id: m.id,
+          question: m.question,
+          totalVolume: m.totalVolume,
+          totalTrades: m.totalTrades,
+          category: m.category
+        }));
+
+      res.json({
+        success: true,
+        analytics: {
+          totalMarkets,
+          aiGeneratedCount: aiMarkets,
+          communityCreatedCount: communityMarkets,
+          aiMarketPercentage: totalMarkets > 0 ? ((aiMarkets / totalMarkets) * 100).toFixed(1) : 0,
+          aiVolumeShare: totalVolume > 0 ? ((aiVolume / totalVolume) * 100).toFixed(1) : 0,
+          aiTradesShare: totalTrades > 0 ? ((aiTrades / totalTrades) * 100).toFixed(1) : 0,
+          avgVolumePerAiMarket: aiMarkets > 0 ? (aiVolume / aiMarkets).toFixed(0) : 0,
+          avgTradesPerAiMarket: aiMarkets > 0 ? (aiTrades / aiMarkets).toFixed(1) : 0,
+          topPerformingAiMarkets: topAiMarkets
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Error fetching AI market analytics:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch AI market analytics' });
+    }
+  }));
   
   // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
