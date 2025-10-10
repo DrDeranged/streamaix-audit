@@ -65,6 +65,8 @@ import {
 } from "./validators";
 import { Request, Response } from "express";
 import cors from "cors";
+import { db } from "./db";
+import { predictionMarkets } from "../shared/schema";
 
 // Helper function to handle validation errors
 const validateRequest = <T>(schema: any, data: any): { success: boolean; data?: T; error?: string } => {
@@ -6938,20 +6940,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
   
-  // Get single market details
-  app.get("/api/prediction-markets/:marketId", asyncHandler(async (req: Request, res: Response) => {
-    const market = await predictionMarketService.getMarket(req.params.marketId);
-    
-    if (!market) {
-      return res.status(404).json({ error: "Market not found" });
-    }
-    
-    res.json({
-      success: true,
-      market
-    });
-  }));
-  
   // Create new market
   app.post("/api/prediction-markets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags, privateKey } = req.body;
@@ -7129,6 +7117,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Error fetching AI market analytics:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch AI market analytics' });
     }
+  }));
+
+  // Get single market details (MUST be last - dynamic route)
+  app.get("/api/prediction-markets/:marketId", asyncHandler(async (req: Request, res: Response) => {
+    const market = await predictionMarketService.getMarket(req.params.marketId);
+    
+    if (!market) {
+      return res.status(404).json({ error: "Market not found" });
+    }
+    
+    res.json({
+      success: true,
+      market
+    });
   }));
   
   // =============================================================================
