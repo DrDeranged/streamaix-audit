@@ -4356,6 +4356,7 @@ export const predictionMarkets = pgTable("prediction_markets", {
   creatorWallet: text("creator_wallet").notNull(),
   deadline: timestamp("deadline").notNull(),
   resolutionSource: text("resolution_source"),
+  sourceContentId: varchar("source_content_id").references(() => summaries.id),
   status: text("status").notNull().default("active"),
   resolution: text("resolution"),
   resolvedAt: timestamp("resolved_at"),
