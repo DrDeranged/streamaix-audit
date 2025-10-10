@@ -7050,6 +7050,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
   
+  // Extract predictions from summary content
+  app.post("/api/summaries/:summaryId/extract-predictions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { extractPredictionsFromSummary } = await import('./services/predictionExtractionService');
+    
+    const summary = await storage.getSummaryById(req.params.summaryId);
+    if (!summary) {
+      return res.status(404).json({ error: "Summary not found" });
+    }
+    
+    if (!summary.summary && !summary.blogPost) {
+      return res.status(400).json({ error: "Summary has no content to analyze" });
+    }
+    
+    const content = summary.summary || summary.blogPost || '';
+    const result = await extractPredictionsFromSummary(content, summary.title, summary.originalUrl);
+    
+    res.json({
+      success: true,
+      ...result
+    });
+  }));
+  
+  // Get markets linked to a specific summary
+  app.get("/api/summaries/:summaryId/prediction-markets", asyncHandler(async (req: Request, res: Response) => {
+    const markets = await predictionMarketService.getMarketsBySourceContent(req.params.summaryId);
+    
+    res.json({
+      success: true,
+      markets,
+      count: markets.length
+    });
+  }));
+  
   // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
   // =============================================================================

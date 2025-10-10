@@ -181,6 +181,24 @@ export class PredictionMarketService {
   }
 
   /**
+   * Get markets linked to a specific source content (summary)
+   */
+  async getMarketsBySourceContent(sourceContentId: string): Promise<PredictionMarket[]> {
+    try {
+      const markets = await db
+        .select()
+        .from(predictionMarkets)
+        .where(eq(predictionMarkets.sourceContentId, sourceContentId))
+        .orderBy(desc(predictionMarkets.createdAt));
+      
+      return markets;
+    } catch (error: any) {
+      console.error('❌ Error fetching markets by source content:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get user positions for a market
    */
   async getUserPositions(userId: string, marketId?: string): Promise<MarketPosition[]> {
