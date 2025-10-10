@@ -41,6 +41,11 @@ interface Market {
   resolutionSource: string;
   yesLiquidity: number;
   noLiquidity: number;
+  sourceContentId?: string;
+  sourceSummary?: {
+    id: string;
+    title: string;
+  };
 }
 
 export default function PredictionMarket() {
@@ -223,6 +228,22 @@ export default function PredictionMarket() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {market.sourceSummary && (
+                      <div className="mb-4 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <Sparkles className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="text-sm text-cyan-300 font-medium mb-1">AI-Generated from Content</div>
+                            <Link href={`/summary/${market.sourceContentId}`}>
+                              <div className="flex items-center gap-2 text-sm text-slate-300 hover:text-cyan-400 transition-colors group">
+                                <span className="line-clamp-1">{market.sourceSummary.title}</span>
+                                <ExternalLink className="w-3 h-3 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                              </div>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center py-3 border-b border-slate-700/50">
                       <span className="text-slate-400">Resolution Source</span>
                       <span className="text-white font-medium capitalize">{market.resolutionSource}</span>

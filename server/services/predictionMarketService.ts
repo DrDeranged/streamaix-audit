@@ -199,11 +199,43 @@ export class PredictionMarketService {
   /**
    * Get market by ID
    */
-  async getMarket(marketId: string): Promise<PredictionMarket | null> {
+  async getMarket(marketId: string): Promise<any | null> {
     try {
       const [market] = await db
-        .select()
+        .select({
+          id: predictionMarkets.id,
+          contractMarketId: predictionMarkets.contractMarketId,
+          question: predictionMarkets.question,
+          description: predictionMarkets.description,
+          category: predictionMarkets.category,
+          creatorId: predictionMarkets.creatorId,
+          creatorWallet: predictionMarkets.creatorWallet,
+          deadline: predictionMarkets.deadline,
+          resolutionSource: predictionMarkets.resolutionSource,
+          sourceContentId: predictionMarkets.sourceContentId,
+          status: predictionMarkets.status,
+          resolution: predictionMarkets.resolution,
+          resolvedAt: predictionMarkets.resolvedAt,
+          totalVolume: predictionMarkets.totalVolume,
+          totalTrades: predictionMarkets.totalTrades,
+          yesPrice: predictionMarkets.yesPrice,
+          noPrice: predictionMarkets.noPrice,
+          yesLiquidity: predictionMarkets.yesLiquidity,
+          noLiquidity: predictionMarkets.noLiquidity,
+          initialLiquidity: predictionMarkets.initialLiquidity,
+          blockchainTxHash: predictionMarkets.blockchainTxHash,
+          resolutionTxHash: predictionMarkets.resolutionTxHash,
+          imageUrl: predictionMarkets.imageUrl,
+          tags: predictionMarkets.tags,
+          createdAt: predictionMarkets.createdAt,
+          updatedAt: predictionMarkets.updatedAt,
+          sourceSummary: {
+            id: summaries.id,
+            title: summaries.title,
+          }
+        })
         .from(predictionMarkets)
+        .leftJoin(summaries, eq(predictionMarkets.sourceContentId, summaries.id))
         .where(eq(predictionMarkets.id, marketId));
       
       return market || null;
