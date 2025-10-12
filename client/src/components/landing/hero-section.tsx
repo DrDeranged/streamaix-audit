@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Play, Mail, Brain, Link2, Shield, Users } from "lucide-react";
+import { Play, Mail, Brain, Link2, Shield, Users, Target, TrendingUp, BarChart3, FileText, LayoutDashboard, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 
 export function HeroSection() {
   const scrollToProcessor = () => {
@@ -92,6 +93,89 @@ export function HeroSection() {
               Join Waitlist
             </Button>
           </div>
+
+          {/* Quick Navigation Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mb-12"
+          >
+            <p className="text-sm text-muted-foreground mb-4">Quick Access</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto px-4">
+              <Link href="/bounties">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-purple-500/20 hover:border-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  data-testid="button-nav-bounties"
+                >
+                  <Target className="w-5 h-5 mr-2" />
+                  Bounties
+                </Button>
+              </Link>
+
+              <Link href="/markets">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-cyan-500/20 hover:border-cyan-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  data-testid="button-nav-markets"
+                >
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Markets
+                </Button>
+              </Link>
+
+              <Link href="/discover">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-green-500/20 hover:border-green-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  data-testid="button-nav-analytics"
+                >
+                  <BarChart3 className="w-5 h-5 mr-2" />
+                  Analytics
+                </Button>
+              </Link>
+
+              <Link href="/summaries">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-orange-500/20 hover:border-orange-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  data-testid="button-nav-summaries"
+                >
+                  <FileText className="w-5 h-5 mr-2" />
+                  Summaries
+                </Button>
+              </Link>
+
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-indigo-500/20 hover:border-indigo-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  data-testid="button-nav-dashboard"
+                >
+                  <LayoutDashboard className="w-5 h-5 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+
+              <Link href="/discover">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-yellow-500/20 hover:border-yellow-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  data-testid="button-nav-discover"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Discover
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
           
           {/* Tech stack indicators */}
           <div className="flex justify-center items-center space-x-4 sm:space-x-6 md:space-x-8 opacity-60 flex-wrap gap-2 sm:gap-4 px-4">
