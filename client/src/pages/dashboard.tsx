@@ -57,7 +57,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  Trash2
+  Trash2,
+  Trophy
 } from 'lucide-react';
 
 interface Summary {

@@ -218,10 +218,10 @@ const VolatilityForecastingSection = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-red-300 text-sm font-medium">Market Stress</p>
-                  <p className="text-white text-2xl font-bold">{volatilityAnalysis.overview.overallStressLevel}</p>
+                  <p className="text-white text-2xl font-bold">{volatilityAnalysis?.overview?.overallStressLevel ?? 0}</p>
                   <p className="text-gray-400 text-xs">0-100 Scale</p>
                 </div>
-                <div className={`p-3 rounded-full ${getStressColor(volatilityAnalysis.overview.overallStressLevel)}`}>
+                <div className={`p-3 rounded-full ${getStressColor(volatilityAnalysis?.overview?.overallStressLevel ?? 0)}`}>
                   <Gauge className="h-6 w-6" />
                 </div>
               </div>
@@ -234,10 +234,10 @@ const VolatilityForecastingSection = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-300 text-sm font-medium">Risk Regime</p>
-                  <p className="text-white text-lg font-bold capitalize">{volatilityAnalysis.riskRegime.current}</p>
-                  <p className="text-gray-400 text-xs">{volatilityAnalysis.riskRegime.confidence}% confidence</p>
+                  <p className="text-white text-lg font-bold capitalize">{volatilityAnalysis?.riskRegime?.current ?? 'unknown'}</p>
+                  <p className="text-gray-400 text-xs">{volatilityAnalysis?.riskRegime?.confidence ?? 0}% confidence</p>
                 </div>
-                <div className={`p-3 rounded-full ${getRegimeColor(volatilityAnalysis.riskRegime.current)}`}>
+                <div className={`p-3 rounded-full ${getRegimeColor(volatilityAnalysis?.riskRegime?.current ?? 'unknown')}`}>
                   <Shield className="h-6 w-6" />
                 </div>
               </div>
@@ -270,7 +270,7 @@ const VolatilityForecastingSection = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-yellow-300 text-sm font-medium">Active Alerts</p>
-                  <p className="text-white text-2xl font-bold">{volatilityAnalysis.overview.activeAlertsCount}</p>
+                  <p className="text-white text-2xl font-bold">{volatilityAnalysis?.overview?.activeAlertsCount ?? 0}</p>
                   <p className="text-gray-400 text-xs">Need attention</p>
                 </div>
                 <div className="p-3 rounded-full bg-yellow-500/20 border-yellow-400/30">
@@ -319,7 +319,7 @@ const VolatilityForecastingSection = () => {
                           {getVolatilityIcon(asset.regime)}
                         </div>
                         <div>
-                          <span className="text-white font-medium">{asset.symbol}</span>
+                          <span className="text-white font-medium">{asset?.symbol ?? 'unknown'}</span>
                           <p className="text-gray-400 text-xs">Current: {(asset?.currentVol ?? 0).toFixed(1)}%</p>
                         </div>
                       </div>
@@ -349,22 +349,22 @@ const VolatilityForecastingSection = () => {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Current Regime:</span>
-                    <Badge className={`${getRegimeColor(volatilityAnalysis.riskRegime.current)} border-0`}>
-                      {(volatilityAnalysis.riskRegime?.current || 'unknown').replace('_', ' ').toUpperCase()}
+                    <Badge className={`${getRegimeColor(volatilityAnalysis?.riskRegime?.current ?? 'unknown')} border-0`}>
+                      {(volatilityAnalysis?.riskRegime?.current || 'unknown').replace('_', ' ').toUpperCase()}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Duration:</span>
-                    <span className="text-white">{volatilityAnalysis.riskRegime.duration} days</span>
+                    <span className="text-white">{volatilityAnalysis?.riskRegime?.duration ?? 0} days</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Confidence:</span>
-                    <span className="text-white">{volatilityAnalysis.riskRegime.confidence}%</span>
+                    <span className="text-white">{volatilityAnalysis?.riskRegime?.confidence ?? 0}%</span>
                   </div>
                   <div className="pt-3 border-t border-blue-500/20">
                     <p className="text-blue-300 text-sm font-medium mb-2">Recommendation:</p>
                     <p className="text-gray-300 text-sm capitalize">
-                      {volatilityAnalysis.riskRegime.recommendations}
+                      {volatilityAnalysis?.riskRegime?.recommendations ?? 'unknown'}
                     </p>
                   </div>
                 </CardContent>
@@ -383,12 +383,12 @@ const VolatilityForecastingSection = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {volatilityAnalysis.stressIndicators.map((indicator: any, index: number) => (
+                  {(volatilityAnalysis?.stressIndicators ?? []).map((indicator: any, index: number) => (
                     <div key={index} className="p-3 bg-black/20 rounded-lg border border-orange-500/20">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-white font-medium text-sm">{indicator.name}</span>
-                        <Badge className={`text-xs border-0 ${getStressColor(indicator.normalizedValue)}`}>
-                          {(indicator.level || 'unknown').toUpperCase()}
+                        <span className="text-white font-medium text-sm">{indicator?.name ?? 'unknown'}</span>
+                        <Badge className={`text-xs border-0 ${getStressColor(indicator?.normalizedValue ?? 0)}`}>
+                          {(indicator?.level || 'unknown').toUpperCase()}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
@@ -432,11 +432,11 @@ const VolatilityForecastingSection = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {assetForecast.predictions.map((pred: any, index: number) => (
+                  {(assetForecast?.predictions ?? []).map((pred: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-purple-500/20">
                       <div>
-                        <span className="text-white font-medium">{pred.horizon}</span>
-                        <p className="text-gray-400 text-xs">{pred.confidence}% confidence</p>
+                        <span className="text-white font-medium">{pred?.horizon ?? 'unknown'}</span>
+                        <p className="text-gray-400 text-xs">{pred?.confidence ?? 0}% confidence</p>
                       </div>
                       <div className="text-right">
                         <p className="text-white font-medium">{(pred?.expectedVolatility ?? 0).toFixed(1)}%</p>
@@ -486,19 +486,19 @@ const VolatilityForecastingSection = () => {
         <TabsContent value="stress" className="space-y-6">
           {stressIndicators && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stressIndicators.indicators.map((indicator: any, index: number) => (
+              {(stressIndicators?.indicators ?? []).map((indicator: any, index: number) => (
                 <Card key={index} className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border-orange-500/30 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-orange-300 flex items-center gap-2 text-base">
                       <Gauge className="h-4 w-4" />
-                      {indicator.name}
+                      {indicator?.name ?? 'unknown'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-300 text-sm">Level:</span>
-                      <Badge className={`text-xs border-0 ${getStressColor(indicator.normalizedValue)}`}>
-                        {(indicator.level || 'unknown').toUpperCase()}
+                      <Badge className={`text-xs border-0 ${getStressColor(indicator?.normalizedValue ?? 0)}`}>
+                        {(indicator?.level || 'unknown').toUpperCase()}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
@@ -509,7 +509,7 @@ const VolatilityForecastingSection = () => {
                       <span className="text-gray-300 text-sm">Percentile:</span>
                       <span className="text-gray-300">{(indicator?.percentile ?? 0).toFixed(0)}%</span>
                     </div>
-                    <p className="text-gray-400 text-xs mt-2">{indicator.interpretation}</p>
+                    <p className="text-gray-400 text-xs mt-2">{indicator?.interpretation ?? ''}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -527,13 +527,13 @@ const VolatilityForecastingSection = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {crisisIndicators.indicators.map((indicator: any, index: number) => (
+                  {(crisisIndicators?.indicators ?? []).map((indicator: any, index: number) => (
                     <div key={index} className="p-4 bg-black/20 rounded-lg border border-red-500/20">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-white font-medium">{indicator.name}</span>
+                        <span className="text-white font-medium">{indicator?.name ?? 'unknown'}</span>
                         <Badge className={`text-xs border-0 ${
-                          indicator.probability > 70 ? 'bg-red-500/30 text-red-300' :
-                          indicator.probability > 40 ? 'bg-orange-500/30 text-orange-300' :
+                          (indicator?.probability ?? 0) > 70 ? 'bg-red-500/30 text-red-300' :
+                          (indicator?.probability ?? 0) > 40 ? 'bg-orange-500/30 text-orange-300' :
                           'bg-yellow-500/30 text-yellow-300'
                         }`}>
                           {(indicator?.probability ?? 0).toFixed(0)}%
@@ -542,15 +542,15 @@ const VolatilityForecastingSection = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-400 text-sm">Type:</span>
-                          <span className="text-gray-300 text-sm capitalize">{indicator.type.replace('_', ' ')}</span>
+                          <span className="text-gray-300 text-sm capitalize">{(indicator?.type ?? 'unknown').replace('_', ' ')}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400 text-sm">Severity:</span>
-                          <span className="text-gray-300 text-sm capitalize">{indicator.severity}</span>
+                          <span className="text-gray-300 text-sm capitalize">{indicator?.severity ?? 'unknown'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400 text-sm">Timeframe:</span>
-                          <span className="text-gray-300 text-sm">{indicator.timeframe}</span>
+                          <span className="text-gray-300 text-sm">{indicator?.timeframe ?? 'unknown'}</span>
                         </div>
                       </div>
                     </div>
@@ -571,31 +571,31 @@ const VolatilityForecastingSection = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          {getSeverityIcon(alert.severity)}
-                          <span className="text-white font-medium">{alert.title}</span>
+                          {getSeverityIcon(alert?.severity ?? 'low')}
+                          <span className="text-white font-medium">{alert?.title ?? 'Alert'}</span>
                           <Badge className={`text-xs border-0 ${
-                            alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
-                            alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
-                            alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                            alert?.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                            alert?.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                            alert?.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
                             'bg-green-500/20 text-green-300'
                           }`}>
-                            {(alert.severity || 'unknown').toUpperCase()}
+                            {(alert?.severity || 'unknown').toUpperCase()}
                           </Badge>
                         </div>
-                        <p className="text-gray-300 text-sm mb-2">{alert.description}</p>
-                        {alert.symbol && (
+                        <p className="text-gray-300 text-sm mb-2">{alert?.description ?? ''}</p>
+                        {alert?.symbol && (
                           <p className="text-gray-400 text-xs">Asset: {alert.symbol}</p>
                         )}
                         <p className="text-gray-400 text-xs">
-                          Current: {alert.currentValue} | Threshold: {alert.thresholdValue} | 
-                          Deviation: {alert.deviationPercent > 0 ? '+' : ''}{(alert?.deviationPercent ?? 0).toFixed(1)}%
+                          Current: {alert?.currentValue ?? 'N/A'} | Threshold: {alert?.thresholdValue ?? 'N/A'} | 
+                          Deviation: {(alert?.deviationPercent ?? 0) > 0 ? '+' : ''}{(alert?.deviationPercent ?? 0).toFixed(1)}%
                         </p>
                       </div>
                       <Button
                         size="sm"
                         variant="outline"
                         className="ml-3 border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/20"
-                        data-testid={`button-acknowledge-vol-alert-${alert.id}`}
+                        data-testid={`button-acknowledge-vol-alert-${alert?.id ?? index}`}
                       >
                         Acknowledge
                       </Button>
@@ -796,50 +796,50 @@ const PatternRecognitionSection = () => {
               ))
             ) : patterns?.patterns?.length ? (
               patterns.patterns.map((pattern: ChartPattern, index: number) => {
-                const PatternIcon = getPatternIcon(pattern.patternType);
+                const PatternIcon = getPatternIcon(pattern?.patternType ?? 'unknown');
                 return (
-                  <Card key={pattern.id} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm hover:border-cyan-400/50 transition-all duration-300">
+                  <Card key={pattern?.id ?? index} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm hover:border-cyan-400/50 transition-all duration-300">
                     <CardHeader>
                       <CardTitle className="text-cyan-300 flex items-center gap-2 text-lg">
                         <PatternIcon className="h-5 w-5" />
-                        {(pattern.patternType || 'unknown').replace(/_/g, ' ').toUpperCase()}
+                        {(pattern?.patternType || 'unknown').replace(/_/g, ' ').toUpperCase()}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Badge className={`text-xs ${getConfidenceColor(pattern.confidence)}`}>
-                            {pattern.confidence}% Confidence
+                          <Badge className={`text-xs ${getConfidenceColor(pattern?.confidence ?? 0)}`}>
+                            {pattern?.confidence ?? 0}% Confidence
                           </Badge>
                           <Badge className={`text-xs ${
-                            pattern.status === 'active' ? 'bg-green-500/20 text-green-300 border-green-400/30' :
-                            pattern.status === 'completed' ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' :
+                            pattern?.status === 'active' ? 'bg-green-500/20 text-green-300 border-green-400/30' :
+                            pattern?.status === 'completed' ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' :
                             'bg-red-500/20 text-red-300 border-red-400/30'
                           }`}>
-                            {(pattern.status || 'unknown').toUpperCase()}
+                            {(pattern?.status || 'unknown').toUpperCase()}
                           </Badge>
                         </div>
-                        <span className="text-gray-400 text-xs">{pattern.timeframe}</span>
+                        <span className="text-gray-400 text-xs">{pattern?.timeframe ?? 'unknown'}</span>
                       </div>
                       
-                      {pattern.targetPrice && (
+                      {pattern?.targetPrice && (
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <p className="text-gray-400 text-xs">Target</p>
-                            <p className="text-green-400 font-medium">${pattern.targetPrice.toLocaleString()}</p>
+                            <p className="text-green-400 font-medium">${(pattern?.targetPrice ?? 0).toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-gray-400 text-xs">Stop Loss</p>
-                            <p className="text-red-400 font-medium">${pattern.stopLoss?.toLocaleString()}</p>
+                            <p className="text-red-400 font-medium">${(pattern?.stopLoss ?? 0).toLocaleString()}</p>
                           </div>
                         </div>
                       )}
                       
-                      <p className="text-gray-300 text-sm">{pattern.description}</p>
+                      <p className="text-gray-300 text-sm">{pattern?.description ?? ''}</p>
                       
                       <div className="flex items-center justify-between pt-2 border-t border-cyan-500/20">
                         <span className="text-gray-400 text-xs">
-                          {new Date(pattern.detectedAt).toLocaleString()}
+                          {new Date(pattern?.detectedAt ?? Date.now()).toLocaleString()}
                         </span>
                         <Button size="sm" variant="outline" className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
                           <Crosshair className="h-3 w-3 mr-1" />
@@ -885,7 +885,7 @@ const PatternRecognitionSection = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
-                    const trendDisplay = getTrendDisplay(trendAnalysis.data.primaryTrend.direction, trendAnalysis.data.primaryTrend.strength);
+                    const trendDisplay = getTrendDisplay(trendAnalysis?.data?.primaryTrend?.direction ?? 'neutral', trendAnalysis?.data?.primaryTrend?.strength ?? 0);
                     const TrendIcon = trendDisplay.icon;
                     return (
                       <div className="flex items-center justify-between">
@@ -895,13 +895,13 @@ const PatternRecognitionSection = () => {
                           </div>
                           <div>
                             <p className={`font-medium ${trendDisplay.color}`}>
-                              {(trendAnalysis.data?.primaryTrend?.direction || 'unknown').toUpperCase()}
+                              {(trendAnalysis?.data?.primaryTrend?.direction || 'unknown').toUpperCase()}
                             </p>
-                            <p className="text-gray-400 text-sm">{trendAnalysis.data.primaryTrend.duration}</p>
+                            <p className="text-gray-400 text-sm">{trendAnalysis?.data?.primaryTrend?.duration ?? 'unknown'}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-white font-bold text-lg">{trendAnalysis.data.primaryTrend.strength}%</p>
+                          <p className="text-white font-bold text-lg">{trendAnalysis?.data?.primaryTrend?.strength ?? 0}%</p>
                           <p className="text-gray-400 text-xs">Strength</p>
                         </div>
                       </div>
@@ -911,10 +911,10 @@ const PatternRecognitionSection = () => {
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full ${
-                        trendAnalysis.data.primaryTrend.direction === 'bullish' ? 'bg-green-500' :
-                        trendAnalysis.data.primaryTrend.direction === 'bearish' ? 'bg-red-500' : 'bg-gray-500'
+                        trendAnalysis?.data?.primaryTrend?.direction === 'bullish' ? 'bg-green-500' :
+                        trendAnalysis?.data?.primaryTrend?.direction === 'bearish' ? 'bg-red-500' : 'bg-gray-500'
                       }`}
-                      style={{ width: `${trendAnalysis.data.primaryTrend.strength}%` }}
+                      style={{ width: `${trendAnalysis?.data?.primaryTrend?.strength ?? 0}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -959,9 +959,9 @@ const PatternRecognitionSection = () => {
                     <div className="text-center p-3 bg-black/20 rounded-lg border border-cyan-500/20">
                       <p className="text-gray-400 text-xs">Volume</p>
                       <p className={`font-bold text-lg ${
-                        trendAnalysis.data?.technicalIndicators?.volume?.trend === 'increasing' ? 'text-green-400' : 'text-red-400'
+                        trendAnalysis?.data?.technicalIndicators?.volume?.trend === 'increasing' ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {trendAnalysis.data?.technicalIndicators?.volume?.strength ?? 0}%
+                        {trendAnalysis?.data?.technicalIndicators?.volume?.strength ?? 0}%
                       </p>
                     </div>
                   </div>
@@ -978,18 +978,18 @@ const PatternRecognitionSection = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {(trendAnalysis.data?.supportResistance ?? []).slice(0, 4).map((level: any, index: number) => (
+                    {(trendAnalysis?.data?.supportResistance ?? []).slice(0, 4).map((level: any, index: number) => (
                       <div key={index} className={`p-3 rounded-lg border ${
-                        level.type === 'support' ? 'bg-green-500/10 border-green-400/30' : 'bg-red-500/10 border-red-400/30'
+                        level?.type === 'support' ? 'bg-green-500/10 border-green-400/30' : 'bg-red-500/10 border-red-400/30'
                       }`}>
                         <div className="flex items-center gap-2 mb-1">
-                          <div className={`w-2 h-2 rounded-full ${level.type === 'support' ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                          <p className={`text-xs font-medium ${level.type === 'support' ? 'text-green-400' : 'text-red-400'}`}>
-                            {(level.type || 'unknown').toUpperCase()}
+                          <div className={`w-2 h-2 rounded-full ${level?.type === 'support' ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                          <p className={`text-xs font-medium ${level?.type === 'support' ? 'text-green-400' : 'text-red-400'}`}>
+                            {(level?.type || 'unknown').toUpperCase()}
                           </p>
                         </div>
-                        <p className="text-white font-bold">${(level.level ?? 0).toLocaleString()}</p>
-                        <p className="text-gray-400 text-xs">{level.strength ?? 0}% strength</p>
+                        <p className="text-white font-bold">${(level?.level ?? 0).toLocaleString()}</p>
+                        <p className="text-gray-400 text-xs">{level?.strength ?? 0}% strength</p>
                       </div>
                     ))}
                   </div>
@@ -1028,48 +1028,48 @@ const PatternRecognitionSection = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
                     <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-lg font-bold ${
-                      marketCycles.data.phase === 'accumulation' ? 'bg-blue-500/20 text-blue-300' :
-                      marketCycles.data.phase === 'markup' ? 'bg-green-500/20 text-green-300' :
-                      marketCycles.data.phase === 'distribution' ? 'bg-yellow-500/20 text-yellow-300' :
+                      marketCycles?.data?.phase === 'accumulation' ? 'bg-blue-500/20 text-blue-300' :
+                      marketCycles?.data?.phase === 'markup' ? 'bg-green-500/20 text-green-300' :
+                      marketCycles?.data?.phase === 'distribution' ? 'bg-yellow-500/20 text-yellow-300' :
                       'bg-red-500/20 text-red-300'
                     }`}>
                       <div className={`w-3 h-3 rounded-full animate-pulse ${
-                        marketCycles.data.phase === 'accumulation' ? 'bg-blue-400' :
-                        marketCycles.data.phase === 'markup' ? 'bg-green-400' :
-                        marketCycles.data.phase === 'distribution' ? 'bg-yellow-400' :
+                        marketCycles?.data?.phase === 'accumulation' ? 'bg-blue-400' :
+                        marketCycles?.data?.phase === 'markup' ? 'bg-green-400' :
+                        marketCycles?.data?.phase === 'distribution' ? 'bg-yellow-400' :
                         'bg-red-400'
                       }`}></div>
-                      {(marketCycles.data?.phase || 'unknown').toUpperCase()}
+                      {(marketCycles?.data?.phase || 'unknown').toUpperCase()}
                     </div>
                     <p className="text-gray-400 text-sm mt-2">Current Phase</p>
                   </div>
                   
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-white">{marketCycles.data.confidence}%</p>
+                    <p className="text-2xl font-bold text-white">{marketCycles?.data?.confidence ?? 0}%</p>
                     <p className="text-gray-400 text-sm">Confidence</p>
                   </div>
                   
                   <div className="text-center">
-                    <p className="text-lg font-medium text-gray-300">{marketCycles.data.duration}</p>
+                    <p className="text-lg font-medium text-gray-300">{marketCycles?.data?.duration ?? 'unknown'}</p>
                     <p className="text-gray-400 text-sm">Duration</p>
                   </div>
                 </div>
                 
                 <div className="bg-black/20 rounded-lg p-4 border border-cyan-500/20">
                   <p className="text-cyan-300 font-medium mb-2">Phase Transition Estimate:</p>
-                  <p className="text-gray-300">{marketCycles.data.nextPhaseEstimate}</p>
+                  <p className="text-gray-300">{marketCycles?.data?.nextPhaseEstimate ?? ''}</p>
                 </div>
                 
                 {/* Cycle Phases Visual */}
                 <div className="grid grid-cols-4 gap-2">
                   {['accumulation', 'markup', 'distribution', 'markdown'].map((phase, index) => (
                     <div key={phase} className={`text-center p-3 rounded-lg border transition-all duration-300 ${
-                      marketCycles.data.phase === phase 
+                      marketCycles?.data?.phase === phase 
                         ? 'border-cyan-400 bg-cyan-500/20' 
                         : 'border-gray-600 bg-gray-500/10'
                     }`}>
                       <p className={`text-xs font-medium ${
-                        marketCycles.data.phase === phase ? 'text-cyan-300' : 'text-gray-400'
+                        marketCycles?.data?.phase === phase ? 'text-cyan-300' : 'text-gray-400'
                       }`}>
                         {phase.charAt(0).toUpperCase() + phase.slice(1)}
                       </p>
@@ -1103,36 +1103,36 @@ const PatternRecognitionSection = () => {
               ))
             ) : tradingSetups?.setups?.length ? (
               tradingSetups.setups.map((setup: TradingSetup) => (
-                <Card key={setup.id} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm hover:border-cyan-400/50 transition-all duration-300">
+                <Card key={setup?.id ?? 0} className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 backdrop-blur-sm hover:border-cyan-400/50 transition-all duration-300">
                   <CardHeader>
                     <CardTitle className="text-cyan-300 flex items-center gap-2">
                       <Zap className="h-5 w-5" />
-                      {(setup.setupType || 'unknown').replace(/_/g, ' ').toUpperCase()}
-                      <Badge className={`ml-auto ${setup.direction === 'long' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
-                        {(setup.direction || 'unknown').toUpperCase()}
+                      {(setup?.setupType || 'unknown').replace(/_/g, ' ').toUpperCase()}
+                      <Badge className={`ml-auto ${setup?.direction === 'long' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+                        {(setup?.direction || 'unknown').toUpperCase()}
                       </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Badge className={`${getConfidenceColor(setup.confidence)}`}>
-                        {setup.confidence}% Confidence
+                      <Badge className={`${getConfidenceColor(setup?.confidence ?? 0)}`}>
+                        {setup?.confidence ?? 0}% Confidence
                       </Badge>
-                      <span className="text-gray-400 text-sm">{setup.timeframe}</span>
+                      <span className="text-gray-400 text-sm">{setup?.timeframe ?? 'unknown'}</span>
                     </div>
                     
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <p className="text-gray-400 text-xs">Entry</p>
-                        <p className="text-blue-400 font-medium">${setup.entryPrice.toLocaleString()}</p>
+                        <p className="text-blue-400 font-medium">${(setup?.entryPrice ?? 0).toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-gray-400 text-xs">Target</p>
-                        <p className="text-green-400 font-medium">${setup.targetPrice.toLocaleString()}</p>
+                        <p className="text-green-400 font-medium">${(setup?.targetPrice ?? 0).toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-gray-400 text-xs">Stop</p>
-                        <p className="text-red-400 font-medium">${setup.stopLoss.toLocaleString()}</p>
+                        <p className="text-red-400 font-medium">${(setup?.stopLoss ?? 0).toLocaleString()}</p>
                       </div>
                     </div>
                     
@@ -1143,10 +1143,10 @@ const PatternRecognitionSection = () => {
                           1:{(setup?.riskReward ?? 0).toFixed(1)}
                         </Badge>
                       </div>
-                      <p className="text-gray-300 text-sm">{setup.rationale}</p>
+                      <p className="text-gray-300 text-sm">{setup?.rationale ?? ''}</p>
                     </div>
                     
-                    <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" data-testid={`button-setup-${setup.id}`}>
+                    <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" data-testid={`button-setup-${setup?.id ?? 0}`}>
                       <Target className="h-4 w-4 mr-2" />
                       Execute Setup
                     </Button>
@@ -1181,46 +1181,46 @@ const PatternRecognitionSection = () => {
               ))
             ) : patternAlerts?.alerts?.length ? (
               patternAlerts.alerts.map((alert: PatternAlert) => (
-                <Card key={alert.id} className={`bg-gradient-to-br border backdrop-blur-sm ${
-                  alert.severity === 'critical' ? 'from-red-900/30 to-red-800/20 border-red-500/50' :
-                  alert.severity === 'high' ? 'from-orange-900/30 to-orange-800/20 border-orange-500/50' :
-                  alert.severity === 'medium' ? 'from-yellow-900/30 to-yellow-800/20 border-yellow-500/50' :
+                <Card key={alert?.id ?? 0} className={`bg-gradient-to-br border backdrop-blur-sm ${
+                  alert?.severity === 'critical' ? 'from-red-900/30 to-red-800/20 border-red-500/50' :
+                  alert?.severity === 'high' ? 'from-orange-900/30 to-orange-800/20 border-orange-500/50' :
+                  alert?.severity === 'medium' ? 'from-yellow-900/30 to-yellow-800/20 border-yellow-500/50' :
                   'from-blue-900/30 to-blue-800/20 border-blue-500/50'
                 }`}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
                         <Bell className={`h-5 w-5 mt-0.5 ${
-                          alert.severity === 'critical' ? 'text-red-400' :
-                          alert.severity === 'high' ? 'text-orange-400' :
-                          alert.severity === 'medium' ? 'text-yellow-400' :
+                          alert?.severity === 'critical' ? 'text-red-400' :
+                          alert?.severity === 'high' ? 'text-orange-400' :
+                          alert?.severity === 'medium' ? 'text-yellow-400' :
                           'text-blue-400'
                         }`} />
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge className="bg-gray-500/20 text-gray-300 text-xs">{alert.symbol}</Badge>
+                            <Badge className="bg-gray-500/20 text-gray-300 text-xs">{alert?.symbol ?? 'unknown'}</Badge>
                             <Badge className={`text-xs ${
-                              alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
-                              alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
-                              alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              alert?.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                              alert?.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                              alert?.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
                               'bg-blue-500/20 text-blue-300'
                             }`}>
-                              {(alert.severity || 'unknown').toUpperCase()}
+                              {(alert?.severity || 'unknown').toUpperCase()}
                             </Badge>
-                            {alert.acknowledged && (
+                            {alert?.acknowledged && (
                               <Badge className="bg-green-500/20 text-green-300 text-xs">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
                                 Acknowledged
                               </Badge>
                             )}
                           </div>
-                          <p className="text-white font-medium">{alert.message}</p>
+                          <p className="text-white font-medium">{alert?.message ?? ''}</p>
                           <p className="text-gray-400 text-xs mt-1">
-                            {new Date(alert.timestamp).toLocaleString()}
+                            {new Date(alert?.timestamp ?? Date.now()).toLocaleString()}
                           </p>
                         </div>
                       </div>
-                      {!alert.acknowledged && (
+                      {!alert?.acknowledged && (
                         <Button size="sm" variant="outline" className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Acknowledge
@@ -1256,11 +1256,11 @@ const PatternRecognitionSection = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Total Symbols</p>
-                <p className="text-white font-bold text-lg">{patternSummary.data.overview.totalSymbols}</p>
+                <p className="text-white font-bold text-lg">{patternSummary?.data?.overview?.totalSymbols ?? 0}</p>
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Avg Patterns</p>
-                <p className="text-cyan-400 font-bold text-lg">{patternSummary.data.overview.avgPatternCount}</p>
+                <p className="text-cyan-400 font-bold text-lg">{patternSummary?.data?.overview?.avgPatternCount ?? 0}</p>
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Avg Confidence</p>
@@ -1268,15 +1268,15 @@ const PatternRecognitionSection = () => {
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Bullish</p>
-                <p className="text-green-400 font-bold text-lg">{patternSummary.data.overview.bullishCount}</p>
+                <p className="text-green-400 font-bold text-lg">{patternSummary?.data?.overview?.bullishCount ?? 0}</p>
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Bearish</p>
-                <p className="text-red-400 font-bold text-lg">{patternSummary.data.overview.bearishCount}</p>
+                <p className="text-red-400 font-bold text-lg">{patternSummary?.data?.overview?.bearishCount ?? 0}</p>
               </div>
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Neutral</p>
-                <p className="text-gray-400 font-bold text-lg">{patternSummary.data.overview.neutralCount}</p>
+                <p className="text-gray-400 font-bold text-lg">{patternSummary?.data?.overview?.neutralCount ?? 0}</p>
               </div>
             </div>
           </CardContent>
