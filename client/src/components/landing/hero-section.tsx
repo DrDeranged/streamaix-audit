@@ -102,56 +102,44 @@ export function HeroSection() {
             className="mb-8"
           >
             <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-400">
-              <Link href="/bounties">
-                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-bounties">
-                  <Target className="w-3.5 h-3.5" />
-                  <span>Bounties</span>
-                </a>
+              <Link href="/bounties" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-bounties">
+                <Target className="w-3.5 h-3.5" />
+                <span>Bounties</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/markets">
-                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-markets">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Markets</span>
-                </a>
+              <Link href="/markets" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-markets">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Markets</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/discover">
-                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-green-500/20 hover:text-green-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-analytics">
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Analytics</span>
-                </a>
+              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-green-500/20 hover:text-green-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-analytics">
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Analytics</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/summaries">
-                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-orange-500/20 hover:text-orange-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-summaries">
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Summaries</span>
-                </a>
+              <Link href="/summaries" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-orange-500/20 hover:text-orange-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-summaries">
+                <FileText className="w-3.5 h-3.5" />
+                <span>Summaries</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/dashboard">
-                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-dashboard">
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Dashboard</span>
-                </a>
+              <Link href="/dashboard" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-dashboard">
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span>Dashboard</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/discover">
-                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-yellow-500/20 hover:text-yellow-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-discover">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Discover</span>
-                </a>
+              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-yellow-500/20 hover:text-yellow-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-discover">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Discover</span>
               </Link>
             </div>
           </motion.div>
