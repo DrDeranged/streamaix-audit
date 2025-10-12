@@ -94,85 +94,64 @@ export function HeroSection() {
             </Button>
           </div>
 
-          {/* Quick Navigation Section */}
+          {/* Elegant Navigation Pills */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-12"
+            className="mb-8"
           >
-            <p className="text-sm text-muted-foreground mb-4">Quick Access</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto px-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-400">
               <Link href="/bounties">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-purple-500/20 hover:border-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
-                  data-testid="button-nav-bounties"
-                >
-                  <Target className="w-5 h-5 mr-2" />
-                  Bounties
-                </Button>
+                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-bounties">
+                  <Target className="w-3.5 h-3.5" />
+                  <span>Bounties</span>
+                </a>
               </Link>
-
+              
+              <span className="text-gray-600">•</span>
+              
               <Link href="/markets">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-cyan-500/20 hover:border-cyan-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
-                  data-testid="button-nav-markets"
-                >
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  Markets
-                </Button>
+                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-markets">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Markets</span>
+                </a>
               </Link>
-
+              
+              <span className="text-gray-600">•</span>
+              
               <Link href="/discover">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-green-500/20 hover:border-green-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
-                  data-testid="button-nav-analytics"
-                >
-                  <BarChart3 className="w-5 h-5 mr-2" />
-                  Analytics
-                </Button>
+                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-green-500/20 hover:text-green-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-analytics">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Analytics</span>
+                </a>
               </Link>
-
+              
+              <span className="text-gray-600">•</span>
+              
               <Link href="/summaries">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-orange-500/20 hover:border-orange-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
-                  data-testid="button-nav-summaries"
-                >
-                  <FileText className="w-5 h-5 mr-2" />
-                  Summaries
-                </Button>
+                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-orange-500/20 hover:text-orange-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-summaries">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Summaries</span>
+                </a>
               </Link>
-
+              
+              <span className="text-gray-600">•</span>
+              
               <Link href="/dashboard">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-indigo-500/20 hover:border-indigo-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
-                  data-testid="button-nav-dashboard"
-                >
-                  <LayoutDashboard className="w-5 h-5 mr-2" />
-                  Dashboard
-                </Button>
+                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-dashboard">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
+                </a>
               </Link>
-
+              
+              <span className="text-gray-600">•</span>
+              
               <Link href="/discover">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-yellow-500/20 hover:border-yellow-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
-                  data-testid="button-nav-discover"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Discover
-                </Button>
+                <a className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-yellow-500/20 hover:text-yellow-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-discover">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Discover</span>
+                </a>
               </Link>
             </div>
           </motion.div>
