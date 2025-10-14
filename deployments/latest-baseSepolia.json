@@ -1,0 +1,12 @@
+{
+  "network": "baseSepolia",
+  "chainId": "84532",
+  "deployer": "0x9C78aCE6cE656Efa4faAdD73F4A9245B90619655",
+  "timestamp": "2025-10-14T17:42:21.000Z",
+  "contracts": {
+    "StreamToken": "0x490520c8c45e444fFC510B35596eB0D4Fb104ff3",
+    "SummaryNFT": "0x74AD35278EF4B3f30Fc42F23860E21256cEd4227",
+    "Staking": "0x8385D2C8b960A84750bB62101bb64F815901331d",
+    "BountyBoard": "0x5F0b11E9A1bb2F16B1c03B92a8C2629e7dAfeF1e"
+  }
+}
