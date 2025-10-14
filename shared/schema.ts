@@ -65,6 +65,11 @@ export const summaries = pgTable("summaries", {
   ipfsHash: text("ipfs_hash"), // alternative decentralized storage
   nftTokenId: text("nft_token_id"), // NFT token ID if minted
   nftTxHash: text("nft_tx_hash"), // NFT minting transaction hash
+  
+  // AI-generated prediction markets from content
+  suggestedMarkets: jsonb("suggested_markets"), // AI extracted predictions: [{ question, description, category, deadline, confidence, tags }]
+  submitterPredictions: jsonb("submitter_predictions"), // Bounty claimer's predictions: [{ question, prediction: "yes" | "no", confidence, rationale }]
+  analysisAnswers: jsonb("analysis_answers"), // Answers to bounty analysis questions: [{ questionId, answer }]
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -93,6 +98,11 @@ export const bounties = pgTable("bounties", {
   completionTxHash: text("completion_tx_hash"), // transaction hash for bounty completion
   claimedAt: timestamp("claimed_at"),
   completedAt: timestamp("completed_at"),
+  
+  // Engagement tier system
+  engagementTier: text("engagement_tier").default("basic"), // basic, analysis, prediction
+  analysisQuestions: jsonb("analysis_questions"), // [{ id, question, type: "text" | "choice" }]
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
