@@ -26,12 +26,16 @@ export function useBounties() {
       reward,
       deadline,
       tags,
+      engagementTier,
+      analysisQuestions,
     }: {
       title: string;
       description: string;
       reward: number;
       deadline: Date;
       tags?: string[];
+      engagementTier?: 'basic' | 'analysis' | 'prediction';
+      analysisQuestions?: string[];
     }) => {
       if (!wallet?.address) throw new Error('Wallet not connected');
 
@@ -72,6 +76,8 @@ export function useBounties() {
           reward,
           deadline: deadline.toISOString(),
           tags: tags || [],
+          engagementTier: engagementTier || 'basic',
+          analysisQuestions: analysisQuestions || [],
           creatorWallet: wallet.address,
           blockchainTxHash: txHash,
           status: 'open',
