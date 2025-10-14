@@ -3,11 +3,11 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface TrackEngagementParams {
-  bountyId: number;
+  bountyId: string;
   type: 'view' | 'share' | 'like';
 }
 
-export function useEngagement(bountyId: number) {
+export function useEngagement(bountyId: string) {
   // Track view automatically when hook is used
   useEffect(() => {
     if (bountyId) {
