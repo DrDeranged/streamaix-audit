@@ -18,13 +18,21 @@ import {
   Share2,
   ExternalLink,
   Award,
-  TrendingUp
+  TrendingUp,
+  Plus,
+  Trash2,
+  Info,
+  Brain,
+  Target,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useBounties } from '@/hooks/useBounties';
 import { useEngagement } from '@/hooks/useEngagement';
@@ -33,6 +41,19 @@ import { formatTokenAmount } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { Bounty } from '@shared/schema';
+
+interface AnalysisAnswer {
+  questionId: string;
+  answer: string;
+}
+
+interface UserPrediction {
+  id: string;
+  question: string;
+  prediction: 'yes' | 'no';
+  confidence: number;
+  rationale: string;
+}
 
 export default function BountyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +64,10 @@ export default function BountyDetail() {
   const [submissionUrl, setSubmissionUrl] = useState('');
   const [submissionNotes, setSubmissionNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Analysis & Prediction state
+  const [analysisAnswers, setAnalysisAnswers] = useState<AnalysisAnswer[]>([]);
+  const [userPredictions, setUserPredictions] = useState<UserPrediction[]>([]);
 
   // Fetch bounty details
   const { data: bountyData, isLoading } = useQuery<{ bounty: Bounty }>({
@@ -70,6 +95,83 @@ export default function BountyDetail() {
   const canClaim = isConnected && !isOwner && !isClaimer && bounty?.status === 'open' && !isExpired;
   const canSubmit = isClaimer && bounty?.status === 'claimed';
   const canReview = isOwner && bounty?.status === 'in_progress' && bounty?.summaryId;
+
+  // Helper functions for predictions
+  const addPrediction = () => {
+    if (userPredictions.length >= 5) {
+      toast({
+        title: 'Maximum Reached',
+        description: 'You can only add up to 5 predictions.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setUserPredictions([
+      ...userPredictions,
+      {
+        id: Date.now().toString(),
+        question: '',
+        prediction: 'yes',
+        confidence: 50,
+        rationale: '',
+      },
+    ]);
+  };
+
+  const updatePrediction = (id: string, field: keyof UserPrediction, value: any) => {
+    setUserPredictions(
+      userPredictions.map(p => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
+
+  const removePrediction = (id: string) => {
+    setUserPredictions(userPredictions.filter(p => p.id !== id));
+  };
+
+  const updateAnalysisAnswer = (questionId: string, answer: string) => {
+    const existing = analysisAnswers.find(a => a.questionId === questionId);
+    if (existing) {
+      setAnalysisAnswers(
+        analysisAnswers.map(a => (a.questionId === questionId ? { ...a, answer } : a))
+      );
+    } else {
+      setAnalysisAnswers([...analysisAnswers, { questionId, answer }]);
+    }
+  };
+
+  // Get tier info
+  const tier = bounty?.engagementTier || 'basic';
+  const questions = (bounty?.analysisQuestions as any[]) || [];
+  const answeredCount = analysisAnswers.filter(a => a.answer.trim()).length;
+
+  const getTierInfo = (tier: string) => {
+    switch (tier) {
+      case 'analysis':
+        return {
+          icon: Brain,
+          color: 'purple',
+          title: 'Analysis Tier',
+          description: 'Provide detailed analysis by answering all questions',
+        };
+      case 'prediction':
+        return {
+          icon: Target,
+          color: 'cyan',
+          title: 'Prediction Tier',
+          description: 'Answer questions and make 1-5 predictions about the content',
+        };
+      default:
+        return {
+          icon: Upload,
+          color: 'yellow',
+          title: 'Basic Tier',
+          description: 'Submit your content URL and optional notes',
+        };
+    }
+  };
+
+  const tierInfo = getTierInfo(tier);
+  const TierIcon = tierInfo.icon;
 
   const handleClaim = async () => {
     if (!bounty?.contractBountyId) {
@@ -109,6 +211,47 @@ export default function BountyDetail() {
       return;
     }
 
+    const tier = bounty?.engagementTier || 'basic';
+
+    // Validation based on tier
+    if (tier === 'analysis' || tier === 'prediction') {
+      const questions = (bounty?.analysisQuestions as any[]) || [];
+      const answeredCount = analysisAnswers.filter(a => a.answer.trim()).length;
+      
+      if (answeredCount < questions.length) {
+        toast({
+          title: 'Incomplete Analysis',
+          description: `Please answer all ${questions.length} analysis questions before submitting.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    if (tier === 'prediction') {
+      if (userPredictions.length === 0) {
+        toast({
+          title: 'Predictions Required',
+          description: 'Please add at least one prediction for this bounty.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const incompletePrediction = userPredictions.find(
+        p => !p.question.trim() || p.confidence === 0
+      );
+
+      if (incompletePrediction) {
+        toast({
+          title: 'Incomplete Prediction',
+          description: 'All predictions must have a question and confidence level.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       // Create summary from the submission
@@ -120,6 +263,8 @@ export default function BountyDetail() {
           title: `Submission for: ${bounty?.title}`,
           description: submissionNotes || 'Bounty submission',
           bountyId: bounty?.id,
+          analysisAnswers: tier !== 'basic' ? analysisAnswers : undefined,
+          submitterPredictions: tier === 'prediction' ? userPredictions : undefined,
         }),
       });
 
@@ -133,6 +278,8 @@ export default function BountyDetail() {
         queryClient.invalidateQueries({ queryKey: ['/api/bounties', id] });
         setSubmissionUrl('');
         setSubmissionNotes('');
+        setAnalysisAnswers([]);
+        setUserPredictions([]);
       } else {
         throw new Error(data.error || 'Failed to submit');
       }
@@ -335,40 +482,220 @@ export default function BountyDetail() {
 
             {/* Submission Form (for claimers) */}
             {canSubmit && (
-              <Card className="bg-slate-900/50 border-yellow-500/30 backdrop-blur-sm p-6">
+              <Card className={`bg-slate-900/50 border-${tierInfo.color}-500/30 backdrop-blur-sm p-6`}>
+                {/* Tier Badge */}
+                <div className="mb-6">
+                  <Badge className={`border-${tierInfo.color}-500/50 bg-${tierInfo.color}-500/10 text-${tierInfo.color}-400 text-sm px-3 py-1`} data-testid="badge-engagement-tier">
+                    <TierIcon className="w-4 h-4 mr-2" />
+                    {tierInfo.title}
+                  </Badge>
+                  <p className="text-sm text-gray-400 mt-2">{tierInfo.description}</p>
+                </div>
+
+                {/* Info Box */}
+                <div className={`mb-6 p-4 bg-${tierInfo.color}-500/10 border border-${tierInfo.color}-500/30 rounded-lg`} data-testid="info-tier-requirements">
+                  <div className="flex items-start gap-3">
+                    <Info className={`w-5 h-5 text-${tierInfo.color}-400 flex-shrink-0 mt-0.5`} />
+                    <div>
+                      <h3 className="font-semibold text-white mb-2">Requirements for {tierInfo.title}</h3>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        <li>• Content URL (required)</li>
+                        {(tier === 'analysis' || tier === 'prediction') && (
+                          <li>• Answer all {questions.length} analysis questions</li>
+                        )}
+                        {tier === 'prediction' && (
+                          <li>• Add 1-5 predictions with confidence levels</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-yellow-400" />
+                  <Upload className={`w-5 h-5 text-${tierInfo.color}-400`} />
                   Submit Your Work
                 </h2>
-                <div className="space-y-4">
+
+                <div className="space-y-6">
+                  {/* Content URL */}
                   <div>
-                    <label className="text-sm text-gray-400 mb-2 block">Summary URL *</label>
+                    <label className="text-sm text-gray-400 mb-2 block">Content URL *</label>
                     <Input
                       value={submissionUrl}
                       onChange={(e) => setSubmissionUrl(e.target.value)}
-                      placeholder="https://youtube.com/watch?v=... or link to your summary"
-                      className="bg-slate-800 border-yellow-500/30 text-white"
+                      placeholder="https://youtube.com/watch?v=... or link to your content"
+                      className={`bg-slate-800 border-${tierInfo.color}-500/30 text-white`}
                       data-testid="input-submission-url"
                     />
                   </div>
+
+                  {/* Analysis Questions (for analysis and prediction tiers) */}
+                  {(tier === 'analysis' || tier === 'prediction') && questions.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Brain className="w-5 h-5 text-purple-400" />
+                          Analysis Questions
+                        </h3>
+                        <Badge variant="outline" className="text-purple-400 border-purple-500/30" data-testid="text-question-counter">
+                          {answeredCount} of {questions.length} answered
+                        </Badge>
+                      </div>
+                      {questions.map((q: any, index: number) => {
+                        const answer = analysisAnswers.find(a => a.questionId === q.id)?.answer || '';
+                        return (
+                          <div key={q.id || index} className="p-4 bg-slate-800/50 rounded-lg border border-purple-500/20">
+                            <label className="text-sm font-medium text-gray-300 mb-2 block">
+                              Question {index + 1}: {q.question}
+                            </label>
+                            <Textarea
+                              value={answer}
+                              onChange={(e) => updateAnalysisAnswer(q.id || `q-${index}`, e.target.value)}
+                              placeholder="Enter your detailed answer..."
+                              className="bg-slate-800 border-purple-500/30 text-white min-h-[100px]"
+                              data-testid={`textarea-analysis-answer-${index}`}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Prediction Builder (for prediction tier only) */}
+                  {tier === 'prediction' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Target className="w-5 h-5 text-cyan-400" />
+                          Your Predictions
+                        </h3>
+                        <Badge variant="outline" className="text-cyan-400 border-cyan-500/30" data-testid="text-prediction-counter">
+                          {userPredictions.length} of 5 predictions
+                        </Badge>
+                      </div>
+
+                      {/* Prediction List */}
+                      {userPredictions.map((prediction, index) => (
+                        <Card key={prediction.id} className="bg-slate-800/50 border-cyan-500/20 p-4" data-testid={`card-prediction-${index}`}>
+                          <div className="flex items-start justify-between mb-3">
+                            <span className="text-sm font-medium text-cyan-400">Prediction {index + 1}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removePrediction(prediction.id)}
+                              className="text-red-400 hover:text-red-300 h-6 w-6 p-0"
+                              data-testid={`button-delete-prediction-${index}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm text-gray-400 mb-1 block">Question/Statement *</label>
+                              <Input
+                                value={prediction.question}
+                                onChange={(e) => updatePrediction(prediction.id, 'question', e.target.value)}
+                                placeholder="e.g., Will Bitcoin hit $100k by EOY?"
+                                className="bg-slate-800 border-cyan-500/30 text-white"
+                                data-testid={`input-prediction-question-${index}`}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-sm text-gray-400 mb-2 block">Your Stance *</label>
+                              <RadioGroup
+                                value={prediction.prediction}
+                                onValueChange={(value: 'yes' | 'no') => updatePrediction(prediction.id, 'prediction', value)}
+                                className="flex gap-4"
+                                data-testid={`radio-prediction-stance-${index}`}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="yes" id={`${prediction.id}-yes`} />
+                                  <label htmlFor={`${prediction.id}-yes`} className="text-sm text-white cursor-pointer">
+                                    YES
+                                  </label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="no" id={`${prediction.id}-no`} />
+                                  <label htmlFor={`${prediction.id}-no`} className="text-sm text-white cursor-pointer">
+                                    NO
+                                  </label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+
+                            <div>
+                              <label className="text-sm text-gray-400 mb-2 block">
+                                Confidence: {prediction.confidence}%
+                              </label>
+                              <Slider
+                                value={[prediction.confidence]}
+                                onValueChange={(value) => updatePrediction(prediction.id, 'confidence', value[0])}
+                                min={0}
+                                max={100}
+                                step={5}
+                                className="w-full"
+                                data-testid={`slider-prediction-confidence-${index}`}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-sm text-gray-400 mb-1 block">Rationale (Optional)</label>
+                              <Textarea
+                                value={prediction.rationale}
+                                onChange={(e) => updatePrediction(prediction.id, 'rationale', e.target.value)}
+                                placeholder="Explain why you believe this..."
+                                className="bg-slate-800 border-cyan-500/30 text-white min-h-[80px]"
+                                data-testid={`textarea-prediction-rationale-${index}`}
+                              />
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+
+                      {/* Add Prediction Button */}
+                      {userPredictions.length < 5 && (
+                        <Button
+                          onClick={addPrediction}
+                          variant="outline"
+                          className="w-full border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+                          data-testid="button-add-prediction"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Prediction ({userPredictions.length}/5)
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Additional Notes */}
                   <div>
                     <label className="text-sm text-gray-400 mb-2 block">Additional Notes (Optional)</label>
                     <Textarea
                       value={submissionNotes}
                       onChange={(e) => setSubmissionNotes(e.target.value)}
-                      placeholder="Any additional context or highlights from your summary..."
-                      className="bg-slate-800 border-yellow-500/30 text-white min-h-[100px]"
+                      placeholder="Any additional context or highlights..."
+                      className={`bg-slate-800 border-${tierInfo.color}-500/30 text-white min-h-[100px]`}
                       data-testid="textarea-submission-notes"
                     />
                   </div>
+
+                  {/* Submit Button */}
                   <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting || !submissionUrl.trim()}
-                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                    className={`w-full bg-gradient-to-r from-${tierInfo.color}-500 to-${tierInfo.color === 'yellow' ? 'orange' : tierInfo.color}-600 hover:from-${tierInfo.color}-600 hover:to-${tierInfo.color === 'yellow' ? 'orange' : tierInfo.color}-700`}
                     data-testid="button-submit-work"
                   >
                     <CheckCircle className="w-5 h-5 mr-2" />
-                    {isSubmitting ? 'Submitting...' : 'Submit for Review'}
+                    {isSubmitting 
+                      ? 'Submitting...' 
+                      : tier === 'prediction' 
+                      ? 'Submit Predictions' 
+                      : tier === 'analysis' 
+                      ? 'Submit Analysis' 
+                      : 'Submit for Review'}
                   </Button>
                 </div>
               </Card>
