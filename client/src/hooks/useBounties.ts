@@ -4,6 +4,47 @@ import { useWeb3 } from './useWeb3';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from './use-toast';
 
+// Helper function to parse blockchain errors
+function parseBlockchainError(error: any): string {
+  const errorMessage = error?.message || error?.toString() || '';
+  
+  // Check for specific error patterns
+  if (errorMessage.includes('user rejected') || errorMessage.includes('User denied')) {
+    return 'Transaction cancelled. You rejected the transaction in your wallet.';
+  }
+  
+  if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient balance')) {
+    return 'Insufficient Base Sepolia ETH for gas fees. Get free testnet ETH from: https://www.alchemy.com/faucets/base-sepolia';
+  }
+  
+  if (errorMessage.includes('already claimed') || errorMessage.includes('AlreadyClaimed')) {
+    return 'This bounty has already been claimed by another user.';
+  }
+  
+  if (errorMessage.includes('creator') || errorMessage.includes('owner') || errorMessage.includes('OnlyCreator')) {
+    return 'You cannot claim your own bounty. Try claiming a different bounty created by someone else.';
+  }
+  
+  if (errorMessage.includes('not open') || errorMessage.includes('BountyNotOpen')) {
+    return 'This bounty is not open for claims. It may be completed, expired, or already claimed.';
+  }
+  
+  if (errorMessage.includes('expired') || errorMessage.includes('deadline')) {
+    return 'This bounty has expired and can no longer be claimed.';
+  }
+  
+  if (errorMessage.includes('network') || errorMessage.includes('chain')) {
+    return 'Wrong network. Please switch to Base Sepolia (Chain ID: 84532) in your wallet.';
+  }
+  
+  if (errorMessage.includes('CALL_EXCEPTION')) {
+    return 'Smart contract rejected the transaction. Possible reasons: bounty already claimed, you created this bounty, or insufficient gas. Try a different bounty or check your wallet balance.';
+  }
+  
+  // Generic error fallback
+  return errorMessage || 'Transaction failed. Please try again.';
+}
+
 export function useBounties() {
   const { wallet, isConnected } = useWeb3();
   const { toast } = useToast();
@@ -95,9 +136,10 @@ export function useBounties() {
       queryClient.invalidateQueries({ queryKey: ['/api/bounties/stats'] });
     },
     onError: (error: any) => {
+      const errorMessage = parseBlockchainError(error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create bounty',
+        title: 'Failed to Create Bounty',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -139,9 +181,10 @@ export function useBounties() {
       queryClient.invalidateQueries({ queryKey: ['/api/bounties'] });
     },
     onError: (error: any) => {
+      const errorMessage = parseBlockchainError(error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to claim bounty',
+        title: 'Failed to Claim Bounty',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -192,9 +235,10 @@ export function useBounties() {
       queryClient.invalidateQueries({ queryKey: ['/api/bounties/stats'] });
     },
     onError: (error: any) => {
+      const errorMessage = parseBlockchainError(error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to complete bounty',
+        title: 'Failed to Complete Bounty',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
