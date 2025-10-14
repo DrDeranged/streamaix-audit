@@ -456,13 +456,13 @@ export default function BountyDetail() {
                   </div>
                 </div>
 
-                {bounty.tipPool > 0 && (
+                {(bounty.tipPool ?? 0) > 0 && (
                   <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
                     <div className="flex items-center gap-3">
                       <DollarSign className="w-6 h-6 text-purple-400" />
                       <div>
                         <p className="text-sm text-gray-400">Tip Pool</p>
-                        <p className="text-xl font-bold text-white">{bounty.tipPool} $STREAM</p>
+                        <p className="text-xl font-bold text-white">{bounty.tipPool ?? 0} $STREAM</p>
                       </div>
                     </div>
                   </div>
@@ -472,7 +472,7 @@ export default function BountyDetail() {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-400">Total Reward:</span>
                     <span className="text-2xl font-bold text-cyan-400">
-                      {bounty.reward + (bounty.tipPool || 0)} $STREAM
+                      {(bounty.reward || 0) + (bounty.tipPool || 0)} $STREAM
                     </span>
                   </div>
                 </div>

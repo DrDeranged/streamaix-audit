@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart, Share2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -73,8 +74,9 @@ export default function BountyCard({ bounty }: BountyCardProps) {
   };
 
   return (
-    <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm overflow-hidden hover:border-cyan-500/60 transition-all">
-      <div className="p-6 space-y-4">
+    <Link href={`/bounties/${bounty.id}`}>
+      <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm overflow-hidden hover:border-cyan-500/60 transition-all cursor-pointer">
+        <div className="p-6 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -324,5 +326,6 @@ export default function BountyCard({ bounty }: BountyCardProps) {
         </div>
       </div>
     </Card>
+    </Link>
   );
 }

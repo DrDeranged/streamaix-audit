@@ -26,6 +26,7 @@ const NFTGallery = React.lazy(() => import("@/pages/nft-gallery"));
 const GovernancePage = React.lazy(() => import("@/pages/governance"));
 const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const BountyBoard = React.lazy(() => import("@/pages/bounty-board"));
+const BountyDetail = React.lazy(() => import("@/pages/bounty-detail"));
 const Leaderboard = React.lazy(() => import("@/pages/leaderboard"));
 const HunterProfile = React.lazy(() => import("@/pages/hunter-profile"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
@@ -97,6 +98,12 @@ function Router() {
       <Route path="/bounties">
         <Suspense fallback={<DashboardSkeleton />}>
           <BountyBoard />
+        </Suspense>
+      </Route>
+      
+      <Route path="/bounties/:id">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <BountyDetail />
         </Suspense>
       </Route>
       
