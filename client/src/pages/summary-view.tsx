@@ -449,6 +449,52 @@ export default function SummaryView() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
+            {/* AI-Generated Prediction Markets Preview - Only show if markets exist */}
+            {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="mb-4"
+              >
+                <Card className="bg-gradient-to-br from-violet-900/30 via-purple-900/30 to-indigo-900/30 border-violet-500/30 backdrop-blur-sm overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-violet-500/20 rounded-lg">
+                          <Sparkles className="w-5 h-5 text-violet-300" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-violet-200">Trade on AI Predictions</h3>
+                          <p className="text-sm text-violet-300/70">AI extracted {summary.suggestedMarkets.length} tradeable prediction{summary.suggestedMarkets.length > 1 ? 's' : ''} from this content</p>
+                        </div>
+                      </div>
+                      <Link href="/markets">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-violet-400/30 text-violet-300 hover:bg-violet-500/20"
+                          data-testid="button-view-all-markets"
+                        >
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          View All Markets
+                        </Button>
+                      </Link>
+                    </div>
+                    
+                    {/* Horizontal scrollable markets preview */}
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-violet-500/50 scrollbar-track-transparent">
+                      <SuggestedMarketsCard
+                        suggestedMarkets={summary.suggestedMarkets}
+                        summaryId={summaryId!}
+                        summaryTitle={summary.title}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
             {/* Summary content */}
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardContent className="p-4">
