@@ -1041,6 +1041,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: { summaryId, txHash: completionTxHash, qualityScore: qualityScore.overallScore },
         });
 
+        // AI Prediction Market Extraction (for analysis/prediction tiers)
+        if (bounty.engagementTier === 'analysis' || bounty.engagementTier === 'prediction') {
+          try {
+            const summary = await storage.getSummary(summaryId);
+            if (summary && summary.summary) {
+              // Extract predictions using AI
+              const { extractPredictionsFromSummary } = await import('./services/predictionExtractionService');
+              const predictionResult = await extractPredictionsFromSummary(
+                summary.summary,
+                summary.title,
+                summary.originalUrl
+              );
+
+              // Save suggested markets to summary
+              if (predictionResult.predictions.length > 0) {
+                await storage.updateSummary(summaryId, {
+                  suggestedMarkets: predictionResult.predictions as any
+                });
+                console.log(`🎯 Generated ${predictionResult.totalFound} prediction markets for summary ${summaryId}`);
+              }
+            }
+          } catch (error) {
+            console.error('Error extracting predictions:', error);
+            // Don't fail the completion if AI extraction fails
+          }
+        }
+
         res.json({
           message: 'Bounty completed and payout initiated',
           bounty: updatedBounty,
