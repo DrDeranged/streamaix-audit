@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard } from 'lucide-react';
+import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -103,6 +104,32 @@ export default function BountyBoard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
+          {/* Navigation Buttons */}
+          <div className="flex gap-3 mb-6">
+            <Button
+              asChild
+              variant="outline"
+              className="border-purple-500/30 hover:border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300"
+              data-testid="button-back-home"
+            >
+              <Link href="/">
+                <Home className="w-4 h-4 mr-2" />
+                Back to Home
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-cyan-500/30 hover:border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300"
+              data-testid="button-back-dashboard"
+            >
+              <Link href="/dashboard">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
+
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 mb-2">
