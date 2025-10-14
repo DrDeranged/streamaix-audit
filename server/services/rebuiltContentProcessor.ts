@@ -203,11 +203,11 @@ export class RebuiltContentProcessor {
           url
         );
         
-        if (predictionResult.markets && predictionResult.markets.length > 0) {
+        if (predictionResult.predictions && predictionResult.predictions.length > 0) {
           await this.storage.updateSummary(summaryId, {
-            suggestedMarkets: predictionResult.markets
+            suggestedMarkets: predictionResult.predictions
           });
-          console.log(`✅ Extracted ${predictionResult.markets.length} prediction markets for ${summaryId}`);
+          console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
         } else {
           console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
         }
@@ -1081,11 +1081,11 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
           url
         );
         
-        if (predictionResult.markets && predictionResult.markets.length > 0) {
+        if (predictionResult.predictions && predictionResult.predictions.length > 0) {
           await this.storage.updateSummary(summaryId, {
-            suggestedMarkets: predictionResult.markets
+            suggestedMarkets: predictionResult.predictions
           });
-          console.log(`✅ Extracted ${predictionResult.markets.length} prediction markets for ${summaryId}`);
+          console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
         } else {
           console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
         }
