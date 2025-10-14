@@ -187,10 +187,66 @@ export default function BountyDetail() {
   const TierIcon = tierInfo.icon;
 
   const handleClaim = async () => {
+    // Pre-flight validation checks
+    if (!isConnected) {
+      toast({
+        title: 'Wallet Not Connected',
+        description: 'Please connect your wallet to claim this bounty.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (isOwner) {
+      toast({
+        title: 'Cannot Claim Own Bounty',
+        description: 'You created this bounty. You cannot claim your own bounties. Try claiming a different bounty or create a new one for others to claim.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (isClaimer) {
+      toast({
+        title: 'Already Claimed',
+        description: 'You have already claimed this bounty. Submit your work to complete it.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (bounty?.status !== 'open') {
+      toast({
+        title: 'Bounty Unavailable',
+        description: `This bounty is ${bounty?.status}. Only open bounties can be claimed.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (isExpired) {
+      toast({
+        title: 'Bounty Expired',
+        description: 'This bounty has passed its deadline and can no longer be claimed.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (bounty?.contractBountyId === null || bounty?.contractBountyId === undefined) {
       toast({
-        title: 'Error',
-        description: 'Bounty not properly initialized',
+        title: 'Bounty Not Initialized',
+        description: 'This bounty was not properly created on the blockchain. Please contact support.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check network
+    if (wallet?.chainId !== 84532) {
+      toast({
+        title: 'Wrong Network',
+        description: 'Please switch to Base Sepolia testnet (Chain ID: 84532) in your wallet.',
         variant: 'destructive',
       });
       return;
