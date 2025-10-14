@@ -193,6 +193,29 @@ export class RebuiltContentProcessor {
 
       console.log(`✅ REBUILT processing completed for ${summaryId}`);
       
+      // Automatically extract AI prediction markets from the summary
+      try {
+        console.log(`🔮 Extracting AI prediction markets for ${summaryId}...`);
+        const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
+        const predictionResult = await extractPredictionsFromSummary(
+          analysis.summary,
+          metadata.title,
+          url
+        );
+        
+        if (predictionResult.markets && predictionResult.markets.length > 0) {
+          await this.storage.updateSummary(summaryId, {
+            suggestedMarkets: predictionResult.markets
+          });
+          console.log(`✅ Extracted ${predictionResult.markets.length} prediction markets for ${summaryId}`);
+        } else {
+          console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
+        }
+      } catch (predictionError: any) {
+        console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, predictionError.message);
+        // Don't fail the whole process if prediction extraction fails
+      }
+      
     } catch (error: any) {
       console.error(`❌ REBUILT processing error for ${summaryId}:`, error);
       await this.storage.updateSummary(summaryId, {
@@ -1047,6 +1070,29 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       });
       
       console.log(`✅ Transcription processing complete for ${summaryId}`);
+      
+      // Automatically extract AI prediction markets from the transcribed summary
+      try {
+        console.log(`🔮 Extracting AI prediction markets for ${summaryId}...`);
+        const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
+        const predictionResult = await extractPredictionsFromSummary(
+          summary.summary,
+          summary.tags.length > 0 ? summary.tags.slice(0, 3).join(' - ') : 'Transcribed Summary',
+          url
+        );
+        
+        if (predictionResult.markets && predictionResult.markets.length > 0) {
+          await this.storage.updateSummary(summaryId, {
+            suggestedMarkets: predictionResult.markets
+          });
+          console.log(`✅ Extracted ${predictionResult.markets.length} prediction markets for ${summaryId}`);
+        } else {
+          console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
+        }
+      } catch (predictionError: any) {
+        console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, predictionError.message);
+        // Don't fail the whole process if prediction extraction fails
+      }
     } catch (error) {
       console.error(`❌ Transcription processing failed:`, error);
       throw error;
