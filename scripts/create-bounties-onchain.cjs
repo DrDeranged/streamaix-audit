@@ -44,56 +44,74 @@ async function main() {
       ? Math.floor(new Date(bounty.deadline).getTime() / 1000)
       : Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60);
     
-    console.log(`   💰 Reward: ${bounty.reward} STREAM (${rewardInWei} wei)`);
+    console.log(`   💰 Reward: ${bounty.reward} STREAM`);
     console.log(`   ⏰ Deadline: ${new Date(deadlineTimestamp * 1000).toISOString()}`);
     
-    // Step 1: Approve STREAM tokens
-    console.log("   🔓 Approving STREAM tokens...");
-    const approveTx = await StreamToken.approve(bountyBoardAddress, rewardInWei);
-    await approveTx.wait();
-    console.log("   ✅ Tokens approved");
-    
-    // Step 2: Create bounty on-chain
-    console.log("   📝 Creating bounty on-chain...");
-    const createTx = await BountyBoard.createBounty(rewardInWei, deadlineTimestamp);
-    const receipt = await createTx.wait();
-    console.log(`   ✅ Bounty created! TxHash: ${receipt.hash}`);
-    
-    // Step 3: Get bounty ID from event
-    const bountyCreatedEvent = receipt.logs.find(log => {
-      try {
-        const parsed = BountyBoard.interface.parseLog(log);
-        return parsed && parsed.name === "BountyCreated";
-      } catch {
-        return false;
+    try {
+      // Step 1: Approve STREAM tokens with gas settings
+      console.log("   🔓 Approving STREAM tokens...");
+      const approveTx = await StreamToken.approve(bountyBoardAddress, rewardInWei, {
+        gasLimit: 100000
+      });
+      await approveTx.wait();
+      console.log("   ✅ Tokens approved");
+      
+      // Wait a bit to avoid nonce issues
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Step 2: Create bounty on-chain with gas settings
+      console.log("   📝 Creating bounty on-chain...");
+      const createTx = await BountyBoard.createBounty(rewardInWei, deadlineTimestamp, {
+        gasLimit: 500000
+      });
+      const receipt = await createTx.wait();
+      console.log(`   ✅ Bounty created! TxHash: ${receipt.hash}`);
+      
+      // Step 3: Get bounty ID from event
+      const bountyCreatedEvent = receipt.logs.find(log => {
+        try {
+          const parsed = BountyBoard.interface.parseLog(log);
+          return parsed && parsed.name === "BountyCreated";
+        } catch {
+          return false;
+        }
+      });
+      
+      let contractBountyId;
+      if (bountyCreatedEvent) {
+        const parsed = BountyBoard.interface.parseLog(bountyCreatedEvent);
+        contractBountyId = Number(parsed.args.bountyId);
+        console.log(`   🎯 On-chain Bounty ID: ${contractBountyId}`);
+      } else {
+        // Fallback: get current bounty count
+        const count = await BountyBoard.bountyCount();
+        contractBountyId = Number(count);
+        console.log(`   🎯 On-chain Bounty ID (from count): ${contractBountyId}`);
       }
-    });
-    
-    let contractBountyId;
-    if (bountyCreatedEvent) {
-      const parsed = BountyBoard.interface.parseLog(bountyCreatedEvent);
-      contractBountyId = Number(parsed.args.bountyId);
-      console.log(`   🎯 On-chain Bounty ID: ${contractBountyId}`);
-    } else {
-      // Fallback: get current bounty count
-      const count = await BountyBoard.bountyCount();
-      contractBountyId = Number(count) - 1;
-      console.log(`   🎯 On-chain Bounty ID (from count): ${contractBountyId}`);
+      
+      // Step 4: Update database with real contractBountyId
+      await db.query(`
+        UPDATE bounties 
+        SET contract_bounty_id = $1, blockchain_tx_hash = $2
+        WHERE id = $3
+      `, [contractBountyId, receipt.hash, bounty.id]);
+      
+      console.log(`   💾 Database updated with contract_bounty_id: ${contractBountyId}`);
+      
+      // Wait between bounties
+      if (i < bounties.length - 1) {
+        console.log("   ⏳ Waiting 3 seconds before next bounty...");
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    } catch (error) {
+      console.error(`   ❌ Error creating bounty: ${error.message}`);
+      continue;
     }
-    
-    // Step 4: Update database with real contractBountyId
-    await db.query(`
-      UPDATE bounties 
-      SET contract_bounty_id = $1, blockchain_tx_hash = $2
-      WHERE id = $3
-    `, [contractBountyId, receipt.hash, bounty.id]);
-    
-    console.log(`   💾 Database updated with contract_bounty_id: ${contractBountyId}`);
   }
   
   // Final check
   console.log("\n" + "=".repeat(80));
-  console.log("✨ ALL BOUNTIES CREATED ON-CHAIN!");
+  console.log("✨ BOUNTY CREATION COMPLETE!");
   console.log("=".repeat(80));
   
   const updatedBounties = await db.query(`
@@ -107,7 +125,7 @@ async function main() {
   updatedBounties.rows.forEach((b, idx) => {
     console.log(`${idx + 1}. ${b.title}`);
     console.log(`   Contract ID: ${b.contract_bounty_id}`);
-    console.log(`   TxHash: ${b.blockchain_tx_hash}`);
+    console.log(`   TxHash: ${b.blockchain_tx_hash ? b.blockchain_tx_hash.substring(0, 20) + '...' : 'N/A'}`);
   });
   
   await db.end();
