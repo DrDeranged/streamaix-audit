@@ -466,7 +466,7 @@ export function LongFormPodcasts() {
           viewport={{ once: true }}
         >
           <Button
-            onClick={() => setLocation('/#ai-processor')}
+            onClick={() => window.location.hash = 'ai-processor'}
             variant="outline"
             className="text-sm"
             data-testid="button-try-own-url"
