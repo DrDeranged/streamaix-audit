@@ -320,7 +320,7 @@ export function BountyFeed() {
                 className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 shadow-lg shadow-indigo-500/25 group"
                 data-testid="button-explore-all-bounties"
               >
-                <Link href="/bounty-board">
+                <Link href="/bounties">
                   <span>Explore All Bounties</span>
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
