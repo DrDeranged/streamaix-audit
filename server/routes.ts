@@ -785,7 +785,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const { limit, offset } = validation.data as { limit: number; offset: number };
-    const bounties = await storage.getBounties(limit, offset);
+    const status = req.query.status as string | undefined;
+    const category = req.query.category as string | undefined;
+    
+    const bounties = await storage.getBounties(limit, offset, status, category);
 
     res.json({
       bounties,

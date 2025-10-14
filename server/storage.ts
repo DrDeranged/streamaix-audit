@@ -476,10 +476,22 @@ export class DatabaseStorage implements IStorage {
     return bounty || undefined;
   }
 
-  async getBounties(limit = 50, offset = 0): Promise<Bounty[]> {
-    return await db
+  async getBounties(limit = 50, offset = 0, status?: string, category?: string): Promise<Bounty[]> {
+    let query = db
       .select()
-      .from(bounties)
+      .from(bounties);
+
+    // Apply status filter if provided
+    if (status) {
+      query = query.where(eq(bounties.status, status)) as any;
+    }
+
+    // Apply category filter if provided  
+    if (category) {
+      query = query.where(eq(bounties.category, category)) as any;
+    }
+
+    return await query
       .orderBy(desc(bounties.createdAt))
       .limit(limit)
       .offset(offset);
