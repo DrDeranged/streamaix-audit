@@ -20,6 +20,7 @@ import type { Bounty } from '@shared/schema';
 // Import components we'll create next
 import BountyCard from '@/components/bounty/BountyCard';
 import CreateBountyModal from '@/components/bounty/CreateBountyModal';
+import { WalletConnector } from '@/components/wallet/WalletConnector';
 
 export default function BountyBoard() {
   const { isConnected } = useWeb3();
@@ -131,10 +132,12 @@ export default function BountyBoard() {
           </div>
 
           {!isConnected && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
-              <p className="text-yellow-400 text-sm">
-                Connect your wallet to create or claim bounties
-              </p>
+            <div className="mb-6">
+              <WalletConnector>
+                <p className="text-sm">
+                  Connect your wallet to create or claim bounties
+                </p>
+              </WalletConnector>
             </div>
           )}
         </motion.div>
