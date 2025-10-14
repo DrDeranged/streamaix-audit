@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { getAuthHeaders } from '@/lib/auth';
-import { MarketSuggestions } from '@/components/MarketSuggestions';
+import { SuggestedMarketsCard } from '@/components/prediction/SuggestedMarketsCard';
 import { 
   ArrowLeft,
   Clock,
@@ -118,6 +118,15 @@ interface Summary {
     views: string;
     thumbnail: string;
   };
+  suggestedMarkets?: Array<{
+    question: string;
+    description: string;
+    category: string;
+    deadline: string;
+    confidence: number;
+    resolutionSource?: string;
+    tags?: string[];
+  }>;
 }
 
 export default function SummaryView() {
@@ -597,7 +606,21 @@ export default function SummaryView() {
 
                   {/* PREDICTION MARKETS TAB */}
                   <TabsContent value="markets" className="space-y-4 mt-4">
-                    <MarketSuggestions 
+                    {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 ? (
+                      <SuggestedMarketsCard
+                        suggestedMarkets={summary.suggestedMarkets}
+                        summaryId={summaryId!}
+                        summaryTitle={summary.title}
+                      />
+                    ) : (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No AI-suggested markets available for this content</p>
+                        <p className="text-sm mt-2">The AI analyzes content to find verifiable predictions</p>
+                      </div>
+                    )}
+                    {/* Old MarketSuggestions component for extraction - keeping for now */}
+                    {/* <MarketSuggestions 
                       summaryId={summaryId!}
                       onCreateMarket={(prediction) => {
                         // Navigate to create market with pre-filled data
@@ -612,7 +635,7 @@ export default function SummaryView() {
                         });
                         window.location.href = `/markets/create?${params.toString()}`;
                       }}
-                    />
+                    /> */}
                   </TabsContent>
 
                   {/* MARKET INTEL TAB */}

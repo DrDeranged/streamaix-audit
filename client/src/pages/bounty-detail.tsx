@@ -41,6 +41,7 @@ import { formatTokenAmount } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { Bounty } from '@shared/schema';
+import { SuggestedMarketsCard } from '@/components/prediction/SuggestedMarketsCard';
 
 interface AnalysisAnswer {
   questionId: string;
@@ -89,6 +90,18 @@ export default function BountyDetail() {
   const { trackLike, trackShare } = useEngagement(id || '');
 
   const bounty = bountyData?.bounty;
+  
+  // Fetch summary data if bounty is completed and has a summaryId
+  const { data: summaryData } = useQuery<{ 
+    summary: { 
+      id: string; 
+      title: string; 
+      suggestedMarkets?: any[] 
+    } 
+  }>({
+    queryKey: ['/api/processing-result', bounty?.summaryId],
+    enabled: !!bounty?.summaryId && (bounty?.status === 'completed' || bounty?.status === 'in_progress'),
+  });
   const isExpired = bounty?.deadline ? new Date(bounty.deadline) < new Date() : false;
   const isOwner = wallet?.address?.toLowerCase() === bounty?.creatorWallet?.toLowerCase();
   const isClaimer = wallet?.address?.toLowerCase() === bounty?.claimerWallet?.toLowerCase();
@@ -881,6 +894,15 @@ export default function BountyDetail() {
                 )}
               </div>
             </Card>
+
+            {/* AI-Suggested Markets (show when bounty is completed and summary has markets) */}
+            {bounty.status === 'completed' && summaryData?.summary?.suggestedMarkets && summaryData.summary.suggestedMarkets.length > 0 && (
+              <SuggestedMarketsCard
+                suggestedMarkets={summaryData.summary.suggestedMarkets}
+                summaryId={bounty.summaryId || ''}
+                summaryTitle={summaryData.summary.title || bounty.title}
+              />
+            )}
 
             {/* Action Button */}
             {canClaim && (
