@@ -652,19 +652,29 @@ export default function SummaryView() {
 
                   {/* PREDICTION MARKETS TAB */}
                   <TabsContent value="markets" className="space-y-4 mt-4">
-                    {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 ? (
-                      <SuggestedMarketsCard
-                        suggestedMarkets={summary.suggestedMarkets}
-                        summaryId={summaryId!}
-                        summaryTitle={summary.title}
-                      />
-                    ) : (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No AI-suggested markets available for this content</p>
-                        <p className="text-sm mt-2">The AI analyzes content to find verifiable predictions</p>
+                    <div className="bg-gradient-to-br from-violet-900/20 via-purple-900/20 to-indigo-900/20 rounded-xl p-8 border border-violet-500/30 text-center">
+                      <div className="p-3 bg-violet-500/20 rounded-full w-fit mx-auto mb-4">
+                        <Sparkles className="w-8 h-8 text-violet-300" />
                       </div>
-                    )}
+                      <h4 className="text-xl font-bold text-violet-200 mb-2">AI Predictions Displayed Above</h4>
+                      <p className="text-violet-300/70 mb-6">
+                        {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 
+                          ? `The AI found ${summary.suggestedMarkets.length} tradeable prediction${summary.suggestedMarkets.length > 1 ? 's' : ''} from this content. Scroll up to see them!`
+                          : 'No AI-suggested markets available for this content. The AI analyzes content to find verifiable predictions.'
+                        }
+                      </p>
+                      {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 && (
+                        <Button
+                          variant="outline"
+                          className="border-violet-400/30 text-violet-300 hover:bg-violet-500/20"
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                          data-testid="button-scroll-to-markets"
+                        >
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          Scroll to Markets
+                        </Button>
+                      )}
+                    </div>
                     {/* Old MarketSuggestions component for extraction - keeping for now */}
                     {/* <MarketSuggestions 
                       summaryId={summaryId!}
