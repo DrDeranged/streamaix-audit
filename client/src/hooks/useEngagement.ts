@@ -27,7 +27,7 @@ export function useEngagement(bountyId: string) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type: params.type }),
+        body: JSON.stringify({ engagementType: params.type }),
       });
       
       // Invalidate engagement data to refresh
