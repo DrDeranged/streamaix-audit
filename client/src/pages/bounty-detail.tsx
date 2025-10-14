@@ -187,7 +187,7 @@ export default function BountyDetail() {
   const TierIcon = tierInfo.icon;
 
   const handleClaim = async () => {
-    if (!bounty?.contractBountyId) {
+    if (bounty?.contractBountyId === null || bounty?.contractBountyId === undefined) {
       toast({
         title: 'Error',
         description: 'Bounty not properly initialized',
