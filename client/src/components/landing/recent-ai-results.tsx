@@ -40,6 +40,15 @@ interface Summary {
   processingStatus: 'pending' | 'processing' | 'completed' | 'failed';
   accuracy: number;
   createdAt: string;
+  suggestedMarkets?: Array<{
+    question: string;
+    description: string;
+    category: string;
+    deadline: string;
+    confidence: number;
+    resolutionSource?: string;
+    tags?: string[];
+  }>;
 }
 
 export function RecentAIResults() {
@@ -409,6 +418,83 @@ export function RecentAIResults() {
                               </motion.div>
                             </TabsContent>
                           </Tabs>
+
+                          {/* AI-Generated Prediction Markets Preview */}
+                          {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 && (
+                            <motion.div 
+                              className="mt-8 pt-6 border-t border-white/10"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.3 }}
+                            >
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-violet-500/20 rounded-lg">
+                                  <Sparkles className="h-5 w-5 text-violet-300" />
+                                </div>
+                                <div>
+                                  <h4 className="text-lg font-bold text-violet-200">AI-Extracted Predictions</h4>
+                                  <p className="text-sm text-violet-300/70">
+                                    {summary.suggestedMarkets.length} tradeable prediction{summary.suggestedMarkets.length > 1 ? 's' : ''} found in this content
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {summary.suggestedMarkets.map((market, idx) => (
+                                  <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.4 + idx * 0.1 }}
+                                    className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-lg p-4 border border-violet-500/30 hover:border-violet-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/20"
+                                  >
+                                    <div className="flex items-start justify-between mb-2">
+                                      <Badge className="bg-violet-500/20 text-violet-200 border-violet-500/30 text-xs">
+                                        {market.category}
+                                      </Badge>
+                                      <Badge variant="outline" className="border-violet-400/30 text-violet-300 text-xs">
+                                        {Math.round(market.confidence * 100)}% confidence
+                                      </Badge>
+                                    </div>
+                                    <h5 className="text-white font-semibold mb-2 leading-tight">
+                                      {market.question}
+                                    </h5>
+                                    <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                                      {market.description}
+                                    </p>
+                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                      <div className="flex items-center gap-1">
+                                        <Clock className="h-3 w-3" />
+                                        {new Date(market.deadline).toLocaleDateString()}
+                                      </div>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost"
+                                        className="h-7 text-violet-300 hover:text-violet-200 hover:bg-violet-500/20"
+                                        onClick={() => window.location.href = `/summary/${summary.id}`}
+                                      >
+                                        Create Market
+                                        <ArrowRight className="h-3 w-3 ml-1" />
+                                      </Button>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                              
+                              <div className="mt-4 text-center">
+                                <Button 
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-violet-400/30 text-violet-300 hover:bg-violet-500/20 hover:border-violet-400/50"
+                                  onClick={() => window.location.href = `/summary/${summary.id}`}
+                                >
+                                  <Sparkles className="h-3 w-3 mr-2" />
+                                  View Full Summary & Create Markets
+                                  <ArrowRight className="h-3 w-3 ml-2" />
+                                </Button>
+                              </div>
+                            </motion.div>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
