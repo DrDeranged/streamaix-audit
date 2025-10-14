@@ -156,7 +156,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
               className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 group/btn"
               data-testid={`button-view-bounty-${bounty.id}`}
             >
-              <Link href={`/bounty-board`}>
+              <Link href={`/bounties/${bounty.id}`}>
                 <span>View</span>
                 <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
               </Link>
