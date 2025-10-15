@@ -15,6 +15,66 @@ export interface ExtractedPrediction {
   tags: string[];
 }
 
+// Generate fallback markets when AI extraction fails or returns too few
+function generateFallbackMarkets(title: string, url: string, count: number): ExtractedPrediction[] {
+  const now = new Date();
+  const markets: ExtractedPrediction[] = [];
+  
+  // Extract topic from title for better market generation
+  const cleanTitle = title.replace(/[^\w\s]/g, '').trim();
+  const titleWords = cleanTitle.split(' ').slice(0, 5).join(' ');
+  
+  const fallbackTemplates = [
+    {
+      question: `Will "${titleWords}" content reach 100K views by ${new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString()}?`,
+      description: `This market resolves to YES if the content titled "${title}" reaches 100,000 views on any platform by the deadline. Verification via platform analytics or public view counters.`,
+      category: 'community' as const,
+      deadline: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      resolutionSource: 'Platform Analytics / Public View Counter',
+      rationale: 'Engagement prediction based on content virality potential',
+      confidence: 65,
+      tags: ['engagement', 'views', 'growth']
+    },
+    {
+      question: `Will this content creator publish similar content within 30 days?`,
+      description: `This market resolves to YES if the content creator of "${title}" publishes another video/podcast on similar topics within 30 days of the original content date.`,
+      category: 'community' as const,
+      deadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      resolutionSource: 'Creator Channel / Platform RSS Feed',
+      rationale: 'Content consistency and creator activity prediction',
+      confidence: 70,
+      tags: ['creator', 'content', 'activity']
+    },
+    {
+      question: `Will topics from "${titleWords}" trend on social media within 14 days?`,
+      description: `This market resolves to YES if key topics or themes from "${title}" become trending topics on major social media platforms (Twitter, Reddit, etc.) within 14 days.`,
+      category: 'realworld' as const,
+      deadline: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      resolutionSource: 'Social Media Trending APIs / Twitter Trends',
+      rationale: 'Social impact and virality prediction for content themes',
+      confidence: 60,
+      tags: ['social', 'trending', 'virality']
+    },
+    {
+      question: `Will the engagement rate exceed 5% for this content by ${new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toLocaleDateString()}?`,
+      description: `This market resolves to YES if "${title}" achieves an engagement rate (likes + comments + shares / views) exceeding 5% within 60 days.`,
+      category: 'community' as const,
+      deadline: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+      resolutionSource: 'Platform Engagement Metrics',
+      rationale: 'High-quality content engagement measurement',
+      confidence: 68,
+      tags: ['engagement', 'quality', 'metrics']
+    }
+  ];
+  
+  // Return requested number of fallback markets
+  for (let i = 0; i < Math.min(count, fallbackTemplates.length); i++) {
+    markets.push(fallbackTemplates[i]);
+  }
+  
+  return markets;
+}
+
 export interface PredictionExtractionResult {
   predictions: ExtractedPrediction[];
   summaryInsights: string;
@@ -123,6 +183,16 @@ Return ONLY valid JSON in this exact format:
         return false;
       }
     });
+
+    // CRITICAL FALLBACK: If AI didn't generate enough markets, create generic ones
+    if (validPredictions.length < 3) {
+      console.log(`⚠️ Only ${validPredictions.length} markets generated, adding fallbacks...`);
+      
+      const fallbackMarkets = generateFallbackMarkets(summaryTitle, summaryUrl, 3 - validPredictions.length);
+      validPredictions.push(...fallbackMarkets);
+    }
+
+    console.log(`✅ Total markets generated: ${validPredictions.length}`);
 
     return {
       predictions: validPredictions,
