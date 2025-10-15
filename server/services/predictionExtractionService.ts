@@ -27,7 +27,7 @@ export async function extractPredictionsFromSummary(
   summaryUrl: string
 ): Promise<PredictionExtractionResult> {
   try {
-    const prompt = `You are an expert prediction market analyst. Analyze the following content and extract verifiable predictions that can be turned into binary YES/NO prediction markets.
+    const prompt = `You are an expert prediction market analyst. **CRITICAL REQUIREMENT: You MUST generate AT LEAST 3 prediction markets for EVERY piece of content, no exceptions.**
 
 Content Title: ${summaryTitle}
 Content URL: ${summaryUrl}
@@ -35,22 +35,31 @@ Content URL: ${summaryUrl}
 Content:
 ${summaryContent.substring(0, 8000)} 
 
-For each prediction you find, provide:
-1. A clear, specific YES/NO question (e.g., "Will Bitcoin reach $150,000 by end of 2025?")
-2. A detailed description explaining the prediction and verification criteria
-3. A realistic deadline (must be in the future, within 2 years max)
-4. The best resolution source (e.g., "CoinGecko API", "Official announcements", "On-chain data")
-5. Category: crypto, defi, bounty, realworld, or community
-6. Rationale: Why this is a good prediction market
-7. Confidence score (0-100): How verifiable and interesting this prediction is
+**MANDATORY: Generate minimum 3 prediction markets. Be creative and think broadly:**
+
+1. **Direct Content Predictions**: Extract explicit claims or forecasts made in the content
+2. **Implied Predictions**: Identify trends or patterns that suggest future outcomes
+3. **Meta Predictions**: Create markets about the content's impact, engagement, or influence
+4. **Related Market Predictions**: Generate markets about related topics, industries, or assets mentioned
+5. **Performance Predictions**: Create markets about viewership, engagement, or virality metrics
+
+**Examples of creative market generation:**
+- For crypto content: Price targets, adoption milestones, regulatory outcomes
+- For tech content: Product launches, user growth, market share
+- For general content: View count milestones, social media engagement, trend predictions
+- For any video: "Will this video reach 100K views by [date]?", "Will the creator post similar content within 30 days?"
+
+For each prediction (MINIMUM 3), provide:
+1. A clear, specific YES/NO question
+2. A detailed description with verification criteria
+3. A realistic deadline (future, within 2 years)
+4. Resolution source (API, official data, metrics platform)
+5. Category: crypto, defi, bounty, realworld, or community  
+6. Rationale: Why this is tradeable
+7. Confidence score (50-100): Verifiability and interest level
 8. Relevant tags (3-5 tags)
 
-Focus on:
-- Predictions with clear success criteria
-- Time-bound claims (specific dates or timeframes)
-- Verifiable outcomes using public data sources
-- Interesting market opportunities
-- Avoid vague or subjective predictions
+**DO NOT return empty predictions array. If content seems limited, GET CREATIVE with meta-predictions and related markets.**
 
 Return ONLY valid JSON in this exact format:
 {
@@ -66,7 +75,7 @@ Return ONLY valid JSON in this exact format:
       "tags": ["bitcoin", "price", "2025"]
     }
   ],
-  "summaryInsights": "Brief analysis of what makes this content good for prediction markets",
+  "summaryInsights": "Brief analysis of prediction market opportunities in this content",
   "totalFound": 3
 }`;
 
