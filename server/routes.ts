@@ -483,7 +483,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 10); // Limit to most recent 10
       
-      res.json(publicSummaries);
+      // Parse JSON fields for each summary to include prediction markets and market analysis
+      const enrichedSummaries = publicSummaries.map(summary => {
+        let marketData = {};
+        let suggestedMarkets = null;
+        
+        try {
+          if (summary.marketAnalysis) {
+            marketData = JSON.parse(summary.marketAnalysis);
+          }
+        } catch (e) {
+          console.log('Could not parse market analysis data for summary:', summary.id);
+        }
+        
+        try {
+          if (summary.suggestedMarkets) {
+            suggestedMarkets = JSON.parse(summary.suggestedMarkets);
+          }
+        } catch (e) {
+          console.log('Could not parse suggested markets data for summary:', summary.id);
+        }
+        
+        return {
+          ...summary,
+          ...marketData,
+          suggestedMarkets,
+          executiveSummary: summary.blogPost || summary.summary
+        };
+      });
+      
+      res.json(enrichedSummaries);
     } catch (error) {
       console.error('Error fetching summaries:', error);
       res.status(500).json({ error: 'Failed to fetch summaries' });
