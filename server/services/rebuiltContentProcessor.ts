@@ -757,7 +757,9 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       // Extract raw text from keyInsights for bulletPoints compatibility
       bulletPoints: Array.isArray(summary.keyInsights) ? summary.keyInsights.map((insight: any) => 
         typeof insight === 'object' ? insight.insight : insight
-      ) : []
+      ) : [],
+      // CRITICAL: Explicitly preserve suggestedMarkets from database (Drizzle auto-parses jsonb)
+      suggestedMarkets: summary.suggestedMarkets || []
     };
 
     // Enhance financial trends with comprehensive multi-asset market data
