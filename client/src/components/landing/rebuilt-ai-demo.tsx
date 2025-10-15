@@ -100,8 +100,14 @@ interface ProcessingResult {
     id?: string;
     question: string;
     category?: string;
-    endDate?: string;
+    deadline?: string;  // Database uses 'deadline', not 'endDate'
+    endDate?: string;   // Keep for backward compatibility
     yesPrice?: number;
+    confidence?: number;
+    description?: string;
+    tags?: string[];
+    rationale?: string;
+    resolutionSource?: string;
   }>;
   rawData: {
     title: string;
@@ -845,7 +851,7 @@ export function AIProcessor() {
                                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                           <span className="flex items-center gap-1">
                                             <Calendar className="h-3 w-3" />
-                                            {market.endDate ? new Date(market.endDate).toLocaleDateString() : 'TBD'}
+                                            {(market.deadline || market.endDate) ? new Date(market.deadline || market.endDate!).toLocaleDateString() : 'TBD'}
                                           </span>
                                           <span className="flex items-center gap-1">
                                             <TrendingUp className="h-3 w-3" />
