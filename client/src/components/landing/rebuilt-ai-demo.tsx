@@ -96,6 +96,13 @@ interface ProcessingResult {
   tags: string[];
   accuracy: number;
   processingStatus: string;
+  suggestedMarkets?: Array<{
+    id?: string;
+    question: string;
+    category?: string;
+    endDate?: string;
+    yesPrice?: number;
+  }>;
   rawData: {
     title: string;
     channel: string;
