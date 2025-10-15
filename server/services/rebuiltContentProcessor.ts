@@ -1085,7 +1085,29 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       ]);
       console.log(`✅ Decentralized storage complete: IPFS=${ipfsHash}, Arweave=${arweaveId}`);
       
-      // Step 4: Save complete results
+      // CRITICAL FIX: Extract AI prediction markets BEFORE marking as completed
+      let suggestedMarkets: any[] = [];
+      try {
+        console.log(`🔮 Extracting AI prediction markets for ${summaryId}...`);
+        const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
+        const predictionResult = await extractPredictionsFromSummary(
+          summary.summary,
+          summary.tags.length > 0 ? summary.tags.slice(0, 3).join(' - ') : 'Transcribed Summary',
+          url
+        );
+        
+        if (predictionResult.predictions && predictionResult.predictions.length > 0) {
+          suggestedMarkets = predictionResult.predictions;
+          console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
+        } else {
+          console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
+        }
+      } catch (predictionError: any) {
+        console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, predictionError.message);
+        // Continue with empty markets array - don't fail the whole process
+      }
+      
+      // Step 4: Save complete results INCLUDING markets in one atomic update
       console.log(`💾 Saving transcription results...`);
       await this.storage.updateSummary(summaryId, {
         processingStatus: 'completed',
@@ -1105,33 +1127,11 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         },
         ipfsHash,
         arweaveId,
+        suggestedMarkets: suggestedMarkets, // Include markets in the completion update
         updatedAt: new Date()
       });
       
-      console.log(`✅ Transcription processing complete for ${summaryId}`);
-      
-      // Automatically extract AI prediction markets from the transcribed summary
-      try {
-        console.log(`🔮 Extracting AI prediction markets for ${summaryId}...`);
-        const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
-        const predictionResult = await extractPredictionsFromSummary(
-          summary.summary,
-          summary.tags.length > 0 ? summary.tags.slice(0, 3).join(' - ') : 'Transcribed Summary',
-          url
-        );
-        
-        if (predictionResult.predictions && predictionResult.predictions.length > 0) {
-          await this.storage.updateSummary(summaryId, {
-            suggestedMarkets: predictionResult.predictions
-          });
-          console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
-        } else {
-          console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
-        }
-      } catch (predictionError: any) {
-        console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, predictionError.message);
-        // Don't fail the whole process if prediction extraction fails
-      }
+      console.log(`✅ Transcription processing complete for ${summaryId} with ${suggestedMarkets.length} prediction markets`)
     } catch (error) {
       console.error(`❌ Transcription processing failed:`, error);
       throw error;
