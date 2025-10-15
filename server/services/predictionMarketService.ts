@@ -44,6 +44,8 @@ export class PredictionMarketService {
     resolutionSource?: string;
     imageUrl?: string;
     tags?: string[];
+    aiProbability?: number;
+    aiReasoning?: string;
     privateKey: string;
   }): Promise<PredictionMarket> {
     try {
@@ -118,6 +120,8 @@ export class PredictionMarketService {
         blockchainTxHash: txHash,
         imageUrl: data.imageUrl,
         tags: data.tags || [],
+        aiProbability: data.aiProbability,
+        aiReasoning: data.aiReasoning,
         yesLiquidity: data.initialLiquidity / 2,
         noLiquidity: data.initialLiquidity / 2,
       }).returning();

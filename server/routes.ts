@@ -7002,7 +7002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Create new market
   app.post("/api/prediction-markets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags } = req.body;
+    const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags, aiProbability, aiReasoning } = req.body;
     
     if (!question || !deadline || !initialLiquidity) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -7025,6 +7025,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       resolutionSource,
       imageUrl,
       tags,
+      aiProbability,
+      aiReasoning,
       privateKey
     });
     

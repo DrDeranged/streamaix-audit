@@ -13,6 +13,9 @@ export interface ExtractedPrediction {
   rationale: string;
   confidence: number;
   tags: string[];
+  aiPrediction: 'YES' | 'NO';
+  aiProbability: number;
+  aiReasoning: string;
 }
 
 // Generate fallback markets when AI extraction fails or returns too few
@@ -33,7 +36,10 @@ function generateFallbackMarkets(title: string, url: string, count: number): Ext
       resolutionSource: 'Platform Analytics / Public View Counter',
       rationale: 'Engagement prediction based on content virality potential',
       confidence: 65,
-      tags: ['engagement', 'views', 'growth']
+      tags: ['engagement', 'views', 'growth'],
+      aiPrediction: 'NO' as const,
+      aiProbability: 35,
+      aiReasoning: 'Most content does not reach 100K views organically. Market potential depends on viral factors.'
     },
     {
       question: `Will this content creator publish similar content within 30 days?`,
@@ -43,7 +49,10 @@ function generateFallbackMarkets(title: string, url: string, count: number): Ext
       resolutionSource: 'Creator Channel / Platform RSS Feed',
       rationale: 'Content consistency and creator activity prediction',
       confidence: 70,
-      tags: ['creator', 'content', 'activity']
+      tags: ['creator', 'content', 'activity'],
+      aiPrediction: 'YES' as const,
+      aiProbability: 70,
+      aiReasoning: 'Active creators typically maintain consistent publishing schedules within 30-day windows.'
     },
     {
       question: `Will topics from "${titleWords}" trend on social media within 14 days?`,
@@ -53,7 +62,10 @@ function generateFallbackMarkets(title: string, url: string, count: number): Ext
       resolutionSource: 'Social Media Trending APIs / Twitter Trends',
       rationale: 'Social impact and virality prediction for content themes',
       confidence: 60,
-      tags: ['social', 'trending', 'virality']
+      tags: ['social', 'trending', 'virality'],
+      aiPrediction: 'NO' as const,
+      aiProbability: 40,
+      aiReasoning: 'Trending status requires significant viral momentum. Most topics remain niche.'
     },
     {
       question: `Will the engagement rate exceed 5% for this content by ${new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toLocaleDateString()}?`,
@@ -63,7 +75,10 @@ function generateFallbackMarkets(title: string, url: string, count: number): Ext
       resolutionSource: 'Platform Engagement Metrics',
       rationale: 'High-quality content engagement measurement',
       confidence: 68,
-      tags: ['engagement', 'quality', 'metrics']
+      tags: ['engagement', 'quality', 'metrics'],
+      aiPrediction: 'YES' as const,
+      aiProbability: 68,
+      aiReasoning: 'Quality content typically achieves 5%+ engagement. This threshold is reasonable for valuable content.'
     }
   ];
   
@@ -118,6 +133,9 @@ For each prediction (MINIMUM 3), provide:
 6. Rationale: Why this is tradeable
 7. Confidence score (50-100): Verifiability and interest level
 8. Relevant tags (3-5 tags)
+9. **AI's prediction**: YES or NO - what does the AI believe will happen?
+10. **AI probability** (0-100): The AI's confidence percentage for its prediction
+11. **AI reasoning**: Brief explanation of why the AI predicts YES or NO
 
 **DO NOT return empty predictions array. If content seems limited, GET CREATIVE with meta-predictions and related markets.**
 
@@ -132,7 +150,10 @@ Return ONLY valid JSON in this exact format:
       "resolutionSource": "CoinGecko API",
       "rationale": "Clear price target with specific timeframe, easily verifiable through multiple price feeds",
       "confidence": 85,
-      "tags": ["bitcoin", "price", "2025"]
+      "tags": ["bitcoin", "price", "2025"],
+      "aiPrediction": "YES",
+      "aiProbability": 65,
+      "aiReasoning": "Based on current adoption trends and institutional interest, Bitcoin has strong potential to reach $150K by end of 2025, though significant volatility expected"
     }
   ],
   "summaryInsights": "Brief analysis of prediction market opportunities in this content",
@@ -177,7 +198,12 @@ Return ONLY valid JSON in this exact format:
           deadline > now &&
           deadline <= twoYearsFromNow &&
           pred.resolutionSource &&
-          pred.confidence >= 50 // Only include high-confidence predictions
+          pred.confidence >= 50 && // Only include high-confidence predictions
+          pred.aiPrediction && 
+          (pred.aiPrediction === 'YES' || pred.aiPrediction === 'NO') &&
+          pred.aiProbability >= 0 &&
+          pred.aiProbability <= 100 &&
+          pred.aiReasoning
         );
       } catch {
         return false;
@@ -227,6 +253,8 @@ export async function generateMarketSuggestion(
   sourceContentId: string;
   initialLiquidity: number;
   tags: string[];
+  aiProbability: number;
+  aiReasoning: string;
 }> {
   return {
     question: prediction.question,
@@ -236,6 +264,8 @@ export async function generateMarketSuggestion(
     resolutionSource: prediction.resolutionSource,
     sourceContentId: summaryId,
     initialLiquidity: Math.max(800, Math.min(2000, prediction.confidence * 20)), // 800-2000 based on confidence
-    tags: prediction.tags
+    tags: prediction.tags,
+    aiProbability: prediction.aiProbability,
+    aiReasoning: prediction.aiReasoning
   };
 }
