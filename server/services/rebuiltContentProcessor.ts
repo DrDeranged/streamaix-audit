@@ -735,6 +735,15 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
     const summary = await this.storage.getSummary(summaryId);
     if (!summary) return null;
 
+    // 🔍 DEBUG: Log raw database data
+    console.log(`📊 [getProcessingResult] Summary ID: ${summaryId}`);
+    console.log(`📊 [getProcessingResult] suggestedMarkets type: ${typeof summary.suggestedMarkets}`);
+    console.log(`📊 [getProcessingResult] suggestedMarkets exists: ${summary.suggestedMarkets !== null && summary.suggestedMarkets !== undefined}`);
+    console.log(`📊 [getProcessingResult] suggestedMarkets length: ${Array.isArray(summary.suggestedMarkets) ? summary.suggestedMarkets.length : 'N/A'}`);
+    if (summary.suggestedMarkets && Array.isArray(summary.suggestedMarkets) && summary.suggestedMarkets.length > 0) {
+      console.log(`📊 [getProcessingResult] First market question: ${summary.suggestedMarkets[0]?.question || 'N/A'}`);
+    }
+
     // Parse the marketAnalysis JSON to extract frontend-expected fields
     let marketData = {};
     try {
@@ -761,6 +770,9 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       // CRITICAL: Explicitly preserve suggestedMarkets from database (Drizzle auto-parses jsonb)
       suggestedMarkets: summary.suggestedMarkets || []
     };
+
+    // 🔍 DEBUG: Log final result
+    console.log(`✅ [getProcessingResult] Final suggestedMarkets count: ${result.suggestedMarkets?.length || 0}`);
 
     // Enhance financial trends with comprehensive multi-asset market data
     const resultWithTrends = result as any;
