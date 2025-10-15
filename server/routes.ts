@@ -5359,8 +5359,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'Expires': '0'
     });
     
+    console.log(`🔍 [API /api/processing-result] Request for summary: ${req.params.summaryId}`);
+    
     const processor = RebuiltContentProcessor.getInstance();
     const result = await processor.getProcessingResult(req.params.summaryId);
+    
+    // 🔍 DEBUG: Log API response data
+    console.log(`🔍 [API /api/processing-result] Response suggestedMarkets count: ${result?.suggestedMarkets?.length || 0}`);
+    if (result?.suggestedMarkets && result.suggestedMarkets.length > 0) {
+      console.log(`🔍 [API /api/processing-result] First market: ${result.suggestedMarkets[0]?.question || 'N/A'}`);
+    }
+    
     res.json(result);
   }));
 
