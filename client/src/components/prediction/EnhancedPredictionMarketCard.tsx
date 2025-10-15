@@ -182,11 +182,11 @@ export function EnhancedPredictionMarketCard({
         className={cn(
           "group bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50",
           "hover:border-purple-500/50 transition-all duration-300 overflow-hidden",
-          "hover:shadow-lg hover:shadow-purple-500/20"
+          "hover:shadow-lg hover:shadow-purple-500/20 h-full"
         )}
         data-testid={`prediction-card-compact-${market.id}`}
       >
-        <CardContent className="p-4">
+        <CardContent className="p-5">
           <div className="flex items-start gap-4">
             {/* Confidence Ring */}
             <ConfidenceRing value={confidence} />
@@ -205,7 +205,7 @@ export function EnhancedPredictionMarketCard({
               </div>
 
               {/* Question */}
-              <h4 className="font-semibold text-white leading-tight mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors" data-testid="text-question">
+              <h4 className="font-semibold text-white leading-snug mb-3 min-h-[2.5rem] group-hover:text-purple-300 transition-colors text-sm" data-testid="text-question">
                 {market.question}
               </h4>
 

@@ -867,7 +867,7 @@ export function AIProcessor() {
                           </Badge>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           {result.suggestedMarkets.slice(0, 6).map((market: any, idx: number) => (
                             <EnhancedPredictionMarketCard
                               key={idx}
