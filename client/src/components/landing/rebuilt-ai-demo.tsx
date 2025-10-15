@@ -781,16 +781,29 @@ export function AIProcessor() {
                                   </p>
                                 </div>
                               </div>
-                              <Link href="/dashboard" data-testid="button-view-dashboard">
-                                <Button 
-                                  size="lg" 
-                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
-                                >
-                                  <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
-                                  View Dashboard
-                                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                              </Link>
+                              <div className="flex flex-col gap-3">
+                                <Link href="/dashboard" data-testid="button-view-dashboard">
+                                  <Button 
+                                    size="lg" 
+                                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group w-full"
+                                  >
+                                    <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
+                                    View Dashboard
+                                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                  </Button>
+                                </Link>
+                                <Link href="/markets" data-testid="button-explore-markets">
+                                  <Button 
+                                    size="lg" 
+                                    variant="outline"
+                                    className="border-indigo-500/30 hover:bg-indigo-500/10 text-gray-900 dark:text-white font-medium transition-all duration-300 group w-full"
+                                  >
+                                    <Target className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
+                                    Explore Markets
+                                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                  </Button>
+                                </Link>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
