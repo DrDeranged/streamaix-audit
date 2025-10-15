@@ -143,15 +143,31 @@ export function AIProcessor() {
   // 🔍 DEBUG: Log suggestedMarkets data when result changes
   useEffect(() => {
     if (result) {
+      // CRITICAL FIX: Ensure suggestedMarkets is always an array on frontend
+      let safeSuggestedMarkets: any[] = [];
+      if (result.suggestedMarkets) {
+        if (Array.isArray(result.suggestedMarkets)) {
+          safeSuggestedMarkets = result.suggestedMarkets;
+        } else if (typeof result.suggestedMarkets === 'object') {
+          // Convert object to empty array (shouldn't happen with backend fix, but defensive)
+          safeSuggestedMarkets = [];
+        }
+      }
+      
       console.log('🔍 [Frontend] Processing result received:', {
         summaryId: result.id,
         processingStatus: result.processingStatus,
-        hasSuggestedMarkets: !!result.suggestedMarkets,
-        suggestedMarketsCount: result.suggestedMarkets?.length || 0,
+        rawSuggestedMarkets: result.suggestedMarkets,
         suggestedMarketsType: typeof result.suggestedMarkets,
         isArray: Array.isArray(result.suggestedMarkets),
-        firstMarket: result.suggestedMarkets?.[0]?.question || 'N/A'
+        safeSuggestedMarketsCount: safeSuggestedMarkets.length,
+        firstMarket: safeSuggestedMarkets[0]?.question || 'N/A'
       });
+      
+      // Override result.suggestedMarkets with safe version if needed
+      if (!Array.isArray(result.suggestedMarkets) && result.suggestedMarkets) {
+        result.suggestedMarkets = safeSuggestedMarkets as any;
+      }
     }
   }, [result]);
 
