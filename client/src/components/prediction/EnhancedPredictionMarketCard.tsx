@@ -45,6 +45,8 @@ interface EnhancedPredictionMarketCardProps {
     noLiquidity?: number;
     status?: string;
     imageUrl?: string;
+    aiProbability?: number;
+    aiReasoning?: string;
   };
   variant?: 'compact' | 'detailed' | 'trading';
   showActions?: boolean;
@@ -119,7 +121,9 @@ export function EnhancedPredictionMarketCard({
           resolutionSource: market.resolutionSource || 'oracle',
           sourceContentId: summaryId,
           tags: market.tags || [],
-          initialLiquidity: 1000
+          initialLiquidity: 1000,
+          aiProbability: market.aiProbability,
+          aiReasoning: market.aiReasoning
         }),
       });
       return response.json();
@@ -229,6 +233,32 @@ export function EnhancedPredictionMarketCard({
                   </span>
                 </div>
               </div>
+
+              {/* AI Prediction */}
+              {market.aiProbability !== undefined && market.aiProbability !== null && (
+                <div className="mb-3 p-2 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                      <span className="text-xs font-medium text-violet-300">AI Predicts:</span>
+                      <Badge 
+                        className={cn(
+                          "text-xs font-bold",
+                          market.aiProbability > 50 
+                            ? "bg-green-500/20 text-green-400 border-green-500/40" 
+                            : "bg-red-500/20 text-red-400 border-red-500/40"
+                        )}
+                        data-testid="ai-prediction-badge"
+                      >
+                        {market.aiProbability > 50 ? 'YES' : 'NO'}
+                      </Badge>
+                    </div>
+                    <span className="text-sm font-bold text-violet-400" data-testid="ai-probability">
+                      {market.aiProbability}%
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Volume & Trades */}
               {(totalVolume > 0 || totalTrades > 0) && (
@@ -349,6 +379,34 @@ export function EnhancedPredictionMarketCard({
                 <Progress value={noPricePercent} className="h-1.5 bg-red-950" />
               </div>
             </div>
+
+            {/* AI Prediction - Detailed View */}
+            {market.aiProbability !== undefined && market.aiProbability !== null && (
+              <div className="p-4 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30">
+                <div className="flex items-center gap-3 mb-3">
+                  <Sparkles className="w-5 h-5 text-violet-400" />
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-violet-300">AI Analysis</h4>
+                  </div>
+                  <Badge 
+                    className={cn(
+                      "text-sm font-bold px-3 py-1",
+                      market.aiProbability > 50 
+                        ? "bg-green-500/20 text-green-400 border-green-500/40" 
+                        : "bg-red-500/20 text-red-400 border-red-500/40"
+                    )}
+                    data-testid="ai-prediction-badge-detailed"
+                  >
+                    {market.aiProbability > 50 ? 'YES' : 'NO'} {market.aiProbability}%
+                  </Badge>
+                </div>
+                {market.aiReasoning && (
+                  <p className="text-xs text-slate-300 leading-relaxed" data-testid="ai-reasoning">
+                    {market.aiReasoning}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Market Stats */}
             <div className="grid grid-cols-3 gap-3 p-3 bg-slate-800/50 rounded-lg">
