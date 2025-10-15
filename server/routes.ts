@@ -484,9 +484,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .slice(0, 10); // Limit to most recent 10
       
       // Parse JSON fields for each summary to include prediction markets and market analysis
+      // Note: Drizzle already parses jsonb fields, so we only parse text fields like marketAnalysis
       const enrichedSummaries = publicSummaries.map(summary => {
         let marketData = {};
-        let suggestedMarkets = null;
         
         try {
           if (summary.marketAnalysis) {
@@ -496,18 +496,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Could not parse market analysis data for summary:', summary.id);
         }
         
-        try {
-          if (summary.suggestedMarkets) {
-            suggestedMarkets = JSON.parse(summary.suggestedMarkets);
-          }
-        } catch (e) {
-          console.log('Could not parse suggested markets data for summary:', summary.id);
-        }
-        
         return {
           ...summary,
           ...marketData,
-          suggestedMarkets,
+          // suggestedMarkets is already parsed by Drizzle (jsonb field), just pass it through
           executiveSummary: summary.blogPost || summary.summary
         };
       });
