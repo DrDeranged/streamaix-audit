@@ -4381,6 +4381,8 @@ export const predictionMarkets = pgTable("prediction_markets", {
   resolutionTxHash: text("resolution_tx_hash"),
   imageUrl: text("image_url"),
   tags: text("tags").array(),
+  aiProbability: integer("ai_probability"),
+  aiReasoning: text("ai_reasoning"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
