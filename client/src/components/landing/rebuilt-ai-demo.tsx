@@ -805,7 +805,7 @@ export function AIProcessor() {
                     )}
 
                     {/* AI-Extracted Prediction Markets */}
-                    {isAuthenticated && result.suggestedMarkets && result.suggestedMarkets.length > 0 && (
+                    {result.suggestedMarkets && result.suggestedMarkets.length > 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
