@@ -781,30 +781,98 @@ export function AIProcessor() {
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex flex-col gap-3">
-                                <Link href="/dashboard" data-testid="button-view-dashboard">
-                                  <Button 
-                                    size="lg" 
-                                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group w-full"
-                                  >
-                                    <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
-                                    View Dashboard
-                                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                  </Button>
+                              <Link href="/dashboard" data-testid="button-view-dashboard">
+                                <Button 
+                                  size="lg" 
+                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                >
+                                  <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
+                                  View Dashboard
+                                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </Button>
+                              </Link>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
+
+                    {/* AI-Extracted Prediction Markets */}
+                    {isAuthenticated && result.suggestedMarkets && result.suggestedMarkets.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-6"
+                      >
+                        <Card className="bg-gradient-to-br from-purple-500/15 via-pink-500/15 to-indigo-500/15 border border-purple-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 animate-pulse"></div>
+                          <CardContent className="p-6 relative">
+                            <div className="mb-4">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                                  <Target className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-purple-200 bg-clip-text text-transparent">
+                                    AI-Extracted Prediction Markets
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">Trade on predictions extracted from this content</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              {result.suggestedMarkets.slice(0, 3).map((market: any, idx: number) => (
+                                <Link 
+                                  key={idx} 
+                                  href={`/markets/${market.id || '#'}`}
+                                  data-testid={`link-market-preview-${idx}`}
+                                >
+                                  <div className="p-4 bg-background/50 backdrop-blur-sm rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 cursor-pointer group">
+                                    <div className="flex items-start justify-between gap-4">
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-sm mb-2 group-hover:text-purple-400 transition-colors line-clamp-2">
+                                          {market.question}
+                                        </h4>
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                          <span className="flex items-center gap-1">
+                                            <Calendar className="h-3 w-3" />
+                                            {market.endDate ? new Date(market.endDate).toLocaleDateString() : 'TBD'}
+                                          </span>
+                                          <span className="flex items-center gap-1">
+                                            <TrendingUp className="h-3 w-3" />
+                                            {market.category || 'Crypto'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-col items-end gap-2">
+                                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                                          {market.yesPrice ? `${Math.round(market.yesPrice * 100)}%` : '50%'} YES
+                                        </Badge>
+                                        <ArrowRight className="h-4 w-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                                      </div>
+                                    </div>
+                                  </div>
                                 </Link>
-                                <Link href="/markets" data-testid="button-explore-markets">
+                              ))}
+                            </div>
+
+                            {result.suggestedMarkets.length > 3 && (
+                              <div className="mt-4 text-center">
+                                <Link href="/markets">
                                   <Button 
-                                    size="lg" 
-                                    variant="outline"
-                                    className="border-indigo-500/30 hover:bg-indigo-500/10 text-gray-900 dark:text-white font-medium transition-all duration-300 group w-full"
+                                    variant="outline" 
+                                    size="sm"
+                                    className="border-purple-500/30 hover:bg-purple-500/10 text-purple-300 hover:text-purple-200 transition-all duration-300"
+                                    data-testid="button-view-all-markets"
                                   >
-                                    <Target className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
-                                    Explore Markets
-                                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    View All {result.suggestedMarkets.length} Markets
+                                    <ArrowRight className="h-3 w-3 ml-2" />
                                   </Button>
                                 </Link>
                               </div>
-                            </div>
+                            )}
                           </CardContent>
                         </Card>
                       </motion.div>
