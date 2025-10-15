@@ -737,11 +737,34 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 
     // 🔍 DEBUG: Log raw database data
     console.log(`📊 [getProcessingResult] Summary ID: ${summaryId}`);
+    console.log(`📊 [getProcessingResult] Raw suggestedMarkets:`, summary.suggestedMarkets);
     console.log(`📊 [getProcessingResult] suggestedMarkets type: ${typeof summary.suggestedMarkets}`);
     console.log(`📊 [getProcessingResult] suggestedMarkets exists: ${summary.suggestedMarkets !== null && summary.suggestedMarkets !== undefined}`);
-    console.log(`📊 [getProcessingResult] suggestedMarkets length: ${Array.isArray(summary.suggestedMarkets) ? summary.suggestedMarkets.length : 'N/A'}`);
-    if (summary.suggestedMarkets && Array.isArray(summary.suggestedMarkets) && summary.suggestedMarkets.length > 0) {
-      console.log(`📊 [getProcessingResult] First market question: ${summary.suggestedMarkets[0]?.question || 'N/A'}`);
+    console.log(`📊 [getProcessingResult] suggestedMarkets isArray: ${Array.isArray(summary.suggestedMarkets)}`);
+    
+    // CRITICAL FIX: Ensure suggestedMarkets is always an array
+    // Drizzle ORM sometimes returns {} for null jsonb fields instead of null or []
+    let safeSuggestedMarkets: any[] = [];
+    if (summary.suggestedMarkets) {
+      if (Array.isArray(summary.suggestedMarkets)) {
+        safeSuggestedMarkets = summary.suggestedMarkets;
+      } else if (typeof summary.suggestedMarkets === 'object') {
+        // If it's an object (like {}), check if it has any keys
+        const keys = Object.keys(summary.suggestedMarkets);
+        if (keys.length > 0) {
+          // It's a non-empty object, might be malformed data
+          console.warn(`⚠️ suggestedMarkets is an object, not an array:`, summary.suggestedMarkets);
+          safeSuggestedMarkets = [];
+        } else {
+          // Empty object {}, treat as empty array
+          safeSuggestedMarkets = [];
+        }
+      }
+    }
+    
+    console.log(`📊 [getProcessingResult] Safe suggestedMarkets count: ${safeSuggestedMarkets.length}`);
+    if (safeSuggestedMarkets.length > 0) {
+      console.log(`📊 [getProcessingResult] First market question: ${safeSuggestedMarkets[0]?.question || 'N/A'}`);
     }
 
     // Parse the marketAnalysis JSON to extract frontend-expected fields
@@ -767,12 +790,13 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       bulletPoints: Array.isArray(summary.keyInsights) ? summary.keyInsights.map((insight: any) => 
         typeof insight === 'object' ? insight.insight : insight
       ) : [],
-      // CRITICAL: Explicitly preserve suggestedMarkets from database (Drizzle auto-parses jsonb)
-      suggestedMarkets: summary.suggestedMarkets || []
+      // CRITICAL: Use the safe array version of suggestedMarkets
+      suggestedMarkets: safeSuggestedMarkets
     };
 
     // 🔍 DEBUG: Log final result
     console.log(`✅ [getProcessingResult] Final suggestedMarkets count: ${result.suggestedMarkets?.length || 0}`);
+    console.log(`✅ [getProcessingResult] Final suggestedMarkets isArray: ${Array.isArray(result.suggestedMarkets)}`);
 
     // Enhance financial trends with comprehensive multi-asset market data
     const resultWithTrends = result as any;
