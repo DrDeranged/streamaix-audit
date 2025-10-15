@@ -119,8 +119,7 @@ export function EnhancedPredictionMarketCard({
           resolutionSource: market.resolutionSource || 'oracle',
           sourceContentId: summaryId,
           tags: market.tags || [],
-          initialLiquidity: 1000,
-          privateKey: import.meta.env.VITE_PRIVATE_KEY || ''
+          initialLiquidity: 1000
         }),
       });
       return response.json();
