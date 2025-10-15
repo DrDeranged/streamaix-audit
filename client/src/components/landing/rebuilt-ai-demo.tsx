@@ -140,6 +140,21 @@ export function AIProcessor() {
     },
   });
 
+  // 🔍 DEBUG: Log suggestedMarkets data when result changes
+  useEffect(() => {
+    if (result) {
+      console.log('🔍 [Frontend] Processing result received:', {
+        summaryId: result.id,
+        processingStatus: result.processingStatus,
+        hasSuggestedMarkets: !!result.suggestedMarkets,
+        suggestedMarketsCount: result.suggestedMarkets?.length || 0,
+        suggestedMarketsType: typeof result.suggestedMarkets,
+        isArray: Array.isArray(result.suggestedMarkets),
+        firstMarket: result.suggestedMarkets?.[0]?.question || 'N/A'
+      });
+    }
+  }, [result]);
+
   // Immediately clean up when processing completes
   useEffect(() => {
     if (result?.processingStatus === 'completed' || result?.processingStatus === 'failed') {
