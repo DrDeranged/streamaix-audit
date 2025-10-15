@@ -47,41 +47,62 @@ export class PredictionMarketService {
     privateKey: string;
   }): Promise<PredictionMarket> {
     try {
-      const wallet = new Wallet(data.privateKey, this.provider);
-      const factoryContract = new Contract(FACTORY_ADDRESS, PREDICTION_FACTORY_ABI, wallet);
+      // Check if smart contracts are deployed (production mode)
+      const isProductionMode = FACTORY_ADDRESS && CONDITIONAL_TOKENS_ADDRESS && FACTORY_ADDRESS !== "" && CONDITIONAL_TOKENS_ADDRESS !== "";
       
-      // Map category to enum
-      const categoryMap: { [key: string]: number } = {
-        'crypto': 0,
-        'defi': 1,
-        'real_world': 2,
-        'community': 3
-      };
+      let marketId: number;
+      let txHash: string;
       
-      const categoryEnum = categoryMap[data.category.toLowerCase()] || 3;
-      const deadlineTimestamp = Math.floor(data.deadline.getTime() / 1000);
-      
-      // Create market on-chain
-      const tx = await factoryContract.createMarket(
-        data.question,
-        deadlineTimestamp,
-        data.initialLiquidity,
-        categoryEnum
-      );
-      
-      const receipt = await tx.wait();
-      console.log('✅ Prediction market created on-chain:', receipt.hash);
-      
-      // Get market ID from event
-      const event = receipt.logs.find((log: any) => 
-        log.topics[0] === factoryContract.interface.getEvent('MarketCreatedWithLiquidity').topicHash
-      );
-      
-      if (!event) {
-        throw new Error('Market creation event not found in transaction logs');
+      if (isProductionMode) {
+        // PRODUCTION MODE: Deploy to blockchain
+        console.log('🔗 Creating market on Base network...');
+        const wallet = new Wallet(data.privateKey, this.provider);
+        const factoryContract = new Contract(FACTORY_ADDRESS, PREDICTION_FACTORY_ABI, wallet);
+        
+        // Map category to enum
+        const categoryMap: { [key: string]: number } = {
+          'crypto': 0,
+          'defi': 1,
+          'real_world': 2,
+          'community': 3
+        };
+        
+        const categoryEnum = categoryMap[data.category.toLowerCase()] || 3;
+        const deadlineTimestamp = Math.floor(data.deadline.getTime() / 1000);
+        
+        // Create market on-chain
+        const tx = await factoryContract.createMarket(
+          data.question,
+          deadlineTimestamp,
+          data.initialLiquidity,
+          categoryEnum
+        );
+        
+        const receipt = await tx.wait();
+        console.log('✅ Prediction market created on-chain:', receipt.hash);
+        
+        // Get market ID from event
+        const event = receipt.logs.find((log: any) => 
+          log.topics[0] === factoryContract.interface.getEvent('MarketCreatedWithLiquidity').topicHash
+        );
+        
+        if (!event) {
+          throw new Error('Market creation event not found in transaction logs');
+        }
+        
+        marketId = parseInt(event.topics[1], 16);
+        txHash = receipt.hash;
+      } else {
+        // DEV MODE: Database-only (no blockchain deployment)
+        console.log('🔧 DEV MODE: Creating market in database only (smart contracts not deployed)');
+        
+        // Generate mock contract ID and tx hash for development
+        marketId = Math.floor(Math.random() * 1000000);
+        txHash = `0xdev${Date.now().toString(16)}${Math.random().toString(16).slice(2, 10)}`;
+        
+        console.log('📝 Generated mock contract ID:', marketId);
+        console.log('📝 Generated mock tx hash:', txHash);
       }
-      
-      const marketId = parseInt(event.topics[1], 16);
       
       // Store in database
       const [market] = await db.insert(predictionMarkets).values({
@@ -90,11 +111,11 @@ export class PredictionMarketService {
         description: data.description,
         category: data.category,
         creatorId: data.creatorId,
-        creatorWallet: data.creatorWallet,
+        creatorWallet: data.creatorWallet || "dev_mode_wallet",
         deadline: data.deadline,
         resolutionSource: data.resolutionSource || 'oracle',
         initialLiquidity: data.initialLiquidity,
-        blockchainTxHash: receipt.hash,
+        blockchainTxHash: txHash,
         imageUrl: data.imageUrl,
         tags: data.tags || [],
         yesLiquidity: data.initialLiquidity / 2,
