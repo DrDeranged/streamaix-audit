@@ -201,8 +201,17 @@ Return ONLY valid JSON in this exact format:
     };
 
   } catch (error: any) {
-    console.error('Error extracting predictions:', error);
-    throw new Error(`Failed to extract predictions: ${error.message}`);
+    console.error('❌ Error extracting predictions:', error);
+    
+    // ABSOLUTE FALLBACK: If everything fails, return generic markets
+    console.log('🔄 Using emergency fallback markets...');
+    const emergencyMarkets = generateFallbackMarkets(summaryTitle, summaryUrl, 3);
+    
+    return {
+      predictions: emergencyMarkets,
+      summaryInsights: 'Markets generated using fallback templates due to extraction error',
+      totalFound: emergencyMarkets.length
+    };
   }
 }
 
