@@ -7002,10 +7002,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Create new market
   app.post("/api/prediction-markets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags, privateKey } = req.body;
+    const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags } = req.body;
     
-    if (!question || !deadline || !initialLiquidity || !privateKey) {
+    if (!question || !deadline || !initialLiquidity) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    // Use server-side private key for security
+    const privateKey = process.env.PRIVATE_KEY;
+    if (!privateKey) {
+      return res.status(500).json({ error: "Server configuration error: Private key not configured" });
     }
     
     const market = await predictionMarketService.createMarket({
