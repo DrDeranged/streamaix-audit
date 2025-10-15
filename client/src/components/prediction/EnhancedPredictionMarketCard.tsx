@@ -66,7 +66,13 @@ export function EnhancedPredictionMarketCard({
   const [tradeAmount, setTradeAmount] = useState<number>(100);
 
   // Get user's position if they have one
-  const { data: userPosition } = useQuery({
+  const { data: userPosition } = useQuery<{
+    outcome: string;
+    shares: number;
+    averagePrice: number;
+    totalInvested: number;
+    unrealizedPnl: number;
+  }>({
     queryKey: ['/api/prediction-markets/positions/me', market.id],
     enabled: !!market.id,
   });

@@ -12,6 +12,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 import UserNotesModal from '@/components/UserNotesModal';
+import { EnhancedPredictionMarketCard } from '@/components/prediction/EnhancedPredictionMarketCard';
 import { 
   Brain, 
   Zap, 
@@ -841,84 +842,71 @@ export function AIProcessor() {
                       </motion.div>
                     )}
 
-                    {/* AI-Extracted Prediction Markets */}
+                    {/* AI-Extracted Prediction Markets - Enhanced Cards */}
                     {result.suggestedMarkets && result.suggestedMarkets.length > 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
-                        className="mt-6"
+                        className="mt-6 space-y-4"
                       >
-                        <Card className="bg-gradient-to-br from-purple-500/15 via-pink-500/15 to-indigo-500/15 border border-purple-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 animate-pulse"></div>
-                          <CardContent className="p-6 relative">
-                            <div className="mb-4">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
-                                  <Target className="h-5 w-5 text-white" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-purple-200 bg-clip-text text-transparent">
-                                    AI-Extracted Prediction Markets
-                                  </h3>
-                                  <p className="text-sm text-muted-foreground">Trade on predictions extracted from this content</p>
-                                </div>
-                              </div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                              <Target className="h-5 w-5 text-white" />
                             </div>
-                            
-                            <div className="space-y-3">
-                              {result.suggestedMarkets.slice(0, 3).map((market: any, idx: number) => (
-                                <Link 
-                                  key={idx} 
-                                  href={`/markets/${market.id || '#'}`}
-                                  data-testid={`link-market-preview-${idx}`}
-                                >
-                                  <div className="p-4 bg-background/50 backdrop-blur-sm rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 cursor-pointer group">
-                                    <div className="flex items-start justify-between gap-4">
-                                      <div className="flex-1">
-                                        <h4 className="font-medium text-sm mb-2 group-hover:text-purple-400 transition-colors line-clamp-2">
-                                          {market.question}
-                                        </h4>
-                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                          <span className="flex items-center gap-1">
-                                            <Calendar className="h-3 w-3" />
-                                            {(market.deadline || market.endDate) ? new Date(market.deadline || market.endDate!).toLocaleDateString() : 'TBD'}
-                                          </span>
-                                          <span className="flex items-center gap-1">
-                                            <TrendingUp className="h-3 w-3" />
-                                            {market.category || 'Crypto'}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      <div className="flex flex-col items-end gap-2">
-                                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                                          {market.yesPrice ? `${Math.round(market.yesPrice * 100)}%` : '50%'} YES
-                                        </Badge>
-                                        <ArrowRight className="h-4 w-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </Link>
-                              ))}
+                            <div>
+                              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-purple-200 bg-clip-text text-transparent">
+                                AI-Extracted Prediction Markets
+                              </h3>
+                              <p className="text-sm text-muted-foreground">Trade on predictions extracted from this content</p>
                             </div>
+                          </div>
+                          <Badge variant="outline" className="bg-purple-500/10 border-purple-500/30 text-purple-300">
+                            {result.suggestedMarkets.length} Markets
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {result.suggestedMarkets.slice(0, 6).map((market: any, idx: number) => (
+                            <EnhancedPredictionMarketCard
+                              key={idx}
+                              market={{
+                                id: market.id,
+                                question: market.question,
+                                description: market.description,
+                                category: market.category || 'content',
+                                deadline: market.deadline || market.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                                yesPrice: market.yesPrice || 5000,
+                                noPrice: market.noPrice || 5000,
+                                confidence: market.confidence || 70,
+                                tags: market.tags,
+                                resolutionSource: market.resolutionSource,
+                                totalVolume: market.totalVolume || 0,
+                                totalTrades: market.totalTrades || 0,
+                              }}
+                              variant="compact"
+                              summaryId={result.id}
+                              summaryTitle={result.title}
+                            />
+                          ))}
+                        </div>
 
-                            {result.suggestedMarkets.length > 3 && (
-                              <div className="mt-4 text-center">
-                                <Link href="/markets">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="border-purple-500/30 hover:bg-purple-500/10 text-purple-300 hover:text-purple-200 transition-all duration-300"
-                                    data-testid="button-view-all-markets"
-                                  >
-                                    View All {result.suggestedMarkets.length} Markets
-                                    <ArrowRight className="h-3 w-3 ml-2" />
-                                  </Button>
-                                </Link>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
+                        {result.suggestedMarkets.length > 6 && (
+                          <div className="text-center pt-2">
+                            <Link href="/markets">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="border-purple-500/30 hover:bg-purple-500/10 text-purple-300 hover:text-purple-200 transition-all duration-300"
+                                data-testid="button-view-all-markets"
+                              >
+                                View All {result.suggestedMarkets.length} Markets
+                                <ArrowRight className="h-3 w-3 ml-2" />
+                              </Button>
+                            </Link>
+                          </div>
+                        )}
                       </motion.div>
                     )}
 
