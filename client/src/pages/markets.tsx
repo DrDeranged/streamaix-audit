@@ -143,6 +143,20 @@ export default function Markets() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  
+  const { toast } = useToast();
+  const {
+    wallet,
+    isConnected,
+    isConnecting,
+    connectWallet,
+    disconnect,
+    switchNetwork,
+    formatAddress,
+    formatBalance,
+    getNetworkInfo,
+    isMetaMaskAvailable,
+  } = useWeb3();
 
   const { data: marketsData, isLoading } = useQuery<{ markets: PredictionMarket[] }>({
     queryKey: category === "all" ? ["/api/prediction-markets"] : ["/api/prediction-markets", { category }],
@@ -197,14 +211,102 @@ export default function Markets() {
             </h1>
             <p className="text-slate-400 text-lg">Trade the future. Win STREAM tokens.</p>
           </div>
-          <Button
-            onClick={() => setCreateModalOpen(true)}
-            className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
-            data-testid="button-create-market"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Market
-          </Button>
+          <div className="flex items-center gap-3">
+            {/* Wallet Button */}
+            {!isConnected ? (
+              <Button
+                onClick={() => connectWallet('metamask')}
+                disabled={isConnecting}
+                variant="outline"
+                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300"
+                data-testid="button-connect-wallet"
+              >
+                <Wallet className="w-4 h-4 mr-2" />
+                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-cyan-500/50 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300"
+                    data-testid="button-wallet-menu"
+                  >
+                    <Wallet className="w-4 h-4 mr-2" />
+                    <span className="text-cyan-400">{formatAddress(wallet?.address || '')}</span>
+                    {wallet?.chainId === 8453 ? (
+                      <Badge className="ml-2 bg-green-500/20 text-green-400 border-green-500/30 text-xs" data-testid="badge-base-network">
+                        Base
+                      </Badge>
+                    ) : (
+                      <Badge className="ml-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs" data-testid="badge-wrong-network">
+                        Wrong Network
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-white w-64">
+                  <DropdownMenuLabel className="text-slate-400">Wallet</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-700" />
+                  <div className="px-2 py-3 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-400">Address:</span>
+                      <div className="flex items-center gap-2">
+                        <code className="text-cyan-400 text-xs">{formatAddress(wallet?.address || '')}</code>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(wallet?.address || '');
+                            toast({ title: "Copied!", description: "Address copied to clipboard" });
+                          }}
+                          className="hover:text-cyan-400 transition-colors"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    {wallet?.balance && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-400">Balance:</span>
+                        <span className="text-white">{formatBalance(wallet.balance)} ETH</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-400">Network:</span>
+                      <span className="text-white">{getNetworkInfo(wallet?.chainId || 1)?.name || 'Unknown'}</span>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator className="bg-slate-700" />
+                  {wallet?.chainId !== 8453 && (
+                    <DropdownMenuItem
+                      onClick={() => switchNetwork(8453)}
+                      className="text-yellow-400 focus:text-yellow-300 focus:bg-yellow-500/10 cursor-pointer"
+                      data-testid="menu-switch-to-base"
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Switch to Base Network
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={disconnect}
+                    className="text-red-400 focus:text-red-300 focus:bg-red-500/10 cursor-pointer"
+                    data-testid="menu-disconnect"
+                  >
+                    Disconnect Wallet
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            {/* Create Market Button */}
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+              data-testid="button-create-market"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Market
+            </Button>
+          </div>
         </motion.div>
 
         {/* Stats */}
