@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CreateMarketModal } from "@/components/prediction/CreateMarketModal";
 
 interface PredictionMarket {
   id: string;
@@ -130,6 +131,7 @@ export default function Markets() {
   const [category, setCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const { data: marketsData, isLoading } = useQuery<{ markets: PredictionMarket[] }>({
     queryKey: category === "all" ? ["/api/prediction-markets"] : ["/api/prediction-markets", { category }],
@@ -185,6 +187,7 @@ export default function Markets() {
             <p className="text-slate-400 text-lg">Trade the future. Win STREAM tokens.</p>
           </div>
           <Button
+            onClick={() => setCreateModalOpen(true)}
             className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
             data-testid="button-create-market"
           >
@@ -310,6 +313,7 @@ export default function Markets() {
                 {searchQuery ? "Try a different search term" : "Be the first to create a market"}
               </p>
               <Button
+                onClick={() => setCreateModalOpen(true)}
                 className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0"
                 data-testid="button-create-first-market"
               >
@@ -319,6 +323,12 @@ export default function Markets() {
             </CardContent>
           </Card>
         )}
+
+        {/* Create Market Modal */}
+        <CreateMarketModal
+          open={createModalOpen}
+          onOpenChange={setCreateModalOpen}
+        />
       </div>
     </div>
   );
