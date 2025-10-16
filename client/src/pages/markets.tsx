@@ -198,20 +198,115 @@ export default function Markets() {
           </Link>
         </motion.div>
 
-        {/* Header */}
+        {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
+          className="relative mb-12 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-8"
         >
-          <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3">
-              Prediction Markets
-            </h1>
-            <p className="text-slate-400 text-lg">Trade the future. Win STREAM tokens.</p>
-          </div>
-          <div className="flex items-center gap-3">
+          {/* Animated background effects */}
+          <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:30px_30px]" />
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              rotate: [90, 0, 90],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
+          />
+          
+          <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex-1">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-3 mb-4"
+              >
+                <motion.div
+                  animate={{
+                    rotate: [0, 360],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <TrendingUp className="w-8 h-8 text-cyan-400" />
+                </motion.div>
+                <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+                  Prediction Markets
+                </h1>
+                <motion.div
+                  animate={{
+                    rotate: [0, -360],
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5
+                  }}
+                >
+                  <Sparkles className="w-8 h-8 text-fuchsia-400" />
+                </motion.div>
+              </motion.div>
+              
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-slate-300 text-xl mb-3 font-light"
+              >
+                🚀 <span className="font-semibold text-cyan-300">Trade the future.</span> Predict outcomes. <span className="font-semibold text-purple-300">Earn STREAM.</span>
+              </motion.p>
+              
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-wrap items-center gap-3 text-sm"
+              >
+                <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-200 border-purple-500/30 px-3 py-1">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  AI-Powered Predictions
+                </Badge>
+                <Badge className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 border-cyan-500/30 px-3 py-1">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  Live Trading
+                </Badge>
+                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200 border-green-500/30 px-3 py-1">
+                  Base Network
+                </Badge>
+              </motion.div>
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+            >
             {/* Wallet Button */}
             {!isConnected ? (
               <Button
@@ -306,6 +401,7 @@ export default function Markets() {
               <Plus className="w-4 h-4 mr-2" />
               Create Market
             </Button>
+            </motion.div>
           </div>
         </motion.div>
 
