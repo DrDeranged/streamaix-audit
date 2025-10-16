@@ -254,6 +254,8 @@ export class PredictionMarketService {
           resolutionTxHash: predictionMarkets.resolutionTxHash,
           imageUrl: predictionMarkets.imageUrl,
           tags: predictionMarkets.tags,
+          aiProbability: predictionMarkets.aiProbability,
+          aiReasoning: predictionMarkets.aiReasoning,
           createdAt: predictionMarkets.createdAt,
           updatedAt: predictionMarkets.updatedAt,
           sourceSummary: {
