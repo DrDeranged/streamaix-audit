@@ -126,7 +126,7 @@ export function EnhancedPredictionMarketCard({
           aiReasoning: market.aiReasoning
         }),
       });
-      return response.json();
+      return response;
     },
     onSuccess: () => {
       toast({
