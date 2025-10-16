@@ -7187,6 +7187,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Backfill AI predictions for markets
+  app.post("/api/prediction-markets/backfill-ai", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { aiPredictionBackfillService } = await import('./services/aiPredictionBackfillService');
+      
+      console.log('🚀 Starting AI prediction backfill...');
+      const result = await aiPredictionBackfillService.backfillAllMarkets();
+      
+      res.json({
+        success: true,
+        message: 'AI prediction backfill completed',
+        result
+      });
+    } catch (error: any) {
+      console.error('❌ Error in AI prediction backfill:', error);
+      res.status(500).json({ success: false, error: 'Failed to backfill AI predictions' });
+    }
+  }));
+
   // Get single market details (MUST be last - dynamic route)
   app.get("/api/prediction-markets/:marketId", asyncHandler(async (req: Request, res: Response) => {
     const market = await predictionMarketService.getMarket(req.params.marketId);
