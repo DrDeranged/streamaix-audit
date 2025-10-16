@@ -313,6 +313,47 @@ export class PredictionMarketService {
   }
 
   /**
+   * Get user positions with market details
+   */
+  async getUserPositionsWithMarkets(userId: string): Promise<any[]> {
+    try {
+      const positions = await db
+        .select({
+          position: marketPositions,
+          market: predictionMarkets
+        })
+        .from(marketPositions)
+        .innerJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
+        .where(eq(marketPositions.userId, userId))
+        .orderBy(desc(marketPositions.updatedAt));
+      
+      return positions.map(({ position, market }) => ({
+        ...position,
+        market: {
+          id: market.id,
+          question: market.question,
+          category: market.category,
+          deadline: market.deadline,
+          yesPrice: market.yesPrice,
+          noPrice: market.noPrice,
+          yesLiquidity: market.yesLiquidity,
+          noLiquidity: market.noLiquidity,
+          totalVolume: market.totalVolume,
+          totalTrades: market.totalTrades,
+          aiProbability: market.aiProbability,
+          aiReasoning: market.aiReasoning,
+          status: market.status,
+          imageUrl: market.imageUrl,
+          tags: market.tags
+        }
+      }));
+    } catch (error: any) {
+      console.error('❌ Error fetching user positions with markets:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get user trade history
    */
   async getUserTrades(userId: string, marketId?: string): Promise<MarketTrade[]> {

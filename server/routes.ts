@@ -7064,7 +7064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get user positions
   app.get("/api/prediction-markets/positions/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const positions = await predictionMarketService.getUserPositions(req.user!.id);
+    const positions = await predictionMarketService.getUserPositionsWithMarkets(req.user!.id);
     
     res.json({
       success: true,
