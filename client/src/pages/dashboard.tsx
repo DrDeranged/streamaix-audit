@@ -18,6 +18,7 @@ import InvestmentJournal from '@/components/InvestmentJournal';
 import { FollowButton } from '@/components/avatars/follow-button';
 import BountyBoardSection from '@/components/bounty/BountyBoardSection';
 import RelatedBountiesWidget from '@/components/bounty/RelatedBountiesWidget';
+import ActivePredictionMarkets from '@/components/dashboard/ActivePredictionMarkets';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -594,10 +595,14 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 bg-white/5 border border-white/20 touch-manipulation">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 bg-white/5 border border-white/20 touch-manipulation">
                   <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
                     <FileText className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Summaries</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="markets" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                    <TrendingUp className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Markets</span>
                   </TabsTrigger>
                   <TabsTrigger value="avatars" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
                     <Users className="h-4 w-4 sm:mr-2" />
@@ -607,7 +612,7 @@ export default function Dashboard() {
                     <BookmarkPlus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="wallet" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
                     <Wallet className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Wallet</span>
                   </TabsTrigger>
@@ -647,6 +652,10 @@ export default function Dashboard() {
                       </div>
                     </CardContent>
                   </Card>
+                </TabsContent>
+
+                <TabsContent value="markets" className="mt-6">
+                  <ActivePredictionMarkets />
                 </TabsContent>
 
                 <TabsContent value="avatars" className="space-y-4 mt-4">
