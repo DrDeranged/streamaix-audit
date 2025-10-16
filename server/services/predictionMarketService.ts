@@ -275,6 +275,24 @@ export class PredictionMarketService {
   }
 
   /**
+   * Find market by question (case-insensitive)
+   */
+  async findMarketByQuestion(normalizedQuestion: string): Promise<PredictionMarket | null> {
+    try {
+      const [market] = await db
+        .select()
+        .from(predictionMarkets)
+        .where(sql`LOWER(TRIM(${predictionMarkets.question})) = ${normalizedQuestion}`)
+        .limit(1);
+      
+      return market || null;
+    } catch (error: any) {
+      console.error('❌ Error finding market by question:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get markets linked to a specific source content (summary)
    */
   async getMarketsBySourceContent(sourceContentId: string): Promise<PredictionMarket[]> {

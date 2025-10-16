@@ -7008,6 +7008,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: "Missing required fields" });
     }
     
+    // Check for duplicate markets with same or very similar question
+    const normalizedQuestion = question.trim().toLowerCase();
+    const existingMarket = await predictionMarketService.findMarketByQuestion(normalizedQuestion);
+    
+    if (existingMarket) {
+      return res.status(409).json({ 
+        error: "A market with this question already exists",
+        existingMarketId: existingMarket.id,
+        existingQuestion: existingMarket.question
+      });
+    }
+    
     // Use server-side private key for security
     const privateKey = process.env.PRIVATE_KEY;
     if (!privateKey) {
