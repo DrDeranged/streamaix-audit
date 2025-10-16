@@ -31,6 +31,8 @@ interface PredictionMarket {
     id: string;
     title: string;
   };
+  aiProbability?: number;
+  aiReasoning?: string;
 }
 
 const MarketCard = ({ market }: { market: PredictionMarket }) => {
@@ -38,6 +40,11 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
   const noPercentage = (market.noPrice / 100).toFixed(1);
   const timeLeft = new Date(market.deadline).getTime() - Date.now();
   const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  
+  // AI prediction indicator
+  const hasAiPrediction = market.aiProbability !== undefined && market.aiProbability !== null;
+  const aiPrediction = hasAiPrediction ? (market.aiProbability! > 50 ? 'YES' : 'NO') : null;
+  const aiConfidence = market.aiProbability || 50;
 
   return (
     <Link href={`/markets/${market.id}`}>
@@ -72,6 +79,17 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
               </div>
               <span className="text-xs text-slate-400">{daysLeft}d left</span>
             </div>
+
+            {/* AI Prediction Indicator */}
+            {hasAiPrediction && (
+              <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30">
+                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                <span className="text-xs font-medium text-violet-300">AI Predicts:</span>
+                <span className={`text-sm font-bold ${aiPrediction === 'YES' ? 'text-green-400' : 'text-red-400'}`}>
+                  {aiPrediction} {aiConfidence}%
+                </span>
+              </div>
+            )}
 
             <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug">
               {market.question}
