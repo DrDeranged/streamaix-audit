@@ -49,10 +49,10 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
   return (
     <Link href={`/markets/${market.id}`}>
       <motion.div
-        whileHover={{ scale: 1.02, y: -4 }}
-        transition={{ duration: 0.2 }}
+        whileHover={{ scale: 1.03, y: -6 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-cyan-500/50 transition-all duration-300 h-full cursor-pointer">
+        <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 h-full cursor-pointer">
           {market.imageUrl && (
             <div className="h-32 overflow-hidden relative">
               <img 
@@ -195,32 +195,45 @@ export default function Markets() {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-slate-900/50 border-slate-700/50">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          >
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
               <CardContent className="p-4">
-                <div className="text-sm text-slate-400">Active Markets</div>
-                <div className="text-2xl font-bold text-white">{stats.activeMarkets}</div>
+                <div className="text-sm text-purple-300/80">Active Markets</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  {stats.activeMarkets}
+                </div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-900/50 border-slate-700/50">
+            <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-300">
               <CardContent className="p-4">
-                <div className="text-sm text-slate-400">Total Volume</div>
-                <div className="text-2xl font-bold text-white">{(stats.totalVolume / 1000000).toFixed(1)}M</div>
+                <div className="text-sm text-cyan-300/80">Total Volume</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  {(stats.totalVolume / 1000000).toFixed(1)}M
+                </div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-900/50 border-slate-700/50">
+            <Card className="bg-gradient-to-br from-green-900/20 to-green-800/10 border-green-500/30 hover:border-green-500/50 transition-all duration-300">
               <CardContent className="p-4">
-                <div className="text-sm text-slate-400">Total Trades</div>
-                <div className="text-2xl font-bold text-white">{stats.totalTrades.toLocaleString()}</div>
+                <div className="text-sm text-green-300/80">Total Trades</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  {stats.totalTrades.toLocaleString()}
+                </div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-900/50 border-slate-700/50">
+            <Card className="bg-gradient-to-br from-orange-900/20 to-orange-800/10 border-orange-500/30 hover:border-orange-500/50 transition-all duration-300">
               <CardContent className="p-4">
-                <div className="text-sm text-slate-400">All Markets</div>
-                <div className="text-2xl font-bold text-white">{stats.totalMarkets}</div>
+                <div className="text-sm text-orange-300/80">All Markets</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+                  {stats.totalMarkets}
+                </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         )}
 
         {/* Filters */}
