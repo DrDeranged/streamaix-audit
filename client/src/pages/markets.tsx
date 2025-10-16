@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink } from "lucide-react";
+import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -151,22 +151,47 @@ export default function Markets() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Navigation */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+              data-testid="button-back-home"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
+        </motion.div>
+
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
+        >
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Prediction Markets</h1>
-            <p className="text-slate-400">Trade the future. Win STREAM tokens.</p>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3">
+              Prediction Markets
+            </h1>
+            <p className="text-slate-400 text-lg">Trade the future. Win STREAM tokens.</p>
           </div>
           <Button
-            className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0 hover:shadow-lg hover:shadow-purple-500/50"
+            className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
             data-testid="button-create-market"
           >
             <Plus className="w-4 h-4 mr-2" />
             Create Market
           </Button>
-        </div>
+        </motion.div>
 
         {/* Stats */}
         {stats && (
