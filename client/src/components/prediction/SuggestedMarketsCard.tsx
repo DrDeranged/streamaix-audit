@@ -20,6 +20,8 @@ interface SuggestedMarket {
   noPrice?: number;
   totalVolume?: number;
   totalTrades?: number;
+  aiProbability?: number;
+  aiReasoning?: string;
 }
 
 interface SuggestedMarketsCardProps {
@@ -124,6 +126,8 @@ export function SuggestedMarketsCard({
               noPrice: market.noPrice || 5000,
               totalVolume: market.totalVolume || 0,
               totalTrades: market.totalTrades || 0,
+              aiProbability: market.aiProbability,
+              aiReasoning: market.aiReasoning,
             }}
             variant="detailed"
             summaryId={summaryId}
