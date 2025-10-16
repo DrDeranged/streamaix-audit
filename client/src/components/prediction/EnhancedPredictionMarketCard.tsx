@@ -135,12 +135,21 @@ export function EnhancedPredictionMarketCard({
       });
       queryClient.invalidateQueries({ queryKey: ['/api/prediction-markets'] });
     },
-    onError: (error: Error) => {
-      toast({
-        title: 'Failed to Create Market',
-        description: error.message,
-        variant: 'destructive',
-      });
+    onError: (error: any) => {
+      // Check if it's a duplicate market error
+      if (error.message?.includes('409')) {
+        toast({
+          title: 'Market Already Exists',
+          description: 'A market with this question already exists. Check the markets page to trade on it!',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Failed to Create Market',
+          description: error.message || 'An error occurred while creating the market',
+          variant: 'destructive',
+        });
+      }
     },
   });
 
