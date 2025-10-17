@@ -130,37 +130,37 @@ export default function InsightsDashboard() {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'bg-red-500/20 text-red-400 border-red-400/30';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-400/30';
-      case 'low': return 'bg-green-500/20 text-green-400 border-green-400/30';
+      case 'high': return 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-400/30';
+      case 'medium': return 'bg-purple-500/20 text-purple-400 border-purple-400/30';
+      case 'low': return 'bg-cyan-500/20 text-cyan-400 border-cyan-400/30';
       default: return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
     }
   };
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
-      case 'bullish': return <TrendingUp className="h-4 w-4 text-green-400" />;
-      case 'bearish': return <TrendingDown className="h-4 w-4 text-red-400" />;
-      default: return <Activity className="h-4 w-4 text-gray-400" />;
+      case 'bullish': return <TrendingUp className="h-4 w-4 text-cyan-400" />;
+      case 'bearish': return <TrendingDown className="h-4 w-4 text-fuchsia-400" />;
+      default: return <Activity className="h-4 w-4 text-purple-400" />;
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'trading': return <Target className="h-5 w-5 text-blue-400" />;
-      case 'market': return <BarChart3 className="h-5 w-5 text-purple-400" />;
-      case 'opportunity': return <Lightbulb className="h-5 w-5 text-yellow-400" />;
-      case 'alert': return <AlertCircle className="h-5 w-5 text-red-400" />;
-      default: return <Zap className="h-5 w-5 text-gray-400" />;
+      case 'trading': return <Target className="h-5 w-5 text-purple-400" />;
+      case 'market': return <BarChart3 className="h-5 w-5 text-fuchsia-400" />;
+      case 'opportunity': return <Lightbulb className="h-5 w-5 text-cyan-400" />;
+      case 'alert': return <AlertCircle className="h-5 w-5 text-fuchsia-400" />;
+      default: return <Zap className="h-5 w-5 text-purple-400" />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-3">
               <Brain className="h-10 w-10 text-purple-400" />
               Smart Insights
             </h1>
@@ -171,58 +171,58 @@ export default function InsightsDashboard() {
         </div>
 
         <div className="grid md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400">Active Signals</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">{insights.length}</div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{insights.length}</div>
+              <div className="flex items-center gap-1 text-xs text-cyan-400 mt-1">
                 <ArrowUpRight className="h-3 w-3" />
                 <span>+12% from last week</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400">Avg Confidence</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                 {Math.round(insights.reduce((acc, i) => acc + i.confidence, 0) / insights.length)}%
               </div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
                 <CheckCircle2 className="h-3 w-3" />
                 <span>High accuracy</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400">Opportunities</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 {insights.filter(i => i.type === 'opportunity').length}
               </div>
-              <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-fuchsia-400 mt-1">
                 <Lightbulb className="h-3 w-3" />
                 <span>Ready to act</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-500/10 to-orange-500/10 border-red-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400">Risk Alerts</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                 {insights.filter(i => i.type === 'alert').length}
               </div>
-              <div className="flex items-center gap-1 text-xs text-red-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-cyan-400 mt-1">
                 <AlertCircle className="h-3 w-3" />
                 <span>Requires attention</span>
               </div>
@@ -231,20 +231,20 @@ export default function InsightsDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-white/5 border border-white/10">
-            <TabsTrigger value="all" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-all">
+          <TabsList className="bg-purple-900/20 border border-purple-500/30">
+            <TabsTrigger value="all" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-all">
               All Insights
             </TabsTrigger>
-            <TabsTrigger value="trading" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-trading">
+            <TabsTrigger value="trading" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-trading">
               Trading
             </TabsTrigger>
-            <TabsTrigger value="market" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-market">
+            <TabsTrigger value="market" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-market">
               Market
             </TabsTrigger>
-            <TabsTrigger value="opportunity" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-opportunity">
+            <TabsTrigger value="opportunity" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-opportunity">
               Opportunities
             </TabsTrigger>
-            <TabsTrigger value="alert" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-alert">
+            <TabsTrigger value="alert" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-alert">
               Alerts
             </TabsTrigger>
           </TabsList>
@@ -253,7 +253,7 @@ export default function InsightsDashboard() {
             {filteredInsights.map((insight) => (
               <Card
                 key={insight.id}
-                className="bg-white/5 border-white/10 hover:border-purple-500/50 transition-all duration-300"
+                className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-fuchsia-500/50 transition-all duration-300"
                 data-testid={`insight-${insight.id}`}
               >
                 <CardHeader>
@@ -274,7 +274,7 @@ export default function InsightsDashboard() {
                             {getSentimentIcon(insight.sentiment)}
                           </div>
                         </div>
-                        <CardTitle className="text-white text-lg">{insight.title}</CardTitle>
+                        <CardTitle className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent text-lg">{insight.title}</CardTitle>
                         <CardDescription className="text-gray-400 mt-1">
                           {insight.description}
                         </CardDescription>
@@ -288,16 +288,16 @@ export default function InsightsDashboard() {
                     <div className="flex items-center gap-6">
                       <div className="text-sm">
                         <span className="text-gray-400">Confidence:</span>
-                        <span className="ml-2 font-semibold text-white">{insight.confidence}%</span>
+                        <span className="ml-2 font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">{insight.confidence}%</span>
                       </div>
                       {insight.metrics?.priceChange && (
                         <div className="flex items-center gap-1 text-sm">
                           {insight.metrics.priceChange > 0 ? (
-                            <ArrowUpRight className="h-4 w-4 text-green-400" />
+                            <ArrowUpRight className="h-4 w-4 text-cyan-400" />
                           ) : (
-                            <ArrowDownRight className="h-4 w-4 text-red-400" />
+                            <ArrowDownRight className="h-4 w-4 text-fuchsia-400" />
                           )}
-                          <span className={insight.metrics.priceChange > 0 ? 'text-green-400' : 'text-red-400'}>
+                          <span className={insight.metrics.priceChange > 0 ? 'text-cyan-400' : 'text-fuchsia-400'}>
                             {Math.abs(insight.metrics.priceChange)}%
                           </span>
                         </div>
@@ -305,7 +305,7 @@ export default function InsightsDashboard() {
                       {insight.metrics?.volume && (
                         <div className="text-sm">
                           <span className="text-gray-400">Vol:</span>
-                          <span className="ml-2 text-white">
+                          <span className="ml-2 bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                             ${(insight.metrics.volume / 1000000).toFixed(1)}M
                           </span>
                         </div>
@@ -313,7 +313,7 @@ export default function InsightsDashboard() {
                     </div>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-cyan-700"
                       data-testid={`button-view-${insight.id}`}
                     >
                       View Details

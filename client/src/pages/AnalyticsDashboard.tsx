@@ -65,11 +65,11 @@ export default function AnalyticsDashboard() {
   ];
 
   const categoryData = [
-    { name: 'DeFi', value: 35, color: '#8b5cf6' },
-    { name: 'NFT', value: 25, color: '#3b82f6' },
-    { name: 'Gaming', value: 20, color: '#10b981' },
-    { name: 'Layer2', value: 15, color: '#f59e0b' },
-    { name: 'Infrastructure', value: 5, color: '#ef4444' },
+    { name: 'DeFi', value: 35, color: '#a78bfa' },
+    { name: 'NFT', value: 25, color: '#e879f9' },
+    { name: 'Gaming', value: 20, color: '#22d3ee' },
+    { name: 'Layer2', value: 15, color: '#c084fc' },
+    { name: 'Infrastructure', value: 5, color: '#d946ef' },
   ];
 
   const rewardDistribution = [
@@ -87,14 +87,14 @@ export default function AnalyticsDashboard() {
     { metric: 'Shares', value: 945, change: 15.7 },
   ];
 
-  const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+  const COLORS = ['#a78bfa', '#e879f9', '#22d3ee', '#c084fc', '#d946ef'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-3">
               <BarChart3 className="h-10 w-10 text-purple-400" />
               Analytics Dashboard
             </h1>
@@ -105,70 +105,70 @@ export default function AnalyticsDashboard() {
         </div>
 
         <div className="grid md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Target className="h-4 w-4" />
+                <Target className="h-4 w-4 text-purple-400" />
                 Active Bounties
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">{stats.activeBounties || 0}</div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{stats.activeBounties || 0}</div>
+              <div className="flex items-center gap-1 text-xs text-cyan-400 mt-1">
                 <ArrowUpRight className="h-3 w-3" />
                 <span>+12% this week</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
+                <DollarSign className="h-4 w-4 text-fuchsia-400" />
                 Total Rewards
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                 {(stats.totalRewards || 0).toLocaleString()} STREAM
               </div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
                 <ArrowUpRight className="h-3 w-3" />
                 <span>+28% this week</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Users className="h-4 w-4" />
+                <Users className="h-4 w-4 text-cyan-400" />
                 Active Users
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 {Math.floor(Math.random() * 500) + 250}
               </div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-fuchsia-400 mt-1">
                 <ArrowUpRight className="h-3 w-3" />
                 <span>+18% this week</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-400/20">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Trophy className="h-4 w-4" />
+                <Trophy className="h-4 w-4 text-purple-400" />
                 Completed
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                 {bounties.filter(b => b.status === 'completed').length}
               </div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-cyan-400 mt-1">
                 <ArrowUpRight className="h-3 w-3" />
                 <span>+15% this week</span>
               </div>
@@ -177,23 +177,23 @@ export default function AnalyticsDashboard() {
         </div>
 
         <Tabs value={timeframe} onValueChange={setTimeframe} className="w-full">
-          <TabsList className="bg-white/5 border border-white/10">
-            <TabsTrigger value="7d" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-7d">
+          <TabsList className="bg-purple-900/20 border border-purple-500/30">
+            <TabsTrigger value="7d" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-7d">
               7 Days
             </TabsTrigger>
-            <TabsTrigger value="30d" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-30d">
+            <TabsTrigger value="30d" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-30d">
               30 Days
             </TabsTrigger>
-            <TabsTrigger value="90d" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="tab-90d">
+            <TabsTrigger value="90d" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-90d">
               90 Days
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value={timeframe} className="mt-6 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
-              <Card className="bg-white/5 border-white/10">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent flex items-center gap-2">
                     <Activity className="h-5 w-5 text-purple-400" />
                     Activity Trends
                   </CardTitle>
@@ -210,22 +210,22 @@ export default function AnalyticsDashboard() {
                       <Tooltip 
                         contentStyle={{ 
                           backgroundColor: '#1f2937', 
-                          border: '1px solid #374151',
+                          border: '1px solid #a78bfa',
                           borderRadius: '8px'
                         }}
                       />
                       <Legend />
-                      <Line type="monotone" dataKey="bounties" stroke="#8b5cf6" strokeWidth={2} />
-                      <Line type="monotone" dataKey="summaries" stroke="#3b82f6" strokeWidth={2} />
+                      <Line type="monotone" dataKey="bounties" stroke="#a78bfa" strokeWidth={2} />
+                      <Line type="monotone" dataKey="summaries" stroke="#e879f9" strokeWidth={2} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/5 border-white/10">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Target className="h-5 w-5 text-blue-400" />
+                  <CardTitle className="bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
+                    <Target className="h-5 w-5 text-fuchsia-400" />
                     Category Distribution
                   </CardTitle>
                   <CardDescription className="text-gray-400">
@@ -252,7 +252,7 @@ export default function AnalyticsDashboard() {
                       <Tooltip 
                         contentStyle={{ 
                           backgroundColor: '#1f2937', 
-                          border: '1px solid #374151',
+                          border: '1px solid #e879f9',
                           borderRadius: '8px'
                         }}
                       />
@@ -261,10 +261,10 @@ export default function AnalyticsDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/5 border-white/10">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-green-400" />
+                  <CardTitle className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-cyan-400" />
                     Reward Distribution
                   </CardTitle>
                   <CardDescription className="text-gray-400">
@@ -280,20 +280,26 @@ export default function AnalyticsDashboard() {
                       <Tooltip 
                         contentStyle={{ 
                           backgroundColor: '#1f2937', 
-                          border: '1px solid #374151',
+                          border: '1px solid #22d3ee',
                           borderRadius: '8px'
                         }}
                       />
-                      <Bar dataKey="count" fill="#10b981" />
+                      <Bar dataKey="count" fill="url(#purpleGradient)" />
+                      <defs>
+                        <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#a78bfa" />
+                          <stop offset="100%" stopColor="#e879f9" />
+                        </linearGradient>
+                      </defs>
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/5 border-white/10">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-400" />
+                  <CardTitle className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-fuchsia-400" />
                     Engagement Metrics
                   </CardTitle>
                   <CardDescription className="text-gray-400">
@@ -302,18 +308,18 @@ export default function AnalyticsDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {engagementData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-purple-900/20 rounded-lg border border-purple-500/20">
                       <div className="flex items-center gap-3">
-                        {item.metric === 'Views' && <Eye className="h-5 w-5 text-blue-400" />}
-                        {item.metric === 'Tips' && <DollarSign className="h-5 w-5 text-green-400" />}
-                        {item.metric === 'Comments' && <MessageSquare className="h-5 w-5 text-purple-400" />}
-                        {item.metric === 'Shares' && <TrendingUp className="h-5 w-5 text-yellow-400" />}
+                        {item.metric === 'Views' && <Eye className="h-5 w-5 text-purple-400" />}
+                        {item.metric === 'Tips' && <DollarSign className="h-5 w-5 text-fuchsia-400" />}
+                        {item.metric === 'Comments' && <MessageSquare className="h-5 w-5 text-cyan-400" />}
+                        {item.metric === 'Shares' && <TrendingUp className="h-5 w-5 text-purple-400" />}
                         <div>
                           <div className="text-sm text-gray-400">{item.metric}</div>
-                          <div className="text-xl font-bold text-white">{item.value.toLocaleString()}</div>
+                          <div className="text-xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{item.value.toLocaleString()}</div>
                         </div>
                       </div>
-                      <Badge className={item.change > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
+                      <Badge className={item.change > 0 ? 'bg-purple-500/20 text-purple-400 border-purple-400/30' : 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-400/30'}>
                         {item.change > 0 ? (
                           <ArrowUpRight className="h-3 w-3 mr-1" />
                         ) : (
