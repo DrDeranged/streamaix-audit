@@ -117,10 +117,10 @@ export default function HunterProfile() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Card className="bg-gradient-to-br from-slate-900/80 to-purple-900/40 border-cyan-500/30 backdrop-blur-sm p-8">
+          <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-500/30 backdrop-blur-sm p-8">
             <div className="flex items-start gap-6">
               {/* Avatar */}
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-3xl font-bold text-white ring-4 ring-cyan-400/30">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 flex items-center justify-center text-3xl font-bold text-white ring-4 ring-purple-400/30">
                 {hunter.userId}
               </div>
 
@@ -136,7 +136,7 @@ export default function HunterProfile() {
                     Level {hunter.level}
                   </Badge>
                   {hunter.currentStreak > 0 && (
-                    <Badge variant="outline" className="text-orange-400 border-orange-500/50">
+                    <Badge variant="outline" className="text-fuchsia-400 border-fuchsia-500/50">
                       🔥 {hunter.currentStreak} day streak
                     </Badge>
                   )}
@@ -153,7 +153,7 @@ export default function HunterProfile() {
                     <span className="text-gray-400">
                       {hunter.reputation.toLocaleString()} / {nextLevelRep.toLocaleString()} XP
                     </span>
-                    <span className="text-cyan-400">{levelProgress.toFixed(0)}%</span>
+                    <span className="text-purple-400">{levelProgress.toFixed(0)}%</span>
                   </div>
                   <Progress value={levelProgress} className="h-3 bg-slate-800" />
                 </div>
@@ -162,7 +162,7 @@ export default function HunterProfile() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-gray-400 text-sm">Total Earnings</p>
-                    <p className="text-lg font-bold text-green-400">{formatTokenAmount(hunter.totalEarnings)} $STREAM</p>
+                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">{formatTokenAmount(hunter.totalEarnings)} $STREAM</p>
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Completed</p>
@@ -170,11 +170,11 @@ export default function HunterProfile() {
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Avg Quality</p>
-                    <p className="text-lg font-bold text-yellow-400">{hunter.averageQuality?.toFixed(1) || 0}/100</p>
+                    <p className="text-lg font-bold text-fuchsia-400">{hunter.averageQuality?.toFixed(1) || 0}/100</p>
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Longest Streak</p>
-                    <p className="text-lg font-bold text-orange-400">{hunter.longestStreak} days</p>
+                    <p className="text-lg font-bold text-cyan-400">{hunter.longestStreak} days</p>
                   </div>
                 </div>
               </div>
@@ -190,7 +190,7 @@ export default function HunterProfile() {
             transition={{ delay: 0.1 }}
             className="lg:col-span-1"
           >
-            <Card className="bg-slate-900/50 border-purple-500/30 backdrop-blur-sm p-6">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Award className="w-5 h-5 text-purple-400" />
                 <h2 className="text-xl font-bold text-white">Achievements</h2>
@@ -238,11 +238,11 @@ export default function HunterProfile() {
             transition={{ delay: 0.2 }}
             className="lg:col-span-2"
           >
-            <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-6">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
               <div className="flex items-center gap-2 mb-6">
-                <Activity className="w-5 h-5 text-cyan-400" />
+                <Activity className="w-5 h-5 text-purple-400" />
                 <h2 className="text-xl font-bold text-white">Recent Activity</h2>
-                <Badge variant="outline" className="ml-auto border-cyan-500/50 text-cyan-400">
+                <Badge variant="outline" className="ml-auto border-purple-500/50 text-purple-400">
                   {completedBounties.length} completed
                 </Badge>
               </div>
@@ -258,7 +258,7 @@ export default function HunterProfile() {
                       <div className="flex-1">
                         <p className="font-semibold text-white">{bounty.title}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs border-cyan-500/50 text-cyan-400">
+                          <Badge variant="outline" className="text-xs border-fuchsia-500/50 text-fuchsia-400">
                             {bounty.category || 'General'}
                           </Badge>
                           {bounty.qualityScore && (
@@ -269,7 +269,7 @@ export default function HunterProfile() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-green-400">{formatTokenAmount(bounty.reward)} {bounty.tokenType}</p>
+                        <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">{formatTokenAmount(bounty.reward)} {bounty.tokenType}</p>
                         <p className="text-xs text-gray-400">{new Date(bounty.completedAt).toLocaleDateString()}</p>
                       </div>
                     </div>

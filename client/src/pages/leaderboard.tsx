@@ -88,7 +88,7 @@ export default function Leaderboard() {
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 mb-2">
+              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
                 Bounty Hunter Leaderboard
               </h1>
               <p className="text-gray-400">
@@ -97,7 +97,7 @@ export default function Leaderboard() {
             </div>
 
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[200px] bg-slate-900/50 border-cyan-500/30" data-testid="select-sort">
+              <SelectTrigger className="w-[200px] bg-slate-900/50 border-purple-500/30" data-testid="select-sort">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -125,17 +125,17 @@ export default function Leaderboard() {
                 transition={{ delay: 0.2 }}
                 className="md:order-1"
               >
-                <Card className="bg-gradient-to-br from-gray-900/50 to-slate-900/50 border-gray-500/30 backdrop-blur-sm p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/10 rounded-full blur-3xl" />
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-fuchsia-500/30 backdrop-blur-sm p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/10 rounded-full blur-3xl" />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline" className="border-gray-500/50 text-gray-300">
+                      <Badge variant="outline" className="border-fuchsia-500/50 text-fuchsia-300">
                         #2
                       </Badge>
-                      <Medal className="w-8 h-8 text-gray-300" />
+                      <Medal className="w-8 h-8 text-fuchsia-300" />
                     </div>
                     <div className="text-center mb-4">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-fuchsia-400 to-fuchsia-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white">
                         {hunters[1]?.userId || 'U'}
                       </div>
                       <p className="text-xl font-bold text-white mb-1">User #{hunters[1]?.userId}</p>
@@ -148,7 +148,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Earnings:</span>
-                        <span className="text-green-400">{formatTokenAmount(hunters[1]?.totalEarnings || '0')} $STREAM</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatTokenAmount(hunters[1]?.totalEarnings || '0')} $STREAM</span>
                       </div>
                     </div>
                   </div>
@@ -162,21 +162,21 @@ export default function Leaderboard() {
                 transition={{ delay: 0.15 }}
                 className="md:order-2 md:-mt-4"
               >
-                <Card className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 border-yellow-500/50 backdrop-blur-sm p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-yellow-500/20 rounded-full blur-3xl" />
+                <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-500/50 backdrop-blur-sm p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl" />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
+                      <Badge variant="outline" className="border-purple-500/50 text-purple-400">
                         👑 Champion
                       </Badge>
-                      <Crown className="w-10 h-10 text-yellow-400" />
+                      <Crown className="w-10 h-10 text-purple-400" />
                     </div>
                     <div className="text-center mb-4">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 mx-auto mb-3 flex items-center justify-center text-3xl font-bold text-white ring-4 ring-yellow-400/50">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 mx-auto mb-3 flex items-center justify-center text-3xl font-bold text-white ring-4 ring-purple-400/50">
                         {hunters[0]?.userId || 'U'}
                       </div>
                       <p className="text-2xl font-bold text-white mb-1">User #{hunters[0]?.userId}</p>
-                      <p className="text-sm text-yellow-400">Level {hunters[0]?.level}</p>
+                      <p className="text-sm text-purple-400">Level {hunters[0]?.level}</p>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between">
@@ -185,7 +185,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Earnings:</span>
-                        <span className="text-yellow-400 font-bold">{formatTokenAmount(hunters[0]?.totalEarnings || '0')} $STREAM</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 font-bold">{formatTokenAmount(hunters[0]?.totalEarnings || '0')} $STREAM</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Quality:</span>
@@ -203,17 +203,17 @@ export default function Leaderboard() {
                 transition={{ delay: 0.25 }}
                 className="md:order-3"
               >
-                <Card className="bg-gradient-to-br from-orange-900/50 to-red-900/50 border-orange-500/30 backdrop-blur-sm p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl" />
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-cyan-500/30 backdrop-blur-sm p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl" />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline" className="border-orange-500/50 text-orange-400">
+                      <Badge variant="outline" className="border-cyan-500/50 text-cyan-400">
                         #3
                       </Badge>
-                      <Medal className="w-8 h-8 text-orange-400" />
+                      <Medal className="w-8 h-8 text-cyan-400" />
                     </div>
                     <div className="text-center mb-4">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-red-500 mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white">
                         {hunters[2]?.userId || 'U'}
                       </div>
                       <p className="text-xl font-bold text-white mb-1">User #{hunters[2]?.userId}</p>
@@ -226,7 +226,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Earnings:</span>
-                        <span className="text-green-400">{formatTokenAmount(hunters[2]?.totalEarnings || '0')} $STREAM</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatTokenAmount(hunters[2]?.totalEarnings || '0')} $STREAM</span>
                       </div>
                     </div>
                   </div>
@@ -242,9 +242,9 @@ export default function Leaderboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm overflow-hidden">
-            <div className="p-6 border-b border-cyan-500/20">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm overflow-hidden">
+            <div className="p-6 border-b border-purple-500/20">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
                 All Hunters
               </h2>
             </div>
@@ -261,7 +261,7 @@ export default function Leaderboard() {
                 <p className="text-gray-400">No hunters yet. Be the first to complete a bounty!</p>
               </div>
             ) : (
-              <div className="divide-y divide-cyan-500/10">
+              <div className="divide-y divide-purple-500/10">
                 {hunters.map((hunter, index) => {
                   const podium = getPodiumPlace(index);
                   const levelColor = LEVEL_COLORS[Math.min(hunter.level - 1, LEVEL_COLORS.length - 1)];
@@ -286,7 +286,7 @@ export default function Leaderboard() {
                         </div>
 
                         {/* Avatar */}
-                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-white font-bold ${podium ? 'ring-2 ' + podium.border : ''}`}>
+                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center text-white font-bold ${podium ? 'ring-2 ' + podium.border : ''}`}>
                           {hunter.userId}
                         </div>
 
@@ -298,7 +298,7 @@ export default function Leaderboard() {
                               Level {hunter.level}
                             </Badge>
                             {hunter.currentStreak > 0 && (
-                              <Badge variant="outline" className="text-xs text-orange-400 border-orange-500/50">
+                              <Badge variant="outline" className="text-xs text-fuchsia-400 border-fuchsia-500/50">
                                 🔥 {hunter.currentStreak} day streak
                               </Badge>
                             )}
@@ -326,19 +326,19 @@ export default function Leaderboard() {
                         <div className="hidden md:flex items-center gap-6 text-sm">
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Reputation</p>
-                            <p className="font-bold text-cyan-400">{hunter.reputation.toLocaleString()}</p>
+                            <p className="font-bold text-purple-400">{hunter.reputation.toLocaleString()}</p>
                           </div>
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Earnings</p>
-                            <p className="font-bold text-green-400">{formatTokenAmount(hunter.totalEarnings)} $STREAM</p>
+                            <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatTokenAmount(hunter.totalEarnings)} $STREAM</p>
                           </div>
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Completed</p>
-                            <p className="font-bold text-purple-400">{hunter.bountiesCompleted}</p>
+                            <p className="font-bold text-cyan-400">{hunter.bountiesCompleted}</p>
                           </div>
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Quality</p>
-                            <p className="font-bold text-yellow-400">{hunter.averageQuality?.toFixed(1) || 0}</p>
+                            <p className="font-bold text-fuchsia-400">{hunter.averageQuality?.toFixed(1) || 0}</p>
                           </div>
                         </div>
 
@@ -346,7 +346,7 @@ export default function Leaderboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-cyan-500/30 hover:bg-cyan-500/10"
+                          className="border-purple-500/30 hover:bg-purple-500/10"
                           onClick={() => setLocation(`/hunter/${hunter.id}`)}
                           data-testid={`button-view-profile-${hunter.id}`}
                         >

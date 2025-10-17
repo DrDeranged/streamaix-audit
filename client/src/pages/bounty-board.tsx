@@ -132,7 +132,7 @@ export default function BountyBoard() {
 
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 mb-2">
+              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
                 Bounty Board
               </h1>
               <p className="text-gray-400">
@@ -145,7 +145,7 @@ export default function BountyBoard() {
                 <Button
                   size="lg"
                   data-testid="button-create-bounty"
-                  className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                  className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
                   disabled={!isConnected}
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -176,10 +176,10 @@ export default function BountyBoard() {
           transition={{ delay: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
         >
-          <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-cyan-500/10">
-                <Trophy className="w-6 h-6 text-cyan-400" />
+              <div className="p-3 rounded-lg bg-purple-500/10">
+                <Trophy className="w-6 h-6 text-purple-400" />
               </div>
               <div>
                 <p className="text-sm text-gray-400">Active Bounties</p>
@@ -190,10 +190,10 @@ export default function BountyBoard() {
             </div>
           </Card>
 
-          <Card className="bg-slate-900/50 border-purple-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-fuchsia-500/30 backdrop-blur-sm p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-purple-500/10">
-                <DollarSign className="w-6 h-6 text-purple-400" />
+              <div className="p-3 rounded-lg bg-fuchsia-500/10">
+                <DollarSign className="w-6 h-6 text-fuchsia-400" />
               </div>
               <div>
                 <p className="text-sm text-gray-400">Total Rewards</p>
@@ -204,10 +204,10 @@ export default function BountyBoard() {
             </div>
           </Card>
 
-          <Card className="bg-slate-900/50 border-blue-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-cyan-500/30 backdrop-blur-sm p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-blue-500/10">
-                <CheckCircle className="w-6 h-6 text-blue-400" />
+              <div className="p-3 rounded-lg bg-cyan-500/10">
+                <CheckCircle className="w-6 h-6 text-cyan-400" />
               </div>
               <div>
                 <p className="text-sm text-gray-400">Summaries Created</p>
@@ -218,10 +218,10 @@ export default function BountyBoard() {
             </div>
           </Card>
 
-          <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-cyan-500/10">
-                <Clock className="w-6 h-6 text-cyan-400" />
+              <div className="p-3 rounded-lg bg-purple-500/10">
+                <Clock className="w-6 h-6 text-purple-400" />
               </div>
               <div>
                 <p className="text-sm text-gray-400">Avg Completion</p>
@@ -244,11 +244,11 @@ export default function BountyBoard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Trending */}
               {trendingBounties.length > 0 && (
-                <Card className="bg-gradient-to-br from-cyan-900/20 to-purple-900/20 border-cyan-500/30 backdrop-blur-sm p-6">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-semibold text-cyan-300">Trending</h3>
-                    <Badge variant="outline" className="ml-auto border-cyan-500/50 text-cyan-400 text-xs">
+                    <TrendingUp className="w-5 h-5 text-purple-400" />
+                    <h3 className="text-lg font-semibold text-purple-300">Trending</h3>
+                    <Badge variant="outline" className="ml-auto border-purple-500/50 text-purple-400 text-xs">
                       {trendingBounties.length}
                     </Badge>
                   </div>
@@ -261,7 +261,7 @@ export default function BountyBoard() {
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-cyan-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
                           <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
                         </div>
                       </div>
@@ -272,11 +272,11 @@ export default function BountyBoard() {
 
               {/* Hot */}
               {hotBounties.length > 0 && (
-                <Card className="bg-gradient-to-br from-orange-900/20 to-red-900/20 border-orange-500/30 backdrop-blur-sm p-6">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-fuchsia-500/30 backdrop-blur-sm p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Flame className="w-5 h-5 text-orange-400" />
-                    <h3 className="text-lg font-semibold text-orange-300">Hot</h3>
-                    <Badge variant="outline" className="ml-auto border-orange-500/50 text-orange-400 text-xs">
+                    <Flame className="w-5 h-5 text-fuchsia-400" />
+                    <h3 className="text-lg font-semibold text-fuchsia-300">Hot</h3>
+                    <Badge variant="outline" className="ml-auto border-fuchsia-500/50 text-fuchsia-400 text-xs">
                       {hotBounties.length}
                     </Badge>
                   </div>
@@ -289,7 +289,7 @@ export default function BountyBoard() {
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-orange-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
                           <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
                         </div>
                       </div>
@@ -300,11 +300,11 @@ export default function BountyBoard() {
 
               {/* Urgent */}
               {urgentBounties.length > 0 && (
-                <Card className="bg-gradient-to-br from-yellow-900/20 to-red-900/20 border-yellow-500/30 backdrop-blur-sm p-6">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-cyan-500/30 backdrop-blur-sm p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <AlertCircle className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-lg font-semibold text-yellow-300">Urgent</h3>
-                    <Badge variant="outline" className="ml-auto border-yellow-500/50 text-yellow-400 text-xs">
+                    <AlertCircle className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-lg font-semibold text-cyan-300">Urgent</h3>
+                    <Badge variant="outline" className="ml-auto border-cyan-500/50 text-cyan-400 text-xs">
                       {urgentBounties.length}
                     </Badge>
                   </div>
@@ -317,7 +317,7 @@ export default function BountyBoard() {
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-yellow-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
                           <span className="text-xs text-gray-400">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
                         </div>
                       </div>
@@ -342,7 +342,7 @@ export default function BountyBoard() {
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] bg-slate-900/50 border-cyan-500/30" data-testid="select-status-filter">
+            <SelectTrigger className="w-[180px] bg-slate-900/50 border-purple-500/30" data-testid="select-status-filter">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -369,7 +369,7 @@ export default function BountyBoard() {
             </SelectContent>
           </Select>
 
-          <Badge variant="outline" className="ml-auto border-cyan-500/50 text-cyan-400">
+          <Badge variant="outline" className="ml-auto border-purple-500/50 text-purple-400">
             {bounties.length} bounties
           </Badge>
         </motion.div>
@@ -380,12 +380,12 @@ export default function BountyBoard() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card
                 key={i}
-                className="bg-slate-900/50 border-cyan-500/20 backdrop-blur-sm h-64 animate-pulse"
+                className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/20 backdrop-blur-sm h-64 animate-pulse"
               />
             ))}
           </div>
         ) : bounties.length === 0 ? (
-          <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-12 text-center">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-12 text-center">
             <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No Bounties Found</h3>
             <p className="text-gray-400 mb-6">
@@ -394,7 +394,7 @@ export default function BountyBoard() {
             {isConnected && (
               <Button
                 onClick={() => setCreateModalOpen(true)}
-                className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
                 data-testid="button-create-first-bounty"
               >
                 <Plus className="w-5 h-5 mr-2" />

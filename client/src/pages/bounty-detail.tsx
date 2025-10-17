@@ -414,17 +414,17 @@ export default function BountyDetail() {
   });
 
   const statusColors: Record<string, string> = {
-    open: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400',
-    claimed: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400',
-    in_progress: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
-    completed: 'border-green-500/50 bg-green-500/10 text-green-400',
-    expired: 'border-red-500/50 bg-red-500/10 text-red-400',
+    open: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
+    claimed: 'border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-400',
+    in_progress: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400',
+    completed: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
+    expired: 'border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-400',
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
-        <div className="text-cyan-400 text-xl">Loading bounty...</div>
+        <div className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 text-xl">Loading bounty...</div>
       </div>
     );
   }
@@ -435,7 +435,7 @@ export default function BountyDetail() {
         <div className="text-center">
           <h2 className="text-2xl text-white mb-4">Bounty not found</h2>
           <Link href="/bounties">
-            <Button variant="outline" className="border-cyan-500/30">
+            <Button variant="outline" className="border-purple-500/30">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Bounties
             </Button>
@@ -464,7 +464,7 @@ export default function BountyDetail() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header */}
-            <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-6">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white mb-3" data-testid="bounty-detail-title">
@@ -514,7 +514,7 @@ export default function BountyDetail() {
                     href={bounty.contentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-cyan-400 hover:text-cyan-300 flex items-center gap-2"
+                    className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 hover:from-purple-300 hover:to-fuchsia-300 flex items-center gap-2"
                   >
                     {bounty.contentUrl}
                     <ExternalLink className="w-4 h-4" />
@@ -535,7 +535,7 @@ export default function BountyDetail() {
                   </button>
                   <button
                     onClick={() => trackShare.mutate()}
-                    className="flex items-center gap-2 text-gray-400 hover:text-blue-400 transition-colors"
+                    className="flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors"
                     data-testid="button-share-bounty"
                   >
                     <Share2 className="w-4 h-4" />
@@ -728,7 +728,7 @@ export default function BountyDetail() {
                         <Button
                           onClick={addPrediction}
                           variant="outline"
-                          className="w-full border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+                          className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
                           data-testid="button-add-prediction"
                         >
                           <Plus className="w-4 h-4 mr-2" />
@@ -772,16 +772,16 @@ export default function BountyDetail() {
 
             {/* Review Interface (for creators) */}
             {canReview && (
-              <Card className="bg-slate-900/50 border-green-500/30 backdrop-blur-sm p-6">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-green-400" />
+                  <Award className="w-5 h-5 text-purple-400" />
                   Review Submission
                 </h2>
                 <div className="space-y-4">
                   <div className="p-4 bg-slate-800/50 rounded-lg">
                     <p className="text-sm text-gray-400 mb-2">Submission ID:</p>
                     <Link href={`/summaries/${bounty.summaryId}`}>
-                      <a className="text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
+                      <a className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 hover:from-purple-300 hover:to-fuchsia-300 flex items-center gap-2">
                         View Summary
                         <ExternalLink className="w-4 h-4" />
                       </a>
@@ -800,7 +800,7 @@ export default function BountyDetail() {
                     <Button
                       onClick={() => handleApprove.mutate()}
                       disabled={handleApprove.isPending}
-                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                      className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
                       data-testid="button-approve-submission"
                     >
                       <CheckCircle className="w-5 h-5 mr-2" />
@@ -813,7 +813,7 @@ export default function BountyDetail() {
 
             {/* Quality Score (for completed) */}
             {bounty.status === 'completed' && qualityData && (
-              <Card className="bg-slate-900/50 border-purple-500/30 backdrop-blur-sm p-6">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-purple-400" />
                   Quality Analysis
@@ -839,12 +839,12 @@ export default function BountyDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Reward Info */}
-            <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-6">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Reward</h3>
               <div className="space-y-4">
-                <div className="p-4 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg border border-cyan-500/30">
+                <div className="p-4 bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 rounded-lg border border-purple-500/30">
                   <div className="flex items-center gap-3 mb-2">
-                    <Trophy className="w-6 h-6 text-cyan-400" />
+                    <Trophy className="w-6 h-6 text-purple-400" />
                     <div>
                       <p className="text-sm text-gray-400">Base Reward</p>
                       <p className="text-2xl font-bold text-white">{bounty.reward} $STREAM</p>
@@ -853,9 +853,9 @@ export default function BountyDetail() {
                 </div>
 
                 {(bounty.tipPool ?? 0) > 0 && (
-                  <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                  <div className="p-4 bg-fuchsia-500/10 rounded-lg border border-fuchsia-500/30">
                     <div className="flex items-center gap-3">
-                      <DollarSign className="w-6 h-6 text-purple-400" />
+                      <DollarSign className="w-6 h-6 text-fuchsia-400" />
                       <div>
                         <p className="text-sm text-gray-400">Tip Pool</p>
                         <p className="text-xl font-bold text-white">{bounty.tipPool ?? 0} $STREAM</p>
@@ -867,7 +867,7 @@ export default function BountyDetail() {
                 <div className="pt-4 border-t border-gray-700">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-400">Total Reward:</span>
-                    <span className="text-2xl font-bold text-cyan-400">
+                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
                       {(bounty.reward || 0) + (bounty.tipPool || 0)} $STREAM
                     </span>
                   </div>
@@ -902,15 +902,15 @@ export default function BountyDetail() {
             </Card>
 
             {/* Deadline & Details */}
-            <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm p-6">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Details</h3>
               <div className="space-y-3">
                 {bounty.deadline && (
                   <div className="flex items-center gap-3">
-                    <Clock className={`w-5 h-5 ${isExpired ? 'text-red-400' : 'text-cyan-400'}`} />
+                    <Clock className={`w-5 h-5 ${isExpired ? 'text-fuchsia-400' : 'text-purple-400'}`} />
                     <div>
                       <p className="text-sm text-gray-400">Deadline</p>
-                      <p className={`font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>
+                      <p className={`font-medium ${isExpired ? 'text-fuchsia-400' : 'text-white'}`}>
                         {isExpired ? 'Expired' : formatDistanceToNow(new Date(bounty.deadline), { addSuffix: true })}
                       </p>
                     </div>
@@ -929,7 +929,7 @@ export default function BountyDetail() {
 
                 {bounty.category && (
                   <div className="flex items-center gap-3">
-                    <Tag className="w-5 h-5 text-cyan-400" />
+                    <Tag className="w-5 h-5 text-fuchsia-400" />
                     <div>
                       <p className="text-sm text-gray-400">Category</p>
                       <p className="font-medium text-white">{bounty.category}</p>
@@ -939,7 +939,7 @@ export default function BountyDetail() {
 
                 {bounty.claimerWallet && (
                   <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-yellow-400" />
+                    <User className="w-5 h-5 text-cyan-400" />
                     <div>
                       <p className="text-sm text-gray-400">Claimed by</p>
                       <p className="font-medium text-white font-mono text-sm">
@@ -965,7 +965,7 @@ export default function BountyDetail() {
               <Button
                 onClick={handleClaim}
                 disabled={claimBounty.isPending}
-                className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-lg py-6"
+                className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 text-lg py-6"
                 data-testid="button-claim-bounty"
               >
                 <Trophy className="w-5 h-5 mr-2" />
@@ -974,15 +974,15 @@ export default function BountyDetail() {
             )}
 
             {isClaimer && bounty.status === 'claimed' && (
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-yellow-400 text-sm font-medium">You've claimed this bounty!</p>
+              <div className="p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-lg">
+                <p className="text-fuchsia-400 text-sm font-medium">You've claimed this bounty!</p>
                 <p className="text-gray-400 text-xs mt-1">Submit your work using the form above.</p>
               </div>
             )}
 
             {!isConnected && canClaim && (
-              <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                <p className="text-orange-400 text-sm">Connect your wallet to claim this bounty</p>
+              <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                <p className="text-purple-400 text-sm">Connect your wallet to claim this bounty</p>
               </div>
             )}
           </div>
