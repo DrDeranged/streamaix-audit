@@ -57,10 +57,10 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-500 dark:to-purple-600 bg-clip-text text-transparent">
             Social + Ecosystem
           </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
             Seamlessly integrated with your favorite Web3 social platforms
           </p>
         </motion.div>
@@ -86,7 +86,7 @@ export function SocialEcosystem() {
               <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${platform.color} rounded-xl flex items-center justify-center`}>
                 <platform.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-sm sm:text-lg font-semibold text-foreground text-center sm:text-left">{platform.name}</span>
+              <span className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white text-center sm:text-left">{platform.name}</span>
             </motion.div>
           ))}
         </div>
@@ -99,7 +99,7 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <div className="inline-flex items-center space-x-2 sm:space-x-4 glass-bg glass-border rounded-xl p-3 sm:p-4 mx-4">
+          <div className="inline-flex items-center space-x-2 sm:space-x-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-purple-500/30 backdrop-blur-xl rounded-xl p-3 sm:p-4 mx-4">
             <motion.div 
               className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center"
               animate={{ scale: [1, 1.1, 1] }}
@@ -112,7 +112,7 @@ export function SocialEcosystem() {
               transition={{ duration: 2, repeat: Infinity }}
               className="hidden sm:block"
             >
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400" />
             </motion.div>
             <div className="flex space-x-1 sm:space-x-2">
               {platforms.slice(0, 3).map((platform, index) => (
@@ -128,7 +128,7 @@ export function SocialEcosystem() {
                 />
               ))}
             </div>
-            <div className="text-muted-foreground text-xs sm:text-sm text-center sm:text-left">
+            <div className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
               One-click sharing across all platforms
             </div>
           </div>

@@ -96,9 +96,9 @@ function BountyCard({ bounty, index }: BountyCardProps) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="h-full"
     >
-      <Card className="group h-full bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10 backdrop-blur-xl hover:border-purple-indigo-500/30 transition-all duration-500 overflow-hidden relative">
+      <Card className="group h-full bg-white dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] border-slate-200 dark:border-white/10 backdrop-blur-xl hover:border-purple-300 dark:hover:border-purple-500/30 transition-all duration-500 overflow-hidden relative">
         {/* Hover gradient effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 dark:group-hover:from-purple-500/10 dark:group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none" />
         
         <CardContent className="p-6 flex flex-col h-full relative">
           {/* Header with reward */}
@@ -108,7 +108,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
                 <Target className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-600 dark:text-gray-400">
                   {bounty.createdAt ? formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true }) : "recently"}
                 </p>
               </div>
@@ -120,12 +120,12 @@ function BountyCard({ bounty, index }: BountyCardProps) {
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">
             {bounty.title}
           </h3>
 
           {/* Description */}
-          <p className="text-gray-300 text-sm mb-4 line-clamp-2 flex-grow">
+          <p className="text-slate-700 dark:text-gray-300 text-sm mb-4 line-clamp-2 flex-grow">
             {bounty.description}
           </p>
 
@@ -137,14 +137,14 @@ function BountyCard({ bounty, index }: BountyCardProps) {
             </Badge>
             
             {bounty.category && (
-              <Badge variant="outline" className="border-purple-indigo-400/30 text-purple-300 bg-purple-indigo-500/10">
+              <Badge variant="outline" className="border-purple-300 dark:border-purple-400/30 text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-500/10">
                 {bounty.category}
               </Badge>
             )}
           </div>
 
           {/* Footer with time and action */}
-          <div className="flex items-center justify-between pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10">
             <div className={`flex items-center gap-1 text-sm ${urgencyColor}`}>
               <Clock className="w-4 h-4" />
               {formatTimeLeft(bounty.deadline)}

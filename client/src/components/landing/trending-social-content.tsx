@@ -84,7 +84,7 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
         className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 ${
           selectedTopic === null
             ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-            : 'bg-gradient-to-r from-slate-800/60 to-slate-700/60 text-slate-300 hover:from-slate-700/70 hover:to-slate-600/70 border border-white/20 hover:border-white/30'
+            : 'bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 text-slate-800 dark:text-slate-300 hover:bg-slate-50 dark:hover:from-slate-700/70 dark:hover:to-slate-600/70 border border-slate-200 dark:border-white/20 hover:border-slate-300 dark:hover:border-white/30'
         }`}
         data-testid="topic-all"
       >
@@ -100,7 +100,7 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
           className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 relative overflow-hidden group ${
             selectedTopic === trend.topic
               ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-              : 'bg-gradient-to-r from-slate-800/60 to-slate-700/60 text-slate-300 hover:from-slate-700/70 hover:to-slate-600/70 border border-white/20 hover:border-white/30'
+              : 'bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 text-slate-800 dark:text-slate-300 hover:bg-slate-50 dark:hover:from-slate-700/70 dark:hover:to-slate-600/70 border border-slate-200 dark:border-white/20 hover:border-slate-300 dark:hover:border-white/30'
           }`}
           data-testid={`topic-${i}`}
         >
@@ -134,19 +134,19 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
     return (
       <div className="space-y-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+          <div key={i} className="bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/30 dark:via-white/5 to-transparent animate-shimmer" />
             <div className="flex gap-4 mb-4 relative z-10">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-slate-700/40 to-slate-600/40 rounded-full border-2 border-white/20" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full border-2 border-slate-300 dark:border-white/20" />
               <div className="flex-1 space-y-3">
-                <div className="h-4 bg-gradient-to-r from-slate-700/40 to-slate-600/40 rounded-full w-1/3" />
-                <div className="h-3 bg-gradient-to-r from-slate-800/30 to-slate-700/30 rounded-full w-1/4" />
+                <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full w-1/3" />
+                <div className="h-3 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-1/4" />
               </div>
             </div>
             <div className="space-y-3 relative z-10">
-              <div className="h-4 bg-gradient-to-r from-slate-800/30 to-slate-700/30 rounded-full w-full" />
-              <div className="h-4 bg-gradient-to-r from-slate-800/20 to-slate-700/20 rounded-full w-4/5" />
-              <div className="h-3 bg-gradient-to-r from-slate-800/10 to-slate-700/10 rounded-full w-2/3" />
+              <div className="h-4 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-full" />
+              <div className="h-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/20 dark:to-slate-700/20 rounded-full w-4/5" />
+              <div className="h-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/10 dark:to-slate-700/10 rounded-full w-2/3" />
             </div>
           </div>
         ))}
@@ -156,18 +156,18 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (error) {
     return (
-      <div className="text-center py-12 sm:py-16 bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl relative overflow-hidden">
+      <div className="text-center py-12 sm:py-16 bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5" />
         <div className="relative z-10">
           <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
             <ExternalLink className="w-8 h-8 text-red-400" />
           </div>
-          <p className="text-slate-300 mb-6 text-base font-medium">Unable to load conversations</p>
+          <p className="text-slate-900 dark:text-slate-300 mb-6 text-base font-medium">Unable to load conversations</p>
           <Button 
             onClick={() => window.location.reload()} 
             variant="outline" 
             size="lg"
-            className="border-white/30 text-slate-200 hover:bg-white/10 hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
+            className="border-slate-300 dark:border-white/30 text-slate-900 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 hover:border-slate-400 dark:hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
             data-testid="retry-feed"
           >
             Try again
@@ -179,36 +179,36 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (!casts || casts.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl relative overflow-hidden">
+      <div className="text-center py-12 sm:py-20 bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-purple-500/5 to-cyan-500/5" />
         <div className="relative z-10 px-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500/20 via-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border-2 border-white/20"
+            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500/20 via-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border-2 border-slate-200 dark:border-white/20"
           >
             <TrendingUp className="w-10 h-10 text-purple-400" />
           </motion.div>
-          <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
+          <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
             No Conversations Yet
           </h3>
-          <p className="text-slate-400 mb-4 text-sm sm:text-base max-w-md mx-auto">
+          <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm sm:text-base max-w-md mx-auto">
             The crypto conversation space is temporarily quiet. Check back soon for the latest discussions and insights.
           </p>
-          <p className="text-slate-500 text-xs sm:text-sm mb-6">
+          <p className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm mb-6">
             Social feeds are being refreshed. This happens when API sources are temporarily unavailable.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Button 
               onClick={() => window.location.reload()} 
               variant="outline" 
-              className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400/50 hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-medium"
+              className="border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 hover:border-purple-400/50 hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-medium"
               data-testid="refresh-feed"
             >
               Refresh Feed
             </Button>
-            <a href="/features" className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1">
+            <a href="/features" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors flex items-center gap-1">
               Explore Features <ChevronRight className="w-4 h-4" />
             </a>
           </div>
@@ -233,7 +233,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
           <Button
             onClick={() => setShowAll(true)}
             variant="outline"
-            className="w-full sm:w-auto bg-gradient-to-r from-slate-800/60 to-slate-700/60 border-white/30 text-slate-200 hover:from-slate-700/70 hover:to-slate-600/70 hover:text-white hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg"
+            className="w-full sm:w-auto bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 border-slate-300 dark:border-white/30 text-slate-900 dark:text-slate-200 hover:bg-slate-50 dark:hover:from-slate-700/70 dark:hover:to-slate-600/70 dark:hover:text-white hover:border-slate-400 dark:hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg"
             data-testid="show-more-posts"
           >
             Show {casts.length - initialCount} more posts
@@ -253,7 +253,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
             onClick={() => setShowAll(false)}
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
             data-testid="show-less-posts"
           >
             Show less
@@ -270,24 +270,24 @@ function DiscoverRightRail() {
   return (
     <div className="space-y-6 sticky top-6">
       {/* Trending Topics */}
-      <div className="bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-slate-900/70 backdrop-blur-xl border border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="bg-white dark:bg-gradient-to-br dark:from-slate-900/70 dark:via-slate-800/50 dark:to-slate-900/70 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="w-5 h-5 text-blue-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">What's happening</h3>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">What's happening</h3>
           </div>
           <TrendingTopicsWidget />
         </div>
       </div>
 
       {/* Who to follow */}
-      <div className="bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-slate-900/70 backdrop-blur-xl border border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="bg-white dark:bg-gradient-to-br dark:from-slate-900/70 dark:via-slate-800/50 dark:to-slate-900/70 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
             <Users className="w-5 h-5 text-purple-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">Who to follow</h3>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">Who to follow</h3>
           </div>
           <WhoToFollowWidget />
         </div>
@@ -531,13 +531,13 @@ function TrendingTopicsWidget() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="p-4 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-300 cursor-pointer border border-transparent hover:border-white/20 group"
+          className="p-4 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-300 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-white/20 group"
           data-testid={`trending-widget-${i}`}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-white font-bold text-base group-hover:text-blue-300 transition-colors">{trend.topic}</p>
-              <p className="text-slate-400 text-sm mt-1">{trend.mentions} posts • Trending</p>
+              <p className="text-slate-900 dark:text-white font-bold text-base group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">{trend.topic}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{trend.mentions} posts • Trending</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
@@ -584,7 +584,7 @@ function WhoToFollowWidget() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 rounded-xl transition-all duration-300 border border-transparent hover:border-white/20 group"
+          className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 rounded-xl transition-all duration-300 border border-transparent hover:border-slate-200 dark:hover:border-white/20 group"
           data-testid={`follow-suggestion-${i}`}
         >
           <div className="flex items-center gap-3">
@@ -682,29 +682,29 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-white/20 rounded-2xl p-5 sm:p-7 hover:bg-gradient-to-br hover:from-slate-800/70 hover:via-slate-700/50 hover:to-slate-800/70 hover:border-white/30 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 cursor-pointer group relative overflow-hidden"
+      className="bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 sm:p-7 hover:bg-slate-50 dark:hover:bg-gradient-to-br dark:hover:from-slate-800/70 dark:hover:via-slate-700/50 dark:hover:to-slate-800/70 hover:border-slate-300 dark:hover:border-white/30 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 cursor-pointer group relative overflow-hidden"
       data-testid={`feed-post-${index}`}
     >
       {/* Animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
       {/* Header */}
       <div className="flex items-start gap-4 sm:gap-5 mb-4 sm:mb-5 relative z-10">
         <div className="relative">
           <img
             src={cast.author.pfpUrl}
             alt={cast.author.displayName}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/30 shadow-lg ring-2 ring-purple-500/20 transition-all duration-300 group-hover:ring-purple-500/40 group-hover:scale-105"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-slate-200 dark:border-white/30 shadow-lg ring-2 ring-purple-500/20 transition-all duration-300 group-hover:ring-purple-500/40 group-hover:scale-105"
           />
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-slate-900 animate-pulse" />
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <h4 className="text-white font-bold text-base sm:text-lg bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent truncate">{cast.author.displayName}</h4>
-            <span className="text-slate-300 text-sm sm:text-base font-medium truncate">@{cast.author.username}</span>
-            <span className="text-slate-500 text-sm hidden sm:inline">·</span>
-            <span className="text-slate-400 text-sm bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{formatTime(cast.timestamp)}</span>
+            <h4 className="text-slate-900 dark:text-white font-bold text-base sm:text-lg truncate">{cast.author.displayName}</h4>
+            <span className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-medium truncate">@{cast.author.username}</span>
+            <span className="text-slate-400 dark:text-slate-500 text-sm hidden sm:inline">·</span>
+            <span className="text-slate-600 dark:text-slate-400 text-sm bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-full border border-slate-200 dark:border-white/10">{formatTime(cast.timestamp)}</span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-1">
               <Users className="w-3 h-3" />
               <span>{(cast.author.followerCount || 0).toLocaleString()} followers</span>
@@ -719,10 +719,10 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
 
       {/* Content */}
       <div className="mb-5 sm:mb-6 relative z-10">
-        <p className="text-slate-100 leading-relaxed text-base sm:text-lg font-light tracking-wide">{cast.text}</p>
+        <p className="text-slate-900 dark:text-slate-100 leading-relaxed text-base sm:text-lg font-light tracking-wide">{cast.text}</p>
         {cast.embeds && cast.embeds.length > 0 && (
-          <div className="mt-4 p-3 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl border border-blue-500/20">
-            <div className="flex items-center gap-2 text-blue-300 text-sm">
+          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-500/20">
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-300 text-sm">
               <ExternalLink className="w-4 h-4" />
               <span>Contains {cast.embeds.length} embedded link{cast.embeds.length > 1 ? 's' : ''}</span>
             </div>
@@ -741,7 +741,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
                 navigator.vibrate(50);
               }
             }}
-            className="flex items-center gap-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
+            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
             data-testid={`reply-button-${cast.hash}`}
             title="Reply to this cast"
             disabled={replyMutation.isPending}
@@ -759,8 +759,8 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
             }}
             className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
 Array.from(recastedCasts).includes(cast.hash) || cast.isRecasted
-                ? 'text-green-400 bg-green-500/10' 
-                : 'text-slate-400 hover:text-green-400 hover:bg-green-500/10'
+                ? 'text-green-600 dark:text-green-400 bg-green-500/10' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10'
             }`}
             data-testid={`recast-button-${cast.hash}`}
             title="Recast this"
@@ -779,8 +779,8 @@ Array.from(recastedCasts).includes(cast.hash) || cast.isRecasted
             }}
             className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
 Array.from(likedCasts).includes(cast.hash) || cast.isLiked
-                ? 'text-red-400 bg-red-500/10' 
-                : 'text-slate-400 hover:text-red-400 hover:bg-red-500/10'
+                ? 'text-red-600 dark:text-red-400 bg-red-500/10' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10'
             }`}
             data-testid={`like-button-${cast.hash}`}
             title="Like this cast"
@@ -791,7 +791,7 @@ Array.from(likedCasts).includes(cast.hash) || cast.isLiked
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">
+          <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-full border border-slate-200 dark:border-white/10">
             {cast.engagement} views
           </div>
           <button 
@@ -800,7 +800,7 @@ Array.from(likedCasts).includes(cast.hash) || cast.isLiked
               const farcasterUrl = `https://warpcast.com/~/conversations/${cast.hash}`;
               window.open(farcasterUrl, '_blank', 'noopener,noreferrer');
             }}
-            className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 sm:opacity-100 hover:scale-110"
+            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 p-2 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 sm:opacity-100 hover:scale-110"
             data-testid={`external-link-${cast.hash}`}
             title="View on Farcaster"
           >
@@ -1094,22 +1094,22 @@ export function TrendingSocialContent() {
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          <h2 className="text-xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:via-purple-200 dark:to-cyan-200 bg-clip-text text-transparent mb-2">
             Discover
           </h2>
-          <p className="text-slate-400 text-sm">Stay updated with the latest in crypto conversations</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Stay updated with the latest in crypto conversations</p>
         </motion.div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-6 mb-4 border-b border-white/10">
+        <div className="flex gap-6 mb-4 border-b border-slate-200 dark:border-white/10">
           {(['trending', 'for-you', 'following'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`pb-3 px-1 text-sm font-medium transition-colors capitalize relative ${
                 activeTab === tab
-                  ? 'text-white'
-                  : 'text-slate-400 hover:text-slate-300'
+                  ? 'text-slate-900 dark:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
               }`}
               data-testid={`tab-${tab}`}
             >

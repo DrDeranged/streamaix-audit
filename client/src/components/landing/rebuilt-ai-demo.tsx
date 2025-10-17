@@ -295,7 +295,7 @@ export function AIProcessor() {
 
 
   return (
-    <section id="ai-processor" className="py-16 bg-background">
+    <section id="ai-processor" className="py-16 bg-white dark:bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
@@ -304,10 +304,10 @@ export function AIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl sm:text-3xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-500 dark:to-purple-600 bg-clip-text text-transparent">
             Live AI Content Intelligence
           </h2>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+          <p className="text-base sm:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto px-4">
             Paste any YouTube URL below and watch real AI extract insights, analyze market sentiment, and generate comprehensive intelligence reports
           </p>
         </motion.div>
@@ -315,7 +315,7 @@ export function AIProcessor() {
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-card/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg">
+            <div className="bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-lg">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
@@ -358,7 +358,7 @@ export function AIProcessor() {
               >
                 {/* Progress Card */}
                 {isProcessing && (
-                  <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                  <Card className="mb-6 bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-muted-foreground/20">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -394,7 +394,7 @@ export function AIProcessor() {
                     transition={{ delay: 0.2 }}
                   >
                     {/* Header Card */}
-                    <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                    <Card className="mb-6 bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-muted-foreground/20">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <img 
@@ -403,8 +403,8 @@ export function AIProcessor() {
                             className="w-32 h-24 object-cover rounded-lg"
                           />
                           <div className="flex-1">
-                            <h3 className="text-xl font-semibold mb-2">{result.title}</h3>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">{result.title}</h3>
+                            <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400 mb-3">
                               <span>📺 {result.rawData?.channel}</span>
                               <span>⏱️ {result.rawData?.duration}</span>
                               <span>👁️ {result.rawData?.views} views</span>
@@ -430,7 +430,7 @@ export function AIProcessor() {
                     </Card>
 
                     {/* Content Tabs */}
-                    <Card className="bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                    <Card className="bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-muted-foreground/20">
                       <CardContent className="p-6">
                         <Tabs defaultValue="summary" className="w-full">
                           <TabsList className="grid w-full grid-cols-4 mb-6">
@@ -462,13 +462,13 @@ export function AIProcessor() {
                               <p className="text-foreground leading-relaxed text-base">{result.tldrSummary}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg">
-                              <h5 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-900 dark:text-gray-900 dark:text-white">
+                              <h5 className="text-lg font-semibold mb-3 flex items-center gap-2 text-slate-900 dark:text-white">
                                 <BarChart3 className="w-5 h-5" />
                                 Market & Trend Analysis
                               </h5>
-                              <div className="text-gray-800 dark:text-gray-200 leading-relaxed space-y-3">
+                              <div className="text-slate-800 dark:text-slate-200 leading-relaxed space-y-3">
                                 {result.summary.split('\n\n').map((paragraph: string, idx: number) => (
-                                  <p key={idx} className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">{paragraph}</p>
+                                  <p key={idx} className="text-sm leading-relaxed text-slate-800 dark:text-slate-200">{paragraph}</p>
                                 ))}
                               </div>
                             </div>
@@ -486,7 +486,7 @@ export function AIProcessor() {
                                   {result.bulletPoints.map((point: string, idx: number) => (
                                     <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
                                       <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                      <span className="text-sm text-gray-800 dark:text-gray-200">{point}</span>
+                                      <span className="text-sm text-slate-800 dark:text-slate-200">{point}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -503,7 +503,7 @@ export function AIProcessor() {
                                   {result.trends.map((trend: any, idx: number) => (
                                     <div key={idx} className="p-3 bg-background/50 rounded-md">
                                       <div className="flex items-center justify-between mb-1">
-                                        <span className="font-medium text-sm text-gray-900 dark:text-gray-900 dark:text-white">{trend.trend}</span>
+                                        <span className="font-medium text-sm text-slate-900 dark:text-white">{trend.trend}</span>
                                         <Badge variant="outline" className={`text-xs ${
                                           trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
                                           trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
@@ -512,7 +512,7 @@ export function AIProcessor() {
                                           {trend.strength}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-gray-600 dark:text-gray-300">{trend.evidence}</p>
+                                      <p className="text-xs text-slate-600 dark:text-slate-300">{trend.evidence}</p>
                                     </div>
                                   ))}
                                 </div>

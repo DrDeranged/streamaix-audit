@@ -164,7 +164,7 @@ export function EnhancedPredictionMarketCard({
           fill="none"
           stroke="currentColor"
           strokeWidth="4"
-          className="text-slate-700"
+          className="text-slate-300 dark:text-slate-700"
         />
         <circle
           cx="32"
@@ -182,7 +182,7 @@ export function EnhancedPredictionMarketCard({
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xs font-bold text-white">{value}%</span>
+        <span className="text-xs font-bold text-slate-900 dark:text-white">{value}%</span>
       </div>
     </div>
   );
@@ -192,8 +192,8 @@ export function EnhancedPredictionMarketCard({
     return (
       <Card 
         className={cn(
-          "group bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50",
-          "hover:border-purple-500/50 transition-all duration-300 overflow-hidden",
+          "group bg-white dark:bg-gradient-to-br dark:from-slate-900/90 dark:to-slate-800/90 border-slate-200 dark:border-slate-700/50",
+          "hover:border-purple-300 dark:hover:border-purple-500/50 transition-all duration-300 overflow-hidden",
           "hover:shadow-lg hover:shadow-purple-500/20 h-full"
         )}
         data-testid={`prediction-card-compact-${market.id}`}
@@ -217,7 +217,7 @@ export function EnhancedPredictionMarketCard({
               </div>
 
               {/* Question */}
-              <h4 className="font-semibold text-white leading-snug mb-3 min-h-[2.5rem] group-hover:text-purple-300 transition-colors text-sm" data-testid="text-question">
+              <h4 className="font-semibold text-slate-900 dark:text-white leading-snug mb-3 min-h-[2.5rem] group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors text-sm" data-testid="text-question">
                 {market.question}
               </h4>
 
@@ -336,7 +336,7 @@ export function EnhancedPredictionMarketCard({
   if (variant === 'detailed') {
     return (
       <Card 
-        className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 hover:border-purple-500/50 transition-all"
+        className="bg-white dark:bg-gradient-to-br dark:from-slate-900/90 dark:to-slate-800/90 border-slate-200 dark:border-slate-700/50 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all"
         data-testid={`prediction-card-detailed-${market.id}`}
       >
         <CardContent className="p-6">
@@ -354,11 +354,11 @@ export function EnhancedPredictionMarketCard({
                     <span>{format(deadline, 'MMM d, yyyy')}</span>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-white leading-tight" data-testid="text-question">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight" data-testid="text-question">
                   {market.question}
                 </h3>
                 {market.description && (
-                  <p className="text-sm text-slate-300 mt-2" data-testid="text-description">
+                  <p className="text-sm text-slate-700 dark:text-slate-300 mt-2" data-testid="text-description">
                     {market.description}
                   </p>
                 )}

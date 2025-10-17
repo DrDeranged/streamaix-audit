@@ -699,7 +699,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
-                          <Card className="group cursor-pointer bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95 backdrop-blur-xl border-2 border-blue-500/30 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
+                          <Card className="group cursor-pointer bg-white dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-blue-950/90 dark:to-slate-900/95 backdrop-blur-xl border-2 border-slate-200 dark:border-blue-500/30 hover:border-slate-300 dark:hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
                           {/* Professional Terminal-Style Header */}
                           <div className="relative flex-shrink-0">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
@@ -736,20 +736,20 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                           </div>
                           
-                          <CardContent className="pt-14 pb-6 px-5 space-y-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-950/50">
+                          <CardContent className="pt-14 pb-6 px-5 space-y-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-950/50">
                             {/* Name and Handle */}
-                            <div className="space-y-2 border-b border-blue-500/20 pb-4 flex-shrink-0">
-                              <h3 className="text-xl font-bold text-blue-50 group-hover:text-blue-300 transition-colors line-clamp-1 tracking-tight font-mono">
+                            <div className="space-y-2 border-b border-slate-200 dark:border-blue-500/20 pb-4 flex-shrink-0">
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-blue-50 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors line-clamp-1 tracking-tight font-mono">
                                 {avatar.name}
                               </h3>
-                              <p className="text-sm text-blue-400/70 font-mono">@{avatar.handle}</p>
+                              <p className="text-sm text-slate-600 dark:text-blue-400/70 font-mono">@{avatar.handle}</p>
                             </div>
                             
                             {/* Bloomberg Terminal-Style Metrics Grid */}
                             <div className="grid grid-cols-2 gap-3 flex-shrink-0">
-                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Portfolio ROI</span>
+                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Portfolio ROI</span>
                                   <div className="flex items-center gap-1.5">
                                     {trend === 'up' ? (
                                       <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />
@@ -764,9 +764,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 </div>
                               </div>
                               
-                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Accuracy</span>
+                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Accuracy</span>
                                   <div className={`w-1.5 h-1.5 rounded-full ${accuracyPercentage >= 80 ? 'bg-emerald-400' : accuracyPercentage >= 60 ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`} />
                                 </div>
                                 <div className={`text-xl font-bold font-mono transition-all duration-300 ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${accuracyPercentage}% accuracy on public predictions and forecasts`}>
@@ -774,9 +774,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 </div>
                               </div>
                               
-                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Influence</span>
+                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Influence</span>
                                   <Star className="h-3.5 w-3.5 text-cyan-400" />
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -803,9 +803,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 )}
                               </div>
                               
-                              <div className="bg-slate-900/60 border border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-blue-400/50 hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-blue-400/80 font-mono uppercase tracking-wider">Net Worth</span>
+                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Net Worth</span>
                                   <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                                 </div>
                                 <div className="text-sm font-bold font-mono text-emerald-400 truncate" title={`Assets Under Management / Net Worth: ${netWorth}`}>
@@ -815,9 +815,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                             
                             {/* Terminal-Style Key Metrics */}
-                            <div className="space-y-2 bg-slate-950/50 border border-blue-500/20 rounded-lg p-3 flex-shrink-0">
+                            <div className="space-y-2 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-blue-500/20 rounded-lg p-3 flex-shrink-0">
                               <div className="flex items-center justify-between">
-                                <span className="text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
+                                <span className="text-slate-600 dark:text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
                                   <Users className="h-3 w-3" />
                                   Followers
                                 </span>
