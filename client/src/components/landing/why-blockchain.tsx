@@ -8,45 +8,45 @@ export function WhyBlockchain() {
       icon: Database,
       title: "Onchain Memory",
       description: "Your summaries are permanently stored on Arweave. Never lose valuable knowledge again.",
-      color: "from-indigo-500 to-purple-600"
+      color: "from-purple-400 via-fuchsia-400 to-cyan-400"
     },
     {
       icon: Coins,
       title: "Tokenized Summaries",
       description: "Each summary becomes an NFT that can be traded, collected, and monetized.",
-      color: "from-purple-500 to-pink-600"
+      color: "from-purple-500 via-fuchsia-500 to-cyan-500"
     },
     {
       icon: UserCheck,
       title: "Creator Ownership",
       description: "You own your content and control how it's used, shared, and monetized.",
-      color: "from-cyan-500 to-blue-600"
+      color: "from-cyan-400 via-purple-400 to-fuchsia-400"
     },
     {
       icon: ShieldCheck,
       title: "AI-Traceable Provenance",
       description: "Every AI operation is recorded onchain for complete transparency and accountability.",
-      color: "from-green-500 to-teal-600"
+      color: "from-fuchsia-400 via-purple-400 to-cyan-400"
     },
     {
       icon: Users,
       title: "Social Curation",
       description: "Community-driven quality control through Lens and Farcaster social graphs.",
-      color: "from-orange-500 to-red-600"
+      color: "from-purple-500 via-cyan-500 to-fuchsia-500"
     },
     {
       icon: Zap,
       title: "Instant Rewards",
       description: "Earn $STREAM tokens for creating valuable summaries and curating content.",
-      color: "from-yellow-500 to-orange-600"
+      color: "from-cyan-500 via-fuchsia-500 to-purple-500"
     }
   ];
 
   const ecosystemLogos = [
-    { name: "Arweave", color: "from-purple-500 to-pink-600" },
-    { name: "Lens", color: "from-green-500 to-teal-600" },
-    { name: "Farcaster", color: "from-indigo-500 to-blue-600" },
-    { name: "Optimism", color: "from-orange-500 to-red-600" }
+    { name: "Arweave", color: "from-purple-500 to-fuchsia-500" },
+    { name: "Lens", color: "from-fuchsia-500 to-cyan-500" },
+    { name: "Farcaster", color: "from-cyan-500 to-purple-500" },
+    { name: "Optimism", color: "from-purple-400 to-cyan-400" }
   ];
 
   return (
@@ -59,7 +59,7 @@ export function WhyBlockchain() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
             Why Blockchain?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -86,7 +86,7 @@ export function WhyBlockchain() {
                   >
                     <feature.icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
                   </motion.div>
-                  <h3 className="text-xs md:text-sm font-semibold text-foreground group-hover:text-indigo-500 transition-colors">
+                  <h3 className="text-xs md:text-sm font-semibold text-foreground group-hover:text-purple-400 transition-colors">
                     {feature.title}
                   </h3>
                 </motion.div>

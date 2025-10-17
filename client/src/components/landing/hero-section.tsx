@@ -13,17 +13,17 @@ export function HeroSection() {
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20 dark:opacity-30">
         <motion.div 
-          className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full blur-xl"
+          className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 rounded-full blur-xl"
           animate={{ y: [-20, 20, -20] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full blur-lg"
+          className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-cyan-400 via-purple-400 to-fuchsia-400 rounded-full blur-lg"
           animate={{ y: [-15, 25, -15] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
         <motion.div 
-          className="absolute bottom-40 left-1/4 w-40 h-40 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full blur-2xl"
+          className="absolute bottom-40 left-1/4 w-40 h-40 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-2xl"
           animate={{ y: [-25, 15, -25] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />
@@ -33,7 +33,7 @@ export function HeroSection() {
           {Array.from({ length: 10 }).map((_, i) => (
             <motion.div
               key={i}
-              className={`w-1 bg-gradient-to-t from-indigo-500 to-purple-600 rounded-full ${
+              className={`w-1 bg-gradient-to-t from-purple-400 via-fuchsia-400 to-cyan-400 rounded-full ${
                 i % 3 === 0 ? 'h-16' : i % 2 === 0 ? 'h-12' : 'h-8'
               }`}
               animate={{ scaleY: [1, 1.5, 1] }}
@@ -67,15 +67,15 @@ export function HeroSection() {
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
             <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence</span>
             <br/>
-            <span className="text-indigo-400 font-semibold mt-2 inline-block">Powered by OpenAI, Base Network & Real-Time Analytics</span>
-            <span className="text-indigo-500 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
+            <span className="text-purple-400 font-semibold mt-2 inline-block">Powered by OpenAI, Base Network & Real-Time Analytics</span>
+            <span className="text-fuchsia-400 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 px-4">
             <Button 
               size="lg"
               onClick={scrollToProcessor}
-              className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-gradient-to-r from-indigo-500 via-purple-600 to-cyan-500 hover:from-indigo-600 hover:via-purple-700 hover:to-cyan-600 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-gradient"
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-gradient"
               data-testid="button-try-ai"
             >
               <Play className="w-5 h-5 mr-2" />
@@ -116,28 +116,28 @@ export function HeroSection() {
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-green-500/20 hover:text-green-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-analytics">
+              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-fuchsia-500/20 hover:text-fuchsia-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-analytics">
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>Analytics</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/summaries" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-orange-500/20 hover:text-orange-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-summaries">
+              <Link href="/summaries" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-summaries">
                 <FileText className="w-3.5 h-3.5" />
                 <span>Summaries</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/dashboard" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-dashboard">
+              <Link href="/dashboard" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-dashboard">
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span>Dashboard</span>
               </Link>
               
               <span className="text-gray-600">•</span>
               
-              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-yellow-500/20 hover:text-yellow-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-discover">
+              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-discover">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Discover</span>
               </Link>
@@ -147,11 +147,11 @@ export function HeroSection() {
           {/* Tech stack indicators */}
           <div className="flex justify-center items-center space-x-4 sm:space-x-6 md:space-x-8 opacity-60 flex-wrap gap-2 sm:gap-4 px-4">
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+              <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               <span className="text-xs sm:text-sm">OpenAI</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+              <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
               <span className="text-xs sm:text-sm">IPFS</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
@@ -159,7 +159,7 @@ export function HeroSection() {
               <span className="text-xs sm:text-sm">Arweave</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               <span className="text-xs sm:text-sm">Lens</span>
             </div>
           </div>

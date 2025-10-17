@@ -401,7 +401,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       {/* Subtle Grid Background */}
       <div className="fixed inset-0" style={{
         backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"1\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
@@ -409,7 +409,7 @@ export default function Dashboard() {
       }}></div>
       
       {/* ENHANCED CRYPTO TICKER - Darker, more visible, continuous */}
-      <div className="relative z-20 bg-gradient-to-r from-slate-900/80 via-purple-900/60 to-slate-900/80 backdrop-blur-md border-b border-white/10">
+      <div className="relative z-20 bg-gradient-to-r from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 backdrop-blur-md border-b border-purple-500/20">
         <div className="overflow-hidden py-3">
           <motion.div 
             className="flex space-x-8 sm:space-x-12 text-xs sm:text-sm opacity-95"
@@ -449,7 +449,7 @@ export default function Dashboard() {
       </div>
 
       {/* ENHANCED FINANCIAL NEWS SECTION */}
-      <div className="relative z-10 bg-gradient-to-r from-slate-900/40 via-blue-900/20 to-slate-900/40 border-b border-white/5">
+      <div className="relative z-10 bg-gradient-to-r from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border-b border-purple-500/10">
         <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">

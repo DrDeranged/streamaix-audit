@@ -9,8 +9,8 @@ export function HowItWorks() {
       icon: Upload,
       title: "Upload or Link",
       description: "Paste any YouTube, SoundCloud, Twitch, or podcast URL for real processing",
-      color: "from-indigo-500 to-purple-600",
-      badgeColor: "bg-blue-500",
+      color: "from-purple-400 via-fuchsia-400 to-cyan-400",
+      badgeColor: "bg-purple-500",
       techIcons: [Youtube, Mic, Database]
     },
     {
@@ -18,8 +18,8 @@ export function HowItWorks() {
       icon: Brain,
       title: "Real AI Processing",
       description: "OpenAI Whisper transcribes with 98% accuracy, GPT-4o analyzes and summarizes",
-      color: "from-purple-500 to-cyan-500",
-      badgeColor: "bg-purple-500",
+      color: "from-purple-500 via-fuchsia-500 to-cyan-500",
+      badgeColor: "bg-fuchsia-500",
       techBadges: ["OpenAI Whisper", "GPT-4o"]
     },
     {
@@ -27,8 +27,8 @@ export function HowItWorks() {
       icon: Coins,
       title: "Publish & Earn",
       description: "Store on Arweave, share on Lens/Farcaster, and monetize your knowledge",
-      color: "from-cyan-500 to-green-500",
-      badgeColor: "bg-orange-500",
+      color: "from-cyan-400 via-purple-400 to-fuchsia-400",
+      badgeColor: "bg-cyan-500",
       techIcons: [Database, Share2, DollarSign]
     }
   ];
@@ -43,7 +43,7 @@ export function HowItWorks() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
             How It Works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -77,7 +77,7 @@ export function HowItWorks() {
                       </div>
                     </div>
                     
-                    <h3 className="text-base md:text-lg font-bold text-foreground group-hover:text-indigo-500 transition-all duration-300">
+                    <h3 className="text-base md:text-lg font-bold text-foreground group-hover:text-purple-400 transition-all duration-300">
                       {step.title}
                     </h3>
                   </motion.div>
@@ -106,7 +106,7 @@ export function HowItWorks() {
                     {step.techBadges && step.techBadges.map((badge, i) => (
                       <span 
                         key={i} 
-                        className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded"
+                        className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded"
                       >
                         {badge}
                       </span>
