@@ -153,7 +153,7 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
           Create New Bounty
         </h2>
         <p className="text-sm text-gray-400">

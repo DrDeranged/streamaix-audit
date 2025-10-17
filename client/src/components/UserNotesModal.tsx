@@ -80,7 +80,7 @@ export default function UserNotesModal({ isOpen, onClose, summaryId, summaryTitl
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]" data-testid="modal-user-notes">
+      <DialogContent className="sm:max-w-[600px] bg-slate-900/95 border-purple-500/30 backdrop-blur-sm" data-testid="modal-user-notes">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookmarkPlus className="w-5 h-5" />

@@ -211,7 +211,7 @@ export function PopularCryptoVideos() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Live AI Processing
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -228,7 +228,7 @@ export function PopularCryptoVideos() {
               variant="outline"
               size="sm"
               onClick={() => handleScroll('left')}
-              className="h-10 w-10 p-0 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 border-indigo-300/30 hover:from-indigo-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
+              className="h-10 w-10 p-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border-purple-300/30 hover:from-purple-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
               disabled={currentIndex === 0}
               data-testid="button-scroll-left"
             >
@@ -238,7 +238,7 @@ export function PopularCryptoVideos() {
               variant="outline"
               size="sm"
               onClick={() => handleScroll('right')}
-              className="h-10 w-10 p-0 bg-gradient-to-r from-indigo-500/10 to-purple-600/10 border-indigo-300/30 hover:from-indigo-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
+              className="h-10 w-10 p-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border-purple-300/30 hover:from-purple-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
               disabled={currentIndex >= latestCryptoPodcasts.length - 1}
               data-testid="button-scroll-right"
             >
@@ -268,7 +268,7 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20 border border-indigo-200/20 hover:border-indigo-400/40 hover:shadow-xl hover:shadow-indigo-500/10 transform hover:scale-[1.02] transition-all duration-500 flex flex-col h-[400px]">
+                <Card className="group relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20 border border-purple-200/20 hover:border-purple-400/40 hover:shadow-xl hover:shadow-indigo-500/10 transform hover:scale-[1.02] transition-all duration-500 flex flex-col h-[400px]">
                   <CardContent className="p-0 flex flex-col flex-1">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
@@ -308,7 +308,7 @@ export function PopularCryptoVideos() {
                       </div>
 
                       {/* Professional Hover Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-indigo-600/40 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                      <div className="absolute inset-0 bg-gradient-to-t from-purple-600/40 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
                             <span className="text-white font-medium text-sm flex items-center gap-2">
@@ -360,7 +360,7 @@ export function PopularCryptoVideos() {
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 active:translate-y-[-2px] transition-all duration-300 font-medium"
+                        className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 active:translate-y-[-2px] transition-all duration-300 font-medium"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (

@@ -49,7 +49,7 @@ export function Navigation() {
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+            <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
               StreamAiX
             </div>
             
@@ -60,18 +60,18 @@ export function Navigation() {
             <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
               <button 
                 onClick={() => scrollToSection("features")}
-                className="text-muted-foreground hover:text-indigo-500 transition-colors"
+                className="text-muted-foreground hover:text-purple-400 transition-colors"
               >
                 Features
               </button>
               <button 
                 onClick={() => scrollToSection("bounties")}
-                className="text-muted-foreground hover:text-indigo-500 transition-colors"
+                className="text-muted-foreground hover:text-fuchsia-400 transition-colors"
               >
                 Bounties
               </button>
               <Link href="/discover">
-                <button className="text-muted-foreground hover:text-indigo-500 transition-colors">
+                <button className="text-muted-foreground hover:text-purple-400 transition-colors">
                   Discover
                 </button>
               </Link>
@@ -80,10 +80,10 @@ export function Navigation() {
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-indigo-500/30 transition-all duration-200">
-                      <Avatar className="h-10 w-10 ring-2 ring-indigo-500/20 hover:ring-indigo-500/40 transition-all duration-200">
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-purple-500/30 transition-all duration-200">
+                      <Avatar className="h-10 w-10 ring-2 ring-purple-500/20 hover:ring-purple-500/40 transition-all duration-200">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 text-white font-semibold">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -94,7 +94,7 @@ export function Navigation() {
                     <div className="flex items-center gap-2 p-3 border-b border-white/10">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-indigo-500 text-white text-sm">
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-sm">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -133,12 +133,12 @@ export function Navigation() {
               ) : (
                 <div className="flex items-center space-x-3">
                   <Link href="/auth">
-                    <Button variant="ghost" className="text-muted-foreground hover:text-indigo-500">
+                    <Button variant="ghost" className="text-muted-foreground hover:text-purple-400">
                       Sign In
                     </Button>
                   </Link>
                   <Link href="/auth">
-                    <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                    <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
                       Get Started
                     </Button>
                   </Link>
@@ -156,7 +156,7 @@ export function Navigation() {
               {theme === "light" ? (
                 <Sun className="w-5 h-5 text-yellow-500" />
               ) : (
-                <Moon className="w-5 h-5 text-indigo-400" />
+                <Moon className="w-5 h-5 text-purple-400" />
               )}
             </Button>
             
@@ -200,7 +200,7 @@ export function Navigation() {
                 <Button 
                   onClick={() => setWalletModalOpen(true)}
                   disabled={isConnecting}
-                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                  className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
                 >
                   {isConnecting ? (
                     <>
@@ -325,7 +325,7 @@ export function Navigation() {
                   <Button 
                     onClick={() => setWalletModalOpen(true)}
                     disabled={isConnecting}
-                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                    className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
                   >
                     {isConnecting ? (
                       <>

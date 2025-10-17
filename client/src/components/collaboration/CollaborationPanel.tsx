@@ -70,7 +70,7 @@ export function CollaborationPanel({ bountyId, userId, username, avatar, isOwner
     <div className="fixed right-4 top-20 z-40 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 w-64">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-purple-600" />
+          <Users className="h-5 w-5 text-purple-400" />
           <h3 className="font-semibold text-sm">Collaborators</h3>
           <Badge variant={connected ? 'default' : 'secondary'} className="text-xs">
             {connected ? 'Live' : 'Offline'}

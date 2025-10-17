@@ -44,7 +44,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Transform Content with AI Power",
     description: "Head to the Create page to convert podcasts, videos, and livestreams into comprehensive blog-style summaries. Our AI uses OpenAI Whisper for transcription and GPT-4o for intelligent chapter generation.",
     icon: Zap,
-    gradient: "from-cyan-500 via-blue-500 to-indigo-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Click the button below to visit the Create page",
       "Paste a YouTube, podcast, or livestream URL",
@@ -157,7 +157,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Own Your Knowledge On-Chain",
     description: "From the Create page, mint your summaries as NFTs! Trade knowledge assets, participate in DeFi, and benefit from smart contract automation.",
     icon: Crown,
-    gradient: "from-violet-500 via-purple-500 to-indigo-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Create a summary on the Create page first",
       "After processing, click 'Mint as NFT' button",

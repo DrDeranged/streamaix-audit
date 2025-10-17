@@ -554,7 +554,7 @@ export function RealAIProcessor() {
     if (error) return <AlertCircle className="w-5 h-5 text-red-500" />;
     if (result) return <CheckCircle className="w-5 h-5 text-green-500" />;
     if (isProcessing) return <Loader2 className="w-5 h-5 animate-spin text-blue-500" />;
-    return <Zap className="w-5 h-5 text-indigo-500" />;
+    return <Zap className="w-5 h-5 text-purple-500" />;
   };
 
   return (
@@ -615,14 +615,14 @@ export function RealAIProcessor() {
                         <div key={step.name} className="flex items-center">
                           <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                             progress > index * 25 
-                              ? 'bg-indigo-500 border-indigo-500 text-white' 
+                              ? 'bg-purple-500 border-purple-500 text-white' 
                               : 'bg-muted border-muted-foreground/20 text-muted-foreground'
                           }`}>
                             <step.icon className="w-4 h-4" />
                           </div>
                           {index < processingSteps.length - 1 && (
                             <div className={`w-12 h-0.5 mx-2 ${
-                              progress > index * 25 ? 'bg-indigo-500' : 'bg-muted-foreground/20'
+                              progress > index * 25 ? 'bg-purple-500' : 'bg-muted-foreground/20'
                             }`} />
                           )}
                         </div>
@@ -678,10 +678,10 @@ export function RealAIProcessor() {
                   </div>
                 </motion.div>
 
-                <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-2 border-indigo-200 dark:border-indigo-800 shadow-2xl shadow-indigo-500/10">
+                <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-800 shadow-2xl shadow-purple-indigo-500/10">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-center">
-                      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent text-2xl font-orbitron font-bold mb-2">
+                      <div className="bg-gradient-to-r from-purple-600 to-purple-600 bg-clip-text text-transparent text-2xl font-orbitron font-bold mb-2">
                         🧠 AI Intelligence Report
                       </div>
                       <p className="text-sm text-muted-foreground font-normal">
@@ -769,8 +769,8 @@ export function RealAIProcessor() {
                           </div>
 
                           {/* Main AI Summary */}
-                          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-4 md:p-6 border border-indigo-200 dark:border-indigo-700">
-                            <h4 className="font-bold text-indigo-700 dark:text-indigo-300 mb-4 flex items-center gap-2">
+                          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-purple-indigo-900/30 dark:to-purple-900/30 rounded-xl p-4 md:p-6 border border-purple-200 dark:border-purple-700">
+                            <h4 className="font-bold text-purple-700 dark:text-purple-300 mb-4 flex items-center gap-2">
                               <Brain className="w-5 h-5" />
                               AI-Generated Summary
                             </h4>
@@ -784,7 +784,7 @@ export function RealAIProcessor() {
 
                             {/* Executive Summary */}
                             <div className="mb-6">
-                              <h5 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-4">Executive Summary</h5>
+                              <h5 className="text-lg font-semibold text-purple-600 dark:text-purple-400 mb-4">Executive Summary</h5>
                               <div className="text-foreground leading-relaxed space-y-3 text-sm md:text-base">
                                 {(result.summary || result.content || "Artificial intelligence is fundamentally reshaping how we create, consume, and interact with digital content. This analysis reveals three critical transformation areas: automated generation systems, intelligent curation platforms, and the emerging ethical framework governing AI-powered creativity.")
                                   .split('. ')
@@ -800,7 +800,7 @@ export function RealAIProcessor() {
 
                             {/* Key Performance Metrics */}
                             <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 mb-4">
-                              <h5 className="font-semibold mb-3 text-indigo-600 dark:text-indigo-400">Key Performance Metrics</h5>
+                              <h5 className="font-semibold mb-3 text-purple-600 dark:text-purple-400">Key Performance Metrics</h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
@@ -835,28 +835,28 @@ export function RealAIProcessor() {
 
                             {/* Strategic Insights */}
                             <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
-                              <h5 className="font-semibold mb-3 text-indigo-600 dark:text-indigo-400">Strategic Insights</h5>
+                              <h5 className="font-semibold mb-3 text-purple-600 dark:text-purple-400">Strategic Insights</h5>
                               <div className="space-y-2">
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
                                   <p className="text-sm text-muted-foreground">
                                     <strong className="text-foreground">Market Leadership:</strong> Early AI adoption creates sustainable competitive advantages in content-driven industries
                                   </p>
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
                                   <p className="text-sm text-muted-foreground">
                                     <strong className="text-foreground">Operational Excellence:</strong> Automated workflows reduce manual overhead while improving output consistency
                                   </p>
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
                                   <p className="text-sm text-muted-foreground">
                                     <strong className="text-foreground">Future Readiness:</strong> Organizations investing in AI infrastructure position themselves for next-generation opportunities
                                   </p>
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></span>
+                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
                                   <p className="text-sm text-muted-foreground">
                                     <strong className="text-foreground">Risk Mitigation:</strong> Ethical AI frameworks ensure sustainable growth while maintaining stakeholder trust
                                   </p>
@@ -1039,7 +1039,7 @@ export function RealAIProcessor() {
                               </div>
                             )}
                             {(result.expertCredibility || result.sourceCredibility) && (
-                              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-purple-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
                                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
                                   {result.sourceCredibility || `${result.expertCredibility}/100`}
                                 </div>
@@ -1056,7 +1056,7 @@ export function RealAIProcessor() {
                         {/* STRUCTURE TAB */}
                         <TabsContent value="structure" className="space-y-4">
                           {/* Chapters */}
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-purple-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
                             <h5 className="font-bold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
                               <Clock className="w-4 h-4" />
                               Content Structure ({(() => {
@@ -1110,8 +1110,8 @@ export function RealAIProcessor() {
                         <TabsContent value="technical" className="space-y-4">
                           {/* Processing Stats */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/40 dark:to-indigo-800/40 rounded-xl border border-indigo-200 dark:border-indigo-700">
-                              <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+                            <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-purple-indigo-900/40 dark:to-purple-indigo-800/40 rounded-xl border border-purple-200 dark:border-purple-700">
+                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-1">
                                 {result.duration ? `${Math.floor(result.duration / 60)}min` : '5min'}
                               </div>
                               <div className="text-xs text-muted-foreground">Duration</div>

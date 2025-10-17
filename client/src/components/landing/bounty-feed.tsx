@@ -14,7 +14,7 @@ const getCategoryColor = (category?: string) => {
     tech: "from-purple-500 to-pink-500",
     business: "from-cyan-500 to-blue-500",
   };
-  return colors[category || ""] || "from-indigo-500 to-purple-600";
+  return colors[category || ""] || "from-purple-500 to-purple-600";
 };
 
 const getDifficultyBadge = (difficulty?: string) => {
@@ -96,9 +96,9 @@ function BountyCard({ bounty, index }: BountyCardProps) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="h-full"
     >
-      <Card className="group h-full bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10 backdrop-blur-xl hover:border-indigo-500/30 transition-all duration-500 overflow-hidden relative">
+      <Card className="group h-full bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10 backdrop-blur-xl hover:border-purple-indigo-500/30 transition-all duration-500 overflow-hidden relative">
         {/* Hover gradient effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/10 group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none" />
         
         <CardContent className="p-6 flex flex-col h-full relative">
           {/* Header with reward */}
@@ -120,7 +120,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-indigo-300 transition-colors">
+          <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors">
             {bounty.title}
           </h3>
 
@@ -137,7 +137,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
             </Badge>
             
             {bounty.category && (
-              <Badge variant="outline" className="border-indigo-400/30 text-indigo-300 bg-indigo-500/10">
+              <Badge variant="outline" className="border-purple-indigo-400/30 text-purple-300 bg-purple-indigo-500/10">
                 {bounty.category}
               </Badge>
             )}
@@ -153,7 +153,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
             <Button
               asChild
               size="sm"
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 group/btn"
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 group/btn"
               data-testid={`button-view-bounty-${bounty.id}`}
             >
               <Link href={`/bounties/${bounty.id}`}>
@@ -209,7 +209,7 @@ export function BountyFeed() {
 
       {/* Animated gradient orbs */}
       <motion.div
-        className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-br from-indigo-500/30 to-purple-600/30 rounded-full blur-3xl"
+        className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-br from-purple-500/30 to-purple-600/30 rounded-full blur-3xl"
         animate={{
           y: [-20, 40, -20],
           x: [-10, 20, -10],
@@ -236,9 +236,9 @@ export function BountyFeed() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 backdrop-blur-sm mb-6">
-            <Target className="w-5 h-5 text-indigo-400" />
-            <span className="text-sm font-medium text-indigo-300">Live Bounties</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-purple-500/20 border border-purple-indigo-500/30 backdrop-blur-sm mb-6">
+            <Target className="w-5 h-5 text-purple-400" />
+            <span className="text-sm font-medium text-purple-300">Live Bounties</span>
           </div>
 
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-orbitron font-bold mb-6">
@@ -248,7 +248,7 @@ export function BountyFeed() {
           </h2>
 
           <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Earn <span className="text-indigo-400 font-semibold">$STREAM tokens</span> by completing bounties.
+            Earn <span className="text-purple-400 font-semibold">$STREAM tokens</span> by completing bounties.
             Create summaries, analyze content, and contribute to the ecosystem.
           </p>
         </motion.div>
@@ -291,7 +291,7 @@ export function BountyFeed() {
         {/* Bounties Grid */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-12 h-12 text-indigo-400 animate-spin mb-4" />
+            <Loader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
             <p className="text-gray-400">Loading bounties...</p>
           </div>
         ) : error ? (
@@ -317,7 +317,7 @@ export function BountyFeed() {
               <Button
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 shadow-lg shadow-indigo-500/25 group"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 shadow-lg shadow-purple-indigo-500/25 group"
                 data-testid="button-explore-all-bounties"
               >
                 <Link href="/bounties">
@@ -334,7 +334,7 @@ export function BountyFeed() {
             <p className="text-gray-500 text-sm mt-2">Be the first to create one!</p>
             <Button
               asChild
-              className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+              className="mt-6 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
             >
               <Link href="/bounty-board">
                 Create Bounty

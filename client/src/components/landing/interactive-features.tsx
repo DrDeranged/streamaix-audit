@@ -82,7 +82,7 @@ export function InteractiveFeatures() {
       title: 'Dashboard',
       description: 'Your personal hub for tracking summaries, bounties & portfolio',
       link: '/dashboard',
-      gradient: 'from-indigo-500/20 to-purple-500/20',
+      gradient: 'from-purple-500/20 to-purple-500/20',
       stat: 'Live',
       statLabel: 'Real-time Data'
     },

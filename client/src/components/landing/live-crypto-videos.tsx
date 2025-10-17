@@ -265,7 +265,7 @@ export default function LiveCryptoVideos() {
                       </div>
 
                       {/* Professional Hover Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-indigo-600/40 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                      <div className="absolute inset-0 bg-gradient-to-t from-purple-600/40 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
                             <span className="text-white font-medium text-sm flex items-center gap-2">
@@ -308,7 +308,7 @@ export default function LiveCryptoVideos() {
                           size="sm"
                           onClick={() => handleProcessVideo(video)}
                           disabled={isProcessing === video.id}
-                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+                          className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
                         >
                           {isProcessing === video.id ? (
                             <>
@@ -354,7 +354,7 @@ export default function LiveCryptoVideos() {
                 size="lg"
                 variant="outline"
                 onClick={() => setLocation('/dashboard')}
-                className="border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 px-8 py-3"
+                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3"
               >
                 <BarChart3 className="w-5 h-5 mr-2" />
                 View Dashboard
@@ -364,7 +364,7 @@ export default function LiveCryptoVideos() {
                 size="lg"
                 variant="outline"
                 onClick={() => setLocation('/auth')}
-                className="border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 px-8 py-3"
+                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3"
               >
                 <FileText className="w-5 h-5 mr-2" />
                 Get Started Free

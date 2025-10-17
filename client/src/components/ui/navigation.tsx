@@ -96,7 +96,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
             <div className="flex items-center space-x-2">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={user?.avatar} alt={user?.username} />
-                <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600 text-gray-900 dark:text-white text-sm">
+                <AvatarFallback className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-gray-900 dark:text-white text-sm">
                   {user?.username?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>

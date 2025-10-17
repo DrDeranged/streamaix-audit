@@ -75,7 +75,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
 
   return (
     <Link href={`/bounties/${bounty.id}`}>
-      <Card className="bg-slate-900/50 border-cyan-500/30 backdrop-blur-sm overflow-hidden hover:border-cyan-500/60 transition-all cursor-pointer">
+      <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm overflow-hidden hover:border-purple-500/60 transition-all cursor-pointer">
         <div className="p-6 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">

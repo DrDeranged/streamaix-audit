@@ -50,7 +50,7 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-cyan-500/50 transition-all duration-300">
+      <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 overflow-hidden backdrop-blur-sm hover:border-purple-500/60 transition-all duration-300">
         {market.imageUrl && (
           <div className="h-32 overflow-hidden relative">
             <img 

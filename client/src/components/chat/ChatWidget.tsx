@@ -91,7 +91,7 @@ export function ChatWidget() {
             <Button
               onClick={() => setIsOpen(true)}
               size="lg"
-              className="h-14 w-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-500/50"
+              className="h-14 w-14 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-lg shadow-purple-500/50"
               data-testid="button-open-chat"
             >
               <MessageCircle className="h-6 w-6" />
@@ -111,9 +111,9 @@ export function ChatWidget() {
             data-testid="chat-panel"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-purple-500/10 via-fuchsia-500/10 to-cyan-500/10">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
                 <div>
@@ -148,7 +148,7 @@ export function ChatWidget() {
                       <div
                         className={`max-w-[80%] rounded-lg p-3 ${
                           msg.role === 'user'
-                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                            ? 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
                             : 'bg-muted text-foreground'
                         }`}
                       >

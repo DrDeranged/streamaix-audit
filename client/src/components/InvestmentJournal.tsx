@@ -797,7 +797,7 @@ export default function InvestmentJournal() {
                 {isToday(selectedDate) && (
                   <Button
                     onClick={() => setShowNewEntry(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700"
+                    className="bg-purple-600 hover:bg-purple-700"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Start Writing

@@ -13,7 +13,7 @@ const getCategoryColor = (category?: string) => {
     tech: "from-purple-500 to-pink-500",
     business: "from-cyan-500 to-blue-500",
   };
-  return colors[category || ""] || "from-indigo-500 to-purple-600";
+  return colors[category || ""] || "from-purple-500 to-purple-600";
 };
 
 const getDifficultyBadge = (difficulty?: string) => {
@@ -27,7 +27,7 @@ const getDifficultyBadge = (difficulty?: string) => {
 
 const getCategoryBadge = (category?: string) => {
   const badges: Record<string, string> = {
-    crypto: "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300",
+    crypto: "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
     tech: "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
     business: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
   };
@@ -101,7 +101,7 @@ export function Bounties() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Summary Bounty Board
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -118,7 +118,7 @@ export function Bounties() {
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg">No bounties available yet</p>
             <Link href="/bounties">
-              <Button className="mt-4 bg-gradient-to-r from-indigo-500 to-purple-600">
+              <Button className="mt-4 bg-gradient-to-r from-purple-500 to-purple-600">
                 Create the first bounty
               </Button>
             </Link>
@@ -225,7 +225,7 @@ export function Bounties() {
           ) : stats ? (
             <>
               <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-500">{stats.activeBounties}</div>
+                <div className="text-3xl font-bold text-purple-500">{stats.activeBounties}</div>
                 <div className="text-muted-foreground">Active Bounties</div>
               </div>
               <div className="text-center">

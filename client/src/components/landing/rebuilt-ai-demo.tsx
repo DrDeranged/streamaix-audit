@@ -304,7 +304,7 @@ export function AIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Live AI Content Intelligence
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
@@ -322,14 +322,14 @@ export function AIProcessor() {
                   placeholder="https://youtube.com/watch?v=..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="flex-1 h-12 text-base border-muted-foreground/20 focus:border-indigo-500 transition-colors"
+                  className="flex-1 h-12 text-base border-muted-foreground/20 focus:border-purple-500 transition-colors"
                   disabled={isProcessing}
                   data-testid="input-youtube-url"
                 />
                 <Button 
                   onClick={handleProcess}
                   disabled={isProcessing || !url.trim()}
-                  className="h-12 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 font-medium"
+                  className="h-12 px-8 bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 font-medium"
                   data-testid="button-analyze"
                 >
                   {isProcessing ? (
@@ -363,8 +363,8 @@ export function AIProcessor() {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                              <Brain className="h-5 w-5 text-indigo-400 animate-pulse" />
+                            <div className="w-10 h-10 rounded-full bg-purple-indigo-500/20 flex items-center justify-center">
+                              <Brain className="h-5 w-5 text-purple-400 animate-pulse" />
                             </div>
                           </div>
                           <div>
@@ -378,7 +378,7 @@ export function AIProcessor() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
-                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-purple-500 to-purple-500 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
@@ -454,7 +454,7 @@ export function AIProcessor() {
 
                           {/* Summary Tab */}
                           <TabsContent value="summary" className="space-y-4">
-                            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
                               <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
                                 <Zap className="w-5 h-5" />
                                 Executive Takeaway
@@ -551,7 +551,7 @@ export function AIProcessor() {
                                 </div>
                                 <div className="text-xs text-muted-foreground">Market Sentiment</div>
                               </div>
-                              <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg border border-purple-500/20">
+                              <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 rounded-lg border border-purple-500/20">
                                 <div className="text-2xl font-bold text-purple-400 mb-1">
                                   {result.sourceCredibility}
                                 </div>
@@ -564,14 +564,14 @@ export function AIProcessor() {
                             {/* REMOVED HARDCODED TEMPLATE DATA - Only show real content-based analysis */}
 
                             {/* Content Source Intelligence - REAL DATA ONLY */}
-                            <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
-                              <h6 className="font-semibold text-indigo-400 mb-3 flex items-center gap-2">
+                            <div className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/10 rounded-lg border border-purple-indigo-500/20">
+                              <h6 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">
                                 <Target className="w-4 h-4" />
                                 Content Source Analysis
                               </h6>
                               <div className="space-y-3 text-sm">
                                 <div className="p-3 bg-background/30 rounded-md">
-                                  <div className="text-indigo-400 font-medium mb-2">Source Information</div>
+                                  <div className="text-purple-400 font-medium mb-2">Source Information</div>
                                   <div className="grid grid-cols-2 gap-4 text-xs">
                                     <div>
                                       <span className="text-gray-600 dark:text-gray-300">Channel:</span>
@@ -691,7 +691,7 @@ export function AIProcessor() {
                                             </div>
                                           )}
                                           {financial.analystSource && (
-                                            <div className="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20">
+                                            <div className="text-xs bg-purple-indigo-500/10 text-purple-400 px-2 py-1 rounded border border-purple-indigo-500/20">
                                               📊 {financial.analystSource}
                                             </div>
                                           )}
@@ -754,12 +754,12 @@ export function AIProcessor() {
                         transition={{ delay: 0.3 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-blue-500/15 dark:via-indigo-500/15 dark:to-purple-500/15 border border-blue-200/30 dark:border-blue-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 animate-pulse"></div>
+                        <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-blue-500/15 dark:via-purple-indigo-500/15 dark:to-purple-500/15 border border-blue-200/30 dark:border-blue-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 animate-pulse"></div>
                           <CardContent className="p-6 relative">
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center">
                                   <Edit3 className="h-5 w-5 text-gray-900 dark:text-white" />
                                 </div>
                                 <div>
@@ -770,7 +770,7 @@ export function AIProcessor() {
                               <Button
                                 onClick={() => setShowNotesModal(true)}
                                 size="lg"
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
                                 data-testid="button-add-analysis-note"
                               >
                                 <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -786,9 +786,9 @@ export function AIProcessor() {
                                 <p className="text-xs text-slate-600 dark:text-blue-200">Quick references</p>
                               </div>
                               <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
-                                <FileText className="h-6 w-6 mx-auto mb-2 text-indigo-300" />
+                                <FileText className="h-6 w-6 mx-auto mb-2 text-purple-300" />
                                 <p className="text-xs font-medium text-gray-900 dark:text-white">Analysis</p>
-                                <p className="text-xs text-slate-600 dark:text-indigo-200">Detailed insights</p>
+                                <p className="text-xs text-slate-600 dark:text-purple-200">Detailed insights</p>
                               </div>
                               <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
                                 <Sparkles className="h-6 w-6 mx-auto mb-2 text-purple-300" />
@@ -809,16 +809,16 @@ export function AIProcessor() {
                         transition={{ delay: 0.5 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-slate-50 via-indigo-50/60 to-purple-50/60 dark:from-indigo-500/15 dark:via-purple-500/15 dark:to-pink-500/15 border border-indigo-200/30 dark:border-indigo-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 animate-pulse"></div>
+                        <Card className="bg-gradient-to-br from-slate-50 via-indigo-50/60 to-purple-50/60 dark:from-purple-500/15 dark:via-purple-500/15 dark:to-pink-500/15 border border-purple-indigo-200/30 dark:border-purple-indigo-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-500/5 animate-pulse"></div>
                           <CardContent className="p-6 relative">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
                                   <BarChart3 className="h-6 w-6 text-gray-900 dark:text-white" />
                                 </div>
                                 <div>
-                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 via-indigo-700/90 to-slate-800 dark:from-indigo-300 dark:via-purple-300 dark:to-indigo-200 bg-clip-text text-transparent mb-1">
+                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 via-purple-indigo-700/90 to-slate-800 dark:from-indigo-300 dark:via-purple-300 dark:to-indigo-200 bg-clip-text text-transparent mb-1">
                                     Maximize Your Insights
                                   </h3>
                                   <p className="text-sm text-muted-foreground">
@@ -829,7 +829,7 @@ export function AIProcessor() {
                               <Link href="/dashboard" data-testid="button-view-dashboard">
                                 <Button 
                                   size="lg" 
-                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                  className="bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
                                 >
                                   <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
                                   View Dashboard

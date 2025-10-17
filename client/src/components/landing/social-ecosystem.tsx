@@ -7,7 +7,7 @@ export function SocialEcosystem() {
   const platforms = [
     { name: "Farcaster", icon: MessageCircle, color: "from-purple-500 to-pink-600" },
     { name: "Lens Protocol", icon: Users, color: "from-green-500 to-teal-600" },
-    { name: "Zora", icon: Image, color: "from-blue-500 to-indigo-600" },
+    { name: "Zora", icon: Image, color: "from-blue-500 to-cyan-600" },
     { name: "Mirror", icon: Edit3, color: "from-orange-500 to-red-600" },
     { name: "Optimism", icon: Zap, color: "from-red-500 to-pink-600" }
   ];
@@ -57,7 +57,7 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Social + Ecosystem
           </h2>
           <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -101,7 +101,7 @@ export function SocialEcosystem() {
         >
           <div className="inline-flex items-center space-x-2 sm:space-x-4 glass-bg glass-border rounded-xl p-3 sm:p-4 mx-4">
             <motion.div 
-              className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center"
+              className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center"
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >

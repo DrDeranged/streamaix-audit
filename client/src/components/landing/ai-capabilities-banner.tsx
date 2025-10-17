@@ -17,7 +17,7 @@ export function AICapabilitiesBanner() {
 
   return (
     <motion.section 
-      className="py-3 bg-gradient-to-r from-indigo-500/90 via-purple-500/90 to-cyan-500/90 text-white relative overflow-hidden backdrop-blur-sm"
+      className="py-3 bg-gradient-to-r from-purple-500/90 via-purple-500/90 to-cyan-500/90 text-white relative overflow-hidden backdrop-blur-sm"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

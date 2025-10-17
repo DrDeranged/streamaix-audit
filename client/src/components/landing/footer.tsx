@@ -9,7 +9,7 @@ export function Footer() {
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <motion.div 
-          className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full blur-xl"
+          className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full blur-xl"
           animate={{ y: [-20, 20, -20] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -46,7 +46,7 @@ export function Footer() {
                     placeholder="vitalik.eth" 
                     className="flex-1 bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-gray-400"
                   />
-                  <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                  <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700">
                     <Search className="w-4 h-4" />
                   </Button>
                 </div>
@@ -54,7 +54,7 @@ export function Footer() {
               
               {/* Wallet Connect */}
               <Button className="glass-bg glass-border hover:bg-muted/20 text-white">
-                <Wallet className="w-5 h-5 mr-3 text-indigo-400" />
+                <Wallet className="w-5 h-5 mr-3 text-purple-400" />
                 Connect Wallet
               </Button>
             </motion.div>
@@ -69,10 +69,10 @@ export function Footer() {
           >
             <h3 className="text-lg font-semibold mb-4">Platform</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">API Reference</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">GitHub</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Whitepaper</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Documentation</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">API Reference</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">GitHub</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Whitepaper</a></li>
             </ul>
           </motion.div>
           
@@ -84,10 +84,10 @@ export function Footer() {
           >
             <h3 className="text-lg font-semibold mb-4">Community</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Discord</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Farcaster</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Lens Protocol</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Twitter</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Discord</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Farcaster</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Lens Protocol</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Twitter</a></li>
             </ul>
           </motion.div>
           
@@ -102,17 +102,17 @@ export function Footer() {
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com" 
-                  className="hover:text-indigo-400 transition-colors flex items-center"
+                  className="hover:text-purple-400 transition-colors flex items-center"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   arslandin.founder@streamaix.com
                 </a>
               </li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Support Center</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors">Support Center</a></li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=Partnership Inquiry&body=Hi! I'm interested in exploring partnership opportunities with StreamAiX." 
-                  className="hover:text-indigo-400 transition-colors"
+                  className="hover:text-purple-400 transition-colors"
                 >
                   Partnership
                 </a>
@@ -135,16 +135,16 @@ export function Footer() {
             </div>
             
             <div className="flex items-center space-x-6">
-              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
                 <MessageCircle className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
                 <Users className="w-5 h-5" />
               </a>
             </div>
