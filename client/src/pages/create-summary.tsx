@@ -361,11 +361,11 @@ export default function CreateSummary() {
   const ContentIcon = contentTypeIcons[formData.contentType];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 pt-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">
             Create AI Summary
           </h1>
           <p className="text-gray-300 text-lg">
@@ -373,10 +373,10 @@ export default function CreateSummary() {
           </p>
         </div>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+        <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <ContentIcon className="h-6 w-6" />
+            <CardTitle className="text-transparent bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text flex items-center gap-2">
+              <ContentIcon className="h-6 w-6 text-purple-400" />
               Content Processing
             </CardTitle>
           </CardHeader>
@@ -384,18 +384,18 @@ export default function CreateSummary() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* URL Input */}
               <div className="space-y-2">
-                <Label htmlFor="url" className="text-white">
+                <Label htmlFor="url" className="text-purple-300">
                   Content URL *
                 </Label>
                 <div className="relative">
-                  <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-purple-400" />
                   <Input
                     id="url"
                     type="url"
                     placeholder="https://youtube.com/watch?v=..."
                     value={formData.url}
                     onChange={(e) => handleUrlChange(e.target.value)}
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                    className="pl-10 bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-400 focus:border-purple-400"
                     required
                     data-testid="input-content-url"
                   />
@@ -404,14 +404,14 @@ export default function CreateSummary() {
 
               {/* Content Type */}
               <div className="space-y-2">
-                <Label className="text-white">Content Type *</Label>
+                <Label className="text-purple-300">Content Type *</Label>
                 <Select
                   value={formData.contentType}
                   onValueChange={(value: 'podcast' | 'video' | 'livestream') =>
                     setFormData(prev => ({ ...prev, contentType: value }))
                   }
                 >
-                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-content-type">
+                  <SelectTrigger className="bg-slate-900/50 border-purple-500/30 text-white" data-testid="select-content-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -424,7 +424,7 @@ export default function CreateSummary() {
 
               {/* Platform */}
               <div className="space-y-2">
-                <Label htmlFor="platform" className="text-white">
+                <Label htmlFor="platform" className="text-purple-300">
                   Platform *
                 </Label>
                 <Input
@@ -432,7 +432,7 @@ export default function CreateSummary() {
                   placeholder="Auto-detected from URL (e.g., YouTube, Spotify)"
                   value={formData.platform}
                   onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                  className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-400 focus:border-purple-400"
                   data-testid="input-platform"
                   required
                 />
@@ -443,7 +443,7 @@ export default function CreateSummary() {
 
               {/* Title */}
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-white">
+                <Label htmlFor="title" className="text-purple-300">
                   Custom Title
                 </Label>
                 <Input
@@ -451,21 +451,21 @@ export default function CreateSummary() {
                   placeholder="Leave blank to auto-extract from content"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                  className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-400 focus:border-purple-400"
                   data-testid="input-custom-title"
                 />
               </div>
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label className="text-white">Tags</Label>
+                <Label className="text-purple-300">Tags</Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Add a tag..."
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-gray-400"
+                    className="flex-1 bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-400 focus:border-purple-400"
                     data-testid="input-add-tag"
                   />
                   <Button
@@ -473,7 +473,7 @@ export default function CreateSummary() {
                     onClick={addTag}
                     size="sm"
                     variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5"
+                    className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 backdrop-blur-lg bg-purple-500/5"
                     data-testid="button-add-tag"
                   >
                     <Plus className="h-4 w-4" />
@@ -505,14 +505,14 @@ export default function CreateSummary() {
 
               {/* Privacy Setting */}
               <div className="space-y-2">
-                <Label className="text-white">Visibility</Label>
+                <Label className="text-purple-300">Visibility</Label>
                 <Select
                   value={formData.isPublic ? 'public' : 'private'}
                   onValueChange={(value) =>
                     setFormData(prev => ({ ...prev, isPublic: value === 'public' }))
                   }
                 >
-                  <SelectTrigger className="bg-white/5 border-white/20 text-white" data-testid="select-visibility">
+                  <SelectTrigger className="bg-slate-900/50 border-purple-500/30 text-white" data-testid="select-visibility">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -524,10 +524,10 @@ export default function CreateSummary() {
 
               {/* Web3 Features */}
               {isConnected && (
-                <div className="space-y-4 p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                <div className="space-y-4 p-4 bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Shield className="h-5 w-5 text-purple-400" />
-                    <Label className="text-white font-semibold">Web3 Options</Label>
+                    <Label className="text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text font-semibold">Web3 Options</Label>
                   </div>
                   
                   <div className="flex items-center space-x-3">
@@ -568,7 +568,7 @@ export default function CreateSummary() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600/80 to-blue-600/80 hover:from-purple-700/90 hover:to-blue-700/90 backdrop-blur-lg border border-white/20 text-white font-semibold py-3"
+                className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 backdrop-blur-lg border border-purple-400/30 text-white font-semibold py-3"
                 disabled={isProcessing}
                 data-testid="button-start-processing"
               >
@@ -594,27 +594,27 @@ export default function CreateSummary() {
                 >
                   {/* Progress Card - Same design as landing page */}
                   {isProcessing && (
-                    <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                    <Card className="mb-6 bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
                             <div className="relative">
-                              <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                                <Brain className="h-5 w-5 text-indigo-400 animate-pulse" />
+                              <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                <Brain className="h-5 w-5 text-purple-400 animate-pulse" />
                               </div>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-white">AI Processing Active</h3>
+                              <h3 className="font-semibold text-transparent bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text">AI Processing Active</h3>
                               <p className="text-sm text-white/90 font-medium">{processingStatus || "Starting AI analysis..."}</p>
                             </div>
                           </div>
-                          <Badge variant="secondary" className="font-mono">
+                          <Badge variant="secondary" className="font-mono bg-purple-500/20 text-purple-300 border-purple-500/30">
                             {Math.round(progress)}%
                           </Badge>
                         </div>
-                        <div className="w-full bg-muted rounded-full h-2">
+                        <div className="w-full bg-slate-800/50 rounded-full h-2">
                           <div 
-                            className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                            className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -629,7 +629,7 @@ export default function CreateSummary() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <Card className="mb-6 bg-card/50 backdrop-blur-sm border-muted-foreground/20">
+                      <Card className="mb-6 bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
                         <CardContent className="p-6">
                           <div className="text-center space-y-4">
                             <div className="flex items-center justify-center gap-2">
@@ -639,7 +639,7 @@ export default function CreateSummary() {
                               </Badge>
                             </div>
                             
-                            <h3 className="text-xl font-semibold">{result.title || "Content Analysis Ready"}</h3>
+                            <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{result.title || "Content Analysis Ready"}</h3>
                             
                             {/* View Results Button */}
                             <Button 
@@ -648,7 +648,7 @@ export default function CreateSummary() {
                                   setLocation(`/processing-results/${result.id}`);
                                 }
                               }}
-                              className="w-full max-w-md bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                              className="w-full max-w-md bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-lg"
                               data-testid="button-view-analysis"
                             >
                               <ExternalLink className="h-4 w-4 mr-2" />

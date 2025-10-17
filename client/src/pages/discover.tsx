@@ -213,7 +213,7 @@ const VolatilityForecastingSection = () => {
       {volatilityAnalysis && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Overall Stress Level */}
-          <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 backdrop-blur-sm">
+          <Card className="bg-gradient-to-r from-purple-900/20 to-fuchsia-900/20 border-purple-500/30 backdrop-blur-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -229,7 +229,7 @@ const VolatilityForecastingSection = () => {
           </Card>
 
           {/* Risk Regime */}
-          <Card className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-blue-500/30 backdrop-blur-sm">
+          <Card className="bg-gradient-to-r from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border-purple-500/30 backdrop-blur-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>

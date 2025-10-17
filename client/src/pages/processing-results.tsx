@@ -131,7 +131,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={{ opacity: 0 }}
@@ -144,8 +144,8 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
           >
             <Brain className="h-16 w-16 text-purple-400 mx-auto" />
           </motion.div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading AI Results</h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Processing your content intelligence...</p>
+          <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">Loading AI Results</h2>
+          <p className="text-sm sm:text-base text-gray-400">Processing your content intelligence...</p>
         </motion.div>
       </div>
     );
@@ -153,11 +153,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
   if (!summaryId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid URL</h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">No summary ID provided in URL</p>
-          <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
+          <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Invalid URL</h2>
+          <p className="text-sm sm:text-base text-gray-400 mb-4">No summary ID provided in URL</p>
+          <Button onClick={() => setLocation('/')} className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
@@ -168,11 +168,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
   if (error || !summary) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Content Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Summary ID: {summaryId}</p>
-          <Button onClick={() => setLocation('/')} className="bg-purple-600 hover:bg-purple-700">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Content Not Found</h2>
+          <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
+          <Button onClick={() => setLocation('/')} className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
@@ -237,7 +237,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-xl sm:text-3xl md:text-4xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
             {summary.title}
           </h2>
           {summary.description && (
@@ -249,7 +249,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
           {/* Content Metadata - Landing Page Style */}
           <div className="flex justify-center items-center space-x-3 sm:space-x-4 md:space-x-6 opacity-70 flex-wrap gap-2 sm:gap-3 px-4">
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               <span className="text-xs sm:text-sm">
                 {summary.originalDuration ? 
                   `${Math.floor(summary.originalDuration / 60)}:${(summary.originalDuration % 60).toString().padStart(2, '0')}` : 
@@ -258,7 +258,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
               <span className="text-xs sm:text-sm">{summary.platform}</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
@@ -288,7 +288,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               {/* Header Card */}
-              <Card className="mb-4 bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
+              <Card className="mb-4 bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex items-start gap-4">
                     {summary.rawData?.thumbnail && (
@@ -328,7 +328,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
               </Card>
 
               {/* Content Tabs */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-gray-600/20" style={{backgroundColor: 'rgba(30, 41, 59, 0.5)', borderColor: 'rgba(107, 114, 128, 0.2)'}}>
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
                 <CardContent className="p-4 sm:p-5">
                   {/* Tab Navigation */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

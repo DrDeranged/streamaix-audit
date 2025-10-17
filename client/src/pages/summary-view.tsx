@@ -279,7 +279,7 @@ export default function SummaryView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={{ opacity: 0 }}
@@ -292,8 +292,8 @@ export default function SummaryView() {
           >
             <Brain className="h-16 w-16 text-purple-400 mx-auto" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading AI Results</h2>
-          <p className="text-gray-600 dark:text-gray-400">Processing your content intelligence...</p>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">Loading AI Results</h2>
+          <p className="text-gray-400">Processing your content intelligence...</p>
         </motion.div>
       </div>
     );
@@ -301,12 +301,12 @@ export default function SummaryView() {
 
   if (error || !summary) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Content Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Summary ID: {summaryId}</p>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Content Not Found</h2>
+          <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
           <Link href="/dashboard">
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
@@ -321,15 +321,15 @@ export default function SummaryView() {
 
   if (!canView) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Private Summary</h2>
+          <Globe className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">Private Summary</h2>
           <p className="text-gray-300 mb-4">
             This summary is private and can only be viewed by its creator.
           </p>
           <Link href="/dashboard">
-            <Button className="w-full">Go Home</Button>
+            <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">Go Home</Button>
           </Link>
         </div>
       </div>
