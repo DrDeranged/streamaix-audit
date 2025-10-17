@@ -120,9 +120,9 @@ export default function NFTGallery() {
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'Legendary': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+      case 'Legendary': return 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30';
       case 'Epic': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-      case 'Rare': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'Rare': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
       case 'Common': return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
       default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
     }
@@ -130,15 +130,15 @@ export default function NFTGallery() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
               <Image className="h-16 w-16 text-purple-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h2>
               <p className="text-gray-300 mb-6">Please sign in to view and manage your NFT collection.</p>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
                 Sign In
               </Button>
             </CardContent>
@@ -149,7 +149,7 @@ export default function NFTGallery() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       
       <div className="max-w-7xl mx-auto p-6">
@@ -167,7 +167,7 @@ export default function NFTGallery() {
             <Button
               onClick={handleMintDemo}
               disabled={isMinting || !isConnected}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
             >
               {isMinting ? (
                 <>
@@ -191,7 +191,7 @@ export default function NFTGallery() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Your NFTs</CardTitle>
             </CardHeader>
@@ -206,7 +206,7 @@ export default function NFTGallery() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Total Collection</CardTitle>
             </CardHeader>
@@ -221,7 +221,7 @@ export default function NFTGallery() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Floor Price</CardTitle>
             </CardHeader>
@@ -236,7 +236,7 @@ export default function NFTGallery() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Volume (24h)</CardTitle>
             </CardHeader>

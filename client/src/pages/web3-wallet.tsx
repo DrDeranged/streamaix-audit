@@ -51,7 +51,7 @@ export default function Web3WalletPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
           <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
@@ -59,7 +59,7 @@ export default function Web3WalletPage() {
               <Wallet className="h-16 w-16 text-purple-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h2>
               <p className="text-gray-300 mb-6">Please sign in to access your Web3 wallet features.</p>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
                 Sign In
               </Button>
             </CardContent>
@@ -70,7 +70,7 @@ export default function Web3WalletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       
       <div className="max-w-6xl mx-auto p-6">
@@ -99,15 +99,15 @@ export default function Web3WalletPage() {
               <div className="mt-4">
                 <p className="text-sm text-gray-300 mb-2">Web3 Features Available:</p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="border-green-500/30 text-green-300">
+                  <Badge variant="outline" className="border-purple-500/30 text-purple-300">
                     <Shield className="h-3 w-3 mr-1" />
                     Secure Transactions
                   </Badge>
-                  <Badge variant="outline" className="border-blue-500/30 text-blue-300">
+                  <Badge variant="outline" className="border-fuchsia-500/30 text-fuchsia-300">
                     <Globe className="h-3 w-3 mr-1" />
                     Decentralized Storage
                   </Badge>
-                  <Badge variant="outline" className="border-purple-500/30 text-purple-300">
+                  <Badge variant="outline" className="border-cyan-500/30 text-cyan-300">
                     <Zap className="h-3 w-3 mr-1" />
                     Instant Rewards
                   </Badge>
@@ -126,50 +126,50 @@ export default function Web3WalletPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
             >
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Network</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                         {networkInfo?.name || 'Unknown'}
                       </p>
                       <p className="text-gray-400 text-sm">Chain ID: {wallet.chainId}</p>
                     </div>
-                    <Globe className="h-8 w-8 text-blue-400" />
+                    <Globe className="h-8 w-8 text-cyan-400" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Balance</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                         {wallet.balance ? formatBalance(wallet.balance) : '0.0000'}
                       </p>
                       <p className="text-gray-400 text-sm">
                         {networkInfo?.nativeCurrency.symbol || 'ETH'}
                       </p>
                     </div>
-                    <Coins className="h-8 w-8 text-green-400" />
+                    <Coins className="h-8 w-8 text-fuchsia-400" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">ENS Name</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                         {wallet.ensName || 'None'}
                       </p>
                       <p className="text-gray-400 text-sm">Domain name</p>
@@ -188,15 +188,15 @@ export default function Web3WalletPage() {
             >
               <Tabs defaultValue="tokens" className="space-y-6">
                 <TabsList className="bg-white/10 border border-white/20">
-                  <TabsTrigger value="tokens" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+                  <TabsTrigger value="tokens" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
                     <Coins className="h-4 w-4 mr-2" />
                     Tokens
                   </TabsTrigger>
-                  <TabsTrigger value="transactions" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+                  <TabsTrigger value="transactions" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
                     <Receipt className="h-4 w-4 mr-2" />
                     Transactions
                   </TabsTrigger>
-                  <TabsTrigger value="send" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+                  <TabsTrigger value="send" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
                     <Send className="h-4 w-4 mr-2" />
                     Send
                   </TabsTrigger>
@@ -205,11 +205,11 @@ export default function Web3WalletPage() {
                 <TabsContent value="tokens" className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Native Token */}
-                    <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                    <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                       <CardHeader className="pb-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full flex items-center justify-center">
                               <span className="text-gray-900 dark:text-white font-bold">ETH</span>
                             </div>
                             <div>
@@ -219,7 +219,7 @@ export default function Web3WalletPage() {
                               <p className="text-gray-400 text-sm">{networkInfo?.name || 'Ethereum'}</p>
                             </div>
                           </div>
-                          <Badge variant="outline" className="border-green-500/30 text-green-300">
+                          <Badge variant="outline" className="border-fuchsia-500/30 text-fuchsia-300">
                             <TrendingUp className="h-3 w-3 mr-1" />
                             +2.1%
                           </Badge>
@@ -242,7 +242,7 @@ export default function Web3WalletPage() {
 
                     {/* Mock Tokens */}
                     {mockTokens.map((token, index) => (
-                      <Card key={token.symbol} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                      <Card key={token.symbol} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                         <CardHeader className="pb-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -281,7 +281,7 @@ export default function Web3WalletPage() {
                 </TabsContent>
 
                 <TabsContent value="transactions" className="space-y-4">
-                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardHeader>
                       <CardTitle className="text-gray-900 dark:text-white">Recent Transactions</CardTitle>
                     </CardHeader>
@@ -291,12 +291,12 @@ export default function Web3WalletPage() {
                           <div key={tx.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                tx.type === 'received' ? 'bg-green-500/20' : 'bg-red-500/20'
+                                tx.type === 'received' ? 'bg-fuchsia-500/20' : 'bg-purple-500/20'
                               }`}>
                                 {tx.type === 'received' ? (
-                                  <ArrowDownRight className="h-4 w-4 text-green-400" />
+                                  <ArrowDownRight className="h-4 w-4 text-fuchsia-400" />
                                 ) : (
-                                  <ArrowUpRight className="h-4 w-4 text-red-400" />
+                                  <ArrowUpRight className="h-4 w-4 text-purple-400" />
                                 )}
                               </div>
                               <div>
@@ -318,7 +318,7 @@ export default function Web3WalletPage() {
                 </TabsContent>
 
                 <TabsContent value="send" className="space-y-4">
-                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardHeader>
                       <CardTitle className="text-gray-900 dark:text-white">Send Tokens</CardTitle>
                       <p className="text-gray-400 text-sm">Send tokens to another wallet address</p>
@@ -343,7 +343,7 @@ export default function Web3WalletPage() {
                         />
                       </div>
                       <Button 
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
                         disabled={!sendAddress || !sendAmount}
                       >
                         <Send className="h-4 w-4 mr-2" />

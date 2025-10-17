@@ -201,7 +201,7 @@ export default function WalletDashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-center text-gray-900 dark:text-white">
           <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
           <p className="mb-4">Please sign in to view your wallet</p>
@@ -212,7 +212,7 @@ export default function WalletDashboard() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
         <Navigation showBackButton title="Wallet Dashboard" />
         <div className="container mx-auto px-4 sm:px-6 py-8 flex items-center justify-center min-h-[80vh]">
           <div className="text-center text-gray-900 dark:text-white max-w-md">
@@ -231,15 +231,15 @@ export default function WalletDashboard() {
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'reward':
-        return <Award className="w-4 h-4 text-green-400" />;
+        return <Award className="w-4 h-4 text-fuchsia-400" />;
       case 'bounty_payment':
         return <Gift className="w-4 h-4 text-purple-400" />;
       case 'tip_received':
-        return <ArrowDownLeft className="w-4 h-4 text-blue-400" />;
+        return <ArrowDownLeft className="w-4 h-4 text-cyan-400" />;
       case 'tip_sent':
-        return <ArrowUpRight className="w-4 h-4 text-orange-400" />;
+        return <ArrowUpRight className="w-4 h-4 text-purple-400" />;
       case 'withdrawal':
-        return <ArrowUpRight className="w-4 h-4 text-red-400" />;
+        return <ArrowUpRight className="w-4 h-4 text-fuchsia-400" />;
       default:
         return <Coins className="w-4 h-4 text-gray-400" />;
     }
@@ -252,13 +252,13 @@ export default function WalletDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation showBackButton title="Wallet Dashboard" />
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="p-2 sm:p-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500">
+            <div className="p-2 sm:p-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500">
               <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-gray-900 dark:text-white" />
             </div>
             <div>
@@ -283,7 +283,7 @@ export default function WalletDashboard() {
             <Button 
               size="sm" 
               variant="outline" 
-              className="border-blue-400/50 bg-blue-500/20 text-gray-900 dark:text-white hover:bg-blue-500/30 hover:border-blue-400 text-xs sm:text-sm"
+              className="border-purple-400/50 bg-purple-500/20 text-gray-900 dark:text-white hover:bg-purple-500/30 hover:border-purple-400 text-xs sm:text-sm"
               onClick={() => window.open(`https://etherscan.io/address/${wallet?.address}`, '_blank')}
             >
               <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -302,7 +302,7 @@ export default function WalletDashboard() {
               <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Copy Address</span>
             </Button>
-            <Button size="sm" className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-xs sm:text-sm">
+            <Button size="sm" className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 text-xs sm:text-sm">
               <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Deposit</span>
             </Button>
@@ -320,22 +320,22 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
               <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
                   <span className="text-slate-400 text-xs sm:text-sm">ETH Balance</span>
-                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                     {walletBalance?.ethBalance?.toFixed(4) || '0.0000'} ETH
                   </p>
                   <p className="text-slate-300 text-xs sm:text-sm">
                     ${((walletBalance?.ethBalance || 0) * 3000).toFixed(2)} USD
                   </p>
                   <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span className="text-blue-400 text-xs">Native Token</span>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span className="text-purple-400 text-xs">Native Token</span>
                   </div>
                 </div>
               </CardContent>
@@ -347,14 +347,14 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
               <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
                   <span className="text-slate-400 text-xs sm:text-sm">STREAM Tokens</span>
-                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                     {walletBalance?.streamTokens?.toFixed(2) || '0.00'} STREAM
                   </p>
                   <p className="text-slate-300 text-xs sm:text-sm">
@@ -380,14 +380,14 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
               <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
                   <span className="text-slate-400 text-xs sm:text-sm">Total Portfolio</span>
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold text-green-400">
+                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                     ${walletBalance?.usdValue.toFixed(2)}
                   </p>
                   <p className="text-slate-400 text-xs sm:text-sm">Total USD Value</p>
@@ -411,14 +411,14 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
           >
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
               <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
                   <span className="text-slate-400 text-xs sm:text-sm">Rewards Earned</span>
-                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold text-purple-400">
+                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                     {walletBalance?.totalEarned.toFixed(2)}
                   </p>
                   <p className="text-slate-400 text-xs sm:text-sm">STREAM earned</p>

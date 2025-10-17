@@ -121,15 +121,15 @@ export default function DeFiDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
               <PieChart className="h-16 w-16 text-purple-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h2>
               <p className="text-gray-300 mb-6">Please sign in to access DeFi features.</p>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
                 Sign In
               </Button>
             </CardContent>
@@ -140,7 +140,7 @@ export default function DeFiDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       
       <div className="max-w-7xl mx-auto p-6">
@@ -196,43 +196,43 @@ export default function DeFiDashboard() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Total Value Locked</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{defiData.totalValueLocked}</p>
-                  <p className="text-green-400 text-sm flex items-center">
+                  <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{defiData.totalValueLocked}</p>
+                  <p className="text-fuchsia-400 text-sm flex items-center">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +12.5%
                   </p>
                 </div>
-                <Lock className="h-8 w-8 text-blue-400" />
+                <Lock className="h-8 w-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">24h Volume</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{defiData.dailyVolume}</p>
-                  <p className="text-green-400 text-sm flex items-center">
+                  <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{defiData.dailyVolume}</p>
+                  <p className="text-fuchsia-400 text-sm flex items-center">
                     <ArrowUpRight className="h-3 w-3 mr-1" />
                     +8.3%
                   </p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-green-400" />
+                <BarChart3 className="h-8 w-8 text-cyan-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Your STREAM Balance</CardTitle>
             </CardHeader>
@@ -247,7 +247,7 @@ export default function DeFiDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Staked Tokens</CardTitle>
             </CardHeader>
@@ -293,7 +293,7 @@ export default function DeFiDashboard() {
             {/* Staking Tab */}
             <TabsContent value="staking" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                   <CardHeader>
                     <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
                       <Lock className="h-5 w-5" />
@@ -329,7 +329,7 @@ export default function DeFiDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                   <CardHeader>
                     <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
                       <Unlock className="h-5 w-5" />
@@ -378,7 +378,7 @@ export default function DeFiDashboard() {
               </div>
 
               {/* Staking Stats */}
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                 <CardHeader>
                   <CardTitle className="text-gray-900 dark:text-white">Staking Statistics</CardTitle>
                 </CardHeader>
@@ -409,7 +409,7 @@ export default function DeFiDashboard() {
             <TabsContent value="liquidity" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {defiData.liquidityPools.map((pool, index) => (
-                  <Card key={pool.pair} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card key={pool.pair} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-gray-900 dark:text-white">{pool.pair}</CardTitle>
@@ -453,7 +453,7 @@ export default function DeFiDashboard() {
             <TabsContent value="yield" className="space-y-6">
               <div className="space-y-4">
                 {defiData.yieldFarms.map((farm, index) => (
-                  <Card key={farm.pool} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card key={farm.pool} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -542,7 +542,7 @@ export default function DeFiDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
               <CardHeader>
                 <CardTitle className="text-gray-900 dark:text-white">Network Information</CardTitle>
               </CardHeader>
