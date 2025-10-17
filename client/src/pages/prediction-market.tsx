@@ -70,16 +70,16 @@ export default function PredictionMarket() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Skeleton className="h-8 w-32 mb-6 bg-slate-800" />
+          <Skeleton className="h-8 w-32 mb-6 bg-purple-900/20" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <Skeleton className="h-64 w-full bg-slate-800" />
-              <Skeleton className="h-96 w-full bg-slate-800" />
+              <Skeleton className="h-64 w-full bg-purple-900/20" />
+              <Skeleton className="h-96 w-full bg-purple-900/20" />
             </div>
             <div className="space-y-6">
-              <Skeleton className="h-96 w-full bg-slate-800" />
+              <Skeleton className="h-96 w-full bg-purple-900/20" />
             </div>
           </div>
         </div>
@@ -89,12 +89,12 @@ export default function PredictionMarket() {
 
   if (!market) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-        <Card className="bg-slate-900/50 border-slate-700/50 p-8 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+        <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 p-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Market Not Found</h2>
           <p className="text-slate-400 mb-4">The market you're looking for doesn't exist.</p>
           <Link href="/markets">
-            <Button variant="outline" className="border-slate-700 text-slate-400">
+            <Button variant="outline" className="border-purple-500/30 text-purple-300">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Markets
             </Button>
@@ -113,9 +113,9 @@ export default function PredictionMarket() {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       crypto: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-      defi: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      real_world: "bg-green-500/20 text-green-300 border-green-500/30",
-      community: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+      defi: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
+      real_world: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+      community: "bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
     };
     return colors[category] || colors.community;
   };
@@ -137,13 +137,13 @@ export default function PredictionMarket() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link href="/markets">
           <Button 
             variant="ghost" 
-            className="mb-6 text-slate-400 hover:text-white"
+            className="mb-6 text-purple-300 hover:text-white hover:bg-purple-900/30"
             data-testid="button-back-to-markets"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -155,7 +155,7 @@ export default function PredictionMarket() {
           {/* Left Column - Market Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Market Header */}
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 overflow-hidden backdrop-blur-sm">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 overflow-hidden backdrop-blur-sm">
               {market.imageUrl && (
                 <div className="h-48 overflow-hidden relative">
                   <img 
@@ -163,7 +163,7 @@ export default function PredictionMarket() {
                     alt={market.question}
                     className="w-full h-full object-cover opacity-70"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent" />
                 </div>
               )}
               
@@ -172,13 +172,13 @@ export default function PredictionMarket() {
                   <Badge className={`${getCategoryColor(market.category)} border`}>
                     {market.category.replace('_', ' ').toUpperCase()}
                   </Badge>
-                  <Badge variant="outline" className="border-slate-600 text-slate-400">
+                  <Badge variant="outline" className="border-purple-500/30 text-purple-300">
                     <Clock className="w-3 h-3 mr-1" />
                     {daysLeft}d {hoursLeft}h left
                   </Badge>
                 </div>
 
-                <h1 className="text-3xl font-bold text-white mb-4">{market.question}</h1>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">{market.question}</h1>
                 
                 {market.description && (
                   <p className="text-slate-400 mb-4">{market.description}</p>
@@ -187,25 +187,25 @@ export default function PredictionMarket() {
                 {market.tags && market.tags.length > 0 && (
                   <div className="flex gap-2 flex-wrap mb-4">
                     {market.tags.map((tag, i) => (
-                      <span key={i} className="px-3 py-1 bg-slate-800/50 text-slate-400 text-sm rounded-full border border-slate-700/50">
+                      <span key={i} className="px-3 py-1 bg-purple-800/30 text-purple-300 text-sm rounded-full border border-purple-500/30">
                         #{tag}
                       </span>
                     ))}
                   </div>
                 )}
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-700/50">
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-500/20">
                   <div>
                     <div className="text-sm text-slate-400">Total Volume</div>
-                    <div className="text-lg font-bold text-white">{(market.totalVolume / 1000).toFixed(1)}K STREAM</div>
+                    <div className="text-lg font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{(market.totalVolume / 1000).toFixed(1)}K STREAM</div>
                   </div>
                   <div>
                     <div className="text-sm text-slate-400">Total Trades</div>
-                    <div className="text-lg font-bold text-white">{market.totalTrades}</div>
+                    <div className="text-lg font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{market.totalTrades}</div>
                   </div>
                   <div>
                     <div className="text-sm text-slate-400">Liquidity</div>
-                    <div className="text-lg font-bold text-white">{((market.yesLiquidity + market.noLiquidity) / 1000).toFixed(1)}K</div>
+                    <div className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">{((market.yesLiquidity + market.noLiquidity) / 1000).toFixed(1)}K</div>
                   </div>
                 </div>
               </CardContent>
@@ -213,23 +213,23 @@ export default function PredictionMarket() {
 
             {/* Market Details */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="bg-slate-900/50 border-b border-slate-700/50">
+              <TabsList className="bg-purple-900/20 border-b border-purple-500/30">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
                 <TabsTrigger value="trades" data-testid="tab-trades">Recent Trades</TabsTrigger>
                 <TabsTrigger value="positions" data-testid="tab-positions">Top Positions</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="mt-6">
-                <Card className="bg-slate-900/50 border-slate-700/50">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
-                      <Info className="w-5 h-5" />
+                      <Info className="w-5 h-5 text-purple-400" />
                       Market Information
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {market.sourceSummary && (
-                      <div className="mb-4 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-lg">
+                      <div className="mb-4 p-4 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-lg">
                         <div className="flex items-start gap-3">
                           <Sparkles className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
                           <div className="flex-1">
@@ -244,17 +244,17 @@ export default function PredictionMarket() {
                         </div>
                       </div>
                     )}
-                    <div className="flex justify-between items-center py-3 border-b border-slate-700/50">
+                    <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
                       <span className="text-slate-400">Resolution Source</span>
                       <span className="text-white font-medium capitalize">{market.resolutionSource}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-slate-700/50">
+                    <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
                       <span className="text-slate-400">Creator</span>
                       <span className="text-white font-mono text-sm">{market.creatorWallet.slice(0, 6)}...{market.creatorWallet.slice(-4)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-slate-700/50">
+                    <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
                       <span className="text-slate-400">Status</span>
-                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30 border">
+                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 border">
                         {market.status.toUpperCase()}
                       </Badge>
                     </div>
@@ -267,7 +267,7 @@ export default function PredictionMarket() {
               </TabsContent>
 
               <TabsContent value="trades" className="mt-6">
-                <Card className="bg-slate-900/50 border-slate-700/50">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                   <CardContent className="p-6 text-center text-slate-400">
                     No recent trades available
                   </CardContent>
@@ -275,7 +275,7 @@ export default function PredictionMarket() {
               </TabsContent>
 
               <TabsContent value="positions" className="mt-6">
-                <Card className="bg-slate-900/50 border-slate-700/50">
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                   <CardContent className="p-6 text-center text-slate-400">
                     No position data available
                   </CardContent>
@@ -287,7 +287,7 @@ export default function PredictionMarket() {
           {/* Right Column - Trading */}
           <div className="space-y-6">
             {/* Price Card */}
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-cyan-400" />
@@ -299,7 +299,7 @@ export default function PredictionMarket() {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="text-sm text-green-300 font-medium">YES</div>
-                      <div className="text-2xl font-bold text-green-400">{yesPercentage}%</div>
+                      <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">{yesPercentage}%</div>
                     </div>
                     <TrendingUp className="w-8 h-8 text-green-400" />
                   </div>
@@ -308,7 +308,7 @@ export default function PredictionMarket() {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="text-sm text-red-300 font-medium">NO</div>
-                      <div className="text-2xl font-bold text-red-400">{noPercentage}%</div>
+                      <div className="text-2xl font-bold bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">{noPercentage}%</div>
                     </div>
                     <TrendingUp className="w-8 h-8 text-red-400 rotate-180" />
                   </div>
@@ -317,7 +317,7 @@ export default function PredictionMarket() {
             </Card>
 
             {/* Trading Card */}
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-white">Trade</CardTitle>
               </CardHeader>
@@ -327,8 +327,8 @@ export default function PredictionMarket() {
                   <Button
                     variant={tradeType === "buy" ? "default" : "outline"}
                     className={tradeType === "buy" 
-                      ? "flex-1 bg-gradient-to-r from-green-500 to-emerald-600 border-0" 
-                      : "flex-1 border-slate-700 text-slate-400"
+                      ? "flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 border-0" 
+                      : "flex-1 border-purple-500/30 text-purple-300"
                     }
                     onClick={() => setTradeType("buy")}
                     data-testid="button-buy"
@@ -338,8 +338,8 @@ export default function PredictionMarket() {
                   <Button
                     variant={tradeType === "sell" ? "default" : "outline"}
                     className={tradeType === "sell" 
-                      ? "flex-1 bg-gradient-to-r from-red-500 to-rose-600 border-0" 
-                      : "flex-1 border-slate-700 text-slate-400"
+                      ? "flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 border-0" 
+                      : "flex-1 border-purple-500/30 text-purple-300"
                     }
                     onClick={() => setTradeType("sell")}
                     data-testid="button-sell"
@@ -356,7 +356,7 @@ export default function PredictionMarket() {
                       variant={outcome === "yes" ? "default" : "outline"}
                       className={outcome === "yes" 
                         ? "flex-1 bg-green-500/30 text-green-300 border-green-500/50" 
-                        : "flex-1 border-slate-700 text-slate-400"
+                        : "flex-1 border-purple-500/30 text-purple-300"
                       }
                       onClick={() => setOutcome("yes")}
                       data-testid="button-outcome-yes"
@@ -367,7 +367,7 @@ export default function PredictionMarket() {
                       variant={outcome === "no" ? "default" : "outline"}
                       className={outcome === "no" 
                         ? "flex-1 bg-red-500/30 text-red-300 border-red-500/50" 
-                        : "flex-1 border-slate-700 text-slate-400"
+                        : "flex-1 border-purple-500/30 text-purple-300"
                       }
                       onClick={() => setOutcome("no")}
                       data-testid="button-outcome-no"
@@ -386,14 +386,14 @@ export default function PredictionMarket() {
                     placeholder="0.00"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-purple-900/20 border-purple-500/30 text-white"
                     data-testid="input-amount"
                   />
                 </div>
 
                 {/* Quote Display */}
                 {amount && parseFloat(amount) > 0 && quote && (
-                  <div className="bg-slate-800/50 rounded-lg p-3 space-y-2">
+                  <div className="bg-purple-900/30 rounded-lg p-3 space-y-2 border border-purple-500/20">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">You'll receive</span>
                       <span className="text-white font-medium">{quote.tokensOut.toFixed(2)} shares</span>
@@ -412,7 +412,7 @@ export default function PredictionMarket() {
                 {/* Advanced Options */}
                 <Button
                   variant="ghost"
-                  className="w-full text-slate-400 hover:text-white"
+                  className="w-full text-purple-300 hover:text-white hover:bg-purple-900/30"
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   data-testid="button-advanced-options"
                 >
@@ -421,7 +421,7 @@ export default function PredictionMarket() {
                 </Button>
 
                 {showAdvanced && (
-                  <div className="space-y-2 pt-2 border-t border-slate-700/50">
+                  <div className="space-y-2 pt-2 border-t border-purple-500/20">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">Slippage Tolerance</span>
                       <span className="text-white">1%</span>
@@ -431,7 +431,7 @@ export default function PredictionMarket() {
 
                 {/* Trade Button */}
                 <Button
-                  className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0 hover:shadow-lg hover:shadow-purple-500/50"
+                  className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-lg hover:shadow-purple-500/50"
                   onClick={handleTrade}
                   disabled={!amount || parseFloat(amount) <= 0}
                   data-testid="button-place-trade"
@@ -447,16 +447,16 @@ export default function PredictionMarket() {
             </Card>
 
             {/* Leaderboard Preview */}
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Award className="w-5 h-5 text-yellow-400" />
+                  <Award className="w-5 h-5 text-fuchsia-400" />
                   Top Predictors
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center text-slate-400 py-4">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-slate-600" />
+                  <Users className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                   <p className="text-sm">No leaderboard data yet</p>
                 </div>
               </CardContent>
