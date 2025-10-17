@@ -491,7 +491,7 @@ export default function AvatarProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-white text-xl">Loading avatar profile...</div>
       </div>
     );
@@ -499,7 +499,7 @@ export default function AvatarProfile() {
 
   if (!avatar) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-white text-xl">Avatar not found</div>
       </div>
     );
@@ -515,14 +515,14 @@ export default function AvatarProfile() {
   const highlightedInsights = insights.filter(insight => insight.is_highlighted).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       {/* Header Section */}
       <div className="relative">
         {/* Banner */}
-        <div className="h-64 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 relative overflow-hidden">
+        <div className="h-64 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
           <Link href="/" className="absolute top-6 left-6 z-10">
-            <Button variant="ghost" size="sm" className="text-white border-white/20 hover:bg-white/10">
+            <Button variant="ghost" size="sm" className="text-white border-purple-500/30 hover:bg-purple-900/20">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
@@ -581,8 +581,8 @@ export default function AvatarProfile() {
                       disabled={followMutation.isPending}
                       className={`${
                         isFollowing 
-                          ? 'bg-white/10 text-white border-white/20' 
-                          : 'bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 text-white'
+                          ? 'bg-purple-900/20 text-white border-purple-500/30' 
+                          : 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
                       } hover:opacity-90`}
                       data-testid="button-follow-avatar"
                     >
@@ -595,7 +595,7 @@ export default function AvatarProfile() {
                         variant="outline"
                         size="sm"
                         onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                        className="border-white/20 text-white hover:bg-white/10"
+                        className="border-purple-500/30 text-white hover:bg-purple-900/20"
                         data-testid="button-notifications-toggle"
                       >
                         {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}

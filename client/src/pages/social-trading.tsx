@@ -115,15 +115,15 @@ export default function SocialTradingPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
-              <Users className="h-16 w-16 text-purple-400 mx-auto mb-4" />
+              <Users className="h-16 w-16 text-fuchsia-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Social Trading Access</h2>
               <p className="text-gray-300 mb-6">Please sign in to access social trading features.</p>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Button className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
                 Sign In
               </Button>
             </CardContent>
@@ -134,7 +134,7 @@ export default function SocialTradingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       
       <div className="max-w-7xl mx-auto p-6">
@@ -144,21 +144,21 @@ export default function SocialTradingPage() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Social Trading</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">Social Trading</h1>
           <p className="text-gray-400">Follow top traders and copy their strategies</p>
         </motion.div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/10 border border-white/20">
-            <TabsTrigger value="traders" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+          <TabsList className="bg-gradient-to-r from-purple-900/20 to-purple-800/10 border border-purple-500/30">
+            <TabsTrigger value="traders" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
               <Trophy className="h-4 w-4 mr-2" />
               Top Traders
             </TabsTrigger>
-            <TabsTrigger value="signals" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="signals" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
               <Signal className="h-4 w-4 mr-2" />
               Trade Signals
             </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="leaderboard" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
               <BarChart3 className="h-4 w-4 mr-2" />
               Leaderboard
             </TabsTrigger>
@@ -169,12 +169,12 @@ export default function SocialTradingPage() {
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card key={i} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card key={i} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardContent className="p-6">
                       <div className="animate-pulse space-y-4">
-                        <div className="h-16 w-16 bg-white/10 rounded-full mx-auto"></div>
-                        <div className="h-4 bg-white/10 rounded w-3/4 mx-auto"></div>
-                        <div className="h-8 bg-white/10 rounded w-full"></div>
+                        <div className="h-16 w-16 bg-purple-500/20 rounded-full mx-auto"></div>
+                        <div className="h-4 bg-purple-500/20 rounded w-3/4 mx-auto"></div>
+                        <div className="h-8 bg-purple-500/20 rounded w-full"></div>
                       </div>
                     </CardContent>
                   </Card>
@@ -189,17 +189,17 @@ export default function SocialTradingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
-                    <Card className="bg-white/10 border-white/20 backdrop-blur-lg hover:bg-white/15 transition-all duration-300">
+                    <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg hover:from-purple-900/30 hover:to-purple-800/20 transition-all duration-300">
                       <CardHeader className="text-center">
                         <div className="flex items-center justify-center mb-4">
                           <Avatar className="h-16 w-16">
                             <AvatarImage src={trader.avatar} />
-                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-gray-900 dark:text-white text-lg font-bold">
+                            <AvatarFallback className="bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 text-gray-900 dark:text-white text-lg font-bold">
                               {trader.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           {trader.verified && (
-                            <Badge className="ml-2 bg-blue-500/20 text-blue-300">
+                            <Badge className="ml-2 bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
                               <Shield className="h-3 w-3 mr-1" />
                               Verified
                             </Badge>
@@ -274,14 +274,14 @@ export default function SocialTradingPage() {
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button 
-                                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600"
+                                className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500"
                                 onClick={() => setSelectedTrader(trader)}
                               >
                                 <Copy className="h-3 w-3 mr-1" />
                                 Copy Trade
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
+                            <DialogContent className="bg-slate-950 border-purple-500/30 text-gray-900 dark:text-white">
                               <DialogHeader>
                                 <DialogTitle>Copy Trade {trader.displayName}</DialogTitle>
                               </DialogHeader>
@@ -293,7 +293,7 @@ export default function SocialTradingPage() {
                                     type="number"
                                     value={copyTradeAmount}
                                     onChange={(e) => setCopyTradeAmount(Number(e.target.value))}
-                                    className="bg-white/5 border-white/20 text-gray-900 dark:text-white mt-2"
+                                    className="bg-purple-900/20 border-purple-500/30 text-gray-900 dark:text-white mt-2"
                                     placeholder="1000"
                                   />
                                   <p className="text-gray-400 text-sm mt-1">
@@ -310,7 +310,7 @@ export default function SocialTradingPage() {
 
                                 <Button
                                   onClick={() => handleStartCopyTrading(trader)}
-                                  className="w-full bg-gradient-to-r from-green-600 to-blue-600"
+                                  className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500"
                                   disabled={!isConnected}
                                 >
                                   Start Copy Trading
@@ -322,7 +322,7 @@ export default function SocialTradingPage() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="border-white/20 text-gray-900 dark:text-white hover:bg-white/5"
+                            className="border-purple-500/30 text-gray-900 dark:text-white hover:bg-purple-900/20"
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             Follow
@@ -346,12 +346,12 @@ export default function SocialTradingPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
                           <Avatar className="h-12 w-12">
-                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-gray-900 dark:text-white font-bold">
+                            <AvatarFallback className="bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 text-gray-900 dark:text-white font-bold">
                               {signal.traderName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -400,7 +400,7 @@ export default function SocialTradingPage() {
                           </div>
                           <Button 
                             size="sm" 
-                            className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600"
+                            className="mt-2 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500"
                           >
                             Copy Signal
                           </Button>
@@ -417,21 +417,21 @@ export default function SocialTradingPage() {
           <TabsContent value="leaderboard" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {topTraders.slice(0, 4).map((trader, index) => (
-                <Card key={trader.address} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                <Card key={trader.address} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                   <CardContent className="p-6 text-center">
                     <div className="flex items-center justify-center mb-4">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-gray-900 dark:text-white ${
-                        index === 0 ? 'bg-yellow-500' :
-                        index === 1 ? 'bg-gray-400' :
-                        index === 2 ? 'bg-amber-600' :
-                        'bg-purple-500'
+                        index === 0 ? 'bg-gradient-to-r from-fuchsia-500 to-cyan-500' :
+                        index === 1 ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500' :
+                        index === 2 ? 'bg-gradient-to-r from-cyan-500 to-purple-500' :
+                        'bg-gradient-to-r from-purple-400 to-fuchsia-400'
                       }`}>
                         {index + 1}
                       </div>
                     </div>
                     
                     <Avatar className="h-16 w-16 mx-auto mb-4">
-                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-gray-900 dark:text-white text-lg font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 text-gray-900 dark:text-white text-lg font-bold">
                         {trader.displayName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

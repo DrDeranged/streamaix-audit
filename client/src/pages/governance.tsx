@@ -128,15 +128,15 @@ export default function GovernancePage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
             <CardContent className="p-8 text-center">
-              <Users className="h-16 w-16 text-purple-400 mx-auto mb-4" />
+              <Users className="h-16 w-16 text-fuchsia-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Governance Access Required</h2>
               <p className="text-gray-300 mb-6">Please sign in to participate in DAO governance.</p>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500">
                 Sign In
               </Button>
             </CardContent>
@@ -147,7 +147,7 @@ export default function GovernancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       
       <div className="max-w-7xl mx-auto p-6">
@@ -159,12 +159,12 @@ export default function GovernancePage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">DAO Governance</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">DAO Governance</h1>
               <p className="text-gray-400">Participate in community-driven decisions</p>
             </div>
             <Button
               onClick={() => toast({ title: 'Coming Soon', description: 'Proposal creation will be available soon' })}
-              className="bg-gradient-to-r from-green-600 to-blue-600"
+              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Proposal
@@ -180,44 +180,44 @@ export default function GovernancePage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
           >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Active Proposals</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.activeProposals}</p>
+                    <p className="text-2xl font-bold text-white">{stats.activeProposals}</p>
                     <p className="text-gray-400 text-sm">of {stats.totalProposals} total</p>
                   </div>
-                  <Activity className="h-8 w-8 text-blue-400" />
+                  <Activity className="h-8 w-8 text-fuchsia-400" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Participation Rate</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.participationRate * 100).toFixed(1)}%</p>
-                    <p className="text-green-400 text-sm">+5.2% vs last month</p>
+                    <p className="text-2xl font-bold text-white">{(stats.participationRate * 100).toFixed(1)}%</p>
+                    <p className="text-cyan-400 text-sm">+5.2% vs last month</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-green-400" />
+                  <TrendingUp className="h-8 w-8 text-cyan-400" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Success Rate</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.successRate * 100).toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-white">{(stats.successRate * 100).toFixed(1)}%</p>
                     <p className="text-purple-400 text-sm">9 of 12 passed</p>
                   </div>
                   <Target className="h-8 w-8 text-purple-400" />
@@ -225,17 +225,17 @@ export default function GovernancePage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Total Voters</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalVoters.toLocaleString()}</p>
-                    <p className="text-yellow-400 text-sm">Community members</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalVoters.toLocaleString()}</p>
+                    <p className="text-fuchsia-400 text-sm">Community members</p>
                   </div>
-                  <Users className="h-8 w-8 text-yellow-400" />
+                  <Users className="h-8 w-8 text-fuchsia-400" />
                 </div>
               </CardContent>
             </Card>
@@ -243,12 +243,12 @@ export default function GovernancePage() {
         )}
 
         <Tabs defaultValue="proposals" className="space-y-6">
-          <TabsList className="bg-white/10 border border-white/20">
-            <TabsTrigger value="proposals" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+          <TabsList className="bg-gradient-to-r from-purple-900/20 to-purple-800/10 border border-purple-500/30">
+            <TabsTrigger value="proposals" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
               <VoteIcon className="h-4 w-4 mr-2" />
               Proposals
             </TabsTrigger>
-            <TabsTrigger value="history" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+            <TabsTrigger value="history" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
               <Clock className="h-4 w-4 mr-2" />
               My Votes
             </TabsTrigger>
@@ -259,12 +259,12 @@ export default function GovernancePage() {
             {isLoading ? (
               <div className="grid grid-cols-1 gap-6">
                 {[1, 2, 3].map((i) => (
-                  <Card key={i} className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card key={i} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                     <CardContent className="p-6">
                       <div className="animate-pulse space-y-4">
-                        <div className="h-6 bg-white/10 rounded w-3/4"></div>
-                        <div className="h-4 bg-white/10 rounded w-full"></div>
-                        <div className="h-4 bg-white/10 rounded w-2/3"></div>
+                        <div className="h-6 bg-purple-500/20 rounded w-3/4"></div>
+                        <div className="h-4 bg-purple-500/20 rounded w-full"></div>
+                        <div className="h-4 bg-purple-500/20 rounded w-2/3"></div>
                       </div>
                     </CardContent>
                   </Card>
@@ -281,7 +281,7 @@ export default function GovernancePage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <Card className="bg-white/10 border-white/20 backdrop-blur-lg hover:bg-white/15 transition-all duration-300">
+                      <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg hover:from-purple-900/30 hover:to-purple-800/20 transition-all duration-300">
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -369,20 +369,20 @@ export default function GovernancePage() {
                                 <DialogTrigger asChild>
                                   <Button
                                     size="sm"
-                                    className="bg-green-600 hover:bg-green-700"
+                                    className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90"
                                     onClick={() => setSelectedProposal(proposal)}
                                   >
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Vote For
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
+                                <DialogContent className="bg-slate-950 border-purple-500/30 text-gray-900 dark:text-white">
                                   <DialogHeader>
                                     <DialogTitle>Vote For Proposal</DialogTitle>
                                   </DialogHeader>
                                   <div className="space-y-4">
                                     <p className="text-gray-300">
-                                      You are voting <strong className="text-green-400">FOR</strong> this proposal.
+                                      You are voting <strong className="text-fuchsia-400">FOR</strong> this proposal.
                                     </p>
                                     <div>
                                       <Label htmlFor="reason" className="text-gray-900 dark:text-white">
@@ -393,13 +393,13 @@ export default function GovernancePage() {
                                         placeholder="Explain why you support this proposal..."
                                         value={voteReason}
                                         onChange={(e) => setVoteReason(e.target.value)}
-                                        className="bg-white/5 border-white/20 text-gray-900 dark:text-white mt-2"
+                                        className="bg-purple-900/20 border-purple-500/30 text-gray-900 dark:text-white mt-2"
                                       />
                                     </div>
                                     <Button
                                       onClick={() => handleVote(proposal.id, 'FOR')}
                                       disabled={isVoting}
-                                      className="w-full bg-green-600 hover:bg-green-700"
+                                      className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90"
                                     >
                                       {isVoting ? 'Submitting Vote...' : 'Submit Vote'}
                                     </Button>
@@ -412,20 +412,20 @@ export default function GovernancePage() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="border-red-500/30 text-red-300 hover:bg-red-500/10"
+                                    className="border-purple-500/30 text-purple-300 hover:bg-purple-900/20"
                                     onClick={() => setSelectedProposal(proposal)}
                                   >
                                     <XCircle className="h-3 w-3 mr-1" />
                                     Vote Against
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
+                                <DialogContent className="bg-slate-950 border-purple-500/30 text-gray-900 dark:text-white">
                                   <DialogHeader>
                                     <DialogTitle>Vote Against Proposal</DialogTitle>
                                   </DialogHeader>
                                   <div className="space-y-4">
                                     <p className="text-gray-300">
-                                      You are voting <strong className="text-red-400">AGAINST</strong> this proposal.
+                                      You are voting <strong className="text-purple-400">AGAINST</strong> this proposal.
                                     </p>
                                     <div>
                                       <Label htmlFor="reason-against" className="text-gray-900 dark:text-white">
@@ -436,13 +436,13 @@ export default function GovernancePage() {
                                         placeholder="Explain why you oppose this proposal..."
                                         value={voteReason}
                                         onChange={(e) => setVoteReason(e.target.value)}
-                                        className="bg-white/5 border-white/20 text-gray-900 dark:text-white mt-2"
+                                        className="bg-purple-900/20 border-purple-500/30 text-gray-900 dark:text-white mt-2"
                                       />
                                     </div>
                                     <Button
                                       onClick={() => handleVote(proposal.id, 'AGAINST')}
                                       disabled={isVoting}
-                                      className="w-full bg-red-600 hover:bg-red-700"
+                                      className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90"
                                     >
                                       {isVoting ? 'Submitting Vote...' : 'Submit Vote'}
                                     </Button>
@@ -453,7 +453,7 @@ export default function GovernancePage() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="text-gray-400 hover:bg-white/5"
+                                className="text-gray-400 hover:bg-purple-900/20"
                                 onClick={() => handleVote(proposal.id, 'ABSTAIN')}
                                 disabled={isVoting}
                               >
@@ -474,9 +474,9 @@ export default function GovernancePage() {
           {/* Voting History */}
           <TabsContent value="history" className="space-y-6">
             {votingHistory.length === 0 ? (
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
                 <CardContent className="p-8 text-center">
-                  <Clock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <Clock className="h-16 w-16 text-fuchsia-400 mx-auto mb-4" />
                   <h3 className="text-gray-900 dark:text-white text-lg font-semibold mb-2">No Voting History</h3>
                   <p className="text-gray-400">
                     You haven't participated in any governance votes yet.
