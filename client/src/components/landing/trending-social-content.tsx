@@ -1094,7 +1094,7 @@ export function TrendingSocialContent() {
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
             Discover
           </h2>
           <p className="text-slate-400 text-sm">Stay updated with the latest in crypto conversations</p>

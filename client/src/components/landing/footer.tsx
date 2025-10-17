@@ -30,7 +30,7 @@ export function Footer() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <div className="font-orbitron font-bold text-3xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4">
+              <div className="font-orbitron font-bold text-xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4">
                 StreamAiX
               </div>
               <p className="text-gray-400 mb-6 max-w-md">

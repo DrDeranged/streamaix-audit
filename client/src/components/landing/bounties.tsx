@@ -101,7 +101,7 @@ export function Bounties() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-orbitron font-bold mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Summary Bounty Board
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

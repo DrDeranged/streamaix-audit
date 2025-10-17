@@ -85,7 +85,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Recommendations
             </h2>
           </motion.div>
@@ -146,7 +146,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Recommendations
             </h2>
           </motion.div>
@@ -171,7 +171,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
               AI-Powered Recommendations
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
@@ -239,7 +239,7 @@ export function AISuggestions() {
                           <Brain className="w-8 h-8 text-cyan-300" />
                         </div>
                         <div>
-                          <h2 className="text-2xl md:text-3xl font-orbitron font-bold bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+                          <h2 className="text-2xl font-orbitron font-bold bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
                             Personalized Intelligence Report
                           </h2>
                           <p className="text-gray-400 text-sm mt-1">Click to view your curated insights</p>
@@ -305,7 +305,7 @@ export function AISuggestions() {
                     <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border border-cyan-400/50">
                       <Brain className="w-7 h-7 text-cyan-300" />
                     </div>
-                    <DialogTitle className="text-3xl md:text-4xl font-orbitron font-bold bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+                    <DialogTitle className="text-2xl font-orbitron font-bold bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
                       Personalized Intelligence Report
                     </DialogTitle>
                   </div>

@@ -241,7 +241,7 @@ export function BountyFeed() {
             <span className="text-sm font-medium text-purple-300">Live Bounties</span>
           </div>
 
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-orbitron font-bold mb-6">
+          <h2 className="text-3xl font-orbitron font-bold mb-6">
             <span className="bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent">
               Bounty Feed
             </span>

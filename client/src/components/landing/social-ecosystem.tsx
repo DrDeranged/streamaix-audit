@@ -57,7 +57,7 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Social + Ecosystem
           </h2>
           <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">

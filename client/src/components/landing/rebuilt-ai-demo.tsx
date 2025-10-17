@@ -304,7 +304,7 @@ export function AIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
             Live AI Content Intelligence
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">

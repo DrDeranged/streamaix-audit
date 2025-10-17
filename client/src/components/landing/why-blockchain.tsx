@@ -59,7 +59,7 @@ export function WhyBlockchain() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
             Why Blockchain?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
