@@ -45,12 +45,18 @@ export function ParticleNetwork() {
 
     // Set canvas size to cover entire document
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = Math.max(
+      const newWidth = window.innerWidth;
+      const newHeight = Math.max(
         document.documentElement.scrollHeight,
         document.body.scrollHeight,
         window.innerHeight
       );
+      
+      // Only update if dimensions changed to avoid unnecessary redraws
+      if (canvas.width !== newWidth || canvas.height !== newHeight) {
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+      }
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -60,6 +66,11 @@ export function ParticleNetwork() {
       resizeCanvas();
     });
     resizeObserver.observe(document.body);
+    
+    // Continuously monitor canvas height to catch dynamic content changes
+    const heightCheckInterval = setInterval(() => {
+      resizeCanvas();
+    }, 1000); // Check every second
 
     // Initialize particles (MORE and LARGER)
     const particleCount = Math.min(Math.floor(window.innerWidth / 8), 200);
@@ -276,6 +287,7 @@ export function ParticleNetwork() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
+      clearInterval(heightCheckInterval);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
