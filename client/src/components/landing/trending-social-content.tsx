@@ -682,7 +682,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 sm:p-7 hover:bg-slate-50 dark:hover:bg-gradient-to-br dark:hover:from-slate-800/70 dark:hover:via-slate-700/50 dark:hover:to-slate-800/70 hover:border-slate-300 dark:hover:border-white/30 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 cursor-pointer group relative overflow-hidden"
+      className="bg-slate-900/75 dark:bg-slate-900/75 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 sm:p-7 hover:bg-slate-900/85 dark:hover:bg-slate-900/85 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 cursor-pointer group relative overflow-hidden"
       data-testid={`feed-post-${index}`}
     >
       {/* Animated gradient overlay */}

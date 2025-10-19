@@ -315,7 +315,7 @@ export function AIProcessor() {
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-lg">
+            <div className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
@@ -358,7 +358,7 @@ export function AIProcessor() {
               >
                 {/* Progress Card */}
                 {isProcessing && (
-                  <Card className="mb-6 bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-muted-foreground/20">
+                  <Card className="mb-6 bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -394,7 +394,7 @@ export function AIProcessor() {
                     transition={{ delay: 0.2 }}
                   >
                     {/* Header Card */}
-                    <Card className="mb-6 bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-muted-foreground/20">
+                    <Card className="mb-6 bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <img 
@@ -430,7 +430,7 @@ export function AIProcessor() {
                     </Card>
 
                     {/* Content Tabs */}
-                    <Card className="bg-white dark:bg-card/50 backdrop-blur-sm border border-slate-200 dark:border-muted-foreground/20">
+                    <Card className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30">
                       <CardContent className="p-6">
                         <Tabs defaultValue="summary" className="w-full">
                           <TabsList className="grid w-full grid-cols-4 mb-6">
