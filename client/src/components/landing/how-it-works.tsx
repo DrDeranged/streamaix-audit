@@ -83,7 +83,7 @@ export function HowItWorks() {
                   </motion.div>
                 </HoverCardTrigger>
                 <HoverCardContent 
-                  className="w-80" 
+                  className="w-80 bg-white dark:bg-slate-900 border-gray-200 dark:border-purple-500/30" 
                   side="bottom"
                   data-testid={`step-${step.number}-details`}
                 >
@@ -92,21 +92,21 @@ export function HowItWorks() {
                     <div className={`w-10 h-10 bg-gradient-to-br ${step.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
                       <step.icon className="w-5 h-5 text-white" />
                     </div>
-                    <h4 className="font-semibold text-white">{step.title}</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">{step.title}</h4>
                   </div>
-                  <p className="text-sm text-gray-200 leading-relaxed">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
                     {step.description}
                   </p>
                   <div className="flex flex-wrap gap-2 pt-2">
                     {step.techIcons && step.techIcons.map((Icon, i) => (
-                      <div key={i} className="flex items-center gap-1 text-xs text-gray-300">
+                      <div key={i} className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
                         <Icon className="w-3 h-3" />
                       </div>
                     ))}
                     {step.techBadges && step.techBadges.map((badge, i) => (
                       <span 
                         key={i} 
-                        className="text-xs bg-purple-500/30 text-purple-200 border border-purple-400/30 px-2 py-1 rounded"
+                        className="text-xs bg-purple-100 dark:bg-purple-500/30 text-purple-700 dark:text-purple-200 border border-purple-300 dark:border-purple-400/30 px-2 py-1 rounded"
                       >
                         {badge}
                       </span>

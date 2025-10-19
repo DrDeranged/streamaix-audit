@@ -96,7 +96,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="h-full"
     >
-      <Card className="group h-full bg-slate-900/80 dark:bg-slate-900/80 border-purple-500/40 backdrop-blur-xl hover:border-purple-400 dark:hover:border-fuchsia-400 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 overflow-hidden relative">
+      <Card className="group h-full bg-white dark:bg-slate-900/80 border-gray-200 dark:border-purple-500/40 backdrop-blur-xl hover:border-purple-400 dark:hover:border-fuchsia-400 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 overflow-hidden relative">
         {/* Hover gradient effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-fuchsia-500/10 transition-all duration-500 pointer-events-none" />
         

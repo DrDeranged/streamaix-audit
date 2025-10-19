@@ -315,14 +315,14 @@ export function AIProcessor() {
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
+            <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
                   placeholder="https://youtube.com/watch?v=..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="flex-1 h-12 text-base border-muted-foreground/20 focus:border-purple-500 transition-colors"
+                  className="flex-1 h-12 text-base bg-white dark:bg-slate-800 border-gray-300 dark:border-muted-foreground/20 focus:border-purple-500 transition-colors"
                   disabled={isProcessing}
                   data-testid="input-youtube-url"
                 />
@@ -358,18 +358,18 @@ export function AIProcessor() {
               >
                 {/* Progress Card */}
                 {isProcessing && (
-                  <Card className="mb-6 bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30">
+                  <Card className="mb-6 bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <div className="w-10 h-10 rounded-full bg-purple-indigo-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
                               <Brain className="h-5 w-5 text-purple-400 animate-pulse" />
                             </div>
                           </div>
                           <div>
-                            <h3 className="font-semibold">AI Processing Active</h3>
-                            <p className="text-sm text-muted-foreground">{processingStatus}</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">AI Processing Active</h3>
+                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{processingStatus}</p>
                           </div>
                         </div>
                         <Badge variant="secondary" className="font-mono">
@@ -394,7 +394,7 @@ export function AIProcessor() {
                     transition={{ delay: 0.2 }}
                   >
                     {/* Header Card */}
-                    <Card className="mb-6 bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30">
+                    <Card className="mb-6 bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <img 
@@ -430,7 +430,7 @@ export function AIProcessor() {
                     </Card>
 
                     {/* Content Tabs */}
-                    <Card className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30">
+                    <Card className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30">
                       <CardContent className="p-6">
                         <Tabs defaultValue="summary" className="w-full">
                           <TabsList className="grid w-full grid-cols-4 mb-6">

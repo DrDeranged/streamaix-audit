@@ -115,13 +115,13 @@ export function Navigation() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
                       <Target className="w-4 h-4 text-fuchsia-400" />
                       <span className="font-medium">Browse Bounties</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-yellow-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-yellow-500/20 transition-all duration-200 rounded-md mx-1">
                       <Trophy className="w-4 h-4 text-yellow-400" />
                       <span className="font-medium">Leaderboard</span>
                     </Link>
@@ -147,7 +147,7 @@ export function Navigation() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
                       <TrendingUp className="w-4 h-4 text-purple-400" />
                       <span className="font-medium">Prediction Markets</span>
                     </Link>
@@ -173,19 +173,19 @@ export function Navigation() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
                       <Compass className="w-4 h-4 text-cyan-400" />
                       <span className="font-medium">Discover</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/insights-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/insights-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
                       <Brain className="w-4 h-4 text-blue-400" />
                       <span className="font-medium">AI Insights</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/analytics-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/analytics-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
                       <PieChart className="w-4 h-4 text-green-400" />
                       <span className="font-medium">Platform Stats</span>
                     </Link>
@@ -211,9 +211,9 @@ export function Navigation() {
                       />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="end" forceMount>
                     {/* User Info Header */}
-                    <div className="flex items-center gap-3 p-3 border-b border-purple-500/20">
+                    <div className="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-purple-500/20">
                       <Avatar className="h-10 w-10 ring-2 ring-purple-500/30">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
                         <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-sm">
@@ -221,32 +221,32 @@ export function Navigation() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <p className="text-white text-sm font-semibold">{user?.username}</p>
-                        <p className="text-slate-400 text-xs">Premium Member</p>
+                        <p className="text-gray-900 dark:text-white text-sm font-semibold">{user?.username}</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-xs">Premium Member</p>
                       </div>
                     </div>
 
                     {/* Menu Items with Icons */}
                     <div className="py-2">
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
                           <LayoutDashboard className="w-4 h-4 text-purple-400" />
                           <span className="font-medium">Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
                           <Compass className="w-4 h-4 text-cyan-400" />
                           <span className="font-medium">Discover</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
                           <Wallet className="w-4 h-4 text-fuchsia-400" />
                           <span className="font-medium">Wallet</span>
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
                         <UserCircle className="w-4 h-4 text-blue-400" />
                         <span className="font-medium">Profile</span>
                       </DropdownMenuItem>
@@ -322,11 +322,11 @@ export function Navigation() {
                       </Button>
                     </motion.div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="end">
+                  <DropdownMenuContent className="w-64 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="end">
                     {/* Wallet Header */}
-                    <div className="p-4 border-b border-purple-500/20">
+                    <div className="p-4 border-b border-gray-200 dark:border-purple-500/20">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Connected Wallet</span>
+                        <span className="text-xs font-medium text-gray-600 dark:text-slate-400 uppercase tracking-wider">Connected Wallet</span>
                         <motion.div 
                           className="flex items-center gap-1.5"
                           animate={{ opacity: [0.5, 1, 0.5] }}
@@ -336,7 +336,7 @@ export function Navigation() {
                           <span className="text-xs text-green-400 font-medium">Active</span>
                         </motion.div>
                       </div>
-                      <div className="text-sm text-white font-mono bg-slate-800/50 px-3 py-2 rounded-lg border border-purple-500/20">
+                      <div className="text-sm text-gray-900 dark:text-white font-mono bg-gray-100 dark:bg-slate-800/50 px-3 py-2 rounded-lg border border-gray-200 dark:border-purple-500/20">
                         {formatAddress(wallet.address)}
                       </div>
                     </div>
@@ -344,12 +344,12 @@ export function Navigation() {
                     {/* Menu Items */}
                     <div className="py-2">
                       <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
                           <LayoutDashboard className="w-4 h-4 text-purple-400" />
                           <span className="font-medium">Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
                         <ExternalLink className="w-4 h-4 text-cyan-400" />
                         <span className="font-medium">View on Explorer</span>
                       </DropdownMenuItem>

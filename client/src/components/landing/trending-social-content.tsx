@@ -84,7 +84,7 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
         className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 ${
           selectedTopic === null
             ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-            : 'bg-slate-800/70 dark:bg-slate-800/70 backdrop-blur-md text-slate-200 dark:text-slate-300 hover:bg-slate-800/90 dark:hover:bg-slate-800/90 border border-purple-500/30 hover:border-purple-500/50'
+            : 'bg-white dark:bg-slate-800/70 backdrop-blur-md text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/90 border border-gray-200 dark:border-purple-500/30 hover:border-purple-400 dark:hover:border-purple-500/50'
         }`}
         data-testid="topic-all"
       >
@@ -100,7 +100,7 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
           className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 relative overflow-hidden group ${
             selectedTopic === trend.topic
               ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-              : 'bg-slate-800/70 dark:bg-slate-800/70 backdrop-blur-md text-slate-200 dark:text-slate-300 hover:bg-slate-800/90 dark:hover:bg-slate-800/90 border border-purple-500/30 hover:border-purple-500/50'
+              : 'bg-white dark:bg-slate-800/70 backdrop-blur-md text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/90 border border-gray-200 dark:border-purple-500/30 hover:border-purple-400 dark:hover:border-purple-500/50'
           }`}
           data-testid={`topic-${i}`}
         >
@@ -134,19 +134,19 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
     return (
       <div className="space-y-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-slate-900/70 dark:bg-slate-900/70 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/30 dark:via-white/5 to-transparent animate-shimmer" />
+          <div key={i} className="bg-white dark:bg-slate-900/70 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/30 dark:via-white/5 to-transparent animate-shimmer" />
             <div className="flex gap-4 mb-4 relative z-10">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full border-2 border-slate-300 dark:border-white/20" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full border-2 border-gray-300 dark:border-white/20" />
               <div className="flex-1 space-y-3">
-                <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full w-1/3" />
-                <div className="h-3 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-1/4" />
+                <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full w-1/3" />
+                <div className="h-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-1/4" />
               </div>
             </div>
             <div className="space-y-3 relative z-10">
-              <div className="h-4 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-full" />
-              <div className="h-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/20 dark:to-slate-700/20 rounded-full w-4/5" />
-              <div className="h-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/10 dark:to-slate-700/10 rounded-full w-2/3" />
+              <div className="h-4 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-full" />
+              <div className="h-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800/20 dark:to-slate-700/20 rounded-full w-4/5" />
+              <div className="h-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800/10 dark:to-slate-700/10 rounded-full w-2/3" />
             </div>
           </div>
         ))}
@@ -156,18 +156,18 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (error) {
     return (
-      <div className="text-center py-12 sm:py-16 bg-slate-900/75 dark:bg-slate-900/75 backdrop-blur-xl border border-purple-500/30 rounded-2xl relative overflow-hidden">
+      <div className="text-center py-12 sm:py-16 bg-white dark:bg-slate-900/75 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5" />
         <div className="relative z-10">
           <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
             <ExternalLink className="w-8 h-8 text-red-400" />
           </div>
-          <p className="text-slate-900 dark:text-slate-300 mb-6 text-base font-medium">Unable to load conversations</p>
+          <p className="text-gray-900 dark:text-slate-300 mb-6 text-base font-medium">Unable to load conversations</p>
           <Button 
             onClick={() => window.location.reload()} 
             variant="outline" 
             size="lg"
-            className="border-slate-300 dark:border-white/30 text-slate-900 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 hover:border-slate-400 dark:hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
+            className="border-gray-300 dark:border-white/30 text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-white/10 hover:border-gray-400 dark:hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
             data-testid="retry-feed"
           >
             Try again
@@ -179,24 +179,24 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (!casts || casts.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 bg-slate-900/75 dark:bg-slate-900/75 backdrop-blur-xl border border-purple-500/30 rounded-2xl relative overflow-hidden">
+      <div className="text-center py-12 sm:py-20 bg-white dark:bg-slate-900/75 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-purple-500/5 to-cyan-500/5" />
         <div className="relative z-10 px-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500/20 via-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border-2 border-slate-200 dark:border-white/20"
+            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500/20 via-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border-2 border-gray-200 dark:border-white/20"
           >
             <TrendingUp className="w-10 h-10 text-purple-400" />
           </motion.div>
-          <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+          <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
             No Conversations Yet
           </h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm sm:text-base max-w-md mx-auto">
+          <p className="text-gray-600 dark:text-slate-400 mb-4 text-sm sm:text-base max-w-md mx-auto">
             The crypto conversation space is temporarily quiet. Check back soon for the latest discussions and insights.
           </p>
-          <p className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm mb-6">
+          <p className="text-gray-500 dark:text-slate-500 text-xs sm:text-sm mb-6">
             Social feeds are being refreshed. This happens when API sources are temporarily unavailable.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -208,7 +208,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
             >
               Refresh Feed
             </Button>
-            <a href="/features" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors flex items-center gap-1">
+            <a href="/features" className="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors flex items-center gap-1">
               Explore Features <ChevronRight className="w-4 h-4" />
             </a>
           </div>
@@ -233,7 +233,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
           <Button
             onClick={() => setShowAll(true)}
             variant="outline"
-            className="w-full sm:w-auto bg-slate-800/70 dark:bg-slate-800/70 backdrop-blur-md border-purple-500/40 text-slate-200 dark:text-slate-200 hover:bg-slate-800/90 dark:hover:bg-slate-800/90 hover:text-white hover:border-purple-500/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20"
+            className="w-full sm:w-auto bg-white dark:bg-slate-800/70 backdrop-blur-md border-gray-200 dark:border-purple-500/40 text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/90 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20"
             data-testid="show-more-posts"
           >
             Show {casts.length - initialCount} more posts
@@ -270,24 +270,24 @@ function DiscoverRightRail() {
   return (
     <div className="space-y-6 sticky top-6">
       {/* Trending Topics */}
-      <div className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-5 hover:border-purple-400 dark:hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="w-5 h-5 text-blue-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">What's happening</h3>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">What's happening</h3>
           </div>
           <TrendingTopicsWidget />
         </div>
       </div>
 
       {/* Who to follow */}
-      <div className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-fuchsia-500/20 transition-all duration-500 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-5 hover:border-purple-400 dark:hover:border-purple-500/50 hover:shadow-2xl hover:shadow-fuchsia-500/20 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
             <Users className="w-5 h-5 text-purple-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">Who to follow</h3>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">Who to follow</h3>
           </div>
           <WhoToFollowWidget />
         </div>
