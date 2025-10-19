@@ -69,8 +69,8 @@ export function ParticleNetwork() {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
+        vx: (Math.random() - 0.5) * 0.2, // Reduced from 0.8 for gentle floating
+        vy: (Math.random() - 0.5) * 0.2, // Reduced from 0.8 for gentle floating
         radius: Math.random() * 3 + 2, // Larger: 2-5px
       });
     }
@@ -188,9 +188,6 @@ export function ParticleNetwork() {
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        // Add subtle scroll influence
-        particle.y += scrollOffsetRef.current * 0.001;
-
         // Mouse interaction (STRONGER attraction/repulsion)
         const dx = mouseRef.current.x - particle.x;
         const dy = mouseRef.current.y - particle.y;
@@ -207,13 +204,13 @@ export function ParticleNetwork() {
         if (particle.y < 0) particle.y = canvas.height;
         if (particle.y > canvas.height) particle.y = 0;
 
-        // Damping
-        particle.vx *= 0.99;
-        particle.vy *= 0.99;
+        // Stronger damping for stability
+        particle.vx *= 0.96; // Increased from 0.99 to reduce drift
+        particle.vy *= 0.96; // Increased from 0.99 to reduce drift
 
-        // Ensure minimum velocity
-        if (Math.abs(particle.vx) < 0.15) particle.vx = (Math.random() - 0.5) * 0.3;
-        if (Math.abs(particle.vy) < 0.15) particle.vy = (Math.random() - 0.5) * 0.3;
+        // Gentle minimum velocity to prevent complete stop
+        if (Math.abs(particle.vx) < 0.05) particle.vx = (Math.random() - 0.5) * 0.1;
+        if (Math.abs(particle.vy) < 0.05) particle.vy = (Math.random() - 0.5) * 0.1;
 
         // Draw connections (LONGER distance, MORE visible)
         particles.slice(i + 1).forEach((otherParticle) => {
