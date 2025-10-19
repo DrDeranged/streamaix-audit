@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation, Link } from 'wouter';
+import { Navigation } from '@/components/landing/navigation';
 import CountdownTimer from '@/components/CountdownTimer';
 import { 
   TrendingUp, 
@@ -3977,70 +3978,8 @@ export default function Discover() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Navigation Header */}
-      <div className="sticky top-0 z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link to="/">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border-purple-400/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 hover:scale-105 transition-all duration-200 backdrop-blur-sm"
-                  data-testid="button-back-home"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="font-medium">Home</span>
-                </Button>
-              </Link>
-              
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
-                Discover
-              </h1>
-              
-              {/* Fixed to 24h display - no time filter buttons */}
-              <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-                24h View
-              </Badge>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowInsights(!showInsights)}
-                className={`border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all ${
-                  showInsights ? 'bg-purple-500/20 border-purple-400' : ''
-                }`}
-                data-testid="button-toggle-insights"
-              >
-                <Brain className="h-4 w-4 mr-2" />
-                AI Insights
-                {showInsights && <span className="ml-1 text-xs">⌄</span>}
-                {!showInsights && <span className="ml-1 text-xs">⌃</span>}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/10"
-                data-testid="button-notifications"
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Alerts
-              </Button>
-              <Button
-                onClick={() => setLocation('/dashboard')}
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/10"
-                data-testid="button-dashboard"
-              >
-                Dashboard
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Unified Navigation Header */}
+      <Navigation />
 
       {/* Smart Insights Panel */}
       <AnimatePresence>
