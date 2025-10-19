@@ -754,8 +754,8 @@ export function AIProcessor() {
                         transition={{ delay: 0.3 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/60 dark:from-blue-500/15 dark:via-purple-indigo-500/15 dark:to-purple-500/15 border border-blue-200/30 dark:border-blue-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 animate-pulse"></div>
+                        <Card className="bg-gradient-to-br from-slate-50 via-purple-50/60 to-slate-50 dark:from-purple-500/15 dark:via-purple-500/15 dark:to-purple-500/15 border border-purple-200/30 dark:border-purple-500/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 animate-pulse"></div>
                           <CardContent className="p-6 relative">
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-3">
@@ -763,7 +763,7 @@ export function AIProcessor() {
                                   <Edit3 className="h-5 w-5 text-gray-900 dark:text-white" />
                                 </div>
                                 <div>
-                                  <h4 className="text-lg font-semibold bg-gradient-to-r from-slate-700 via-blue-700/90 to-slate-800 dark:from-blue-200 dark:via-indigo-200 dark:to-blue-100 bg-clip-text text-transparent">Add Your Analysis</h4>
+                                  <h4 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-800 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">Add Your Analysis</h4>
                                   <p className="text-sm text-slate-600 dark:text-blue-200">Capture insights • Private notes • Dashboard access</p>
                                 </div>
                               </div>
@@ -809,7 +809,7 @@ export function AIProcessor() {
                         transition={{ delay: 0.5 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-slate-50 via-indigo-50/60 to-purple-50/60 dark:from-purple-500/15 dark:via-purple-500/15 dark:to-pink-500/15 border border-purple-indigo-200/30 dark:border-purple-indigo-500/20 overflow-hidden relative">
+                        <Card className="bg-gradient-to-br from-slate-50 via-purple-50/60 to-slate-50 dark:from-purple-500/15 dark:via-purple-500/15 dark:to-purple-500/15 border border-purple-200/30 dark:border-purple-500/20 overflow-hidden relative">
                           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-500/5 animate-pulse"></div>
                           <CardContent className="p-6 relative">
                             <div className="flex items-center justify-between">
@@ -818,7 +818,7 @@ export function AIProcessor() {
                                   <BarChart3 className="h-6 w-6 text-gray-900 dark:text-white" />
                                 </div>
                                 <div>
-                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 via-purple-indigo-700/90 to-slate-800 dark:from-indigo-300 dark:via-purple-300 dark:to-indigo-200 bg-clip-text text-transparent mb-1">
+                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-800 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-1">
                                     Maximize Your Insights
                                   </h3>
                                   <p className="text-sm text-muted-foreground">

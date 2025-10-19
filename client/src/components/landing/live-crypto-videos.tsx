@@ -117,10 +117,10 @@ export default function LiveCryptoVideos() {
 
   if (isLoading && !videos.length) {
     return (
-      <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+      <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
               Live AI Processing
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -141,10 +141,10 @@ export default function LiveCryptoVideos() {
 
   if (error) {
     return (
-      <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+      <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
               Live AI Processing
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -165,12 +165,12 @@ export default function LiveCryptoVideos() {
   }
 
   return (
-    <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+    <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header with Live Status */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
               Live AI Processing
             </h2>
             <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">

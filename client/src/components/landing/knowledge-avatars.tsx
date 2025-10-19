@@ -87,18 +87,18 @@ interface DatabaseAvatar {
 
 const getAvatarGradient = (name: string) => {
   const gradients: Record<string, string> = {
-    'Naval Ravikant': 'from-slate-800 via-blue-900 to-indigo-950',
-    'Vitalik Buterin': 'from-indigo-900 via-purple-900 to-blue-950',
-    'Michael Saylor': 'from-slate-900 via-blue-900 to-cyan-950',
-    'Brian Armstrong': 'from-blue-900 via-cyan-900 to-teal-950',
-    'Changpeng Zhao': 'from-blue-950 via-indigo-950 to-purple-950',
-    'Cathie Wood': 'from-purple-900 via-indigo-900 to-blue-950',
-    'Tyler Winklevoss': 'from-teal-900 via-cyan-900 to-blue-950',
-    'Cameron Winklevoss': 'from-indigo-900 via-blue-900 to-cyan-950',
-    'Balaji Srinivasan': 'from-cyan-900 via-blue-900 to-indigo-950',
-    'Paul Graham': 'from-slate-900 via-gray-900 to-zinc-950'
+    'Naval Ravikant': 'from-slate-950 via-purple-950 to-slate-950',
+    'Vitalik Buterin': 'from-purple-950 via-fuchsia-950 to-purple-950',
+    'Michael Saylor': 'from-slate-950 via-purple-950 to-cyan-950',
+    'Brian Armstrong': 'from-purple-950 via-cyan-950 to-teal-950',
+    'Changpeng Zhao': 'from-purple-950 via-fuchsia-950 to-purple-950',
+    'Cathie Wood': 'from-purple-950 via-fuchsia-950 to-purple-950',
+    'Tyler Winklevoss': 'from-teal-950 via-cyan-950 to-purple-950',
+    'Cameron Winklevoss': 'from-purple-950 via-cyan-950 to-cyan-950',
+    'Balaji Srinivasan': 'from-cyan-950 via-purple-950 to-purple-950',
+    'Paul Graham': 'from-slate-950 via-gray-950 to-zinc-950'
   };
-  return gradients[name] || 'from-slate-900 via-gray-900 to-zinc-950';
+  return gradients[name] || 'from-slate-950 via-gray-950 to-zinc-950';
 };
 
 const formatFollowerCount = (count: number) => {
@@ -584,9 +584,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoPrev}
-                className={`absolute -left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute -left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoPrev 
-                    ? 'hover:from-slate-800 hover:to-blue-900 hover:scale-110 hover:shadow-blue-500/30 cursor-pointer' 
+                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer' 
                     : 'opacity-40 cursor-not-allowed'
                 }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
@@ -600,9 +600,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoNext}
-                className={`absolute -right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-900/95 to-blue-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute -right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoNext 
-                    ? 'hover:from-slate-800 hover:to-blue-900 hover:scale-110 hover:shadow-blue-500/30 cursor-pointer' 
+                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer' 
                     : 'opacity-40 cursor-not-allowed'
                 }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
@@ -699,7 +699,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
-                          <Card className="group cursor-pointer bg-white dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-blue-950/90 dark:to-slate-900/95 backdrop-blur-xl border-2 border-slate-200 dark:border-blue-500/30 hover:border-slate-300 dark:hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
+                          <Card className="group cursor-pointer bg-white dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-purple-950/90 dark:to-slate-950/95 backdrop-blur-xl border-2 border-slate-200 dark:border-purple-500/30 hover:border-slate-300 dark:hover:border-purple-400/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
                           {/* Professional Terminal-Style Header */}
                           <div className="relative flex-shrink-0">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
@@ -718,7 +718,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     alt={`${avatar.name} avatar`}
                                     className="object-cover object-top scale-110"
                                   />
-                                  <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 text-white">
+                                  <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
                                     {avatar.name.split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>
                                 </Avatar>

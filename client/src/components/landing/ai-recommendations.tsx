@@ -71,7 +71,7 @@ export function AIRecommendations() {
 
   if (!user) {
     return (
-      <section className="py-20 bg-gradient-to-b from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
+      <section className="py-20 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-cyan-500/5" />
         
         <div className="container mx-auto px-6 relative">
@@ -157,7 +157,7 @@ export function AIRecommendations() {
 
   if (isLoading) {
     return (
-      <section className="py-20 bg-gradient-to-b from-gray-100 to-white dark:from-gray-800 dark:to-gray-900">
+      <section className="py-20 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-center space-x-3 mb-12">
             <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500/30 border-t-blue-500" />
@@ -173,7 +173,7 @@ export function AIRecommendations() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
+    <section className="py-20 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-cyan-500/5" />
       

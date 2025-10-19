@@ -85,7 +85,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Recommendations
             </h2>
           </motion.div>
@@ -146,7 +146,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Recommendations
             </h2>
           </motion.div>
@@ -171,7 +171,7 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
               AI-Powered Recommendations
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">

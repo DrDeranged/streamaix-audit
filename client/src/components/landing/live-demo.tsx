@@ -239,7 +239,7 @@ function FarcasterActivityDemo() {
 
 export function LiveDemo() {
   return (
-    <section id="real-demo" className="py-12 sm:py-20 bg-gray-100 dark:bg-gray-900 relative">
+    <section id="real-demo" className="py-12 sm:py-20 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950 relative">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
