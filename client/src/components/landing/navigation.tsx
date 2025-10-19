@@ -72,7 +72,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-slate-950/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-purple-500/30 transition-all duration-300 shadow-lg shadow-purple-500/10">
+    <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-purple-500/30 transition-all duration-300 shadow-lg dark:shadow-purple-500/10">
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo with Animated Glow */}
@@ -101,19 +101,19 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 to-fuchsia-500/0 group-hover:from-fuchsia-500/20 group-hover:to-fuchsia-500/10 transition-all duration-300 rounded-lg" />
                     <div className="relative flex items-center gap-1.5">
-                      <Target className="w-4 h-4 text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors" />
+                      <Target className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-colors" />
                       <span className="font-medium">Bounties</span>
                       <ChevronDown className="w-3 h-3" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-48 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
                       <Target className="w-4 h-4 text-fuchsia-400" />
@@ -133,19 +133,19 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/20 group-hover:to-purple-500/10 transition-all duration-300 rounded-lg" />
                     <div className="relative flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                      <TrendingUp className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors" />
                       <span className="font-medium">Markets</span>
                       <ChevronDown className="w-3 h-3" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-48 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
                       <TrendingUp className="w-4 h-4 text-purple-400" />
@@ -159,19 +159,19 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/20 group-hover:to-cyan-500/10 transition-all duration-300 rounded-lg" />
                     <div className="relative flex items-center gap-1.5">
-                      <BarChart3 className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                      <BarChart3 className="w-4 h-4 text-cyan-500 dark:text-cyan-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors" />
                       <span className="font-medium">Analytics</span>
                       <ChevronDown className="w-3 h-3" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
                       <Compass className="w-4 h-4 text-cyan-400" />
