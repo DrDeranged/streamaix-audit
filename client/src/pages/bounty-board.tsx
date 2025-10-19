@@ -96,7 +96,7 @@ export default function BountyBoard() {
   const urgentBounties = urgentData?.bounties || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+    <div className="min-h-screen bg-transparent dark:bg-transparent">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <motion.div
@@ -176,7 +176,7 @@ export default function BountyBoard() {
           transition={{ delay: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
         >
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-purple-500/10">
                 <Trophy className="w-6 h-6 text-purple-400" />
@@ -190,7 +190,7 @@ export default function BountyBoard() {
             </div>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-fuchsia-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-fuchsia-500/10">
                 <DollarSign className="w-6 h-6 text-fuchsia-400" />
@@ -204,7 +204,7 @@ export default function BountyBoard() {
             </div>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-cyan-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-cyan-500/10">
                 <CheckCircle className="w-6 h-6 text-cyan-400" />
@@ -218,7 +218,7 @@ export default function BountyBoard() {
             </div>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-purple-500/10">
                 <Clock className="w-6 h-6 text-purple-400" />
@@ -244,7 +244,7 @@ export default function BountyBoard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Trending */}
               {trendingBounties.length > 0 && (
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+                <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-5 h-5 text-purple-400" />
                     <h3 className="text-lg font-semibold text-purple-300">Trending</h3>
@@ -256,7 +256,7 @@ export default function BountyBoard() {
                     {trendingBounties.slice(0, 3).map((bounty) => (
                       <div
                         key={bounty.id}
-                        className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer"
+                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
                         data-testid={`trending-bounty-${bounty.id}`}
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
@@ -272,7 +272,7 @@ export default function BountyBoard() {
 
               {/* Hot */}
               {hotBounties.length > 0 && (
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-fuchsia-500/30 backdrop-blur-sm p-6">
+                <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Flame className="w-5 h-5 text-fuchsia-400" />
                     <h3 className="text-lg font-semibold text-fuchsia-300">Hot</h3>
@@ -284,7 +284,7 @@ export default function BountyBoard() {
                     {hotBounties.map((bounty) => (
                       <div
                         key={bounty.id}
-                        className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer"
+                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
                         data-testid={`hot-bounty-${bounty.id}`}
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
@@ -300,7 +300,7 @@ export default function BountyBoard() {
 
               {/* Urgent */}
               {urgentBounties.length > 0 && (
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-cyan-500/30 backdrop-blur-sm p-6">
+                <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <AlertCircle className="w-5 h-5 text-cyan-400" />
                     <h3 className="text-lg font-semibold text-cyan-300">Urgent</h3>
@@ -312,7 +312,7 @@ export default function BountyBoard() {
                     {urgentBounties.map((bounty) => (
                       <div
                         key={bounty.id}
-                        className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer"
+                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
                         data-testid={`urgent-bounty-${bounty.id}`}
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>

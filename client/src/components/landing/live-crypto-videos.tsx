@@ -165,12 +165,12 @@ export default function LiveCryptoVideos() {
   }
 
   return (
-    <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+    <section className="py-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header with Live Status */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
               Live AI Processing
             </h2>
             <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
@@ -235,7 +235,7 @@ export default function LiveCryptoVideos() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="flex-shrink-0 w-80"
               >
-                <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white dark:bg-card/50 backdrop-blur-sm border-slate-200 dark:border-muted/50 hover:border-purple-300 dark:hover:border-primary/50">
+                <Card className="group hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 overflow-hidden bg-white/95 dark:bg-slate-900/85 backdrop-blur-xl border-slate-200/50 dark:border-purple-500/40 hover:border-purple-400 dark:hover:border-fuchsia-400 hover:scale-[1.02]">
                   <CardContent className="p-0">
                     {/* Thumbnail */}
                     <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
@@ -308,7 +308,7 @@ export default function LiveCryptoVideos() {
                           size="sm"
                           onClick={() => handleProcessVideo(video)}
                           disabled={isProcessing === video.id}
-                          className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+                          className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-600 hover:from-purple-600 hover:via-fuchsia-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300"
                         >
                           {isProcessing === video.id ? (
                             <>
@@ -327,7 +327,7 @@ export default function LiveCryptoVideos() {
                           size="sm"
                           variant="outline"
                           onClick={() => window.open(video.url, '_blank')}
-                          className="px-3"
+                          className="px-3 border-purple-300 dark:border-purple-500/50 hover:bg-purple-500/20 hover:border-purple-400"
                         >
                           <Play className="w-4 h-4" />
                         </Button>

@@ -6339,11 +6339,20 @@ export default function Discover() {
                 )}
               </>
             ) : (
-              <Card className="bg-white/5 border-white/10">
-                <CardContent className="p-8 text-center">
-                  <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-spin" />
-                  <p className="text-gray-300">Loading trending stories...</p>
-                  <p className="text-gray-400 text-sm mt-2">Analyzing content intelligence across platforms...</p>
+              <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg">
+                <CardContent className="p-12 text-center">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <RefreshCw className="h-16 w-16 text-purple-400 mx-auto mb-6 animate-spin" />
+                    <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-3">
+                      Discovering Intelligence
+                    </h3>
+                    <p className="text-gray-300 text-lg">Loading trending stories...</p>
+                    <p className="text-gray-400 text-sm mt-2">Analyzing content intelligence across platforms...</p>
+                  </motion.div>
                 </CardContent>
               </Card>
             )}
