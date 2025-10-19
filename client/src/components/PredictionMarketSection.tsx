@@ -50,7 +50,7 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="bg-white dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-purple-800/10 border-slate-200 dark:border-purple-500/30 overflow-hidden backdrop-blur-sm hover:border-slate-300 dark:hover:border-purple-500/60 transition-all duration-300">
+      <Card className="bg-slate-900/85 dark:bg-slate-900/85 backdrop-blur-xl border-purple-500/40 overflow-hidden hover:border-purple-400 dark:hover:border-fuchsia-400 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
         {market.imageUrl && (
           <div className="h-32 overflow-hidden relative">
             <img 
@@ -119,7 +119,7 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
 const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}
-    className="bg-white dark:bg-gradient-to-br dark:from-slate-900/90 dark:to-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-4 backdrop-blur-sm"
+    className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-lg p-4 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
   >
     <div className="flex items-center justify-between">
       <div>
@@ -150,7 +150,7 @@ export function PredictionMarketSection() {
   return (
     <section className="relative py-20 overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
+      <div className="absolute inset-0 bg-transparent" />
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/5 dark:bg-cyan-500/10 rounded-full blur-3xl" />
@@ -256,7 +256,7 @@ export function PredictionMarketSection() {
         {marketsLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50">
+              <Card key={i} className="bg-slate-900/70 dark:bg-slate-900/70 backdrop-blur-lg border-purple-500/30">
                 <CardContent className="p-4 space-y-3">
                   <Skeleton className="h-4 w-24 bg-slate-700" />
                   <Skeleton className="h-12 w-full bg-slate-700" />
