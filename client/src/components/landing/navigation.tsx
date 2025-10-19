@@ -31,7 +31,13 @@ import {
   CreditCard,
   UserCircle,
   Zap,
-  Activity
+  Activity,
+  TrendingUp,
+  Brain,
+  Trophy,
+  ChevronDown,
+  LineChart,
+  PieChart
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -91,45 +97,101 @@ export function Navigation() {
           <div className="flex items-center space-x-3 sm:space-x-6">
             {/* Desktop Navigation with Icons */}
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
-              <motion.button 
-                onClick={() => scrollToSection("features")}
-                className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/20 group-hover:to-purple-500/10 transition-all duration-300 rounded-lg" />
-                <div className="relative flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
-                  <span className="font-medium">Features</span>
-                </div>
-              </motion.button>
+              {/* Bounties Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 to-fuchsia-500/0 group-hover:from-fuchsia-500/20 group-hover:to-fuchsia-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="relative flex items-center gap-1.5">
+                      <Target className="w-4 h-4 text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors" />
+                      <span className="font-medium">Bounties</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Target className="w-4 h-4 text-fuchsia-400" />
+                      <span className="font-medium">Browse Bounties</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-yellow-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Trophy className="w-4 h-4 text-yellow-400" />
+                      <span className="font-medium">Leaderboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <motion.button 
-                onClick={() => scrollToSection("bounties")}
-                className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 to-fuchsia-500/0 group-hover:from-fuchsia-500/20 group-hover:to-fuchsia-500/10 transition-all duration-300 rounded-lg" />
-                <div className="relative flex items-center gap-2">
-                  <Target className="w-4 h-4 text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors" />
-                  <span className="font-medium">Bounties</span>
-                </div>
-              </motion.button>
+              {/* Markets Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/20 group-hover:to-purple-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="relative flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                      <span className="font-medium">Markets</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                      <TrendingUp className="w-4 h-4 text-purple-400" />
+                      <span className="font-medium">Prediction Markets</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <Link href="/discover">
-                <motion.button 
-                  className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/20 group-hover:to-cyan-500/10 transition-all duration-300 rounded-lg" />
-                  <div className="relative flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
-                    <span className="font-medium">Discover</span>
-                  </div>
-                </motion.button>
-              </Link>
+              {/* Analytics Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="group relative px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/20 group-hover:to-cyan-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="relative flex items-center gap-1.5">
+                      <BarChart3 className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                      <span className="font-medium">Analytics</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-900/95 backdrop-blur-xl border-purple-500/30 shadow-2xl shadow-purple-500/20" align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Compass className="w-4 h-4 text-cyan-400" />
+                      <span className="font-medium">Discover</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/insights-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Brain className="w-4 h-4 text-blue-400" />
+                      <span className="font-medium">AI Insights</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/analytics-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
+                      <PieChart className="w-4 h-4 text-green-400" />
+                      <span className="font-medium">Platform Stats</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
               {/* Authentication */}
               {isAuthenticated ? (
@@ -360,20 +422,41 @@ export function Navigation() {
               className="md:hidden mt-4 py-4 border-t border-purple-500/30 bg-slate-900/90 backdrop-blur-xl rounded-lg mx-2 shadow-xl shadow-purple-500/10"
             >
               <div className="flex flex-col space-y-1 px-4">
-                <button 
-                  onClick={() => scrollToSection("features")}
-                  className="flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
-                >
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  Features
-                </button>
-                <button 
-                  onClick={() => scrollToSection("bounties")}
-                  className="flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm"
-                >
-                  <Target className="w-4 h-4 text-fuchsia-400" />
-                  Bounties
-                </button>
+                {/* Bounties Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">Bounties</div>
+                <Link href="/bounties" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Target className="w-4 h-4 text-fuchsia-400" />
+                    Browse Bounties
+                  </button>
+                </Link>
+                <Link href="/leaderboard" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-yellow-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Trophy className="w-4 h-4 text-yellow-400" />
+                    Leaderboard
+                  </button>
+                </Link>
+
+                {/* Markets Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Markets</div>
+                <Link href="/markets" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <TrendingUp className="w-4 h-4 text-purple-400" />
+                    Prediction Markets
+                  </button>
+                </Link>
+
+                {/* Analytics Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Analytics</div>
                 <Link href="/discover" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
@@ -381,6 +464,24 @@ export function Navigation() {
                   >
                     <Compass className="w-4 h-4 text-cyan-400" />
                     Discover
+                  </button>
+                </Link>
+                <Link href="/insights-dashboard" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-blue-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Brain className="w-4 h-4 text-blue-400" />
+                    AI Insights
+                  </button>
+                </Link>
+                <Link href="/analytics-dashboard" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-green-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <PieChart className="w-4 h-4 text-green-400" />
+                    Platform Stats
                   </button>
                 </Link>
                 
