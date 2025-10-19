@@ -188,14 +188,14 @@ export function ParticleNetwork() {
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        // Mouse interaction (STRONGER attraction/repulsion)
+        // Mouse interaction (gentle repulsion)
         const dx = mouseRef.current.x - particle.x;
         const dy = mouseRef.current.y - particle.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 250) { // Increased from 150
+        if (distance < 250) {
           const force = (250 - distance) / 250;
-          particle.vx -= (dx / distance) * force * 0.05; // Increased from 0.02
-          particle.vy -= (dy / distance) * force * 0.05;
+          particle.vx -= (dx / distance) * force * 0.015; // Reduced for smooth flow
+          particle.vy -= (dy / distance) * force * 0.015;
         }
 
         // Boundary check with wrapping
@@ -204,13 +204,13 @@ export function ParticleNetwork() {
         if (particle.y < 0) particle.y = canvas.height;
         if (particle.y > canvas.height) particle.y = 0;
 
-        // Stronger damping for stability
-        particle.vx *= 0.96; // Increased from 0.99 to reduce drift
-        particle.vy *= 0.96; // Increased from 0.99 to reduce drift
+        // Gentle damping for continuous motion
+        particle.vx *= 0.985; // Gentle damping to maintain motion
+        particle.vy *= 0.985; // Gentle damping to maintain motion
 
-        // Gentle minimum velocity to prevent complete stop
-        if (Math.abs(particle.vx) < 0.05) particle.vx = (Math.random() - 0.5) * 0.1;
-        if (Math.abs(particle.vy) < 0.05) particle.vy = (Math.random() - 0.5) * 0.1;
+        // Ensure minimum velocity for constant gentle motion
+        if (Math.abs(particle.vx) < 0.1) particle.vx = (Math.random() - 0.5) * 0.25;
+        if (Math.abs(particle.vy) < 0.1) particle.vy = (Math.random() - 0.5) * 0.25;
 
         // Draw connections (LONGER distance, MORE visible)
         particles.slice(i + 1).forEach((otherParticle) => {
