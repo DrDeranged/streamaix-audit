@@ -69,8 +69,8 @@ export function ParticleNetwork() {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.2, // Reduced from 0.8 for gentle floating
-        vy: (Math.random() - 0.5) * 0.2, // Reduced from 0.8 for gentle floating
+        vx: (Math.random() - 0.5) * 0.5, // Balanced velocity for consistent motion
+        vy: (Math.random() - 0.5) * 0.5, // Balanced velocity for consistent motion
         radius: Math.random() * 3 + 2, // Larger: 2-5px
       });
     }
@@ -188,14 +188,14 @@ export function ParticleNetwork() {
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        // Mouse interaction (gentle repulsion)
+        // Mouse interaction (responsive repulsion)
         const dx = mouseRef.current.x - particle.x;
         const dy = mouseRef.current.y - particle.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance < 250) {
           const force = (250 - distance) / 250;
-          particle.vx -= (dx / distance) * force * 0.015; // Reduced for smooth flow
-          particle.vy -= (dy / distance) * force * 0.015;
+          particle.vx -= (dx / distance) * force * 0.03; // Balanced for consistent interaction
+          particle.vy -= (dy / distance) * force * 0.03;
         }
 
         // Boundary check with wrapping
@@ -204,13 +204,13 @@ export function ParticleNetwork() {
         if (particle.y < 0) particle.y = canvas.height;
         if (particle.y > canvas.height) particle.y = 0;
 
-        // Gentle damping for continuous motion
-        particle.vx *= 0.985; // Gentle damping to maintain motion
-        particle.vy *= 0.985; // Gentle damping to maintain motion
+        // Balanced damping for lively motion
+        particle.vx *= 0.99; // Lighter damping to maintain energy
+        particle.vy *= 0.99; // Lighter damping to maintain energy
 
-        // Ensure minimum velocity for constant gentle motion
-        if (Math.abs(particle.vx) < 0.1) particle.vx = (Math.random() - 0.5) * 0.25;
-        if (Math.abs(particle.vy) < 0.1) particle.vy = (Math.random() - 0.5) * 0.25;
+        // Ensure minimum velocity for continuous motion
+        if (Math.abs(particle.vx) < 0.15) particle.vx = (Math.random() - 0.5) * 0.3;
+        if (Math.abs(particle.vy) < 0.15) particle.vy = (Math.random() - 0.5) * 0.3;
 
         // Draw connections (LONGER distance, MORE visible)
         particles.slice(i + 1).forEach((otherParticle) => {
