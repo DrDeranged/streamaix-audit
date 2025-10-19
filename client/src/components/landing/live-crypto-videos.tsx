@@ -117,8 +117,8 @@ export default function LiveCryptoVideos() {
 
   if (isLoading && !videos.length) {
     return (
-      <section className="py-16 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-20 bg-transparent">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
               Live AI Processing
@@ -141,8 +141,8 @@ export default function LiveCryptoVideos() {
 
   if (error) {
     return (
-      <section className="py-16 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-20 bg-transparent">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
               Live AI Processing
@@ -165,8 +165,8 @@ export default function LiveCryptoVideos() {
   }
 
   return (
-    <section className="py-16 bg-transparent">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-20 bg-transparent">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Header with Live Status */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -308,7 +308,7 @@ export default function LiveCryptoVideos() {
                           size="sm"
                           onClick={() => handleProcessVideo(video)}
                           disabled={isProcessing === video.id}
-                          className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-600 hover:from-purple-600 hover:via-fuchsia-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300"
+                          className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-600 hover:from-purple-600 hover:via-fuchsia-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transform hover:scale-105 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
                         >
                           {isProcessing === video.id ? (
                             <>
@@ -354,7 +354,7 @@ export default function LiveCryptoVideos() {
                 size="lg"
                 variant="outline"
                 onClick={() => setLocation('/dashboard')}
-                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3"
+                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               >
                 <BarChart3 className="w-5 h-5 mr-2" />
                 View Dashboard
@@ -364,7 +364,7 @@ export default function LiveCryptoVideos() {
                 size="lg"
                 variant="outline"
                 onClick={() => setLocation('/auth')}
-                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3"
+                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               >
                 <FileText className="w-5 h-5 mr-2" />
                 Get Started Free

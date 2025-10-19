@@ -97,12 +97,12 @@ export default function BountyBoard() {
 
   return (
     <div className="min-h-screen bg-transparent dark:bg-transparent">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-12"
         >
           {/* Navigation Buttons */}
           <div className="flex gap-3 mb-6">
@@ -145,7 +145,7 @@ export default function BountyBoard() {
                 <Button
                   size="lg"
                   data-testid="button-create-bounty"
-                  className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                  className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
                   disabled={!isConnected}
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -174,7 +174,7 @@ export default function BountyBoard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
         >
           <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export default function BountyBoard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="mb-8"
+            className="mb-12"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Trending */}
@@ -394,7 +394,7 @@ export default function BountyBoard() {
             {isConnected && (
               <Button
                 onClick={() => setCreateModalOpen(true)}
-                className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
                 data-testid="button-create-first-bounty"
               >
                 <Plus className="w-5 h-5 mr-2" />

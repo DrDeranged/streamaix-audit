@@ -9,7 +9,7 @@ export function HeroSection() {
   };
 
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 bg-transparent">
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16 bg-transparent">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20 dark:opacity-30">
         <motion.div 
@@ -48,7 +48,7 @@ export function HeroSection() {
         </div>
       </div>
       
-      <div className="container mx-auto px-6 text-center relative z-10">
+      <div className="container mx-auto px-6 md:px-8 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -64,18 +64,18 @@ export function HeroSection() {
             </span>
           </h1>
           
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed px-4">
             <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence</span>
             <br/>
             <span className="text-purple-400 font-semibold mt-2 inline-block">Powered by OpenAI, Base Network & Real-Time Analytics</span>
             <span className="text-fuchsia-400 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 px-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 px-4">
             <Button 
               size="lg"
               onClick={scrollToProcessor}
-              className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-gradient"
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-gradient focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               data-testid="button-try-ai"
             >
               <Play className="w-5 h-5 mr-2" />
@@ -86,7 +86,7 @@ export function HeroSection() {
               size="lg"
               variant="outline"
               onClick={() => window.location.href = 'mailto:arslandin.founder@streamaix.com?subject=StreamAiX Waitlist&body=Hi! I would like to join the StreamAiX waitlist.'}
-              className="w-full sm:w-auto px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-white/20 dark:hover:bg-white/10 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-white/20 dark:hover:bg-white/10 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               data-testid="button-join-waitlist"
             >
               <Mail className="w-5 h-5 mr-2" />
