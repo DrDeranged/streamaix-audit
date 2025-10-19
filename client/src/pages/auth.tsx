@@ -192,7 +192,7 @@ export default function AuthPage() {
 
               <TabsContent value="register" className="space-y-4">
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="register-username" className="text-gray-900 dark:text-white">
                         <User className="w-4 h-4 inline mr-2" />
@@ -224,7 +224,7 @@ export default function AuthPage() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="register-password" className="text-gray-900 dark:text-white">
                         <Lock className="w-4 h-4 inline mr-2" />
@@ -271,7 +271,7 @@ export default function AuthPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="register-wallet" className="text-gray-900 dark:text-white">
                         <Wallet className="w-4 h-4 inline mr-2" />
