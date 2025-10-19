@@ -9,9 +9,22 @@ interface Particle {
   radius: number;
 }
 
+interface GeometricShape {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  rotation: number;
+  rotationSpeed: number;
+  size: number;
+  type: 'hexagon' | 'triangle' | 'square';
+  opacity: number;
+}
+
 export function ParticleNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const shapesRef = useRef<GeometricShape[]>([]);
   const animationFrameRef = useRef<number>();
   const mouseRef = useRef({ x: 0, y: 0 });
   const scrollOffsetRef = useRef(0);
@@ -38,20 +51,40 @@ export function ParticleNetwork() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Initialize particles
-    const particleCount = Math.min(Math.floor(window.innerWidth / 15), 80);
+    // Initialize particles (MORE and LARGER)
+    const particleCount = Math.min(Math.floor(window.innerWidth / 8), 200);
     const particles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 2 + 1,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        radius: Math.random() * 3 + 2, // Larger: 2-5px
       });
     }
     particlesRef.current = particles;
+
+    // Initialize geometric shapes
+    const shapeCount = Math.min(Math.floor(window.innerWidth / 300), 15);
+    const shapes: GeometricShape[] = [];
+    const shapeTypes: ('hexagon' | 'triangle' | 'square')[] = ['hexagon', 'triangle', 'square'];
+
+    for (let i = 0; i < shapeCount; i++) {
+      shapes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.02,
+        size: Math.random() * 30 + 20,
+        type: shapeTypes[Math.floor(Math.random() * shapeTypes.length)],
+        opacity: Math.random() * 0.15 + 0.05,
+      });
+    }
+    shapesRef.current = shapes;
 
     // Mouse move handler
     const handleMouseMove = (e: MouseEvent) => {
@@ -66,24 +99,78 @@ export function ParticleNetwork() {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
 
+    // Helper function to draw geometric shapes
+    const drawShape = (shape: GeometricShape, color: string) => {
+      ctx.save();
+      ctx.translate(shape.x, shape.y);
+      ctx.rotate(shape.rotation);
+      ctx.globalAlpha = shape.opacity;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      if (shape.type === 'hexagon') {
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i;
+          const x = shape.size * Math.cos(angle);
+          const y = shape.size * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      } else if (shape.type === 'triangle') {
+        for (let i = 0; i < 3; i++) {
+          const angle = (Math.PI * 2 / 3) * i - Math.PI / 2;
+          const x = shape.size * Math.cos(angle);
+          const y = shape.size * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      } else {
+        ctx.rect(-shape.size / 2, -shape.size / 2, shape.size, shape.size);
+      }
+      ctx.stroke();
+      ctx.restore();
+    };
+
     // Animation loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Get theme-based colors
+      // Get theme-based colors (STRONGER)
       const colors = isDark
         ? {
-            particle: 'rgba(168, 85, 247, 0.6)', // purple-500
-            particleGlow: 'rgba(168, 85, 247, 0.3)',
-            line: 'rgba(217, 70, 239, 0.2)', // fuchsia-500
-            lineStrong: 'rgba(217, 70, 239, 0.4)',
+            particle: 'rgba(168, 85, 247, 0.9)', // purple-500 - more opaque
+            particleGlow: 'rgba(168, 85, 247, 0.5)', // stronger glow
+            line: 'rgba(217, 70, 239, 0.35)', // fuchsia-500 - more visible
+            lineStrong: 'rgba(217, 70, 239, 0.6)',
+            linePulse: 'rgba(6, 182, 212, 0.7)', // cyan-500 for pulsing lines
+            shape: 'rgba(168, 85, 247, 0.3)',
           }
         : {
-            particle: 'rgba(100, 116, 139, 0.4)', // slate-500
-            particleGlow: 'rgba(100, 116, 139, 0.1)',
-            line: 'rgba(148, 163, 184, 0.15)', // slate-400
-            lineStrong: 'rgba(148, 163, 184, 0.25)',
+            particle: 'rgba(100, 116, 139, 0.6)', // slate-500
+            particleGlow: 'rgba(100, 116, 139, 0.2)',
+            line: 'rgba(148, 163, 184, 0.25)', // slate-400
+            lineStrong: 'rgba(148, 163, 184, 0.4)',
+            linePulse: 'rgba(100, 116, 139, 0.5)',
+            shape: 'rgba(100, 116, 139, 0.2)',
           };
+
+      // Update and draw geometric shapes
+      shapes.forEach((shape) => {
+        shape.x += shape.vx;
+        shape.y += shape.vy;
+        shape.rotation += shape.rotationSpeed;
+
+        // Boundary check with wrapping
+        if (shape.x < -100) shape.x = canvas.width + 100;
+        if (shape.x > canvas.width + 100) shape.x = -100;
+        if (shape.y < -100) shape.y = canvas.height + 100;
+        if (shape.y > canvas.height + 100) shape.y = -100;
+
+        drawShape(shape, colors.shape);
+      });
 
       // Update and draw particles
       particles.forEach((particle, i) => {
@@ -94,14 +181,14 @@ export function ParticleNetwork() {
         // Add subtle scroll influence
         particle.y += scrollOffsetRef.current * 0.001;
 
-        // Mouse interaction (subtle attraction/repulsion)
+        // Mouse interaction (STRONGER attraction/repulsion)
         const dx = mouseRef.current.x - particle.x;
         const dy = mouseRef.current.y - particle.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 150) {
-          const force = (150 - distance) / 150;
-          particle.vx -= (dx / distance) * force * 0.02;
-          particle.vy -= (dy / distance) * force * 0.02;
+        if (distance < 250) { // Increased from 150
+          const force = (250 - distance) / 250;
+          particle.vx -= (dx / distance) * force * 0.05; // Increased from 0.02
+          particle.vy -= (dy / distance) * force * 0.05;
         }
 
         // Boundary check with wrapping
@@ -115,21 +202,34 @@ export function ParticleNetwork() {
         particle.vy *= 0.99;
 
         // Ensure minimum velocity
-        if (Math.abs(particle.vx) < 0.1) particle.vx = (Math.random() - 0.5) * 0.2;
-        if (Math.abs(particle.vy) < 0.1) particle.vy = (Math.random() - 0.5) * 0.2;
+        if (Math.abs(particle.vx) < 0.15) particle.vx = (Math.random() - 0.5) * 0.3;
+        if (Math.abs(particle.vy) < 0.15) particle.vy = (Math.random() - 0.5) * 0.3;
 
-        // Draw connections
+        // Draw connections (LONGER distance, MORE visible)
         particles.slice(i + 1).forEach((otherParticle) => {
           const dx = particle.x - otherParticle.x;
           const dy = particle.y - otherParticle.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 150) {
-            const opacity = 1 - distance / 150;
+          if (distance < 200) { // Increased from 150
+            const opacity = 1 - distance / 200;
+            const pulseIntensity = Math.sin(Date.now() / 1000 + distance) * 0.3 + 0.7;
+            
             ctx.beginPath();
-            ctx.strokeStyle = distance < 80 ? colors.lineStrong : colors.line;
-            ctx.globalAlpha = opacity * 0.5;
-            ctx.lineWidth = distance < 80 ? 1.5 : 1;
+            // Use pulsing color for very close connections
+            if (distance < 100) {
+              ctx.strokeStyle = colors.linePulse;
+              ctx.globalAlpha = opacity * 0.8 * pulseIntensity;
+              ctx.lineWidth = 2;
+            } else if (distance < 150) {
+              ctx.strokeStyle = colors.lineStrong;
+              ctx.globalAlpha = opacity * 0.7;
+              ctx.lineWidth = 1.5;
+            } else {
+              ctx.strokeStyle = colors.line;
+              ctx.globalAlpha = opacity * 0.6;
+              ctx.lineWidth = 1;
+            }
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
             ctx.stroke();
@@ -137,14 +237,22 @@ export function ParticleNetwork() {
           }
         });
 
-        // Draw particle with glow
+        // Draw particle with STRONGER glow
         if (isDark) {
+          // Outer glow
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.radius + 6, 0, Math.PI * 2);
+          ctx.fillStyle = colors.particleGlow;
+          ctx.fill();
+          
+          // Inner glow
           ctx.beginPath();
           ctx.arc(particle.x, particle.y, particle.radius + 3, 0, Math.PI * 2);
-          ctx.fillStyle = colors.particleGlow;
+          ctx.fillStyle = 'rgba(168, 85, 247, 0.7)';
           ctx.fill();
         }
 
+        // Draw particle core
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
         ctx.fillStyle = colors.particle;
