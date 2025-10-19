@@ -84,7 +84,7 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
         className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 ${
           selectedTopic === null
             ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-            : 'bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 text-slate-800 dark:text-slate-300 hover:bg-slate-50 dark:hover:from-slate-700/70 dark:hover:to-slate-600/70 border border-slate-200 dark:border-white/20 hover:border-slate-300 dark:hover:border-white/30'
+            : 'bg-slate-800/70 dark:bg-slate-800/70 backdrop-blur-md text-slate-200 dark:text-slate-300 hover:bg-slate-800/90 dark:hover:bg-slate-800/90 border border-purple-500/30 hover:border-purple-500/50'
         }`}
         data-testid="topic-all"
       >
@@ -100,7 +100,7 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
           className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 relative overflow-hidden group ${
             selectedTopic === trend.topic
               ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-              : 'bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 text-slate-800 dark:text-slate-300 hover:bg-slate-50 dark:hover:from-slate-700/70 dark:hover:to-slate-600/70 border border-slate-200 dark:border-white/20 hover:border-slate-300 dark:hover:border-white/30'
+              : 'bg-slate-800/70 dark:bg-slate-800/70 backdrop-blur-md text-slate-200 dark:text-slate-300 hover:bg-slate-800/90 dark:hover:bg-slate-800/90 border border-purple-500/30 hover:border-purple-500/50'
           }`}
           data-testid={`topic-${i}`}
         >
@@ -134,7 +134,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
     return (
       <div className="space-y-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
+          <div key={i} className="bg-slate-900/70 dark:bg-slate-900/70 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/30 dark:via-white/5 to-transparent animate-shimmer" />
             <div className="flex gap-4 mb-4 relative z-10">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full border-2 border-slate-300 dark:border-white/20" />
@@ -156,7 +156,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (error) {
     return (
-      <div className="text-center py-12 sm:py-16 bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl relative overflow-hidden">
+      <div className="text-center py-12 sm:py-16 bg-slate-900/75 dark:bg-slate-900/75 backdrop-blur-xl border border-purple-500/30 rounded-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5" />
         <div className="relative z-10">
           <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
@@ -179,7 +179,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (!casts || casts.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 bg-white dark:bg-gradient-to-br dark:from-slate-900/60 dark:via-slate-800/40 dark:to-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl relative overflow-hidden">
+      <div className="text-center py-12 sm:py-20 bg-slate-900/75 dark:bg-slate-900/75 backdrop-blur-xl border border-purple-500/30 rounded-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-purple-500/5 to-cyan-500/5" />
         <div className="relative z-10 px-4">
           <motion.div
@@ -233,7 +233,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
           <Button
             onClick={() => setShowAll(true)}
             variant="outline"
-            className="w-full sm:w-auto bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 border-slate-300 dark:border-white/30 text-slate-900 dark:text-slate-200 hover:bg-slate-50 dark:hover:from-slate-700/70 dark:hover:to-slate-600/70 dark:hover:text-white hover:border-slate-400 dark:hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg"
+            className="w-full sm:w-auto bg-slate-800/70 dark:bg-slate-800/70 backdrop-blur-md border-purple-500/40 text-slate-200 dark:text-slate-200 hover:bg-slate-800/90 dark:hover:bg-slate-800/90 hover:text-white hover:border-purple-500/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20"
             data-testid="show-more-posts"
           >
             Show {casts.length - initialCount} more posts
@@ -270,7 +270,7 @@ function DiscoverRightRail() {
   return (
     <div className="space-y-6 sticky top-6">
       {/* Trending Topics */}
-      <div className="bg-white dark:bg-gradient-to-br dark:from-slate-900/70 dark:via-slate-800/50 dark:to-slate-900/70 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 relative overflow-hidden">
+      <div className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
@@ -282,7 +282,7 @@ function DiscoverRightRail() {
       </div>
 
       {/* Who to follow */}
-      <div className="bg-white dark:bg-gradient-to-br dark:from-slate-900/70 dark:via-slate-800/50 dark:to-slate-900/70 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl p-5 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 relative overflow-hidden">
+      <div className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-fuchsia-500/20 transition-all duration-500 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
