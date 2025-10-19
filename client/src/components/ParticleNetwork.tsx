@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/theme-provider';
 
 interface Particle {
   x: number;
