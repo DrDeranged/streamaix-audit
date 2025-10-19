@@ -43,13 +43,23 @@ export function ParticleNetwork() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size to cover entire document
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
-      canvas.height = document.documentElement.scrollHeight;
+      canvas.height = Math.max(
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight,
+        window.innerHeight
+      );
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+    
+    // Update canvas height when content changes
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
+    });
+    resizeObserver.observe(document.body);
 
     // Initialize particles (MORE and LARGER)
     const particleCount = Math.min(Math.floor(window.innerWidth / 8), 200);
@@ -268,6 +278,7 @@ export function ParticleNetwork() {
       window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
