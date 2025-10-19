@@ -1085,7 +1085,7 @@ export function TrendingSocialContent() {
   const allCasts = trendingData?.items || [];
 
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-transparent">
       {/* Header Section - X-style */}
       <div className="mb-8">
         <motion.div

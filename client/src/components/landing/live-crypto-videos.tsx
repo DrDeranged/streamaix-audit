@@ -117,7 +117,7 @@ export default function LiveCryptoVideos() {
 
   if (isLoading && !videos.length) {
     return (
-      <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+      <section className="py-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
@@ -141,7 +141,7 @@ export default function LiveCryptoVideos() {
 
   if (error) {
     return (
-      <section className="py-16 bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+      <section className="py-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">

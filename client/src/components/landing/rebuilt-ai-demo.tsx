@@ -295,7 +295,7 @@ export function AIProcessor() {
 
 
   return (
-    <section id="ai-processor" className="py-16 bg-white dark:bg-background">
+    <section id="ai-processor" className="py-16 bg-transparent">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"

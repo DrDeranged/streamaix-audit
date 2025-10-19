@@ -74,8 +74,7 @@ export function AISuggestions() {
 
   if (!isAuthenticated || !user) {
     return (
-      <section id="suggestions" className="py-24 relative overflow-hidden bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent pointer-events-none" />
+      <section id="suggestions" className="py-24 relative overflow-hidden bg-transparent">
         
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
@@ -137,7 +136,7 @@ export function AISuggestions() {
 
   if (isLoading) {
     return (
-      <section id="suggestions" className="py-24 relative bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+      <section id="suggestions" className="py-24 relative bg-transparent">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-16"
@@ -162,7 +161,7 @@ export function AISuggestions() {
 
   if (error || !data?.success) {
     return (
-      <section id="suggestions" className="py-24 relative bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+      <section id="suggestions" className="py-24 relative bg-transparent">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-16"
@@ -213,8 +212,7 @@ export function AISuggestions() {
   const topInvestments = alignedAssets?.slice(0, 5) || [];
 
   return (
-    <section id="suggestions" className="py-20 relative overflow-hidden bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/5 to-transparent pointer-events-none" />
+    <section id="suggestions" className="py-20 relative overflow-hidden bg-transparent">
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-6xl">
         {/* Compact Report Button */}

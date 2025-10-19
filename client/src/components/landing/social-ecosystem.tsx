@@ -48,7 +48,7 @@ export function SocialEcosystem() {
   ];
 
   return (
-    <section id="ecosystem" className="py-8 sm:py-12 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+    <section id="ecosystem" className="py-8 sm:py-12 bg-transparent">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-6 sm:mb-10"

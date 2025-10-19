@@ -198,14 +198,7 @@ export function BountyFeed() {
   const stats = statsData?.stats;
 
   return (
-    <section className="py-20 relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-black to-gray-900">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(139, 92, 246, 0.15) 1px, transparent 0)`,
-          backgroundSize: '48px 48px'
-        }} />
-      </div>
+    <section className="py-20 relative overflow-hidden bg-transparent">
 
       {/* Animated gradient orbs */}
       <motion.div

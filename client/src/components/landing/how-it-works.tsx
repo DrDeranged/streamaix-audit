@@ -34,7 +34,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 relative overflow-hidden bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
+    <section id="how-it-works" className="py-20 relative overflow-hidden bg-transparent">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-10"
