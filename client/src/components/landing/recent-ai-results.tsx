@@ -68,7 +68,7 @@ export function RecentAIResults() {
 
   if (isLoading) {
     return (
-      <section className="py-20 px-4 bg-gradient-to-br from-slate-900/50 via-purple-900/30 to-slate-900/50">
+      <section className="py-20 px-4 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
         <div className="container mx-auto max-w-7xl text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <motion.div
@@ -86,7 +86,7 @@ export function RecentAIResults() {
 
   if (completedSummaries.length === 0) {
     return (
-      <section className="py-20 px-4 bg-gradient-to-br from-slate-900/50 via-purple-900/30 to-slate-900/50">
+      <section className="py-20 px-4 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
         <div className="container mx-auto max-w-7xl text-center">
           <Badge className="mb-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
             <Brain className="h-3 w-3 mr-1" />
@@ -124,7 +124,7 @@ export function RecentAIResults() {
   };
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-slate-900/50 via-purple-900/30 to-slate-900/50">
+    <section className="py-20 px-4 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
       <div className="container mx-auto max-w-7xl">
         {/* Section Header */}
         <motion.div

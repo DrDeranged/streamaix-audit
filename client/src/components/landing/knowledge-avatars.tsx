@@ -553,7 +553,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   }
 
   return (
-    <section id="profiles" className="py-20 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+    <section id="profiles" className="py-20 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent" />

@@ -91,7 +91,7 @@ export function Bounties() {
   const stats = statsData?.stats;
 
   return (
-    <section id="bounties" className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-background relative overflow-hidden">
+    <section id="bounties" className="py-24 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950 relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-gray-900/[0.04] dark:bg-grid-white/[0.02] pointer-events-none" />
       <div className="container mx-auto px-6 relative z-10">
         <motion.div 

@@ -50,7 +50,7 @@ export function WhyBlockchain() {
   ];
 
   return (
-    <section id="features" className="py-12">
+    <section id="features" className="py-12 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-10"
@@ -92,7 +92,7 @@ export function WhyBlockchain() {
                 </motion.div>
               </HoverCardTrigger>
               <HoverCardContent 
-                className="w-72 glass-bg glass-border" 
+                className="w-72 bg-white dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-purple-800/10 backdrop-blur-sm border border-slate-200 dark:border-purple-500/30" 
                 side="top"
                 data-testid={`feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}-details`}
               >

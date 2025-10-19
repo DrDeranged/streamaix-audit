@@ -34,7 +34,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 relative overflow-hidden">
+    <section id="how-it-works" className="py-20 relative overflow-hidden bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-10"
@@ -83,7 +83,7 @@ export function HowItWorks() {
                   </motion.div>
                 </HoverCardTrigger>
                 <HoverCardContent 
-                  className="w-80 glass-bg glass-border shadow-2xl" 
+                  className="w-80 bg-white dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-purple-800/10 backdrop-blur-sm border border-slate-200 dark:border-purple-500/30 shadow-2xl" 
                   side="bottom"
                   data-testid={`step-${step.number}-details`}
                 >
