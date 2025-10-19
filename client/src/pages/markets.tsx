@@ -183,12 +183,12 @@ export default function Markets() {
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
 
-        {/* Hero Header */}
+        {/* Hero Header - Compact */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="relative mb-12 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-8"
+          className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4"
         >
           {/* Animated background effects */}
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:30px_30px]" />
@@ -217,51 +217,25 @@ export default function Markets() {
             className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
           />
           
-          <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex-1">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="flex items-center gap-3 mb-4"
+                className="flex items-center gap-2 mb-2"
               >
-                <motion.div
-                  animate={{
-                    rotate: [0, 360],
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <TrendingUp className="w-8 h-8 text-cyan-400" />
-                </motion.div>
-                <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                  Prediction Markets
+                <TrendingUp className="w-5 h-5 text-cyan-400" />
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+                  Prediction Markets ✨
                 </h1>
-                <motion.div
-                  animate={{
-                    rotate: [0, -360],
-                    scale: [1, 1.2, 1],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.5
-                  }}
-                >
-                  <Sparkles className="w-8 h-8 text-fuchsia-400" />
-                </motion.div>
               </motion.div>
               
               <motion.p
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-slate-300 text-xl mb-3 font-light"
+                className="text-slate-300 text-sm mb-2 font-light"
               >
                 🚀 <span className="font-semibold text-cyan-300">Trade the future.</span> Predict outcomes. <span className="font-semibold text-purple-300">Earn STREAM.</span>
               </motion.p>
@@ -270,17 +244,17 @@ export default function Markets() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
-                className="flex flex-wrap items-center gap-3 text-sm"
+                className="flex flex-wrap items-center gap-2 text-xs"
               >
-                <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-200 border-purple-500/30 px-3 py-1">
+                <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-200 border-purple-500/30 px-2 py-0.5">
                   <Sparkles className="w-3 h-3 mr-1" />
                   AI-Powered Predictions
                 </Badge>
-                <Badge className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 border-cyan-500/30 px-3 py-1">
+                <Badge className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 border-cyan-500/30 px-2 py-0.5">
                   <TrendingUp className="w-3 h-3 mr-1" />
                   Live Trading
                 </Badge>
-                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200 border-green-500/30 px-3 py-1">
+                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200 border-green-500/30 px-2 py-0.5">
                   Base Network
                 </Badge>
               </motion.div>
@@ -390,42 +364,42 @@ export default function Markets() {
           </div>
         </motion.div>
 
-        {/* Stats */}
+        {/* Stats - Compact */}
         {stats && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
           >
             <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="text-sm text-purple-300/80">Active Markets</div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+              <CardContent className="p-3">
+                <div className="text-xs text-purple-300/80">Active Markets</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
                   {stats.activeMarkets}
                 </div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="text-sm text-cyan-300/80">Total Volume</div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              <CardContent className="p-3">
+                <div className="text-xs text-cyan-300/80">Total Volume</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                   {(stats.totalVolume / 1000000).toFixed(1)}M
                 </div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-green-900/20 to-green-800/10 border-green-500/30 hover:border-green-500/50 transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="text-sm text-green-300/80">Total Trades</div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+              <CardContent className="p-3">
+                <div className="text-xs text-green-300/80">Total Trades</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                   {stats.totalTrades.toLocaleString()}
                 </div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-orange-900/20 to-orange-800/10 border-orange-500/30 hover:border-orange-500/50 transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="text-sm text-orange-300/80">All Markets</div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              <CardContent className="p-3">
+                <div className="text-xs text-orange-300/80">All Markets</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
                   {stats.totalMarkets}
                 </div>
               </CardContent>
