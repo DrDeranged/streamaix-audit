@@ -37,7 +37,8 @@ import {
   Trophy,
   ChevronDown,
   LineChart,
-  PieChart
+  PieChart,
+  MessageCircle
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -154,6 +155,22 @@ export function Navigation() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Social Center Link */}
+              <Link href="/social">
+                <motion.button 
+                  className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  data-testid="nav-social-center"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 to-pink-500/0 group-hover:from-pink-500/20 group-hover:to-pink-500/10 transition-all duration-300 rounded-lg" />
+                  <div className="relative flex items-center gap-1.5">
+                    <MessageCircle className="w-4 h-4 text-pink-500 dark:text-pink-400 group-hover:text-pink-600 dark:group-hover:text-pink-300 transition-colors" />
+                    <span className="font-medium">Social</span>
+                  </div>
+                </motion.button>
+              </Link>
 
               {/* Analytics Dropdown */}
               <DropdownMenu>
