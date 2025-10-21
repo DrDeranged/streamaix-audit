@@ -229,7 +229,7 @@ export function SocialFeed() {
     (activeTab === 'predictions' && marketsLoading);
 
   return (
-    <section className="relative overflow-hidden py-8 sm:py-12">
+    <section className="relative overflow-hidden py-6 sm:py-8">
       {/* Neural Network Background */}
       <canvas
         ref={canvasRef}
@@ -243,12 +243,12 @@ export function SocialFeed() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-6 sm:mb-10"
+          className="text-center mb-4 sm:mb-6"
         >
-          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-2 sm:mb-3 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
             Social Feed
           </h2>
-          <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
             Engage with markets, predictions, and real-time data
           </p>
         </motion.div>
@@ -258,62 +258,62 @@ export function SocialFeed() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="mb-6 bg-gradient-to-r from-purple-600/20 via-fuchsia-600/20 to-cyan-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-4 shadow-lg"
+          className="mb-3 bg-gradient-to-r from-purple-600/20 via-fuchsia-600/20 to-cyan-600/20 backdrop-blur-md border border-purple-500/30 rounded-lg p-2.5 shadow-lg"
           data-testid="incentive-banner"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center">
-              <Gift className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center">
+              <Gift className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="text-white font-semibold text-sm mb-1 flex items-center gap-2">
+              <h3 className="text-white font-semibold text-xs mb-0.5 flex items-center gap-1.5">
                 Earn STREAM Tokens! 
-                <Sparkles className="w-4 h-4 text-yellow-400" />
+                <Sparkles className="w-3 h-3 text-yellow-400" />
               </h3>
-              <p className="text-gray-300 text-xs">
-                Like, comment, and save content to earn STREAM tokens. The more you engage, the more you earn! 
-                {!isAuthenticated && <span className="text-fuchsia-400 font-semibold"> Sign in to start earning.</span>}
+              <p className="text-gray-300 text-[10px]">
+                Like, comment, and save content to earn rewards.
+                {!isAuthenticated && <span className="text-fuchsia-400 font-semibold"> Sign in to start.</span>}
               </p>
             </div>
           </div>
         </motion.div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 p-1.5 bg-white/5 backdrop-blur-md rounded-xl border border-purple-500/20">
+        <div className="flex gap-1.5 mb-3 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-purple-500/20">
           <button
             onClick={() => setActiveTab('macro')}
-            className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'macro'
                 ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
             data-testid="tab-macro"
           >
-            <LineChart className="w-4 h-4 inline mr-2" />
+            <LineChart className="w-3 h-3 inline mr-1" />
             MACRO
           </button>
           <button
             onClick={() => setActiveTab('crypto')}
-            className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'crypto'
                 ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
             data-testid="tab-crypto"
           >
-            <Coins className="w-4 h-4 inline mr-2" />
+            <Coins className="w-3 h-3 inline mr-1" />
             CRYPTO
           </button>
           <button
             onClick={() => setActiveTab('predictions')}
-            className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'predictions'
                 ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
             data-testid="tab-predictions"
           >
-            <TrendingUp className="w-4 h-4 inline mr-2" />
+            <TrendingUp className="w-3 h-3 inline mr-1" />
             PREDICTIONS
           </button>
         </div>
@@ -326,7 +326,7 @@ export function SocialFeed() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="space-y-4"
+              className="space-y-2"
             >
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-2.5 animate-pulse">
