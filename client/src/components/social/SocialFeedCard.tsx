@@ -18,7 +18,9 @@ import {
   ChevronDown,
   Send,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  ExternalLink,
+  Newspaper
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -197,6 +199,27 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
             {/* Type-specific metadata */}
             {content.metadata && (
               <div className="mt-1 flex items-center gap-2 text-[10px]">
+                {(type === 'macro' || type === 'crypto') && (
+                  <>
+                    {content.metadata.category && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-300 font-medium">
+                        {content.metadata.category}
+                      </span>
+                    )}
+                    {content.metadata.url && (
+                      <a 
+                        href={content.metadata.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-0.5 text-cyan-400 hover:text-cyan-300"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ExternalLink className="w-2.5 h-2.5" />
+                        Read Full Story
+                      </a>
+                    )}
+                  </>
+                )}
                 {type === 'bounty' && (
                   <>
                     <span className="text-fuchsia-400 font-semibold flex items-center gap-0.5">
