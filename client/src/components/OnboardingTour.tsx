@@ -56,7 +56,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Try AI Summaries →",
-      path: "/create"
+      path: "/create-summary"
     }
   },
   {
@@ -132,7 +132,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "View Dashboard →",
-      path: "/profile"
+      path: "/dashboard"
     }
   },
   {
@@ -151,7 +151,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Connect Social →",
-      path: "/profile"
+      path: "/dashboard"
     }
   },
   {
