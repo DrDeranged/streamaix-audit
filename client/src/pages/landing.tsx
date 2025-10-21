@@ -13,6 +13,7 @@ import { Bounties } from "@/components/landing/bounties";
 import { BountyFeed } from "@/components/landing/bounty-feed";
 import { PredictionMarketSection } from "@/components/PredictionMarketSection";
 import { SocialEcosystem } from "@/components/landing/social-ecosystem";
+import { DiscoverFeed } from "@/components/landing/DiscoverFeed";
 import { Footer } from "@/components/landing/footer";
 
 export default function Landing() {
@@ -33,6 +34,7 @@ export default function Landing() {
         <BountyFeed />
         <PredictionMarketSection />
         <SocialEcosystem />
+        <DiscoverFeed />
         <Footer />
       </div>
     </div>
