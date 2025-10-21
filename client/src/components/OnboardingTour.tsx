@@ -554,13 +554,12 @@ export function OnboardingTour() {
                       >
                         <Button
                           onClick={() => handleAction(currentStepData.action.path)}
-                          size="lg"
-                          className={`px-12 py-7 text-xl font-bold bg-gradient-to-r ${currentStepData.gradient} hover:scale-105 text-white shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 rounded-2xl`}
+                          className={`px-6 py-2.5 text-sm font-semibold bg-gradient-to-r ${currentStepData.gradient} hover:scale-105 text-white shadow-lg hover:shadow-purple-500/30 transition-all duration-300 rounded-lg`}
                           data-testid={`button-action-step-${currentStep}`}
                         >
                           <span className="flex items-center gap-2">
                             {currentStepData.action.label}
-                            <ArrowRight className="h-6 w-6" />
+                            <ArrowRight className="h-4 w-4" />
                           </span>
                         </Button>
                       </motion.div>
