@@ -5205,6 +5205,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // CONVERSATIONS ROUTES (Social Platform)
+  // =============================================================================
+
+  // Get conversations feed with trending/for-you/following tabs
+  app.get('/api/conversations', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { tab = 'trending', topic, limit = '20', offset = '0' } = req.query;
+    
+    try {
+      const conversations = await storage.getConversationsFeed({
+        tab: tab as 'trending' | 'for-you' | 'following',
+        topic: topic as string | undefined,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+        userId: req.user?.id
+      });
+      
+      res.json({
+        success: true,
+        conversations,
+        pagination: {
+          limit: parseInt(limit as string),
+          offset: parseInt(offset as string),
+          hasMore: conversations.length === parseInt(limit as string)
+        }
+      });
+    } catch (error) {
+      console.error('Get conversations feed error:', error);
+      res.status(500).json({ error: 'Failed to fetch conversations' });
+    }
+  }));
+
+  // Create new conversation
+  app.post('/api/conversations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const { content, imageUrl, tags, linkedSummaryId, linkedMarketId, isPublic } = req.body;
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+    
+    if (content.length > 5000) {
+      return res.status(400).json({ error: 'Content must be less than 5000 characters' });
+    }
+    
+    try {
+      const conversation = await storage.createConversation({
+        authorId: req.user.id,
+        content: content.trim(),
+        imageUrl,
+        tags: tags || [],
+        linkedSummaryId,
+        linkedMarketId,
+        isPublic: isPublic !== false
+      });
+      
+      res.status(201).json({
+        success: true,
+        conversation
+      });
+    } catch (error) {
+      console.error('Create conversation error:', error);
+      res.status(500).json({ error: 'Failed to create conversation' });
+    }
+  }));
+
+  // Get single conversation with comments
+  app.get('/api/conversations/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      const conversation = await storage.getConversationById(id, req.user?.id);
+      
+      if (!conversation) {
+        return res.status(404).json({ error: 'Conversation not found' });
+      }
+      
+      res.json({
+        success: true,
+        conversation
+      });
+    } catch (error) {
+      console.error('Get conversation error:', error);
+      res.status(500).json({ error: 'Failed to fetch conversation' });
+    }
+  }));
+
+  // Update conversation
+  app.put('/api/conversations/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const { id } = req.params;
+    const { content, tags, isPublic, isPinned } = req.body;
+    
+    try {
+      const conversation = await storage.updateConversation(id, req.user.id, {
+        content,
+        tags,
+        isPublic,
+        isPinned
+      });
+      
+      if (!conversation) {
+        return res.status(404).json({ error: 'Conversation not found or unauthorized' });
+      }
+      
+      res.json({
+        success: true,
+        conversation
+      });
+    } catch (error) {
+      console.error('Update conversation error:', error);
+      res.status(500).json({ error: 'Failed to update conversation' });
+    }
+  }));
+
+  // Delete conversation
+  app.delete('/api/conversations/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const { id } = req.params;
+    
+    try {
+      const success = await storage.deleteConversation(id, req.user.id);
+      
+      if (!success) {
+        return res.status(404).json({ error: 'Conversation not found or unauthorized' });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Conversation deleted successfully'
+      });
+    } catch (error) {
+      console.error('Delete conversation error:', error);
+      res.status(500).json({ error: 'Failed to delete conversation' });
+    }
+  }));
+
+  // Like/unlike conversation
+  app.post('/api/conversations/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const { id } = req.params;
+    
+    try {
+      const result = await storage.toggleConversationLike(id, req.user.id);
+      
+      res.json({
+        success: true,
+        liked: result.liked,
+        likesCount: result.likesCount
+      });
+    } catch (error) {
+      console.error('Like conversation error:', error);
+      res.status(500).json({ error: 'Failed to like conversation' });
+    }
+  }));
+
+  // Comment on conversation
+  app.post('/api/conversations/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const { id } = req.params;
+    const { content, parentCommentId } = req.body;
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment content is required' });
+    }
+    
+    if (content.length > 1000) {
+      return res.status(400).json({ error: 'Comment must be less than 1000 characters' });
+    }
+    
+    try {
+      const comment = await storage.createConversationComment({
+        conversationId: id,
+        userId: req.user.id,
+        content: content.trim(),
+        parentCommentId
+      });
+      
+      res.status(201).json({
+        success: true,
+        comment
+      });
+    } catch (error) {
+      console.error('Comment error:', error);
+      res.status(500).json({ error: 'Failed to create comment' });
+    }
+  }));
+
+  // Share conversation
+  app.post('/api/conversations/:id/share', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const { id } = req.params;
+    const { platform = 'internal' } = req.body;
+    
+    try {
+      await storage.createConversationShare({
+        conversationId: id,
+        userId: req.user.id,
+        platform
+      });
+      
+      res.json({
+        success: true,
+        message: 'Conversation shared successfully'
+      });
+    } catch (error) {
+      console.error('Share conversation error:', error);
+      res.status(500).json({ error: 'Failed to share conversation' });
+    }
+  }));
+
+  // =============================================================================
   // ADMIN ROUTES (Protected)
   // =============================================================================
 

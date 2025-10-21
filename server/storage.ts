@@ -98,7 +98,17 @@ import {
   // Bounty Templates
   bountyTemplates,
   type BountyTemplate,
-  type InsertBountyTemplate
+  type InsertBountyTemplate,
+  // Conversation Tables
+  conversations,
+  conversationLikes,
+  conversationComments,
+  conversationShares,
+  type Conversation,
+  type InsertConversation,
+  type ConversationLike,
+  type ConversationComment,
+  type ConversationShare
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -364,6 +374,44 @@ export interface IStorage {
   updateBountyTemplate(id: string, updates: Partial<InsertBountyTemplate>): Promise<BountyTemplate | undefined>;
   deleteBountyTemplate(id: string): Promise<boolean>;
   incrementTemplateUsage(id: string): Promise<void>;
+
+  // Conversation operations
+  getConversationsFeed(options: {
+    tab: 'trending' | 'for-you' | 'following';
+    topic?: string;
+    limit: number;
+    offset: number;
+    userId?: string;
+  }): Promise<any[]>;
+  createConversation(data: {
+    authorId: string;
+    content: string;
+    imageUrl?: string;
+    tags?: string[];
+    linkedSummaryId?: string;
+    linkedMarketId?: string;
+    isPublic?: boolean;
+  }): Promise<any>;
+  getConversationById(id: string, userId?: string): Promise<any | undefined>;
+  updateConversation(id: string, userId: string, updates: {
+    content?: string;
+    tags?: string[];
+    isPublic?: boolean;
+    isPinned?: boolean;
+  }): Promise<any | undefined>;
+  deleteConversation(id: string, userId: string): Promise<boolean>;
+  toggleConversationLike(conversationId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
+  createConversationComment(data: {
+    conversationId: string;
+    userId: string;
+    content: string;
+    parentCommentId?: string;
+  }): Promise<any>;
+  createConversationShare(data: {
+    conversationId: string;
+    userId: string;
+    platform: string;
+  }): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2018,6 +2066,298 @@ export class DatabaseStorage implements IStorage {
     await db.update(bountyTemplates)
       .set({ usageCount: sql`${bountyTemplates.usageCount} + 1` })
       .where(eq(bountyTemplates.id, id));
+  }
+
+  // Conversation operations
+  async getConversationsFeed(options: {
+    tab: 'trending' | 'for-you' | 'following';
+    topic?: string;
+    limit: number;
+    offset: number;
+    userId?: string;
+  }): Promise<any[]> {
+    let query = db
+      .select({
+        conversation: conversations,
+        author: {
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar,
+          bio: users.bio
+        }
+      })
+      .from(conversations)
+      .leftJoin(users, eq(conversations.authorId, users.id))
+      .where(eq(conversations.isPublic, true))
+      .limit(options.limit)
+      .offset(options.offset);
+
+    // Filter by topic if provided
+    if (options.topic) {
+      query = query.where(sql`${conversations.tags} @> ARRAY[${options.topic}]::text[]`) as any;
+    }
+
+    // Order based on tab
+    if (options.tab === 'trending') {
+      query = query.orderBy(desc(conversations.trendingScore), desc(conversations.createdAt)) as any;
+    } else if (options.tab === 'for-you') {
+      // TODO: Implement personalized feed based on user preferences
+      query = query.orderBy(desc(conversations.engagementRate), desc(conversations.createdAt)) as any;
+    } else if (options.tab === 'following' && options.userId) {
+      // TODO: Filter by followed users
+      query = query.orderBy(desc(conversations.createdAt)) as any;
+    } else {
+      query = query.orderBy(desc(conversations.createdAt)) as any;
+    }
+
+    const results = await query;
+    
+    // Check if user has liked each conversation
+    if (options.userId) {
+      const conversationIds = results.map(r => r.conversation.id);
+      const likes = await db
+        .select()
+        .from(conversationLikes)
+        .where(
+          and(
+            eq(conversationLikes.userId, options.userId),
+            inArray(conversationLikes.conversationId, conversationIds)
+          )
+        );
+      
+      const likedIds = new Set(likes.map(l => l.conversationId));
+      return results.map(r => ({
+        ...r.conversation,
+        author: r.author,
+        isLiked: likedIds.has(r.conversation.id)
+      }));
+    }
+
+    return results.map(r => ({ ...r.conversation, author: r.author, isLiked: false }));
+  }
+
+  async createConversation(data: {
+    authorId: string;
+    content: string;
+    imageUrl?: string;
+    tags?: string[];
+    linkedSummaryId?: string;
+    linkedMarketId?: string;
+    isPublic?: boolean;
+  }): Promise<any> {
+    const [conversation] = await db
+      .insert(conversations)
+      .values({
+        authorId: data.authorId,
+        content: data.content,
+        imageUrl: data.imageUrl,
+        tags: data.tags || [],
+        linkedSummaryId: data.linkedSummaryId,
+        linkedMarketId: data.linkedMarketId,
+        isPublic: data.isPublic !== false
+      })
+      .returning();
+
+    // Get author info
+    const author = await this.getUser(data.authorId);
+    
+    return {
+      ...conversation,
+      author: {
+        id: author?.id,
+        username: author?.username,
+        avatar: author?.avatar,
+        bio: author?.bio
+      }
+    };
+  }
+
+  async getConversationById(id: string, userId?: string): Promise<any | undefined> {
+    const [result] = await db
+      .select({
+        conversation: conversations,
+        author: {
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar,
+          bio: users.bio
+        }
+      })
+      .from(conversations)
+      .leftJoin(users, eq(conversations.authorId, users.id))
+      .where(eq(conversations.id, id));
+
+    if (!result) return undefined;
+
+    // Get comments
+    const comments = await db
+      .select({
+        comment: conversationComments,
+        author: {
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar
+        }
+      })
+      .from(conversationComments)
+      .leftJoin(users, eq(conversationComments.userId, users.id))
+      .where(eq(conversationComments.conversationId, id))
+      .orderBy(desc(conversationComments.createdAt));
+
+    // Check if user liked
+    let isLiked = false;
+    if (userId) {
+      const [like] = await db
+        .select()
+        .from(conversationLikes)
+        .where(
+          and(
+            eq(conversationLikes.conversationId, id),
+            eq(conversationLikes.userId, userId)
+          )
+        );
+      isLiked = !!like;
+    }
+
+    return {
+      ...result.conversation,
+      author: result.author,
+      comments: comments.map(c => ({ ...c.comment, author: c.author })),
+      isLiked
+    };
+  }
+
+  async updateConversation(id: string, userId: string, updates: {
+    content?: string;
+    tags?: string[];
+    isPublic?: boolean;
+    isPinned?: boolean;
+  }): Promise<any | undefined> {
+    // Check if user owns the conversation
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(and(eq(conversations.id, id), eq(conversations.authorId, userId)));
+
+    if (!conversation) return undefined;
+
+    const [updated] = await db
+      .update(conversations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(conversations.id, id))
+      .returning();
+
+    return updated;
+  }
+
+  async deleteConversation(id: string, userId: string): Promise<boolean> {
+    // Check if user owns the conversation
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(and(eq(conversations.id, id), eq(conversations.authorId, userId)));
+
+    if (!conversation) return false;
+
+    // Delete related data
+    await db.delete(conversationLikes).where(eq(conversationLikes.conversationId, id));
+    await db.delete(conversationComments).where(eq(conversationComments.conversationId, id));
+    await db.delete(conversationShares).where(eq(conversationShares.conversationId, id));
+    
+    // Delete conversation
+    const result = await db.delete(conversations).where(eq(conversations.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async toggleConversationLike(conversationId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
+    // Check if already liked
+    const [existingLike] = await db
+      .select()
+      .from(conversationLikes)
+      .where(
+        and(
+          eq(conversationLikes.conversationId, conversationId),
+          eq(conversationLikes.userId, userId)
+        )
+      );
+
+    if (existingLike) {
+      // Unlike
+      await db.delete(conversationLikes)
+        .where(
+          and(
+            eq(conversationLikes.conversationId, conversationId),
+            eq(conversationLikes.userId, userId)
+          )
+        );
+      
+      // Decrement count
+      await db.update(conversations)
+        .set({ likesCount: sql`${conversations.likesCount} - 1` })
+        .where(eq(conversations.id, conversationId));
+
+      const [conversation] = await db.select().from(conversations).where(eq(conversations.id, conversationId));
+      return { liked: false, likesCount: conversation.likesCount };
+    } else {
+      // Like
+      await db.insert(conversationLikes)
+        .values({ conversationId, userId });
+      
+      // Increment count
+      await db.update(conversations)
+        .set({ likesCount: sql`${conversations.likesCount} + 1` })
+        .where(eq(conversations.id, conversationId));
+
+      const [conversation] = await db.select().from(conversations).where(eq(conversations.id, conversationId));
+      return { liked: true, likesCount: conversation.likesCount };
+    }
+  }
+
+  async createConversationComment(data: {
+    conversationId: string;
+    userId: string;
+    content: string;
+    parentCommentId?: string;
+  }): Promise<any> {
+    const [comment] = await db
+      .insert(conversationComments)
+      .values(data)
+      .returning();
+
+    // Increment comments count on conversation
+    await db.update(conversations)
+      .set({ commentsCount: sql`${conversations.commentsCount} + 1` })
+      .where(eq(conversations.id, data.conversationId));
+
+    // Get author info
+    const author = await this.getUser(data.userId);
+    
+    return {
+      ...comment,
+      author: {
+        id: author?.id,
+        username: author?.username,
+        avatar: author?.avatar
+      }
+    };
+  }
+
+  async createConversationShare(data: {
+    conversationId: string;
+    userId: string;
+    platform: string;
+  }): Promise<any> {
+    const [share] = await db
+      .insert(conversationShares)
+      .values(data)
+      .returning();
+
+    // Increment shares count
+    await db.update(conversations)
+      .set({ sharesCount: sql`${conversations.sharesCount} + 1` })
+      .where(eq(conversations.id, data.conversationId));
+
+    return share;
   }
 }
 

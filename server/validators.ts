@@ -179,6 +179,45 @@ export const socialShareSchema = z.object({
   message: z.string().max(280).optional(),
 });
 
+// Conversation schemas
+export const createConversationSchema = z.object({
+  content: z.string().min(1, 'Content is required').max(5000, 'Content must be less than 5000 characters'),
+  imageUrl: z.string().url('Invalid image URL').optional().or(z.literal('').transform(() => undefined)),
+  tags: z.array(z.string().max(30)).max(10).optional(),
+  linkedSummaryId: z.string().uuid('Invalid summary ID').optional().or(z.literal('').transform(() => undefined)),
+  linkedMarketId: z.string().uuid('Invalid market ID').optional().or(z.literal('').transform(() => undefined)),
+  isPublic: z.boolean().default(true),
+});
+
+export const updateConversationSchema = z.object({
+  content: z.string().min(1).max(5000).optional(),
+  tags: z.array(z.string().max(30)).max(10).optional(),
+  isPublic: z.boolean().optional(),
+  isPinned: z.boolean().optional(),
+});
+
+export const conversationLikeSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID'),
+});
+
+export const conversationCommentSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID'),
+  content: z.string().min(1, 'Comment is required').max(1000, 'Comment must be less than 1000 characters'),
+  parentCommentId: z.string().uuid('Invalid comment ID').optional().or(z.literal('').transform(() => undefined)),
+});
+
+export const conversationShareSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID'),
+  platform: z.enum(['twitter', 'lens', 'farcaster', 'internal']).optional().default('internal'),
+});
+
+export const conversationFeedSchema = z.object({
+  tab: z.enum(['trending', 'for-you', 'following']).default('trending'),
+  topic: z.string().max(30).optional().or(z.literal('').transform(() => undefined)),
+  limit: z.coerce.number().min(1).max(50).default(20),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // Admin schemas
 export const adminUserUpdateSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
@@ -211,6 +250,13 @@ export type RecentActivityRequest = z.infer<typeof recentActivitySchema>;
 
 export type ProcessContentRequest = z.infer<typeof processContentSchema>;
 export type SocialShareRequest = z.infer<typeof socialShareSchema>;
+
+export type CreateConversationRequest = z.infer<typeof createConversationSchema>;
+export type UpdateConversationRequest = z.infer<typeof updateConversationSchema>;
+export type ConversationLikeRequest = z.infer<typeof conversationLikeSchema>;
+export type ConversationCommentRequest = z.infer<typeof conversationCommentSchema>;
+export type ConversationShareRequest = z.infer<typeof conversationShareSchema>;
+export type ConversationFeedRequest = z.infer<typeof conversationFeedSchema>;
 
 // Helper function for validation
 export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown): {
