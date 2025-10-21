@@ -1,40 +1,34 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Link } from 'wouter';
-import { 
-  TrendingUp, 
-  Target, 
-  FileText, 
-  BarChart3,
-  Trophy,
-  MessageSquare,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { SocialPost } from '@/components/social/SocialPost';
+import { PostCreationModal } from '@/components/social/PostCreationModal';
+import { useAuth } from '@/hooks/useAuth';
+import { Plus, Sparkles, TrendingUp } from 'lucide-react';
 
 interface FeedItem {
   id: string;
-  type: 'bounty' | 'market' | 'summary';
+  type: 'conversation' | 'bounty' | 'market' | 'summary';
   title: string;
-  description?: string;
-  category?: string;
-  tags?: string[];
+  content?: string;
+  author: {
+    id: string;
+    username: string;
+    avatar?: string;
+  };
   createdAt: string;
+  likesCount: number;
+  commentsCount: number;
+  isLiked?: boolean;
   metadata?: any;
 }
 
 export function DiscoverFeed() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'trending' | 'forYou' | 'following'>('trending');
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 12;
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Neural network background animation
   useEffect(() => {
@@ -48,14 +42,14 @@ export function DiscoverFeed() {
     canvas.height = canvas.offsetHeight;
 
     const nodes: Array<{ x: number; y: number; vx: number; vy: number }> = [];
-    const nodeCount = 30;
+    const nodeCount = 40;
 
     for (let i = 0; i < nodeCount; i++) {
       nodes.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
       });
     }
 
@@ -63,7 +57,6 @@ export function DiscoverFeed() {
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Update and draw nodes
       nodes.forEach((node, i) => {
         node.x += node.vx;
         node.y += node.vy;
@@ -78,9 +71,9 @@ export function DiscoverFeed() {
           const dy = node.y - otherNode.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 150) {
+          if (distance < 120) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(168, 85, 247, ${0.15 * (1 - distance / 150)})`;
+            ctx.strokeStyle = `rgba(168, 85, 247, ${0.1 * (1 - distance / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(otherNode.x, otherNode.y);
@@ -90,8 +83,8 @@ export function DiscoverFeed() {
 
         // Draw node
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(168, 85, 247, 0.6)';
+        ctx.arc(node.x, node.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
         ctx.fill();
       });
 
@@ -99,9 +92,21 @@ export function DiscoverFeed() {
     }
 
     animate();
+
+    const handleResize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch platform content
+  // Fetch all content types
+  const { data: conversations, isLoading: conversationsLoading } = useQuery<any>({
+    queryKey: ['/api/conversations'],
+  });
+
   const { data: bounties, isLoading: bountiesLoading } = useQuery<{ bounties: any[] }>({
     queryKey: ['/api/bounties'],
   });
@@ -114,105 +119,101 @@ export function DiscoverFeed() {
     queryKey: ['/api/summaries'],
   });
 
-  // Fetch topic filters with real counts
-  const { data: topicData } = useQuery<{ topics: Array<{ name: string; count: number }> }>({
-    queryKey: ['/api/content-topics'],
-  });
-
-  // Combine feed items
+  // Combine all feed items
   const feedItems: FeedItem[] = [];
 
+  // Add conversations
+  if (conversations?.conversations) {
+    feedItems.push(...conversations.conversations.map((c: any) => ({
+      id: c.id,
+      type: 'conversation' as const,
+      title: c.title,
+      content: c.content,
+      author: {
+        id: c.authorId || c.userId,
+        username: c.author?.username || 'Anonymous',
+        avatar: c.author?.avatar,
+      },
+      createdAt: c.createdAt,
+      likesCount: c.likesCount || 0,
+      commentsCount: c.commentsCount || 0,
+      isLiked: c.isLiked || false,
+    })));
+  }
+
+  // Add bounties
   if (bounties?.bounties) {
-    feedItems.push(...bounties.bounties.map(b => ({
+    feedItems.push(...bounties.bounties.map((b: any) => ({
       id: b.id,
       type: 'bounty' as const,
       title: b.title,
-      description: b.description,
-      category: b.category,
-      tags: b.tags,
+      content: b.description,
+      author: {
+        id: b.creatorId,
+        username: b.creator?.username || 'Anonymous',
+        avatar: b.creator?.avatar,
+      },
       createdAt: b.createdAt,
-      metadata: { reward: b.reward, status: b.status }
+      likesCount: 0,
+      commentsCount: 0,
+      metadata: { reward: b.reward, status: b.status },
     })));
   }
 
+  // Add markets
   if (markets?.markets) {
-    feedItems.push(...markets.markets.map(m => ({
+    feedItems.push(...markets.markets.map((m: any) => ({
       id: m.id,
       type: 'market' as const,
       title: m.question,
-      description: m.description,
-      category: m.category,
-      tags: m.tags,
+      content: m.description,
+      author: {
+        id: m.creatorId,
+        username: m.creator?.username || 'Anonymous',
+        avatar: m.creator?.avatar,
+      },
       createdAt: m.createdAt,
-      metadata: { yesPrice: m.yesPrice, volume: m.volume }
+      likesCount: 0,
+      commentsCount: 0,
+      metadata: { yesPrice: m.yesPrice, volume: m.totalVolume },
     })));
   }
 
+  // Add summaries
   if (summaries) {
-    feedItems.push(...summaries.map(s => ({
+    feedItems.push(...summaries.map((s: any) => ({
       id: s.id,
       type: 'summary' as const,
       title: s.title,
-      description: s.tldrSummary || s.description,
-      category: s.category || 'Content',
-      tags: s.tags,
+      content: s.tldrSummary || s.executiveSummary,
+      author: {
+        id: s.creatorId,
+        username: s.creator?.username || 'AI Hunter',
+        avatar: s.creator?.avatar,
+      },
       createdAt: s.createdAt,
-      metadata: { contentType: s.contentType }
+      likesCount: 0,
+      commentsCount: 0,
     })));
   }
 
+  // Sort by date
   const sortedFeed = feedItems.sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const filteredFeed = selectedTopic
-    ? sortedFeed.filter(item => 
-        item.category?.toLowerCase().includes(selectedTopic.toLowerCase()) ||
-        item.tags?.some(tag => tag.toLowerCase().includes(selectedTopic.toLowerCase()))
-      )
-    : sortedFeed;
-
-  const topics = topicData?.topics || [];
-  const totalPages = Math.ceil(filteredFeed.length / ITEMS_PER_PAGE);
-  const paginatedFeed = filteredFeed.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  const isLoading = bountiesLoading || marketsLoading || summariesLoading;
-
-  const getFeedItemIcon = (type: FeedItem['type']) => {
-    switch (type) {
-      case 'bounty':
-        return <Trophy className="w-4 h-4" />;
-      case 'market':
-        return <BarChart3 className="w-4 h-4" />;
-      case 'summary':
-        return <FileText className="w-4 h-4" />;
-    }
-  };
-
-  const getFeedItemLink = (item: FeedItem) => {
-    switch (item.type) {
-      case 'bounty':
-        return `/bounties/${item.id}`;
-      case 'market':
-        return `/markets/${item.id}`;
-      case 'summary':
-        return `/summaries/${item.id}`;
-    }
-  };
+  const isLoading = conversationsLoading || bountiesLoading || marketsLoading || summariesLoading;
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <section className="relative min-h-screen overflow-hidden">
       {/* Neural Network Background */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 opacity-40"
+        className="fixed inset-0 opacity-30 pointer-events-none"
         style={{ width: '100%', height: '100%' }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 py-16">
+      <div className="relative z-10 container mx-auto px-4 py-16 max-w-4xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -224,259 +225,127 @@ export function DiscoverFeed() {
             Discover
           </h2>
           <p className="text-gray-400">
-            Stay updated with the latest in crypto conversations
+            Join the conversation on crypto, bounties, and predictions
           </p>
         </motion.div>
 
-        <div className="flex gap-6">
-          {/* Main Feed Area */}
-          <div className="flex-1">
-            {/* Tabs */}
-            <div className="flex gap-1 mb-6 p-1 bg-purple-950/30 rounded-lg backdrop-blur-sm border border-purple-500/20">
-              <button
-                onClick={() => setActiveTab('trending')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                  activeTab === 'trending'
-                    ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-                data-testid="tab-trending"
-              >
-                Trending
-              </button>
-              <button
-                onClick={() => setActiveTab('forYou')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                  activeTab === 'forYou'
-                    ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-                data-testid="tab-for-you"
-              >
-                For You
-              </button>
-              <button
-                onClick={() => setActiveTab('following')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                  activeTab === 'following'
-                    ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-                data-testid="tab-following"
-              >
-                Following
-              </button>
-            </div>
-
-            {/* Topic Filters */}
-            {topics.length > 0 && (
-              <div className="mb-6 flex gap-2 flex-wrap">
-                <Button
-                  variant={selectedTopic === null ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => { setSelectedTopic(null); setCurrentPage(1); }}
-                  className={`rounded-full h-8 text-xs ${
-                    selectedTopic === null
-                      ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 border-0'
-                      : 'border-purple-500/30 hover:border-fuchsia-500/50'
-                  }`}
-                  data-testid="filter-all"
-                >
-                  All
-                </Button>
-                {topics.slice(0, 8).map(topic => (
-                  <Button
-                    key={topic.name}
-                    variant={selectedTopic === topic.name ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => { setSelectedTopic(topic.name); setCurrentPage(1); }}
-                    className={`rounded-full h-8 text-xs ${
-                      selectedTopic === topic.name
-                        ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 border-0'
-                        : 'border-purple-500/30 hover:border-fuchsia-500/50'
-                    }`}
-                    data-testid={`filter-${topic.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    {topic.name}
-                    {topic.count > 0 && (
-                      <span className="ml-1.5 px-1.5 py-0.5 bg-purple-900/50 rounded-full text-[10px]">
-                        {topic.count}
-                      </span>
-                    )}
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            {/* 3-Column Grid */}
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="bg-purple-950/20 border-purple-500/20 animate-pulse">
-                    <div className="p-4 space-y-3">
-                      <div className="h-4 bg-purple-800/30 rounded w-3/4"></div>
-                      <div className="h-3 bg-purple-800/20 rounded w-full"></div>
-                      <div className="h-3 bg-purple-800/20 rounded w-2/3"></div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {paginatedFeed.map((item, index) => (
-                    <Link key={item.id} href={getFeedItemLink(item)}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <Card className="bg-purple-950/20 backdrop-blur-sm border-purple-500/20 hover:border-fuchsia-500/40 transition-all duration-300 cursor-pointer group h-full">
-                          <div className="p-4">
-                            {/* Header */}
-                            <div className="flex items-start gap-2 mb-3">
-                              <div className="p-1.5 rounded bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border border-purple-500/20 group-hover:border-fuchsia-500/40 transition-colors">
-                                {getFeedItemIcon(item.type)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <Badge className="bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 border-purple-500/20 text-purple-300 text-[10px] px-1.5 py-0 h-5">
-                                  {item.type}
-                                </Badge>
-                              </div>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-fuchsia-400 transition-colors" data-testid={`feed-title-${item.type}-${item.id}`}>
-                              {item.title}
-                            </h3>
-
-                            {/* Description */}
-                            {item.description && (
-                              <p className="text-xs text-gray-400 mb-3 line-clamp-2">
-                                {item.description}
-                              </p>
-                            )}
-
-                            {/* Metadata */}
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                              <div className="flex items-center gap-2">
-                                {item.type === 'bounty' && (
-                                  <span className="text-fuchsia-400 font-semibold">
-                                    {item.metadata.reward} STREAM
-                                  </span>
-                                )}
-                                {item.type === 'market' && (
-                                  <span className="text-green-400">
-                                    YES: {Math.round(item.metadata.yesPrice * 100)}%
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-[10px]">
-                                {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
-                              </span>
-                            </div>
-
-                            {/* Tags */}
-                            {item.tags && item.tags.length > 0 && (
-                              <div className="flex gap-1 mt-2 flex-wrap">
-                                {item.tags.slice(0, 2).map(tag => (
-                                  <span key={tag} className="text-cyan-400 text-[10px]">
-                                    #{tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </Card>
-                      </motion.div>
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="border-purple-500/30 hover:border-fuchsia-500/50"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                    <div className="flex gap-1">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <Button
-                          key={i}
-                          variant={currentPage === i + 1 ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`w-8 h-8 p-0 ${
-                            currentPage === i + 1
-                              ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 border-0'
-                              : 'border-purple-500/30 hover:border-fuchsia-500/50'
-                          }`}
-                        >
-                          {i + 1}
-                        </Button>
-                      ))}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="border-purple-500/30 hover:border-fuchsia-500/50"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {filteredFeed.length === 0 && !isLoading && (
-              <Card className="bg-purple-950/20 border-purple-500/20 p-8 text-center">
-                <MessageSquare className="w-12 h-12 text-purple-400 mx-auto mb-3" />
-                <p className="text-gray-400">No content available yet. Check back soon!</p>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar - What's happening */}
-          <div className="hidden xl:block w-80">
-            <Card className="bg-purple-950/20 backdrop-blur-sm border-purple-500/20 sticky top-4">
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-fuchsia-400" />
-                  <h3 className="font-semibold text-white">What's happening</h3>
-                </div>
-                
-                {topics.slice(0, 5).map((topic, index) => (
-                  <button
-                    key={topic.name}
-                    onClick={() => { setSelectedTopic(topic.name); setCurrentPage(1); }}
-                    className="w-full text-left p-3 rounded-lg hover:bg-purple-900/30 transition-colors mb-2 group"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-semibold text-white group-hover:text-fuchsia-400 transition-colors">
-                        {topic.name}
-                      </span>
-                      <TrendingUp className="w-3 h-3 text-green-400" />
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span>{topic.count} posts</span>
-                      <span>•</span>
-                      <span>Trending</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-1 mb-6 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-purple-500/20">
+          <button
+            onClick={() => setActiveTab('trending')}
+            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'trending'
+                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+            data-testid="tab-trending"
+          >
+            <TrendingUp className="w-4 h-4 inline mr-1.5" />
+            Trending
+          </button>
+          <button
+            onClick={() => setActiveTab('forYou')}
+            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'forYou'
+                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+            data-testid="tab-for-you"
+          >
+            <Sparkles className="w-4 h-4 inline mr-1.5" />
+            For You
+          </button>
+          <button
+            onClick={() => setActiveTab('following')}
+            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'following'
+                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+            data-testid="tab-following"
+          >
+            Following
+          </button>
         </div>
+
+        {/* Feed */}
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-6 animate-pulse">
+                <div className="flex gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-purple-500/20 rounded w-1/3"></div>
+                    <div className="h-3 bg-purple-500/10 rounded w-1/4"></div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-purple-500/20 rounded w-3/4"></div>
+                  <div className="h-3 bg-purple-500/10 rounded w-full"></div>
+                  <div className="h-3 bg-purple-500/10 rounded w-2/3"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : sortedFeed.length > 0 ? (
+          <div className="space-y-4">
+            {sortedFeed.map((item) => (
+              <motion.div
+                key={`${item.type}-${item.id}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <SocialPost {...item} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
+              <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">No posts yet</h3>
+              <p className="text-gray-400 mb-4">
+                Be the first to start a conversation!
+              </p>
+              {isAuthenticated && (
+                <Button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Post
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Floating Action Button */}
+      {isAuthenticated && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="fixed bottom-8 right-8 z-50"
+        >
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            size="lg"
+            className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-fuchsia-500/50 transition-all"
+            data-testid="button-create-post"
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
+        </motion.div>
+      )}
+
+      {/* Post Creation Modal */}
+      <PostCreationModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+      />
     </section>
   );
 }
