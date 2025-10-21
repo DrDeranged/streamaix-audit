@@ -4,24 +4,16 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { SocialPost } from '@/components/social/SocialPost';
 import { PostCreationModal } from '@/components/social/PostCreationModal';
+import { CompactBountyCard, CompactMarketCard, CompactStoryCard, MacroDataCard } from '@/components/social/CompactCards';
 import { useAuth } from '@/hooks/useAuth';
 import { Plus, Sparkles, TrendingUp } from 'lucide-react';
 
 interface FeedItem {
   id: string;
-  type: 'conversation' | 'bounty' | 'market' | 'summary';
-  title: string;
-  content?: string;
-  author: {
-    id: string;
-    username: string;
-    avatar?: string;
-  };
-  createdAt: string;
-  likesCount: number;
-  commentsCount: number;
-  isLiked?: boolean;
-  metadata?: any;
+  type: 'conversation' | 'bounty' | 'market' | 'summary' | 'macro';
+  data: any;
+  score: number;
+  timestamp: number;
 }
 
 export function DiscoverFeed() {
@@ -119,89 +111,139 @@ export function DiscoverFeed() {
     queryKey: ['/api/summaries'],
   });
 
-  // Combine all feed items
-  const feedItems: FeedItem[] = [];
+  // Fetch live market data for macro cards
+  const { data: stockData } = useQuery({
+    queryKey: ['/api/stock-prices'],
+  });
 
-  // Add conversations
-  if (conversations?.conversations) {
-    feedItems.push(...conversations.conversations.map((c: any) => ({
-      id: c.id,
-      type: 'conversation' as const,
-      title: c.title,
-      content: c.content,
-      author: {
-        id: c.authorId || c.userId,
-        username: c.author?.username || 'Anonymous',
-        avatar: c.author?.avatar,
-      },
-      createdAt: c.createdAt,
-      likesCount: c.likesCount || 0,
-      commentsCount: c.commentsCount || 0,
-      isLiked: c.isLiked || false,
-    })));
-  }
+  // Build unified feed with all content types
+  const buildFeed = (): FeedItem[] => {
+    const feed: FeedItem[] = [];
 
-  // Add bounties
-  if (bounties?.bounties) {
-    feedItems.push(...bounties.bounties.map((b: any) => ({
-      id: b.id,
-      type: 'bounty' as const,
-      title: b.title,
-      content: b.description,
-      author: {
-        id: b.creatorId,
-        username: b.creator?.username || 'Anonymous',
-        avatar: b.creator?.avatar,
-      },
-      createdAt: b.createdAt,
-      likesCount: 0,
-      commentsCount: 0,
-      metadata: { reward: b.reward, status: b.status },
-    })));
-  }
+    // Add conversations
+    if (conversations?.conversations) {
+      conversations.conversations.forEach((c: any) => {
+        feed.push({
+          id: `conv-${c.id}`,
+          type: 'conversation',
+          data: {
+            id: c.id,
+            title: c.title,
+            content: c.content,
+            author: {
+              id: c.authorId || c.userId,
+              username: c.author?.username || 'Anonymous',
+              avatar: c.author?.avatar,
+            },
+            createdAt: c.createdAt,
+            likesCount: c.likesCount || 0,
+            commentsCount: c.commentsCount || 0,
+            isLiked: c.isLiked || false,
+          },
+          score: (c.likesCount || 0) * 2 + (c.commentsCount || 0) * 3,
+          timestamp: new Date(c.createdAt).getTime(),
+        });
+      });
+    }
 
-  // Add markets
-  if (markets?.markets) {
-    feedItems.push(...markets.markets.map((m: any) => ({
-      id: m.id,
-      type: 'market' as const,
-      title: m.question,
-      content: m.description,
-      author: {
-        id: m.creatorId,
-        username: m.creator?.username || 'Anonymous',
-        avatar: m.creator?.avatar,
-      },
-      createdAt: m.createdAt,
-      likesCount: 0,
-      commentsCount: 0,
-      metadata: { yesPrice: m.yesPrice, volume: m.totalVolume },
-    })));
-  }
+    // Add bounties (compact cards)
+    if (bounties?.bounties) {
+      bounties.bounties.slice(0, 8).forEach((b: any) => {
+        feed.push({
+          id: `bounty-${b.id}`,
+          type: 'bounty',
+          data: b,
+          score: (b.reward || 0) / 10 + (b.status === 'open' ? 50 : 0),
+          timestamp: new Date(b.createdAt).getTime(),
+        });
+      });
+    }
 
-  // Add summaries
-  if (summaries) {
-    feedItems.push(...summaries.map((s: any) => ({
-      id: s.id,
-      type: 'summary' as const,
-      title: s.title,
-      content: s.tldrSummary || s.executiveSummary,
-      author: {
-        id: s.creatorId,
-        username: s.creator?.username || 'AI Hunter',
-        avatar: s.creator?.avatar,
-      },
-      createdAt: s.createdAt,
-      likesCount: 0,
-      commentsCount: 0,
-    })));
-  }
+    // Add markets (compact cards)
+    if (markets?.markets) {
+      markets.markets.slice(0, 8).forEach((m: any) => {
+        feed.push({
+          id: `market-${m.id}`,
+          type: 'market',
+          data: m,
+          score: (m.totalVolume || 0) / 100 + Math.abs(m.yesPrice - 0.5) * 100,
+          timestamp: new Date(m.createdAt).getTime(),
+        });
+      });
+    }
 
-  // Sort by date
-  const sortedFeed = feedItems.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+    // Add summaries (compact story cards)
+    if (summaries) {
+      summaries.slice(0, 6).forEach((s: any) => {
+        feed.push({
+          id: `summary-${s.id}`,
+          type: 'summary',
+          data: s,
+          score: 30,
+          timestamp: new Date(s.createdAt).getTime(),
+        });
+      });
+    }
 
+    // Add macro/crypto data cards
+    if (stockData?.prices) {
+      const topAssets = ['BTC', 'ETH', 'SPY', 'QQQ'];
+      topAssets.forEach((symbol, idx) => {
+        const assetData = stockData.prices[symbol];
+        if (assetData) {
+          feed.push({
+            id: `macro-${symbol}`,
+            type: 'macro',
+            data: {
+              symbol,
+              name: assetData.name || symbol,
+              price: assetData.price || 0,
+              change: assetData.change || 0,
+              changePercent: assetData.changePercent || 0,
+            },
+            score: 40 - idx * 5, // Prioritize BTC/ETH
+            timestamp: Date.now(),
+          });
+        }
+      });
+    }
+
+    // Sort by score and recency
+    return feed.sort((a, b) => {
+      const scoreWeight = 0.7;
+      const timeWeight = 0.3;
+      const scoreA = a.score * scoreWeight + (a.timestamp / 1000000) * timeWeight;
+      const scoreB = b.score * scoreWeight + (b.timestamp / 1000000) * timeWeight;
+      return scoreB - scoreA;
+    });
+  };
+
+  // Interleave macro cards every 4-5 items
+  const interleaveContent = (items: FeedItem[]): FeedItem[] => {
+    const macroCards = items.filter(item => item.type === 'macro');
+    const otherCards = items.filter(item => item.type !== 'macro');
+    const result: FeedItem[] = [];
+
+    let macroIndex = 0;
+    otherCards.forEach((item, idx) => {
+      result.push(item);
+      // Insert macro card every 4 items
+      if ((idx + 1) % 4 === 0 && macroIndex < macroCards.length) {
+        result.push(macroCards[macroIndex]);
+        macroIndex++;
+      }
+    });
+
+    // Add remaining macro cards at the end
+    while (macroIndex < macroCards.length) {
+      result.push(macroCards[macroIndex]);
+      macroIndex++;
+    }
+
+    return result;
+  };
+
+  const feedItems = interleaveContent(buildFeed());
   const isLoading = conversationsLoading || bountiesLoading || marketsLoading || summariesLoading;
 
   return (
@@ -213,7 +255,7 @@ export function DiscoverFeed() {
         style={{ width: '100%', height: '100%' }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 py-16 max-w-4xl">
+      <div className="relative z-10 container mx-auto px-4 py-16 max-w-3xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -224,8 +266,8 @@ export function DiscoverFeed() {
           <h2 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
             Discover
           </h2>
-          <p className="text-gray-400">
-            Join the conversation on crypto, bounties, and predictions
+          <p className="text-gray-400 text-sm">
+            Live feed of bounties, predictions, stories, and market data
           </p>
         </motion.div>
 
@@ -233,31 +275,31 @@ export function DiscoverFeed() {
         <div className="flex gap-1 mb-6 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-purple-500/20">
           <button
             onClick={() => setActiveTab('trending')}
-            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'trending'
                 ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
             data-testid="tab-trending"
           >
-            <TrendingUp className="w-4 h-4 inline mr-1.5" />
+            <TrendingUp className="w-3.5 h-3.5 inline mr-1.5" />
             Trending
           </button>
           <button
             onClick={() => setActiveTab('forYou')}
-            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'forYou'
                 ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
             data-testid="tab-for-you"
           >
-            <Sparkles className="w-4 h-4 inline mr-1.5" />
+            <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
             For You
           </button>
           <button
             onClick={() => setActiveTab('following')}
-            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'following'
                 ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -270,34 +312,68 @@ export function DiscoverFeed() {
 
         {/* Feed */}
         {isLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-6 animate-pulse">
-                <div className="flex gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-purple-500/20"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-purple-500/20 rounded w-1/3"></div>
-                    <div className="h-3 bg-purple-500/10 rounded w-1/4"></div>
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-3 animate-pulse">
+                <div className="flex gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/20"></div>
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 bg-purple-500/20 rounded w-1/3"></div>
+                    <div className="h-2.5 bg-purple-500/10 rounded w-1/4"></div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-purple-500/20 rounded w-3/4"></div>
-                  <div className="h-3 bg-purple-500/10 rounded w-full"></div>
-                  <div className="h-3 bg-purple-500/10 rounded w-2/3"></div>
+                <div className="space-y-1.5">
+                  <div className="h-3 bg-purple-500/20 rounded w-3/4"></div>
+                  <div className="h-2.5 bg-purple-500/10 rounded w-full"></div>
+                  <div className="h-2.5 bg-purple-500/10 rounded w-2/3"></div>
                 </div>
               </div>
             ))}
           </div>
-        ) : sortedFeed.length > 0 ? (
-          <div className="space-y-4">
-            {sortedFeed.map((item) => (
+        ) : feedItems.length > 0 ? (
+          <div className="space-y-3">
+            {feedItems.map((item) => (
               <motion.div
-                key={`${item.type}-${item.id}`}
-                initial={{ opacity: 0, y: 20 }}
+                key={item.id}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <SocialPost {...item} />
+                {item.type === 'conversation' && (
+                  <SocialPost {...item.data} type="conversation" />
+                )}
+                {item.type === 'bounty' && (
+                  <CompactBountyCard
+                    id={item.data.id}
+                    title={item.data.title}
+                    reward={item.data.reward}
+                    status={item.data.status}
+                    createdAt={item.data.createdAt}
+                    creator={item.data.creator}
+                  />
+                )}
+                {item.type === 'market' && (
+                  <CompactMarketCard
+                    id={item.data.id}
+                    question={item.data.question}
+                    yesPrice={item.data.yesPrice}
+                    totalVolume={item.data.totalVolume}
+                    createdAt={item.data.createdAt}
+                  />
+                )}
+                {item.type === 'summary' && (
+                  <CompactStoryCard
+                    id={item.data.id}
+                    title={item.data.title}
+                    summary={item.data.tldrSummary || item.data.executiveSummary || 'No summary available'}
+                    thumbnailUrl={item.data.thumbnailUrl}
+                    createdAt={item.data.createdAt}
+                    creator={item.data.creator}
+                  />
+                )}
+                {item.type === 'macro' && (
+                  <MacroDataCard {...item.data} />
+                )}
               </motion.div>
             ))}
           </div>

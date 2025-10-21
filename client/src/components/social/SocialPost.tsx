@@ -165,21 +165,21 @@ export function SocialPost({
 
   return (
     <Card className="bg-white/5 dark:bg-white/5 backdrop-blur-md border border-purple-500/20 hover:border-fuchsia-500/40 transition-all duration-300">
-      <div className="p-4">
+      <div className="p-3">
         {/* Header - Author Info */}
-        <div className="flex items-start gap-3 mb-3">
+        <div className="flex items-start gap-2 mb-2">
           <Link href={`/hunter/${author.id}`}>
-            <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-purple-500/20 hover:ring-fuchsia-500/40 transition-all">
-              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-sm">
+            <Avatar className="w-8 h-8 cursor-pointer ring-2 ring-purple-500/20 hover:ring-fuchsia-500/40 transition-all">
+              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-xs">
                 {author.username.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </Link>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Link href={`/hunter/${author.id}`}>
-                <span className="font-semibold text-white hover:text-fuchsia-400 transition-colors cursor-pointer" data-testid={`post-author-${id}`}>
+                <span className="text-sm font-semibold text-white hover:text-fuchsia-400 transition-colors cursor-pointer" data-testid={`post-author-${id}`}>
                   @{author.username}
                 </span>
               </Link>
@@ -187,7 +187,7 @@ export function SocialPost({
               <span className="text-gray-500 text-xs" data-testid={`post-time-${id}`}>
                 {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
               </span>
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
+              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
                 {getTypeIcon()}
                 <span className="text-xs text-purple-300 capitalize">{type}</span>
               </div>
@@ -197,12 +197,12 @@ export function SocialPost({
 
         {/* Post Content */}
         <Link href={getPostLink()}>
-          <div className="mb-3 cursor-pointer">
-            <h3 className="text-base font-semibold text-white mb-2 hover:text-fuchsia-400 transition-colors" data-testid={`post-title-${id}`}>
+          <div className="mb-2 cursor-pointer">
+            <h3 className="text-sm font-semibold text-white mb-1 hover:text-fuchsia-400 transition-colors" data-testid={`post-title-${id}`}>
               {title}
             </h3>
             {content && (
-              <p className="text-sm text-gray-300 line-clamp-3" data-testid={`post-content-${id}`}>
+              <p className="text-xs text-gray-300 line-clamp-2" data-testid={`post-content-${id}`}>
                 {content}
               </p>
             )}
@@ -211,17 +211,17 @@ export function SocialPost({
 
         {/* Metadata */}
         {metadata && (
-          <div className="mb-3 p-2 rounded-lg bg-purple-500/5 border border-purple-500/10">
+          <div className="mb-2 p-1.5 rounded-lg bg-purple-500/5 border border-purple-500/10">
             {type === 'bounty' && (
-              <div className="flex items-center gap-2 text-sm">
-                <Trophy className="w-4 h-4 text-fuchsia-400" />
+              <div className="flex items-center gap-2 text-xs">
+                <Trophy className="w-3 h-3 text-fuchsia-400" />
                 <span className="text-fuchsia-400 font-semibold">{metadata.reward} STREAM</span>
                 <span className="text-gray-500">•</span>
                 <span className="text-gray-400 capitalize">{metadata.status}</span>
               </div>
             )}
             {type === 'market' && (
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-3 text-xs">
                 <div className="flex items-center gap-1">
                   <span className="text-green-400">YES: {Math.round((metadata.yesPrice || 0.5) * 100)}%</span>
                 </div>
@@ -234,23 +234,23 @@ export function SocialPost({
         )}
 
         {/* Engagement Bar */}
-        <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
+        <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
           <span data-testid={`post-likes-${id}`}>{likesCount} likes</span>
           <span>•</span>
           <span data-testid={`post-comments-${id}`}>{initialCommentsCount} comments</span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 pb-3 border-b border-purple-500/10">
+        <div className="flex items-center gap-1 pb-2 border-b border-purple-500/10">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleLike}
             disabled={likeMutation.isPending}
-            className={`flex-1 gap-2 ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500 transition-colors`}
+            className={`flex-1 gap-1.5 h-8 text-xs ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500 transition-colors`}
             data-testid={`button-like-${id}`}
           >
-            <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+            <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
             Like
           </Button>
           
@@ -258,20 +258,20 @@ export function SocialPost({
             variant="ghost"
             size="sm"
             onClick={() => setShowComments(!showComments)}
-            className="flex-1 gap-2 text-gray-400 hover:text-cyan-500 transition-colors"
+            className="flex-1 gap-1.5 h-8 text-xs text-gray-400 hover:text-cyan-500 transition-colors"
             data-testid={`button-comment-${id}`}
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-3.5 h-3.5" />
             Comment
           </Button>
           
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1 gap-2 text-gray-400 hover:text-purple-500 transition-colors"
+            className="flex-1 gap-1.5 h-8 text-xs text-gray-400 hover:text-purple-500 transition-colors"
             data-testid={`button-share-${id}`}
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-3.5 h-3.5" />
             Share
           </Button>
           
