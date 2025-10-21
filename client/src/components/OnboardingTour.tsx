@@ -28,7 +28,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence",
     description: "StreamAiX combines AI-powered content processing, prediction markets, institutional-grade analytics, and gamified bounties on the Base network. Turn content into markets, earn tokens, and access real-time intelligence—all on-chain.",
     icon: Sparkles,
-    gradient: "from-purple-500 via-pink-500 to-cyan-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Navigate through each feature by clicking 'Next'",
       "Visit actual pages with 'Try It' buttons",
@@ -64,7 +64,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Trade on Future Outcomes with Real Money",
     description: "Binary YES/NO markets powered by smart contracts on Base. AMM-based pricing, real-time trading, and automated settlement. Create markets from AI summaries or trade on community predictions.",
     icon: TrendingUp,
-    gradient: "from-green-500 via-teal-500 to-cyan-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Browse crypto, DeFi, and real-world event markets",
       "Buy YES/NO positions with instant pricing",
@@ -83,7 +83,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Institutional-Grade Market Intelligence",
     description: "Access 9 analytics categories with 67+ live endpoints. AI trading signals, volatility forecasting, pattern recognition, and cross-market correlations. 3-tier API fallback ensures uninterrupted data flow.",
     icon: BarChart3,
-    gradient: "from-blue-500 via-purple-500 to-pink-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Explore volatility forecasting with ML models",
       "View AI-powered Smart Insights with confidence scores",
@@ -102,7 +102,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Your Personal Investment & Platform Guide",
     description: "GPT-4o powered assistant providing platform help, investment insights, market analysis, and personalized recommendations. Ask anything about features, strategies, or crypto trends.",
     icon: Bot,
-    gradient: "from-pink-500 via-rose-500 to-red-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Type questions in natural language",
       "Get platform help: 'How do bounties work?'",
@@ -121,7 +121,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Your Summaries, Markets & Portfolio",
     description: "Track all your created summaries, active prediction market positions, bounty progress, and earnings in one place. Monitor your knowledge assets, P&L, and Web3 reputation.",
     icon: Crown,
-    gradient: "from-amber-500 via-yellow-500 to-orange-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "View all your AI summaries and NFTs",
       "Track prediction market positions and P&L",
@@ -140,7 +140,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Connect & Share Across Web3",
     description: "Link Twitter, Lens Protocol, and Farcaster accounts. Share summaries across platforms, build Web3 reputation, and engage with decentralized social networks—all with one click.",
     icon: Share2,
-    gradient: "from-sky-500 via-blue-500 to-indigo-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Connect Twitter via OAuth for social sharing",
       "Link Lens Protocol for Web3 social graph",
@@ -159,7 +159,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Earn STREAM, ETH & USDC for Contributions",
     description: "Complete tasks, create content, and contribute to the ecosystem. Gamified with reputation levels, badges, streaks, and AI-powered quality scoring. Multi-token rewards distributed instantly.",
     icon: Coins,
-    gradient: "from-yellow-500 via-orange-500 to-red-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Browse available bounties sorted by reward",
       "Accept tasks that match your skills",
@@ -178,7 +178,7 @@ const steps: OnboardingStep[] = [
     subtitle: "On-Chain Ownership & DeFi Features",
     description: "Connect your Web3 wallet to unlock decentralized features. Own knowledge assets as NFTs, participate in staking, trade on Base network, and manage your STREAM tokens.",
     icon: Wallet,
-    gradient: "from-orange-500 via-amber-500 to-yellow-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Click 'Connect Wallet' in the navbar",
       "Approve MetaMask or WalletConnect request",
@@ -197,7 +197,7 @@ const steps: OnboardingStep[] = [
     subtitle: "Start Building Your Web3 Empire",
     description: "You've completed the StreamAiX tour! Create AI summaries, launch prediction markets, earn through bounties, access analytics, and build your decentralized portfolio. Let's go!",
     icon: Rocket,
-    gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Install StreamAiX as a PWA on any device",
       "Create your first AI summary and market",
