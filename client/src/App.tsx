@@ -24,7 +24,6 @@ const Web3WalletPage = React.lazy(() => import("@/pages/web3-wallet"));
 const DeFiDashboard = React.lazy(() => import("@/pages/defi-dashboard"));
 const NFTGallery = React.lazy(() => import("@/pages/nft-gallery"));
 const GovernancePage = React.lazy(() => import("@/pages/governance"));
-const SocialTradingPage = React.lazy(() => import("@/pages/social-trading"));
 const BountyBoard = React.lazy(() => import("@/pages/bounty-board"));
 const BountyDetail = React.lazy(() => import("@/pages/bounty-detail"));
 const Leaderboard = React.lazy(() => import("@/pages/leaderboard"));
@@ -34,7 +33,6 @@ const ProcessingResults = React.lazy(() => import("@/pages/processing-results"))
 const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
 const AvatarProfile = React.lazy(() => import("@/pages/avatar-profile"));
 const InsightsDashboard = React.lazy(() => import("@/pages/InsightsDashboard"));
-const AIDiscovery = React.lazy(() => import("@/pages/DiscoveryPage"));
 const AnalyticsDashboard = React.lazy(() => import("@/pages/AnalyticsDashboard"));
 const Markets = React.lazy(() => import("@/pages/markets"));
 const PredictionMarket = React.lazy(() => import("@/pages/prediction-market"));
@@ -89,12 +87,6 @@ function Router() {
         </Suspense>
       </Route>
       
-      <Route path="/social-trading">
-        <Suspense fallback={<TradingSkeleton />}>
-          <SocialTradingPage />
-        </Suspense>
-      </Route>
-      
       <Route path="/bounties">
         <Suspense fallback={<DashboardSkeleton />}>
           <BountyBoard />
@@ -134,12 +126,6 @@ function Router() {
       <Route path="/insights">
         <Suspense fallback={<DashboardSkeleton />}>
           <InsightsDashboard />
-        </Suspense>
-      </Route>
-      
-      <Route path="/ai-discovery">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <AIDiscovery />
         </Suspense>
       </Route>
       

@@ -1,11 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { CommentSection } from '@/components/comments/CommentSection';
 import { Link } from 'wouter';
 import { 
   TrendingUp, 
@@ -13,50 +11,107 @@ import {
   FileText, 
   BarChart3,
   Trophy,
-  Eye,
   MessageSquare,
-  Heart,
-  Calendar,
-  ExternalLink
+  ChevronLeft,
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface FeedItem {
   id: string;
-  type: 'bounty' | 'market' | 'summary' | 'news';
+  type: 'bounty' | 'market' | 'summary';
   title: string;
   description?: string;
-  content?: string;
-  excerpt?: string;
   category?: string;
   tags?: string[];
   createdAt: string;
-  author?: { id: string; username: string; avatar?: string };
-  imageUrl?: string;
-  url?: string;
   metadata?: any;
 }
 
 export function DiscoverFeed() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeTab, setActiveTab] = useState<'trending' | 'forYou' | 'following'>('trending');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
+
+  // Neural network background animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const nodes: Array<{ x: number; y: number; vx: number; vy: number }> = [];
+    const nodeCount = 30;
+
+    for (let i = 0; i < nodeCount; i++) {
+      nodes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+      });
+    }
+
+    function animate() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update and draw nodes
+      nodes.forEach((node, i) => {
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+
+        // Draw connections
+        nodes.forEach((otherNode, j) => {
+          if (i === j) return;
+          const dx = node.x - otherNode.x;
+          const dy = node.y - otherNode.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 150) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(168, 85, 247, ${0.15 * (1 - distance / 150)})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(otherNode.x, otherNode.y);
+            ctx.stroke();
+          }
+        });
+
+        // Draw node
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.6)';
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  }, []);
 
   // Fetch platform content
-  const { data: bounties } = useQuery<{ bounties: any[] }>({
+  const { data: bounties, isLoading: bountiesLoading } = useQuery<{ bounties: any[] }>({
     queryKey: ['/api/bounties'],
   });
 
-  const { data: markets } = useQuery<{ markets: any[] }>({
+  const { data: markets, isLoading: marketsLoading } = useQuery<{ markets: any[] }>({
     queryKey: ['/api/prediction-markets'],
   });
 
-  const { data: summaries } = useQuery<any[]>({
+  const { data: summaries, isLoading: summariesLoading } = useQuery<any[]>({
     queryKey: ['/api/summaries'],
-  });
-
-  // Fetch crypto news
-  const { data: newsData } = useQuery<{ articles: any[] }>({
-    queryKey: ['/api/crypto-news'],
   });
 
   // Fetch topic filters with real counts
@@ -73,7 +128,6 @@ export function DiscoverFeed() {
       type: 'bounty' as const,
       title: b.title,
       description: b.description,
-      excerpt: b.description?.slice(0, 200) + '...',
       category: b.category,
       tags: b.tags,
       createdAt: b.createdAt,
@@ -87,7 +141,6 @@ export function DiscoverFeed() {
       type: 'market' as const,
       title: m.question,
       description: m.description,
-      excerpt: m.description?.slice(0, 200) + '...',
       category: m.category,
       tags: m.tags,
       createdAt: m.createdAt,
@@ -101,29 +154,10 @@ export function DiscoverFeed() {
       type: 'summary' as const,
       title: s.title,
       description: s.tldrSummary || s.description,
-      excerpt: (s.tldrSummary || s.description)?.slice(0, 200) + '...',
       category: s.category || 'Content',
       tags: s.tags,
       createdAt: s.createdAt,
-      imageUrl: s.thumbnailUrl,
       metadata: { contentType: s.contentType }
-    })));
-  }
-
-  if (newsData?.articles) {
-    feedItems.push(...newsData.articles.map((article, index) => ({
-      id: `news-${index}`,
-      type: 'news' as const,
-      title: article.title,
-      description: article.description || article.summary,
-      excerpt: (article.description || article.summary)?.slice(0, 200) + '...',
-      category: 'Crypto News',
-      tags: article.tags || [],
-      createdAt: article.publishedAt || article.pubDate,
-      imageUrl: article.imageUrl || article.image,
-      url: article.url || article.link,
-      author: article.source ? { id: 'news', username: article.source, avatar: undefined } : undefined,
-      metadata: { source: article.source }
     })));
   }
 
@@ -139,22 +173,26 @@ export function DiscoverFeed() {
     : sortedFeed;
 
   const topics = topicData?.topics || [];
+  const totalPages = Math.ceil(filteredFeed.length / ITEMS_PER_PAGE);
+  const paginatedFeed = filteredFeed.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const isLoading = bountiesLoading || marketsLoading || summariesLoading;
 
   const getFeedItemIcon = (type: FeedItem['type']) => {
     switch (type) {
       case 'bounty':
-        return <Trophy className="w-5 h-5 text-fuchsia-400" />;
+        return <Trophy className="w-4 h-4" />;
       case 'market':
-        return <BarChart3 className="w-5 h-5 text-cyan-400" />;
+        return <BarChart3 className="w-4 h-4" />;
       case 'summary':
-        return <FileText className="w-5 h-5 text-purple-400" />;
-      case 'news':
-        return <TrendingUp className="w-5 h-5 text-green-400" />;
+        return <FileText className="w-4 h-4" />;
     }
   };
 
   const getFeedItemLink = (item: FeedItem) => {
-    if (item.type === 'news') return null;
     switch (item.type) {
       case 'bounty':
         return `/bounties/${item.id}`;
@@ -166,40 +204,41 @@ export function DiscoverFeed() {
   };
 
   return (
-    <section className="relative py-24 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Neural Network Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_50%)]" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-      </div>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 opacity-40"
+        style={{ width: '100%', height: '100%' }}
+      />
 
-      <div className="relative z-10 container mx-auto px-4">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            Social
+          <h2 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+            Discover
           </h2>
-          <p className="text-gray-400 text-lg">
-            Stay updated with the latest in crypto conversations, bounties, and predictions
+          <p className="text-gray-400">
+            Stay updated with the latest in crypto conversations
           </p>
         </motion.div>
 
-        <div className="max-w-6xl mx-auto">
-          <Card className="neural-glass border-purple-500/30 overflow-hidden mb-8">
+        <div className="flex gap-6">
+          {/* Main Feed Area */}
+          <div className="flex-1">
             {/* Tabs */}
-            <div className="flex border-b border-purple-500/20">
+            <div className="flex gap-1 mb-6 p-1 bg-purple-950/30 rounded-lg backdrop-blur-sm border border-purple-500/20">
               <button
                 onClick={() => setActiveTab('trending')}
-                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   activeTab === 'trending'
-                    ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
-                    : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
+                    ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white'
+                    : 'text-gray-400 hover:text-white'
                 }`}
                 data-testid="tab-trending"
               >
@@ -207,10 +246,10 @@ export function DiscoverFeed() {
               </button>
               <button
                 onClick={() => setActiveTab('forYou')}
-                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   activeTab === 'forYou'
-                    ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
-                    : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
+                    ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white'
+                    : 'text-gray-400 hover:text-white'
                 }`}
                 data-testid="tab-for-you"
               >
@@ -218,10 +257,10 @@ export function DiscoverFeed() {
               </button>
               <button
                 onClick={() => setActiveTab('following')}
-                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   activeTab === 'following'
-                    ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
-                    : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
+                    ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white'
+                    : 'text-gray-400 hover:text-white'
                 }`}
                 data-testid="tab-following"
               >
@@ -231,183 +270,210 @@ export function DiscoverFeed() {
 
             {/* Topic Filters */}
             {topics.length > 0 && (
-              <div className="p-4 border-b border-purple-500/20">
-                <div className="flex gap-2 flex-wrap">
+              <div className="mb-6 flex gap-2 flex-wrap">
+                <Button
+                  variant={selectedTopic === null ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => { setSelectedTopic(null); setCurrentPage(1); }}
+                  className={`rounded-full h-8 text-xs ${
+                    selectedTopic === null
+                      ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 border-0'
+                      : 'border-purple-500/30 hover:border-fuchsia-500/50'
+                  }`}
+                  data-testid="filter-all"
+                >
+                  All
+                </Button>
+                {topics.slice(0, 8).map(topic => (
                   <Button
-                    variant={selectedTopic === null ? 'default' : 'outline'}
+                    key={topic.name}
+                    variant={selectedTopic === topic.name ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setSelectedTopic(null)}
-                    className="rounded-full"
-                    data-testid="filter-all"
+                    onClick={() => { setSelectedTopic(topic.name); setCurrentPage(1); }}
+                    className={`rounded-full h-8 text-xs ${
+                      selectedTopic === topic.name
+                        ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 border-0'
+                        : 'border-purple-500/30 hover:border-fuchsia-500/50'
+                    }`}
+                    data-testid={`filter-${topic.name.toLowerCase().replace(/\s+/g, '-')}`}
                   >
-                    All
+                    {topic.name}
+                    {topic.count > 0 && (
+                      <span className="ml-1.5 px-1.5 py-0.5 bg-purple-900/50 rounded-full text-[10px]">
+                        {topic.count}
+                      </span>
+                    )}
                   </Button>
-                  {topics.map(topic => (
-                    <Button
-                      key={topic.name}
-                      variant={selectedTopic === topic.name ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedTopic(topic.name)}
-                      className="rounded-full"
-                      data-testid={`filter-${topic.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {topic.name}
-                      {topic.count > 0 && (
-                        <span className="ml-2 text-xs opacity-60">{topic.count}</span>
-                      )}
-                    </Button>
-                  ))}
-                </div>
+                ))}
               </div>
             )}
-          </Card>
 
-          {/* Feed Items - Blog Style */}
-          <div className="space-y-6">
-            <AnimatePresence mode="popLayout">
-              {filteredFeed.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="neural-glass border-purple-500/30 hover:border-fuchsia-500/50 transition-all duration-300 overflow-hidden group">
-                    <div className="md:flex">
-                      {/* Image */}
-                      {item.imageUrl && (
-                        <div className="md:w-1/3 h-48 md:h-auto bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex-shrink-0">
-                          <img
-                            src={item.imageUrl}
-                            alt={item.title}
-                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                          />
-                        </div>
-                      )}
-
-                      {/* Content */}
-                      <div className="p-6 flex-1">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border border-purple-500/20">
-                            {getFeedItemIcon(item.type)}
-                          </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 border-purple-500/30 text-purple-300 text-xs">
-                              {item.type}
-                            </Badge>
-                            {item.category && (
-                              <Badge variant="outline" className="border-cyan-500/30 text-cyan-300 text-xs">
-                                {item.category}
-                              </Badge>
-                            )}
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Calendar className="w-3 h-3" />
-                              {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Title */}
-                        {item.type === 'news' && item.url ? (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block group"
-                          >
-                            <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-fuchsia-400 transition-colors flex items-center gap-2">
-                              {item.title}
-                              <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </h3>
-                          </a>
-                        ) : (
-                          <Link href={getFeedItemLink(item) || '#'}>
-                            <h3 className="text-xl font-semibold text-white mb-2 hover:text-fuchsia-400 transition-colors cursor-pointer" data-testid={`feed-title-${item.type}-${item.id}`}>
-                              {item.title}
-                            </h3>
-                          </Link>
-                        )}
-
-                        {/* Excerpt */}
-                        {item.excerpt && (
-                          <p className="text-gray-400 mb-4 line-clamp-3">{item.excerpt}</p>
-                        )}
-
-                        {/* Tags */}
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="flex gap-2 flex-wrap mb-4">
-                            {item.tags.slice(0, 5).map(tag => (
-                              <span key={tag} className="text-cyan-400 text-xs">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Metadata */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            {item.type === 'bounty' && (
-                              <div className="flex items-center gap-1 text-fuchsia-400 font-semibold">
-                                <Trophy className="w-4 h-4" />
-                                {item.metadata.reward} STREAM
-                              </div>
-                            )}
-                            {item.type === 'market' && (
-                              <>
-                                <span className="text-green-400">
-                                  YES: {Math.round(item.metadata.yesPrice * 100)}%
-                                </span>
-                                <span className="text-red-400">
-                                  NO: {Math.round((1 - item.metadata.yesPrice) * 100)}%
-                                </span>
-                              </>
-                            )}
-                            {item.author && (
-                              <div className="flex items-center gap-2">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarImage src={item.author.avatar} />
-                                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-xs">
-                                    {item.author.username.charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="text-gray-400 text-xs">{item.author.username}</span>
-                              </div>
-                            )}
-                          </div>
-
-                        </div>
-
-                        {/* Comments Section - Only for platform content */}
-                        {item.type !== 'news' && (
-                          <div className="mt-6 pt-6 border-t border-purple-500/20">
-                            <CommentSection
-                              entityType={item.type}
-                              entityId={item.id}
-                            />
-                          </div>
-                        )}
-                      </div>
+            {/* 3-Column Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="bg-purple-950/20 border-purple-500/20 animate-pulse">
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-purple-800/30 rounded w-3/4"></div>
+                      <div className="h-3 bg-purple-800/20 rounded w-full"></div>
+                      <div className="h-3 bg-purple-800/20 rounded w-2/3"></div>
                     </div>
                   </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {paginatedFeed.map((item, index) => (
+                    <Link key={item.id} href={getFeedItemLink(item)}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <Card className="bg-purple-950/20 backdrop-blur-sm border-purple-500/20 hover:border-fuchsia-500/40 transition-all duration-300 cursor-pointer group h-full">
+                          <div className="p-4">
+                            {/* Header */}
+                            <div className="flex items-start gap-2 mb-3">
+                              <div className="p-1.5 rounded bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border border-purple-500/20 group-hover:border-fuchsia-500/40 transition-colors">
+                                {getFeedItemIcon(item.type)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <Badge className="bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 border-purple-500/20 text-purple-300 text-[10px] px-1.5 py-0 h-5">
+                                  {item.type}
+                                </Badge>
+                              </div>
+                            </div>
 
-            {filteredFeed.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-12"
-              >
-                <Card className="neural-glass border-purple-500/30 p-8">
-                  <MessageSquare className="w-12 h-12 text-purple-400 mx-auto mb-3" />
-                  <p className="text-gray-400">No content available yet. Check back soon!</p>
-                </Card>
-              </motion.div>
+                            {/* Title */}
+                            <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-fuchsia-400 transition-colors" data-testid={`feed-title-${item.type}-${item.id}`}>
+                              {item.title}
+                            </h3>
+
+                            {/* Description */}
+                            {item.description && (
+                              <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                                {item.description}
+                              </p>
+                            )}
+
+                            {/* Metadata */}
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <div className="flex items-center gap-2">
+                                {item.type === 'bounty' && (
+                                  <span className="text-fuchsia-400 font-semibold">
+                                    {item.metadata.reward} STREAM
+                                  </span>
+                                )}
+                                {item.type === 'market' && (
+                                  <span className="text-green-400">
+                                    YES: {Math.round(item.metadata.yesPrice * 100)}%
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px]">
+                                {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+                              </span>
+                            </div>
+
+                            {/* Tags */}
+                            {item.tags && item.tags.length > 0 && (
+                              <div className="flex gap-1 mt-2 flex-wrap">
+                                {item.tags.slice(0, 2).map(tag => (
+                                  <span key={tag} className="text-cyan-400 text-[10px]">
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="border-purple-500/30 hover:border-fuchsia-500/50"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <div className="flex gap-1">
+                      {[...Array(totalPages)].map((_, i) => (
+                        <Button
+                          key={i}
+                          variant={currentPage === i + 1 ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setCurrentPage(i + 1)}
+                          className={`w-8 h-8 p-0 ${
+                            currentPage === i + 1
+                              ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 border-0'
+                              : 'border-purple-500/30 hover:border-fuchsia-500/50'
+                          }`}
+                        >
+                          {i + 1}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="border-purple-500/30 hover:border-fuchsia-500/50"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
+
+            {filteredFeed.length === 0 && !isLoading && (
+              <Card className="bg-purple-950/20 border-purple-500/20 p-8 text-center">
+                <MessageSquare className="w-12 h-12 text-purple-400 mx-auto mb-3" />
+                <p className="text-gray-400">No content available yet. Check back soon!</p>
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar - What's happening */}
+          <div className="hidden xl:block w-80">
+            <Card className="bg-purple-950/20 backdrop-blur-sm border-purple-500/20 sticky top-4">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-fuchsia-400" />
+                  <h3 className="font-semibold text-white">What's happening</h3>
+                </div>
+                
+                {topics.slice(0, 5).map((topic, index) => (
+                  <button
+                    key={topic.name}
+                    onClick={() => { setSelectedTopic(topic.name); setCurrentPage(1); }}
+                    className="w-full text-left p-3 rounded-lg hover:bg-purple-900/30 transition-colors mb-2 group"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-semibold text-white group-hover:text-fuchsia-400 transition-colors">
+                        {topic.name}
+                      </span>
+                      <TrendingUp className="w-3 h-3 text-green-400" />
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>{topic.count} posts</span>
+                      <span>•</span>
+                      <span>Trending</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
       </div>
