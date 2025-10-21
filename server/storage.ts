@@ -383,6 +383,14 @@ export interface IStorage {
     offset: number;
     userId?: string;
   }): Promise<any[]>;
+  getConversationsForEntity(options: {
+    linkedSummaryId?: string;
+    linkedMarketId?: string;
+    linkedBountyId?: string;
+    limit: number;
+    offset: number;
+    userId?: string;
+  }): Promise<any[]>;
   createConversation(data: {
     authorId: string;
     content: string;
@@ -390,6 +398,8 @@ export interface IStorage {
     tags?: string[];
     linkedSummaryId?: string;
     linkedMarketId?: string;
+    linkedBountyId?: string;
+    parentId?: string;
     isPublic?: boolean;
   }): Promise<any>;
   getConversationById(id: string, userId?: string): Promise<any | undefined>;
@@ -2136,6 +2146,68 @@ export class DatabaseStorage implements IStorage {
     return results.map(r => ({ ...r.conversation, author: r.author, isLiked: false }));
   }
 
+  async getConversationsForEntity(options: {
+    linkedSummaryId?: string;
+    linkedMarketId?: string;
+    linkedBountyId?: string;
+    limit: number;
+    offset: number;
+    userId?: string;
+  }): Promise<any[]> {
+    const conditions = [];
+    
+    if (options.linkedSummaryId) {
+      conditions.push(eq(conversations.linkedSummaryId, options.linkedSummaryId));
+    }
+    if (options.linkedMarketId) {
+      conditions.push(eq(conversations.linkedMarketId, options.linkedMarketId));
+    }
+    if (options.linkedBountyId) {
+      conditions.push(eq(conversations.linkedBountyId, options.linkedBountyId));
+    }
+
+    const query = db
+      .select({
+        conversation: conversations,
+        author: {
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar
+        }
+      })
+      .from(conversations)
+      .leftJoin(users, eq(conversations.authorId, users.id))
+      .where(and(...conditions))
+      .orderBy(desc(conversations.createdAt))
+      .limit(options.limit)
+      .offset(options.offset);
+
+    const results = await query;
+
+    // Check if user has liked each conversation
+    if (options.userId && results.length > 0) {
+      const conversationIds = results.map(r => r.conversation.id);
+      const likes = await db
+        .select()
+        .from(conversationLikes)
+        .where(
+          and(
+            eq(conversationLikes.userId, options.userId),
+            inArray(conversationLikes.conversationId, conversationIds)
+          )
+        );
+      
+      const likedIds = new Set(likes.map(l => l.conversationId));
+      return results.map(r => ({
+        ...r.conversation,
+        author: r.author,
+        isLiked: likedIds.has(r.conversation.id)
+      }));
+    }
+
+    return results.map(r => ({ ...r.conversation, author: r.author, isLiked: false }));
+  }
+
   async createConversation(data: {
     authorId: string;
     content: string;
@@ -2143,6 +2215,8 @@ export class DatabaseStorage implements IStorage {
     tags?: string[];
     linkedSummaryId?: string;
     linkedMarketId?: string;
+    linkedBountyId?: string;
+    parentId?: string;
     isPublic?: boolean;
   }): Promise<any> {
     const [conversation] = await db
@@ -2154,9 +2228,21 @@ export class DatabaseStorage implements IStorage {
         tags: data.tags || [],
         linkedSummaryId: data.linkedSummaryId,
         linkedMarketId: data.linkedMarketId,
+        linkedBountyId: data.linkedBountyId,
+        parentId: data.parentId,
         isPublic: data.isPublic !== false
       })
       .returning();
+
+    // If this is a reply, increment parent's comment count
+    if (data.parentId) {
+      await db
+        .update(conversations)
+        .set({ 
+          commentsCount: sql`${conversations.commentsCount} + 1` 
+        })
+        .where(eq(conversations.id, data.parentId));
+    }
 
     // Get author info
     const author = await this.getUser(data.authorId);

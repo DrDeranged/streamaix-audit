@@ -216,7 +216,8 @@ export const userNotes = pgTable("user_notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Social Conversations Platform
+// Unified Commenting & Discussion System
+// Used for both standalone discussions and embedded comments on bounties, markets, summaries, etc.
 export const conversations = pgTable("conversations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   authorId: varchar("author_id").references(() => users.id).notNull(),
@@ -224,13 +225,17 @@ export const conversations = pgTable("conversations", {
   imageUrl: text("image_url"), // optional image attachment
   tags: text("tags").array(), // crypto topics: ["Bitcoin", "DeFi", "Layer2"]
   
-  // Optional relationships to other content
+  // Thread support for nested replies
+  parentId: varchar("parent_id").references((): AnyPgColumn => conversations.id), // for comment threading
+  
+  // Optional relationships to entities (null = standalone post)
   linkedSummaryId: varchar("linked_summary_id").references(() => summaries.id),
-  linkedMarketId: varchar("linked_market_id"), // Will reference predictionMarkets
+  linkedMarketId: varchar("linked_market_id"), // references predictionMarkets
+  linkedBountyId: varchar("linked_bounty_id").references(() => bounties.id),
   
   // Engagement metrics
   likesCount: integer("likes_count").default(0),
-  commentsCount: integer("comments_count").default(0),
+  commentsCount: integer("comments_count").default(0), // reply count
   sharesCount: integer("shares_count").default(0),
   viewsCount: integer("views_count").default(0),
   

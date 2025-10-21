@@ -42,6 +42,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { Bounty } from '@shared/schema';
 import { SuggestedMarketsCard } from '@/components/prediction/SuggestedMarketsCard';
+import { CommentSection } from '@/components/comments/CommentSection';
 
 interface AnalysisAnswer {
   questionId: string;
@@ -983,6 +984,13 @@ export default function BountyDetail() {
             {!isConnected && canClaim && (
               <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                 <p className="text-purple-400 text-sm">Connect your wallet to claim this bounty</p>
+              </div>
+            )}
+
+            {/* Comments Section */}
+            {bounty && (
+              <div className="mt-8">
+                <CommentSection entityType="bounty" entityId={bounty.id} />
               </div>
             )}
           </div>

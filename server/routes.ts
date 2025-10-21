@@ -5236,13 +5236,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Create new conversation
+  // Get comments for an entity (embedded comments)
+  app.get('/api/conversations/comments', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { linkedSummaryId, linkedMarketId, linkedBountyId, limit = '50', offset = '0' } = req.query;
+    
+    try {
+      const conversations = await storage.getConversationsForEntity({
+        linkedSummaryId: linkedSummaryId as string | undefined,
+        linkedMarketId: linkedMarketId as string | undefined,
+        linkedBountyId: linkedBountyId as string | undefined,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+        userId: req.user?.id
+      });
+      
+      res.json(conversations);
+    } catch (error) {
+      console.error('Get entity comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  }));
+
+  // Create new conversation (or comment)
   app.post('/api/conversations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
     
-    const { content, imageUrl, tags, linkedSummaryId, linkedMarketId, isPublic } = req.body;
+    const { content, imageUrl, tags, linkedSummaryId, linkedMarketId, linkedBountyId, parentId, isPublic } = req.body;
     
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'Content is required' });
@@ -5260,6 +5281,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags: tags || [],
         linkedSummaryId,
         linkedMarketId,
+        linkedBountyId,
+        parentId,
         isPublic: isPublic !== false
       });
       
