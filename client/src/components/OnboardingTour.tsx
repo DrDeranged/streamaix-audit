@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronRight, ChevronLeft, Sparkles, Coins, TrendingUp, Bot, Wallet, 
   Zap, Users, Shield, Trophy, BarChart3, Radio, Rocket, Globe, Crown,
-  LineChart, ArrowRight, MousePointer2
+  LineChart, ArrowRight, MousePointer2, CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import { NeuralNetworkBackground } from './NeuralNetworkBackground';
 
 interface OnboardingStep {
   title: string;
@@ -256,12 +257,10 @@ export function OnboardingTour() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    // Show onboarding on every app load
     setTimeout(() => setIsOpen(true), 1000);
   }, []);
 
   const handleClose = () => {
-    // Just close the modal, don't save to localStorage
     setIsOpen(false);
     setIsMinimized(false);
   };
@@ -285,17 +284,14 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
-    // If on welcome step (step 0), just go to next step instead of navigating
     if (currentStep === 0) {
       handleNext();
       return;
     }
     
-    // Minimize the tour and navigate to the page
     setIsMinimized(true);
     setLocation(path);
     
-    // Auto-expand after navigation to show next step
     setTimeout(() => {
       if (currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
@@ -312,11 +308,16 @@ export function OnboardingTour() {
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
 
+  // Circular progress calculation
+  const radius = 56;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Minimized Floating Guide */}
+          {/* Minimized Floating Widget */}
           {isMinimized && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 100 }}
@@ -326,318 +327,310 @@ export function OnboardingTour() {
             >
               <button
                 onClick={toggleMinimize}
-                className={`group relative p-4 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105`}
+                className={`group relative p-4 neural-glass rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden`}
                 data-testid="button-tour-minimized"
               >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                <div className="flex items-center gap-4 relative z-10">
+                  <div className={`p-3 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-lg`}>
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-left pr-2">
-                    <p className="text-xs text-white/80 font-medium">Tour Active</p>
+                    <p className="text-xs text-white/80 font-medium font-orbitron">Tour Active</p>
                     <p className="text-sm text-white font-bold">Step {currentStep + 1}/{steps.length}</p>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <div className="relative w-12 h-12">
+                    <svg className="w-12 h-12 transform -rotate-90">
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="rgba(255,255,255,0.2)"
+                        strokeWidth="3"
+                        fill="none"
+                      />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="url(#progress-gradient)"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 20}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                      />
+                      <defs>
+                        <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#a855f7" />
+                          <stop offset="50%" stopColor="#06b6d4" />
+                          <stop offset="100%" stopColor="#ec4899" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                     <motion.div
-                      className="text-2xl"
+                      className="absolute inset-0 flex items-center justify-center text-xl"
                       animate={{ rotate: [0, 10, -10, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      👋
+                      ✨
                     </motion.div>
                   </div>
                 </div>
                 
-                {/* Progress ring */}
-                <svg className="absolute -top-1 -right-1 w-8 h-8 transform -rotate-90">
-                  <circle
-                    cx="16"
-                    cy="16"
-                    r="14"
-                    stroke="rgba(255,255,255,0.3)"
-                    strokeWidth="2"
-                    fill="none"
-                  />
-                  <circle
-                    cx="16"
-                    cy="16"
-                    r="14"
-                    stroke="white"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 14}`}
-                    strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <div className="absolute inset-0 iridescent-shimmer rounded-3xl" />
               </button>
             </motion.div>
           )}
 
-          {/* Full Tour Modal (only show when not minimized) */}
+          {/* Full Tour Modal */}
           {!isMinimized && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4"
               onClick={handleSkip}
             >
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-              className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-            <div className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 border-2 border-white/20 rounded-3xl shadow-2xl overflow-hidden">
-              {/* Animated gradient overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${currentStepData.gradient} opacity-5 pointer-events-none`} />
-              
-              {/* Close Button */}
-              <button
-                onClick={handleSkip}
-                className="absolute top-6 right-6 z-10 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
-                data-testid="button-skip-onboarding"
-              >
-                <X className="h-6 w-6" />
-              </button>
-              
-              {/* Minimize Button */}
-              <button
-                onClick={toggleMinimize}
-                className="absolute top-6 right-20 z-10 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
-                data-testid="button-minimize-tour"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
+              {/* Neural Network Background */}
+              <div className="absolute inset-0 overflow-hidden">
+                <NeuralNetworkBackground />
+              </div>
 
-              {/* Content Container */}
-              <div className="overflow-y-auto max-h-[75vh] custom-scrollbar">
-                {/* Header */}
-                <div className="relative p-8 pb-6">
-                  <div className="flex items-start gap-6 mb-6">
-                    {/* Animated Icon */}
-                    <motion.div
-                      key={currentStep}
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: "spring", duration: 0.8, delay: 0.1 }}
-                      className={`p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-lg flex-shrink-0`}
+              {/* Modal Container */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 50 }}
+                transition={{ type: "spring", duration: 0.7, bounce: 0.25 }}
+                className="relative w-full max-w-4xl max-h-[90vh] transform-3d"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Main Card */}
+                <div className="relative neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border">
+                  {/* Animated gradient overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${currentStepData.gradient} opacity-10 pointer-events-none animate-gradient`} />
+                  
+                  {/* Control Buttons */}
+                  <div className="absolute top-6 right-6 z-10 flex gap-2">
+                    <button
+                      onClick={toggleMinimize}
+                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow"
+                      data-testid="button-minimize-tour"
                     >
-                      <Icon className="h-12 w-12 text-white" />
-                    </motion.div>
-
-                    <div className="flex-1 min-w-0">
-                      <motion.div
-                        key={currentStep}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className={`text-sm font-bold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text`}>
-                            Step {currentStep + 1} of {steps.length}
-                          </span>
-                          <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden max-w-xs">
-                            <motion.div
-                              className={`h-full bg-gradient-to-r ${currentStepData.gradient}`}
-                              initial={{ width: 0 }}
-                              animate={{ width: `${progress}%` }}
-                              transition={{ duration: 0.5 }}
-                            />
-                          </div>
-                        </div>
-                        <h2 className="text-4xl font-bold text-white mb-2">
-                          {currentStepData.title}
-                        </h2>
-                        <p className={`text-xl font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text`}>
-                          {currentStepData.subtitle}
-                        </p>
-                      </motion.div>
-                    </div>
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={handleSkip}
+                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow"
+                      data-testid="button-skip-onboarding"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
                   </div>
 
-                  {/* Description */}
-                  <motion.p
-                    key={currentStep}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-gray-300 text-lg leading-relaxed mb-6"
-                  >
-                    {currentStepData.description}
-                  </motion.p>
-                </div>
-
-                {/* Instructions */}
-                <div className="relative px-8 pb-8">
-                  <motion.div
-                    key={currentStep}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <MousePointer2 className={`h-5 w-5 bg-gradient-to-r ${currentStepData.gradient} text-transparent`} style={{ WebkitTextFillColor: 'white' }} />
-                        <h3 className="text-xl font-bold text-white">How to Get Started:</h3>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        {currentStepData.instructions.map((instruction, index) => (
+                  {/* Content Container */}
+                  <div className="overflow-y-auto max-h-[80vh] scrollbar-thin">
+                    <div className="p-10">
+                      {/* Header Section */}
+                      <div className="flex items-start gap-8 mb-8">
+                        {/* Circular Progress & Icon */}
+                        <div className="relative flex-shrink-0">
+                          <svg className="w-32 h-32 transform -rotate-90">
+                            <defs>
+                              <linearGradient id={`grad-${currentStep}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#a855f7" />
+                                <stop offset="50%" stopColor="#06b6d4" />
+                                <stop offset="100%" stopColor="#ec4899" />
+                              </linearGradient>
+                            </defs>
+                            <circle
+                              cx="64"
+                              cy="64"
+                              r={radius}
+                              stroke="rgba(255,255,255,0.1)"
+                              strokeWidth="4"
+                              fill="none"
+                            />
+                            <motion.circle
+                              cx="64"
+                              cy="64"
+                              r={radius}
+                              stroke={`url(#grad-${currentStep})`}
+                              strokeWidth="4"
+                              fill="none"
+                              strokeDasharray={circumference}
+                              strokeDashoffset={strokeDashoffset}
+                              strokeLinecap="round"
+                              initial={{ strokeDashoffset: circumference }}
+                              animate={{ strokeDashoffset }}
+                              transition={{ duration: 0.6, ease: "easeOut" }}
+                            />
+                          </svg>
+                          
+                          {/* Icon in center */}
                           <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.5 + index * 0.1 }}
-                            className="flex items-start gap-3 group"
+                            key={currentStep}
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", duration: 0.8, delay: 0.2 }}
+                            className={`absolute inset-0 flex items-center justify-center`}
                           >
-                            <div className={`flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-r ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-sm mt-0.5`}>
-                              {index + 1}
+                            <div className={`p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl float-3d`}>
+                              <Icon className="h-10 w-10 text-white" />
                             </div>
-                            <p className="text-gray-200 text-base leading-relaxed group-hover:text-white transition-colors">
-                              {instruction}
+                          </motion.div>
+                        </div>
+
+                        {/* Text Content */}
+                        <div className="flex-1 min-w-0">
+                          <motion.div
+                            key={currentStep}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-sm font-bold font-orbitron bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 text-transparent bg-clip-text">
+                                STEP {currentStep + 1} / {steps.length}
+                              </span>
+                              <div className="h-px flex-1 bg-gradient-to-r from-purple-500/50 via-cyan-500/50 to-transparent" />
+                            </div>
+                            <h2 className="text-5xl font-bold text-white mb-3 font-orbitron">
+                              {currentStepData.title}
+                            </h2>
+                            <p className={`text-xl font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text mb-4`}>
+                              {currentStepData.subtitle}
+                            </p>
+                            <p className="text-gray-300 text-lg leading-relaxed">
+                              {currentStepData.description}
                             </p>
                           </motion.div>
-                        ))}
+                        </div>
+                      </div>
+
+                      {/* Instructions Section */}
+                      <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="mb-8"
+                      >
+                        <div className="relative neural-glass rounded-2xl p-8 border border-purple-500/20 overflow-hidden">
+                          <div className="absolute inset-0 iridescent-shimmer rounded-2xl opacity-50" />
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className={`p-2 bg-gradient-to-br ${currentStepData.gradient} rounded-lg`}>
+                                <MousePointer2 className="h-5 w-5 text-white" />
+                              </div>
+                              <h3 className="text-2xl font-bold text-white font-orbitron">Quick Start Guide</h3>
+                            </div>
+                            
+                            <div className="grid gap-4">
+                              {currentStepData.instructions.map((instruction, index) => (
+                                <motion.div
+                                  key={index}
+                                  initial={{ opacity: 0, x: -30 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.5 + index * 0.08 }}
+                                  className="flex items-start gap-4 group hover:bg-white/5 p-3 rounded-xl transition-all"
+                                >
+                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg neural-pulse`}>
+                                    {index + 1}
+                                  </div>
+                                  <p className="text-gray-200 text-base leading-relaxed group-hover:text-white transition-colors flex-1">
+                                    {instruction}
+                                  </p>
+                                  <CheckCircle2 className="h-5 w-5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.7 }}
+                          className="mt-6"
+                        >
+                          <Button
+                            onClick={() => handleAction(currentStepData.action.path)}
+                            size="lg"
+                            className={`w-full bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white font-bold text-lg py-7 rounded-xl group relative overflow-hidden shadow-2xl glow-pulse`}
+                            data-testid="button-action"
+                          >
+                            <div className="absolute inset-0 iridescent-shimmer" />
+                            <span className="relative z-10 flex items-center justify-center gap-3">
+                              <Globe className="h-6 w-6" />
+                              <span className="font-orbitron">{currentStepData.action.label}</span>
+                              <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                            </span>
+                          </Button>
+                        </motion.div>
+                      </motion.div>
+
+                      {/* Footer Navigation */}
+                      <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                        {/* Step Indicators */}
+                        <div className="flex gap-2 flex-wrap">
+                          {steps.map((step, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentStep(index)}
+                              className={`relative transition-all duration-300 rounded-full overflow-hidden ${
+                                index === currentStep
+                                  ? 'w-10 h-3'
+                                  : 'w-3 h-3'
+                              }`}
+                              data-testid={`button-step-${index}`}
+                              aria-label={`Go to step ${index + 1}: ${step.title}`}
+                            >
+                              <div className={`absolute inset-0 rounded-full transition-all ${
+                                index === currentStep
+                                  ? `bg-gradient-to-r ${steps[index].gradient} shadow-lg`
+                                  : index < currentStep
+                                  ? 'bg-cyan-400/60'
+                                  : 'bg-white/20'
+                              }`} />
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Nav Buttons */}
+                        <div className="flex items-center gap-3">
+                          <Button
+                            onClick={handlePrevious}
+                            disabled={currentStep === 0}
+                            variant="outline"
+                            size="lg"
+                            className="font-orbitron disabled:opacity-30"
+                            data-testid="button-previous"
+                          >
+                            <ChevronLeft className="h-5 w-5 mr-2" />
+                            Previous
+                          </Button>
+                          <Button
+                            onClick={handleNext}
+                            size="lg"
+                            className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:opacity-90 font-orbitron"
+                            data-testid="button-next"
+                          >
+                            {currentStep === steps.length - 1 ? 'Finish' : 'Next Step'}
+                            <ChevronRight className="h-5 w-5 ml-2" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Action Button */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      className="mt-6"
-                    >
-                      <Button
-                        onClick={() => handleAction(currentStepData.action.path)}
-                        size="lg"
-                        className={`w-full bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white font-bold text-lg py-6 group`}
-                        data-testid="button-action"
-                      >
-                        <Globe className="h-5 w-5 mr-2" />
-                        {currentStepData.action.label}
-                        <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </motion.div>
-                  </motion.div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="relative px-8 py-6 bg-black/40 backdrop-blur-sm border-t border-white/10">
-                <div className="flex items-center justify-between">
-                  {/* Progress Dots */}
-                  <div className="flex gap-2 flex-wrap max-w-md">
-                    {steps.map((step, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentStep(index)}
-                        className={`relative transition-all duration-300 ${
-                          index === currentStep
-                            ? 'w-12 h-3'
-                            : 'w-3 h-3'
-                        }`}
-                        data-testid={`button-step-${index}`}
-                        aria-label={`Go to step ${index + 1}: ${step.title}`}
-                      >
-                        <div className={`absolute inset-0 rounded-full transition-all ${
-                          index === currentStep
-                            ? `bg-gradient-to-r ${steps[index].gradient}`
-                            : index < currentStep
-                            ? 'bg-white/40'
-                            : 'bg-white/20'
-                        }`} />
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Navigation Buttons */}
-                  <div className="flex items-center gap-3">
-                    {currentStep > 0 && (
-                      <Button
-                        onClick={handlePrevious}
-                        variant="ghost"
-                        size="lg"
-                        className="text-gray-300 hover:text-white hover:bg-white/10"
-                        data-testid="button-previous"
-                      >
-                        <ChevronLeft className="h-5 w-5 mr-1" />
-                        Previous
-                      </Button>
-                    )}
-
-                    <Button
-                      onClick={handleNext}
-                      size="lg"
-                      className={`bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white font-semibold px-8`}
-                      data-testid="button-next"
-                    >
-                      {currentStep === steps.length - 1 ? (
-                        <>
-                          <Rocket className="h-5 w-5 mr-2" />
-                          Start Building
-                        </>
-                      ) : (
-                        <>
-                          Next Step
-                          <ChevronRight className="h-5 w-5 ml-2" />
-                        </>
-                      )}
-                    </Button>
                   </div>
                 </div>
-              </div>
-            </div>
-            </motion.div>
+              </motion.div>
             </motion.div>
           )}
-
-          {/* Custom scrollbar styles */}
-          <style>{`
-            .custom-scrollbar::-webkit-scrollbar {
-              width: 8px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-              background: rgba(255, 255, 255, 0.05);
-              border-radius: 4px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-              background: rgba(255, 255, 255, 0.2);
-              border-radius: 4px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: rgba(255, 255, 255, 0.3);
-            }
-          `}</style>
         </>
       )}
     </AnimatePresence>
-  );
-}
-
-// Manual trigger button for users who want to replay the tour
-// Note: Tour now shows on every app load, so this just reloads the page
-export function OnboardingTrigger() {
-  const [, setLocation] = useLocation();
-
-  const restartTour = () => {
-    setLocation('/');
-    window.location.reload();
-  };
-
-  return (
-    <button
-      onClick={restartTour}
-      className="group text-sm text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-cyan-500/10"
-      data-testid="button-restart-tour"
-    >
-      <Sparkles className="h-4 w-4 group-hover:rotate-12 transition-transform" />
-      Replay Tutorial
-    </button>
   );
 }
