@@ -2965,6 +2965,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get crypto news from CoinTelegraph and CoinDesk
+  app.get('/api/news/crypto', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { newsService } = await import('./services/newsService');
+      const limit = parseInt(req.query.limit as string) || 10;
+      const articles = await newsService.getCryptoNews(limit);
+      
+      res.json({ 
+        success: true,
+        articles, 
+        count: articles.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Crypto news error:', error);
+      res.status(500).json({ 
+        success: false,
+        articles: [], 
+        error: 'News feed temporarily unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get macro/financial news from CoinDesk
+  app.get('/api/news/macro', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const { newsService } = await import('./services/newsService');
+      const limit = parseInt(req.query.limit as string) || 10;
+      const articles = await newsService.getMacroNews(limit);
+      
+      res.json({ 
+        success: true,
+        articles, 
+        count: articles.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Macro news error:', error);
+      res.status(500).json({ 
+        success: false,
+        articles: [], 
+        error: 'News feed temporarily unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Get user engagement predictions
   app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
