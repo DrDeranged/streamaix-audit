@@ -165,6 +165,20 @@ export interface IStorage {
   createBountyEngagement(engagement: InsertBountyEngagement): Promise<BountyEngagement>;
   getBountyEngagements(bountyId: string): Promise<BountyEngagement[]>;
   getBountyEngagementStats(bountyId: string): Promise<{ views: number; shares: number; likes: number; comments: number }>;
+  toggleBountyLike(userId: string, bountyId: string): Promise<{ liked: boolean; likesCount: number }>;
+  toggleBountySave(userId: string, bountyId: string): Promise<{ saved: boolean }>;
+  createBountyComment(comment: { bountyId: string; userId: string; content: string }): Promise<any>;
+  getBountyComments(bountyId: string): Promise<any[]>;
+
+  // Market social engagement
+  toggleMarketLike(userId: string, marketId: string): Promise<{ liked: boolean; likesCount: number }>;
+  toggleMarketSave(userId: string, marketId: string): Promise<{ saved: boolean }>;
+  createMarketComment(comment: { marketId: string; userId: string; content: string }): Promise<any>;
+  getMarketComments(marketId: string): Promise<any[]>;
+
+  // Summary social engagement
+  toggleSummaryLike(userId: string, summaryId: string): Promise<{ liked: boolean; likesCount: number }>;
+  toggleSummarySave(userId: string, summaryId: string): Promise<{ saved: boolean }>;
 
   // User interaction operations
   getUserInteractions(userId: string, options?: { summaryId?: string; limit?: number; targetType?: string; since?: Date }): Promise<UserInteraction[]>;
@@ -738,6 +752,56 @@ export class DatabaseStorage implements IStorage {
       likes: engagements.filter(e => e.engagementType === 'like').length,
       comments: engagements.filter(e => e.engagementType === 'comment').length,
     };
+  }
+
+  async toggleBountyLike(userId: string, bountyId: string): Promise<{ liked: boolean; likesCount: number }> {
+    // Stub implementation - returns placeholder data
+    return { liked: false, likesCount: 0 };
+  }
+
+  async toggleBountySave(userId: string, bountyId: string): Promise<{ saved: boolean }> {
+    // Stub implementation - returns placeholder data
+    return { saved: false };
+  }
+
+  async createBountyComment(comment: { bountyId: string; userId: string; content: string }): Promise<any> {
+    // Stub implementation - returns placeholder comment
+    return { id: '1', ...comment, createdAt: new Date(), user: { username: 'User' } };
+  }
+
+  async getBountyComments(bountyId: string): Promise<any[]> {
+    // Stub implementation - returns empty array
+    return [];
+  }
+
+  async toggleMarketLike(userId: string, marketId: string): Promise<{ liked: boolean; likesCount: number }> {
+    // Stub implementation - returns placeholder data
+    return { liked: false, likesCount: 0 };
+  }
+
+  async toggleMarketSave(userId: string, marketId: string): Promise<{ saved: boolean }> {
+    // Stub implementation - returns placeholder data
+    return { saved: false };
+  }
+
+  async createMarketComment(comment: { marketId: string; userId: string; content: string }): Promise<any> {
+    // Stub implementation - returns placeholder comment
+    return { id: '1', ...comment, createdAt: new Date(), user: { username: 'User' } };
+  }
+
+  async getMarketComments(marketId: string): Promise<any[]> {
+    // Stub implementation - returns empty array
+    return [];
+  }
+
+  async toggleSummaryLike(userId: string, summaryId: string): Promise<{ liked: boolean; likesCount: number }> {
+    // Stub implementation - returns placeholder data
+    return { liked: false, likesCount: 0 };
+  }
+
+  async toggleSummarySave(userId: string, summaryId: string): Promise<{ saved: boolean }> {
+    // Stub implementation - returns placeholder data
+    return { saved: false };
   }
 
   // User interaction operations
