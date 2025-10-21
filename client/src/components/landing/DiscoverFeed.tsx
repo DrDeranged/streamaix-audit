@@ -186,10 +186,11 @@ export function DiscoverFeed() {
     }
 
     // Add macro/crypto data cards
-    if (stockData?.prices) {
+    const prices = (stockData as any)?.prices;
+    if (prices) {
       const topAssets = ['BTC', 'ETH', 'SPY', 'QQQ'];
       topAssets.forEach((symbol, idx) => {
-        const assetData = stockData.prices[symbol];
+        const assetData = prices[symbol];
         if (assetData) {
           feed.push({
             id: `macro-${symbol}`,
