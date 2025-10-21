@@ -522,20 +522,20 @@ export function OnboardingTour() {
                               <h3 className="text-2xl font-bold text-white font-orbitron">Quick Start Guide</h3>
                             </div>
                             
-                            <div className="grid gap-4">
+                            <div className="grid gap-3">
                               {currentStepData.instructions.map((instruction, index) => (
                                 <motion.div
                                   key={index}
                                   initial={{ opacity: 0, x: -30 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.5 + index * 0.08 }}
-                                  className="flex items-start gap-5 group hover:bg-white/5 p-3 rounded-xl transition-all"
+                                  className="flex items-start gap-3 group hover:bg-white/5 p-2 rounded-lg transition-all"
                                 >
-                                  {/* Enhanced numbered bullet */}
-                                  <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-lg shadow-2xl ring-2 ring-white/20 hover:ring-white/40 transition-all hover:scale-110`}>
-                                    {index + 1}
-                                  </div>
-                                  <p className="text-gray-200 text-base leading-relaxed pt-2">
+                                  {/* Simple numbered indicator */}
+                                  <span className={`flex-shrink-0 text-sm font-bold bg-gradient-to-br ${currentStepData.gradient} text-transparent bg-clip-text pt-0.5`}>
+                                    {index + 1}.
+                                  </span>
+                                  <p className="text-gray-200 text-base leading-relaxed">
                                     {instruction}
                                   </p>
                                 </motion.div>
