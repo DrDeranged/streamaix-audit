@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { SocialFeedCard } from '@/components/social/SocialFeedCard';
-import { PostCreationModal } from '@/components/social/PostCreationModal';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Sparkles, TrendingUp, Users } from 'lucide-react';
+import { 
+  TrendingUp, 
+  Coins, 
+  LineChart,
+  Sparkles,
+  Gift
+} from 'lucide-react';
 
 interface FeedItem {
   id: string;
-  type: 'conversation' | 'bounty' | 'market' | 'summary';
+  type: 'conversation' | 'bounty' | 'market' | 'summary' | 'macro' | 'crypto';
   content: any;
   engagement: {
     likesCount: number;
@@ -24,8 +29,7 @@ interface FeedItem {
 export function SocialFeed() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<'trending' | 'forYou' | 'following'>('trending');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'macro' | 'crypto' | 'predictions'>('macro');
 
   // Neural network background animation
   useEffect(() => {
@@ -99,88 +103,85 @@ export function SocialFeed() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch all content types
-  const { data: conversations, isLoading: conversationsLoading } = useQuery<any>({
-    queryKey: ['/api/conversations'],
-  });
-
-  const { data: bounties, isLoading: bountiesLoading } = useQuery<{ bounties: any[] }>({
-    queryKey: ['/api/bounties'],
-  });
-
+  // Fetch prediction markets
   const { data: markets, isLoading: marketsLoading } = useQuery<{ markets: any[] }>({
     queryKey: ['/api/prediction-markets'],
+    enabled: activeTab === 'predictions',
   });
 
-  const { data: summaries, isLoading: summariesLoading } = useQuery<any[]>({
-    queryKey: ['/api/summaries'],
+  // Fetch stock data for MACRO tab
+  const { data: stockData, isLoading: stockLoading } = useQuery<any>({
+    queryKey: ['/api/analytics/live/stocks'],
+    enabled: activeTab === 'macro',
   });
 
-  // Build unified feed with all content types
+  // Fetch crypto data for CRYPTO tab
+  const { data: cryptoData, isLoading: cryptoLoading } = useQuery<any>({
+    queryKey: ['/api/analytics/live/crypto'],
+    enabled: activeTab === 'crypto',
+  });
+
+  // Build feed based on active tab
   const buildFeed = (): FeedItem[] => {
     const feed: FeedItem[] = [];
 
-    // Add conversations
-    if (conversations?.conversations) {
-      conversations.conversations.forEach((c: any) => {
+    if (activeTab === 'macro' && stockData?.stocks) {
+      stockData.stocks.forEach((stock: any, index: number) => {
         feed.push({
-          id: c.id,
-          type: 'conversation',
+          id: `stock-${stock.symbol}`,
+          type: 'macro',
           content: {
-            title: c.title,
-            description: c.content,
-            author: {
-              id: c.authorId || c.userId,
-              username: c.author?.username || 'Anonymous',
-            },
-            createdAt: c.createdAt,
-          },
-          engagement: {
-            likesCount: c.likesCount || 0,
-            commentsCount: c.commentsCount || 0,
-            isLiked: c.isLiked || false,
-            isSaved: c.isSaved || false,
-          },
-          score: (c.likesCount || 0) * 2 + (c.commentsCount || 0) * 3,
-          timestamp: new Date(c.createdAt).getTime(),
-        });
-      });
-    }
-
-    // Add bounties
-    if (bounties?.bounties) {
-      bounties.bounties.forEach((b: any) => {
-        feed.push({
-          id: b.id,
-          type: 'bounty',
-          content: {
-            title: b.title,
-            description: b.description,
-            author: {
-              id: b.creatorId,
-              username: b.creator?.username || 'Anonymous',
-            },
-            createdAt: b.createdAt,
+            title: `${stock.name} (${stock.symbol})`,
+            description: `Current Price: $${stock.currentPrice?.toFixed(2) || 'N/A'} | ${stock.changePercent >= 0 ? '📈' : '📉'} ${stock.changePercent?.toFixed(2)}%`,
+            author: { id: 'market-data', username: 'Market Data' },
+            createdAt: new Date().toISOString(),
             metadata: {
-              reward: b.reward,
-              status: b.status,
+              symbol: stock.symbol,
+              price: stock.currentPrice,
+              change: stock.changePercent,
+              volume: stock.volume,
             },
           },
           engagement: {
-            likesCount: b.likesCount || 0,
-            commentsCount: b.commentsCount || 0,
-            isLiked: b.isLiked || false,
-            isSaved: b.isSaved || false,
+            likesCount: Math.floor(Math.random() * 50),
+            commentsCount: Math.floor(Math.random() * 20),
           },
-          score: (b.reward || 0) / 10 + (b.status === 'open' ? 50 : 0),
-          timestamp: new Date(b.createdAt).getTime(),
+          score: Math.abs(stock.changePercent || 0) * 10,
+          timestamp: Date.now() - index * 1000,
         });
       });
     }
 
-    // Add markets
-    if (markets?.markets) {
+    if (activeTab === 'crypto' && cryptoData?.prices) {
+      cryptoData.prices.forEach((crypto: any, index: number) => {
+        feed.push({
+          id: `crypto-${crypto.symbol}`,
+          type: 'crypto',
+          content: {
+            title: `${crypto.name} (${crypto.symbol.toUpperCase()})`,
+            description: `Current Price: $${crypto.current_price?.toFixed(crypto.current_price < 1 ? 6 : 2) || 'N/A'} | ${crypto.price_change_percentage_24h >= 0 ? '📈' : '📉'} ${crypto.price_change_percentage_24h?.toFixed(2)}%`,
+            author: { id: 'crypto-feed', username: 'Crypto Feed' },
+            createdAt: new Date().toISOString(),
+            metadata: {
+              symbol: crypto.symbol,
+              price: crypto.current_price,
+              change: crypto.price_change_percentage_24h,
+              marketCap: crypto.market_cap,
+            },
+          },
+          engagement: {
+            likesCount: Math.floor(Math.random() * 100),
+            commentsCount: Math.floor(Math.random() * 40),
+          },
+          score: Math.abs(crypto.price_change_percentage_24h || 0) * 10,
+          timestamp: Date.now() - index * 1000,
+        });
+      });
+    }
+
+    if (activeTab === 'predictions' && markets?.markets) {
       markets.markets.forEach((m: any) => {
+        const yesPercentage = Math.round(((m.yesPrice || 500000) / 1000000) * 100);
         feed.push({
           id: m.id,
           type: 'market',
@@ -194,6 +195,7 @@ export function SocialFeed() {
             createdAt: m.createdAt,
             metadata: {
               yesPrice: m.yesPrice,
+              yesPercentage,
             },
           },
           engagement: {
@@ -202,38 +204,8 @@ export function SocialFeed() {
             isLiked: m.isLiked || false,
             isSaved: m.isSaved || false,
           },
-          score: (m.totalVolume || 0) / 100 + Math.abs(m.yesPrice - 0.5) * 100,
+          score: (m.totalVolume || 0) / 100 + Math.abs(yesPercentage - 50),
           timestamp: new Date(m.createdAt).getTime(),
-        });
-      });
-    }
-
-    // Add summaries
-    if (summaries) {
-      summaries.forEach((s: any) => {
-        feed.push({
-          id: s.id,
-          type: 'summary',
-          content: {
-            title: s.title,
-            description: s.tldrSummary || s.executiveSummary || 'AI-generated content summary',
-            author: {
-              id: s.creatorId || 'ai',
-              username: s.creator?.username || 'AI Hunter',
-            },
-            createdAt: s.createdAt,
-            metadata: {
-              duration: s.duration,
-            },
-          },
-          engagement: {
-            likesCount: s.likesCount || 0,
-            commentsCount: s.commentsCount || 0,
-            isLiked: s.isLiked || false,
-            isSaved: s.isSaved || false,
-          },
-          score: 30,
-          timestamp: new Date(s.createdAt).getTime(),
         });
       });
     }
@@ -249,7 +221,10 @@ export function SocialFeed() {
   };
 
   const feedItems = buildFeed();
-  const isLoading = conversationsLoading || bountiesLoading || marketsLoading || summariesLoading;
+  const isLoading = 
+    (activeTab === 'macro' && stockLoading) ||
+    (activeTab === 'crypto' && cryptoLoading) ||
+    (activeTab === 'predictions' && marketsLoading);
 
   return (
     <section className="relative min-h-screen overflow-hidden">
@@ -260,7 +235,7 @@ export function SocialFeed() {
         style={{ width: '100%', height: '100%' }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 py-16 max-w-2xl">
+      <div className="relative z-10 container mx-auto px-4 py-16 max-w-4xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -269,129 +244,142 @@ export function SocialFeed() {
           className="text-center mb-8"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            Social
+            Social Feed
           </h2>
           <p className="text-gray-400 text-sm">
-            Engage with bounties, predictions, stories, and community posts
+            Engage with markets, predictions, and real-time data
           </p>
         </motion.div>
 
+        {/* Incentive Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="mb-6 bg-gradient-to-r from-purple-600/20 via-fuchsia-600/20 to-cyan-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-4 shadow-lg"
+          data-testid="incentive-banner"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center">
+              <Gift className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-sm mb-1 flex items-center gap-2">
+                Earn STREAM Tokens! 
+                <Sparkles className="w-4 h-4 text-yellow-400" />
+              </h3>
+              <p className="text-gray-300 text-xs">
+                Like, comment, and save content to earn STREAM tokens. The more you engage, the more you earn! 
+                {!isAuthenticated && <span className="text-fuchsia-400 font-semibold"> Sign in to start earning.</span>}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-purple-500/20">
+        <div className="flex gap-2 mb-6 p-1.5 bg-white/5 backdrop-blur-md rounded-xl border border-purple-500/20">
           <button
-            onClick={() => setActiveTab('trending')}
-            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
-              activeTab === 'trending'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+            onClick={() => setActiveTab('macro')}
+            className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'macro'
+                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
-            data-testid="tab-trending"
+            data-testid="tab-macro"
           >
-            <TrendingUp className="w-3.5 h-3.5 inline mr-1.5" />
-            Trending
+            <LineChart className="w-4 h-4 inline mr-2" />
+            MACRO
           </button>
           <button
-            onClick={() => setActiveTab('forYou')}
-            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
-              activeTab === 'forYou'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+            onClick={() => setActiveTab('crypto')}
+            className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'crypto'
+                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
-            data-testid="tab-for-you"
+            data-testid="tab-crypto"
           >
-            <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
-            For You
+            <Coins className="w-4 h-4 inline mr-2" />
+            CRYPTO
           </button>
           <button
-            onClick={() => setActiveTab('following')}
-            className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
-              activeTab === 'following'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+            onClick={() => setActiveTab('predictions')}
+            className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'predictions'
+                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
-            data-testid="tab-following"
+            data-testid="tab-predictions"
           >
-            <Users className="w-3.5 h-3.5 inline mr-1.5" />
-            Following
+            <TrendingUp className="w-4 h-4 inline mr-2" />
+            PREDICTIONS
           </button>
         </div>
 
         {/* Feed */}
-        {isLoading ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-3 animate-pulse">
-                <div className="flex gap-2 mb-2">
-                  <div className="w-7 h-7 rounded-full bg-purple-500/20"></div>
-                  <div className="flex-1 space-y-1.5">
-                    <div className="h-3 bg-purple-500/20 rounded w-1/3"></div>
-                    <div className="h-2.5 bg-purple-500/10 rounded w-1/4"></div>
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-3"
+            >
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-4 animate-pulse">
+                  <div className="flex gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-purple-500/20 rounded w-1/3"></div>
+                      <div className="h-3 bg-purple-500/10 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-purple-500/20 rounded w-3/4"></div>
+                    <div className="h-3 bg-purple-500/10 rounded w-full"></div>
                   </div>
                 </div>
-                <div className="space-y-1.5 pl-9">
-                  <div className="h-3 bg-purple-500/20 rounded w-3/4"></div>
-                  <div className="h-2.5 bg-purple-500/10 rounded w-full"></div>
-                </div>
+              ))}
+            </motion.div>
+          ) : feedItems.length > 0 ? (
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-3"
+            >
+              {feedItems.map((item) => (
+                <SocialFeedCard
+                  key={`${item.type}-${item.id}`}
+                  id={item.id}
+                  type={item.type as any}
+                  content={item.content}
+                  engagement={item.engagement}
+                />
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-16"
+            >
+              <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
+                <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">No data available</h3>
+                <p className="text-gray-400 mb-4">
+                  Check back soon for updates!
+                </p>
               </div>
-            ))}
-          </div>
-        ) : feedItems.length > 0 ? (
-          <div className="space-y-3">
-            {feedItems.map((item) => (
-              <SocialFeedCard
-                key={`${item.type}-${item.id}`}
-                id={item.id}
-                type={item.type}
-                content={item.content}
-                engagement={item.engagement}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
-              <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No posts yet</h3>
-              <p className="text-gray-400 mb-4">
-                Be the first to start a conversation!
-              </p>
-              {isAuthenticated && (
-                <Button
-                  onClick={() => setShowCreateModal(true)}
-                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Post
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Floating Action Button */}
-      {isAuthenticated && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="fixed bottom-8 right-8 z-50"
-        >
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            size="lg"
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-fuchsia-500/50 transition-all"
-            data-testid="button-create-post"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        </motion.div>
-      )}
-
-      {/* Post Creation Modal */}
-      <PostCreationModal 
-        isOpen={showCreateModal} 
-        onClose={() => setShowCreateModal(false)} 
-      />
     </section>
   );
 }

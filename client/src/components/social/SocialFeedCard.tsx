@@ -209,10 +209,10 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
                 {type === 'market' && (
                   <div className="flex items-center gap-2">
                     <span className="text-green-400 font-medium">
-                      YES {Math.round((content.metadata.yesPrice || 0.5) * 100)}%
+                      YES {Math.round(((content.metadata.yesPrice || 500000) / 1000000) * 100)}%
                     </span>
                     <span className="text-red-400 font-medium">
-                      NO {Math.round((1 - (content.metadata.yesPrice || 0.5)) * 100)}%
+                      NO {Math.round((1 - ((content.metadata.yesPrice || 500000) / 1000000)) * 100)}%
                     </span>
                   </div>
                 )}
