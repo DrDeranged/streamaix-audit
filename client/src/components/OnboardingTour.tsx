@@ -309,7 +309,7 @@ export function OnboardingTour() {
             >
               <button
                 onClick={toggleMinimize}
-                className="group relative p-4 neural-glass rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden perspective-tilt"
+                className="group relative p-4 neural-glass rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden"
                 data-testid="button-tour-minimized"
               >
                 <div className="flex items-center gap-4 relative z-10">
@@ -379,20 +379,20 @@ export function OnboardingTour() {
                 <NeuralNetworkBackground />
               </div>
 
-              {/* Modal Container - Holographic Card */}
+              {/* Modal Container */}
               <motion.div
                 ref={modalRef}
                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 50 }}
                 transition={{ type: "spring", duration: 0.7, bounce: 0.25 }}
-                className="relative w-full max-w-4xl max-h-[90vh] transform-3d holographic-card"
+                className="relative w-full max-w-4xl max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Main Card with Liquid Gradient Background */}
-                <div className="relative neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border liquid-gradient scan-lines">
-                  {/* Flowing Particle Stream */}
-                  <div className="particle-stream">
+                <div className="relative neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border liquid-gradient">
+                  {/* Flowing Particle Stream - Reduced opacity */}
+                  <div className="particle-stream opacity-30">
                     {particles.map((p) => (
                       <div
                         key={p.id}
@@ -406,34 +406,22 @@ export function OnboardingTour() {
                     ))}
                   </div>
                   
-                  {/* Control Buttons with Orbital Particles */}
+                  {/* Control Buttons */}
                   <div className="absolute top-6 right-6 z-20 flex gap-2">
                     <button
                       onClick={toggleMinimize}
-                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow perspective-tilt"
+                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm"
                       data-testid="button-minimize-tour"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <div className="orbital-particles">
-                      <button
-                        onClick={handleSkip}
-                        className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow perspective-tilt relative"
-                        data-testid="button-skip-onboarding"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                      {[0, 1, 2].map((i) => (
-                        <div
-                          key={i}
-                          className="orbital-particle"
-                          style={{
-                            animationDelay: `${i * 1}s`,
-                            animationDuration: `${3 + i}s`
-                          }}
-                        />
-                      ))}
-                    </div>
+                    <button
+                      onClick={handleSkip}
+                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm"
+                      data-testid="button-skip-onboarding"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
                   </div>
 
                   {/* Content Container */}
@@ -474,7 +462,7 @@ export function OnboardingTour() {
                             />
                           </svg>
                           
-                          {/* Icon in center with 3D morph */}
+                          {/* Icon in center */}
                           <motion.div
                             key={currentStep}
                             initial={{ scale: 0, rotate: -180 }}
@@ -482,8 +470,8 @@ export function OnboardingTour() {
                             transition={{ type: "spring", duration: 0.8, delay: 0.2 }}
                             className="absolute inset-0 flex items-center justify-center"
                           >
-                            <div className={`p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl float-3d particle-border magnetic-hover`}>
-                              <Icon className="h-10 w-10 text-white icon-morph" />
+                            <div className={`p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl`}>
+                              <Icon className="h-10 w-10 text-white" />
                             </div>
                           </motion.div>
                         </div>
@@ -495,15 +483,14 @@ export function OnboardingTour() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="glitch-transition"
                           >
                             <div className="flex items-center gap-3 mb-3">
-                              <span className="text-sm font-bold font-orbitron bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 text-transparent bg-clip-text count-up">
+                              <span className="text-sm font-bold font-orbitron bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 text-transparent bg-clip-text">
                                 STEP {currentStep + 1} / {steps.length}
                               </span>
                               <div className="h-px flex-1 bg-gradient-to-r from-purple-500/50 via-cyan-500/50 to-transparent" />
                             </div>
-                            <h2 className="text-5xl font-bold text-white mb-3 font-orbitron mouse-glow">
+                            <h2 className="text-5xl font-bold text-white mb-3 font-orbitron">
                               {currentStepData.title}
                             </h2>
                             <p className={`text-xl font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text mb-4 animate-gradient`}>
@@ -524,12 +511,12 @@ export function OnboardingTour() {
                         transition={{ delay: 0.4 }}
                         className="mb-8"
                       >
-                        <div className="relative neural-glass rounded-2xl p-8 border border-purple-500/20 overflow-hidden perspective-tilt">
+                        <div className="relative neural-glass rounded-2xl p-8 border border-purple-500/20 overflow-hidden">
                           <div className="absolute inset-0 iridescent-shimmer rounded-2xl opacity-50" />
                           
                           <div className="relative z-10">
                             <div className="flex items-center gap-3 mb-6">
-                              <div className={`p-2 bg-gradient-to-br ${currentStepData.gradient} rounded-lg magnetic-hover`}>
+                              <div className={`p-2 bg-gradient-to-br ${currentStepData.gradient} rounded-lg`}>
                                 <MousePointer2 className="h-5 w-5 text-white" />
                               </div>
                               <h3 className="text-2xl font-bold text-white font-orbitron">Quick Start Guide</h3>
@@ -542,12 +529,13 @@ export function OnboardingTour() {
                                   initial={{ opacity: 0, x: -30 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.5 + index * 0.08 }}
-                                  className="flex items-start gap-4 group hover:bg-white/5 p-3 rounded-xl transition-all"
+                                  className="flex items-start gap-5 group hover:bg-white/5 p-3 rounded-xl transition-all"
                                 >
-                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg neural-pulse count-up`}>
+                                  {/* Enhanced numbered bullet */}
+                                  <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-lg shadow-2xl ring-2 ring-white/20 hover:ring-white/40 transition-all hover:scale-110`}>
                                     {index + 1}
                                   </div>
-                                  <p className="text-gray-200 text-base leading-relaxed pt-0.5">
+                                  <p className="text-gray-200 text-base leading-relaxed pt-2">
                                     {instruction}
                                   </p>
                                 </motion.div>
@@ -557,7 +545,7 @@ export function OnboardingTour() {
                         </div>
                       </motion.div>
 
-                      {/* Action Button - Enhanced with all effects */}
+                      {/* Main Action Button */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -567,14 +555,13 @@ export function OnboardingTour() {
                         <Button
                           onClick={() => handleAction(currentStepData.action.path)}
                           size="lg"
-                          className={`px-10 py-6 text-lg font-bold bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white shadow-2xl hover:shadow-3xl transform transition-all duration-300 neural-glow magnetic-hover ripple-effect animate-gradient relative overflow-hidden`}
+                          className={`px-12 py-7 text-xl font-bold bg-gradient-to-r ${currentStepData.gradient} hover:scale-105 text-white shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 rounded-2xl`}
                           data-testid={`button-action-step-${currentStep}`}
                         >
-                          <span className="relative z-10 flex items-center">
+                          <span className="flex items-center gap-2">
                             {currentStepData.action.label}
-                            <ArrowRight className="ml-2 h-5 w-5" />
+                            <ArrowRight className="h-6 w-6" />
                           </span>
-                          <div className="absolute inset-0 iridescent-shimmer opacity-30" />
                         </Button>
                       </motion.div>
 
@@ -584,7 +571,7 @@ export function OnboardingTour() {
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
                           variant="ghost"
-                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed neural-glass px-6 perspective-tilt"
+                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed px-6 hover:bg-white/10 rounded-xl transition-all"
                           data-testid="button-previous-step"
                         >
                           <ChevronLeft className="mr-2 h-5 w-5" />
@@ -597,7 +584,7 @@ export function OnboardingTour() {
                               key={index}
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 index === currentStep 
-                                  ? `w-8 bg-gradient-to-r ${currentStepData.gradient} glow-pulse` 
+                                  ? `w-8 bg-gradient-to-r ${currentStepData.gradient} shadow-lg shadow-purple-500/50` 
                                   : index < currentStep
                                   ? 'w-2 bg-green-500 shadow-lg shadow-green-500/50'
                                   : 'w-2 bg-white/20'
@@ -611,7 +598,7 @@ export function OnboardingTour() {
                         <Button
                           onClick={handleNext}
                           variant="ghost"
-                          className="text-gray-400 hover:text-white neural-glass px-6 perspective-tilt"
+                          className="text-gray-400 hover:text-white px-6 hover:bg-white/10 rounded-xl transition-all"
                           data-testid="button-next-step"
                         >
                           {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
