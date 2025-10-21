@@ -108,7 +108,11 @@ import {
   type InsertConversation,
   type ConversationLike,
   type ConversationComment,
-  type ConversationShare
+  type ConversationShare,
+  // Blog Posts
+  blogPosts,
+  type BlogPost,
+  type InsertBlogPost
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -411,6 +415,35 @@ export interface IStorage {
   }): Promise<any | undefined>;
   deleteConversation(id: string, userId: string): Promise<boolean>;
   toggleConversationLike(conversationId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
+  
+  // Blog Post operations
+  getBlogPost(id: string): Promise<any | undefined>;
+  getBlogPosts(options?: { limit?: number; offset?: number; category?: string; isFeatured?: boolean }): Promise<any[]>;
+  createBlogPost(data: {
+    title: string;
+    content: string;
+    summary?: string;
+    coverImage?: string;
+    category: string;
+    tags?: string[];
+    authorId: string;
+    sourceUrl?: string;
+    sourceName?: string;
+    isPublished?: boolean;
+    isFeatured?: boolean;
+  }): Promise<any>;
+  updateBlogPost(id: string, updates: any): Promise<any | undefined>;
+  deleteBlogPost(id: string): Promise<boolean>;
+  
+  // Unified Social Feed
+  getUnifiedSocialFeed(options: {
+    types?: ('blog' | 'bounty' | 'market' | 'summary')[];
+    category?: string;
+    limit: number;
+    offset: number;
+    userId?: string;
+  }): Promise<any[]>;
+  
   createConversationComment(data: {
     conversationId: string;
     userId: string;
@@ -2444,6 +2477,156 @@ export class DatabaseStorage implements IStorage {
       .where(eq(conversations.id, data.conversationId));
 
     return share;
+  }
+
+  // Blog Post operations
+  async getBlogPost(id: string): Promise<any | undefined> {
+    const [result] = await db
+      .select({
+        post: blogPosts,
+        author: {
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar
+        }
+      })
+      .from(blogPosts)
+      .leftJoin(users, eq(blogPosts.authorId, users.id))
+      .where(eq(blogPosts.id, id));
+    
+    if (!result) return undefined;
+    return { ...result.post, author: result.author };
+  }
+
+  async getBlogPosts(options?: { limit?: number; offset?: number; category?: string; isFeatured?: boolean }): Promise<any[]> {
+    const limit = options?.limit || 20;
+    const offset = options?.offset || 0;
+    
+    let query = db
+      .select({
+        post: blogPosts,
+        author: {
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar
+        }
+      })
+      .from(blogPosts)
+      .leftJoin(users, eq(blogPosts.authorId, users.id))
+      .where(eq(blogPosts.isPublished, true));
+    
+    if (options?.category) {
+      query = query.where(and(eq(blogPosts.isPublished, true), eq(blogPosts.category, options.category)));
+    }
+    
+    if (options?.isFeatured !== undefined) {
+      query = query.where(and(eq(blogPosts.isPublished, true), eq(blogPosts.isFeatured, options.isFeatured)));
+    }
+    
+    const results = await query
+      .orderBy(desc(blogPosts.publishedAt))
+      .limit(limit)
+      .offset(offset);
+    
+    return results.map(r => ({ ...r.post, author: r.author }));
+  }
+
+  async createBlogPost(data: {
+    title: string;
+    content: string;
+    summary?: string;
+    coverImage?: string;
+    category: string;
+    tags?: string[];
+    authorId: string;
+    sourceUrl?: string;
+    sourceName?: string;
+    isPublished?: boolean;
+    isFeatured?: boolean;
+  }): Promise<any> {
+    const [post] = await db
+      .insert(blogPosts)
+      .values(data)
+      .returning();
+    
+    const author = await this.getUser(data.authorId);
+    return { ...post, author: { id: author?.id, username: author?.username, avatar: author?.avatar } };
+  }
+
+  async updateBlogPost(id: string, updates: any): Promise<any | undefined> {
+    const [post] = await db
+      .update(blogPosts)
+      .set({ ...updates, updatedAt: sql`now()` })
+      .where(eq(blogPosts.id, id))
+      .returning();
+    
+    if (!post) return undefined;
+    
+    const author = await this.getUser(post.authorId);
+    return { ...post, author: { id: author?.id, username: author?.username, avatar: author?.avatar } };
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  // Unified Social Feed
+  async getUnifiedSocialFeed(options: {
+    types?: ('blog' | 'bounty' | 'market' | 'summary')[];
+    category?: string;
+    limit: number;
+    offset: number;
+    userId?: string;
+  }): Promise<any[]> {
+    const feedItems: any[] = [];
+    const types = options.types || ['blog', 'bounty', 'market', 'summary'];
+    
+    // Fetch blog posts
+    if (types.includes('blog')) {
+      const posts = await this.getBlogPosts({ limit: options.limit, offset: options.offset, category: options.category });
+      feedItems.push(...posts.map(p => ({
+        ...p,
+        type: 'blog',
+        timestamp: p.publishedAt
+      })));
+    }
+    
+    // Fetch bounties
+    if (types.includes('bounty')) {
+      const bounties = await this.getBounties(options.limit, options.offset);
+      feedItems.push(...bounties.map(b => ({
+        ...b,
+        type: 'bounty',
+        timestamp: b.createdAt
+      })));
+    }
+    
+    // Fetch prediction markets
+    if (types.includes('market')) {
+      const markets = await this.getPredictionMarkets({ limit: options.limit, offset: options.offset });
+      feedItems.push(...markets.map(m => ({
+        ...m,
+        type: 'market',
+        timestamp: m.createdAt
+      })));
+    }
+    
+    // Fetch summaries
+    if (types.includes('summary')) {
+      const summaries = await this.getSummaries(options.limit, options.offset);
+      feedItems.push(...summaries.map(s => ({
+        ...s,
+        type: 'summary',
+        timestamp: s.createdAt
+      })));
+    }
+    
+    // Sort by timestamp descending
+    feedItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    // Return limited results
+    return feedItems.slice(options.offset, options.offset + options.limit);
   }
 }
 

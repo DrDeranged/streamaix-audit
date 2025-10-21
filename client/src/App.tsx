@@ -39,7 +39,7 @@ const AnalyticsDashboard = React.lazy(() => import("@/pages/AnalyticsDashboard")
 const Markets = React.lazy(() => import("@/pages/markets"));
 const PredictionMarket = React.lazy(() => import("@/pages/prediction-market"));
 const ChatPage = React.lazy(() => import("@/pages/chat"));
-const SocialCenter = React.lazy(() => import("@/pages/social-center"));
+const SocialFeed = React.lazy(() => import("@/pages/social-feed"));
 
 function Router() {
   return (
@@ -170,7 +170,7 @@ function Router() {
       
       <Route path="/social">
         <Suspense fallback={<DashboardSkeleton />}>
-          <SocialCenter />
+          <SocialFeed />
         </Suspense>
       </Route>
       
