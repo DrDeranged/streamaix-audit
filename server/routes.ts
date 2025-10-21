@@ -1865,6 +1865,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // SOCIAL ENGAGEMENT ROUTES (Bounties, Markets, Summaries)
+  // =============================================================================
+
+  // Bounty social engagement
+  app.post('/api/bounties/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const result = await storage.toggleBountyLike(req.user.id, req.params.id);
+      res.json({ liked: result.liked, likesCount: result.likesCount });
+    } catch (error) {
+      console.error('Like bounty error:', error);
+      res.status(500).json({ error: 'Failed to like bounty' });
+    }
+  }));
+
+  app.post('/api/bounties/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    const { content } = req.body;
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment content is required' });
+    }
+    
+    try {
+      const comment = await storage.createBountyComment({
+        bountyId: req.params.id,
+        userId: req.user.id,
+        content: content.trim()
+      });
+      res.status(201).json({ comment });
+    } catch (error) {
+      console.error('Comment bounty error:', error);
+      res.status(500).json({ error: 'Failed to comment on bounty' });
+    }
+  }));
+
+  app.get('/api/bounties/:id/comments', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const comments = await storage.getBountyComments(req.params.id);
+      res.json({ comments });
+    } catch (error) {
+      console.error('Get bounty comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  }));
+
+  app.post('/api/bounties/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const result = await storage.toggleBountySave(req.user.id, req.params.id);
+      res.json({ saved: result.saved });
+    } catch (error) {
+      console.error('Save bounty error:', error);
+      res.status(500).json({ error: 'Failed to save bounty' });
+    }
+  }));
+
+  // Prediction market social engagement
+  app.post('/api/prediction-markets/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const result = await storage.toggleMarketLike(req.user.id, req.params.id);
+      res.json({ liked: result.liked, likesCount: result.likesCount });
+    } catch (error) {
+      console.error('Like market error:', error);
+      res.status(500).json({ error: 'Failed to like market' });
+    }
+  }));
+
+  app.post('/api/prediction-markets/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    const { content } = req.body;
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment content is required' });
+    }
+    
+    try {
+      const comment = await storage.createMarketComment({
+        marketId: req.params.id,
+        userId: req.user.id,
+        content: content.trim()
+      });
+      res.status(201).json({ comment });
+    } catch (error) {
+      console.error('Comment market error:', error);
+      res.status(500).json({ error: 'Failed to comment on market' });
+    }
+  }));
+
+  app.get('/api/prediction-markets/:id/comments', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const comments = await storage.getMarketComments(req.params.id);
+      res.json({ comments });
+    } catch (error) {
+      console.error('Get market comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  }));
+
+  app.post('/api/prediction-markets/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const result = await storage.toggleMarketSave(req.user.id, req.params.id);
+      res.json({ saved: result.saved });
+    } catch (error) {
+      console.error('Save market error:', error);
+      res.status(500).json({ error: 'Failed to save market' });
+    }
+  }));
+
+  // Summary social engagement
+  app.post('/api/summaries/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const result = await storage.toggleSummaryLike(req.user.id, req.params.id);
+      res.json({ liked: result.liked, likesCount: result.likesCount });
+    } catch (error) {
+      console.error('Like summary error:', error);
+      res.status(500).json({ error: 'Failed to like summary' });
+    }
+  }));
+
+  app.post('/api/summaries/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    const { content } = req.body;
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment content is required' });
+    }
+    
+    try {
+      const comment = await storage.createSummaryComment({
+        summaryId: req.params.id,
+        userId: req.user.id,
+        content: content.trim(),
+        rating: null
+      });
+      res.status(201).json({ comment });
+    } catch (error) {
+      console.error('Comment summary error:', error);
+      res.status(500).json({ error: 'Failed to comment on summary' });
+    }
+  }));
+
+  app.get('/api/summaries/:id/comments', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const comments = await storage.getSummaryComments(req.params.id);
+      res.json({ comments });
+    } catch (error) {
+      console.error('Get summary comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  }));
+
+  app.post('/api/summaries/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const result = await storage.toggleSummarySave(req.user.id, req.params.id);
+      res.json({ saved: result.saved });
+    } catch (error) {
+      console.error('Save summary error:', error);
+      res.status(500).json({ error: 'Failed to save summary' });
+    }
+  }));
+
+  // =============================================================================
   // KNOWLEDGE STACK ROUTES
   // =============================================================================
 
