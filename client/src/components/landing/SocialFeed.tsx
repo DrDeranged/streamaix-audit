@@ -116,9 +116,10 @@ export function SocialFeed() {
   });
 
   // Fetch crypto data for CRYPTO tab
-  const { data: cryptoData, isLoading: cryptoLoading } = useQuery<any>({
+  const { data: cryptoData, isLoading: cryptoLoading, error: cryptoError } = useQuery<any>({
     queryKey: ['/api/analytics/live/crypto'],
     enabled: activeTab === 'crypto',
+    retry: false,
   });
 
   // Build feed based on active tab
@@ -131,15 +132,16 @@ export function SocialFeed() {
           id: `stock-${stock.symbol}`,
           type: 'macro',
           content: {
-            title: `${stock.name} (${stock.symbol})`,
-            description: `Current Price: $${stock.currentPrice?.toFixed(2) || 'N/A'} | ${stock.changePercent >= 0 ? '📈' : '📉'} ${stock.changePercent?.toFixed(2)}%`,
+            title: `${stock.name || stock.symbol} (${stock.symbol})`,
+            description: `Current Price: $${stock.price?.toFixed(2) || 'N/A'} | ${stock.changePercent >= 0 ? '📈' : '📉'} ${stock.changePercent?.toFixed(2)}%`,
             author: { id: 'market-data', username: 'Market Data' },
             createdAt: new Date().toISOString(),
             metadata: {
               symbol: stock.symbol,
-              price: stock.currentPrice,
+              price: stock.price,
               change: stock.changePercent,
               volume: stock.volume,
+              momentum: stock.momentum,
             },
           },
           engagement: {
@@ -159,21 +161,21 @@ export function SocialFeed() {
           type: 'crypto',
           content: {
             title: `${crypto.name} (${crypto.symbol.toUpperCase()})`,
-            description: `Current Price: $${crypto.current_price?.toFixed(crypto.current_price < 1 ? 6 : 2) || 'N/A'} | ${crypto.price_change_percentage_24h >= 0 ? '📈' : '📉'} ${crypto.price_change_percentage_24h?.toFixed(2)}%`,
+            description: `Current Price: $${crypto.price?.toFixed(crypto.price < 1 ? 6 : 2) || 'N/A'} | ${crypto.percentChange24h >= 0 ? '📈' : '📉'} ${crypto.percentChange24h?.toFixed(2)}%`,
             author: { id: 'crypto-feed', username: 'Crypto Feed' },
             createdAt: new Date().toISOString(),
             metadata: {
               symbol: crypto.symbol,
-              price: crypto.current_price,
-              change: crypto.price_change_percentage_24h,
-              marketCap: crypto.market_cap,
+              price: crypto.price,
+              change: crypto.percentChange24h,
+              marketCap: crypto.marketCap,
             },
           },
           engagement: {
             likesCount: Math.floor(Math.random() * 100),
             commentsCount: Math.floor(Math.random() * 40),
           },
-          score: Math.abs(crypto.price_change_percentage_24h || 0) * 10,
+          score: Math.abs(crypto.percentChange24h || 0) * 10,
           timestamp: Date.now() - index * 1000,
         });
       });
@@ -235,7 +237,7 @@ export function SocialFeed() {
         style={{ width: '100%', height: '100%' }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 py-16 max-w-4xl">
+      <div className="relative z-10 container mx-auto px-4 py-16 max-w-7xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -371,10 +373,24 @@ export function SocialFeed() {
             >
               <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
                 <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No data available</h3>
-                <p className="text-gray-400 mb-4">
-                  Check back soon for updates!
-                </p>
+                {activeTab === 'crypto' && cryptoError ? (
+                  <>
+                    <h3 className="text-xl font-semibold text-white mb-2">API Rate Limits Reached</h3>
+                    <p className="text-gray-400 mb-2">
+                      All crypto data APIs (CoinGecko, CoinMarketCap, Dune Analytics) have reached their rate limits.
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Please try again later or check the MACRO and PREDICTIONS tabs for live market data.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-xl font-semibold text-white mb-2">No data available</h3>
+                    <p className="text-gray-400 mb-4">
+                      Check back soon for updates!
+                    </p>
+                  </>
+                )}
               </div>
             </motion.div>
           )}

@@ -2903,6 +2903,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get live stock data (Finnhub API)
+  app.get('/api/analytics/live/stocks', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const stocks = await marketDataService.getCryptoStocks();
+      res.json({ 
+        success: true,
+        stocks, 
+        count: stocks.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Stock data error:', error);
+      res.status(500).json({ 
+        success: false,
+        stocks: [], 
+        error: 'Stock data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get live crypto data with graceful fallback for rate limits
+  app.get('/api/analytics/live/crypto', optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const symbols = [
+        'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK',
+        'UNI', 'AAVE', 'ATOM', 'ALGO', 'VET', 'FIL', 'ICP', 'HBAR', 'APT', 'ARB'
+      ];
+      const prices = await marketDataService.getCryptoQuotes(symbols);
+      
+      if (prices.length === 0) {
+        // All APIs rate limited
+        return res.status(429).json({
+          success: false,
+          prices: [],
+          error: 'All crypto data APIs have reached their rate limits. Please try again later.',
+          rateLimitInfo: {
+            coinGecko: 'Rate limit exceeded (10,000 calls/month)',
+            coinMarketCap: 'Monthly credit limit reached',
+            duneAnalytics: 'Rate limit exceeded'
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      res.json({ 
+        success: true,
+        prices, 
+        count: prices.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Crypto data error:', error);
+      res.status(500).json({ 
+        success: false,
+        prices: [], 
+        error: 'Crypto data unavailable', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Get user engagement predictions
   app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
