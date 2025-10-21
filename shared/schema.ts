@@ -216,6 +216,62 @@ export const userNotes = pgTable("user_notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Social Conversations Platform
+export const conversations = pgTable("conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  authorId: varchar("author_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  imageUrl: text("image_url"), // optional image attachment
+  tags: text("tags").array(), // crypto topics: ["Bitcoin", "DeFi", "Layer2"]
+  
+  // Optional relationships to other content
+  linkedSummaryId: varchar("linked_summary_id").references(() => summaries.id),
+  linkedMarketId: varchar("linked_market_id"), // Will reference predictionMarkets
+  
+  // Engagement metrics
+  likesCount: integer("likes_count").default(0),
+  commentsCount: integer("comments_count").default(0),
+  sharesCount: integer("shares_count").default(0),
+  viewsCount: integer("views_count").default(0),
+  
+  // Trending & relevance
+  trendingScore: real("trending_score").default(0), // calculated from engagement velocity
+  engagementRate: real("engagement_rate").default(0), // engagement / views
+  
+  // Visibility
+  isPublic: boolean("is_public").default(true),
+  isPinned: boolean("is_pinned").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const conversationLikes = pgTable("conversation_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const conversationComments = pgTable("conversation_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  parentCommentId: varchar("parent_comment_id").references((): AnyPgColumn => conversationComments.id), // for nested replies
+  likesCount: integer("likes_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const conversationShares = pgTable("conversation_shares", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  platform: text("platform"), // 'twitter', 'lens', 'farcaster', 'internal'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
@@ -990,6 +1046,36 @@ export const insertUserNoteSchema = createInsertSchema(userNotes).pick({
   isPrivate: true,
 });
 
+// Social Conversations Schemas
+export const insertConversationSchema = createInsertSchema(conversations).pick({
+  authorId: true,
+  content: true,
+  imageUrl: true,
+  tags: true,
+  linkedSummaryId: true,
+  linkedMarketId: true,
+  isPublic: true,
+  isPinned: true,
+});
+
+export const insertConversationLikeSchema = createInsertSchema(conversationLikes).pick({
+  conversationId: true,
+  userId: true,
+});
+
+export const insertConversationCommentSchema = createInsertSchema(conversationComments).pick({
+  conversationId: true,
+  userId: true,
+  content: true,
+  parentCommentId: true,
+});
+
+export const insertConversationShareSchema = createInsertSchema(conversationShares).pick({
+  conversationId: true,
+  userId: true,
+  platform: true,
+});
+
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
   createdAt: true,
@@ -1261,6 +1347,18 @@ export type KnowledgeStack = typeof knowledgeStacks.$inferSelect;
 
 export type InsertUserNote = z.infer<typeof insertUserNoteSchema>;
 export type UserNote = typeof userNotes.$inferSelect;
+
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+
+export type InsertConversationLike = z.infer<typeof insertConversationLikeSchema>;
+export type ConversationLike = typeof conversationLikes.$inferSelect;
+
+export type InsertConversationComment = z.infer<typeof insertConversationCommentSchema>;
+export type ConversationComment = typeof conversationComments.$inferSelect;
+
+export type InsertConversationShare = z.infer<typeof insertConversationShareSchema>;
+export type ConversationShare = typeof conversationShares.$inferSelect;
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
