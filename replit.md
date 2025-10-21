@@ -8,7 +8,12 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 ### UI/UX Decisions
-The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, and Radix UI primitives. It features a futuristic, clean design with glass morphism effects, offering both light and dark modes and a mobile-first responsive layout. Animations are handled by Framer Motion.
+The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, and Radix UI primitives. It features an **AI-Native aesthetic** with sophisticated neural network visualizations, advanced glass morphism effects, iridescent borders, and 3D depth transforms. The design emphasizes technology-forward visuals with:
+- **Neural Network Background**: Animated nodes with glowing connections, data flow particles, and mouse-reactive interactions
+- **Enhanced Glass Morphism**: Multi-layer frosted glass with iridescent shimmer effects and holographic borders
+- **Advanced Animations**: 3D transforms, floating elements, circular progress visualizations, neural pulse effects, and glow animations
+- **Design System**: Custom CSS utilities for `.neural-glass`, `.iridescent-border`, `.glow-pulse`, `.tilt-hover`, and `.float-3d` effects
+Offering both light and dark modes with mobile-first responsive layout. Animations powered by Framer Motion and custom CSS keyframes.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, TailwindCSS, shadcn/ui, Radix UI, TanStack React Query for state management, wouter for routing, Framer Motion for animations.
@@ -27,7 +32,14 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
     - **AI Discovery**: Personalized content recommendations, trending bounties, "For You" feed.
     - **Smart Insights Dashboard**: AI-powered market intelligence, trading signals, sentiment analysis, confidence scoring.
     - **Analytics Dashboard**: Platform-wide engagement metrics, activity trends, category distribution, reward distribution.
-    - **User Onboarding**: Interactive 6-step tutorial tour for new users featuring platform introduction, key features walkthrough, animated modal with progress tracking, localStorage-based completion tracking, and manual replay option.
+    - **User Onboarding**: Redesigned AI-Native onboarding modal with 12-step interactive tutorial featuring:
+        - Neural network animated background with glowing nodes and connections
+        - Circular progress ring (Apple Watch style) instead of traditional dots
+        - Enhanced glass morphism with iridescent shimmer effects
+        - 3D floating icon animations and depth transforms
+        - Modernized layout with better spacing and visual hierarchy
+        - Minimized floating widget for continued navigation
+        - Step-by-step platform walkthrough with interactive elements
     - **Prediction Markets**: Full-featured binary YES/NO prediction market platform (Polymarket-inspired) with:
         - **Smart Contracts**: ERC-1155 conditional tokens, AMM-based pricing, on-chain settlement on Base network
         - **Market Types**: Crypto predictions, DeFi events, bounty outcomes, real-world events, community predictions

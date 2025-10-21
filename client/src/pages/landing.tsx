@@ -5,7 +5,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
 import LiveCryptoVideos from "@/components/landing/live-crypto-videos";
 import { TrendingSocialContent } from "@/components/landing/trending-social-content";
-import { ParticleNetwork } from "@/components/ParticleNetwork";
+import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
@@ -18,7 +18,7 @@ import { Footer } from "@/components/landing/footer";
 export default function Landing() {
   return (
     <div className="relative min-h-screen bg-background text-foreground">
-      <ParticleNetwork />
+      <NeuralNetworkBackground />
       <div className="relative z-10">
         <Navigation />
         <AICapabilitiesBanner />
