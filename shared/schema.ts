@@ -251,6 +251,36 @@ export const conversations = pgTable("conversations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Blog posts for crypto news/stories
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  content: text("content").notNull(), // markdown or rich text
+  summary: text("summary"), // short preview text
+  coverImage: text("cover_image"), // optional cover image URL
+  category: text("category").notNull(), // News, Analysis, Tutorial, Market Update, etc
+  tags: text("tags").array(), // ["Bitcoin", "DeFi", "Layer2"]
+  authorId: varchar("author_id").references(() => users.id).notNull(),
+  
+  // External source info (if aggregated from external news)
+  sourceUrl: text("source_url"), // original article URL
+  sourceName: text("source_name"), // CoinDesk, Cointelegraph, etc
+  
+  // Engagement metrics
+  viewsCount: integer("views_count").default(0),
+  likesCount: integer("likes_count").default(0),
+  commentsCount: integer("comments_count").default(0),
+  sharesCount: integer("shares_count").default(0),
+  
+  // Publishing
+  isPublished: boolean("is_published").default(true),
+  isFeatured: boolean("is_featured").default(false), // featured on homepage
+  publishedAt: timestamp("published_at").defaultNow(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const conversationLikes = pgTable("conversation_likes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
@@ -1080,6 +1110,24 @@ export const insertConversationShareSchema = createInsertSchema(conversationShar
   userId: true,
   platform: true,
 });
+
+// Blog Posts Schemas
+export const insertBlogPostSchema = createInsertSchema(blogPosts).pick({
+  title: true,
+  content: true,
+  summary: true,
+  coverImage: true,
+  category: true,
+  tags: true,
+  authorId: true,
+  sourceUrl: true,
+  sourceName: true,
+  isPublished: true,
+  isFeatured: true,
+});
+
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
