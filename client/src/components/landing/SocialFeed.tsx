@@ -109,74 +109,74 @@ export function SocialFeed() {
     enabled: activeTab === 'predictions',
   });
 
-  // Fetch stock data for MACRO tab
-  const { data: stockData, isLoading: stockLoading } = useQuery<any>({
-    queryKey: ['/api/analytics/live/stocks'],
+  // Fetch macro news for MACRO tab
+  const { data: macroNews, isLoading: macroLoading } = useQuery<any>({
+    queryKey: ['/api/news/macro'],
     enabled: activeTab === 'macro',
   });
 
-  // Fetch crypto data for CRYPTO tab
-  const { data: cryptoData, isLoading: cryptoLoading, error: cryptoError } = useQuery<any>({
-    queryKey: ['/api/analytics/live/crypto'],
+  // Fetch crypto news for CRYPTO tab
+  const { data: cryptoNews, isLoading: cryptoLoading } = useQuery<any>({
+    queryKey: ['/api/news/crypto'],
     enabled: activeTab === 'crypto',
-    retry: false,
   });
 
   // Build feed based on active tab
   const buildFeed = (): FeedItem[] => {
     const feed: FeedItem[] = [];
 
-    if (activeTab === 'macro' && stockData?.stocks) {
-      stockData.stocks.forEach((stock: any, index: number) => {
+    if (activeTab === 'macro' && macroNews?.articles) {
+      macroNews.articles.forEach((article: any, index: number) => {
         feed.push({
-          id: `stock-${stock.symbol}`,
+          id: article.id,
           type: 'macro',
           content: {
-            title: `${stock.name || stock.symbol} (${stock.symbol})`,
-            description: `Current Price: $${stock.price?.toFixed(2) || 'N/A'} | ${stock.changePercent >= 0 ? '📈' : '📉'} ${stock.changePercent?.toFixed(2)}%`,
-            author: { id: 'market-data', username: 'Market Data' },
-            createdAt: new Date().toISOString(),
+            title: article.title,
+            description: article.summary,
+            author: { id: article.source.toLowerCase(), username: article.source },
+            createdAt: article.published,
             metadata: {
-              symbol: stock.symbol,
-              price: stock.price,
-              change: stock.changePercent,
-              volume: stock.volume,
-              momentum: stock.momentum,
+              source: article.source,
+              sourceLogo: article.sourceLogo,
+              category: article.category,
+              url: article.url,
+              imageUrl: article.imageUrl,
             },
           },
           engagement: {
-            likesCount: Math.floor(Math.random() * 50),
-            commentsCount: Math.floor(Math.random() * 20),
+            likesCount: Math.floor(Math.random() * 50 + 10),
+            commentsCount: Math.floor(Math.random() * 20 + 5),
           },
-          score: Math.abs(stock.changePercent || 0) * 10,
-          timestamp: Date.now() - index * 1000,
+          score: 100 - index,
+          timestamp: new Date(article.published).getTime(),
         });
       });
     }
 
-    if (activeTab === 'crypto' && cryptoData?.prices) {
-      cryptoData.prices.forEach((crypto: any, index: number) => {
+    if (activeTab === 'crypto' && cryptoNews?.articles) {
+      cryptoNews.articles.forEach((article: any, index: number) => {
         feed.push({
-          id: `crypto-${crypto.symbol}`,
+          id: article.id,
           type: 'crypto',
           content: {
-            title: `${crypto.name} (${crypto.symbol.toUpperCase()})`,
-            description: `Current Price: $${crypto.price?.toFixed(crypto.price < 1 ? 6 : 2) || 'N/A'} | ${crypto.percentChange24h >= 0 ? '📈' : '📉'} ${crypto.percentChange24h?.toFixed(2)}%`,
-            author: { id: 'crypto-feed', username: 'Crypto Feed' },
-            createdAt: new Date().toISOString(),
+            title: article.title,
+            description: article.summary,
+            author: { id: article.source.toLowerCase(), username: article.source },
+            createdAt: article.published,
             metadata: {
-              symbol: crypto.symbol,
-              price: crypto.price,
-              change: crypto.percentChange24h,
-              marketCap: crypto.marketCap,
+              source: article.source,
+              sourceLogo: article.sourceLogo,
+              category: article.category,
+              url: article.url,
+              imageUrl: article.imageUrl,
             },
           },
           engagement: {
-            likesCount: Math.floor(Math.random() * 100),
-            commentsCount: Math.floor(Math.random() * 40),
+            likesCount: Math.floor(Math.random() * 100 + 20),
+            commentsCount: Math.floor(Math.random() * 40 + 10),
           },
-          score: Math.abs(crypto.percentChange24h || 0) * 10,
-          timestamp: Date.now() - index * 1000,
+          score: 100 - index,
+          timestamp: new Date(article.published).getTime(),
         });
       });
     }
@@ -224,7 +224,7 @@ export function SocialFeed() {
 
   const feedItems = buildFeed();
   const isLoading = 
-    (activeTab === 'macro' && stockLoading) ||
+    (activeTab === 'macro' && macroLoading) ||
     (activeTab === 'crypto' && cryptoLoading) ||
     (activeTab === 'predictions' && marketsLoading);
 
@@ -373,24 +373,10 @@ export function SocialFeed() {
             >
               <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
                 <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                {activeTab === 'crypto' && cryptoError ? (
-                  <>
-                    <h3 className="text-xl font-semibold text-white mb-2">API Rate Limits Reached</h3>
-                    <p className="text-gray-400 mb-2">
-                      All crypto data APIs (CoinGecko, CoinMarketCap, Dune Analytics) have reached their rate limits.
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      Please try again later or check the MACRO and PREDICTIONS tabs for live market data.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-xl font-semibold text-white mb-2">No data available</h3>
-                    <p className="text-gray-400 mb-4">
-                      Check back soon for updates!
-                    </p>
-                  </>
-                )}
+                <h3 className="text-xl font-semibold text-white mb-2">No stories available</h3>
+                <p className="text-gray-400 mb-4">
+                  Check back soon for the latest news and updates!
+                </p>
               </div>
             </motion.div>
           )}
