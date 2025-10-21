@@ -565,28 +565,29 @@ export function OnboardingTour() {
                       </motion.div>
 
                       {/* Navigation Footer */}
-                      <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                      <div className="flex items-center justify-between pt-4 border-t border-white/10">
                         <Button
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
                           variant="ghost"
-                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed px-6 hover:bg-white/10 rounded-xl transition-all"
+                          size="sm"
+                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all text-sm"
                           data-testid="button-previous-step"
                         >
-                          <ChevronLeft className="mr-2 h-5 w-5" />
+                          <ChevronLeft className="mr-1 h-4 w-4" />
                           Previous
                         </Button>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           {steps.map((_, index) => (
                             <motion.div
                               key={index}
-                              className={`h-2 rounded-full transition-all duration-300 ${
+                              className={`h-1.5 rounded-full transition-all duration-300 ${
                                 index === currentStep 
-                                  ? `w-8 bg-gradient-to-r ${currentStepData.gradient} shadow-lg shadow-purple-500/50` 
+                                  ? `w-6 bg-gradient-to-r ${currentStepData.gradient}` 
                                   : index < currentStep
-                                  ? 'w-2 bg-green-500 shadow-lg shadow-green-500/50'
-                                  : 'w-2 bg-white/20'
+                                  ? 'w-1.5 bg-green-500'
+                                  : 'w-1.5 bg-white/20'
                               }`}
                               initial={{ scale: 0.8 }}
                               animate={{ scale: index === currentStep ? 1 : 0.8 }}
@@ -597,11 +598,12 @@ export function OnboardingTour() {
                         <Button
                           onClick={handleNext}
                           variant="ghost"
-                          className="text-gray-400 hover:text-white px-6 hover:bg-white/10 rounded-xl transition-all"
+                          size="sm"
+                          className="text-gray-400 hover:text-white px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all text-sm"
                           data-testid="button-next-step"
                         >
                           {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
-                          <ChevronRight className="ml-2 h-5 w-5" />
+                          <ChevronRight className="ml-1 h-4 w-4" />
                         </Button>
                       </div>
                     </div>
