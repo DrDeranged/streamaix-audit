@@ -229,7 +229,7 @@ export function SocialFeed() {
     (activeTab === 'predictions' && marketsLoading);
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative overflow-hidden py-8 sm:py-12">
       {/* Neural Network Background */}
       <canvas
         ref={canvasRef}
@@ -237,18 +237,18 @@ export function SocialFeed() {
         style={{ width: '100%', height: '100%' }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 py-16 max-w-7xl">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 max-w-7xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-8"
+          className="text-center mb-6 sm:mb-10"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
             Social Feed
           </h2>
-          <p className="text-gray-400 text-sm">
+          <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
             Engage with markets, predictions, and real-time data
           </p>
         </motion.div>
@@ -326,20 +326,20 @@ export function SocialFeed() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="space-y-3"
+              className="space-y-4"
             >
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-4 animate-pulse">
-                  <div className="flex gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/20"></div>
+                <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-5 animate-pulse">
+                  <div className="flex gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-full bg-purple-500/20"></div>
                     <div className="flex-1 space-y-2">
                       <div className="h-4 bg-purple-500/20 rounded w-1/3"></div>
                       <div className="h-3 bg-purple-500/10 rounded w-1/4"></div>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="h-4 bg-purple-500/20 rounded w-3/4"></div>
-                    <div className="h-3 bg-purple-500/10 rounded w-full"></div>
+                    <div className="h-5 bg-purple-500/20 rounded w-3/4"></div>
+                    <div className="h-4 bg-purple-500/10 rounded w-full"></div>
                   </div>
                 </div>
               ))}
@@ -351,7 +351,7 @@ export function SocialFeed() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="space-y-3"
+              className="space-y-4"
             >
               {feedItems.map((item) => (
                 <SocialFeedCard

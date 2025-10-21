@@ -152,12 +152,12 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
       className="bg-white/5 backdrop-blur-md border border-purple-500/20 hover:border-fuchsia-500/40 rounded-lg transition-all"
       data-testid={`social-card-${type}-${id}`}
     >
-      <div className="p-2.5">
+      <div className="p-4 sm:p-5">
         {/* Header */}
-        <div className="flex items-start gap-2 mb-2">
+        <div className="flex items-start gap-3 mb-3">
           <Link href={`/hunter/${content.author?.id || 'anon'}`}>
-            <Avatar className="w-7 h-7 cursor-pointer ring-1 ring-purple-500/20">
-              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-xs">
+            <Avatar className="w-9 h-9 cursor-pointer ring-1 ring-purple-500/20">
+              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-sm">
                 {(content.author?.username || 'AI')[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -166,12 +166,12 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <Link href={`/hunter/${content.author?.id || 'anon'}`}>
-                <span className="text-xs font-semibold text-white hover:text-fuchsia-400 cursor-pointer">
+                <span className="text-sm font-semibold text-white hover:text-fuchsia-400 cursor-pointer">
                   @{content.author?.username || 'AI Hunter'}
                 </span>
               </Link>
-              <span className="text-gray-500 text-xs">•</span>
-              <span className="text-gray-500 text-xs">
+              <span className="text-gray-500 text-sm">•</span>
+              <span className="text-gray-500 text-sm">
                 {formatDistanceToNow(new Date(content.createdAt), { addSuffix: true })}
               </span>
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
@@ -184,23 +184,23 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
         {/* Content */}
         <Link href={getLink()}>
-          <div className="mb-2 cursor-pointer pl-9">
-            <h3 className="text-sm font-semibold text-white mb-1 hover:text-fuchsia-400 line-clamp-2">
+          <div className="mb-3 cursor-pointer pl-11">
+            <h3 className="text-base font-semibold text-white mb-1.5 hover:text-fuchsia-400 line-clamp-2">
               {content.title}
             </h3>
             {content.description && (
-              <p className="text-xs text-gray-400 line-clamp-2">
+              <p className="text-sm text-gray-400 line-clamp-2 mb-2">
                 {content.description}
               </p>
             )}
             
             {/* Type-specific metadata */}
             {content.metadata && (
-              <div className="mt-1.5 flex items-center gap-3 text-xs">
+              <div className="mt-2 flex items-center gap-3 text-xs">
                 {type === 'bounty' && (
                   <>
                     <span className="text-fuchsia-400 font-semibold flex items-center gap-1">
-                      <Trophy className="w-3 h-3" />
+                      <Trophy className="w-3.5 h-3.5" />
                       {content.metadata.reward} STREAM
                     </span>
                     <span className="text-gray-400 capitalize">{content.metadata.status}</span>
@@ -225,23 +225,23 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
         </Link>
 
         {/* Engagement Stats */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 pl-9">
+        <div className="flex items-center gap-2 text-xs text-gray-500 mb-3 pl-11">
           <span>{likesCount} likes</span>
           <span>•</span>
           <span>{engagement.commentsCount} comments</span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1 pb-2 border-b border-purple-500/10 pl-9">
+        <div className="flex items-center gap-1.5 pb-3 border-b border-purple-500/10 pl-11">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleLike}
             disabled={likeMutation.isPending}
-            className={`flex-1 gap-1 h-7 text-xs ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500`}
+            className={`flex-1 gap-1.5 h-8 text-sm ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500`}
             data-testid={`button-like-${id}`}
           >
-            <Heart className={`w-3 h-3 ${isLiked ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
             {isLiked ? 'Liked' : 'Like'}
           </Button>
           
@@ -249,10 +249,10 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
             variant="ghost"
             size="sm"
             onClick={() => setShowComments(!showComments)}
-            className="flex-1 gap-1 h-7 text-xs text-gray-400 hover:text-cyan-500"
+            className="flex-1 gap-1.5 h-8 text-sm text-gray-400 hover:text-cyan-500"
             data-testid={`button-comment-${id}`}
           >
-            <MessageCircle className="w-3 h-3" />
+            <MessageCircle className="w-4 h-4" />
             Comment
           </Button>
           
@@ -261,10 +261,10 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
             size="sm"
             onClick={handleSave}
             disabled={saveMutation.isPending}
-            className={`flex-1 gap-1 h-7 text-xs ${isSaved ? 'text-purple-400' : 'text-gray-400'} hover:text-purple-400`}
+            className={`flex-1 gap-1.5 h-8 text-sm ${isSaved ? 'text-purple-400' : 'text-gray-400'} hover:text-purple-400`}
             data-testid={`button-save-${id}`}
           >
-            <Bookmark className={`w-3 h-3 ${isSaved ? 'fill-current' : ''}`} />
+            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
             {isSaved ? 'Saved' : 'Save'}
           </Button>
         </div>
