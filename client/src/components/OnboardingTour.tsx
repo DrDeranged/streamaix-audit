@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronRight, ChevronLeft, Sparkles, Coins, TrendingUp, Bot, Wallet, 
@@ -218,12 +218,24 @@ export function OnboardingTour() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [, setLocation] = useLocation();
+  const [particles, setParticles] = useState<Array<{ id: number; delay: number; x: number }>>([]);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('streamaix_tour_completed');
     if (!hasSeenTour) {
       setTimeout(() => setIsOpen(true), 1000);
     }
+  }, []);
+
+  // Generate random particles for the stream effect
+  useEffect(() => {
+    const particleArray = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      delay: Math.random() * 4,
+      x: Math.random() * 100
+    }));
+    setParticles(particleArray);
   }, []);
 
   const handleClose = () => {
@@ -251,24 +263,20 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
-    // For first step, just move to next
     if (currentStep === 0) {
       handleNext();
       return;
     }
     
-    // For last step, close the tour
     if (currentStep === steps.length - 1) {
       handleClose();
       setLocation(path);
       return;
     }
     
-    // For all other steps, navigate and minimize
     setLocation(path);
     setIsMinimized(true);
     
-    // Auto-advance to next step after navigation
     setTimeout(() => {
       setCurrentStep(currentStep + 1);
       setIsMinimized(false);
@@ -283,7 +291,6 @@ export function OnboardingTour() {
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
 
-  // Circular progress calculation
   const radius = 56;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -302,7 +309,7 @@ export function OnboardingTour() {
             >
               <button
                 onClick={toggleMinimize}
-                className={`group relative p-4 neural-glass rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden`}
+                className="group relative p-4 neural-glass rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden perspective-tilt"
                 data-testid="button-tour-minimized"
               >
                 <div className="flex items-center gap-4 relative z-10">
@@ -333,6 +340,7 @@ export function OnboardingTour() {
                         strokeDasharray={`${2 * Math.PI * 20}`}
                         strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
                         strokeLinecap="round"
+                        className="energy-flow"
                       />
                       <defs>
                         <linearGradient id="progress-gradient-mini" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -371,48 +379,73 @@ export function OnboardingTour() {
                 <NeuralNetworkBackground />
               </div>
 
-              {/* Modal Container */}
+              {/* Modal Container - Holographic Card */}
               <motion.div
+                ref={modalRef}
                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 50 }}
                 transition={{ type: "spring", duration: 0.7, bounce: 0.25 }}
-                className="relative w-full max-w-4xl max-h-[90vh] transform-3d"
+                className="relative w-full max-w-4xl max-h-[90vh] transform-3d holographic-card"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Main Card */}
-                <div className="relative neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border">
-                  {/* Animated gradient overlay */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${currentStepData.gradient} opacity-10 pointer-events-none animate-gradient`} />
+                {/* Main Card with Liquid Gradient Background */}
+                <div className="relative neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border liquid-gradient scan-lines">
+                  {/* Flowing Particle Stream */}
+                  <div className="particle-stream">
+                    {particles.map((p) => (
+                      <div
+                        key={p.id}
+                        className="particle"
+                        style={{
+                          left: `${p.x}%`,
+                          bottom: 0,
+                          animationDelay: `${p.delay}s`
+                        }}
+                      />
+                    ))}
+                  </div>
                   
-                  {/* Control Buttons */}
-                  <div className="absolute top-6 right-6 z-10 flex gap-2">
+                  {/* Control Buttons with Orbital Particles */}
+                  <div className="absolute top-6 right-6 z-20 flex gap-2">
                     <button
                       onClick={toggleMinimize}
-                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow"
+                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow perspective-tilt"
                       data-testid="button-minimize-tour"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <button
-                      onClick={handleSkip}
-                      className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow"
-                      data-testid="button-skip-onboarding"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
+                    <div className="orbital-particles">
+                      <button
+                        onClick={handleSkip}
+                        className="text-gray-400 hover:text-white transition-all p-3 hover:bg-white/10 rounded-xl backdrop-blur-sm neural-glow perspective-tilt relative"
+                        data-testid="button-skip-onboarding"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="orbital-particle"
+                          style={{
+                            animationDelay: `${i * 1}s`,
+                            animationDuration: `${3 + i}s`
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
 
                   {/* Content Container */}
-                  <div className="overflow-y-auto max-h-[80vh] scrollbar-thin">
+                  <div className="overflow-y-auto max-h-[80vh] scrollbar-thin relative z-10">
                     <div className="p-10">
                       {/* Header Section */}
                       <div className="flex items-start gap-8 mb-8">
-                        {/* Circular Progress & Icon */}
+                        {/* Circular Progress & Icon with Energy Flow */}
                         <div className="relative flex-shrink-0">
                           <svg className="w-32 h-32 transform -rotate-90">
                             <defs>
-                              <linearGradient id={`grad-${currentStep}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                              <linearGradient id={`energy-gradient`} x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stopColor="#a855f7" />
                                 <stop offset="50%" stopColor="#06b6d4" />
                                 <stop offset="100%" stopColor="#ec4899" />
@@ -430,28 +463,27 @@ export function OnboardingTour() {
                               cx="64"
                               cy="64"
                               r={radius}
-                              stroke={`url(#grad-${currentStep})`}
+                              className="energy-flow"
                               strokeWidth="4"
                               fill="none"
                               strokeDasharray={circumference}
                               strokeDashoffset={strokeDashoffset}
-                              strokeLinecap="round"
                               initial={{ strokeDashoffset: circumference }}
                               animate={{ strokeDashoffset }}
                               transition={{ duration: 0.6, ease: "easeOut" }}
                             />
                           </svg>
                           
-                          {/* Icon in center */}
+                          {/* Icon in center with 3D morph */}
                           <motion.div
                             key={currentStep}
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ type: "spring", duration: 0.8, delay: 0.2 }}
-                            className={`absolute inset-0 flex items-center justify-center`}
+                            className="absolute inset-0 flex items-center justify-center"
                           >
-                            <div className={`p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl float-3d`}>
-                              <Icon className="h-10 w-10 text-white" />
+                            <div className={`p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-2xl float-3d particle-border magnetic-hover`}>
+                              <Icon className="h-10 w-10 text-white icon-morph" />
                             </div>
                           </motion.div>
                         </div>
@@ -463,17 +495,18 @@ export function OnboardingTour() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
+                            className="glitch-transition"
                           >
                             <div className="flex items-center gap-3 mb-3">
-                              <span className="text-sm font-bold font-orbitron bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 text-transparent bg-clip-text">
+                              <span className="text-sm font-bold font-orbitron bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 text-transparent bg-clip-text count-up">
                                 STEP {currentStep + 1} / {steps.length}
                               </span>
                               <div className="h-px flex-1 bg-gradient-to-r from-purple-500/50 via-cyan-500/50 to-transparent" />
                             </div>
-                            <h2 className="text-5xl font-bold text-white mb-3 font-orbitron">
+                            <h2 className="text-5xl font-bold text-white mb-3 font-orbitron mouse-glow">
                               {currentStepData.title}
                             </h2>
-                            <p className={`text-xl font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text mb-4`}>
+                            <p className={`text-xl font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text mb-4 animate-gradient`}>
                               {currentStepData.subtitle}
                             </p>
                             <p className="text-gray-300 text-lg leading-relaxed">
@@ -491,12 +524,12 @@ export function OnboardingTour() {
                         transition={{ delay: 0.4 }}
                         className="mb-8"
                       >
-                        <div className="relative neural-glass rounded-2xl p-8 border border-purple-500/20 overflow-hidden">
+                        <div className="relative neural-glass rounded-2xl p-8 border border-purple-500/20 overflow-hidden perspective-tilt">
                           <div className="absolute inset-0 iridescent-shimmer rounded-2xl opacity-50" />
                           
                           <div className="relative z-10">
                             <div className="flex items-center gap-3 mb-6">
-                              <div className={`p-2 bg-gradient-to-br ${currentStepData.gradient} rounded-lg`}>
+                              <div className={`p-2 bg-gradient-to-br ${currentStepData.gradient} rounded-lg magnetic-hover`}>
                                 <MousePointer2 className="h-5 w-5 text-white" />
                               </div>
                               <h3 className="text-2xl font-bold text-white font-orbitron">Quick Start Guide</h3>
@@ -511,7 +544,7 @@ export function OnboardingTour() {
                                   transition={{ delay: 0.5 + index * 0.08 }}
                                   className="flex items-start gap-4 group hover:bg-white/5 p-3 rounded-xl transition-all"
                                 >
-                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg neural-pulse`}>
+                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg neural-pulse count-up`}>
                                     {index + 1}
                                   </div>
                                   <p className="text-gray-200 text-base leading-relaxed pt-0.5">
@@ -524,7 +557,7 @@ export function OnboardingTour() {
                         </div>
                       </motion.div>
 
-                      {/* Action Button */}
+                      {/* Action Button - Enhanced with all effects */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -534,11 +567,14 @@ export function OnboardingTour() {
                         <Button
                           onClick={() => handleAction(currentStepData.action.path)}
                           size="lg"
-                          className={`px-10 py-6 text-lg font-bold bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 neural-glow`}
+                          className={`px-10 py-6 text-lg font-bold bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white shadow-2xl hover:shadow-3xl transform transition-all duration-300 neural-glow magnetic-hover ripple-effect animate-gradient relative overflow-hidden`}
                           data-testid={`button-action-step-${currentStep}`}
                         >
-                          {currentStepData.action.label}
-                          <ArrowRight className="ml-2 h-5 w-5" />
+                          <span className="relative z-10 flex items-center">
+                            {currentStepData.action.label}
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                          </span>
+                          <div className="absolute inset-0 iridescent-shimmer opacity-30" />
                         </Button>
                       </motion.div>
 
@@ -548,7 +584,7 @@ export function OnboardingTour() {
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
                           variant="ghost"
-                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed neural-glass px-6"
+                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed neural-glass px-6 perspective-tilt"
                           data-testid="button-previous-step"
                         >
                           <ChevronLeft className="mr-2 h-5 w-5" />
@@ -561,9 +597,9 @@ export function OnboardingTour() {
                               key={index}
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 index === currentStep 
-                                  ? `w-8 bg-gradient-to-r ${currentStepData.gradient}` 
+                                  ? `w-8 bg-gradient-to-r ${currentStepData.gradient} glow-pulse` 
                                   : index < currentStep
-                                  ? 'w-2 bg-green-500'
+                                  ? 'w-2 bg-green-500 shadow-lg shadow-green-500/50'
                                   : 'w-2 bg-white/20'
                               }`}
                               initial={{ scale: 0.8 }}
@@ -575,7 +611,7 @@ export function OnboardingTour() {
                         <Button
                           onClick={handleNext}
                           variant="ghost"
-                          className="text-gray-400 hover:text-white neural-glass px-6"
+                          className="text-gray-400 hover:text-white neural-glass px-6 perspective-tilt"
                           data-testid="button-next-step"
                         >
                           {currentStep === steps.length - 1 ? 'Finish' : 'Next'}

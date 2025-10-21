@@ -466,3 +466,382 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ========================================
+   ADVANCED ONBOARDING TOUR ANIMATIONS
+   ======================================== */
+
+/* Scan Line Effect */
+.scan-lines {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-lines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent,
+    hsla(195, 100%, 60%, 0.8),
+    transparent
+  );
+  animation: scan-line 3s linear infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(600px); opacity: 0; }
+}
+
+/* Flowing Particle Stream */
+.particle-stream {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: hsla(195, 100%, 60%, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 10px hsla(195, 100%, 60%, 0.8);
+  animation: particle-float 4s linear infinite;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-600px) translateX(50px);
+    opacity: 0;
+  }
+}
+
+/* Liquid Gradient Background */
+.liquid-gradient {
+  background: linear-gradient(
+    135deg,
+    hsla(258, 84%, 20%, 0.9) 0%,
+    hsla(195, 100%, 15%, 0.8) 25%,
+    hsla(340, 100%, 20%, 0.9) 50%,
+    hsla(195, 100%, 15%, 0.8) 75%,
+    hsla(258, 84%, 20%, 0.9) 100%
+  );
+  background-size: 400% 400%;
+  animation: liquid-morph 15s ease infinite;
+}
+
+@keyframes liquid-morph {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 50% 100%; }
+  75% { background-position: 50% 0%; }
+}
+
+/* Holographic Card 3D Effect */
+.holographic-card {
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1500px;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.holographic-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    135deg,
+    hsla(280, 100%, 70%, 0.3),
+    hsla(200, 100%, 60%, 0.3),
+    hsla(340, 100%, 65%, 0.3)
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: holographic-shimmer 3s linear infinite;
+}
+
+.holographic-card:hover::before {
+  opacity: 1;
+}
+
+@keyframes holographic-shimmer {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* Hexagonal Button Shape */
+.hexagon-button {
+  position: relative;
+  clip-path: polygon(
+    30% 0%, 70% 0%,
+    100% 30%, 100% 70%,
+    70% 100%, 30% 100%,
+    0% 70%, 0% 30%
+  );
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.hexagon-button:hover {
+  clip-path: polygon(
+    20% 0%, 80% 0%,
+    100% 20%, 100% 80%,
+    80% 100%, 20% 100%,
+    0% 80%, 0% 20%
+  );
+  transform: scale(1.05);
+}
+
+/* Animated Border Particles */
+.particle-border {
+  position: relative;
+  overflow: visible;
+}
+
+.particle-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    90deg,
+    hsla(258, 84%, 58%, 0) 0%,
+    hsla(258, 84%, 58%, 0.8) 50%,
+    hsla(258, 84%, 58%, 0) 100%
+  );
+  border-radius: inherit;
+  animation: particle-border-flow 2s linear infinite;
+  z-index: -1;
+}
+
+@keyframes particle-border-flow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Magnetic Hover Effect */
+.magnetic-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.magnetic-hover:hover {
+  transform: scale(1.1) translateZ(20px);
+}
+
+/* Glitch Transition Effect */
+.glitch-transition {
+  animation: glitch 0.3s steps(4) 1;
+}
+
+@keyframes glitch {
+  0% {
+    transform: translateX(0);
+    filter: none;
+  }
+  20% {
+    transform: translateX(-5px) skewX(-5deg);
+    filter: hue-rotate(90deg);
+  }
+  40% {
+    transform: translateX(5px) skewX(5deg);
+    filter: hue-rotate(180deg);
+  }
+  60% {
+    transform: translateX(-2px) skewX(-2deg);
+    filter: hue-rotate(270deg);
+  }
+  80% {
+    transform: translateX(2px) skewX(2deg);
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    transform: translateX(0);
+    filter: none;
+  }
+}
+
+/* Energy Flow Effect for Progress Ring */
+.energy-flow {
+  stroke: url(#energy-gradient);
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px hsla(195, 100%, 60%, 0.8));
+  animation: energy-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes energy-pulse {
+  0%, 100% {
+    stroke-width: 4;
+    opacity: 1;
+  }
+  50% {
+    stroke-width: 6;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 15px hsla(195, 100%, 60%, 1));
+  }
+}
+
+/* Ripple Click Effect */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: hsla(195, 100%, 60%, 0.5);
+  transform: translate(-50%, -50%);
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+/* Typing Animation for Text */
+.typing-reveal {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40) 1 normal both;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Number Count Up Animation */
+.count-up {
+  animation: count-up 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Icon Morph 3D */
+.icon-morph {
+  animation: icon-morph-3d 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes icon-morph-3d {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.2);
+  }
+  100% {
+    transform: rotateY(360deg) scale(1);
+  }
+}
+
+/* Orbital Particles */
+.orbital-particles {
+  position: relative;
+}
+
+.orbital-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: hsla(195, 100%, 60%, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 0 10px hsla(195, 100%, 60%, 0.9);
+  animation: orbit 3s linear infinite;
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(30px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(30px) rotate(-360deg);
+  }
+}
+
+/* Perspective Tilt on Hover */
+.perspective-tilt {
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.perspective-tilt:hover {
+  transform: perspective(1000px) rotateX(10deg) rotateY(10deg) translateZ(20px);
+}
+
+/* Glow Halo that follows mouse */
+.mouse-glow {
+  position: relative;
+}
+
+.mouse-glow::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    hsla(258, 84%, 58%, 0.4) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mouse-glow:hover::before {
+  opacity: 1;
+  animation: mouse-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes mouse-glow-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
