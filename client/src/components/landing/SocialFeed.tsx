@@ -328,18 +328,18 @@ export function SocialFeed() {
               exit={{ opacity: 0 }}
               className="space-y-4"
             >
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-5 animate-pulse">
-                  <div className="flex gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-full bg-purple-500/20"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-purple-500/20 rounded w-1/3"></div>
-                      <div className="h-3 bg-purple-500/10 rounded w-1/4"></div>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-2.5 animate-pulse">
+                  <div className="flex gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-full bg-purple-500/20"></div>
+                    <div className="flex-1 space-y-1">
+                      <div className="h-3 bg-purple-500/20 rounded w-1/3"></div>
+                      <div className="h-2 bg-purple-500/10 rounded w-1/4"></div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="h-5 bg-purple-500/20 rounded w-3/4"></div>
-                    <div className="h-4 bg-purple-500/10 rounded w-full"></div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-purple-500/20 rounded w-3/4"></div>
+                    <div className="h-2 bg-purple-500/10 rounded w-full"></div>
                   </div>
                 </div>
               ))}
@@ -351,9 +351,9 @@ export function SocialFeed() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="space-y-4"
+              className="space-y-2"
             >
-              {feedItems.map((item) => (
+              {feedItems.slice(0, 5).map((item) => (
                 <SocialFeedCard
                   key={`${item.type}-${item.id}`}
                   id={item.id}
