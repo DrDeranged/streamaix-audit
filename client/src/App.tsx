@@ -32,7 +32,6 @@ const HunterProfile = React.lazy(() => import("@/pages/hunter-profile"));
 const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
 const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
-const Discover = React.lazy(() => import("@/pages/discover"));
 const AvatarProfile = React.lazy(() => import("@/pages/avatar-profile"));
 const InsightsDashboard = React.lazy(() => import("@/pages/InsightsDashboard"));
 const AIDiscovery = React.lazy(() => import("@/pages/DiscoveryPage"));
@@ -124,12 +123,6 @@ function Router() {
       <Route path="/farcaster-activity">
         <Suspense fallback={<DashboardSkeleton />}>
           <FarcasterActivity />
-        </Suspense>
-      </Route>
-      
-      <Route path="/discover">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <Discover />
         </Suspense>
       </Route>
       
