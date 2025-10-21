@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { CommentSection } from '@/components/comments/CommentSection';
 import { Link } from 'wouter';
 import { 
   TrendingUp, 
@@ -15,21 +16,24 @@ import {
   Eye,
   MessageSquare,
   Heart,
-  TrendingDown,
-  Users,
-  Activity
+  Calendar,
+  ExternalLink
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface FeedItem {
   id: string;
-  type: 'bounty' | 'market' | 'summary';
+  type: 'bounty' | 'market' | 'summary' | 'news';
   title: string;
   description?: string;
+  content?: string;
+  excerpt?: string;
   category?: string;
   tags?: string[];
   createdAt: string;
   author?: { id: string; username: string; avatar?: string };
+  imageUrl?: string;
+  url?: string;
   metadata?: any;
 }
 
@@ -50,15 +54,26 @@ export function DiscoverFeed() {
     queryKey: ['/api/summaries'],
   });
 
+  // Fetch crypto news
+  const { data: newsData } = useQuery<{ articles: any[] }>({
+    queryKey: ['/api/crypto-news'],
+  });
+
+  // Fetch topic filters with real counts
+  const { data: topicData } = useQuery<{ topics: Array<{ name: string; count: number }> }>({
+    queryKey: ['/api/content-topics'],
+  });
+
   // Combine feed items
   const feedItems: FeedItem[] = [];
 
   if (bounties?.bounties) {
-    feedItems.push(...bounties.bounties.slice(0, 5).map(b => ({
+    feedItems.push(...bounties.bounties.map(b => ({
       id: b.id,
       type: 'bounty' as const,
       title: b.title,
       description: b.description,
+      excerpt: b.description?.slice(0, 200) + '...',
       category: b.category,
       tags: b.tags,
       createdAt: b.createdAt,
@@ -67,11 +82,12 @@ export function DiscoverFeed() {
   }
 
   if (markets?.markets) {
-    feedItems.push(...markets.markets.slice(0, 5).map(m => ({
+    feedItems.push(...markets.markets.map(m => ({
       id: m.id,
       type: 'market' as const,
       title: m.question,
       description: m.description,
+      excerpt: m.description?.slice(0, 200) + '...',
       category: m.category,
       tags: m.tags,
       createdAt: m.createdAt,
@@ -80,15 +96,34 @@ export function DiscoverFeed() {
   }
 
   if (summaries) {
-    feedItems.push(...summaries.slice(0, 5).map(s => ({
+    feedItems.push(...summaries.map(s => ({
       id: s.id,
       type: 'summary' as const,
       title: s.title,
-      description: s.description || s.tldrSummary,
-      category: 'Content',
+      description: s.tldrSummary || s.description,
+      excerpt: (s.tldrSummary || s.description)?.slice(0, 200) + '...',
+      category: s.category || 'Content',
       tags: s.tags,
       createdAt: s.createdAt,
+      imageUrl: s.thumbnailUrl,
       metadata: { contentType: s.contentType }
+    })));
+  }
+
+  if (newsData?.articles) {
+    feedItems.push(...newsData.articles.map((article, index) => ({
+      id: `news-${index}`,
+      type: 'news' as const,
+      title: article.title,
+      description: article.description || article.summary,
+      excerpt: (article.description || article.summary)?.slice(0, 200) + '...',
+      category: 'Crypto News',
+      tags: article.tags || [],
+      createdAt: article.publishedAt || article.pubDate,
+      imageUrl: article.imageUrl || article.image,
+      url: article.url || article.link,
+      author: article.source ? { id: 'news', username: article.source, avatar: undefined } : undefined,
+      metadata: { source: article.source }
     })));
   }
 
@@ -103,27 +138,23 @@ export function DiscoverFeed() {
       )
     : sortedFeed;
 
-  const topics = [
-    { name: 'Bitcoin ETF', count: 247 },
-    { name: 'DePIN', count: 180 },
-    { name: 'L2 scaling', count: 156 },
-    { name: 'Base chain', count: 134 },
-    { name: 'AI x Crypto', count: 89 },
-    { name: 'NFTs', count: 67 }
-  ];
+  const topics = topicData?.topics || [];
 
   const getFeedItemIcon = (type: FeedItem['type']) => {
     switch (type) {
       case 'bounty':
-        return <Trophy className="w-4 h-4 text-fuchsia-400" />;
+        return <Trophy className="w-5 h-5 text-fuchsia-400" />;
       case 'market':
-        return <BarChart3 className="w-4 h-4 text-cyan-400" />;
+        return <BarChart3 className="w-5 h-5 text-cyan-400" />;
       case 'summary':
-        return <FileText className="w-4 h-4 text-purple-400" />;
+        return <FileText className="w-5 h-5 text-purple-400" />;
+      case 'news':
+        return <TrendingUp className="w-5 h-5 text-green-400" />;
     }
   };
 
   const getFeedItemLink = (item: FeedItem) => {
+    if (item.type === 'news') return null;
     switch (item.type) {
       case 'bounty':
         return `/bounties/${item.id}`;
@@ -136,8 +167,9 @@ export function DiscoverFeed() {
 
   return (
     <section className="relative py-24 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Background Effects */}
+      {/* Neural Network Background */}
       <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_50%)]" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
@@ -151,55 +183,54 @@ export function DiscoverFeed() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            Discover
+            Social
           </h2>
           <p className="text-gray-400 text-lg">
-            Stay updated with the latest in crypto conversations
+            Stay updated with the latest in crypto conversations, bounties, and predictions
           </p>
         </motion.div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Feed */}
-          <div className="lg:col-span-2">
-            <Card className="neural-glass border-purple-500/30 overflow-hidden">
-              {/* Tabs */}
-              <div className="flex border-b border-purple-500/20">
-                <button
-                  onClick={() => setActiveTab('trending')}
-                  className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
-                    activeTab === 'trending'
-                      ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
-                      : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
-                  }`}
-                  data-testid="tab-trending"
-                >
-                  Trending
-                </button>
-                <button
-                  onClick={() => setActiveTab('forYou')}
-                  className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
-                    activeTab === 'forYou'
-                      ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
-                      : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
-                  }`}
-                  data-testid="tab-for-you"
-                >
-                  For You
-                </button>
-                <button
-                  onClick={() => setActiveTab('following')}
-                  className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
-                    activeTab === 'following'
-                      ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
-                      : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
-                  }`}
-                  data-testid="tab-following"
-                >
-                  Following
-                </button>
-              </div>
+        <div className="max-w-6xl mx-auto">
+          <Card className="neural-glass border-purple-500/30 overflow-hidden mb-8">
+            {/* Tabs */}
+            <div className="flex border-b border-purple-500/20">
+              <button
+                onClick={() => setActiveTab('trending')}
+                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                  activeTab === 'trending'
+                    ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
+                    : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
+                }`}
+                data-testid="tab-trending"
+              >
+                Trending
+              </button>
+              <button
+                onClick={() => setActiveTab('forYou')}
+                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                  activeTab === 'forYou'
+                    ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
+                    : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
+                }`}
+                data-testid="tab-for-you"
+              >
+                For You
+              </button>
+              <button
+                onClick={() => setActiveTab('following')}
+                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                  activeTab === 'following'
+                    ? 'text-white border-b-2 border-fuchsia-500 bg-fuchsia-500/10'
+                    : 'text-gray-400 hover:text-white hover:bg-purple-500/5'
+                }`}
+                data-testid="tab-following"
+              >
+                Following
+              </button>
+            </div>
 
-              {/* Topic Filters */}
+            {/* Topic Filters */}
+            {topics.length > 0 && (
               <div className="p-4 border-b border-purple-500/20">
                 <div className="flex gap-2 flex-wrap">
                   <Button
@@ -221,35 +252,48 @@ export function DiscoverFeed() {
                       data-testid={`filter-${topic.name.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {topic.name}
-                      <span className="ml-2 text-xs opacity-60">{topic.count}</span>
+                      {topic.count > 0 && (
+                        <span className="ml-2 text-xs opacity-60">{topic.count}</span>
+                      )}
                     </Button>
                   ))}
                 </div>
               </div>
+            )}
+          </Card>
 
-              {/* Feed Items */}
-              <div className="divide-y divide-purple-500/20">
-                <AnimatePresence mode="popLayout">
-                  {filteredFeed.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="p-6 hover:bg-purple-500/5 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex gap-3">
-                        {/* Avatar */}
-                        <div className="flex-shrink-0">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center">
+          {/* Feed Items - Blog Style */}
+          <div className="space-y-6">
+            <AnimatePresence mode="popLayout">
+              {filteredFeed.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="neural-glass border-purple-500/30 hover:border-fuchsia-500/50 transition-all duration-300 overflow-hidden group">
+                    <div className="md:flex">
+                      {/* Image */}
+                      {item.imageUrl && (
+                        <div className="md:w-1/3 h-48 md:h-auto bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex-shrink-0">
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                          />
+                        </div>
+                      )}
+
+                      {/* Content */}
+                      <div className="p-6 flex-1">
+                        {/* Header */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border border-purple-500/20">
                             {getFeedItemIcon(item.type)}
                           </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 border-purple-500/30 text-purple-300 text-xs">
                               {item.type}
                             </Badge>
@@ -258,129 +302,112 @@ export function DiscoverFeed() {
                                 {item.category}
                               </Badge>
                             )}
-                            <span className="text-xs text-gray-500">
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Calendar className="w-3 h-3" />
                               {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
-                            </span>
+                            </div>
                           </div>
+                        </div>
 
-                          <Link href={getFeedItemLink(item)}>
-                            <h3 className="text-white font-semibold mb-1 group-hover:text-fuchsia-400 transition-colors line-clamp-2" data-testid={`feed-title-${item.type}-${item.id}`}>
+                        {/* Title */}
+                        {item.type === 'news' && item.url ? (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block group"
+                          >
+                            <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-fuchsia-400 transition-colors flex items-center gap-2">
+                              {item.title}
+                              <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </h3>
+                          </a>
+                        ) : (
+                          <Link href={getFeedItemLink(item) || '#'}>
+                            <h3 className="text-xl font-semibold text-white mb-2 hover:text-fuchsia-400 transition-colors cursor-pointer" data-testid={`feed-title-${item.type}-${item.id}`}>
                               {item.title}
                             </h3>
                           </Link>
+                        )}
 
-                          {item.description && (
-                            <p className="text-gray-400 text-sm mb-2 line-clamp-2">{item.description}</p>
-                          )}
+                        {/* Excerpt */}
+                        {item.excerpt && (
+                          <p className="text-gray-400 mb-4 line-clamp-3">{item.excerpt}</p>
+                        )}
 
-                          {/* Tags */}
-                          {item.tags && item.tags.length > 0 && (
-                            <div className="flex gap-1 flex-wrap mb-3">
-                              {item.tags.slice(0, 3).map(tag => (
-                                <span key={tag} className="text-cyan-400 text-xs">
-                                  #{tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                        {/* Tags */}
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex gap-2 flex-wrap mb-4">
+                            {item.tags.slice(0, 5).map(tag => (
+                              <span key={tag} className="text-cyan-400 text-xs">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
-                          {/* Engagement */}
+                        {/* Metadata */}
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <button className="flex items-center gap-1 hover:text-fuchsia-400 transition-colors">
-                              <MessageSquare className="w-4 h-4" />
-                              <span>{Math.floor(Math.random() * 50)}</span>
-                            </button>
-                            <button className="flex items-center gap-1 hover:text-red-400 transition-colors">
-                              <Heart className="w-4 h-4" />
-                              <span>{Math.floor(Math.random() * 100)}</span>
-                            </button>
-                            <div className="flex items-center gap-1">
-                              <Eye className="w-4 h-4" />
-                              <span>{Math.floor(Math.random() * 500)}</span>
-                            </div>
                             {item.type === 'bounty' && (
-                              <div className="ml-auto flex items-center gap-1 text-fuchsia-400">
+                              <div className="flex items-center gap-1 text-fuchsia-400 font-semibold">
                                 <Trophy className="w-4 h-4" />
                                 {item.metadata.reward} STREAM
                               </div>
                             )}
+                            {item.type === 'market' && (
+                              <>
+                                <span className="text-green-400">
+                                  YES: {Math.round(item.metadata.yesPrice * 100)}%
+                                </span>
+                                <span className="text-red-400">
+                                  NO: {Math.round((1 - item.metadata.yesPrice) * 100)}%
+                                </span>
+                              </>
+                            )}
+                            {item.author && (
+                              <div className="flex items-center gap-2">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarImage src={item.author.avatar} />
+                                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-xs">
+                                    {item.author.username.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-gray-400 text-xs">{item.author.username}</span>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </Card>
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* What's Happening */}
-            <Card className="neural-glass border-purple-500/30 overflow-hidden">
-              <div className="p-4 border-b border-purple-500/20">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-fuchsia-400" />
-                  What's happening
-                </h3>
-              </div>
-              <div className="divide-y divide-purple-500/20">
-                {topics.map((topic, index) => (
-                  <button
-                    key={topic.name}
-                    onClick={() => setSelectedTopic(topic.name)}
-                    className="w-full p-4 hover:bg-purple-500/5 transition-colors text-left"
-                    data-testid={`trending-${topic.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-500 mb-1">Trending in Crypto</p>
-                        <p className="text-white font-semibold mb-1">{topic.name}</p>
-                        <p className="text-xs text-gray-500">{topic.count} posts • Trending</p>
-                      </div>
-                      <Activity className="w-4 h-4 text-cyan-400 mt-1" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </Card>
-
-            {/* Who to Follow */}
-            <Card className="neural-glass border-purple-500/30 overflow-hidden">
-              <div className="p-4 border-b border-purple-500/20">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-cyan-400" />
-                  Who to follow
-                </h3>
-              </div>
-              <div className="divide-y divide-purple-500/20">
-                {['CryptoWhale', 'DeFiBuilder', 'Web3Dev'].map((username, index) => (
-                  <div key={username} className="p-4 hover:bg-purple-500/5 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-10 h-10 ring-2 ring-purple-500/30">
-                          <AvatarFallback className="bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 text-white">
-                            {username.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-white font-semibold text-sm">{username}</p>
-                          <p className="text-gray-500 text-xs">@{username.toLowerCase()}</p>
                         </div>
+
+                        {/* Comments Section - Only for platform content */}
+                        {item.type !== 'news' && (
+                          <div className="mt-6 pt-6 border-t border-purple-500/20">
+                            <CommentSection
+                              entityType={item.type}
+                              entityId={item.id}
+                            />
+                          </div>
+                        )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-fuchsia-500/30 hover:bg-fuchsia-500/20"
-                        data-testid={`follow-${username.toLowerCase()}`}
-                      >
-                        Follow
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {filteredFeed.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12"
+              >
+                <Card className="neural-glass border-purple-500/30 p-8">
+                  <MessageSquare className="w-12 h-12 text-purple-400 mx-auto mb-3" />
+                  <p className="text-gray-400">No content available yet. Check back soon!</p>
+                </Card>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

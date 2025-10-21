@@ -795,6 +795,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // SOCIAL FEED ROUTES
+  // =============================================================================
+
+  // Get crypto news from external APIs
+  app.get('/api/crypto-news', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    try {
+      // Fetch from CoinDesk RSS
+      const coinDeskResponse = await axios.get('https://www.coindesk.com/arc/outboundfeeds/rss/');
+      const cointelegraphResponse = await axios.get('https://cointelegraph.com/rss');
+      
+      // Parse RSS feeds (simplified - in production use a proper RSS parser)
+      const articles: any[] = [];
+      
+      // For now, return empty array - RSS parsing would require additional library
+      // In production, integrate with RSS parser or use crypto news APIs
+      res.json({ articles: articles.slice(0, limit) });
+    } catch (error) {
+      console.error('Error fetching crypto news:', error);
+      res.json({ articles: [] }); // Return empty array on error
+    }
+  }));
+
+  // Get content topics with real counts
+  app.get('/api/content-topics', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      // Get all content to calculate topic counts
+      const bounties = await storage.getBounties(1000, 0);
+      const summaries = await storage.getSummaries();
+      const markets = await storage.getAllPredictionMarkets();
+
+      // Count by category and tags
+      const topicCounts = new Map<string, number>();
+
+      // Count bounty categories and tags
+      bounties.forEach(b => {
+        if (b.category) {
+          topicCounts.set(b.category, (topicCounts.get(b.category) || 0) + 1);
+        }
+        b.tags?.forEach(tag => {
+          topicCounts.set(tag, (topicCounts.get(tag) || 0) + 1);
+        });
+      });
+
+      // Count summary tags and categories
+      summaries.forEach(s => {
+        if (s.category) {
+          topicCounts.set(s.category, (topicCounts.get(s.category) || 0) + 1);
+        }
+        s.tags?.forEach(tag => {
+          topicCounts.set(tag, (topicCounts.get(tag) || 0) + 1);
+        });
+      });
+
+      // Count market categories and tags
+      markets.forEach(m => {
+        if (m.category) {
+          topicCounts.set(m.category, (topicCounts.get(m.category) || 0) + 1);
+        }
+        m.tags?.forEach(tag => {
+          topicCounts.set(tag, (topicCounts.get(tag) || 0) + 1);
+        });
+      });
+
+      // Convert to array and sort by count
+      const topics = Array.from(topicCounts.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10); // Top 10 topics
+
+      res.json({ topics });
+    } catch (error) {
+      console.error('Error fetching content topics:', error);
+      res.json({ topics: [] });
+    }
+  }));
+
+  // =============================================================================
   // BOUNTY ROUTES
   // =============================================================================
 
