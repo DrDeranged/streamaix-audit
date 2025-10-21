@@ -30,6 +30,7 @@ import { bountyHunterService } from "./services/bountyHunterService";
 import { qualityScorerService } from "./services/qualityScorerService";
 import { trendingService } from "./services/trendingService";
 import passport from "passport";
+import axios from "axios";
 
 // Initialize services
 const marketDataService = MarketDataService.getInstance();
@@ -825,7 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all content to calculate topic counts
       const bounties = await storage.getBounties(1000, 0);
       const summaries = await storage.getSummaries();
-      const markets = await storage.getAllPredictionMarkets();
+      const markets = await storage.getPredictionMarkets(1000, 0);
 
       // Count by category and tags
       const topicCounts = new Map<string, number>();
