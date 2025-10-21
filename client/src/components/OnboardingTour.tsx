@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronRight, ChevronLeft, Sparkles, Coins, TrendingUp, Bot, Wallet, 
   Zap, Users, Shield, Trophy, BarChart3, Radio, Rocket, Globe, Crown,
-  LineChart, ArrowRight, MousePointer2, CheckCircle2
+  LineChart, ArrowRight, MousePointer2, CheckCircle2, Target, Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
@@ -26,12 +26,12 @@ const steps: OnboardingStep[] = [
   {
     title: "Welcome to StreamAiX",
     subtitle: "Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence",
-    description: "StreamAiX is your all-in-one platform combining AI-powered content processing, gamified bounty rewards, institutional-grade analytics, and Web3 integration on the Base network. Earn tokens, access real-time market data, and own your digital assets on-chain.",
+    description: "StreamAiX combines AI-powered content processing, prediction markets, institutional-grade analytics, and gamified bounties on the Base network. Turn content into markets, earn tokens, and access real-time intelligence—all on-chain.",
     icon: Sparkles,
-    gradient: "from-purple-500 via-pink-500 to-red-500",
+    gradient: "from-purple-500 via-pink-500 to-cyan-500",
     instructions: [
-      "Explore each feature by clicking 'Next'",
-      "Each step will guide you to the actual page",
+      "Navigate through each feature by clicking 'Next'",
+      "Visit actual pages with 'Try It' buttons",
       "Learn hands-on by interacting with real features",
       "Complete the tour to unlock your first rewards"
     ],
@@ -41,93 +41,75 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Create AI Summaries",
-    subtitle: "Transform Content with AI Power",
-    description: "Head to the Create page to convert podcasts, videos, and livestreams into comprehensive blog-style summaries. Our AI uses OpenAI Whisper for transcription and GPT-4o for intelligent chapter generation.",
+    title: "AI-Powered Summaries",
+    subtitle: "Transform Content Into Knowledge Assets & Markets",
+    description: "Convert podcasts, videos, and livestreams into comprehensive summaries using OpenAI Whisper + GPT-4o. Then instantly turn insights into prediction markets—creating tradeable forecasts from content analysis.",
     icon: Zap,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Click the button below to visit the Create page",
-      "Paste a YouTube, podcast, or livestream URL",
-      "Click 'Process Content' to start AI analysis",
-      "Get AI-generated chapters, insights, and key takeaways",
-      "Your summary is stored on IPFS/Arweave forever"
+      "Paste any YouTube, podcast, or Twitch URL",
+      "AI transcribes with 98% accuracy using Whisper",
+      "GPT-4o generates chapters and key insights",
+      "One-click to create prediction markets from content",
+      "Markets auto-link to summaries for context",
+      "Store forever on Arweave/IPFS decentralized storage"
     ],
     action: {
-      label: "Try Creating Content →",
+      label: "Try AI Summaries →",
       path: "/create"
     }
   },
   {
-    title: "Earn with Bounties",
-    subtitle: "Get Rewarded for Your Work",
-    description: "The Bounties page is where you earn STREAM, ETH, and USDC tokens! Complete tasks, level up your reputation, unlock badges, and compete on the leaderboard.",
-    icon: Coins,
-    gradient: "from-yellow-500 via-orange-500 to-red-500",
-    instructions: [
-      "Click below to explore the Bounties Board",
-      "Browse available bounties sorted by reward amount",
-      "Click 'Accept Bounty' to start working",
-      "Complete the task and submit your work",
-      "Earn multi-token rewards instantly on-chain",
-      "Track your reputation level and unlock badges"
-    ],
-    action: {
-      label: "Explore Bounty Board →",
-      path: "/bounties"
-    }
-  },
-  {
-    title: "Real-Time Collaboration",
-    subtitle: "Work Together, Earn Together",
-    description: "On the Bounties page, you can collaborate with others in real-time. WebSocket technology powers live editing, cursor tracking, and instant reward distribution.",
-    icon: Users,
-    gradient: "from-green-500 via-emerald-500 to-teal-500",
-    instructions: [
-      "Open any bounty from the Bounties page",
-      "See live cursors of other users working",
-      "Edit together in real-time with auto-sync",
-      "Chat with collaborators in the workspace",
-      "Rewards are distributed automatically when complete"
-    ],
-    action: {
-      label: "Try Collaboration →",
-      path: "/bounties"
-    }
-  },
-  {
-    title: "Advanced Market Analytics",
-    subtitle: "Institutional-Grade Intelligence & AI Insights",
-    description: "Access the Discover page for comprehensive market analytics with 9 categories, 67+ live endpoints, AI trading signals, and a 3-tier API fallback system (CoinGecko → CoinMarketCap → Dune Analytics) ensuring uninterrupted data flow.",
+    title: "Prediction Markets",
+    subtitle: "Trade on Future Outcomes with Real Money",
+    description: "Binary YES/NO markets powered by smart contracts on Base. AMM-based pricing, real-time trading, and automated settlement. Create markets from AI summaries or trade on community predictions.",
     icon: TrendingUp,
+    gradient: "from-green-500 via-teal-500 to-cyan-500",
+    instructions: [
+      "Browse crypto, DeFi, and real-world event markets",
+      "Buy YES/NO positions with instant pricing",
+      "AMM automatically adjusts prices (x*y=k formula)",
+      "Track your positions and P&L in real-time",
+      "Earn from accurate predictions when markets resolve",
+      "Build reputation on the predictor leaderboard"
+    ],
+    action: {
+      label: "Explore Markets →",
+      path: "/markets"
+    }
+  },
+  {
+    title: "Discovery & Analytics",
+    subtitle: "Institutional-Grade Market Intelligence",
+    description: "Access 9 analytics categories with 67+ live endpoints. AI trading signals, volatility forecasting, pattern recognition, and cross-market correlations. 3-tier API fallback ensures uninterrupted data flow.",
+    icon: BarChart3,
     gradient: "from-blue-500 via-purple-500 to-pink-500",
     instructions: [
-      "Click below to open the Analytics Dashboard",
-      "Explore 9 analytics categories: volatility, patterns, derivatives & more",
+      "Explore volatility forecasting with ML models",
       "View AI-powered Smart Insights with confidence scores",
-      "Check real-time charts, trading signals, and sentiment analysis",
-      "Analyze cross-market correlations and risk metrics",
-      "Experience seamless data from our 3-tier API fallback system",
-      "Get personalized recommendations based on your activity"
+      "Analyze real-time charts and trading signals",
+      "Check sentiment analysis across social media",
+      "Monitor cross-market correlations and regime detection",
+      "Get personalized recommendations based on activity"
     ],
     action: {
-      label: "Explore Analytics →",
+      label: "Open Analytics →",
       path: "/discover"
     }
   },
   {
     title: "AI Chat Assistant",
-    subtitle: "Your Personal AI Guide",
-    description: "Visit the Chat page to talk with our GPT-4o powered assistant. Get platform help, investment insights, market analysis, and personalized content recommendations.",
+    subtitle: "Your Personal Investment & Platform Guide",
+    description: "GPT-4o powered assistant providing platform help, investment insights, market analysis, and personalized recommendations. Ask anything about features, strategies, or crypto trends.",
     icon: Bot,
     gradient: "from-pink-500 via-rose-500 to-red-500",
     instructions: [
-      "Click below to open the AI Chat interface",
-      "Type your question or request in the chat box",
-      "Ask about platform features: 'How do bounties work?'",
-      "Get investment insights: 'Analyze Bitcoin trends'",
-      "Request market analysis: 'What's happening in DeFi?'",
-      "Receive personalized recommendations based on your activity"
+      "Type questions in natural language",
+      "Get platform help: 'How do bounties work?'",
+      "Request market insights: 'Analyze Bitcoin trends'",
+      "Ask about DeFi: 'What's happening with Uniswap?'",
+      "Receive investment ideas based on your portfolio",
+      "Chat history saved for easy reference"
     ],
     action: {
       label: "Chat with AI →",
@@ -135,56 +117,37 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Connect Your Wallet",
-    subtitle: "Access Web3 Features",
-    description: "Link your Web3 wallet from the navbar to unlock decentralized features. Own your knowledge assets on-chain, earn tokens, and participate in Base network activities.",
-    icon: Wallet,
-    gradient: "from-orange-500 via-amber-500 to-yellow-500",
-    instructions: [
-      "Look for the 'Connect Wallet' button in the top navbar",
-      "Click to connect MetaMask or other Web3 wallets",
-      "Approve the connection request in your wallet",
-      "Switch to Base network (Chain ID 8453) if prompted",
-      "Once connected, access staking and DeFi features",
-      "View your STREAM token balance in the navbar"
-    ],
-    action: {
-      label: "Connect Now →",
-      path: "/"
-    }
-  },
-  {
-    title: "NFT Summaries & DeFi",
-    subtitle: "Own Your Knowledge On-Chain",
-    description: "From the Create page, mint your summaries as NFTs! Trade knowledge assets, participate in DeFi, and benefit from smart contract automation.",
+    title: "Personal Dashboard",
+    subtitle: "Your Summaries, Markets & Portfolio",
+    description: "Track all your created summaries, active prediction market positions, bounty progress, and earnings in one place. Monitor your knowledge assets, P&L, and Web3 reputation.",
     icon: Crown,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    gradient: "from-amber-500 via-yellow-500 to-orange-500",
     instructions: [
-      "Create a summary on the Create page first",
-      "After processing, click 'Mint as NFT' button",
-      "Approve the transaction in your wallet",
-      "Your summary becomes a tradeable NFT",
-      "List it on decentralized marketplaces",
-      "Earn royalties from future sales automatically"
+      "View all your AI summaries and NFTs",
+      "Track prediction market positions and P&L",
+      "Monitor bounty completions and earnings",
+      "Check referral stats and bonus rewards",
+      "See your STREAM token balance and staking",
+      "Export data for tax reporting"
     ],
     action: {
-      label: "Mint Your First NFT →",
-      path: "/create"
+      label: "View Dashboard →",
+      path: "/profile"
     }
   },
   {
     title: "Social Integration",
     subtitle: "Connect & Share Across Web3",
-    description: "Navigate to Settings to link Twitter, Lens Protocol, and Farcaster accounts. Share your summaries, build your Web3 reputation, and engage with decentralized social networks.",
-    icon: Radio,
+    description: "Link Twitter, Lens Protocol, and Farcaster accounts. Share summaries across platforms, build Web3 reputation, and engage with decentralized social networks—all with one click.",
+    icon: Share2,
     gradient: "from-sky-500 via-blue-500 to-indigo-500",
     instructions: [
-      "Go to your Profile page from the navbar",
-      "Click on 'Social Connections' tab",
-      "Connect your Twitter account (OAuth)",
-      "Link Lens Protocol profile for Web3 social",
-      "Connect Farcaster for decentralized posting",
-      "Share summaries across all platforms with one click"
+      "Connect Twitter via OAuth for social sharing",
+      "Link Lens Protocol for Web3 social graph",
+      "Join Farcaster for decentralized posting",
+      "Share summaries across all platforms at once",
+      "Build cross-platform reputation and followers",
+      "Earn from social engagement and referrals"
     ],
     action: {
       label: "Connect Social →",
@@ -192,56 +155,56 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Referral & Rewards",
-    subtitle: "Earn More by Inviting Friends",
-    description: "Check your Profile page to find your unique referral code. Invite friends, track signups, earn bonus STREAM tokens, and climb the referral leaderboard.",
-    icon: Trophy,
-    gradient: "from-amber-500 via-yellow-500 to-orange-500",
+    title: "Bounty System",
+    subtitle: "Earn STREAM, ETH & USDC for Contributions",
+    description: "Complete tasks, create content, and contribute to the ecosystem. Gamified with reputation levels, badges, streaks, and AI-powered quality scoring. Multi-token rewards distributed instantly.",
+    icon: Coins,
+    gradient: "from-yellow-500 via-orange-500 to-red-500",
     instructions: [
-      "Navigate to your Profile page (navbar)",
-      "Find your unique referral code in the 'Referrals' section",
-      "Copy and share your code with friends",
-      "Track signups in real-time on your dashboard",
-      "Earn 50 STREAM tokens per successful referral",
-      "Compete on the global referral leaderboard"
+      "Browse available bounties sorted by reward",
+      "Accept tasks that match your skills",
+      "Collaborate in real-time with WebSocket sync",
+      "Submit work and earn multi-token rewards",
+      "Level up reputation and unlock badges",
+      "Climb the global bounty leaderboard"
     ],
     action: {
-      label: "Get Referral Code →",
-      path: "/profile"
+      label: "Explore Bounties →",
+      path: "/bounties"
     }
   },
   {
-    title: "Platform Analytics",
-    subtitle: "Monitor Ecosystem Growth",
-    description: "Visit the Analytics Dashboard to see platform-wide metrics. Track engagement trends, category distribution, reward analytics, and user growth in real-time.",
-    icon: BarChart3,
-    gradient: "from-teal-500 via-cyan-500 to-blue-500",
+    title: "Web3 & Wallet",
+    subtitle: "On-Chain Ownership & DeFi Features",
+    description: "Connect your Web3 wallet to unlock decentralized features. Own knowledge assets as NFTs, participate in staking, trade on Base network, and manage your STREAM tokens.",
+    icon: Wallet,
+    gradient: "from-orange-500 via-amber-500 to-yellow-500",
     instructions: [
-      "Click below to open the Platform Analytics",
-      "View total platform engagement metrics",
-      "Analyze activity trends over time",
-      "See category distribution charts",
-      "Track total rewards distributed",
-      "Monitor user growth and retention stats"
+      "Click 'Connect Wallet' in the navbar",
+      "Approve MetaMask or WalletConnect request",
+      "Switch to Base network (Chain ID 8453)",
+      "View STREAM token balance in real-time",
+      "Mint summaries as tradeable NFTs",
+      "Stake tokens for governance and rewards"
     ],
     action: {
-      label: "View Platform Stats →",
-      path: "/analytics"
+      label: "Connect Wallet →",
+      path: "/"
     }
   },
   {
     title: "You're All Set!",
     subtitle: "Start Building Your Web3 Empire",
-    description: "You've completed the StreamAiX tour! You now know how to create AI summaries, earn through bounties, access advanced analytics, chat with AI, connect your wallet, and much more.",
+    description: "You've completed the StreamAiX tour! Create AI summaries, launch prediction markets, earn through bounties, access analytics, and build your decentralized portfolio. Let's go!",
     icon: Rocket,
     gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
     instructions: [
       "Install StreamAiX as a PWA on any device",
-      "Start creating summaries to build your portfolio",
+      "Create your first AI summary and market",
       "Complete bounties to earn tokens daily",
       "Use analytics for smarter trading decisions",
-      "Invite friends to grow together",
-      "Join our community on Discord and Twitter"
+      "Invite friends with your referral code",
+      "Join our Discord and Twitter communities"
     ],
     action: {
       label: "Start Building →",
@@ -257,12 +220,16 @@ export function OnboardingTour() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    setTimeout(() => setIsOpen(true), 1000);
+    const hasSeenTour = localStorage.getItem('streamaix_tour_completed');
+    if (!hasSeenTour) {
+      setTimeout(() => setIsOpen(true), 1000);
+    }
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
     setIsMinimized(false);
+    localStorage.setItem('streamaix_tour_completed', 'true');
   };
 
   const handleNext = () => {
@@ -284,20 +251,28 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
+    // For first step, just move to next
     if (currentStep === 0) {
       handleNext();
       return;
     }
     
-    setIsMinimized(true);
-    setLocation(path);
+    // For last step, close the tour
+    if (currentStep === steps.length - 1) {
+      handleClose();
+      setLocation(path);
+      return;
+    }
     
+    // For all other steps, navigate and minimize
+    setLocation(path);
+    setIsMinimized(true);
+    
+    // Auto-advance to next step after navigation
     setTimeout(() => {
-      if (currentStep < steps.length - 1) {
-        setCurrentStep(currentStep + 1);
-        setIsMinimized(false);
-      }
-    }, 1500);
+      setCurrentStep(currentStep + 1);
+      setIsMinimized(false);
+    }, 2000);
   };
 
   const toggleMinimize = () => {
@@ -352,7 +327,7 @@ export function OnboardingTour() {
                         cx="24"
                         cy="24"
                         r="20"
-                        stroke="url(#progress-gradient)"
+                        stroke="url(#progress-gradient-mini)"
                         strokeWidth="3"
                         fill="none"
                         strokeDasharray={`${2 * Math.PI * 20}`}
@@ -360,7 +335,7 @@ export function OnboardingTour() {
                         strokeLinecap="round"
                       />
                       <defs>
-                        <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <linearGradient id="progress-gradient-mini" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stopColor="#a855f7" />
                           <stop offset="50%" stopColor="#06b6d4" />
                           <stop offset="100%" stopColor="#ec4899" />
@@ -539,89 +514,73 @@ export function OnboardingTour() {
                                   <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg neural-pulse`}>
                                     {index + 1}
                                   </div>
-                                  <p className="text-gray-200 text-base leading-relaxed group-hover:text-white transition-colors flex-1">
+                                  <p className="text-gray-200 text-base leading-relaxed pt-0.5">
                                     {instruction}
                                   </p>
-                                  <CheckCircle2 className="h-5 w-5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                                 </motion.div>
                               ))}
                             </div>
                           </div>
                         </div>
-
-                        {/* Action Button */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.7 }}
-                          className="mt-6"
-                        >
-                          <Button
-                            onClick={() => handleAction(currentStepData.action.path)}
-                            size="lg"
-                            className={`w-full bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white font-bold text-lg py-7 rounded-xl group relative overflow-hidden shadow-2xl glow-pulse`}
-                            data-testid="button-action"
-                          >
-                            <div className="absolute inset-0 iridescent-shimmer" />
-                            <span className="relative z-10 flex items-center justify-center gap-3">
-                              <Globe className="h-6 w-6" />
-                              <span className="font-orbitron">{currentStepData.action.label}</span>
-                              <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
-                            </span>
-                          </Button>
-                        </motion.div>
                       </motion.div>
 
-                      {/* Footer Navigation */}
+                      {/* Action Button */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="flex justify-center mb-8"
+                      >
+                        <Button
+                          onClick={() => handleAction(currentStepData.action.path)}
+                          size="lg"
+                          className={`px-10 py-6 text-lg font-bold bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 neural-glow`}
+                          data-testid={`button-action-step-${currentStep}`}
+                        >
+                          {currentStepData.action.label}
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </motion.div>
+
+                      {/* Navigation Footer */}
                       <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                        {/* Step Indicators */}
-                        <div className="flex gap-2 flex-wrap">
-                          {steps.map((step, index) => (
-                            <button
+                        <Button
+                          onClick={handlePrevious}
+                          disabled={currentStep === 0}
+                          variant="ghost"
+                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed neural-glass px-6"
+                          data-testid="button-previous-step"
+                        >
+                          <ChevronLeft className="mr-2 h-5 w-5" />
+                          Previous
+                        </Button>
+
+                        <div className="flex items-center gap-2">
+                          {steps.map((_, index) => (
+                            <motion.div
                               key={index}
-                              onClick={() => setCurrentStep(index)}
-                              className={`relative transition-all duration-300 rounded-full overflow-hidden ${
-                                index === currentStep
-                                  ? 'w-10 h-3'
-                                  : 'w-3 h-3'
-                              }`}
-                              data-testid={`button-step-${index}`}
-                              aria-label={`Go to step ${index + 1}: ${step.title}`}
-                            >
-                              <div className={`absolute inset-0 rounded-full transition-all ${
-                                index === currentStep
-                                  ? `bg-gradient-to-r ${steps[index].gradient} shadow-lg`
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                index === currentStep 
+                                  ? `w-8 bg-gradient-to-r ${currentStepData.gradient}` 
                                   : index < currentStep
-                                  ? 'bg-cyan-400/60'
-                                  : 'bg-white/20'
-                              }`} />
-                            </button>
+                                  ? 'w-2 bg-green-500'
+                                  : 'w-2 bg-white/20'
+                              }`}
+                              initial={{ scale: 0.8 }}
+                              animate={{ scale: index === currentStep ? 1 : 0.8 }}
+                            />
                           ))}
                         </div>
 
-                        {/* Nav Buttons */}
-                        <div className="flex items-center gap-3">
-                          <Button
-                            onClick={handlePrevious}
-                            disabled={currentStep === 0}
-                            variant="outline"
-                            size="lg"
-                            className="font-orbitron disabled:opacity-30"
-                            data-testid="button-previous"
-                          >
-                            <ChevronLeft className="h-5 w-5 mr-2" />
-                            Previous
-                          </Button>
-                          <Button
-                            onClick={handleNext}
-                            size="lg"
-                            className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:opacity-90 font-orbitron"
-                            data-testid="button-next"
-                          >
-                            {currentStep === steps.length - 1 ? 'Finish' : 'Next Step'}
-                            <ChevronRight className="h-5 w-5 ml-2" />
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={handleNext}
+                          variant="ghost"
+                          className="text-gray-400 hover:text-white neural-glass px-6"
+                          data-testid="button-next-step"
+                        >
+                          {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+                          <ChevronRight className="ml-2 h-5 w-5" />
+                        </Button>
                       </div>
                     </div>
                   </div>
