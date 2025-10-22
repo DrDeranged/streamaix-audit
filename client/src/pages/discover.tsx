@@ -1,332 +1,474 @@
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/landing/navigation";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "wouter";
 import { 
-  Sparkles, 
-  TrendingUp, 
-  DollarSign, 
-  FileText, 
-  Calendar,
-  Trophy,
-  Users,
-  ArrowRight,
-  Target,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  Brain,
+  AlertCircle,
   Clock,
-  Award
+  Zap,
+  Target,
+  Waves,
+  Radio,
+  ExternalLink,
+  MessageSquare,
+  Heart,
+  Share2,
+  Eye,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight
 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Discover() {
-  const { data: summariesData = [], isLoading: summariesLoading } = useQuery({
-    queryKey: ['/api/summaries'],
+  const [timeFilter, setTimeFilter] = useState('24h');
+  const [sectorTimeFilter, setSectorTimeFilter] = useState('24h');
+  const [contentFilter, setContentFilter] = useState('all');
+
+  // API Queries
+  const { data: marketPulseData, isLoading: pulseLoading } = useQuery({
+    queryKey: ['/api/analytics/live/crypto', timeFilter],
   });
 
-  const { data: bountiesData, isLoading: bountiesLoading } = useQuery({
-    queryKey: ['/api/bounties'],
+  const { data: sectorsData, isLoading: sectorsLoading } = useQuery({
+    queryKey: ['/api/market/sectors', sectorTimeFilter],
   });
 
-  const { data: marketsData, isLoading: marketsLoading } = useQuery({
-    queryKey: ['/api/prediction-markets'],
+  const { data: trendingContent, isLoading: contentLoading } = useQuery({
+    queryKey: ['/api/discover/trending', contentFilter],
   });
 
-  const summaries = Array.isArray(summariesData) ? summariesData : [];
-  const bounties = (bountiesData as any)?.bounties || [];
-  const markets = (marketsData as any)?.markets || [];
+  const { data: correlationData } = useQuery({
+    queryKey: ['/api/analytics/correlation-matrix', '24h'],
+  });
 
-  const recentSummaries = summaries
-    .filter((s: any) => s.processingStatus === 'completed')
-    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 6);
+  const { data: volatilityData } = useQuery({
+    queryKey: ['/api/volatility/dashboard'],
+  });
 
-  const activeBounties = bounties
-    .filter((b: any) => b.status === 'open')
-    .sort((a: any, b: any) => b.reward - a.reward)
-    .slice(0, 6);
+  const { data: patternData } = useQuery({
+    queryKey: ['/api/patterns/dashboard'],
+  });
 
-  const activeMarkets = markets
-    .filter((m: any) => m.status === 'active')
-    .sort((a: any, b: any) => b.totalVolume - a.totalVolume)
-    .slice(0, 6);
+  const { data: signalsData } = useQuery({
+    queryKey: ['/api/cross-market/signals'],
+  });
+
+  const cryptoAssets = (marketPulseData as any)?.assets || [];
+  const sectors = (sectorsData as any)?.sectors || [];
+  const stories = (trendingContent as any)?.stories || [];
+  const correlationMatrix = (correlationData as any)?.correlationMatrix || [];
+  const volatilityAlerts = (volatilityData as any)?.alerts || [];
+  const patterns = (patternData as any)?.recentPatterns || [];
+  const signals = (signalsData as any)?.signals || [];
+
+  const timeFilters = [
+    { label: '1h', value: '1h' },
+    { label: '8h', value: '8h' },
+    { label: '24h', value: '24h' },
+    { label: '7d', value: '7d' }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
-      <Navigation />
-      
-      <div className="container mx-auto px-4 pt-24 pb-16">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 mb-6">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-              Discover Content
-            </span>
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-purple-500/20">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-orbitron font-bold text-white">Discover</h1>
+              <p className="text-sm text-gray-400 mt-1">Advanced Market Intelligence & Analytics</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {/* Time Filter */}
+              <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg p-1">
+                {timeFilters.map((filter) => (
+                  <button
+                    key={filter.value}
+                    onClick={() => setTimeFilter(filter.value)}
+                    className={`px-3 py-1.5 rounded text-sm font-medium transition-all ${
+                      timeFilter === filter.value
+                        ? 'bg-purple-500 text-white'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                    data-testid={`filter-${filter.value}`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                <Radio className="w-3 h-3 mr-1 animate-pulse" />
+                Live
+              </Badge>
+
+              <Button variant="outline" size="sm" data-testid="button-alerts">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Alerts
+              </Button>
+
+              <Button variant="default" size="sm" data-testid="button-dashboard">
+                Dashboard
+              </Button>
+            </div>
           </div>
-          
-          <h1 className="text-4xl sm:text-5xl font-orbitron font-bold mb-4">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
-              Explore StreamAiX
-            </span>
-          </h1>
-          
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Browse AI-processed summaries, open bounties, and active prediction markets
-          </p>
         </div>
+      </div>
 
-        {/* Tabbed Content */}
-        <Tabs defaultValue="summaries" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
-            <TabsTrigger value="summaries" data-testid="tab-summaries">
-              <FileText className="w-4 h-4 mr-2" />
-              Summaries
-            </TabsTrigger>
-            <TabsTrigger value="bounties" data-testid="tab-bounties">
-              <Target className="w-4 h-4 mr-2" />
-              Bounties
-            </TabsTrigger>
-            <TabsTrigger value="markets" data-testid="tab-markets">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Markets
-            </TabsTrigger>
-          </TabsList>
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Market Pulse */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Activity className="w-6 h-6 text-purple-400" />
+              <h2 className="text-2xl font-orbitron font-bold text-white">Market Pulse</h2>
+            </div>
+            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+              <Radio className="w-3 h-3 mr-1 animate-pulse" />
+              Live
+            </Badge>
+          </div>
 
-          {/* Summaries Tab */}
-          <TabsContent value="summaries">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {summariesLoading ? (
-                <div className="col-span-full text-center py-12 text-gray-400">
-                  Loading summaries...
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pulseLoading ? (
+              <div className="col-span-full text-center py-8 text-gray-400">
+                Loading market data...
+              </div>
+            ) : cryptoAssets.slice(0, 6).map((asset: any) => (
+              <Card key={asset.symbol} className="bg-slate-900/50 border-purple-500/20 hover:border-purple-500/40 transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold text-white text-lg">{asset.symbol}</h3>
+                      <p className="text-sm text-gray-400">{asset.name}</p>
+                    </div>
+                    <Badge variant={asset.changePercent >= 0 ? 'default' : 'destructive'} className="text-xs">
+                      {asset.changePercent >= 0 ? '↗ bearish' : '↘ bearish'}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-white">
+                        ${asset.price?.toFixed(2)}
+                      </span>
+                      <span className={`text-sm font-medium ${asset.changePercent >= 0 ? 'text-red-400' : 'text-red-400'}`}>
+                        {asset.changePercent >= 0 ? '+' : ''}{asset.changePercent?.toFixed(2)}%
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-gray-400">
+                      Vol: ${(asset.volume / 1e9)?.toFixed(2)}B
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Sector Intelligence */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="w-6 h-6 text-cyan-400" />
+              <h2 className="text-2xl font-orbitron font-bold text-white">Sector Intelligence</h2>
+            </div>
+            <Button variant="ghost" size="sm" data-testid="button-correlations">
+              Real-time correlations
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sectorsLoading ? (
+              <div className="col-span-full text-center py-8 text-gray-400">
+                Loading sector data...
+              </div>
+            ) : sectors.slice(0, 6).map((sector: any) => (
+              <Card key={sector.name} className="bg-slate-900/50 border-purple-500/20 hover:border-cyan-500/40 transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-white">{sector.name}</h3>
+                      <p className="text-xs text-gray-400">{sector.assets} Assets</p>
+                    </div>
+                    <Badge variant={sector.performance >= 0 ? 'default' : 'destructive'} className="text-xs">
+                      {sector.performance >= 0 ? '↗' : '↘'} {Math.abs(sector.performance)?.toFixed(2)}%
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-400">Volume</span>
+                      <span className="text-white font-medium">
+                        ${(sector.volume / 1e6)?.toFixed(2)}M
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-400">Sentiment</span>
+                      <span className="text-white font-medium">
+                        {(sector.sentiment * 100)?.toFixed(0)}%
+                      </span>
+                    </div>
+
+                    {/* Sentiment Bar */}
+                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-yellow-500 to-green-500"
+                        style={{ width: `${sector.sentiment * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Content Intelligence */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <Brain className="w-6 h-6 text-fuchsia-400" />
+            <h2 className="text-2xl font-orbitron font-bold text-white">Content Intelligence</h2>
+          </div>
+
+          <Card className="bg-slate-900/50 border-purple-500/20">
+            <CardHeader>
+              <Tabs value={contentFilter} onValueChange={setContentFilter}>
+                <TabsList className="grid w-full max-w-md grid-cols-4">
+                  <TabsTrigger value="all" data-testid="content-all">
+                    All Sources
+                  </TabsTrigger>
+                  <TabsTrigger value="twitter" data-testid="content-social">
+                    Social
+                  </TabsTrigger>
+                  <TabsTrigger value="youtube" data-testid="content-videos">
+                    Videos
+                  </TabsTrigger>
+                  <TabsTrigger value="news" data-testid="content-news">
+                    News
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              {contentLoading ? (
+                <div className="text-center py-8 text-gray-400">
+                  Loading trending content...
                 </div>
-              ) : recentSummaries.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No summaries yet. Create your first one!</p>
-                  <Link href="/create-summary">
-                    <Button className="mt-4" data-testid="button-create-summary">
-                      Create Summary
-                    </Button>
-                  </Link>
+              ) : stories.slice(0, 5).map((story: any) => (
+                <div 
+                  key={story.id}
+                  className="p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-all border border-slate-700/50"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-white mb-1 line-clamp-2">
+                        {story.title}
+                      </h4>
+                      <p className="text-sm text-gray-400 line-clamp-2">
+                        {story.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-center gap-4 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3 h-3" />
+                        {story.engagement?.likes}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3" />
+                        {story.engagement?.comments}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Share2 className="w-3 h-3" />
+                        {story.engagement?.shares}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {story.engagement?.views}
+                      </span>
+                    </div>
+
+                    <Badge variant="outline" className="text-xs">
+                      {story.source}
+                    </Badge>
+                  </div>
                 </div>
-              ) : (
-                recentSummaries.map((summary: any) => (
-                  <Card key={summary.id} className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer" data-testid={`card-summary-${summary.id}`}>
-                    <Link href={`/summary/${summary.id}`}>
-                      <CardHeader>
-                        <CardTitle className="text-lg line-clamp-2 text-white">
-                          {summary.title}
-                        </CardTitle>
-                        <CardDescription className="line-clamp-2">
-                          {summary.description || summary.tldrSummary || 'AI-processed content'}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between text-sm">
-                          <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                            {summary.contentType || 'video'}
-                          </Badge>
-                          <div className="flex items-center gap-2 text-gray-400">
-                            <Calendar className="w-4 h-4" />
-                            <span>{format(new Date(summary.createdAt), 'MMM d')}</span>
-                          </div>
-                        </div>
-                        {summary.tags && summary.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-3">
-                            {summary.tags.slice(0, 3).map((tag: string) => (
-                              <Badge key={tag} variant="secondary" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Advanced Analytics Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Correlation Analysis */}
+          <Card className="bg-slate-900/50 border-purple-500/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Waves className="w-5 h-5 text-blue-400" />
+                <CardTitle className="text-white">Correlation Analysis</CardTitle>
+              </div>
+              <CardDescription>Asset pair correlations and market regime</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {correlationMatrix.slice(0, 5).map((pair: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 rounded bg-slate-800/50">
+                    <div>
+                      <span className="text-white font-medium">{pair.asset1} / {pair.asset2}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-slate-700 rounded-full h-2">
+                        <div 
+                          className={`h-full rounded-full ${
+                            pair.correlation > 0.7 ? 'bg-green-500' : 
+                            pair.correlation > 0.3 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${Math.abs(pair.correlation) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-white w-12 text-right">
+                        {pair.correlation?.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Volatility Forecasting */}
+          <Card className="bg-slate-900/50 border-purple-500/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-400" />
+                <CardTitle className="text-white">Volatility Forecasting</CardTitle>
+              </div>
+              <CardDescription>Stress indicators and crisis detection</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {volatilityAlerts.length > 0 ? (
+                  volatilityAlerts.slice(0, 5).map((alert: any, idx: number) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 rounded bg-slate-800/50">
+                      <AlertCircle className={`w-5 h-5 flex-shrink-0 ${
+                        alert.severity === 'high' ? 'text-red-400' : 
+                        alert.severity === 'medium' ? 'text-yellow-400' : 'text-blue-400'
+                      }`} />
+                      <div className="flex-1">
+                        <h4 className="text-white font-medium text-sm">{alert.symbol}</h4>
+                        <p className="text-xs text-gray-400">{alert.message}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {alert.severity}
+                      </Badge>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-gray-400 text-sm">
+                    No volatility alerts at this time
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pattern Recognition */}
+          <Card className="bg-slate-900/50 border-purple-500/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-purple-400" />
+                <CardTitle className="text-white">Pattern Recognition</CardTitle>
+              </div>
+              <CardDescription>Chart patterns and trading setups</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {patterns.length > 0 ? (
+                  patterns.slice(0, 5).map((pattern: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between p-3 rounded bg-slate-800/50">
+                      <div>
+                        <h4 className="text-white font-medium text-sm">{pattern.symbol}</h4>
+                        <p className="text-xs text-gray-400">{pattern.patternType}</p>
+                      </div>
+                      <Badge 
+                        variant={pattern.confidence > 0.7 ? 'default' : 'outline'}
+                        className="text-xs"
+                      >
+                        {(pattern.confidence * 100).toFixed(0)}% confident
+                      </Badge>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-gray-400 text-sm">
+                    No active patterns detected
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Cross-Market Signals */}
+          <Card className="bg-slate-900/50 border-purple-500/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-400" />
+                <CardTitle className="text-white">Cross-Market Signals</CardTitle>
+              </div>
+              <CardDescription>Unified trading signals across markets</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {signals.length > 0 ? (
+                  signals.slice(0, 5).map((signal: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between p-3 rounded bg-slate-800/50">
+                      <div className="flex items-center gap-3">
+                        {signal.direction === 'bullish' ? (
+                          <ArrowUpRight className="w-5 h-5 text-green-400" />
+                        ) : (
+                          <ArrowDownRight className="w-5 h-5 text-red-400" />
                         )}
-                      </CardContent>
-                    </Link>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Bounties Tab */}
-          <TabsContent value="bounties">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bountiesLoading ? (
-                <div className="col-span-full text-center py-12 text-gray-400">
-                  Loading bounties...
-                </div>
-              ) : activeBounties.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No active bounties</p>
-                  <Link href="/bounties">
-                    <Button className="mt-4" data-testid="button-view-bounties">
-                      View All Bounties
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                activeBounties.map((bounty: any) => (
-                  <Card key={bounty.id} className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer" data-testid={`card-bounty-${bounty.id}`}>
-                    <Link href={`/bounties/${bounty.id}`}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-2">
-                          <CardTitle className="text-lg line-clamp-2 text-white flex-1">
-                            {bounty.title}
-                          </CardTitle>
-                          <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 border-yellow-500/30 shrink-0">
-                            {bounty.reward} STREAM
-                          </Badge>
+                        <div>
+                          <h4 className="text-white font-medium text-sm">{signal.symbol}</h4>
+                          <p className="text-xs text-gray-400">{signal.type}</p>
                         </div>
-                        <CardDescription className="line-clamp-2">
-                          {bounty.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between text-sm">
-                          <Badge variant="outline" className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-                            {bounty.difficulty || 'medium'}
-                          </Badge>
-                          {bounty.deadline && (
-                            <div className="flex items-center gap-2 text-gray-400">
-                              <Clock className="w-4 h-4" />
-                              <span>{format(new Date(bounty.deadline), 'MMM d')}</span>
-                            </div>
-                          )}
-                        </div>
-                        {bounty.category && (
-                          <div className="mt-3">
-                            <Badge variant="secondary" className="text-xs">
-                              {bounty.category}
-                            </Badge>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Link>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Markets Tab */}
-          <TabsContent value="markets">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {marketsLoading ? (
-                <div className="col-span-full text-center py-12 text-gray-400">
-                  Loading markets...
-                </div>
-              ) : activeMarkets.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <TrendingUp className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No active markets</p>
-                  <Link href="/markets">
-                    <Button className="mt-4" data-testid="button-view-markets">
-                      View All Markets
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                activeMarkets.map((market: any) => (
-                  <Card key={market.id} className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer" data-testid={`card-market-${market.id}`}>
-                    <Link href={`/markets/${market.id}`}>
-                      <CardHeader>
-                        <CardTitle className="text-lg line-clamp-2 text-white">
-                          {market.question}
-                        </CardTitle>
-                        <CardDescription className="line-clamp-2">
-                          {market.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="text-2xl font-bold text-green-400">
-                              {Math.round((market.yesPrice / 10000) * 100)}%
-                            </div>
-                            <span className="text-gray-400 text-sm">YES</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-400 text-sm">NO</span>
-                            <div className="text-2xl font-bold text-red-400">
-                              {Math.round((market.noPrice / 10000) * 100)}%
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                            {market.category}
-                          </Badge>
-                          {market.deadline && (
-                            <div className="flex items-center gap-2 text-gray-400">
-                              <Calendar className="w-4 h-4" />
-                              <span>{format(new Date(market.deadline), 'MMM d')}</span>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Link>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <Link href="/create-summary">
-            <Card className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer" data-testid="card-create-summary">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20">
-                    <Sparkles className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div className="text-right">
+                        <Badge 
+                          variant={signal.direction === 'bullish' ? 'default' : 'destructive'}
+                          className="text-xs"
+                        >
+                          {signal.direction}
+                        </Badge>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {signal.confidence}% confidence
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-gray-400 text-sm">
+                    No active signals
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white mb-1">Create Summary</h3>
-                    <p className="text-sm text-gray-400">Process new content with AI</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/bounties">
-            <Card className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer" data-testid="card-browse-bounties">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20">
-                    <Trophy className="w-6 h-6 text-cyan-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white mb-1">Browse Bounties</h3>
-                    <p className="text-sm text-gray-400">Earn STREAM tokens</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/markets">
-            <Card className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer" data-testid="card-trade-markets">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20">
-                    <TrendingUp className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white mb-1">Trade Markets</h3>
-                    <p className="text-sm text-gray-400">Predict future events</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
