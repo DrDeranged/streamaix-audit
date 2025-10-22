@@ -160,21 +160,12 @@ export default function Discover() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 relative overflow-hidden">
-      {/* Neural Background Particles */}
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-purple-500 rounded-full animate-pulse-glow" />
-        <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-cyan-400 rounded-full glow-pulse" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse-glow" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-2/3 right-1/3 w-2 h-2 bg-cyan-500 rounded-full glow-pulse" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-1/3 left-1/2 w-1 h-1 bg-purple-400 rounded-full animate-pulse-glow" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 right-1/2 w-1.5 h-1.5 bg-fuchsia-400 rounded-full glow-pulse" style={{ animationDelay: '2.5s' }} />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
+      {/* Subtle Background Accent */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent pointer-events-none" />
       
-      {/* Gradient Overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent pointer-events-none opacity-50" />
-      {/* AI-Native Header with Neural Glass Effect */}
-      <div className="sticky top-0 z-50 neural-glass iridescent-border border-b">
+      {/* Professional Header */}
+      <div className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50">
         <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
@@ -182,32 +173,31 @@ export default function Discover() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-fuchsia-500/20 h-8 sm:h-10 px-2 sm:px-3 rounded-lg transition-all duration-300 float-3d"
+                  className="text-gray-400 hover:text-white hover:bg-slate-800/50 h-8 sm:h-10 px-2 sm:px-3"
                   data-testid="button-back-home"
                 >
                   <Home className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </Link>
               <div>
-                <h1 className="text-xl sm:text-4xl font-orbitron font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent tracking-tight glow-pulse">
+                <h1 className="text-xl sm:text-4xl font-orbitron font-bold text-white tracking-tight">
                   Discover
                 </h1>
-                <p className="text-xs sm:text-sm bg-gradient-to-r from-gray-400 to-gray-500 bg-clip-text text-transparent mt-0.5 sm:mt-1 hidden sm:block">
+                <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 hidden sm:block">
                   Advanced Market Intelligence & Analytics
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <Badge className="relative overflow-hidden bg-green-500/20 text-green-400 border border-green-500/40 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold shadow-lg shadow-green-500/20 glow-pulse">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/20 to-green-400/0 animate-shimmer" />
-                <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse relative z-10" />
-                <span className="hidden sm:inline relative z-10">Live</span>
+              <Badge className="bg-green-500/10 text-green-400 border border-green-500/30 px-2 sm:px-3 py-1 sm:py-1.5 text-xs">
+                <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse" />
+                <span className="hidden sm:inline">Live</span>
               </Badge>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="neural-glass iridescent-border text-white h-7 sm:h-10 px-2 sm:px-3 text-xs hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-cyan-500/20 tilt-hover transition-all duration-300"
+                className="bg-slate-800/50 border-slate-700/50 text-gray-300 hover:bg-slate-700/50 hover:text-white h-7 sm:h-10 px-2 sm:px-3 text-xs"
                 data-testid="button-alerts"
               >
                 <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -216,11 +206,10 @@ export default function Discover() {
               <Button 
                 variant="default" 
                 size="sm"
-                className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-cyan-700 h-7 sm:h-10 px-2 sm:px-4 text-xs hidden sm:inline-flex shadow-lg shadow-purple-500/30 tilt-hover transition-all duration-300"
+                className="bg-purple-600/80 hover:bg-purple-600 text-white h-7 sm:h-10 px-2 sm:px-4 text-xs hidden sm:inline-flex"
                 data-testid="button-dashboard"
               >
-                <span className="relative z-10">Dashboard</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-shimmer" />
+                Dashboard
               </Button>
             </div>
           </div>
