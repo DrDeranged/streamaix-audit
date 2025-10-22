@@ -185,67 +185,90 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
         </div>
 
         {/* Content */}
-        <Link href={getLink()}>
-          <div className="mb-1.5 cursor-pointer pl-9">
-            <h3 className="text-sm font-semibold text-white mb-0.5 hover:text-fuchsia-400 line-clamp-1">
-              {content.title}
-            </h3>
-            {content.description && (
-              <p className="text-xs text-gray-400 line-clamp-1">
-                {content.description}
-              </p>
-            )}
-            
-            {/* Type-specific metadata */}
-            {content.metadata && (
-              <div className="mt-1 flex items-center gap-2 text-[10px]">
-                {(type === 'macro' || type === 'crypto') && (
-                  <>
-                    {content.metadata.category && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-300 font-medium">
-                        {content.metadata.category}
-                      </span>
-                    )}
-                    {content.metadata.url && (
-                      <a 
-                        href={content.metadata.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-0.5 text-cyan-400 hover:text-cyan-300"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <ExternalLink className="w-2.5 h-2.5" />
-                        Read Full Story
-                      </a>
-                    )}
-                  </>
-                )}
-                {type === 'bounty' && (
-                  <>
-                    <span className="text-fuchsia-400 font-semibold flex items-center gap-0.5">
-                      <Trophy className="w-2.5 h-2.5" />
-                      {content.metadata.reward} STREAM
+        <div className="mb-1.5 pl-9">
+          {(type === 'macro' || type === 'crypto') ? (
+            // For news articles, title links to external URL
+            <>
+              {content.metadata?.url ? (
+                <a 
+                  href={content.metadata.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <h3 className="text-sm font-semibold text-white mb-0.5 hover:text-fuchsia-400 line-clamp-1 cursor-pointer">
+                    {content.title}
+                  </h3>
+                </a>
+              ) : (
+                <h3 className="text-sm font-semibold text-white mb-0.5 line-clamp-1">
+                  {content.title}
+                </h3>
+              )}
+            </>
+          ) : (
+            // For other types, title links to internal page
+            <Link href={getLink()}>
+              <h3 className="text-sm font-semibold text-white mb-0.5 hover:text-fuchsia-400 line-clamp-1 cursor-pointer">
+                {content.title}
+              </h3>
+            </Link>
+          )}
+          
+          {content.description && (
+            <p className="text-xs text-gray-400 line-clamp-1">
+              {content.description}
+            </p>
+          )}
+          
+          {/* Type-specific metadata */}
+          {content.metadata && (
+            <div className="mt-1 flex items-center gap-2 text-[10px]">
+              {(type === 'macro' || type === 'crypto') && (
+                <>
+                  {content.metadata.category && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-300 font-medium">
+                      {content.metadata.category}
                     </span>
-                    <span className="text-gray-400 capitalize">{content.metadata.status}</span>
-                  </>
-                )}
-                {type === 'market' && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-green-400 font-medium">
-                      YES {Math.round(((content.metadata.yesPrice || 500000) / 1000000) * 100)}%
-                    </span>
-                    <span className="text-red-400 font-medium">
-                      NO {Math.round((1 - ((content.metadata.yesPrice || 500000) / 1000000)) * 100)}%
-                    </span>
-                  </div>
-                )}
-                {type === 'summary' && content.metadata.duration && (
-                  <span className="text-gray-400">{content.metadata.duration}</span>
-                )}
-              </div>
-            )}
-          </div>
-        </Link>
+                  )}
+                  {content.metadata.url && (
+                    <a 
+                      href={content.metadata.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-0.5 text-cyan-400 hover:text-cyan-300"
+                    >
+                      <ExternalLink className="w-2.5 h-2.5" />
+                      Read Full Story
+                    </a>
+                  )}
+                </>
+              )}
+              {type === 'bounty' && (
+                <>
+                  <span className="text-fuchsia-400 font-semibold flex items-center gap-0.5">
+                    <Trophy className="w-2.5 h-2.5" />
+                    {content.metadata.reward} STREAM
+                  </span>
+                  <span className="text-gray-400 capitalize">{content.metadata.status}</span>
+                </>
+              )}
+              {type === 'market' && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-green-400 font-medium">
+                    YES {Math.round(((content.metadata.yesPrice || 500000) / 1000000) * 100)}%
+                  </span>
+                  <span className="text-red-400 font-medium">
+                    NO {Math.round((1 - ((content.metadata.yesPrice || 500000) / 1000000)) * 100)}%
+                  </span>
+                </div>
+              )}
+              {type === 'summary' && content.metadata.duration && (
+                <span className="text-gray-400">{content.metadata.duration}</span>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Engagement Stats */}
         <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mb-1.5 pl-9">
