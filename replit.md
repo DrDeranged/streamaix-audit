@@ -57,7 +57,7 @@ Offering both light and dark modes with mobile-first responsive layout. Animatio
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless
 - **AI Services**: OpenAI API (GPT-4o for chatbot, quality scoring, content analysis, Whisper for transcription)
 - **Financial Data APIs**:
-    - Finnhub API: Real-time stock and forex data.
+    - Finnhub API: Real-time stock and forex data (working).
     - CoinGecko API: Crypto prices (primary, rate-limited at 10K calls).
     - CoinMarketCap API: Crypto prices and market data (secondary fallback, monthly credit limit reached).
     - Dune Analytics API: **Fully implemented** blockchain data and on-chain DEX price queries (tertiary fallback). Queries 15+ ERC-20 tokens using contract addresses, tries 4 different public query IDs for maximum coverage. Free tier rate-limited at ~2,500 credits/month.
@@ -65,3 +65,27 @@ Offering both light and dark modes with mobile-first responsive layout. Animatio
 - **Build & UI Tools**: Vite, esbuild, Radix UI, shadcn/ui, TailwindCSS, Framer Motion, Google Fonts (Inter, Orbitron).
 - **Audio/Video Processing**: yt-dlp, ffmpeg.
 - **Social Integration**: Twitter API (currently rate-limited).
+
+## Production Readiness
+
+### Pre-Deployment Checklist (Completed)
+- ✅ **Graceful API Fallbacks**: Implemented fallback UI components for when APIs are rate-limited
+- ✅ **Error Handling**: Created reusable `ApiErrorFallback` and `ApiErrorCard` components
+- ✅ **Discover Page**: Added fallback UI for crypto/stock data when APIs fail
+- ✅ **Landing Page**: Added "API rate-limited" indicators for social sentiment cards
+- ✅ **API Status Monitoring**: Created `ApiStatusIndicator` component for real-time service monitoring
+- ✅ **Admin Notifications**: Built `AdminApiNotification` banner to alert about needed API upgrades
+- ✅ **Deployment Guide**: Comprehensive `DEPLOYMENT.md` with API keys, pricing, and optimization strategies
+
+### Recommended Actions for Production
+1. **Upgrade CoinGecko** to Analyst tier ($129/month) - Highest priority to eliminate crypto data issues
+2. **Monitor API usage** patterns in first 24 hours after deployment
+3. **Review DEPLOYMENT.md** for detailed setup instructions and cost projections
+4. **Set up error tracking** (Sentry recommended) for production monitoring
+5. **Test with production API keys** before going live
+
+### Known Limitations (Pre-Production)
+- Twitter API rate-limited (429 errors) - Social features gracefully degrade
+- CoinGecko/CoinMarketCap free tiers exhausted - Fallback UI displays upgrade prompts
+- Dune Analytics rate-limited - Tertiary fallback, less critical
+- Stock data via Finnhub working correctly ✓
