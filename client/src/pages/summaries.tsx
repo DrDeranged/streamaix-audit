@@ -133,7 +133,7 @@ export default function Summaries() {
           {/* Results Count */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-400">
-              Showing {filteredSummaries.length} of {summaries.length} summaries
+              Showing {filteredSummaries.length} of {(summaries as any[]).length} summaries
             </p>
             <Link href="/create-summary">
               <Button variant="outline" className="gap-2" data-testid="button-create-new">
