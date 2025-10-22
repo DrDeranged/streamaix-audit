@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,8 @@ import {
   Scale,
   CircleDollarSign,
   Wallet,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Home
 } from "lucide-react";
 
 export default function Discover() {
@@ -163,9 +165,21 @@ export default function Discover() {
       <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-purple-500/10">
         <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl sm:text-3xl font-orbitron font-bold text-white tracking-tight">Discover</h1>
-              <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 hidden sm:block">Advanced Market Intelligence & Analytics</p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Link href="/">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-gray-400 hover:text-white hover:bg-slate-800/50 h-8 sm:h-9 px-2 sm:px-3"
+                  data-testid="button-back-home"
+                >
+                  <Home className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-xl sm:text-3xl font-orbitron font-bold text-white tracking-tight">Discover</h1>
+                <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 hidden sm:block">Advanced Market Intelligence & Analytics</p>
+              </div>
             </div>
             
             <div className="flex items-center gap-1.5 sm:gap-3">

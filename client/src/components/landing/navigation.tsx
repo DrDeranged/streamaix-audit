@@ -179,13 +179,13 @@ export function Navigation() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/insights" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
                       <Brain className="w-4 h-4 text-blue-400" />
                       <span className="font-medium">AI Insights</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/analytics" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
                       <PieChart className="w-4 h-4 text-green-400" />
                       <span className="font-medium">Platform Stats</span>
                     </Link>
@@ -466,7 +466,7 @@ export function Navigation() {
                     Discover
                   </button>
                 </Link>
-                <Link href="/insights" className="block">
+                <Link href="/discover" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-blue-500/20 transition-all duration-200 font-medium text-sm"
@@ -475,7 +475,7 @@ export function Navigation() {
                     AI Insights
                   </button>
                 </Link>
-                <Link href="/analytics" className="block">
+                <Link href="/discover" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-green-500/20 transition-all duration-200 font-medium text-sm"
