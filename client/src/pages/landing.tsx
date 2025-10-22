@@ -28,10 +28,10 @@ export default function Landing() {
         <BountyFeed />
         <PredictionMarketSection />
         <WhyBlockchain />
-        <SocialEcosystem />
         <SocialFeed />
         <KnowledgeAvatars />
         <AISuggestions />
+        <SocialEcosystem />
         <Footer />
       </div>
     </div>
