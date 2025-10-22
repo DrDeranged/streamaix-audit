@@ -161,36 +161,41 @@ export default function Discover() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950">
-      {/* Minimal Header - Mobile Optimized */}
-      <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-purple-500/10">
-        <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
+      {/* AI-Native Header with Neural Glass Effect */}
+      <div className="sticky top-0 z-50 neural-glass iridescent-border border-b">
+        <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
               <Link href="/">
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-gray-400 hover:text-white hover:bg-slate-800/50 h-8 sm:h-9 px-2 sm:px-3"
+                  className="text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-fuchsia-500/20 h-8 sm:h-10 px-2 sm:px-3 rounded-lg transition-all duration-300 float-3d"
                   data-testid="button-back-home"
                 >
                   <Home className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </Link>
               <div>
-                <h1 className="text-xl sm:text-3xl font-orbitron font-bold text-white tracking-tight">Discover</h1>
-                <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 hidden sm:block">Advanced Market Intelligence & Analytics</p>
+                <h1 className="text-xl sm:text-4xl font-orbitron font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent tracking-tight glow-pulse">
+                  Discover
+                </h1>
+                <p className="text-xs sm:text-sm bg-gradient-to-r from-gray-400 to-gray-500 bg-clip-text text-transparent mt-0.5 sm:mt-1 hidden sm:block">
+                  Advanced Market Intelligence & Analytics
+                </p>
               </div>
             </div>
             
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-2 sm:px-3 py-1 sm:py-1.5 text-xs">
-                <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse" />
-                <span className="hidden sm:inline">Live</span>
+              <Badge className="relative overflow-hidden bg-green-500/20 text-green-400 border border-green-500/40 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold shadow-lg shadow-green-500/20 glow-pulse">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/20 to-green-400/0 animate-shimmer" />
+                <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse relative z-10" />
+                <span className="hidden sm:inline relative z-10">Live</span>
               </Badge>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-slate-900/50 border-purple-500/20 hover:border-purple-500/40 text-white h-7 sm:h-9 px-2 sm:px-3 text-xs"
+                className="neural-glass iridescent-border text-white h-7 sm:h-10 px-2 sm:px-3 text-xs hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-cyan-500/20 tilt-hover transition-all duration-300"
                 data-testid="button-alerts"
               >
                 <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -199,10 +204,11 @@ export default function Discover() {
               <Button 
                 variant="default" 
                 size="sm"
-                className="bg-purple-600 hover:bg-purple-700 h-7 sm:h-9 px-2 sm:px-3 text-xs hidden sm:inline-flex"
+                className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-cyan-700 h-7 sm:h-10 px-2 sm:px-4 text-xs hidden sm:inline-flex shadow-lg shadow-purple-500/30 tilt-hover transition-all duration-300"
                 data-testid="button-dashboard"
               >
-                Dashboard
+                <span className="relative z-10">Dashboard</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-shimmer" />
               </Button>
             </div>
           </div>
@@ -210,23 +216,28 @@ export default function Discover() {
       </div>
 
       <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
-        {/* Market Pulse - Stocks + Crypto - Mobile Optimized */}
+        {/* Market Pulse - Stocks + Crypto */}
         <section>
           <div
             onClick={() => toggleSection('pulse')}
-            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            className="relative flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group p-3 sm:p-4 rounded-xl neural-glass iridescent-border hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-cyan-500/10 transition-all duration-300"
             data-testid="toggle-market-pulse"
           >
-            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Market Pulse</h2>
+            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 glow-pulse">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+            </div>
+            <h2 className="text-base sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+              Market Pulse
+            </h2>
             {pulseExpanded ? (
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-purple-400 transition-colors" />
             ) : (
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-purple-400 transition-colors" />
             )}
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-              <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 animate-pulse" />
-              Live
+            <Badge className="relative overflow-hidden bg-green-500/20 text-green-400 border border-green-500/40 text-xs shadow-lg shadow-green-500/20">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/20 to-green-400/0 animate-shimmer" />
+              <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 animate-pulse relative z-10" />
+              <span className="relative z-10">Live</span>
             </Badge>
           </div>
 
@@ -240,7 +251,7 @@ export default function Discover() {
                     {movers.slice(0, 12).map((asset: any, idx: number) => (
                       <Card 
                         key={idx}
-                        className="bg-slate-900/30 border-purple-500/10 hover:border-purple-500/30 transition-all backdrop-blur-sm"
+                        className="neural-glass iridescent-border hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-fuchsia-500/10 transition-all duration-300 tilt-hover"
                       >
                         <CardContent className="p-2 sm:p-3">
                           <div className="flex items-start justify-between mb-1.5 sm:mb-2">
@@ -275,7 +286,7 @@ export default function Discover() {
                     {stockAssets.slice(0, 12).map((asset: any) => (
                       <Card 
                         key={asset.symbol}
-                        className="bg-slate-900/30 border-cyan-500/10 hover:border-cyan-500/30 transition-all backdrop-blur-sm"
+                        className="neural-glass iridescent-border hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 tilt-hover"
                       >
                         <CardContent className="p-2 sm:p-3">
                           <div className="flex items-start justify-between mb-1.5 sm:mb-2">
@@ -330,19 +341,23 @@ export default function Discover() {
           )}
         </section>
 
-        {/* Advanced Market Metrics - NEW */}
+        {/* Advanced Market Metrics */}
         <section>
           <div
             onClick={() => toggleSection('metrics')}
-            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            className="relative flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group p-3 sm:p-4 rounded-xl neural-glass iridescent-border hover:bg-gradient-to-r hover:from-orange-500/10 hover:to-red-500/10 transition-all duration-300"
             data-testid="toggle-advanced-metrics"
           >
-            <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
-            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Advanced Market Metrics</h2>
+            <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-red-500/20 glow-pulse">
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+            </div>
+            <h2 className="text-base sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-orange-200 to-red-200 bg-clip-text text-transparent">
+              Advanced Market Metrics
+            </h2>
             {metricsExpanded ? (
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-orange-400 transition-colors" />
             ) : (
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-orange-400 transition-colors" />
             )}
           </div>
 
@@ -467,15 +482,19 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('macro')}
-            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            className="relative flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group p-3 sm:p-4 rounded-xl neural-glass iridescent-border hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300"
             data-testid="toggle-macro-dashboard"
           >
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
-            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Macro Economic Dashboard</h2>
+            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 glow-pulse">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+            </div>
+            <h2 className="text-base sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
+              Macro Economic Dashboard
+            </h2>
             {macroExpanded ? (
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-cyan-400 transition-colors" />
             ) : (
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-cyan-400 transition-colors" />
             )}
           </div>
 
@@ -563,15 +582,19 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('sector')}
-            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            className="relative flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group p-3 sm:p-4 rounded-xl neural-glass iridescent-border hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-teal-500/10 transition-all duration-300"
             data-testid="toggle-sector-intelligence"
           >
-            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
-            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Sector Intelligence</h2>
+            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-teal-500/20 glow-pulse">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+            </div>
+            <h2 className="text-base sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-cyan-200 to-teal-200 bg-clip-text text-transparent">
+              Sector Intelligence
+            </h2>
             {sectorExpanded ? (
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-cyan-400 transition-colors" />
             ) : (
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-cyan-400 transition-colors" />
             )}
           </div>
 
@@ -633,15 +656,19 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('news')}
-            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            className="relative flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group p-3 sm:p-4 rounded-xl neural-glass iridescent-border hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-indigo-500/10 transition-all duration-300"
             data-testid="toggle-news"
           >
-            <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Market News & Intelligence</h2>
+            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 glow-pulse">
+              <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+            </div>
+            <h2 className="text-base sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-blue-200 to-indigo-200 bg-clip-text text-transparent">
+              Market News & Intelligence
+            </h2>
             {newsExpanded ? (
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-blue-400 transition-colors" />
             ) : (
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-blue-400 transition-colors" />
             )}
           </div>
 
@@ -689,15 +716,19 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('content')}
-            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            className="relative flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group p-3 sm:p-4 rounded-xl neural-glass iridescent-border hover:bg-gradient-to-r hover:from-fuchsia-500/10 hover:to-pink-500/10 transition-all duration-300"
             data-testid="toggle-content-intelligence"
           >
-            <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
-            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Content Intelligence</h2>
+            <div className="p-2 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 glow-pulse">
+              <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+            </div>
+            <h2 className="text-base sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-fuchsia-200 to-pink-200 bg-clip-text text-transparent">
+              Content Intelligence
+            </h2>
             {contentExpanded ? (
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-fuchsia-400 transition-colors" />
             ) : (
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto group-hover:text-fuchsia-400 transition-colors" />
             )}
           </div>
 
