@@ -21,31 +21,35 @@ import {
 import { format } from "date-fns";
 
 export default function Discover() {
-  const { data: summaries = [], isLoading: summariesLoading } = useQuery({
+  const { data: summariesData = [], isLoading: summariesLoading } = useQuery({
     queryKey: ['/api/summaries'],
   });
 
-  const { data: bounties = [], isLoading: bountiesLoading } = useQuery({
+  const { data: bountiesData, isLoading: bountiesLoading } = useQuery({
     queryKey: ['/api/bounties'],
   });
 
-  const { data: markets = [], isLoading: marketsLoading } = useQuery({
+  const { data: marketsData, isLoading: marketsLoading } = useQuery({
     queryKey: ['/api/prediction-markets'],
   });
 
-  const recentSummaries = (summaries as any[])
-    .filter(s => s.processingStatus === 'completed')
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const summaries = Array.isArray(summariesData) ? summariesData : [];
+  const bounties = (bountiesData as any)?.bounties || [];
+  const markets = (marketsData as any)?.markets || [];
+
+  const recentSummaries = summaries
+    .filter((s: any) => s.processingStatus === 'completed')
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 6);
 
-  const activeBounties = (bounties as any[])
-    .filter(b => b.status === 'open')
-    .sort((a, b) => b.reward - a.reward)
+  const activeBounties = bounties
+    .filter((b: any) => b.status === 'open')
+    .sort((a: any, b: any) => b.reward - a.reward)
     .slice(0, 6);
 
-  const activeMarkets = (markets as any[])
-    .filter(m => m.status === 'active')
-    .sort((a, b) => b.totalVolume - a.totalVolume)
+  const activeMarkets = markets
+    .filter((m: any) => m.status === 'active')
+    .sort((a: any, b: any) => b.totalVolume - a.totalVolume)
     .slice(0, 6);
 
   return (
