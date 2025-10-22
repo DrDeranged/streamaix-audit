@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ApiErrorCard, ApiLoadingCard } from "@/components/ApiErrorFallback";
 import { 
   Activity,
   TrendingUp,
@@ -47,11 +48,11 @@ export default function Discover() {
   const [contentFilter, setContentFilter] = useState('all');
 
   // Market Data Queries - 24h only as requested
-  const { data: cryptoData } = useQuery({
+  const { data: cryptoData, isLoading: cryptoLoading, isError: cryptoError } = useQuery({
     queryKey: ['/api/analytics/live/crypto'],
   });
 
-  const { data: stocksData } = useQuery({
+  const { data: stocksData, isLoading: stocksLoading, isError: stocksError } = useQuery({
     queryKey: ['/api/analytics/live/stocks'],
   });
 
@@ -309,9 +310,20 @@ export default function Discover() {
               )}
 
               {/* Crypto */}
-              {cryptoAssets.length > 0 && (
-                <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-400 mb-2 sm:mb-3 uppercase tracking-wide">Crypto</h3>
+              <div>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-400 mb-2 sm:mb-3 uppercase tracking-wide">Crypto</h3>
+                {cryptoLoading ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+                    {[...Array(6)].map((_, i) => (
+                      <ApiLoadingCard key={i} title="Loading..." />
+                    ))}
+                  </div>
+                ) : cryptoError || cryptoAssets.length === 0 ? (
+                  <ApiErrorCard 
+                    title="Crypto Data Unavailable"
+                    description="API rate limit reached. Upgrading to CoinGecko Analyst tier provides higher limits."
+                  />
+                ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
                     {cryptoAssets.slice(0, 12).map((asset: any) => (
                       <Card 
@@ -335,8 +347,8 @@ export default function Discover() {
                       </Card>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </section>
