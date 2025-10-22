@@ -57,12 +57,13 @@ tsx server/seed-production.ts
 - Finnhub (FREE) - stock market data
 - RSS Feeds (FREE) - news content
 
-**🟢 OPTIONAL (Skip for now)**:
-- CoinGecko, CoinMarketCap, Dune (all hit rate limits)
+**🟢 OPTIONAL (For Enhanced Features)**:
+- CoinGecko Analyst ($129/month) - User plans to add for production
 - Twitter OAuth (if you want Twitter login)
-- Others not needed
+- Other crypto data APIs (not needed with CoinGecko)
 
 **Minimum monthly cost**: ~$5-20 (just OpenAI)
+**User's production plan**: ~$135-150/month (OpenAI + CoinGecko Analyst)
 
 ---
 
@@ -152,9 +153,9 @@ Visit these pages to verify:
 ### External APIs
 - **Minimum Setup** (Database + OpenAI): ~$5-20/month
 - **Enhanced Setup** (+ Finnhub free): ~$5-20/month
-- **Full Featured** (+ paid crypto APIs): ~$150+/month
+- **User's Production Plan** (+ CoinGecko Analyst): ~$135-150/month
 
-**Recommendation**: Start with minimum setup, upgrade only if needed.
+**User's Plan**: Deploy with CoinGecko Analyst tier for professional-grade crypto analytics with 50,000 API calls/month.
 
 ---
 
