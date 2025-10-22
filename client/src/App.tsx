@@ -37,6 +37,8 @@ const AnalyticsDashboard = React.lazy(() => import("@/pages/AnalyticsDashboard")
 const Markets = React.lazy(() => import("@/pages/markets"));
 const PredictionMarket = React.lazy(() => import("@/pages/prediction-market"));
 const ChatPage = React.lazy(() => import("@/pages/chat"));
+const Discover = React.lazy(() => import("@/pages/discover"));
+const Summaries = React.lazy(() => import("@/pages/summaries"));
 
 function Router() {
   return (
@@ -132,6 +134,18 @@ function Router() {
       <Route path="/analytics">
         <Suspense fallback={<DashboardSkeleton />}>
           <AnalyticsDashboard />
+        </Suspense>
+      </Route>
+      
+      <Route path="/discover">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <Discover />
+        </Suspense>
+      </Route>
+      
+      <Route path="/summaries">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <Summaries />
         </Suspense>
       </Route>
       
