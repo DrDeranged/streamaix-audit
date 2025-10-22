@@ -364,13 +364,13 @@ export default function Discover() {
           {metricsExpanded && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
               {/* Fear & Greed Index */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border hover:bg-gradient-to-br hover:from-orange-500/10 hover:to-red-500/10 transition-all duration-300 tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
-                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
-                    <Flame className="w-4 h-4" />
+                  <CardTitle className="text-sm sm:text-base bg-gradient-to-r from-white to-orange-200 bg-clip-text text-transparent flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-orange-400" />
                     Fear & Greed
                   </CardTitle>
-                  <CardDescription className="text-xs">Market sentiment index</CardDescription>
+                  <CardDescription className="text-xs text-gray-400">Market sentiment index</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -395,13 +395,13 @@ export default function Discover() {
               </Card>
 
               {/* Crypto Dominance */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-blue-500/10 transition-all duration-300 tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
-                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
-                    <CircleDollarSign className="w-4 h-4" />
+                  <CardTitle className="text-sm sm:text-base bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent flex items-center gap-2">
+                    <CircleDollarSign className="w-4 h-4 text-purple-400" />
                     Dominance
                   </CardTitle>
-                  <CardDescription className="text-xs">Market share distribution</CardDescription>
+                  <CardDescription className="text-xs text-gray-400">Market share distribution</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -422,13 +422,13 @@ export default function Discover() {
               </Card>
 
               {/* Gas Tracker */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
-                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
-                    <Droplet className="w-4 h-4" />
+                  <CardTitle className="text-sm sm:text-base bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent flex items-center gap-2">
+                    <Droplet className="w-4 h-4 text-cyan-400" />
                     Gas Tracker
                   </CardTitle>
-                  <CardDescription className="text-xs">Ethereum network fees</CardDescription>
+                  <CardDescription className="text-xs text-gray-400">Ethereum network fees</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -455,13 +455,13 @@ export default function Discover() {
               </Card>
 
               {/* Funding Rates */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border hover:bg-gradient-to-br hover:from-fuchsia-500/10 hover:to-pink-500/10 transition-all duration-300 tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
-                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
-                    <Scale className="w-4 h-4" />
+                  <CardTitle className="text-sm sm:text-base bg-gradient-to-r from-white to-fuchsia-200 bg-clip-text text-transparent flex items-center gap-2">
+                    <Scale className="w-4 h-4 text-fuchsia-400" />
                     Funding Rates
                   </CardTitle>
-                  <CardDescription className="text-xs">Perpetual contract rates</CardDescription>
+                  <CardDescription className="text-xs text-gray-400">Perpetual contract rates</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-1.5">
                   {fundingRates.map((rate, idx) => (
@@ -501,7 +501,7 @@ export default function Discover() {
           {macroExpanded && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Economic Calendar */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
                   <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
@@ -527,7 +527,7 @@ export default function Discover() {
               </Card>
 
               {/* FOMC Meetings */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
                   <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
                     <Building className="w-4 h-4" />
@@ -550,7 +550,7 @@ export default function Discover() {
               </Card>
 
               {/* High Impact Events */}
-              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+              <Card className="neural-glass iridescent-border tilt-hover">
                 <CardHeader className="pb-2 sm:pb-3">
                   <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />
@@ -733,7 +733,7 @@ export default function Discover() {
           </div>
 
           {contentExpanded && (
-            <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+            <Card className="neural-glass iridescent-border tilt-hover">
               <CardHeader className="pb-3 sm:pb-4">
                 <Tabs value={contentFilter} onValueChange={setContentFilter}>
                   <TabsList className="grid w-full grid-cols-4 bg-slate-800/50">
@@ -788,7 +788,7 @@ export default function Discover() {
         {/* Advanced Analytics Grid - 2x4 Layout - Mobile Optimized */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8">
           {/* Market Regime */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <TrendingUpIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
@@ -815,7 +815,7 @@ export default function Discover() {
           </Card>
 
           {/* Risk Sentiment */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
@@ -846,7 +846,7 @@ export default function Discover() {
           </Card>
 
           {/* Correlation Analysis */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <Waves className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
@@ -884,7 +884,7 @@ export default function Discover() {
           </Card>
 
           {/* Volatility Forecasting */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
@@ -913,7 +913,7 @@ export default function Discover() {
           </Card>
 
           {/* Stress Indicators */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
@@ -938,7 +938,7 @@ export default function Discover() {
           </Card>
 
           {/* Crisis Indicators */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
@@ -961,7 +961,7 @@ export default function Discover() {
           </Card>
 
           {/* Pattern Recognition */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
@@ -989,7 +989,7 @@ export default function Discover() {
           </Card>
 
           {/* Pattern Alerts */}
-          <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+          <Card className="neural-glass iridescent-border tilt-hover hover:border-purple-500/30 transition-all">
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <LineChart className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
