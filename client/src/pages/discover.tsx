@@ -25,15 +25,23 @@ import {
   Clock,
   TrendingUpIcon,
   Building,
-  LineChart
+  LineChart,
+  Flame,
+  Users,
+  Droplet,
+  Scale,
+  CircleDollarSign,
+  Wallet,
+  Link as LinkIcon
 } from "lucide-react";
 
 export default function Discover() {
   const [pulseExpanded, setPulseExpanded] = useState(true);
-  const [macroExpanded, setMacroExpanded] = useState(true);
-  const [sectorExpanded, setSectorExpanded] = useState(true);
-  const [newsExpanded, setNewsExpanded] = useState(true);
-  const [contentExpanded, setContentExpanded] = useState(true);
+  const [macroExpanded, setMacroExpanded] = useState(false);
+  const [sectorExpanded, setSectorExpanded] = useState(false);
+  const [newsExpanded, setNewsExpanded] = useState(false);
+  const [contentExpanded, setContentExpanded] = useState(false);
+  const [metricsExpanded, setMetricsExpanded] = useState(true);
   const [contentFilter, setContentFilter] = useState('all');
 
   // Market Data Queries - 24h only as requested
@@ -127,6 +135,17 @@ export default function Discover() {
   const patterns = (patternDashboard as any)?.recentPatterns || [];
   const alerts = (patternAlerts as any)?.alerts || [];
 
+  // Mock advanced metrics (these would come from real APIs in production)
+  const fearGreedIndex = 65; // 0-100
+  const btcDominance = 42.3;
+  const ethDominance = 18.7;
+  const gasPrice = 15; // Gwei
+  const fundingRates = [
+    { exchange: 'Binance', symbol: 'BTC', rate: 0.0100 },
+    { exchange: 'Bybit', symbol: 'ETH', rate: 0.0075 },
+    { exchange: 'OKX', symbol: 'SOL', rate: -0.0050 }
+  ];
+
   const toggleSection = (section: string) => {
     switch(section) {
       case 'pulse': setPulseExpanded(!pulseExpanded); break;
@@ -134,38 +153,39 @@ export default function Discover() {
       case 'sector': setSectorExpanded(!sectorExpanded); break;
       case 'news': setNewsExpanded(!newsExpanded); break;
       case 'content': setContentExpanded(!contentExpanded); break;
+      case 'metrics': setMetricsExpanded(!metricsExpanded); break;
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950">
-      {/* Minimal Header */}
+      {/* Minimal Header - Mobile Optimized */}
       <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-purple-500/10">
-        <div className="container mx-auto px-6 py-5">
+        <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-orbitron font-bold text-white tracking-tight">Discover</h1>
-              <p className="text-sm text-gray-400 mt-1">Advanced Market Intelligence & Analytics</p>
+              <h1 className="text-xl sm:text-3xl font-orbitron font-bold text-white tracking-tight">Discover</h1>
+              <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 hidden sm:block">Advanced Market Intelligence & Analytics</p>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-3 py-1.5">
-                <Radio className="w-3 h-3 mr-1.5 animate-pulse" />
-                Live
+            <div className="flex items-center gap-1.5 sm:gap-3">
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-2 sm:px-3 py-1 sm:py-1.5 text-xs">
+                <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse" />
+                <span className="hidden sm:inline">Live</span>
               </Badge>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-slate-900/50 border-purple-500/20 hover:border-purple-500/40 text-white"
+                className="bg-slate-900/50 border-purple-500/20 hover:border-purple-500/40 text-white h-7 sm:h-9 px-2 sm:px-3 text-xs"
                 data-testid="button-alerts"
               >
-                <AlertCircle className="w-4 h-4 mr-2" />
-                Alerts
+                <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Alerts</span>
               </Button>
               <Button 
                 variant="default" 
                 size="sm"
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-purple-600 hover:bg-purple-700 h-7 sm:h-9 px-2 sm:px-3 text-xs hidden sm:inline-flex"
                 data-testid="button-dashboard"
               >
                 Dashboard
@@ -175,52 +195,52 @@ export default function Discover() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8 space-y-6">
-        {/* Market Pulse - Stocks + Crypto */}
+      <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
+        {/* Market Pulse - Stocks + Crypto - Mobile Optimized */}
         <section>
           <div
             onClick={() => toggleSection('pulse')}
-            className="flex items-center gap-3 mb-4 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
             data-testid="toggle-market-pulse"
           >
-            <Activity className="w-5 h-5 text-purple-400" />
-            <h2 className="text-xl font-orbitron font-bold text-white">Market Pulse</h2>
+            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Market Pulse</h2>
             {pulseExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             )}
             <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-              <Radio className="w-2.5 h-2.5 mr-1 animate-pulse" />
+              <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 animate-pulse" />
               Live
             </Badge>
           </div>
 
           {pulseExpanded && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Top Movers */}
               {movers.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Top Movers (24h)</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-400 mb-2 sm:mb-3 uppercase tracking-wide">Top Movers (24h)</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
                     {movers.slice(0, 12).map((asset: any, idx: number) => (
                       <Card 
                         key={idx}
                         className="bg-slate-900/30 border-purple-500/10 hover:border-purple-500/30 transition-all backdrop-blur-sm"
                       >
-                        <CardContent className="p-3">
-                          <div className="flex items-start justify-between mb-2">
+                        <CardContent className="p-2 sm:p-3">
+                          <div className="flex items-start justify-between mb-1.5 sm:mb-2">
                             <div className="min-w-0">
-                              <h3 className="font-bold text-white text-sm truncate">{asset.symbol}</h3>
-                              <p className="text-xs text-gray-500 truncate">{asset.category}</p>
+                              <h3 className="font-bold text-white text-xs sm:text-sm truncate">{asset.symbol}</h3>
+                              <p className="text-xs text-gray-500 truncate hidden sm:block">{asset.category}</p>
                             </div>
                             {asset.changePercent >= 0 ? (
-                              <ArrowUpRight className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                              <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-400 flex-shrink-0" />
                             ) : (
-                              <ArrowDownRight className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                              <ArrowDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400 flex-shrink-0" />
                             )}
                           </div>
-                          <div className="text-lg font-bold text-white mb-0.5">
+                          <div className="text-sm sm:text-lg font-bold text-white mb-0.5">
                             ${typeof asset.price === 'number' ? asset.price.toFixed(asset.price > 1000 ? 0 : 2) : '0.00'}
                           </div>
                           <div className={`text-xs font-medium ${asset.changePercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -236,21 +256,21 @@ export default function Discover() {
               {/* Stocks */}
               {stockAssets.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Stocks</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-400 mb-2 sm:mb-3 uppercase tracking-wide">Stocks</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
                     {stockAssets.slice(0, 12).map((asset: any) => (
                       <Card 
                         key={asset.symbol}
                         className="bg-slate-900/30 border-cyan-500/10 hover:border-cyan-500/30 transition-all backdrop-blur-sm"
                       >
-                        <CardContent className="p-3">
-                          <div className="flex items-start justify-between mb-2">
+                        <CardContent className="p-2 sm:p-3">
+                          <div className="flex items-start justify-between mb-1.5 sm:mb-2">
                             <div className="min-w-0">
-                              <h3 className="font-bold text-white text-sm truncate">{asset.symbol}</h3>
-                              <p className="text-xs text-gray-500 truncate">{asset.name}</p>
+                              <h3 className="font-bold text-white text-xs sm:text-sm truncate">{asset.symbol}</h3>
+                              <p className="text-xs text-gray-500 truncate hidden sm:block">{asset.name}</p>
                             </div>
                           </div>
-                          <div className="text-lg font-bold text-white mb-0.5">
+                          <div className="text-sm sm:text-lg font-bold text-white mb-0.5">
                             ${typeof asset.price === 'number' ? asset.price.toFixed(2) : '0.00'}
                           </div>
                           <div className={`text-xs font-medium ${(asset.changePercent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -266,21 +286,21 @@ export default function Discover() {
               {/* Crypto */}
               {cryptoAssets.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Crypto</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-400 mb-2 sm:mb-3 uppercase tracking-wide">Crypto</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
                     {cryptoAssets.slice(0, 12).map((asset: any) => (
                       <Card 
                         key={asset.symbol}
                         className="bg-slate-900/30 border-fuchsia-500/10 hover:border-fuchsia-500/30 transition-all backdrop-blur-sm"
                       >
-                        <CardContent className="p-3">
-                          <div className="flex items-start justify-between mb-2">
+                        <CardContent className="p-2 sm:p-3">
+                          <div className="flex items-start justify-between mb-1.5 sm:mb-2">
                             <div className="min-w-0">
-                              <h3 className="font-bold text-white text-sm truncate">{asset.symbol}</h3>
-                              <p className="text-xs text-gray-500 truncate">{asset.name}</p>
+                              <h3 className="font-bold text-white text-xs sm:text-sm truncate">{asset.symbol}</h3>
+                              <p className="text-xs text-gray-500 truncate hidden sm:block">{asset.name}</p>
                             </div>
                           </div>
-                          <div className="text-lg font-bold text-white mb-0.5">
+                          <div className="text-sm sm:text-lg font-bold text-white mb-0.5">
                             ${typeof asset.price === 'number' ? asset.price.toFixed(asset.price > 1000 ? 0 : 2) : '0.00'}
                           </div>
                           <div className={`text-xs font-medium ${(asset.changePercent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -296,44 +316,177 @@ export default function Discover() {
           )}
         </section>
 
+        {/* Advanced Market Metrics - NEW */}
+        <section>
+          <div
+            onClick={() => toggleSection('metrics')}
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
+            data-testid="toggle-advanced-metrics"
+          >
+            <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Advanced Market Metrics</h2>
+            {metricsExpanded ? (
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+            ) : (
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
+            )}
+          </div>
+
+          {metricsExpanded && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+              {/* Fear & Greed Index */}
+              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
+                    <Flame className="w-4 h-4" />
+                    Fear & Greed
+                  </CardTitle>
+                  <CardDescription className="text-xs">Market sentiment index</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="text-3xl sm:text-4xl font-bold text-white">{fearGreedIndex}</div>
+                    <div className="w-full bg-slate-800/50 rounded-full h-2">
+                      <div 
+                        className={`h-full rounded-full ${
+                          fearGreedIndex > 75 ? 'bg-green-500' : 
+                          fearGreedIndex > 50 ? 'bg-yellow-500' : 
+                          fearGreedIndex > 25 ? 'bg-orange-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${fearGreedIndex}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      {fearGreedIndex > 75 ? 'Extreme Greed' : 
+                       fearGreedIndex > 50 ? 'Greed' : 
+                       fearGreedIndex > 25 ? 'Fear' : 'Extreme Fear'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Crypto Dominance */}
+              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
+                    <CircleDollarSign className="w-4 h-4" />
+                    Dominance
+                  </CardTitle>
+                  <CardDescription className="text-xs">Market share distribution</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">BTC</span>
+                    <span className="text-sm font-bold text-white">{btcDominance}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800/50 rounded-full h-1.5">
+                    <div className="h-full bg-orange-500 rounded-full" style={{ width: `${btcDominance}%` }} />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">ETH</span>
+                    <span className="text-sm font-bold text-white">{ethDominance}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800/50 rounded-full h-1.5">
+                    <div className="h-full bg-blue-500 rounded-full" style={{ width: `${ethDominance}%` }} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gas Tracker */}
+              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
+                    <Droplet className="w-4 h-4" />
+                    Gas Tracker
+                  </CardTitle>
+                  <CardDescription className="text-xs">Ethereum network fees</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl sm:text-3xl font-bold text-white">{gasPrice}</span>
+                      <span className="text-xs text-gray-400">Gwei</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5 text-xs">
+                      <div className="bg-slate-800/30 p-1.5 rounded">
+                        <div className="text-gray-400">Low</div>
+                        <div className="text-white font-semibold">{gasPrice - 5}</div>
+                      </div>
+                      <div className="bg-slate-800/30 p-1.5 rounded">
+                        <div className="text-gray-400">Avg</div>
+                        <div className="text-white font-semibold">{gasPrice}</div>
+                      </div>
+                      <div className="bg-slate-800/30 p-1.5 rounded">
+                        <div className="text-gray-400">High</div>
+                        <div className="text-white font-semibold">{gasPrice + 10}</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Funding Rates */}
+              <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
+                    <Scale className="w-4 h-4" />
+                    Funding Rates
+                  </CardTitle>
+                  <CardDescription className="text-xs">Perpetual contract rates</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
+                  {fundingRates.map((rate, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs bg-slate-800/30 p-1.5 rounded">
+                      <span className="text-gray-400">{rate.symbol}</span>
+                      <span className={`font-semibold ${rate.rate >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {rate.rate >= 0 ? '+' : ''}{(rate.rate * 100).toFixed(3)}%
+                      </span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </section>
+
         {/* Macro Economic Dashboard */}
         <section>
           <div
             onClick={() => toggleSection('macro')}
-            className="flex items-center gap-3 mb-4 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
             data-testid="toggle-macro-dashboard"
           >
-            <Calendar className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-xl font-orbitron font-bold text-white">Macro Economic Dashboard</h2>
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Macro Economic Dashboard</h2>
             {macroExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             )}
           </div>
 
           {macroExpanded && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Economic Calendar */}
               <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base text-white flex items-center gap-2">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Economic Calendar
                   </CardTitle>
                   <CardDescription className="text-xs">Upcoming economic events</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 max-h-64 overflow-y-auto">
+                <CardContent className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
                   {events.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-4">No upcoming events</p>
+                    <p className="text-xs sm:text-sm text-gray-500 text-center py-4">No upcoming events</p>
                   ) : (
                     events.slice(0, 8).map((event: any, idx: number) => (
-                      <div key={idx} className="p-2 rounded bg-slate-800/30 text-xs">
+                      <div key={idx} className="p-1.5 sm:p-2 rounded bg-slate-800/30 text-xs">
                         <div className="flex items-start justify-between mb-1">
-                          <span className="font-medium text-white">{event.title}</span>
+                          <span className="font-medium text-white text-xs">{event.title}</span>
                           <Badge variant="outline" className="text-xs">{event.impact}</Badge>
                         </div>
-                        <p className="text-gray-400">{event.date}</p>
+                        <p className="text-gray-400 text-xs">{event.date}</p>
                       </div>
                     ))
                   )}
@@ -342,21 +495,21 @@ export default function Discover() {
 
               {/* FOMC Meetings */}
               <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base text-white flex items-center gap-2">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
                     <Building className="w-4 h-4" />
                     FOMC Meetings
                   </CardTitle>
                   <CardDescription className="text-xs">Federal Reserve meetings</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 max-h-64 overflow-y-auto">
+                <CardContent className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
                   {fomcEvents.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-4">No scheduled meetings</p>
+                    <p className="text-xs sm:text-sm text-gray-500 text-center py-4">No scheduled meetings</p>
                   ) : (
                     fomcEvents.slice(0, 5).map((meeting: any, idx: number) => (
-                      <div key={idx} className="p-2 rounded bg-slate-800/30 text-xs">
-                        <div className="font-medium text-white mb-1">{meeting.title}</div>
-                        <p className="text-gray-400">{meeting.date}</p>
+                      <div key={idx} className="p-1.5 sm:p-2 rounded bg-slate-800/30 text-xs">
+                        <div className="font-medium text-white mb-1 text-xs">{meeting.title}</div>
+                        <p className="text-gray-400 text-xs">{meeting.date}</p>
                       </div>
                     ))
                   )}
@@ -365,24 +518,24 @@ export default function Discover() {
 
               {/* High Impact Events */}
               <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base text-white flex items-center gap-2">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base text-white flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />
                     High Impact Events
                   </CardTitle>
                   <CardDescription className="text-xs">Critical market-moving events</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 max-h-64 overflow-y-auto">
+                <CardContent className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
                   {highImpact.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-4">No high impact events</p>
+                    <p className="text-xs sm:text-sm text-gray-500 text-center py-4">No high impact events</p>
                   ) : (
                     highImpact.slice(0, 5).map((event: any, idx: number) => (
-                      <div key={idx} className="p-2 rounded bg-red-900/20 border border-red-500/20 text-xs">
+                      <div key={idx} className="p-1.5 sm:p-2 rounded bg-red-900/20 border border-red-500/20 text-xs">
                         <div className="flex items-start justify-between mb-1">
-                          <span className="font-medium text-white">{event.title}</span>
+                          <span className="font-medium text-white text-xs">{event.title}</span>
                           <Badge variant="destructive" className="text-xs">High</Badge>
                         </div>
-                        <p className="text-gray-400">{event.date}</p>
+                        <p className="text-gray-400 text-xs">{event.date}</p>
                       </div>
                     ))
                   )}
@@ -396,22 +549,22 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('sector')}
-            className="flex items-center gap-3 mb-4 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
             data-testid="toggle-sector-intelligence"
           >
-            <BarChart3 className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-xl font-orbitron font-bold text-white">Sector Intelligence</h2>
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Sector Intelligence</h2>
             {sectorExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             )}
           </div>
 
           {sectorExpanded && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               {sectors.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-400 text-sm">
+                <div className="col-span-full text-center py-8 text-gray-400 text-xs sm:text-sm">
                   Loading sector data...
                 </div>
               ) : (
@@ -420,10 +573,10 @@ export default function Discover() {
                     key={sector.name}
                     className="bg-slate-900/30 border-purple-500/10 hover:border-cyan-500/30 transition-all backdrop-blur-sm"
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-start justify-between mb-2 sm:mb-3">
                         <div>
-                          <h3 className="font-semibold text-white text-sm">{sector.name}</h3>
+                          <h3 className="font-semibold text-white text-xs sm:text-sm">{sector.name}</h3>
                           <p className="text-xs text-gray-500">{sector.assets} Assets</p>
                         </div>
                         <Badge 
@@ -434,7 +587,7 @@ export default function Discover() {
                         </Badge>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1.5 sm:space-y-2">
                         <div className="flex justify-between text-xs">
                           <span className="text-gray-500">Volume</span>
                           <span className="text-white font-medium">
@@ -466,22 +619,22 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('news')}
-            className="flex items-center gap-3 mb-4 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
             data-testid="toggle-news"
           >
-            <Newspaper className="w-5 h-5 text-blue-400" />
-            <h2 className="text-xl font-orbitron font-bold text-white">Market News & Intelligence</h2>
+            <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Market News & Intelligence</h2>
             {newsExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             )}
           </div>
 
           {newsExpanded && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {news.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-400 text-sm">
+                <div className="col-span-full text-center py-8 text-gray-400 text-xs sm:text-sm">
                   Loading news...
                 </div>
               ) : (
@@ -490,9 +643,9 @@ export default function Discover() {
                     key={idx}
                     className="bg-slate-900/30 border-purple-500/10 hover:border-blue-500/30 transition-all backdrop-blur-sm"
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 sm:p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-white text-sm line-clamp-2 flex-1">
+                        <h4 className="font-medium text-white text-xs sm:text-sm line-clamp-2 flex-1">
                           {item.title || item.headline}
                         </h4>
                         <Badge variant="outline" className="text-xs ml-2 whitespace-nowrap">
@@ -522,25 +675,25 @@ export default function Discover() {
         <section>
           <div
             onClick={() => toggleSection('content')}
-            className="flex items-center gap-3 mb-4 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 cursor-pointer group"
             data-testid="toggle-content-intelligence"
           >
-            <Brain className="w-5 h-5 text-fuchsia-400" />
-            <h2 className="text-xl font-orbitron font-bold text-white">Content Intelligence</h2>
+            <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+            <h2 className="text-base sm:text-xl font-orbitron font-bold text-white">Content Intelligence</h2>
             {contentExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-auto" />
             )}
           </div>
 
           {contentExpanded && (
             <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3 sm:pb-4">
                 <Tabs value={contentFilter} onValueChange={setContentFilter}>
-                  <TabsList className="grid w-full max-w-md grid-cols-4 bg-slate-800/50">
+                  <TabsList className="grid w-full grid-cols-4 bg-slate-800/50">
                     <TabsTrigger value="all" className="data-[state=active]:bg-purple-600 text-xs" data-testid="content-all">
-                      All Sources
+                      All
                     </TabsTrigger>
                     <TabsTrigger value="twitter" className="data-[state=active]:bg-purple-600 text-xs" data-testid="content-social">
                       Social
@@ -555,19 +708,19 @@ export default function Discover() {
                 </Tabs>
               </CardHeader>
 
-              <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+              <CardContent className="space-y-2 sm:space-y-3 max-h-72 sm:max-h-96 overflow-y-auto">
                 {stories.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400 text-sm">
+                  <div className="text-center py-8 text-gray-400 text-xs sm:text-sm">
                     No content available
                   </div>
                 ) : (
                   stories.slice(0, 8).map((story: any) => (
                     <div 
                       key={story.id}
-                      className="p-3 rounded-lg bg-slate-800/30 hover:bg-slate-800/50 transition-all border border-slate-700/30 hover:border-purple-500/30"
+                      className="p-2 sm:p-3 rounded-lg bg-slate-800/30 hover:bg-slate-800/50 transition-all border border-slate-700/30 hover:border-purple-500/30"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-white text-sm line-clamp-2 flex-1">
+                      <div className="flex items-start justify-between mb-1.5 sm:mb-2">
+                        <h4 className="font-medium text-white text-xs sm:text-sm line-clamp-2 flex-1">
                           {story.title}
                         </h4>
                         <Badge variant="outline" className="text-xs ml-2 whitespace-nowrap">
@@ -587,54 +740,54 @@ export default function Discover() {
           )}
         </section>
 
-        {/* Advanced Analytics Grid - 2x4 Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8">
+        {/* Advanced Analytics Grid - 2x4 Layout - Mobile Optimized */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8">
           {/* Market Regime */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <TrendingUpIcon className="w-5 h-5 text-purple-400" />
-                <CardTitle className="text-white text-base">Market Regime</CardTitle>
+                <TrendingUpIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Market Regime</CardTitle>
               </div>
-              <CardDescription className="text-xs">Current market conditions and regime</CardDescription>
+              <CardDescription className="text-xs">Current market conditions</CardDescription>
             </CardHeader>
             <CardContent>
               {regime.currentRegime ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded bg-purple-900/20 border border-purple-500/20">
-                    <span className="text-white font-medium">Regime</span>
-                    <Badge className="bg-purple-600">{regime.currentRegime}</Badge>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center justify-between p-2 sm:p-3 rounded bg-purple-900/20 border border-purple-500/20">
+                    <span className="text-white font-medium text-xs sm:text-sm">Regime</span>
+                    <Badge className="bg-purple-600 text-xs">{regime.currentRegime}</Badge>
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-800/30 text-sm">
+                  <div className="flex items-center justify-between p-1.5 sm:p-2 rounded bg-slate-800/30 text-xs sm:text-sm">
                     <span className="text-gray-400">Confidence</span>
                     <span className="text-white">{((regime.confidence || 0) * 100).toFixed(0)}%</span>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-6 text-gray-500 text-sm">No regime data</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No regime data</div>
               )}
             </CardContent>
           </Card>
 
           {/* Risk Sentiment */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-400" />
-                <CardTitle className="text-white text-base">Risk Sentiment</CardTitle>
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Risk Sentiment</CardTitle>
               </div>
-              <CardDescription className="text-xs">Market risk appetite indicator</CardDescription>
+              <CardDescription className="text-xs">Market risk appetite</CardDescription>
             </CardHeader>
             <CardContent>
               {sentiment.sentiment ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded bg-slate-800/30">
-                    <span className="text-white font-medium">Sentiment</span>
-                    <Badge variant={sentiment.sentiment === 'risk-on' ? 'default' : 'destructive'}>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center justify-between p-2 sm:p-3 rounded bg-slate-800/30">
+                    <span className="text-white font-medium text-xs sm:text-sm">Sentiment</span>
+                    <Badge variant={sentiment.sentiment === 'risk-on' ? 'default' : 'destructive'} className="text-xs">
                       {sentiment.sentiment}
                     </Badge>
                   </div>
-                  <div className="w-full bg-slate-800/50 rounded-full h-2">
+                  <div className="w-full bg-slate-800/50 rounded-full h-1.5 sm:h-2">
                     <div 
                       className={`h-full rounded-full ${sentiment.sentiment === 'risk-on' ? 'bg-green-500' : 'bg-red-500'}`}
                       style={{ width: `${(sentiment.score || 0.5) * 100}%` }}
@@ -642,31 +795,31 @@ export default function Discover() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-6 text-gray-500 text-sm">No sentiment data</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No sentiment data</div>
               )}
             </CardContent>
           </Card>
 
           {/* Correlation Analysis */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <Waves className="w-5 h-5 text-blue-400" />
-                <CardTitle className="text-white text-base">Correlation Analysis</CardTitle>
+                <Waves className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Correlation Analysis</CardTitle>
               </div>
               <CardDescription className="text-xs">Asset pair correlations</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1.5 sm:space-y-2">
               {correlationMatrix.length === 0 ? (
-                <div className="text-center py-6 text-gray-500 text-sm">No correlation data</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No correlation data</div>
               ) : (
                 correlationMatrix.slice(0, 5).map((pair: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-800/30 text-sm">
+                  <div key={idx} className="flex items-center justify-between p-1.5 sm:p-2 rounded bg-slate-800/30 text-xs sm:text-sm">
                     <span className="text-white font-medium text-xs">
                       {pair.asset1} / {pair.asset2}
                     </span>
                     <div className="flex items-center gap-2">
-                      <div className="w-16 bg-slate-700/50 rounded-full h-1.5">
+                      <div className="w-12 sm:w-16 bg-slate-700/50 rounded-full h-1.5">
                         <div 
                           className={`h-full rounded-full ${
                             pair.correlation > 0.7 ? 'bg-green-500' : 
@@ -687,20 +840,20 @@ export default function Discover() {
 
           {/* Volatility Forecasting */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-400" />
-                <CardTitle className="text-white text-base">Volatility Alerts</CardTitle>
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Volatility Alerts</CardTitle>
               </div>
-              <CardDescription className="text-xs">Real-time volatility monitoring</CardDescription>
+              <CardDescription className="text-xs">Real-time monitoring</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1.5 sm:space-y-2">
               {volatilityAlerts.length === 0 ? (
-                <div className="text-center py-6 text-gray-500 text-sm">No volatility alerts</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No volatility alerts</div>
               ) : (
                 volatilityAlerts.slice(0, 5).map((alert: any, idx: number) => (
-                  <div key={idx} className="flex items-start gap-2 p-2 rounded bg-slate-800/30">
-                    <AlertCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                  <div key={idx} className="flex items-start gap-2 p-1.5 sm:p-2 rounded bg-slate-800/30">
+                    <AlertCircle className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 ${
                       alert.severity === 'high' ? 'text-red-400' : 
                       alert.severity === 'medium' ? 'text-yellow-400' : 'text-blue-400'
                     }`} />
@@ -716,19 +869,19 @@ export default function Discover() {
 
           {/* Stress Indicators */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-orange-400" />
-                <CardTitle className="text-white text-base">Market Stress</CardTitle>
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Market Stress</CardTitle>
               </div>
-              <CardDescription className="text-xs">Stress indicators and risk metrics</CardDescription>
+              <CardDescription className="text-xs">Stress & risk metrics</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1.5 sm:space-y-2">
               {stress.length === 0 ? (
-                <div className="text-center py-6 text-gray-500 text-sm">No stress indicators</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No stress indicators</div>
               ) : (
                 stress.slice(0, 5).map((indicator: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-800/30 text-sm">
+                  <div key={idx} className="flex items-center justify-between p-1.5 sm:p-2 rounded bg-slate-800/30 text-xs sm:text-sm">
                     <span className="text-white text-xs">{indicator.name}</span>
                     <Badge variant={indicator.level === 'high' ? 'destructive' : 'outline'} className="text-xs">
                       {indicator.value}
@@ -741,19 +894,19 @@ export default function Discover() {
 
           {/* Crisis Indicators */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-400" />
-                <CardTitle className="text-white text-base">Crisis Detection</CardTitle>
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Crisis Detection</CardTitle>
               </div>
               <CardDescription className="text-xs">Early warning signals</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1.5 sm:space-y-2">
               {crisis.length === 0 ? (
-                <div className="text-center py-6 text-gray-500 text-sm">No crisis signals</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No crisis signals</div>
               ) : (
                 crisis.slice(0, 5).map((indicator: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-red-900/20 border border-red-500/20 text-sm">
+                  <div key={idx} className="flex items-center justify-between p-1.5 sm:p-2 rounded bg-red-900/20 border border-red-500/20 text-xs sm:text-sm">
                     <span className="text-white text-xs">{indicator.type}</span>
                     <Badge variant="destructive" className="text-xs">{indicator.severity}</Badge>
                   </div>
@@ -764,19 +917,19 @@ export default function Discover() {
 
           {/* Pattern Recognition */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-purple-400" />
-                <CardTitle className="text-white text-base">Pattern Recognition</CardTitle>
+                <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Pattern Recognition</CardTitle>
               </div>
-              <CardDescription className="text-xs">Chart patterns and setups</CardDescription>
+              <CardDescription className="text-xs">Chart patterns</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1.5 sm:space-y-2">
               {patterns.length === 0 ? (
-                <div className="text-center py-6 text-gray-500 text-sm">No active patterns</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No active patterns</div>
               ) : (
                 patterns.slice(0, 5).map((pattern: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-800/30 text-sm">
+                  <div key={idx} className="flex items-center justify-between p-1.5 sm:p-2 rounded bg-slate-800/30 text-xs sm:text-sm">
                     <div>
                       <h4 className="text-white font-medium text-xs">{pattern.symbol}</h4>
                       <p className="text-xs text-gray-400">{pattern.patternType}</p>
@@ -792,24 +945,24 @@ export default function Discover() {
 
           {/* Pattern Alerts */}
           <Card className="bg-slate-900/30 border-purple-500/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
-                <LineChart className="w-5 h-5 text-cyan-400" />
-                <CardTitle className="text-white text-base">Trading Signals</CardTitle>
+                <LineChart className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+                <CardTitle className="text-white text-sm sm:text-base">Trading Signals</CardTitle>
               </div>
-              <CardDescription className="text-xs">Active pattern-based signals</CardDescription>
+              <CardDescription className="text-xs">Active pattern signals</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1.5 sm:space-y-2">
               {alerts.length === 0 ? (
-                <div className="text-center py-6 text-gray-500 text-sm">No active signals</div>
+                <div className="text-center py-6 text-gray-500 text-xs sm:text-sm">No active signals</div>
               ) : (
                 alerts.slice(0, 5).map((alert: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-800/30">
+                  <div key={idx} className="flex items-center justify-between p-1.5 sm:p-2 rounded bg-slate-800/30">
                     <div className="flex items-center gap-2">
                       {alert.direction === 'bullish' ? (
-                        <ArrowUpRight className="w-4 h-4 text-green-400" />
+                        <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
                       ) : (
-                        <ArrowDownRight className="w-4 h-4 text-red-400" />
+                        <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
                       )}
                       <div>
                         <h4 className="text-white font-medium text-xs">{alert.symbol}</h4>
