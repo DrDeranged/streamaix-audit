@@ -125,7 +125,7 @@
 
 ---
 
-### 5. CoinGecko API (OPTIONAL 🟢)
+### 5. CoinGecko API (RECOMMENDED FOR PRODUCTION 🟡)
 
 **Environment Variable:** `COINGECKO_API_KEY`  
 **Cost:** 
@@ -133,7 +133,8 @@
 - Analyst: $129/month (50,000 calls)
 - Pro: $429/month (500,000 calls)
 
-**Current Status:** ⚠️ Hit rate limit (10k calls exhausted)
+**Current Status:** ⚠️ Hit rate limit in development (10k calls exhausted)
+**Production Plan:** ✅ User plans to upgrade to paid tier after deployment
 
 **What It Does:**
 - Cryptocurrency price data
@@ -146,13 +147,13 @@
 - ✅ Core features unaffected
 
 **Recommendation:**
-- **For Testing:** Skip it, use Finnhub for stocks
-- **For Production:** Only if you need live crypto prices
-- **Alternative:** Use free tier and implement better caching
+- **For Production:** User plans to use paid Analyst tier ($129/month)
+- **Benefit:** 50,000 API calls/month ensures reliable crypto data
+- **Alternative:** Free tier works but may hit limits with moderate traffic
 
 **Action Required:**
-- Skip unless crypto price tracking is critical
-- If needed: Upgrade to paid tier or optimize caching
+- ✅ User will add paid CoinGecko API key after deployment
+- Upgrade to Analyst tier for production reliability
 
 ---
 
@@ -298,16 +299,24 @@
 - News Feed ✅ (RSS is free)
 - Navigation ✅
 
-### Enhanced Experience
+### Enhanced Experience (Recommended)
 **Add these for full features:**
-3. Finnhub API (stock data)
-4. Keep RSS feeds (already working)
+3. Finnhub API (stock data) - FREE
+4. CoinGecko Analyst tier (crypto prices) - $129/month
+5. Keep RSS feeds (already working) - FREE
 
 **Don't add:**
-- CoinGecko (hit rate limit)
-- CoinMarketCap (hit credit limit)
-- Dune (tertiary fallback)
+- CoinMarketCap (redundant with CoinGecko paid tier)
+- Dune (tertiary fallback, not needed)
 - Other optional services
+
+### User's Production Plan
+**Confirmed setup:**
+- PostgreSQL ✅
+- OpenAI API ✅
+- Finnhub (free tier) ✅
+- **CoinGecko Analyst ($129/month)** ✅ - Planned after deployment
+- RSS news feeds ✅
 
 ### Cost Estimation
 
@@ -316,26 +325,29 @@
 - OpenAI: ~$5-20/month
 - **Total: ~$5-20/month**
 
-**Enhanced Setup:**
+**Enhanced Setup (User's Production Plan):**
+- Database: Included
+- OpenAI: ~$5-20/month
+- Finnhub: FREE
+- CoinGecko Analyst: $129/month
+- **Total: ~$135-150/month**
+
+**Alternative - Minimum Setup:**
 - Database: Included
 - OpenAI: ~$5-20/month
 - Finnhub: FREE
 - **Total: ~$5-20/month**
 
-**Full Featured (not recommended):**
-- Database: Included
-- OpenAI: ~$20/month
-- Finnhub: FREE
-- CoinGecko Pro: $129/month
-- **Total: ~$149/month**
-
 ## Recommendation
 
-**For Launch:**
-Start with minimum setup (database + OpenAI). Monitor usage and only add paid APIs if specific features are heavily used by real users.
+**User's Production Plan:**
+Deploy with CoinGecko Analyst tier ($129/month) for reliable crypto price data. This ensures the analytics dashboard has full functionality with both stock AND crypto data.
 
-**Why:**
-- News feed works great with free RSS
-- Stock data works with free Finnhub
-- Crypto prices nice-to-have but not critical
-- Save money until you validate user demand
+**Benefits:**
+- 50,000 API calls/month (vs 10,000 free)
+- Reliable crypto price tracking
+- Professional-grade analytics
+- No rate limiting issues
+
+**Alternative:**
+Start with free tiers to test with limited traffic, then upgrade to CoinGecko Analyst when traffic grows.
