@@ -38,12 +38,34 @@ class DuneService {
   // These would be created on Dune dashboard and referenced here
   private readonly CRYPTO_PRICE_QUERY_ID = 4355826; // Public token price query
   
+  // Error suppression to prevent rate limit spam
+  private errorLog = new Map<string, number>(); // Track last error log time
+  private errorLogCooldown = 3600000; // 1 hour cooldown for same error type
+  
   constructor() {
     this.apiKey = process.env.DUNE_API_KEY || '';
     if (!this.apiKey) {
       console.warn('⚠️ DUNE_API_KEY not configured - Dune Analytics will not be available');
     } else {
       console.log('✅ Dune Analytics initialized with API key');
+    }
+  }
+
+  /**
+   * Log an error with suppression to prevent spam (only logs same error type once per hour)
+   */
+  private logErrorOnce(errorKey: string, message: string, details?: any): void {
+    const now = Date.now();
+    const lastLogged = this.errorLog.get(errorKey);
+    
+    // Only log if we haven't logged this error recently
+    if (!lastLogged || (now - lastLogged) > this.errorLogCooldown) {
+      if (details) {
+        console.error(message, details);
+      } else {
+        console.error(message);
+      }
+      this.errorLog.set(errorKey, now);
     }
   }
 
@@ -104,7 +126,7 @@ class DuneService {
 
       throw new Error('Dune query timeout');
     } catch (error: any) {
-      console.error(`❌ Dune API error:`, error.response?.data || error.message);
+      this.logErrorOnce('dune_query_error', `❌ Dune API error:`, error.response?.data || error.message);
       throw error;
     }
   }
@@ -126,7 +148,7 @@ class DuneService {
       // For now, we'll use a workaround with known token addresses
       return [];
     } catch (error: any) {
-      console.error(`❌ Dune custom SQL error:`, error.response?.data || error.message);
+      this.logErrorOnce('dune_sql_error', `❌ Dune custom SQL error:`, error.response?.data || error.message);
       throw error;
     }
   }

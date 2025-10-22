@@ -85,6 +85,10 @@ export class MarketDataService {
   private cacheTimeout = 30000; // 30 second cache for real-time data
   private economicCacheTimeout = 300000; // 5 minute cache for economic data
   
+  // Error suppression to prevent rate limit spam
+  private errorLog = new Map<string, number>(); // Track last error log time
+  private errorLogCooldown = 3600000; // 1 hour cooldown for same error type
+  
   // Crypto-related stocks list - expanded to 25+ symbols
   private cryptoStocks = [
     // Major crypto companies
@@ -124,6 +128,24 @@ export class MarketDataService {
       MarketDataService.instance = new MarketDataService();
     }
     return MarketDataService.instance;
+  }
+
+  /**
+   * Log an error with suppression to prevent spam (only logs same error type once per hour)
+   */
+  private logErrorOnce(errorKey: string, message: string, details?: any): void {
+    const now = Date.now();
+    const lastLogged = this.errorLog.get(errorKey);
+    
+    // Only log if we haven't logged this error recently
+    if (!lastLogged || (now - lastLogged) > this.errorLogCooldown) {
+      if (details) {
+        console.error(message, details);
+      } else {
+        console.error(message);
+      }
+      this.errorLog.set(errorKey, now);
+    }
   }
 
   private isValidCache(key: string): boolean {
@@ -286,7 +308,7 @@ export class MarketDataService {
       return quotes;
       
     } catch (error: any) {
-      console.error('❌ CoinGecko API error:', error.response?.data || error.message);
+      this.logErrorOnce('coingecko_error', '❌ CoinGecko API error:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -336,7 +358,7 @@ export class MarketDataService {
       return quotes;
 
     } catch (error: any) {
-      console.error('❌ [CoinMarketCap] API error:', error.response?.data || error.message);
+      this.logErrorOnce('coinmarketcap_error', '❌ [CoinMarketCap] API error:', error.response?.data || error.message);
       throw error;
     }
   }
