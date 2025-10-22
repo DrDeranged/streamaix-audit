@@ -160,7 +160,19 @@ export default function Discover() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 relative overflow-hidden">
+      {/* Neural Background Particles */}
+      <div className="absolute inset-0 pointer-events-none opacity-30">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-purple-500 rounded-full animate-pulse-glow" />
+        <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-cyan-400 rounded-full glow-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse-glow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-2/3 right-1/3 w-2 h-2 bg-cyan-500 rounded-full glow-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-1/3 left-1/2 w-1 h-1 bg-purple-400 rounded-full animate-pulse-glow" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 right-1/2 w-1.5 h-1.5 bg-fuchsia-400 rounded-full glow-pulse" style={{ animationDelay: '2.5s' }} />
+      </div>
+      
+      {/* Gradient Overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent pointer-events-none opacity-50" />
       {/* AI-Native Header with Neural Glass Effect */}
       <div className="sticky top-0 z-50 neural-glass iridescent-border border-b">
         <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6">
