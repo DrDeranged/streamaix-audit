@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { ApiErrorCard } from "@/components/ApiErrorFallback";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -796,6 +797,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     }`}>
                                       {Math.round(socialSentiment.sentiment.sentimentScore * 100)}%
                                     </div>
+                                  </div>
+                                )}
+                                {sentimentData?.error && !sentimentLoading && (
+                                  <div className="text-xs text-amber-500/70 font-mono">
+                                    API rate-limited
                                   </div>
                                 )}
                               </div>
