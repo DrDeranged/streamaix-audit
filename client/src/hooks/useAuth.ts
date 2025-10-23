@@ -168,7 +168,11 @@ export function useLogout() {
     },
     onSuccess: () => {
       removeAuthToken();
-      queryClient.clear();
+      // Remove auth data first
+      queryClient.setQueryData(['auth', 'current-user'], null);
+      // Then invalidate other queries gracefully instead of clearing everything
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      queryClient.removeQueries({ queryKey: ['user'] });
       toast({
         title: 'Logged out',
         description: 'You have been successfully logged out.',
