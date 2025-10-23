@@ -149,6 +149,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Validate password is provided for non-social logins
+      if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+      }
+
       // Hash password and create user
       const hashedPassword = await AuthService.hashPassword(password);
       const user = await storage.createUser({

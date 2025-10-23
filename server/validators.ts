@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const registerSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
   password: z.string().min(6).max(100).optional(), // Make password optional for social logins
+  confirmPassword: z.string().optional(), // For frontend password confirmation
   email: z.string().email().optional().or(z.literal('').transform(() => undefined)),
   walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address').optional().or(z.literal('').transform(() => undefined)),
   ensName: z.string().optional().or(z.literal('').transform(() => undefined)),
@@ -17,6 +18,15 @@ export const registerSchema = z.object({
   twitterDisplayName: z.string().optional(),
   twitterVerified: z.boolean().optional(),
   authProvider: z.string().optional(),
+}).refine((data) => {
+  // If password is provided, confirmPassword must match
+  if (data.password && data.confirmPassword) {
+    return data.password === data.confirmPassword;
+  }
+  return true;
+}, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 export const loginSchema = z.object({
