@@ -5861,10 +5861,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Error handling middleware
   app.use((error: any, req: Request, res: Response, next: Function) => {
-    console.error('API Error:', error);
-    res.status(500).json({
+    // Log full error details on server
+    console.error('=== API Error ===');
+    console.error('URL:', req.method, req.path);
+    console.error('Error:', error);
+    console.error('Stack:', error.stack);
+    console.error('================');
+    
+    // Determine user-friendly error message
+    let userMessage = 'Something went wrong. Please try again.';
+    
+    // Provide specific messages for common errors
+    if (error.message?.includes('OpenAI')) {
+      userMessage = 'AI service is temporarily unavailable. Please try again later.';
+    } else if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+      userMessage = 'Service is experiencing high demand. Please try again in a few moments.';
+    } else if (error.message?.includes('network') || error.message?.includes('ECONNREFUSED')) {
+      userMessage = 'Network connection issue. Please check your connection and try again.';
+    } else if (error.message?.includes('timeout')) {
+      userMessage = 'Request timed out. Please try again.';
+    } else if (error.message?.includes('authentication') || error.message?.includes('unauthorized')) {
+      userMessage = 'Authentication required. Please log in and try again.';
+    } else if (process.env.NODE_ENV === 'development') {
+      userMessage = error.message;
+    }
+    
+    res.status(error.status || 500).json({
       error: 'Internal server error',
-      message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      message: userMessage,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
   });
 
