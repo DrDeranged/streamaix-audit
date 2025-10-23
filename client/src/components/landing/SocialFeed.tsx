@@ -104,19 +104,19 @@ export function SocialFeed() {
   }, []);
 
   // Fetch prediction markets
-  const { data: markets, isLoading: marketsLoading } = useQuery<{ markets: any[] }>({
+  const { data: markets, isLoading: marketsLoading, error: marketsError } = useQuery<{ markets: any[] }>({
     queryKey: ['/api/prediction-markets'],
     enabled: activeTab === 'predictions',
   });
 
   // Fetch macro news for MACRO tab
-  const { data: macroNews, isLoading: macroLoading } = useQuery<any>({
+  const { data: macroNews, isLoading: macroLoading, error: macroError } = useQuery<any>({
     queryKey: ['/api/news/macro'],
     enabled: activeTab === 'macro',
   });
 
   // Fetch crypto news for CRYPTO tab
-  const { data: cryptoNews, isLoading: cryptoLoading } = useQuery<any>({
+  const { data: cryptoNews, isLoading: cryptoLoading, error: cryptoError } = useQuery<any>({
     queryKey: ['/api/news/crypto'],
     enabled: activeTab === 'crypto',
   });
@@ -227,6 +227,11 @@ export function SocialFeed() {
     (activeTab === 'macro' && macroLoading) ||
     (activeTab === 'crypto' && cryptoLoading) ||
     (activeTab === 'predictions' && marketsLoading);
+  
+  const currentError = 
+    (activeTab === 'macro' && macroError) ||
+    (activeTab === 'crypto' && cryptoError) ||
+    (activeTab === 'predictions' && marketsError);
 
   return (
     <section className="relative overflow-hidden py-6 sm:py-8">
@@ -320,7 +325,34 @@ export function SocialFeed() {
 
         {/* Feed */}
         <AnimatePresence mode="wait">
-          {isLoading ? (
+          {currentError ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-8"
+            >
+              <div className="bg-orange-500/10 backdrop-blur-md border border-orange-500/30 rounded-lg p-6">
+                <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-3">
+                  <TrendingUp className="w-6 h-6 text-orange-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">High Demand</h3>
+                <p className="text-gray-300 text-sm mb-3">
+                  Our data services are experiencing high traffic. Please try again in a few moments.
+                </p>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  size="sm"
+                  className="border-orange-500/50 hover:bg-orange-500/20"
+                  data-testid="button-reload"
+                >
+                  Refresh
+                </Button>
+              </div>
+            </motion.div>
+          ) : isLoading ? (
             <motion.div
               key="loading"
               initial={{ opacity: 0 }}
