@@ -177,6 +177,10 @@ export function useLogout() {
         title: 'Logged out',
         description: 'You have been successfully logged out.',
       });
+      // Redirect to home page after a brief delay to allow toast to show
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
     },
   });
 }
