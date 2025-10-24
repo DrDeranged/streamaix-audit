@@ -15,7 +15,7 @@ import { motion } from 'framer-motion';
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [registerData, setRegisterData] = useState({
     username: '',
@@ -37,7 +37,17 @@ export default function AuthPage() {
     if (isAuthenticated) {
       setLocation('/');
     }
-  }, [isAuthenticated, setLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+  
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+      </div>
+    );
+  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
