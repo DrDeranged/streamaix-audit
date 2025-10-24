@@ -51,6 +51,7 @@ export default function AuthPage() {
     const cleanData = {
       username: registerData.username,
       password: registerData.password,
+      confirmPassword: registerData.confirmPassword,
       email: registerData.email || undefined,
       walletAddress: registerData.walletAddress || undefined,
       ensName: registerData.ensName || undefined,
