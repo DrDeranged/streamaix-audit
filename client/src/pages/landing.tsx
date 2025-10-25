@@ -10,7 +10,6 @@ import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
 import { BountyFeed } from "@/components/landing/bounty-feed";
 import { PredictionMarketSection } from "@/components/PredictionMarketSection";
-import { SocialEcosystem } from "@/components/landing/social-ecosystem";
 import { SocialFeed } from "@/components/landing/SocialFeed";
 import { Footer } from "@/components/landing/footer";
 
@@ -31,7 +30,6 @@ export default function Landing() {
         <SocialFeed />
         <KnowledgeAvatars />
         <AISuggestions />
-        <SocialEcosystem />
         <Footer />
       </div>
     </div>
