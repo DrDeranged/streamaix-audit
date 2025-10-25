@@ -37,6 +37,28 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Validate critical environment variables on startup
+  console.log('\n🔐 ========== ENVIRONMENT VALIDATION ==========');
+  
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (!openaiKey) {
+    console.error('❌ CRITICAL: OPENAI_API_KEY is NOT configured!');
+    console.error('📍 AI content processing will fail without this key.');
+    console.error('🔧 Please set OPENAI_API_KEY in your environment or .env file');
+  } else {
+    console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters)`);
+    console.log(`🔑 Key preview: ${openaiKey.substring(0, 10)}...${openaiKey.substring(openaiKey.length - 4)}`);
+  }
+  
+  const duneKey = process.env.DUNE_API_KEY;
+  if (duneKey) {
+    console.log(`✅ DUNE_API_KEY configured (${duneKey.length} characters)`);
+  } else {
+    console.log(`⚠️  DUNE_API_KEY not configured (optional, for advanced analytics)`);
+  }
+  
+  console.log('========================================\n');
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
