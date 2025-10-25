@@ -42,13 +42,6 @@ export function WhyBlockchain() {
     }
   ];
 
-  const ecosystemLogos = [
-    { name: "Arweave", color: "from-purple-500 to-fuchsia-500" },
-    { name: "Lens", color: "from-fuchsia-500 to-cyan-500" },
-    { name: "Farcaster", color: "from-cyan-500 to-purple-500" },
-    { name: "Optimism", color: "from-purple-400 to-cyan-400" }
-  ];
-
   return (
     <section id="features" className="py-12 bg-transparent">
       <div className="container mx-auto px-6">
@@ -111,35 +104,6 @@ export function WhyBlockchain() {
             </HoverCard>
           ))}
         </div>
-        
-        {/* Animated ecosystem logos - more compact */}
-        <motion.div 
-          className="mt-10 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-sm text-muted-foreground mb-4">Powered by</p>
-          <div className="flex justify-center items-center space-x-6 opacity-60 flex-wrap gap-3">
-            {ecosystemLogos.map((logo, index) => (
-              <motion.div 
-                key={logo.name}
-                className="flex items-center space-x-2"
-                animate={{ y: [-3, 3, -3] }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity, 
-                  ease: "easeInOut",
-                  delay: index * 0.5 
-                }}
-              >
-                <div className={`w-6 h-6 bg-gradient-to-br ${logo.color} rounded-lg`} />
-                <span className="text-xs">{logo.name}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </section>
   );
