@@ -50,8 +50,8 @@ export function NeuralNetworkBackground() {
     const nodeCount = Math.min(Math.floor(window.innerWidth / 12), 80);
     const nodes: NeuralNode[] = [];
 
-    // Vibrant color palette: purple, cyan, fuchsia, pink
-    const colorHues = [280, 195, 320, 340]; // Electric purple, cyan, fuchsia, pink
+    // Balanced color palette: purple and cyan only
+    const colorHues = [280, 195]; // Purple and cyan
     
     for (let i = 0; i < nodeCount; i++) {
       nodes.push({
@@ -59,9 +59,9 @@ export function NeuralNetworkBackground() {
         y: Math.random() * canvas.height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 4 + 4, // Slightly larger
+        radius: Math.random() * 3 + 3,
         pulsePhase: Math.random() * Math.PI * 2,
-        energy: Math.random() * 0.5 + 0.5, // Start with higher energy
+        energy: Math.random() * 0.4 + 0.3,
         colorHue: colorHues[Math.floor(Math.random() * colorHues.length)],
       });
     }
@@ -122,48 +122,45 @@ export function NeuralNetworkBackground() {
         // Decay energy
         node.energy *= 0.98;
 
-        // Draw node with INTENSE glow
-        const pulseSize = Math.sin(node.pulsePhase) * 0.6 + 1.2; // Bigger pulse
-        const glowIntensity = 0.5 + node.energy * 0.5; // Always glowing
+        // Draw node with balanced glow
+        const pulseSize = Math.sin(node.pulsePhase) * 0.5 + 1;
+        const glowIntensity = 0.3 + node.energy * 0.7;
 
-        // MASSIVE outer glow (4x radius)
+        // Outer glow (3.5x radius for subtlety)
         const glowGradient = ctx.createRadialGradient(
           node.x, node.y, 0,
-          node.x, node.y, node.radius * pulseSize * 5
+          node.x, node.y, node.radius * pulseSize * 3.5
         );
         
         if (isDark) {
-          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 80%, ${glowIntensity})`);
-          glowGradient.addColorStop(0.3, `hsla(${node.colorHue}, 100%, 70%, ${glowIntensity * 0.7})`);
-          glowGradient.addColorStop(0.6, `hsla(${node.colorHue}, 100%, 60%, ${glowIntensity * 0.3})`);
+          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 70%, ${glowIntensity * 0.9})`);
+          glowGradient.addColorStop(0.5, `hsla(${node.colorHue}, 100%, 60%, ${glowIntensity * 0.5})`);
           glowGradient.addColorStop(1, `hsla(${node.colorHue}, 100%, 50%, 0)`);
         } else {
-          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 65%, ${glowIntensity * 0.8})`);
-          glowGradient.addColorStop(0.3, `hsla(${node.colorHue}, 100%, 55%, ${glowIntensity * 0.5})`);
-          glowGradient.addColorStop(0.6, `hsla(${node.colorHue}, 100%, 45%, ${glowIntensity * 0.25})`);
+          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 60%, ${glowIntensity * 0.6})`);
+          glowGradient.addColorStop(0.5, `hsla(${node.colorHue}, 100%, 50%, ${glowIntensity * 0.3})`);
           glowGradient.addColorStop(1, `hsla(${node.colorHue}, 100%, 40%, 0)`);
         }
 
         ctx.fillStyle = glowGradient;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius * pulseSize * 5, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, node.radius * pulseSize * 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Bright core node with 100% saturation
+        // Core node with rich saturation
         ctx.fillStyle = isDark 
-          ? `hsla(${node.colorHue}, 100%, 75%, ${0.9 + glowIntensity * 0.1})`
-          : `hsla(${node.colorHue}, 100%, 60%, ${0.7 + glowIntensity * 0.2})`;
+          ? `hsla(${node.colorHue}, 100%, 70%, ${0.75 + glowIntensity * 0.25})`
+          : `hsla(${node.colorHue}, 100%, 55%, ${0.6 + glowIntensity * 0.2})`;
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius * pulseSize, 0, Math.PI * 2);
         ctx.fill();
 
-        // Electric white highlight (always bright)
-        const highlightColor = node.colorHue === 195 ? 200 : 195; // Complementary highlight
+        // Subtle highlight
         ctx.fillStyle = isDark
-          ? `hsla(${highlightColor}, 100%, 95%, ${0.8 + glowIntensity * 0.2})`
-          : `hsla(${highlightColor}, 100%, 85%, ${0.6 + glowIntensity * 0.3})`;
+          ? `hsla(${node.colorHue === 195 ? 280 : 195}, 100%, 85%, ${0.5 + glowIntensity * 0.3})`
+          : `hsla(${node.colorHue === 195 ? 280 : 195}, 100%, 70%, ${0.4 + glowIntensity * 0.2})`;
         ctx.beginPath();
-        ctx.arc(node.x - node.radius * 0.3, node.y - node.radius * 0.3, node.radius * 0.5, 0, Math.PI * 2);
+        ctx.arc(node.x - node.radius * 0.3, node.y - node.radius * 0.3, node.radius * 0.4, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -191,54 +188,52 @@ export function NeuralNetworkBackground() {
 
       connectionsRef.current = connections;
 
-      // Draw VIBRANT connections with data flow
+      // Draw balanced connections with data flow
       connections.forEach(conn => {
         const avgEnergy = (conn.node1.energy + conn.node2.energy) / 2;
-        const opacity = conn.strength * 0.6 * (0.5 + avgEnergy * 0.5); // Brighter connections
+        const opacity = conn.strength * 0.4 * (0.3 + avgEnergy * 0.7);
 
-        // Rainbow gradient connection line
+        // Gentle gradient connection line
         const lineGradient = ctx.createLinearGradient(
           conn.node1.x, conn.node1.y,
           conn.node2.x, conn.node2.y
         );
 
-        // Use node colors for gradient
         const color1 = conn.node1.colorHue;
         const color2 = conn.node2.colorHue;
         
         if (isDark) {
-          lineGradient.addColorStop(0, `hsla(${color1}, 100%, 75%, ${opacity})`);
-          lineGradient.addColorStop(0.5, `hsla(${(color1 + color2) / 2}, 100%, 70%, ${opacity})`);
-          lineGradient.addColorStop(1, `hsla(${color2}, 100%, 75%, ${opacity})`);
+          lineGradient.addColorStop(0, `hsla(${color1}, 100%, 70%, ${opacity})`);
+          lineGradient.addColorStop(0.5, `hsla(${(color1 + color2) / 2}, 100%, 65%, ${opacity * 0.9})`);
+          lineGradient.addColorStop(1, `hsla(${color2}, 100%, 70%, ${opacity})`);
         } else {
-          lineGradient.addColorStop(0, `hsla(${color1}, 100%, 60%, ${opacity * 0.8})`);
-          lineGradient.addColorStop(0.5, `hsla(${(color1 + color2) / 2}, 100%, 55%, ${opacity * 0.8})`);
-          lineGradient.addColorStop(1, `hsla(${color2}, 100%, 60%, ${opacity * 0.8})`);
+          lineGradient.addColorStop(0, `hsla(${color1}, 100%, 55%, ${opacity * 0.7})`);
+          lineGradient.addColorStop(0.5, `hsla(${(color1 + color2) / 2}, 100%, 50%, ${opacity * 0.6})`);
+          lineGradient.addColorStop(1, `hsla(${color2}, 100%, 55%, ${opacity * 0.7})`);
         }
 
         ctx.strokeStyle = lineGradient;
-        ctx.lineWidth = 1.5 + conn.strength * 2.5; // Thicker lines
+        ctx.lineWidth = 1 + conn.strength * 2;
         ctx.beginPath();
         ctx.moveTo(conn.node1.x, conn.node1.y);
         ctx.lineTo(conn.node2.x, conn.node2.y);
         ctx.stroke();
 
-        // BRIGHT data flow particles
-        if (conn.strength > 0.4 && Math.random() < 0.08) { // More particles
+        // Subtle data flow particles
+        if (conn.strength > 0.5 && Math.random() < 0.05) {
           const flowPos = conn.dataFlow;
           const px = conn.node1.x + (conn.node2.x - conn.node1.x) * flowPos;
           const py = conn.node1.y + (conn.node2.y - conn.node1.y) * flowPos;
 
-          // Glowing particle
-          const particleGlow = ctx.createRadialGradient(px, py, 0, px, py, 4);
+          const particleGlow = ctx.createRadialGradient(px, py, 0, px, py, 3);
           particleGlow.addColorStop(0, isDark 
-            ? `hsla(195, 100%, 95%, ${opacity * 3})` 
-            : `hsla(195, 100%, 80%, ${opacity * 2})`);
+            ? `hsla(195, 100%, 85%, ${opacity * 2.5})` 
+            : `hsla(195, 100%, 70%, ${opacity * 1.5})`);
           particleGlow.addColorStop(1, 'hsla(195, 100%, 50%, 0)');
           
           ctx.fillStyle = particleGlow;
           ctx.beginPath();
-          ctx.arc(px, py, 4, 0, Math.PI * 2);
+          ctx.arc(px, py, 3, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -261,7 +256,7 @@ export function NeuralNetworkBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: isDark ? 0.85 : 0.55 }}
+      style={{ opacity: isDark ? 0.75 : 0.5 }}
     />
   );
 }
