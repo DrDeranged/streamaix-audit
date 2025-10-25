@@ -6,6 +6,7 @@ import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
 import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
+console.log('🔍 DIAGNOSTIC: routes.ts file is being loaded and executed');
 import { AIService } from "./services/aiService";
 import { Web3Service } from "./services/web3Service";
 import { MarketDataService } from "./services/marketDataService";
@@ -87,6 +88,11 @@ const asyncHandler = (fn: (req: any, res: Response, next: Function) => Promise<a
   };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log('\n🚀 ========== STARTING ROUTE REGISTRATION ==========');
+  console.log('📂 Current working directory:', process.cwd());
+  console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+  console.log('==================================================\n');
+  
   // Enable CORS
   app.use(cors({
     origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : true,
@@ -5921,10 +5927,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // DIAGNOSTIC ENDPOINTS
+  // =============================================================================
+  
+  // Simple health check to verify routing works at all
+  console.log('📍 Registering health check endpoint: GET /api/health');
+  app.get('/api/health', (req: Request, res: Response) => {
+    console.log('✅ Health check endpoint hit!');
+    res.status(200).json({ 
+      status: 'ok', 
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV
+    });
+  });
+  console.log('✅ Health check endpoint registered');
+  
+  // =============================================================================
   // REAL PROCESSING ENDPOINTS
   // =============================================================================
 
   // Test real processing endpoint
+  console.log('📍 Registering analyze-content endpoint: POST /api/analyze-content');
   app.post('/api/analyze-content', asyncHandler(async (req: Request, res: Response) => {
     console.log(`\n🔵 ========== ROUTE: POST /api/analyze-content ==========`);
     
@@ -6013,6 +6037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   }));
+  console.log('✅ Analyze-content endpoint registered successfully');
 
   // Debug endpoint to check processing status and detect issues
   app.get('/api/debug/summary/:id', asyncHandler(async (req: Request, res: Response) => {
@@ -8252,6 +8277,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     clearInterval(volatilityAlertInterval);
     clients.clear();
   });
+  
+  console.log('\n✅ ========== ROUTE REGISTRATION COMPLETE ==========');
+  console.log('🎯 All routes and services have been registered successfully');
+  console.log('📡 WebSocket servers initialized');
+  console.log('🌐 Server ready to accept requests');
+  console.log('==================================================\n');
   
   return httpServer;
 }
