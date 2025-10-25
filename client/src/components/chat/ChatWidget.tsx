@@ -23,18 +23,13 @@ export function ChatWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Only show chat widget if user is authenticated
+  // Check if user is authenticated for personalized features
   const isAuthenticated = !!getAuthToken();
-  
-  // Don't render anything if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
 
-  // Fetch chat history
+  // Fetch chat history (only for authenticated users)
   const { data: chatHistory, isLoading } = useQuery<{ messages: ChatMessage[] }>({
     queryKey: ['/api/chat/history'],
-    enabled: isOpen,
+    enabled: isOpen && isAuthenticated,
   });
 
   // Send message mutation
