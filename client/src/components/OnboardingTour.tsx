@@ -232,6 +232,18 @@ export function OnboardingTour() {
     }
   }, []);
 
+  // Listen for custom event to trigger tour (for testing)
+  useEffect(() => {
+    const handleTriggerTour = () => {
+      setIsOpen(true);
+      setCurrentStep(0);
+      setIsMinimized(false);
+    };
+    
+    window.addEventListener('triggerOnboardingTour', handleTriggerTour);
+    return () => window.removeEventListener('triggerOnboardingTour', handleTriggerTour);
+  }, []);
+
   // Generate random particles for the stream effect
   useEffect(() => {
     const particleArray = Array.from({ length: 20 }, (_, i) => ({
