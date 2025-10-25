@@ -12,22 +12,6 @@ export function HeroSection() {
     <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16 bg-transparent">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-40 dark:opacity-50">
-        <motion.div 
-          className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500 rounded-full blur-3xl"
-          animate={{ y: [-20, 20, -20], scale: [1, 1.1, 1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute top-40 right-20 w-56 h-56 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur-2xl"
-          animate={{ y: [-15, 25, -15], scale: [1, 1.2, 1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        />
-        <motion.div 
-          className="absolute bottom-40 left-1/4 w-72 h-72 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 rounded-full blur-3xl"
-          animate={{ y: [-25, 15, -25], scale: [1.1, 1, 1.1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
-        
         {/* Animated waveform */}
         <div className="absolute bottom-20 left-0 right-0 flex items-end justify-center space-x-2 opacity-50">
           {Array.from({ length: 12 }).map((_, i) => (
