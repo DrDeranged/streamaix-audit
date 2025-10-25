@@ -128,13 +128,13 @@ export function NeuralNetworkBackground() {
         );
         
         if (isDark) {
-          gradient.addColorStop(0, `hsla(258, 84%, 70%, ${glowIntensity * 0.8})`);
-          gradient.addColorStop(0.5, `hsla(195, 100%, 60%, ${glowIntensity * 0.3})`);
-          gradient.addColorStop(1, 'hsla(258, 84%, 58%, 0)');
+          gradient.addColorStop(0, `hsla(280, 95%, 75%, ${glowIntensity * 0.9})`);
+          gradient.addColorStop(0.5, `hsla(195, 100%, 65%, ${glowIntensity * 0.4})`);
+          gradient.addColorStop(1, 'hsla(280, 90%, 65%, 0)');
         } else {
-          gradient.addColorStop(0, `hsla(258, 84%, 50%, ${glowIntensity * 0.4})`);
-          gradient.addColorStop(0.5, `hsla(195, 100%, 50%, ${glowIntensity * 0.15})`);
-          gradient.addColorStop(1, 'hsla(258, 84%, 58%, 0)');
+          gradient.addColorStop(0, `hsla(280, 90%, 60%, ${glowIntensity * 0.5})`);
+          gradient.addColorStop(0.5, `hsla(195, 100%, 55%, ${glowIntensity * 0.25})`);
+          gradient.addColorStop(1, 'hsla(280, 85%, 60%, 0)');
         }
 
         ctx.fillStyle = gradient;
@@ -144,16 +144,16 @@ export function NeuralNetworkBackground() {
 
         // Core node
         ctx.fillStyle = isDark 
-          ? `hsla(258, 84%, 70%, ${0.6 + glowIntensity * 0.4})`
-          : `hsla(258, 84%, 50%, ${0.3 + glowIntensity * 0.2})`;
+          ? `hsla(280, 95%, 75%, ${0.7 + glowIntensity * 0.3})`
+          : `hsla(280, 90%, 60%, ${0.4 + glowIntensity * 0.2})`;
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius * pulseSize, 0, Math.PI * 2);
         ctx.fill();
 
         // Inner highlight
         ctx.fillStyle = isDark
-          ? `hsla(195, 100%, 80%, ${0.4 + glowIntensity * 0.6})`
-          : `hsla(195, 100%, 60%, ${0.2 + glowIntensity * 0.3})`;
+          ? `hsla(195, 100%, 85%, ${0.5 + glowIntensity * 0.5})`
+          : `hsla(195, 100%, 65%, ${0.3 + glowIntensity * 0.3})`;
         ctx.beginPath();
         ctx.arc(node.x - node.radius * 0.3, node.y - node.radius * 0.3, node.radius * 0.4, 0, Math.PI * 2);
         ctx.fill();
@@ -195,13 +195,13 @@ export function NeuralNetworkBackground() {
         );
 
         if (isDark) {
-          gradient.addColorStop(0, `hsla(258, 84%, 70%, ${opacity})`);
-          gradient.addColorStop(0.5, `hsla(195, 100%, 60%, ${opacity * 0.8})`);
-          gradient.addColorStop(1, `hsla(258, 84%, 70%, ${opacity})`);
+          gradient.addColorStop(0, `hsla(280, 95%, 75%, ${opacity})`);
+          gradient.addColorStop(0.5, `hsla(195, 100%, 65%, ${opacity * 0.9})`);
+          gradient.addColorStop(1, `hsla(320, 100%, 70%, ${opacity})`);
         } else {
-          gradient.addColorStop(0, `hsla(258, 84%, 50%, ${opacity * 0.5})`);
-          gradient.addColorStop(0.5, `hsla(195, 100%, 50%, ${opacity * 0.4})`);
-          gradient.addColorStop(1, `hsla(258, 84%, 50%, ${opacity * 0.5})`);
+          gradient.addColorStop(0, `hsla(280, 90%, 60%, ${opacity * 0.6})`);
+          gradient.addColorStop(0.5, `hsla(195, 100%, 55%, ${opacity * 0.5})`);
+          gradient.addColorStop(1, `hsla(320, 95%, 65%, ${opacity * 0.6})`);
         }
 
         ctx.strokeStyle = gradient;
@@ -218,10 +218,10 @@ export function NeuralNetworkBackground() {
           const py = conn.node1.y + (conn.node2.y - conn.node1.y) * flowPos;
 
           ctx.fillStyle = isDark
-            ? `hsla(195, 100%, 80%, ${opacity * 2})`
-            : `hsla(195, 100%, 60%, ${opacity})`;
+            ? `hsla(195, 100%, 85%, ${opacity * 2.5})`
+            : `hsla(195, 100%, 65%, ${opacity * 1.2})`;
           ctx.beginPath();
-          ctx.arc(px, py, 2, 0, Math.PI * 2);
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -244,7 +244,7 @@ export function NeuralNetworkBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: isDark ? 0.6 : 0.3 }}
+      style={{ opacity: isDark ? 0.7 : 0.4 }}
     />
   );
 }

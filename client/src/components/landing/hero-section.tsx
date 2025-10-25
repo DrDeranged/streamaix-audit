@@ -11,34 +11,34 @@ export function HeroSection() {
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16 bg-transparent">
       {/* Animated Background */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-30">
+      <div className="absolute inset-0 opacity-40 dark:opacity-50">
         <motion.div 
-          className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 rounded-full blur-xl"
-          animate={{ y: [-20, 20, -20] }}
+          className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500 rounded-full blur-3xl"
+          animate={{ y: [-20, 20, -20], scale: [1, 1.1, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-cyan-400 via-purple-400 to-fuchsia-400 rounded-full blur-lg"
-          animate={{ y: [-15, 25, -15] }}
+          className="absolute top-40 right-20 w-56 h-56 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur-2xl"
+          animate={{ y: [-15, 25, -15], scale: [1, 1.2, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
         <motion.div 
-          className="absolute bottom-40 left-1/4 w-40 h-40 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-2xl"
-          animate={{ y: [-25, 15, -25] }}
+          className="absolute bottom-40 left-1/4 w-72 h-72 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 rounded-full blur-3xl"
+          animate={{ y: [-25, 15, -25], scale: [1.1, 1, 1.1] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />
         
         {/* Animated waveform */}
-        <div className="absolute bottom-20 left-0 right-0 flex items-end justify-center space-x-1 opacity-30">
-          {Array.from({ length: 10 }).map((_, i) => (
+        <div className="absolute bottom-20 left-0 right-0 flex items-end justify-center space-x-2 opacity-50">
+          {Array.from({ length: 12 }).map((_, i) => (
             <motion.div
               key={i}
-              className={`w-1 bg-gradient-to-t from-purple-400 via-fuchsia-400 to-cyan-400 rounded-full ${
-                i % 3 === 0 ? 'h-16' : i % 2 === 0 ? 'h-12' : 'h-8'
+              className={`w-2 bg-gradient-to-t from-purple-500 via-fuchsia-500 to-cyan-400 rounded-full shadow-lg shadow-purple-500/50 ${
+                i % 3 === 0 ? 'h-20' : i % 2 === 0 ? 'h-16' : 'h-12'
               }`}
-              animate={{ scaleY: [1, 1.5, 1] }}
+              animate={{ scaleY: [1, 1.8, 1] }}
               transition={{ 
-                duration: 3, 
+                duration: 2.5, 
                 repeat: Infinity, 
                 ease: "easeInOut",
                 delay: i * 0.1 
