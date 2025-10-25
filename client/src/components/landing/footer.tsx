@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Wallet, Search, Github, Twitter, MessageCircle, Users, Mail } from "lucide-react";
+import { Wallet, Mail, Target, TrendingUp, BarChart3, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
+import { useWeb3 } from "@/hooks/useWeb3";
 
 export function Footer() {
+  const { isConnected, connect } = useWeb3();
+  
   return (
     <footer className="py-20 bg-transparent text-slate-900 dark:text-white relative overflow-hidden border-t border-slate-200/50 dark:border-slate-800/50">
       {/* Background Pattern */}
@@ -21,9 +24,9 @@ export function Footer() {
       </div>
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Brand Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -34,33 +37,23 @@ export function Footer() {
                 StreamAiX
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
-                The future of content consumption. Transform any video into valuable, ownable knowledge with AI and Web3.
+                Your Web3 Hub for AI Content, Prediction Markets, DeFi Bounties & Market Intelligence.
               </p>
               
-              {/* ENS Lookup */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">ENS Name Lookup</label>
-                <div className="flex space-x-2">
-                  <Input 
-                    type="text" 
-                    placeholder="vitalik.eth" 
-                    className="flex-1 bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-gray-400"
-                  />
-                  <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700">
-                    <Search className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              
               {/* Wallet Connect */}
-              <Button className="glass-bg glass-border hover:bg-muted/20 text-white">
-                <Wallet className="w-5 h-5 mr-3 text-purple-400" />
-                Connect Wallet
-              </Button>
+              {!isConnected && (
+                <Button 
+                  onClick={connect}
+                  className="glass-bg glass-border hover:bg-muted/20 text-white"
+                >
+                  <Wallet className="w-5 h-5 mr-3 text-purple-400" />
+                  Connect Wallet
+                </Button>
+              )}
             </motion.div>
           </div>
           
-          {/* Links Sections */}
+          {/* Platform Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -69,28 +62,72 @@ export function Footer() {
           >
             <h3 className="text-lg font-semibold mb-4">Platform</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">API Reference</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">GitHub</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Whitepaper</a></li>
+              <li>
+                <Link href="/bounties" className="hover:text-purple-400 transition-colors flex items-center">
+                  <Target className="w-3.5 h-3.5 mr-2" />
+                  Bounties
+                </Link>
+              </li>
+              <li>
+                <Link href="/markets" className="hover:text-purple-400 transition-colors flex items-center">
+                  <TrendingUp className="w-3.5 h-3.5 mr-2" />
+                  Prediction Markets
+                </Link>
+              </li>
+              <li>
+                <Link href="/discover" className="hover:text-purple-400 transition-colors flex items-center">
+                  <BarChart3 className="w-3.5 h-3.5 mr-2" />
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard" className="hover:text-purple-400 transition-colors flex items-center">
+                  <LayoutDashboard className="w-3.5 h-3.5 mr-2" />
+                  Dashboard
+                </Link>
+              </li>
             </ul>
           </motion.div>
           
+          {/* Resources */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-lg font-semibold mb-4">Community</h3>
+            <h3 className="text-lg font-semibold mb-4">Resources</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Discord</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Farcaster</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Lens Protocol</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Twitter</a></li>
+              <li>
+                <Link href="/auth" className="hover:text-purple-400 transition-colors">
+                  Sign Up
+                </Link>
+              </li>
+              <li>
+                <Link href="/auth" className="hover:text-purple-400 transition-colors">
+                  Sign In
+                </Link>
+              </li>
+              <li>
+                <a 
+                  href="mailto:arslandin.founder@streamaix.com?subject=StreamAiX%20Support" 
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  Support
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="mailto:arslandin.founder@streamaix.com?subject=StreamAiX%20Waitlist" 
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  Join Waitlist
+                </a>
+              </li>
             </ul>
           </motion.div>
           
+          {/* Contact */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -105,16 +142,15 @@ export function Footer() {
                   className="hover:text-purple-400 transition-colors flex items-center"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  arslandin.founder@streamaix.com
+                  Email Us
                 </a>
               </li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Support Center</a></li>
               <li>
                 <a 
-                  href="mailto:arslandin.founder@streamaix.com?subject=Partnership Inquiry&body=Hi! I'm interested in exploring partnership opportunities with StreamAiX." 
+                  href="mailto:arslandin.founder@streamaix.com?subject=Partnership%20Inquiry" 
                   className="hover:text-purple-400 transition-colors"
                 >
-                  Partnership
+                  Partnerships
                 </a>
               </li>
             </ul>
@@ -134,19 +170,10 @@ export function Footer() {
               © 2024 StreamAiX. Built with ❤️ for the decentralized future.
             </div>
             
-            <div className="flex items-center space-x-6">
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
-                <MessageCircle className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
-                <Users className="w-5 h-5" />
-              </a>
+            <div className="text-gray-400 text-sm">
+              <span className="inline-flex items-center gap-2">
+                Powered by <span className="text-purple-400 font-semibold">OpenAI</span> · <span className="text-cyan-400 font-semibold">Base Network</span>
+              </span>
             </div>
           </div>
         </motion.div>
