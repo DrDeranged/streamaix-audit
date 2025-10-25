@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import { useWeb3 } from "@/hooks/useWeb3";
 
 export function Footer() {
-  const { isConnected, connect } = useWeb3();
+  const { isConnected, connectWallet } = useWeb3();
   
   return (
     <footer className="py-20 bg-transparent text-slate-900 dark:text-white relative overflow-hidden border-t border-slate-200/50 dark:border-slate-800/50">
@@ -43,7 +43,7 @@ export function Footer() {
               {/* Wallet Connect */}
               {!isConnected && (
                 <Button 
-                  onClick={connect}
+                  onClick={() => connectWallet('metamask')}
                   className="glass-bg glass-border hover:bg-muted/20 text-white"
                 >
                   <Wallet className="w-5 h-5 mr-3 text-purple-400" />
