@@ -441,13 +441,13 @@ export function OnboardingTour() {
                   </div>
 
                   {/* Content Container */}
-                  <div className="overflow-y-auto max-h-[80vh] scrollbar-thin relative z-10">
-                    <div className="p-4 sm:p-6 md:p-10">
+                  <div className="overflow-y-auto max-h-[85vh] scrollbar-thin relative z-10">
+                    <div className="p-3 sm:p-4 md:p-6">
                       {/* Header Section */}
-                      <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
+                      <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-5 mb-4 sm:mb-5">
                         {/* Circular Progress & Icon with Energy Flow */}
                         <div className="relative flex-shrink-0 mx-auto sm:mx-0">
-                          <svg className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 transform -rotate-90">
+                          <svg className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transform -rotate-90">
                             <defs>
                               <linearGradient id={`energy-gradient`} x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stopColor="#a855f7" />
@@ -487,8 +487,8 @@ export function OnboardingTour() {
                             transition={{ type: "spring", duration: 0.8, delay: 0.2 }}
                             className="absolute inset-0 flex items-center justify-center"
                           >
-                            <div className={`p-2 sm:p-3 md:p-5 bg-gradient-to-br ${currentStepData.gradient} rounded-lg sm:rounded-xl md:rounded-2xl shadow-2xl`}>
-                              <Icon className="h-5 w-5 sm:h-7 sm:h-7 md:h-10 md:w-10 text-white" />
+                            <div className={`p-1.5 sm:p-2.5 md:p-3.5 bg-gradient-to-br ${currentStepData.gradient} rounded-lg sm:rounded-xl md:rounded-2xl shadow-2xl`}>
+                              <Icon className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 text-white" />
                             </div>
                           </motion.div>
                         </div>
@@ -501,19 +501,19 @@ export function OnboardingTour() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
                           >
-                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 justify-center sm:justify-start">
+                            <div className="flex items-center gap-2 sm:gap-2.5 mb-1.5 sm:mb-2 justify-center sm:justify-start">
                               <span className="text-xs sm:text-sm font-bold font-orbitron bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 text-transparent bg-clip-text">
                                 STEP {currentStep + 1} / {steps.length}
                               </span>
                               <div className="h-px flex-1 bg-gradient-to-r from-purple-500/50 via-cyan-500/50 to-transparent hidden sm:block" />
                             </div>
-                            <h2 className="text-xl sm:text-3xl md:text-5xl font-bold text-white mb-2 sm:mb-3 font-orbitron">
+                            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1.5 sm:mb-2 font-orbitron">
                               {currentStepData.title}
                             </h2>
-                            <p className={`text-sm sm:text-base md:text-xl font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text mb-2 sm:mb-4 animate-gradient`}>
+                            <p className={`text-sm sm:text-base md:text-lg font-semibold bg-gradient-to-r ${currentStepData.gradient} text-transparent bg-clip-text mb-1.5 sm:mb-2.5 animate-gradient`}>
                               {currentStepData.subtitle}
                             </p>
-                            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed">
+                            <p className="text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">
                               {currentStepData.description}
                             </p>
                           </motion.div>
@@ -526,33 +526,33 @@ export function OnboardingTour() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="mb-6 sm:mb-8"
+                        className="mb-4 sm:mb-5"
                       >
-                        <div className="relative neural-glass rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border border-purple-500/20 overflow-hidden">
-                          <div className="absolute inset-0 iridescent-shimmer rounded-xl sm:rounded-2xl opacity-50" />
+                        <div className="relative neural-glass rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border border-purple-500/20 overflow-hidden">
+                          <div className="absolute inset-0 iridescent-shimmer rounded-lg sm:rounded-xl opacity-50" />
                           
                           <div className="relative z-10">
-                            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                              <div className={`p-1.5 sm:p-2 bg-gradient-to-br ${currentStepData.gradient} rounded-lg`}>
-                                <MousePointer2 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                              <div className={`p-1.5 bg-gradient-to-br ${currentStepData.gradient} rounded-lg`}>
+                                <MousePointer2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                               </div>
-                              <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white font-orbitron">Quick Start Guide</h3>
+                              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white font-orbitron">Quick Start Guide</h3>
                             </div>
                             
-                            <div className="grid gap-2 sm:gap-3">
+                            <div className="grid gap-1.5 sm:gap-2">
                               {currentStepData.instructions.map((instruction, index) => (
                                 <motion.div
                                   key={index}
                                   initial={{ opacity: 0, x: -30 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.5 + index * 0.08 }}
-                                  className="flex items-start gap-2 sm:gap-3 group hover:bg-white/5 p-1.5 sm:p-2 rounded-lg transition-all"
+                                  className="flex items-start gap-2 group hover:bg-white/5 p-1 sm:p-1.5 rounded-lg transition-all"
                                 >
                                   {/* Simple numbered indicator */}
-                                  <span className={`flex-shrink-0 text-xs sm:text-sm font-bold bg-gradient-to-br ${currentStepData.gradient} text-transparent bg-clip-text pt-0.5`}>
+                                  <span className={`flex-shrink-0 text-xs font-bold bg-gradient-to-br ${currentStepData.gradient} text-transparent bg-clip-text pt-0.5`}>
                                     {index + 1}.
                                   </span>
-                                  <p className="text-gray-200 text-xs sm:text-sm md:text-base leading-relaxed">
+                                  <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
                                     {instruction}
                                   </p>
                                 </motion.div>
@@ -567,45 +567,45 @@ export function OnboardingTour() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
-                        className="flex justify-center mb-6 sm:mb-8"
+                        className="flex justify-center mb-3 sm:mb-4"
                       >
                         <Button
                           onClick={() => handleAction(currentStepData.action.path)}
-                          className={`px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold bg-gradient-to-r ${currentStepData.gradient} hover:scale-105 text-white shadow-lg hover:shadow-purple-500/30 transition-all duration-300 rounded-lg`}
+                          className={`px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r ${currentStepData.gradient} hover:scale-105 text-white shadow-lg hover:shadow-purple-500/30 transition-all duration-300 rounded-lg`}
                           data-testid={`button-action-step-${currentStep}`}
                         >
-                          <span className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="flex items-center gap-1.5">
                             {currentStepData.action.label}
-                            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </span>
                         </Button>
                       </motion.div>
 
                       {/* Navigation Footer */}
-                      <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/10">
+                      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-white/10">
                         <Button
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
                           variant="ghost"
                           size="sm"
-                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed px-2 sm:px-3 py-1 sm:py-1.5 hover:bg-white/10 rounded-lg transition-all text-xs sm:text-sm"
+                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed px-2 sm:px-2.5 py-1 hover:bg-white/10 rounded-lg transition-all text-xs"
                           data-testid="button-previous-step"
                         >
-                          <ChevronLeft className="mr-0.5 sm:mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                          <ChevronLeft className="mr-0.5 h-3 w-3" />
                           <span className="hidden sm:inline">Previous</span>
                           <span className="sm:hidden">Prev</span>
                         </Button>
 
-                        <div className="flex items-center gap-1 sm:gap-1.5">
+                        <div className="flex items-center gap-1">
                           {steps.map((_, index) => (
                             <motion.div
                               key={index}
-                              className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
+                              className={`h-1 rounded-full transition-all duration-300 ${
                                 index === currentStep 
-                                  ? `w-4 sm:w-6 bg-gradient-to-r ${currentStepData.gradient}` 
+                                  ? `w-5 bg-gradient-to-r ${currentStepData.gradient}` 
                                   : index < currentStep
-                                  ? 'w-1 sm:w-1.5 bg-green-500'
-                                  : 'w-1 sm:w-1.5 bg-white/20'
+                                  ? 'w-1 bg-green-500'
+                                  : 'w-1 bg-white/20'
                               }`}
                               initial={{ scale: 0.8 }}
                               animate={{ scale: index === currentStep ? 1 : 0.8 }}
@@ -617,12 +617,12 @@ export function OnboardingTour() {
                           onClick={handleNext}
                           variant="ghost"
                           size="sm"
-                          className="text-gray-400 hover:text-white px-2 sm:px-3 py-1 sm:py-1.5 hover:bg-white/10 rounded-lg transition-all text-xs sm:text-sm"
+                          className="text-gray-400 hover:text-white px-2 sm:px-2.5 py-1 hover:bg-white/10 rounded-lg transition-all text-xs"
                           data-testid="button-next-step"
                         >
                           <span className="hidden sm:inline">{currentStep === steps.length - 1 ? 'Finish' : 'Next'}</span>
                           <span className="sm:hidden">{currentStep === steps.length - 1 ? 'Done' : 'Next'}</span>
-                          <ChevronRight className="ml-0.5 sm:ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+                          <ChevronRight className="ml-0.5 h-3 w-3" />
                         </Button>
                       </div>
                     </div>
