@@ -51,7 +51,6 @@ export function HeroSection() {
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed px-4">
             <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence</span>
             <br/>
-            <span className="text-purple-400 font-semibold mt-2 inline-block">Powered by OpenAI, Base Network & Real-Time Analytics</span>
             <span className="text-fuchsia-400 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
           </p>
           
