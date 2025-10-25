@@ -47,9 +47,17 @@ export class RebuiltContentProcessor {
 
   constructor() {
     this.storage = new DatabaseStorage();
-    this.openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY 
-    }) : null;
+    
+    // Enhanced API key validation with detailed logging
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      console.error('❌ CRITICAL: OPENAI_API_KEY environment variable is not set!');
+      console.error('📍 Check your .env file or environment configuration');
+      this.openai = null;
+    } else {
+      console.log('✅ OpenAI API key detected (length:', apiKey.length, 'characters)');
+      this.openai = new OpenAI({ apiKey });
+    }
   }
 
   static getInstance(): RebuiltContentProcessor {
@@ -63,9 +71,13 @@ export class RebuiltContentProcessor {
     useTranscription?: boolean;
   }): Promise<{ summaryId: string }> {
     console.log(`🔄 Starting REBUILT processing for URL: ${url}`, options);
+    console.log(`👤 User ID: ${userId || 'anonymous'}`);
+    console.log(`🔑 OpenAI instance: ${this.openai ? 'CONFIGURED ✓' : 'NOT CONFIGURED ✗'}`);
     
     if (!this.openai) {
-      throw new Error('OpenAI API key not configured');
+      const errorMsg = 'OpenAI API key not configured. Server admin must set OPENAI_API_KEY environment variable.';
+      console.error(`❌ ${errorMsg}`);
+      throw new Error(errorMsg);
     }
 
     // Create initial summary record
@@ -81,7 +93,14 @@ export class RebuiltContentProcessor {
 
     // Start async processing
     this.performAsyncProcessing(url, summary.id, options).catch(error => {
-      console.error(`❌ REBUILT processing failed for ${summary.id}:`, error);
+      console.error(`\n❌ ========== PROCESSING FAILED FOR ${summary.id} ==========`);
+      console.error(`📍 URL: ${url}`);
+      console.error(`⚠️  Error Type: ${error.constructor.name}`);
+      console.error(`💬 Error Message: ${error.message}`);
+      console.error(`📚 Error Stack:`);
+      console.error(error.stack || 'No stack trace available');
+      console.error(`========================================\n`);
+      
       this.storage.updateSummary(summary.id, {
         processingStatus: 'failed',
         summary: `Processing failed: ${error.message}`,
@@ -218,7 +237,14 @@ export class RebuiltContentProcessor {
       console.log(`✅ REBUILT processing completed for ${summaryId} with ${suggestedMarkets.length} prediction markets`)
       
     } catch (error: any) {
-      console.error(`❌ REBUILT processing error for ${summaryId}:`, error);
+      console.error(`\n❌ ========== ASYNC PROCESSING ERROR FOR ${summaryId} ==========`);
+      console.error(`⚠️  Error Type: ${error.constructor.name}`);
+      console.error(`💬 Error Message: ${error.message}`);
+      console.error(`📚 Full Error:`, error);
+      console.error(`🔍 Stack Trace:`);
+      console.error(error.stack || 'No stack trace available');
+      console.error(`========================================\n`);
+      
       await this.storage.updateSummary(summaryId, {
         processingStatus: 'failed',
         summary: `Analysis failed: ${error.message}`,
