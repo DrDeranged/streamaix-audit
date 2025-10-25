@@ -284,19 +284,6 @@ export function Navigation() {
               )}
             </div>
             
-            {/* TEMPORARY: Tour Test Button */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.dispatchEvent(new Event('triggerOnboardingTour'))}
-                className="bg-amber-500/20 border-amber-500/50 hover:bg-amber-500/30 hover:border-amber-500/70 text-amber-400 hover:text-amber-300 transition-all duration-300 text-xs font-semibold"
-                data-testid="button-tour-test"
-              >
-                Tour
-              </Button>
-            </motion.div>
-
             {/* Theme Toggle with Enhanced Styling */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
