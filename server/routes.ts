@@ -2362,13 +2362,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { url, contentType, platform, title, isPublic, tags } = validation.data as any;
 
     try {
-      console.log(`Starting AI content analysis for URL: ${url}`);
+      console.log(`\n🎬 ========== NEW PROCESSING REQUEST ==========`);
+      console.log(`📍 URL: ${url}`);
+      console.log(`👤 User: ${req.user!.username} (ID: ${req.user!.id})`);
+      console.log(`🔧 Options:`, { contentType, platform, title, isPublic });
       
       // Use RebuiltContentProcessor for faster processing
-      console.log('🚀 Starting processing with RebuiltContentProcessor');
+      console.log('🚀 Initializing RebuiltContentProcessor...');
       const processor = RebuiltContentProcessor.getInstance();
+      
+      console.log('▶️  Starting content processing...');
       const result = await processor.processContent(url, req.user!.id);
       const summaryId = result.summaryId;
+      
+      console.log(`✅ Processing started successfully! Summary ID: ${summaryId}`);
+      console.log(`========================================\n`);
 
       res.status(201).json({
         message: 'Content processing started successfully',
@@ -2384,10 +2392,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         statusUrl: `/api/processing-result/${summaryId}`
       });
     } catch (error) {
-      console.error('Content processing failed to start:', error);
+      console.error(`\n❌ ========== ROUTE ERROR: /api/process-content ==========`);
+      console.error(`📍 URL: ${url}`);
+      console.error(`👤 User: ${req.user!.username}`);
+      console.error(`⚠️  Error Type: ${error instanceof Error ? error.constructor.name : typeof error}`);
+      console.error(`💬 Error Message: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`📚 Full Error:`, error);
+      if (error instanceof Error && error.stack) {
+        console.error(`🔍 Stack Trace:`);
+        console.error(error.stack);
+      }
+      console.error(`========================================\n`);
+      
+      // Provide detailed error to frontend
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const isConfigError = errorMessage.includes('API key') || errorMessage.includes('not configured');
+      
       res.status(500).json({ 
         error: 'Failed to start content processing',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: errorMessage,
+        type: isConfigError ? 'configuration_error' : 'processing_error',
+        suggestion: isConfigError ? 
+          'Server configuration issue. Please contact the administrator.' : 
+          'Please try again or contact support if the problem persists.'
       });
     }
   }));
