@@ -48,8 +48,8 @@ export function HeroSection() {
             </span>
           </h1>
           
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed px-4">
-            <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence</span>
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed px-4">
+            <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, Prediction Markets, DeFi Bounties & Market Intelligence</span>
             <br/>
             <span className="text-fuchsia-400 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
           </p>
