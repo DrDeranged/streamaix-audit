@@ -5926,14 +5926,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test real processing endpoint
   app.post('/api/analyze-content', asyncHandler(async (req: Request, res: Response) => {
+    console.log(`\n🔵 ========== ROUTE: POST /api/analyze-content ==========`);
+    
     const { url } = req.body;
+    console.log(`📥 Request body:`, JSON.stringify(req.body, null, 2));
     
     if (!url) {
+      console.error(`❌ Missing URL in request body`);
       return res.status(400).json({ error: 'URL is required for processing' });
     }
 
     try {
-      console.log(`Starting AI content analysis for URL: ${url}`);
+      console.log(`✅ URL received: ${url}`);
+      console.log(`🔐 Environment check: OPENAI_API_KEY = ${process.env.OPENAI_API_KEY ? 'SET ✓' : 'MISSING ✗'}`);
       
       // Get current user ID from session/request
       // For now, use a consistent demo user until auth is fully implemented
@@ -5947,14 +5952,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId = '22e98fd8-e107-4f6d-bc84-e99f5b4c73e9';
       }
 
-      console.log(`📝 Processing content for user: ${userId}`);
+      console.log(`👤 User ID selected: ${userId}`);
+      console.log(`🏗️  Step 1: Getting RebuiltContentProcessor instance...`);
+      
+      let processor;
+      try {
+        processor = RebuiltContentProcessor.getInstance();
+        console.log(`✅ Step 1 complete: Processor instance obtained`);
+      } catch (processorError: any) {
+        console.error(`❌ STEP 1 FAILED: Failed to get processor instance`);
+        console.error(`⚠️  Error Type: ${processorError.constructor.name}`);
+        console.error(`💬 Error Message: ${processorError.message}`);
+        console.error(`📚 Stack Trace:`);
+        console.error(processorError.stack);
+        throw processorError;
+      }
 
-      // Start real processing with RealContentProcessor
-      console.log('🚀 Starting processing with RealContentProcessor');
-      const processor = RebuiltContentProcessor.getInstance();
-      const result = await processor.processContent(url, userId);
+      console.log(`🚀 Step 2: Starting content processing...`);
+      
+      let result;
+      try {
+        result = await processor.processContent(url, userId);
+        console.log(`✅ Step 2 complete: Processing started, summary ID: ${result.summaryId}`);
+      } catch (processingError: any) {
+        console.error(`❌ STEP 2 FAILED: processContent() threw an error`);
+        console.error(`⚠️  Error Type: ${processingError.constructor.name}`);
+        console.error(`💬 Error Message: ${processingError.message}`);
+        console.error(`📚 Stack Trace:`);
+        console.error(processingError.stack);
+        throw processingError;
+      }
+      
       const summaryId = result.summaryId;
 
+      console.log(`✅ SUCCESS: Returning response to client with summaryId=${summaryId}`);
+      console.log(`========================================\n`);
+      
       res.status(201).json({
         message: 'AI content analysis started successfully',
         summaryId,
@@ -5964,11 +5997,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         debugUrl: `/api/summaries/${summaryId}`,
         instructions: 'Check the processing result endpoint for real-time updates'
       });
-    } catch (error) {
-      console.error('Real processing failed to start:', error);
+    } catch (error: any) {
+      console.error(`\n❌ ========== ROUTE ERROR: /api/analyze-content ==========`);
+      console.error(`📍 URL attempted: ${url}`);
+      console.error(`⚠️  Final Error Type: ${error.constructor?.name || typeof error}`);
+      console.error(`💬 Final Error Message: ${error.message || String(error)}`);
+      console.error(`📚 Final Stack Trace:`);
+      console.error(error.stack || 'No stack trace available');
+      console.error(`========================================\n`);
+      
       res.status(500).json({ 
         error: 'Failed to start real processing',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }));
