@@ -126,20 +126,20 @@ export function NeuralNetworkBackground() {
         const pulseSize = Math.sin(node.pulsePhase) * 0.5 + 1;
         const glowIntensity = 0.3 + node.energy * 0.7;
 
-        // Outer glow (3.5x radius for subtlety)
+        // Outer glow (3.5x radius for subtlety) - starts from edge of solid core
         const glowGradient = ctx.createRadialGradient(
-          node.x, node.y, 0,
+          node.x, node.y, node.radius * pulseSize,
           node.x, node.y, node.radius * pulseSize * 3.5
         );
         
         if (isDark) {
-          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 70%, ${glowIntensity * 0.9})`);
-          glowGradient.addColorStop(0.5, `hsla(${node.colorHue}, 100%, 60%, ${glowIntensity * 0.5})`);
-          glowGradient.addColorStop(1, `hsla(${node.colorHue}, 100%, 50%, 0)`);
+          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 65%, ${glowIntensity * 0.6})`);
+          glowGradient.addColorStop(0.5, `hsla(${node.colorHue}, 100%, 55%, ${glowIntensity * 0.3})`);
+          glowGradient.addColorStop(1, `hsla(${node.colorHue}, 100%, 45%, 0)`);
         } else {
-          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 60%, ${glowIntensity * 0.6})`);
-          glowGradient.addColorStop(0.5, `hsla(${node.colorHue}, 100%, 50%, ${glowIntensity * 0.3})`);
-          glowGradient.addColorStop(1, `hsla(${node.colorHue}, 100%, 40%, 0)`);
+          glowGradient.addColorStop(0, `hsla(${node.colorHue}, 100%, 55%, ${glowIntensity * 0.4})`);
+          glowGradient.addColorStop(0.5, `hsla(${node.colorHue}, 100%, 45%, ${glowIntensity * 0.2})`);
+          glowGradient.addColorStop(1, `hsla(${node.colorHue}, 100%, 35%, 0)`);
         }
 
         ctx.fillStyle = glowGradient;
@@ -147,18 +147,18 @@ export function NeuralNetworkBackground() {
         ctx.arc(node.x, node.y, node.radius * pulseSize * 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Core node with rich saturation
+        // SOLID core node (nearly opaque)
         ctx.fillStyle = isDark 
-          ? `hsla(${node.colorHue}, 100%, 70%, ${0.75 + glowIntensity * 0.25})`
-          : `hsla(${node.colorHue}, 100%, 55%, ${0.6 + glowIntensity * 0.2})`;
+          ? `hsla(${node.colorHue}, 100%, 65%, 0.95)`
+          : `hsla(${node.colorHue}, 100%, 50%, 0.9)`;
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius * pulseSize, 0, Math.PI * 2);
         ctx.fill();
 
-        // Subtle highlight
+        // Bright solid highlight
         ctx.fillStyle = isDark
-          ? `hsla(${node.colorHue === 195 ? 280 : 195}, 100%, 85%, ${0.5 + glowIntensity * 0.3})`
-          : `hsla(${node.colorHue === 195 ? 280 : 195}, 100%, 70%, ${0.4 + glowIntensity * 0.2})`;
+          ? `hsla(${node.colorHue === 195 ? 280 : 195}, 100%, 85%, 0.7)`
+          : `hsla(${node.colorHue === 195 ? 280 : 195}, 100%, 70%, 0.6)`;
         ctx.beginPath();
         ctx.arc(node.x - node.radius * 0.3, node.y - node.radius * 0.3, node.radius * 0.4, 0, Math.PI * 2);
         ctx.fill();
