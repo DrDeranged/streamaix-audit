@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Play, Mail, Brain, Link2, Shield, Users, Target, TrendingUp, BarChart3, FileText, LayoutDashboard, Sparkles } from "lucide-react";
+import { Play, Mail, Brain, Link2, Shield, Users, Target, TrendingUp, BarChart3, FileText, LayoutDashboard, Sparkles, Hexagon } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 
@@ -142,8 +142,8 @@ export function HeroSection() {
               <span className="text-xs sm:text-sm">Arweave</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-              <span className="text-xs sm:text-sm">Lens</span>
+              <Hexagon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+              <span className="text-xs sm:text-sm">Base</span>
             </div>
           </div>
         </motion.div>
