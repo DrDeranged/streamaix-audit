@@ -222,8 +222,12 @@ export function OnboardingTour() {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Check for ?tour=1 URL parameter for testing
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceTour = urlParams.get('tour') === '1';
+    
     const hasSeenTour = localStorage.getItem('streamaix_tour_completed');
-    if (!hasSeenTour) {
+    if (forceTour || !hasSeenTour) {
       setTimeout(() => setIsOpen(true), 1000);
     }
   }, []);
