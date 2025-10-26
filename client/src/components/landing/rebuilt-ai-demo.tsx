@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 import UserNotesModal from '@/components/UserNotesModal';
 import { EnhancedPredictionMarketCard } from '@/components/prediction/EnhancedPredictionMarketCard';
+import { DiagnosticPanel } from '@/components/DiagnosticPanel';
 import { 
   Brain, 
   Zap, 
@@ -128,6 +129,8 @@ export function AIProcessor() {
   const [processingStatus, setProcessingStatus] = useState('');
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
   const [statusTimeouts, setStatusTimeouts] = useState<NodeJS.Timeout[]>([]);
+  const [lastError, setLastError] = useState<any>(null);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const [showNotesModal, setShowNotesModal] = useState(false);
@@ -243,15 +246,42 @@ export function AIProcessor() {
     setIsProcessing(true);
     setProgress(0);
     setProcessingStatus('Starting AI analysis...');
+    setLastError(null); // Clear previous errors
     
     try {
-      const response = await apiRequest('/api/analyze-content', {
+      // Make raw fetch to capture full response details
+      const response = await fetch('/api/analyze-content', {
         method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
         body: JSON.stringify({ url: targetUrl.trim() }),
-        headers: { 'Content-Type': 'application/json' }
       });
 
-      setSummaryId(response.summaryId);
+      // Capture response headers for diagnostics
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({ error: response.statusText }));
+        const detailedError = {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+          body: errorBody,
+          url: '/api/analyze-content',
+          timestamp: new Date().toISOString(),
+        };
+        setLastError(detailedError);
+        setShowDiagnostics(true); // Auto-show diagnostics on error
+        throw new Error(errorBody.error || errorBody.message || `${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setSummaryId(data.summaryId);
       
       // Simulate progress updates
       const newProgressInterval = setInterval(() => {
@@ -277,6 +307,8 @@ export function AIProcessor() {
         variant: "default"
       });
     } catch (error: any) {
+      console.error('🔴 Processing error:', error);
+      console.error('🔴 Error details:', lastError);
       toast({
         title: "Processing Failed",
         description: error.message || "Failed to start processing",
@@ -345,8 +377,92 @@ export function AIProcessor() {
                   )}
                 </Button>
               </div>
+              
+              {/* Diagnostics Toggle */}
+              <div className="mt-4 text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDiagnostics(!showDiagnostics)}
+                  className="text-xs text-muted-foreground hover:text-purple-400"
+                  data-testid="button-toggle-diagnostics"
+                >
+                  {showDiagnostics ? '🔽 Hide' : '🔧 Show'} Production Diagnostics
+                </Button>
+              </div>
             </div>
           </div>
+
+          {/* Diagnostic Panel */}
+          <AnimatePresence>
+            {showDiagnostics && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-8"
+              >
+                <DiagnosticPanel />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Error Display */}
+          <AnimatePresence>
+            {lastError && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-6"
+              >
+                <Card className="border-red-500/50 bg-red-500/10">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                      <CardTitle className="text-red-500">Request Failed</CardTitle>
+                      <Badge variant="destructive" className="ml-auto">
+                        {lastError.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="text-xs font-semibold text-red-400">Server Response:</div>
+                      <pre className="text-xs bg-black/30 p-3 rounded overflow-x-auto">
+                        {JSON.stringify(lastError.body, null, 2)}
+                      </pre>
+                    </div>
+                    
+                    {lastError.headers['x-server-version'] && (
+                      <div className="bg-purple-500/10 p-2 rounded text-xs space-y-1">
+                        <div className="text-purple-400 font-semibold">Server Info:</div>
+                        <div className="font-mono text-[10px] space-y-0.5">
+                          <div>Version: {lastError.headers['x-server-version']}</div>
+                          <div>Build: {lastError.headers['x-server-build-time']}</div>
+                          <div>Env: {lastError.headers['x-server-node-env']}</div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="text-[10px] text-muted-foreground">
+                      Failed at: {new Date(lastError.timestamp).toLocaleString()}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDiagnostics(true)}
+                      className="w-full text-xs"
+                      data-testid="button-show-diagnostics-from-error"
+                    >
+                      Open Full Diagnostics Panel
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Processing Status */}
           <AnimatePresence>
