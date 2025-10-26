@@ -5943,6 +5943,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   console.log('✅ Health check endpoint registered');
   
+  // CRITICAL: Diagnostic probe endpoint - NO asyncHandler wrapper
+  // This endpoint's unique name proves which code version is running
+  console.log('📍 Registering diagnostic-probe-v2 endpoint: GET /api/diagnostic-probe-v2');
+  app.get('/api/diagnostic-probe-v2', (req: Request, res: Response) => {
+    console.log('🔍 DIAGNOSTIC PROBE V2 HIT!');
+    const buildInfo = {
+      success: true,
+      probeVersion: 'v2.0.0',
+      serverVersion: res.getHeader('X-Server-Version'),
+      buildTime: res.getHeader('X-Server-Build-Time'),
+      nodeEnv: process.env.NODE_ENV || 'unknown',
+      nodeVersion: process.version,
+      timestamp: new Date().toISOString(),
+      platform: process.platform,
+      uptime: process.uptime(),
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      openAIKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+      routesThatExist: [
+        '/api/health',
+        '/api/diagnostic-probe-v2',
+        '/api/test-post-simple',
+        '/api/test-post-echo',
+        '/api/analyze-content'
+      ]
+    };
+    res.status(200).json(buildInfo);
+  });
+  console.log('✅ Diagnostic probe V2 registered');
+  
+  // CRITICAL: Simple POST test - NO asyncHandler, NO dependencies
+  console.log('📍 Registering test-post-simple endpoint: POST /api/test-post-simple');
+  app.post('/api/test-post-simple', (req: Request, res: Response) => {
+    console.log('✅ SIMPLE POST TEST HIT!');
+    res.status(200).json({
+      success: true,
+      message: 'Simple POST endpoint working',
+      timestamp: new Date().toISOString(),
+      receivedBody: !!req.body,
+      bodyKeys: Object.keys(req.body || {})
+    });
+  });
+  console.log('✅ Simple POST test registered');
+  
+  // CRITICAL: Echo POST test - Returns exactly what it receives
+  console.log('📍 Registering test-post-echo endpoint: POST /api/test-post-echo');
+  app.post('/api/test-post-echo', (req: Request, res: Response) => {
+    console.log('✅ ECHO POST TEST HIT with body:', req.body);
+    res.status(200).json({
+      success: true,
+      message: 'Echo endpoint working',
+      timestamp: new Date().toISOString(),
+      youSent: req.body,
+      contentType: req.get('content-type'),
+      method: req.method
+    });
+  });
+  console.log('✅ Echo POST test registered');
+  
   // =============================================================================
   // REAL PROCESSING ENDPOINTS
   // =============================================================================

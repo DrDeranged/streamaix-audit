@@ -3,6 +3,17 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// CRITICAL: Server version middleware - adds headers visible in browser DevTools
+const SERVER_BUILD_TIME = new Date().toISOString();
+const SERVER_VERSION = `v${Date.now()}`; // Unique build identifier
+app.use((req, res, next) => {
+  res.setHeader('X-Server-Version', SERVER_VERSION);
+  res.setHeader('X-Server-Build-Time', SERVER_BUILD_TIME);
+  res.setHeader('X-Server-Node-Env', process.env.NODE_ENV || 'unknown');
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
