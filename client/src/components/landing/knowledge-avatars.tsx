@@ -554,7 +554,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   }
 
   return (
-    <section id="profiles" className="py-20 bg-transparent relative overflow-hidden">
+    <section id="profiles" className="py-20 bg-transparent relative overflow-visible">
       
       <div className="container mx-auto px-6 relative">
         <motion.div 
@@ -613,14 +613,14 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           
           {/* Enhanced Mobile Touch-Friendly Carousel Content */}
           <div 
-            className="overflow-hidden relative"
+            className="overflow-visible relative"
             onTouchStart={isMobile ? onTouchStart : undefined}
             onTouchMove={isMobile ? onTouchMove : undefined}
             onTouchEnd={isMobile ? onTouchEnd : undefined}
             style={{
               touchAction: isMobile ? 'pan-x' : 'auto',
               padding: isMobile ? '0 1rem' : '0 3rem',
-              minHeight: '660px'
+              minHeight: '700px'
             }}
           >
             {/* Enhanced Mobile Swipe Indicators */}
