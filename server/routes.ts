@@ -6025,15 +6025,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get current user ID from authenticated session
       // @ts-ignore - req.user is added by Passport.js authentication middleware
       const authenticatedUser = req.user;
-      const userId = authenticatedUser?.id || null; // Use authenticated user ID or null for guests
+      let userId = authenticatedUser?.id || null;
       
+      // CRITICAL FIX: Verify user exists in database before using their ID
+      // This prevents foreign key constraint violations from session/DB mismatches
       if (userId) {
-        console.log(`👤 Authenticated user: ${userId} (${authenticatedUser.username})`);
+        console.log(`👤 Session has authenticated user: ${userId} (${authenticatedUser.username})`);
+        console.log(`🔍 Verifying user exists in production database...`);
+        
+        try {
+          const userExists = await storage.getUser(userId);
+          
+          if (userExists) {
+            console.log(`✅ User verified in database: ${userId}`);
+          } else {
+            console.warn(`⚠️  SESSION/DATABASE MISMATCH DETECTED!`);
+            console.warn(`📝 User ${userId} has valid session but NO database record`);
+            console.warn(`🔧 Treating as guest user (creator_id = null) to avoid FK constraint error`);
+            console.warn(`💡 This usually means: Session from dev, user creation failed, or DB not synced`);
+            userId = null; // Treat as guest to avoid foreign key violation
+          }
+        } catch (dbError: any) {
+          console.error(`❌ Database verification failed for user ${userId}`);
+          console.error(`💬 Error: ${dbError.message}`);
+          console.warn(`🔧 Treating as guest user (creator_id = null) to avoid errors`);
+          userId = null; // Treat as guest on DB error
+        }
       } else {
         console.log(`👤 Guest user (no authentication) - will save with creator_id = null`);
       }
 
-      console.log(`👤 User ID for processing: ${userId}`);
+      console.log(`👤 Final user ID for processing: ${userId}`);
       console.log(`🏗️  Step 1: Getting RebuiltContentProcessor instance...`);
       
       let processor;
