@@ -13,7 +13,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 import UserNotesModal from '@/components/UserNotesModal';
 import { EnhancedPredictionMarketCard } from '@/components/prediction/EnhancedPredictionMarketCard';
-import { DiagnosticPanel } from '@/components/DiagnosticPanel';
 import { 
   Brain, 
   Zap, 
@@ -130,7 +129,6 @@ export function AIProcessor() {
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
   const [statusTimeouts, setStatusTimeouts] = useState<NodeJS.Timeout[]>([]);
   const [lastError, setLastError] = useState<any>(null);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const [showNotesModal, setShowNotesModal] = useState(false);
@@ -377,35 +375,8 @@ export function AIProcessor() {
                   )}
                 </Button>
               </div>
-              
-              {/* Diagnostics Toggle */}
-              <div className="mt-4 text-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowDiagnostics(!showDiagnostics)}
-                  className="text-xs text-muted-foreground hover:text-purple-400"
-                  data-testid="button-toggle-diagnostics"
-                >
-                  {showDiagnostics ? '🔽 Hide' : '🔧 Show'} Production Diagnostics
-                </Button>
-              </div>
             </div>
           </div>
-
-          {/* Diagnostic Panel */}
-          <AnimatePresence>
-            {showDiagnostics && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-8"
-              >
-                <DiagnosticPanel />
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Error Display */}
           <AnimatePresence>
