@@ -6022,19 +6022,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ URL received: ${url}`);
       console.log(`🔐 Environment check: OPENAI_API_KEY = ${process.env.OPENAI_API_KEY ? 'SET ✓' : 'MISSING ✗'}`);
       
-      // Get current user ID from session/request
-      // For now, use a consistent demo user until auth is fully implemented
-      let userId = 'b57e2c1e-c053-4bff-8bff-d3cee93a3f0a'; // Default demo user
+      // Get current user ID from authenticated session
+      // @ts-ignore - req.user is added by Passport.js authentication middleware
+      const authenticatedUser = req.user;
+      const userId = authenticatedUser?.id || null; // Use authenticated user ID or null for guests
       
-      // Try to get actual user from query param or use the main demo user we see in logs
-      if (req.query.userId) {
-        userId = req.query.userId as string;
+      if (userId) {
+        console.log(`👤 Authenticated user: ${userId} (${authenticatedUser.username})`);
       } else {
-        // Use the actual user ID we see in the dashboard logs
-        userId = '22e98fd8-e107-4f6d-bc84-e99f5b4c73e9';
+        console.log(`👤 Guest user (no authentication) - will save with creator_id = null`);
       }
 
-      console.log(`👤 User ID selected: ${userId}`);
+      console.log(`👤 User ID for processing: ${userId}`);
       console.log(`🏗️  Step 1: Getting RebuiltContentProcessor instance...`);
       
       let processor;
