@@ -6087,11 +6087,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error(error.stack || 'No stack trace available');
       console.error(`========================================\n`);
       
-      res.status(500).json({ 
-        error: 'Failed to start real processing',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      });
+      // Detect foreign key constraint violations
+      const isForeignKeyError = error.message?.includes('foreign key constraint') || 
+                                error.message?.includes('violates foreign key') ||
+                                error.code === '23503'; // PostgreSQL FK violation code
+      
+      if (isForeignKeyError) {
+        console.error(`🔴 FOREIGN KEY VIOLATION DETECTED`);
+        console.error(`📝 This usually means the user ID doesn't exist in the database`);
+        console.error(`👤 Attempted user ID: ${userId}`);
+        
+        res.status(500).json({ 
+          error: 'Failed to start real processing',
+          details: 'Database constraint violation - user account may not exist in production database',
+          hint: 'This is likely a deployment/migration issue. Check that user accounts are synced.',
+          technicalDetails: error.message,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+      } else {
+        res.status(500).json({ 
+          error: 'Failed to start real processing',
+          details: error instanceof Error ? error.message : 'Unknown error',
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+      }
     }
   }));
   console.log('✅ Analyze-content endpoint registered successfully');
