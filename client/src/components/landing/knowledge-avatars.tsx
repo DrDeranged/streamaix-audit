@@ -251,6 +251,16 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
 
   const avatars = avatarsResponse?.avatars || [];
   
+  // Debug logging
+  useEffect(() => {
+    console.log('🎭 KnowledgeAvatars Debug:', {
+      isLoading,
+      avatarsResponse,
+      avatarsCount: avatars.length,
+      firstAvatar: avatars[0]
+    });
+  }, [isLoading, avatarsResponse, avatars]);
+  
   // Enhanced responsive design: mobile (1), tablet (2-3), desktop (4)
   const getItemsPerView = () => {
     if (typeof window === 'undefined') return 4;

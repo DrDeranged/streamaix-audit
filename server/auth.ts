@@ -161,22 +161,36 @@ export class AuthService {
           });
         } else {
           // Create new user from Twitter profile
-          const newUser = await storage.createUser({
-            username: twitterProfile.username,
-            twitterId: twitterProfile.id,
-            twitterUsername: twitterProfile.username,
-            twitterDisplayName: twitterProfile.displayName,
-            twitterVerified: twitterProfile.verified || false,
-            email: twitterProfile.emails?.[0]?.value,
-            avatar: twitterProfile.photos?.[0]?.value,
-            authProvider: 'twitter',
-          });
-          user = newUser;
+          console.log(`🆕 Creating new Twitter user: ${twitterProfile.username} (Twitter ID: ${twitterProfile.id})`);
+          console.log(`📧 Twitter email: ${twitterProfile.emails?.[0]?.value || 'No email'}`);
+          
+          try {
+            const newUser = await storage.createUser({
+              username: twitterProfile.username,
+              twitterId: twitterProfile.id,
+              twitterUsername: twitterProfile.username,
+              twitterDisplayName: twitterProfile.displayName,
+              twitterVerified: twitterProfile.verified || false,
+              email: twitterProfile.emails?.[0]?.value,
+              avatar: twitterProfile.photos?.[0]?.value,
+              authProvider: 'twitter',
+            });
+            console.log(`✅ Successfully created Twitter user in database! User ID: ${newUser.id}`);
+            user = newUser;
+          } catch (createError: any) {
+            console.error(`❌ Failed to create Twitter user in database!`);
+            console.error(`💬 Error message: ${createError.message}`);
+            console.error(`📚 Error stack:`, createError.stack);
+            throw createError;
+          }
         }
 
+        console.log(`✅ Twitter OAuth successful for user: ${user.id} (${user.username})`);
         return done(null, user);
-      } catch (error) {
-        console.error('Twitter OAuth error:', error);
+      } catch (error: any) {
+        console.error('❌ Twitter OAuth error:', error);
+        console.error(`💬 Error type: ${error.constructor?.name}`);
+        console.error(`📝 Error details:`, error);
         return done(error, null);
       }
     }));
