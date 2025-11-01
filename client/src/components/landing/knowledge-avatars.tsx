@@ -611,64 +611,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             </>
           )}
           
-          {/* Enhanced Mobile Touch-Friendly Carousel Content */}
-          <div 
-            className="overflow-visible relative"
-            onTouchStart={isMobile ? onTouchStart : undefined}
-            onTouchMove={isMobile ? onTouchMove : undefined}
-            onTouchEnd={isMobile ? onTouchEnd : undefined}
-            style={{
-              touchAction: isMobile ? 'pan-x' : 'auto',
-              padding: isMobile ? '0 1rem' : '0 3rem',
-              minHeight: '700px'
-            }}
-          >
-            {/* Enhanced Mobile Swipe Indicators */}
-            {isMobile && avatars.length > 1 && (
-              <div className="flex justify-center items-center space-x-3 mb-6">
-                {avatars.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentIndex(index)}
-                    className={`transition-all duration-300 hover:scale-110 ${
-                      index === currentIndex 
-                        ? 'w-6 h-2 bg-primary rounded-full shadow-lg shadow-primary/30' 
-                        : 'w-2 h-2 bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50'
-                    }`}
-                    data-testid={`carousel-indicator-${index}`}
-                  />
-                ))}
-                {/* Swipe Hint Animation */}
-                {isSwipeActive && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-8">
-                    <div className={`text-xs text-muted-foreground flex items-center gap-1 transition-all duration-200 ${
-                      swipeDirection === 'left' ? 'animate-pulse text-primary' : 
-                      swipeDirection === 'right' ? 'animate-pulse text-primary' : ''
-                    }`}>
-                      {swipeDirection === 'left' && '← Next'}
-                      {swipeDirection === 'right' && 'Previous →'}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            <motion.div
-              className="flex"
-              style={{
-                gap: isMobile ? '0' : '1.5rem',
-                pointerEvents: 'auto'
-              }}
-              animate={{
-                x: isMobile 
-                  ? `${-currentIndex * 100}%`
-                  : `calc(-${(currentIndex * 100) / itemsPerView}% - ${currentIndex * 1.5}rem)`,
-                scale: 1,
-              }}
-              transition={{ 
-                duration: 0.5,
-                ease: [0.4, 0, 0.2, 1]
-              }}
-            >
+          {/* Temporary Simple Grid Layout for Testing */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
               {avatars.map((avatar, index) => {
                 // Use real database values instead of hardcoded data
                 const portfolioRoi = avatar.portfolioRoi ?? 0;
@@ -682,18 +626,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 const influenceScore = avatar.influenceScore || socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 
                 return (
-                  <motion.div
-                    key={avatar.id}
-                    className="flex-none relative z-10"
-                    style={{
-                      width: isMobile ? '100%' : `calc((100% - ${1.5 * (itemsPerView - 1)}rem) / ${itemsPerView})`,
-                      pointerEvents: 'auto',
-                      minWidth: isMobile ? '100%' : `calc((100% - ${1.5 * (itemsPerView - 1)}rem) / ${itemsPerView})`
-                    }}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
+                  <div key={avatar.id} className="relative z-10">
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
@@ -1300,10 +1233,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                         </div>
                       </DialogContent>
                     </Dialog>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </motion.div>
           </div>
         </div>
 
