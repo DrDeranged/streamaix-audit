@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { autoSeedDatabase } from "./auto-seed";
 
 const app = express();
 
@@ -71,6 +72,9 @@ app.use((req, res, next) => {
   console.log('========================================\n');
   
   const server = await registerRoutes(app);
+
+  // Auto-seed database if empty (runs on every deployment)
+  await autoSeedDatabase();
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
