@@ -1274,17 +1274,20 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
         </div>
 
         {/* Carousel Indicators */}
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'bg-primary w-8' : 'bg-muted-foreground/30'
-              }`}
-              data-testid={`carousel-indicator-${idx}`}
-            />
-          ))}
+        {!isMobile && (
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  idx === currentIndex ? 'bg-primary w-8' : 'bg-muted-foreground/30'
+                }`}
+                data-testid={`carousel-indicator-${idx}`}
+              />
+            ))}
+          </div>
+        )}
         </div>
 
         {/* Action Buttons for Selected Entrepreneurs */}
