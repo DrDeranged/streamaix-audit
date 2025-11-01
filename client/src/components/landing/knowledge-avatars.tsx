@@ -611,8 +611,36 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             </>
           )}
           
-          {/* Temporary Simple Grid Layout for Testing */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
+          {/* Working Carousel with Overflow Hidden */}
+          <div className="overflow-hidden px-4 md:px-12">
+            {/* Mobile Indicators */}
+            {isMobile && avatars.length > 1 && (
+              <div className="flex justify-center gap-2 mb-6">
+                {avatars.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`transition-all duration-300 rounded-full ${
+                      idx === currentIndex 
+                        ? 'w-8 h-2 bg-primary' 
+                        : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                    }`}
+                    data-testid={`carousel-indicator-${idx}`}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Carousel Track */}
+            <div 
+              className="flex transition-transform duration-500 ease-out gap-6"
+              style={{
+                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`
+              }}
+              onTouchStart={isMobile ? onTouchStart : undefined}
+              onTouchMove={isMobile ? onTouchMove : undefined}
+              onTouchEnd={isMobile ? onTouchEnd : undefined}
+            >
               {avatars.map((avatar, index) => {
                 // Use real database values instead of hardcoded data
                 const portfolioRoi = avatar.portfolioRoi ?? 0;
@@ -626,7 +654,13 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 const influenceScore = avatar.influenceScore || socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 
                 return (
-                  <div key={avatar.id} className="relative z-10">
+                  <div 
+                    key={avatar.id} 
+                    className="flex-shrink-0 relative z-10"
+                    style={{
+                      width: isMobile ? '100%' : `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 1.5}rem / ${itemsPerView})`
+                    }}
+                  >
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
