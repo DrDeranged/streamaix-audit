@@ -951,15 +951,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 <FollowButton
                                   avatarId={avatar.id}
                                   avatarName={avatar.name}
-                                  className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white px-4 sm:px-6 text-sm sm:text-base flex-1 sm:flex-none`}
+                                  className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white px-4 sm:px-6 text-sm sm:text-base w-full`}
                                 />
-                                <Link href={`/avatar/${avatar.handle}`} className="flex-1 sm:flex-none">
-                                  <Button variant="outline" className="px-3 sm:px-6 text-sm sm:text-base w-full" data-testid={`button-profile-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                                    <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                                    <span className="hidden sm:inline">Full Profile</span>
-                                    <span className="sm:hidden">Profile</span>
-                                  </Button>
-                                </Link>
                               </div>
                             </div>
                             
