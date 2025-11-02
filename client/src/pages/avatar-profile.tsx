@@ -505,57 +505,57 @@ export default function AvatarProfile() {
       {/* Header Section */}
       <div className="relative">
         {/* Banner */}
-        <div className="h-64 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 relative overflow-hidden">
+        <div className="h-40 sm:h-48 md:h-64 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
-          <Link href="/" className="absolute top-6 left-6 z-10">
-            <Button variant="ghost" size="sm" className="text-white border-purple-500/30 hover:bg-purple-900/20">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+          <Link href="/" className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 z-10">
+            <Button variant="ghost" size="sm" className="text-white border-purple-500/30 hover:bg-purple-900/20 h-8 text-xs sm:text-sm">
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
               Back
             </Button>
           </Link>
         </div>
 
         {/* Profile Info */}
-        <div className="container mx-auto px-6 -mt-16 relative z-10">
-          <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 mb-8">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 -mt-12 sm:mt-14 md:-mt-16 relative z-10">
+          <div className="flex flex-col lg:flex-row items-start lg:items-end gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-8">
             <div className="relative">
               <img 
                 src={avatar.image_url || '/api/placeholder/128/128'} 
                 alt={`${avatar.name} avatar`}
-                className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-xl"
+                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white object-cover shadow-xl"
               />
               {avatar.verification_status === 'verified' && (
-                <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-2">
-                  <CheckCircle2 className="h-4 w-4 text-white" />
+                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-blue-500 rounded-full p-1 sm:p-1.5 md:p-2">
+                  <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" />
                 </div>
               )}
             </div>
 
-            <div className="flex-1 text-white">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex-1 text-white w-full">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 md:gap-4">
                 <div>
-                  <h1 className="text-4xl font-bold mb-2">{avatar.name}</h1>
-                  <p className="text-xl text-white/80 mb-2">{avatar.handle}</p>
-                  <p className="text-lg text-white/70">{avatar.expertise}</p>
-                  <p className="text-white/80 mt-3 max-w-2xl">{avatar.bio}</p>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1 md:mb-2">{avatar.name}</h1>
+                  <p className="text-sm sm:text-base md:text-xl text-white/80 mb-1 md:mb-2">{avatar.handle}</p>
+                  <p className="text-xs sm:text-sm md:text-lg text-white/70">{avatar.expertise}</p>
+                  <p className="text-xs sm:text-sm md:text-base text-white/80 mt-2 md:mt-3 max-w-2xl line-clamp-2 md:line-clamp-none">{avatar.bio}</p>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row lg:flex-row gap-2 md:gap-4">
                   {/* Social Links */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     {avatar.twitter_handle && (
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
-                        <Twitter className="h-4 w-4" />
+                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
+                        <Twitter className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
                     {avatar.linkedin_url && (
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
-                        <Linkedin className="h-4 w-4" />
+                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
+                        <Linkedin className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
                     {avatar.website_url && (
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
-                        <Globe className="h-4 w-4" />
+                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
+                        <Globe className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
                   </div>
@@ -565,15 +565,16 @@ export default function AvatarProfile() {
                     <Button
                       onClick={() => followMutation.mutate()}
                       disabled={followMutation.isPending}
+                      size="sm"
                       className={`${
                         isFollowing 
                           ? 'bg-purple-900/20 text-white border-purple-500/30' 
                           : 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
-                      } hover:opacity-90`}
+                      } hover:opacity-90 text-xs sm:text-sm h-8`}
                       data-testid="button-follow-avatar"
                     >
-                      <User className="h-4 w-4 mr-2" />
-                      {isFollowing ? 'Following' : 'Follow Trail'}
+                      <User className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
+                      {isFollowing ? 'Following' : 'Follow'}
                     </Button>
                     
                     {isFollowing && (
@@ -581,10 +582,10 @@ export default function AvatarProfile() {
                         variant="outline"
                         size="sm"
                         onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                        className="border-purple-500/30 text-white hover:bg-purple-900/20"
+                        className="border-purple-500/30 text-white hover:bg-purple-900/20 h-8 w-8 p-0"
                         data-testid="button-notifications-toggle"
                       >
-                        {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                        {notificationsEnabled ? <Bell className="h-3 w-3 md:h-4 md:w-4" /> : <BellOff className="h-3 w-3 md:h-4 md:w-4" />}
                       </Button>
                     )}
                   </div>
@@ -592,22 +593,22 @@ export default function AvatarProfile() {
               </div>
 
               {/* Stats */}
-              <div className="flex gap-8 mt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{avatar.follower_count.toLocaleString()}</div>
-                  <div className="text-sm text-white/60">Followers</div>
+              <div className="flex gap-3 sm:gap-5 md:gap-8 mt-3 md:mt-6 overflow-x-auto pb-2">
+                <div className="text-center min-w-[60px]">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.follower_count.toLocaleString()}</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Followers</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{avatar.keyMetrics?.contentCount || 150}</div>
-                  <div className="text-sm text-white/60">Content</div>
+                <div className="text-center min-w-[60px]">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.keyMetrics?.contentCount || 150}</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Content</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{avatar.keyMetrics?.credibilityScore || 95}%</div>
-                  <div className="text-sm text-white/60">Credibility</div>
+                <div className="text-center min-w-[60px]">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.keyMetrics?.credibilityScore || 95}%</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Credibility</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{avatar.keyMetrics?.engagementRate?.toFixed(1) || '4.2'}%</div>
-                  <div className="text-sm text-white/60">Engagement</div>
+                <div className="text-center min-w-[60px]">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.keyMetrics?.engagementRate?.toFixed(1) || '4.2'}%</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Engagement</div>
                 </div>
               </div>
             </div>
@@ -616,34 +617,36 @@ export default function AvatarProfile() {
       </div>
 
       {/* Content Tabs */}
-      <div className="container mx-auto px-6 pb-20">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 pb-12 md:pb-20">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-8 bg-white/5 border-white/10">
-            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/10 text-sm">Overview</TabsTrigger>
-            <TabsTrigger value="investments" className="text-white data-[state=active]:bg-white/10 text-sm">Investments</TabsTrigger>
-            <TabsTrigger value="companies" className="text-white data-[state=active]:bg-white/10 text-sm">Companies</TabsTrigger>
-            <TabsTrigger value="podcasts" className="text-white data-[state=active]:bg-white/10 text-sm">Podcasts</TabsTrigger>
-            <TabsTrigger value="content" className="text-white data-[state=active]:bg-white/10 text-sm">Content</TabsTrigger>
-            <TabsTrigger value="routines" className="text-white data-[state=active]:bg-white/10 text-sm">Routines</TabsTrigger>
-            <TabsTrigger value="ai-insights" className="text-white data-[state=active]:bg-white/10 text-sm">AI Insights</TabsTrigger>
-            <TabsTrigger value="network" className="text-white data-[state=active]:bg-white/10 text-sm">Network</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 mb-4 md:mb-8">
+            <TabsList className="grid w-full min-w-[600px] md:min-w-0 grid-cols-8 bg-white/5 border-white/10">
+              <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Overview</TabsTrigger>
+              <TabsTrigger value="investments" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Invest</TabsTrigger>
+              <TabsTrigger value="companies" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Co's</TabsTrigger>
+              <TabsTrigger value="podcasts" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Pods</TabsTrigger>
+              <TabsTrigger value="content" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Content</TabsTrigger>
+              <TabsTrigger value="routines" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Routine</TabsTrigger>
+              <TabsTrigger value="ai-insights" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">AI</TabsTrigger>
+              <TabsTrigger value="network" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Network</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid lg:grid-cols-3 gap-6">
+          <TabsContent value="overview" className="space-y-4 md:space-y-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {/* Primary Focus */}
               <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Target className="h-5 w-5" />
+                <CardHeader className="pb-3 md:pb-6">
+                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                    <Target className="h-4 w-4 md:h-5 md:w-5" />
                     Primary Focus
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {avatar.primary_interests?.map((focus: string, index: number) => (
-                      <Badge key={index} variant="outline" className="border-purple-400/30 text-purple-300">
+                      <Badge key={index} variant="outline" className="border-purple-400/30 text-purple-300 text-[10px] md:text-xs px-2 py-0.5">
                         {focus}
                       </Badge>
                     ))}
@@ -653,16 +656,16 @@ export default function AvatarProfile() {
 
               {/* Expertise */}
               <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Award className="h-5 w-5" />
+                <CardHeader className="pb-3 md:pb-6">
+                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                    <Award className="h-4 w-4 md:h-5 md:w-5" />
                     Expertise
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {[avatar.expertise].map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline" className="border-blue-400/30 text-blue-300">
+                      <Badge key={index} variant="outline" className="border-blue-400/30 text-blue-300 text-[10px] md:text-xs px-2 py-0.5">
                         {skill}
                       </Badge>
                     ))}
@@ -671,23 +674,23 @@ export default function AvatarProfile() {
               </Card>
 
               {/* Investment Performance */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
+              <Card className="bg-white/5 border-white/10 backdrop-blur-sm sm:col-span-2 lg:col-span-1">
+                <CardHeader className="pb-3 md:pb-6">
+                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                    <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
                     Performance
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
+                <CardContent className="space-y-2 md:space-y-3 pt-0">
+                  <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-300">Total Return</span>
                     <span className="text-green-400 font-bold">{avatar.investmentReturns.totalReturn}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-300">Annual Return</span>
                     <span className="text-green-400 font-bold">{avatar.investmentReturns.annualizedReturn}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-300">Portfolio Value</span>
                     <span className="text-white font-bold">{avatar.investmentReturns.portfolioValue}</span>
                   </div>
@@ -698,29 +701,29 @@ export default function AvatarProfile() {
             {/* Highlighted Insights */}
             {highlightedInsights.length > 0 && (
               <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
+                <CardHeader className="pb-3 md:pb-6">
+                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                    <Zap className="h-4 w-4 md:h-5 md:w-5" />
                     Featured Insights
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid lg:grid-cols-3 gap-4">
+                <CardContent className="pt-0">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {highlightedInsights.map((insight) => (
                       <motion.div
                         key={insight.id}
-                        className="p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20"
+                        className="p-3 md:p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`insight-${insight.id}`}
                       >
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="text-xs border-purple-400/30 text-purple-300">
+                        <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                          <Badge variant="outline" className="text-[10px] md:text-xs border-purple-400/30 text-purple-300 px-1.5 py-0.5">
                             {insight.category}
                           </Badge>
-                          <span className="text-xs text-gray-400">{insight.confidence}% confidence</span>
+                          <span className="text-[10px] md:text-xs text-gray-400">{insight.confidence}% confidence</span>
                         </div>
-                        <h4 className="text-white font-semibold mb-2">{insight.title}</h4>
-                        <p className="text-gray-300 text-sm line-clamp-3">{insight.content}</p>
+                        <h4 className="text-white font-semibold mb-1.5 md:mb-2 text-xs md:text-sm">{insight.title}</h4>
+                        <p className="text-gray-300 text-[11px] md:text-sm line-clamp-3">{insight.content}</p>
                       </motion.div>
                     ))}
                   </div>
