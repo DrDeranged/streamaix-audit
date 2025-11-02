@@ -895,8 +895,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       </DialogTrigger>
                       
                       {/* Enhanced Popup Modal Content */}
-                      <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
-                        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                      <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl h-[90vh] max-h-[90vh] overflow-hidden bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl p-0">
+                        <div className="h-full overflow-y-auto overscroll-contain px-4 sm:px-6 py-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+                          <div className="space-y-4 sm:space-y-6 md:space-y-8">
                           {/* Premium Header */}
                           <div className="relative">
                             <div className={`h-24 sm:h-32 md:h-40 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-80 rounded-t-lg relative overflow-hidden`}>
@@ -1276,6 +1277,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                               </div>
                             )}
                           </div>
+                        </div>
                         </div>
                       </DialogContent>
                     </Dialog>
