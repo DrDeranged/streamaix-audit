@@ -1,4 +1,5 @@
 import { BrowserProvider, JsonRpcSigner } from 'ethers';
+import { isMobile, isInMobileWalletBrowser, openMetaMaskMobile, openCoinbaseMobile, getMobileWalletAvailability } from './mobileWallet';
 
 // Define wallet types
 export type WalletType = 'metamask' | 'walletconnect' | 'coinbase' | 'injected';
@@ -109,6 +110,12 @@ class Web3Manager {
 
   // Connect to MetaMask
   async connectMetaMask(): Promise<WalletInfo> {
+    // Mobile deep linking
+    if (isMobile() && !isInMobileWalletBrowser() && !this.isMetaMaskAvailable()) {
+      openMetaMaskMobile();
+      throw new Error('Redirecting to MetaMask mobile app...');
+    }
+    
     if (!this.isMetaMaskAvailable()) {
       throw new Error('MetaMask is not installed. Please install MetaMask to continue.');
     }
@@ -197,6 +204,12 @@ class Web3Manager {
 
   // Connect to Coinbase Wallet
   async connectCoinbaseWallet(): Promise<WalletInfo> {
+    // Mobile deep linking
+    if (isMobile() && !isInMobileWalletBrowser() && !this.isCoinbaseWalletAvailable()) {
+      openCoinbaseMobile();
+      throw new Error('Redirecting to Coinbase Wallet mobile app...');
+    }
+    
     if (!this.isCoinbaseWalletAvailable()) {
       throw new Error('Coinbase Wallet is not installed. Please install Coinbase Wallet to continue.');
     }
