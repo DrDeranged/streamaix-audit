@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet, ExternalLink, Copy, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Wallet, ExternalLink, Copy, CheckCircle, Loader2, AlertTriangle, Smartphone } from 'lucide-react';
+import { isMobile, isInMobileWalletBrowser } from '@/lib/mobileWallet';
 
 interface WalletOption {
   type: string;
@@ -119,27 +120,33 @@ export function WalletConnector({
   };
 
   const networkInfo = wallet && wallet.chainId ? getNetworkInfo(wallet.chainId) : null;
+  const mobile = isMobile();
+  const inWalletBrowser = isInMobileWalletBrowser();
 
   const walletOptions: WalletOption[] = [
     {
       type: 'metamask',
       name: 'MetaMask',
       icon: '🦊',
-      available: isMetaMaskAvailable(),
-      description: 'Connect with MetaMask wallet'
+      available: mobile ? true : isMetaMaskAvailable(), // Always available on mobile via deep link
+      description: mobile && !inWalletBrowser 
+        ? 'Open in MetaMask app'
+        : 'Connect with MetaMask wallet'
     },
     {
       type: 'coinbase',
       name: 'Coinbase Wallet',
       icon: '🔵',
-      available: isCoinbaseWalletAvailable(),
-      description: 'Connect with Coinbase Wallet'
+      available: mobile ? true : isCoinbaseWalletAvailable(), // Always available on mobile via deep link
+      description: mobile && !inWalletBrowser
+        ? 'Open in Coinbase Wallet app'
+        : 'Connect with Coinbase Wallet'
     },
     {
       type: 'walletconnect',
       name: 'WalletConnect',
       icon: '🔗',
-      available: true,
+      available: false, // Disabled for now
       description: 'Connect with any WalletConnect compatible wallet (Coming Soon)'
     }
   ];
@@ -184,10 +191,16 @@ export function WalletConnector({
         
         <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
           <CardHeader className="text-center">
-            <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-2" />
+            {mobile ? (
+              <Smartphone className="h-12 w-12 text-purple-400 mx-auto mb-2" />
+            ) : (
+              <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-2" />
+            )}
             <CardTitle className="text-gray-900 dark:text-white">Connect Your Wallet</CardTitle>
             <p className="text-gray-300 text-sm">
-              Choose your preferred wallet to access Web3 features
+              {mobile && !inWalletBrowser
+                ? 'Tap to open in your wallet app'
+                : 'Choose your preferred wallet to access Web3 features'}
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
