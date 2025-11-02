@@ -238,6 +238,140 @@ const generateInvestmentPhilosophy = (philosophies: string[] | undefined) => {
   return philosophies?.join(' ') || 'Investment philosophy focused on early-stage technology companies with strong network effects and the potential to democratize access to information and capital.';
 };
 
+const generateCompanyData = (investments: string[] | undefined, name: string) => {
+  if (!investments || investments.length === 0) return [];
+  
+  const roles = ['Founder', 'Co-founder', 'Advisor', 'Board Member', 'Angel Investor'];
+  const types: Array<'founder' | 'advisor' | 'board' | 'investor'> = ['founder', 'advisor', 'board', 'investor'];
+  
+  return investments.slice(0, 6).map((company, idx) => ({
+    name: company,
+    role: roles[idx % roles.length],
+    type: types[idx % types.length],
+    startDate: `${2015 + idx}`,
+    endDate: idx > 2 ? `${2020 + idx}` : undefined,
+    description: `${roles[idx % roles.length]} role at ${company}, contributing strategic vision and operational expertise`,
+    status: idx > 2 ? 'past' as const : 'current' as const
+  }));
+};
+
+const generatePodcastData = (name: string) => {
+  const podcasts = [
+    { title: 'The Tim Ferriss Show', host: 'Tim Ferriss', topics: ['Philosophy', 'Investing', 'Life Optimization'] },
+    { title: 'The Knowledge Project', host: 'Shane Parrish', topics: ['Decision Making', 'Mental Models', 'Wisdom'] },
+    { title: 'Invest Like the Best', host: 'Patrick O\'Shaughnessy', topics: ['Investing', 'Technology', 'Business Strategy'] },
+    { title: 'The Joe Rogan Experience', host: 'Joe Rogan', topics: ['Technology', 'Philosophy', 'Future Trends'] }
+  ];
+  
+  return podcasts.map((pod, idx) => ({
+    title: pod.title,
+    host: pod.host,
+    url: `https://podcast.example.com/${name.toLowerCase().replace(' ', '-')}-${idx}`,
+    date: `2024-${String(idx + 1).padStart(2, '0')}-15`,
+    duration: `${45 + idx * 15} minutes`,
+    topics: pod.topics,
+    keyPoints: [
+      'Shared investment philosophy and decision-making frameworks',
+      'Discussion on emerging technology trends and their implications',
+      'Personal routines and habits for long-term success'
+    ]
+  }));
+};
+
+const generateContentData = (name: string, recentThoughts?: string[]) => {
+  const contentTypes: Array<'tweet' | 'article' | 'interview' | 'book' | 'video'> = ['tweet', 'article', 'interview', 'book', 'video'];
+  const platforms = ['Twitter', 'Medium', 'Personal Blog', 'YouTube', 'Podcast'];
+  
+  const baseContent = recentThoughts || [
+    'The future of technology and its impact on society',
+    'Investment strategies for the next decade',
+    'Building sustainable and ethical businesses'
+  ];
+  
+  return baseContent.slice(0, 8).map((thought, idx) => ({
+    type: contentTypes[idx % contentTypes.length],
+    title: thought.length > 50 ? thought.substring(0, 50) + '...' : thought,
+    content: thought,
+    url: `https://content.example.com/${name.toLowerCase().replace(' ', '-')}-${idx}`,
+    date: `2024-${String((idx % 12) + 1).padStart(2, '0')}-${String((idx % 28) + 1).padStart(2, '0')}`,
+    engagement: 1000 + idx * 500,
+    platform: platforms[idx % platforms.length]
+  }));
+};
+
+const generateRoutineData = (philosophies: string[] | undefined) => ({
+  morning: [
+    'Meditation (20 minutes)',
+    'Reading philosophy or economics',
+    'Light exercise or walking',
+    'Review investment portfolio'
+  ],
+  work: [
+    'Deep focus blocks (2-3 hours)',
+    'Strategic meetings only',
+    'Investment research and analysis',
+    'Mentoring portfolio companies'
+  ],
+  evening: [
+    'Family time',
+    'Reading fiction or non-fiction',
+    'Reflection and journaling',
+    'Early bedtime (before 10 PM)'
+  ],
+  fitness: [
+    'Daily walks in nature',
+    'Bodyweight exercises',
+    'Yoga or stretching',
+    'Mental fitness through meditation'
+  ],
+  learning: [
+    'Continuous reading habit',
+    'Podcasts during commute',
+    'Conversations with experts',
+    'Twitter for real-time insights'
+  ],
+  principles: philosophies?.slice(0, 4) || []
+});
+
+const generateAIInsights = (avatar: DatabaseAvatar) => [
+  {
+    category: 'personality' as const,
+    insight: 'Demonstrates high intellectual curiosity with strong bias toward first-principles thinking. Communication style favors brevity and clarity.',
+    confidence: 92,
+    supporting_data: ['Consistent use of philosophical frameworks', 'Preference for fundamental analysis', 'Clear, concise communication patterns'],
+    last_updated: '2024-09-28'
+  },
+  {
+    category: 'investment_pattern' as const,
+    insight: 'Strong preference for early-stage technology investments with network effects. Particularly drawn to companies that democratize access to information or capital.',
+    confidence: 88,
+    supporting_data: ['Twitter, AngelList, Uber investments', 'Focus on platform businesses', 'Emphasis on network effects'],
+    last_updated: '2024-09-28'
+  },
+  {
+    category: 'communication' as const,
+    insight: 'Uses Twitter as primary platform for sharing insights. Favors philosophical and practical wisdom over technical jargon.',
+    confidence: 95,
+    supporting_data: ['High engagement on philosophical tweets', 'Regular use of aphorisms', 'Educational content focus'],
+    last_updated: '2024-09-28'
+  }
+];
+
+const generateNetworkData = (name: string) => {
+  const connections: Record<string, Array<{name: string, relationship: string, strength: 'strong' | 'medium' | 'weak', context: string, collaborations: string[]}>> = {
+    'Naval Ravikant': [
+      { name: 'Tim Ferriss', relationship: 'Close Friend & Collaborator', strength: 'strong', context: 'Podcast appearances and shared philosophy', collaborations: ['Multiple podcast episodes', 'Investment discussions'] },
+      { name: 'Balaji Srinivasan', relationship: 'Former Colleague', strength: 'strong', context: 'AngelList collaboration', collaborations: ['AngelList development', 'Crypto investments'] },
+      { name: 'Vitalik Buterin', relationship: 'Professional Respect', strength: 'medium', context: 'Blockchain and crypto discussions', collaborations: ['Crypto philosophy discussions'] }
+    ]
+  };
+  
+  return connections[name] || [
+    { name: 'Industry Leader 1', relationship: 'Collaborator', strength: 'strong', context: 'Technology innovation', collaborations: ['Joint investments'] },
+    { name: 'Industry Leader 2', relationship: 'Advisor', strength: 'medium', context: 'Strategic guidance', collaborations: ['Board positions'] }
+  ];
+};
+
 export default function AvatarProfile() {
   const { handle } = useParams<{ handle: string }>();
   const [isFollowing, setIsFollowing] = useState(false);
@@ -285,154 +419,6 @@ export default function AvatarProfile() {
       credibilityScore: 88 + Math.floor(Math.random() * 12)
     }
   } : undefined;
-
-  // Use the helper functions defined at the top level
-
-  // Function already defined at top level
-
-  const generateInvestmentMetrics = (investments: string[]) => ({
-    totalReturn: '2,400%',
-    annualizedReturn: '47%',
-    bestInvestment: investments[0] || 'Twitter',
-    portfolioValue: '$500M+',
-    successRate: '78%'
-  });
-
-  const generateInvestmentPhilosophy = (philosophies: string[]) => {
-    return philosophies.slice(0, 2).join(' ') || 'Focus on early-stage technology companies with strong network effects and defensible business models. Invest in exceptional founders building the future.';
-  };
-
-  const generateCompanyData = (investments: string[], name: string) => {
-    const roles = ['Founder', 'Co-founder', 'Advisor', 'Board Member', 'Angel Investor'];
-    const types: Array<'founder' | 'advisor' | 'board' | 'investor'> = ['founder', 'advisor', 'board', 'investor'];
-    
-    return investments.slice(0, 6).map((company, idx) => ({
-      name: company,
-      role: roles[idx % roles.length],
-      type: types[idx % types.length],
-      startDate: `${2015 + idx}`,
-      endDate: idx > 2 ? `${2020 + idx}` : undefined,
-      description: `${roles[idx % roles.length]} role at ${company}, contributing strategic vision and operational expertise`,
-      status: idx > 2 ? 'past' as const : 'current' as const
-    }));
-  };
-
-  const generatePodcastData = (name: string) => {
-    const podcasts = [
-      { title: 'The Tim Ferriss Show', host: 'Tim Ferriss', topics: ['Philosophy', 'Investing', 'Life Optimization'] },
-      { title: 'The Knowledge Project', host: 'Shane Parrish', topics: ['Decision Making', 'Mental Models', 'Wisdom'] },
-      { title: 'Invest Like the Best', host: 'Patrick O\'Shaughnessy', topics: ['Investing', 'Technology', 'Business Strategy'] },
-      { title: 'The Joe Rogan Experience', host: 'Joe Rogan', topics: ['Technology', 'Philosophy', 'Future Trends'] }
-    ];
-    
-    return podcasts.map((pod, idx) => ({
-      title: pod.title,
-      host: pod.host,
-      url: `https://podcast.example.com/${name.toLowerCase().replace(' ', '-')}-${idx}`,
-      date: `2024-${String(idx + 1).padStart(2, '0')}-15`,
-      duration: `${45 + idx * 15} minutes`,
-      topics: pod.topics,
-      keyPoints: [
-        'Shared investment philosophy and decision-making frameworks',
-        'Discussion on emerging technology trends and their implications',
-        'Personal routines and habits for long-term success'
-      ]
-    }));
-  };
-
-  const generateContentData = (name: string, recentThoughts?: string[]) => {
-    const contentTypes: Array<'tweet' | 'article' | 'interview' | 'book' | 'video'> = ['tweet', 'article', 'interview', 'book', 'video'];
-    const platforms = ['Twitter', 'Medium', 'Personal Blog', 'YouTube', 'Podcast'];
-    
-    const baseContent = recentThoughts || [
-      'The future of technology and its impact on society',
-      'Investment strategies for the next decade',
-      'Building sustainable and ethical businesses'
-    ];
-    
-    return baseContent.slice(0, 8).map((thought, idx) => ({
-      type: contentTypes[idx % contentTypes.length],
-      title: thought.length > 50 ? thought.substring(0, 50) + '...' : thought,
-      content: thought,
-      url: `https://content.example.com/${name.toLowerCase().replace(' ', '-')}-${idx}`,
-      date: `2024-${String((idx % 12) + 1).padStart(2, '0')}-${String((idx % 28) + 1).padStart(2, '0')}`,
-      engagement: 1000 + idx * 500,
-      platform: platforms[idx % platforms.length]
-    }));
-  };
-
-  const generateRoutineData = (philosophies: string[]) => ({
-    morning: [
-      'Meditation (20 minutes)',
-      'Reading philosophy or economics',
-      'Light exercise or walking',
-      'Review investment portfolio'
-    ],
-    work: [
-      'Deep focus blocks (2-3 hours)',
-      'Strategic meetings only',
-      'Investment research and analysis',
-      'Mentoring portfolio companies'
-    ],
-    evening: [
-      'Family time',
-      'Reading fiction or non-fiction',
-      'Reflection and journaling',
-      'Early bedtime (before 10 PM)'
-    ],
-    fitness: [
-      'Daily walks in nature',
-      'Bodyweight exercises',
-      'Yoga or stretching',
-      'Mental fitness through meditation'
-    ],
-    learning: [
-      'Continuous reading habit',
-      'Podcasts during commute',
-      'Conversations with experts',
-      'Twitter for real-time insights'
-    ],
-    principles: philosophies.slice(0, 4)
-  });
-
-  const generateAIInsights = (avatar: DatabaseAvatar) => [
-    {
-      category: 'personality' as const,
-      insight: 'Demonstrates high intellectual curiosity with strong bias toward first-principles thinking. Communication style favors brevity and clarity.',
-      confidence: 92,
-      supporting_data: ['Consistent use of philosophical frameworks', 'Preference for fundamental analysis', 'Clear, concise communication patterns'],
-      last_updated: '2024-09-28'
-    },
-    {
-      category: 'investment_pattern' as const,
-      insight: 'Strong preference for early-stage technology investments with network effects. Particularly drawn to companies that democratize access to information or capital.',
-      confidence: 88,
-      supporting_data: ['Twitter, AngelList, Uber investments', 'Focus on platform businesses', 'Emphasis on network effects'],
-      last_updated: '2024-09-28'
-    },
-    {
-      category: 'communication' as const,
-      insight: 'Uses Twitter as primary platform for sharing insights. Favors philosophical and practical wisdom over technical jargon.',
-      confidence: 95,
-      supporting_data: ['High engagement on philosophical tweets', 'Regular use of aphorisms', 'Educational content focus'],
-      last_updated: '2024-09-28'
-    }
-  ];
-
-  const generateNetworkData = (name: string) => {
-    const connections: Record<string, Array<{name: string, relationship: string, strength: 'strong' | 'medium' | 'weak', context: string, collaborations: string[]}>> = {
-      'Naval Ravikant': [
-        { name: 'Tim Ferriss', relationship: 'Close Friend & Collaborator', strength: 'strong', context: 'Podcast appearances and shared philosophy', collaborations: ['Multiple podcast episodes', 'Investment discussions'] },
-        { name: 'Balaji Srinivasan', relationship: 'Former Colleague', strength: 'strong', context: 'AngelList collaboration', collaborations: ['AngelList development', 'Crypto investments'] },
-        { name: 'Vitalik Buterin', relationship: 'Professional Respect', strength: 'medium', context: 'Blockchain and crypto discussions', collaborations: ['Crypto philosophy discussions'] }
-      ]
-    };
-    
-    return connections[name] || [
-      { name: 'Industry Leader 1', relationship: 'Collaborator', strength: 'strong', context: 'Technology innovation', collaborations: ['Joint investments'] },
-      { name: 'Industry Leader 2', relationship: 'Advisor', strength: 'medium', context: 'Strategic guidance', collaborations: ['Board positions'] }
-    ];
-  };
 
   // Fetch avatar insights  
   const { data: insightsData, isError: insightsError } = useQuery<{ insights: AvatarInsight[] }>({
