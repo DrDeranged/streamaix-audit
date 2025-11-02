@@ -28,6 +28,7 @@ export default function BountyBoard() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
 
   // Fetch bounties
   const { data: bountiesData, isLoading: bountiesLoading } = useQuery<{ bounties: Bounty[] }>({
@@ -140,34 +141,39 @@ export default function BountyBoard() {
               </p>
             </div>
 
-            {!isConnected ? (
-              <WalletConnector>
-                <Button
-                  size="lg"
-                  data-testid="button-create-bounty"
-                  className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Bounty
-                </Button>
-              </WalletConnector>
-            ) : (
-              <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    size="lg"
-                    data-testid="button-create-bounty"
-                    className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                  >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Create Bounty
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <CreateBountyModal onSuccess={() => setCreateModalOpen(false)} />
-                </DialogContent>
-              </Dialog>
-            )}
+            <Button
+              size="lg"
+              data-testid="button-create-bounty"
+              onClick={() => {
+                if (!isConnected) {
+                  setWalletModalOpen(true);
+                } else {
+                  setCreateModalOpen(true);
+                }
+              }}
+              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Create Bounty
+            </Button>
+
+            {/* Wallet Connection Modal */}
+            <Dialog open={walletModalOpen} onOpenChange={setWalletModalOpen}>
+              <DialogContent className="max-w-lg">
+                <WalletConnector>
+                  <p className="text-sm">
+                    Connect your wallet to create bounties
+                  </p>
+                </WalletConnector>
+              </DialogContent>
+            </Dialog>
+
+            {/* Create Bounty Modal */}
+            <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <CreateBountyModal onSuccess={() => setCreateModalOpen(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
 
           {!isConnected && (
