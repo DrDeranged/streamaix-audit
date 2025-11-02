@@ -564,10 +564,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl md:text-3xl font-orbitron font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-700 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-orbitron font-bold mb-4 md:mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-700 bg-clip-text text-transparent">
             Alpha Network
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Real-time intelligence on crypto's most influential minds. Track investments, predictions, and market impact with Bloomberg Terminal precision.
           </p>
         </motion.div>
@@ -582,7 +582,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoPrev}
-                className={`absolute -left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-lg md:rounded-xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoPrev 
                     ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer' 
                     : 'opacity-40 cursor-not-allowed'
@@ -590,7 +590,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-prev"
               >
-                <ChevronLeft className="h-7 w-7" />
+                <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
               </Button>
               
               <Button
@@ -598,7 +598,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoNext}
-                className={`absolute -right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-xl w-14 h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-lg md:rounded-xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoNext 
                     ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer' 
                     : 'opacity-40 cursor-not-allowed'
@@ -606,7 +606,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-next"
               >
-                <ChevronRight className="h-7 w-7" />
+                <ChevronRight className="h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
               </Button>
             </>
           )}
@@ -701,51 +701,51 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                           </div>
                           
-                          <CardContent className="pt-14 pb-6 px-5 space-y-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-950/50">
+                          <CardContent className="pt-14 pb-4 px-3 sm:px-4 md:px-5 space-y-3 md:space-y-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-950/50">
                             {/* Name and Handle */}
-                            <div className="space-y-2 border-b border-slate-200 dark:border-blue-500/20 pb-4 flex-shrink-0">
-                              <h3 className="text-xl font-bold text-slate-900 dark:text-blue-50 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors line-clamp-1 tracking-tight font-mono">
+                            <div className="space-y-1 md:space-y-2 border-b border-slate-200 dark:border-blue-500/20 pb-3 md:pb-4 flex-shrink-0">
+                              <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-blue-50 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors line-clamp-1 tracking-tight font-mono">
                                 {avatar.name}
                               </h3>
-                              <p className="text-sm text-slate-600 dark:text-blue-400/70 font-mono">@{avatar.handle}</p>
+                              <p className="text-xs sm:text-sm text-slate-600 dark:text-blue-400/70 font-mono">@{avatar.handle}</p>
                             </div>
                             
                             {/* Bloomberg Terminal-Style Metrics Grid */}
-                            <div className="grid grid-cols-2 gap-3 flex-shrink-0">
-                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 flex-shrink-0">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-2 sm:p-3 space-y-1 sm:space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Portfolio ROI</span>
+                                  <span className="text-[10px] sm:text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Portfolio ROI</span>
                                   <div className="flex items-center gap-1.5">
                                     {trend === 'up' ? (
-                                      <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />
+                                      <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400" />
                                     ) : (
-                                      <ArrowDownRight className="h-3.5 w-3.5 text-red-400" />
+                                      <ArrowDownRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-red-400" />
                                     )}
                                     <div className={`w-1.5 h-1.5 rounded-full ${portfolioRoi >= 0 ? 'bg-emerald-400' : 'bg-red-400'} animate-pulse`} />
                                   </div>
                                 </div>
-                                <div className={`text-xl font-bold font-mono transition-all duration-300 ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${portfolioRoi >= 0 ? '+' : ''}${portfolioRoi}% total portfolio return`}>
+                                <div className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`} title={`${portfolioRoi >= 0 ? '+' : ''}${portfolioRoi}% total portfolio return`}>
                                   {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                 </div>
                               </div>
                               
-                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-2 sm:p-3 space-y-1 sm:space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Accuracy</span>
+                                  <span className="text-[10px] sm:text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Accuracy</span>
                                   <div className={`w-1.5 h-1.5 rounded-full ${accuracyPercentage >= 80 ? 'bg-emerald-400' : accuracyPercentage >= 60 ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`} />
                                 </div>
-                                <div className={`text-xl font-bold font-mono transition-all duration-300 ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${accuracyPercentage}% accuracy on public predictions and forecasts`}>
+                                <div className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`} title={`${accuracyPercentage}% accuracy on public predictions and forecasts`}>
                                   {accuracyPercentage}%
                                 </div>
                               </div>
                               
-                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-2 sm:p-3 space-y-1 sm:space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Influence</span>
-                                  <Star className="h-3.5 w-3.5 text-cyan-400" />
+                                  <span className="text-[10px] sm:text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Influence</span>
+                                  <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-cyan-400" />
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <div className="text-xl font-bold font-mono text-cyan-400">
+                                  <div className="text-lg sm:text-xl font-bold font-mono text-cyan-400">
                                     {Math.round(influenceScore)}
                                   </div>
                                   {sentimentLoading && (
@@ -773,19 +773,19 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 )}
                               </div>
                               
-                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-3 space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
+                              <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-2 sm:p-3 space-y-1 sm:space-y-2 backdrop-blur-sm hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all duration-300">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Net Worth</span>
-                                  <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
+                                  <span className="text-[10px] sm:text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">Net Worth</span>
+                                  <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400" />
                                 </div>
-                                <div className="text-sm font-bold font-mono text-emerald-400 truncate" title={`Assets Under Management / Net Worth: ${netWorth}`}>
+                                <div className="text-xs sm:text-sm font-bold font-mono text-emerald-400 truncate" title={`Assets Under Management / Net Worth: ${netWorth}`}>
                                   {netWorth}
                                 </div>
                               </div>
                             </div>
                             
                             {/* Terminal-Style Key Metrics */}
-                            <div className="space-y-2 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-blue-500/20 rounded-lg p-3 flex-shrink-0">
+                            <div className="space-y-1.5 sm:space-y-2 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-blue-500/20 rounded-lg p-2 sm:p-3 flex-shrink-0">
                               <div className="flex items-center justify-between">
                                 <span className="text-slate-600 dark:text-blue-400/70 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider">
                                   <Users className="h-3 w-3" />
@@ -941,56 +941,56 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                             
                             {/* Bio */}
-                            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">{avatar.bio}</p>
+                            <p className="text-muted-foreground mb-4 sm:mb-6 md:mb-8 text-sm sm:text-base md:text-lg leading-relaxed">{avatar.bio}</p>
                             
                             {/* Enhanced Analytics Dashboard */}
-                            <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-6 mb-8 border border-muted/30">
-                              <h4 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                                <BarChart3 className="h-5 w-5 mr-2 text-primary" />
+                            <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-muted/30">
+                              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center">
+                                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
                                 Performance Analytics
                               </h4>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/20">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className="text-2xl font-bold text-foreground">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-blue-500/20">
+                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                                     {formatFollowerCount(avatar.followerCount)}
                                   </div>
-                                  <Users className="h-6 w-6 text-blue-500" />
+                                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
                                 </div>
-                                <div className="text-sm text-muted-foreground">Total Followers</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">Total Followers</div>
                                 <div className="text-xs text-green-500 mt-1">+12.3% this month</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-6 border border-green-500/20">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className={`text-2xl font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-green-500/20">
+                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                                  <div className={`text-lg sm:text-xl md:text-2xl font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                   </div>
-                                  <TrendingUp className="h-6 w-6 text-green-500" />
+                                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
                                 </div>
-                                <div className="text-sm text-muted-foreground">Portfolio ROI</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">Portfolio ROI</div>
                                 <div className="text-xs text-green-500 mt-1">All-time returns</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-500/20">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className="text-2xl font-bold text-foreground">
+                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-purple-500/20">
+                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                                     {accuracyPercentage}%
                                   </div>
-                                  <Target className="h-6 w-6 text-purple-500" />
+                                  <Target className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
                                 </div>
-                                <div className="text-sm text-muted-foreground">Prediction Accuracy</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">Prediction Accuracy</div>
                                 <div className="text-xs text-purple-500 mt-1">Last 100 predictions</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-6 border border-orange-500/20">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className="text-2xl font-bold text-foreground">
+                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-orange-500/20">
+                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                                  <div className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">
                                     {netWorth}
                                   </div>
-                                  <PieChart className="h-6 w-6 text-orange-500" />
+                                  <PieChart className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500" />
                                 </div>
-                                <div className="text-sm text-muted-foreground">Assets Under Management</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">Assets Under Management</div>
                                 <div className="text-xs text-orange-500 mt-1">Public portfolio value</div>
                               </div>
                             </div>
@@ -1019,12 +1019,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             
                             {/* Enhanced Investment Portfolio Section */}
                             {avatar.notableInvestments && avatar.notableInvestments.length > 0 && (
-                              <div className="bg-gradient-to-br from-card/50 to-muted/30 rounded-xl p-6 mb-8 border border-muted/30">
-                                <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                                  <Building2 className="h-5 w-5 mr-2 text-primary" />
+                              <div className="bg-gradient-to-br from-card/50 to-muted/30 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-muted/30">
+                                <h4 className="text-base sm:text-lg md:text-xl font-semibold text-foreground mb-3 sm:mb-4 flex items-center">
+                                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
                                   Investment Portfolio ({avatar.notableInvestments.length} Companies)
                                 </h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                                   {avatar.notableInvestments.slice(0, 12).map((investment, idx) => {
                                     const roi = getInvestmentROI(avatar.name, investment);
                                     const isFounder = typeof getInvestmentROI === 'function' && 
@@ -1063,15 +1063,15 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             )}
                             
                             {/* Recent Intelligence & Activity */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                               {/* Recent Thoughts */}
                               {avatar.recentThoughts && avatar.recentThoughts.length > 0 && (
                                 <div>
-                                  <h4 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                                    <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
+                                  <h4 className="text-base sm:text-lg md:text-xl font-semibold text-foreground mb-3 sm:mb-4 flex items-center">
+                                    <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-yellow-500" />
                                     Market Intelligence
                                   </h4>
-                                  <div className="space-y-4">
+                                  <div className="space-y-2 sm:space-y-3 md:space-y-4">
                                     {avatar.recentThoughts.slice(0, 3).map((thought, idx) => {
                                       // Realistic timestamps based on thought content and recency
                                       const timestamps = ['2h ago', '6h ago', '1d ago', '3d ago', '1w ago', '2w ago'];
@@ -1083,8 +1083,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                       const impactIndex = Math.abs(thought.length) % impactLevels.length;
                                       
                                       return (
-                                        <div key={idx} className="p-4 bg-muted/20 rounded-lg border-l-4 border-primary/30 hover:bg-muted/30 hover:border-primary/50 transition-all duration-300 hover:shadow-md">
-                                          <p className="text-sm text-muted-foreground italic leading-relaxed">"{thought}"</p>
+                                        <div key={idx} className="p-2 sm:p-3 md:p-4 bg-muted/20 rounded-lg border-l-4 border-primary/30 hover:bg-muted/30 hover:border-primary/50 transition-all duration-300 hover:shadow-md">
+                                          <p className="text-xs sm:text-sm text-muted-foreground italic leading-relaxed">"{thought}"</p>
                                           <div className="flex items-center justify-between mt-3">
                                             <div className="text-xs text-muted-foreground/70 font-medium">
                                               {timestamps[timestampIndex]}
