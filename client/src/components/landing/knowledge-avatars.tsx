@@ -242,6 +242,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [showPortfolioSimulator, setShowPortfolioSimulator] = useState(false);
 
   // Fetch real avatars from API
@@ -268,6 +270,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
       setItemsPerView(getItemsPerView());
+      
+      // Measure container width for accurate carousel positioning
+      if (containerRef.current) {
+        const width = containerRef.current.offsetWidth;
+        setContainerWidth(width);
+      }
     };
     
     handleResize();
@@ -612,7 +620,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           )}
           
           {/* Working Carousel with Overflow Hidden */}
-          <div className="overflow-hidden px-4 md:px-12">
+          <div className="overflow-hidden px-4 md:px-12" ref={containerRef}>
             {/* Mobile Indicators */}
             {isMobile && avatars.length > 1 && (
               <div className="flex justify-center gap-2 mb-6">
@@ -635,7 +643,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             <div 
               className="flex transition-transform duration-500 ease-out gap-6"
               style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                transform: isMobile && containerWidth > 0
+                  ? `translateX(-${currentIndex * (containerWidth)}px)`
+                  : `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
                 touchAction: 'pan-y'
               }}
               onTouchStart={isMobile ? onTouchStart : undefined}
