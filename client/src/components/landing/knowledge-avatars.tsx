@@ -635,7 +635,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             <div 
               className="flex transition-transform duration-500 ease-out gap-6"
               style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`
+                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                touchAction: 'pan-y'
               }}
               onTouchStart={isMobile ? onTouchStart : undefined}
               onTouchMove={isMobile ? onTouchMove : undefined}
@@ -663,7 +664,17 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                   >
                     <Dialog>
                       <DialogTrigger asChild>
-                        <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
+                        <div 
+                          className="w-full h-full" 
+                          style={{ pointerEvents: 'auto' }}
+                          onClick={(e) => {
+                            // Prevent dialog from opening if user is swiping
+                            if (isSwipeActive || swipeDirection) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                          }}
+                        >
                           <Card className="group cursor-pointer bg-white dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-purple-950/90 dark:to-slate-950/95 backdrop-blur-xl border-2 border-slate-200 dark:border-purple-500/30 hover:border-slate-300 dark:hover:border-purple-400/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
                           {/* Professional Terminal-Style Header */}
                           <div className="relative flex-shrink-0">
@@ -884,57 +895,58 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       </DialogTrigger>
                       
                       {/* Enhanced Popup Modal Content */}
-                      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
-                        <div className="space-y-8">
+                      <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
+                        <div className="space-y-4 sm:space-y-6 md:space-y-8">
                           {/* Premium Header */}
                           <div className="relative">
-                            <div className={`h-40 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-80 rounded-t-lg relative overflow-hidden`}>
+                            <div className={`h-24 sm:h-32 md:h-40 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-80 rounded-t-lg relative overflow-hidden`}>
                               <div className="absolute inset-0 bg-black/40" />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             </div>
-                            <div className="absolute -bottom-12 left-8">
-                              <Avatar className="w-24 h-24 ring-6 ring-card border-4 border-white/20 shadow-2xl">
+                            <div className="absolute -bottom-8 sm:-bottom-10 md:-bottom-12 left-4 sm:left-6 md:left-8">
+                              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 ring-4 sm:ring-6 ring-card border-2 sm:border-4 border-white/20 shadow-2xl">
                                 <AvatarImage 
                                   src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                   alt={`${avatar.name} avatar`}
                                 />
-                                <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                                <AvatarFallback className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                                   {avatar.name.split(' ').map(n => n[0]).join('')}
                                 </AvatarFallback>
                               </Avatar>
                               {avatar.verificationStatus === 'verified' && (
-                                <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-2">
-                                  <CheckCircle className="h-4 w-4 text-white" />
+                                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-blue-500 rounded-full p-1 sm:p-2">
+                                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                                 </div>
                               )}
                             </div>
                           </div>
                           
                           {/* Profile Header */}
-                          <div className="pt-12 px-4">
-                            <div className="flex items-start justify-between mb-8">
-                              <div className="space-y-2">
-                                <h3 className="text-3xl font-bold text-foreground">{avatar.name}</h3>
-                                <p className="text-lg text-muted-foreground">@{avatar.handle}</p>
-                                <div className="flex gap-2">
-                                  <Badge variant="secondary" className="bg-primary/10 text-primary">
+                          <div className="pt-8 sm:pt-10 md:pt-12 px-3 sm:px-4 md:px-8">
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0 mb-4 sm:mb-6 md:mb-8">
+                              <div className="space-y-1 sm:space-y-2">
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{avatar.name}</h3>
+                                <p className="text-sm sm:text-base md:text-lg text-muted-foreground">@{avatar.handle}</p>
+                                <div className="flex flex-wrap gap-2">
+                                  <Badge variant="secondary" className="bg-primary/10 text-primary text-xs sm:text-sm">
                                     {avatar.expertise}
                                   </Badge>
-                                  <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">
-                                    Influence Score: {influenceScore}
+                                  <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm">
+                                    Influence: {influenceScore}
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="flex gap-3">
+                              <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                                 <FollowButton
                                   avatarId={avatar.id}
                                   avatarName={avatar.name}
-                                  className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white px-6`}
+                                  className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white px-4 sm:px-6 text-sm sm:text-base flex-1 sm:flex-none`}
                                 />
-                                <Link href={`/avatar/${avatar.handle}`}>
-                                  <Button variant="outline" className="px-6" data-testid={`button-profile-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                                    <ExternalLink className="h-4 w-4 mr-2" />
-                                    Full Profile
+                                <Link href={`/avatar/${avatar.handle}`} className="flex-1 sm:flex-none">
+                                  <Button variant="outline" className="px-3 sm:px-6 text-sm sm:text-base w-full" data-testid={`button-profile-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                                    <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                                    <span className="hidden sm:inline">Full Profile</span>
+                                    <span className="sm:hidden">Profile</span>
                                   </Button>
                                 </Link>
                               </div>
