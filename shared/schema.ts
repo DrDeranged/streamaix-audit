@@ -4688,6 +4688,7 @@ export const aiTrades = pgTable("ai_trades", {
   streamAmount: integer("stream_amount").notNull(),
   fee: integer("fee").notNull(),
   reasoning: text("reasoning"),
+  probability: real("probability"), // AI confidence score 0-100
   createdAt: timestamp("created_at").defaultNow(),
 });
 
