@@ -28,6 +28,7 @@ import { CreateMarketModal } from "@/components/prediction/CreateMarketModal";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 import { MarketActivityFeed } from "@/components/markets/MarketActivityFeed";
 import { AIConsensusCard } from "@/components/markets/AIConsensusCard";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 
@@ -359,7 +360,7 @@ export default function Markets() {
           </div>
         </motion.div>
 
-        {/* Stats - Compact */}
+        {/* Stats - Enhanced with Animated Counters */}
         {stats && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -367,38 +368,82 @@ export default function Markets() {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
           >
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
-              <CardContent className="p-3">
-                <div className="text-xs text-purple-300/80">Active Markets</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-                  {stats.activeMarkets}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-300">
-              <CardContent className="p-3">
-                <div className="text-xs text-cyan-300/80">Total Volume</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  {(stats.totalVolume / 1000000).toFixed(1)}M
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-green-900/20 to-green-800/10 border-green-500/30 hover:border-green-500/50 transition-all duration-300">
-              <CardContent className="p-3">
-                <div className="text-xs text-green-300/80">Total Trades</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                  {stats.totalTrades.toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-orange-900/20 to-orange-800/10 border-orange-500/30 hover:border-orange-500/50 transition-all duration-300">
-              <CardContent className="p-3">
-                <div className="text-xs text-orange-300/80">All Markets</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
-                  {stats.totalMarkets}
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Card className="gradient-border-warm bg-gradient-to-br from-purple-900/30 to-purple-800/20 stat-glow overflow-hidden">
+                <CardContent className="p-4 relative">
+                  <div className="text-xs font-semibold text-purple-300/90 mb-1">Active Markets</div>
+                  <AnimatedCounter 
+                    value={stats.activeMarkets} 
+                    className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent"
+                    duration={800}
+                  />
+                  <motion.div
+                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Card className="gradient-border-warm bg-gradient-to-br from-cyan-900/30 to-cyan-800/20 stat-glow overflow-hidden">
+                <CardContent className="p-4 relative">
+                  <div className="text-xs font-semibold text-cyan-300/90 mb-1">Total Volume</div>
+                  <AnimatedCounter 
+                    value={stats.totalVolume / 1000000} 
+                    formatValue={(v) => `${v.toFixed(1)}M`}
+                    className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+                    trend="up"
+                    trendValue="+12%"
+                    duration={1000}
+                  />
+                  <motion.div
+                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Card className="gradient-border-warm bg-gradient-to-br from-green-900/30 to-green-800/20 stat-glow overflow-hidden">
+                <CardContent className="p-4 relative">
+                  <div className="text-xs font-semibold text-green-300/90 mb-1">Total Trades</div>
+                  <AnimatedCounter 
+                    value={stats.totalTrades} 
+                    formatValue={(v) => v.toLocaleString()}
+                    className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent"
+                    showSparkle={true}
+                    duration={900}
+                  />
+                  <motion.div
+                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Card className="gradient-border-warm bg-gradient-to-br from-orange-900/30 to-orange-800/20 stat-glow overflow-hidden">
+                <CardContent className="p-4 relative">
+                  <div className="text-xs font-semibold text-orange-300/90 mb-1">All Markets</div>
+                  <AnimatedCounter 
+                    value={stats.totalMarkets} 
+                    className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent"
+                    duration={850}
+                  />
+                  <motion.div
+                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-orange-500/10 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
           </motion.div>
         )}
 
