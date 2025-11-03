@@ -21,6 +21,7 @@ interface AITrade {
   price: number;
   fee: number;
   reasoning: string;
+  probability: number | null;
   createdAt: string;
 }
 
@@ -69,10 +70,12 @@ export function MarketActivityFeed({
     setPrevTradeCount(trades.length);
   }, [trades.length, prevTradeCount]);
 
-  // Extract confidence from reasoning
-  const extractConfidence = (reasoning: string): number | null => {
-    const match = reasoning.match(/Confidence:\s*(\d+\.?\d*)%/);
-    return match ? parseFloat(match[1]) : null;
+  // Get confidence level styling
+  const getConfidenceColor = (probability: number): string => {
+    if (probability >= 80) return "bg-green-500/20 text-green-400 border-green-500/30";
+    if (probability >= 65) return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    if (probability >= 50) return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    return "bg-orange-500/20 text-orange-400 border-orange-500/30";
   };
 
   if (isLoading) {
@@ -138,8 +141,8 @@ export function MarketActivityFeed({
       <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-visible">
         <AnimatePresence mode="popLayout">
           {trades.map((trade, index) => {
-            const confidence = extractConfidence(trade.reasoning);
             const isYes = trade.outcome === "YES";
+            const probability = trade.probability;
             
             return (
               <motion.div
@@ -150,29 +153,36 @@ export function MarketActivityFeed({
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 data-testid={`trade-card-${trade.id}`}
               >
-                <Card className="neural-glass p-4 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border iridescent-border">
+                <Card className="neural-glass p-3.5 hover:shadow-lg transition-all duration-300 hover:scale-[1.01] border iridescent-border">
                   <div className="flex items-start gap-3">
-                    {/* Agent Icon */}
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-lg ${personalityColors[trade.agentPersonality] || personalityColors.quantitative}`}>
-                      {personalityIcons[trade.agentPersonality] || "🤖"}
+                    {/* Agent Icon with Probability Ring */}
+                    <div className="flex-shrink-0 relative">
+                      <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-lg ${personalityColors[trade.agentPersonality] || personalityColors.quantitative}`}>
+                        {personalityIcons[trade.agentPersonality] || "🤖"}
+                      </div>
+                      {probability && (
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-background border-2 border-primary/20 flex items-center justify-center">
+                          <span className="text-[9px] font-bold text-primary">{probability.toFixed(0)}%</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Trade Details */}
                     <div className="flex-1 min-w-0">
                       {/* Agent Name & Time */}
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center gap-2 min-w-0">
                           <span className="font-semibold text-sm truncate" data-testid={`text-agent-name-${trade.id}`}>
                             {trade.agentName}
                           </span>
                           <Badge 
                             variant="outline" 
-                            className={`text-xs ${personalityColors[trade.agentPersonality]}`}
+                            className={`text-xs flex-shrink-0 ${personalityColors[trade.agentPersonality]}`}
                           >
                             {trade.agentPersonality}
                           </Badge>
                         </div>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                           {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
                         </span>
                       </div>
@@ -184,7 +194,7 @@ export function MarketActivityFeed({
 
                       {/* Trade Action */}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           {isYes ? (
                             <TrendingUp className="w-4 h-4 text-green-500" />
                           ) : (
@@ -203,24 +213,29 @@ export function MarketActivityFeed({
                           {trade.streamAmount.toLocaleString()} STREAM
                         </span>
 
-                        {confidence && (
-                          <Badge variant="secondary" className="text-xs">
-                            {confidence.toFixed(1)}% confidence
+                        {probability && (
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs font-semibold border ${getConfidenceColor(probability)}`}
+                            data-testid={`badge-probability-${trade.id}`}
+                          >
+                            {probability.toFixed(0)}% confidence
                           </Badge>
                         )}
 
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs capitalize">
                           {trade.marketCategory}
                         </Badge>
                       </div>
 
                       {/* Reasoning (optional, collapsed) */}
                       {trade.reasoning && (
-                        <details className="mt-2 text-xs text-muted-foreground">
-                          <summary className="cursor-pointer hover:text-foreground transition-colors">
-                            View analysis
+                        <details className="mt-2.5 text-xs text-muted-foreground">
+                          <summary className="cursor-pointer hover:text-foreground transition-colors flex items-center gap-1">
+                            <Bot className="w-3 h-3" />
+                            View AI analysis
                           </summary>
-                          <p className="mt-1 pl-2 border-l-2 border-primary/20">
+                          <p className="mt-2 pl-3 py-2 border-l-2 border-primary/30 bg-muted/30 rounded-r text-xs leading-relaxed">
                             {trade.reasoning}
                           </p>
                         </details>

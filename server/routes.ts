@@ -2051,6 +2051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: aiTrades.price,
           fee: aiTrades.fee,
           reasoning: aiTrades.reasoning,
+          probability: aiTrades.probability,
           createdAt: aiTrades.createdAt
         })
         .from(aiTrades)
