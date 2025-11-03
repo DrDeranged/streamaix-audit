@@ -1,0 +1,361 @@
+import { db } from '../db';
+import { 
+  aiAgents, 
+  predictionMarkets, 
+  aiPredictions, 
+  aiPositions, 
+  aiTrades 
+} from '@shared/schema';
+import { eq, and, sql } from 'drizzle-orm';
+import { aiAgentService } from './aiAgentService';
+import { ammService } from './ammService';
+import { marketDataService } from './marketDataService';
+
+/**
+ * Autonomous Trading Engine
+ * Periodically analyzes markets and executes trades for AI agents
+ */
+
+class AutonomousTradingEngine {
+  private isRunning = false;
+  private intervalId: NodeJS.Timeout | null = null;
+  private tradingInterval = 30 * 60 * 1000; // 30 minutes default
+
+  /**
+   * Start the autonomous trading engine
+   */
+  start(intervalMinutes: number = 30) {
+    if (this.isRunning) {
+      console.log('⚠️ Trading engine is already running');
+      return;
+    }
+
+    this.tradingInterval = intervalMinutes * 60 * 1000;
+    console.log(`🤖 Starting Autonomous Trading Engine (interval: ${intervalMinutes} minutes)`);
+    
+    // Run immediately on start
+    this.executeTradingCycle().catch(error => {
+      console.error('❌ Initial trading cycle failed:', error);
+    });
+
+    // Then run periodically
+    this.intervalId = setInterval(() => {
+      this.executeTradingCycle().catch(error => {
+        console.error('❌ Trading cycle failed:', error);
+      });
+    }, this.tradingInterval);
+
+    this.isRunning = true;
+    console.log('✅ Trading engine started successfully');
+  }
+
+  /**
+   * Stop the trading engine
+   */
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+    this.isRunning = false;
+    console.log('🛑 Trading engine stopped');
+  }
+
+  /**
+   * Execute a complete trading cycle
+   * 1. Fetch active markets and agents
+   * 2. For each market, have each agent analyze and trade
+   * 3. Update agent stats and positions
+   */
+  private async executeTradingCycle() {
+    console.log('\n═══════════════════════════════════════════════════');
+    console.log('🔄 Starting Trading Cycle - ' + new Date().toISOString());
+    console.log('═══════════════════════════════════════════════════\n');
+
+    try {
+      // Get all active agents
+      const agents = await db
+        .select()
+        .from(aiAgents)
+        .where(eq(aiAgents.isActive, true));
+
+      // Get all active markets
+      const markets = await db
+        .select()
+        .from(predictionMarkets)
+        .where(eq(predictionMarkets.status, 'active'));
+
+      console.log(`📊 Found ${agents.length} active agents and ${markets.length} active markets`);
+
+      if (agents.length === 0 || markets.length === 0) {
+        console.log('⏭️  Skipping cycle - no active agents or markets\n');
+        return;
+      }
+
+      // Get market context (live prices, news, sentiment)
+      const marketContext = await marketDataService.getInstance().getMarketContext();
+      console.log(`📈 Market Sentiment: ${marketContext.marketSentiment.overall.toUpperCase()} (${marketContext.marketSentiment.confidence}% confidence)\n`);
+
+      let totalTrades = 0;
+      let totalVolume = 0;
+
+      // For each market, have each agent analyze and potentially trade
+      for (const market of markets) {
+        console.log(`\n🎯 Analyzing Market: "${market.question.substring(0, 80)}..."`);
+        console.log(`   Current Price: ${this.calculateMarketPrice(market.yesLiquidity, market.noLiquidity)}% YES`);
+
+        for (const agent of agents) {
+          try {
+            const traded = await this.analyzeAndTrade(agent, market, marketContext);
+            if (traded) {
+              totalTrades++;
+              totalVolume += traded.amount;
+            }
+          } catch (error) {
+            console.error(`   ❌ ${agent.name} trade failed:`, error);
+          }
+        }
+      }
+
+      console.log('\n═══════════════════════════════════════════════════');
+      console.log(`✅ Trading Cycle Complete`);
+      console.log(`   📊 Total Trades: ${totalTrades}`);
+      console.log(`   💰 Total Volume: ${totalVolume.toFixed(2)} STREAM`);
+      console.log('═══════════════════════════════════════════════════\n');
+
+    } catch (error) {
+      console.error('❌ Trading cycle error:', error);
+    }
+  }
+
+  /**
+   * Have an AI agent analyze a market and execute a trade if confident enough
+   */
+  private async analyzeAndTrade(
+    agent: any,
+    market: any,
+    marketContext: any
+  ): Promise<{ amount: number; side: 'YES' | 'NO' } | null> {
+    // Check if agent already has a position in this market
+    const existingPosition = await db
+      .select()
+      .from(aiPositions)
+      .where(
+        and(
+          eq(aiPositions.agentId, agent.id),
+          eq(aiPositions.marketId, market.id)
+        )
+      )
+      .limit(1);
+
+    if (existingPosition.length > 0) {
+      // Agent already has a position - skip for now
+      // In future, could implement position management (adding, reducing, closing)
+      return null;
+    }
+
+    // Generate prediction using GPT-4
+    const prediction = await aiAgentService.generatePrediction(
+      agent.id,
+      market.id,
+      market.question,
+      marketContext
+    );
+
+    console.log(`   🤖 ${agent.name}:`);
+    console.log(`      Prediction: ${prediction.prediction} (${prediction.confidence}% confidence)`);
+
+    // Check if confidence exceeds agent's threshold
+    if (prediction.confidence < agent.minConfidence) {
+      console.log(`      ⏭️  Skip - confidence below threshold (${agent.minConfidence}%)`);
+      return null;
+    }
+
+    // Calculate position size based on confidence and risk tolerance
+    const positionSize = this.calculatePositionSize(
+      agent,
+      prediction.confidence,
+      market
+    );
+
+    if (positionSize === 0) {
+      console.log(`      ⏭️  Skip - insufficient balance or liquidity`);
+      return null;
+    }
+
+    // Execute the trade
+    const tradeSuccess = await this.executeTrade(
+      agent,
+      market,
+      prediction.prediction,
+      positionSize,
+      prediction.confidence,
+      prediction.reasoning
+    );
+
+    if (tradeSuccess) {
+      console.log(`      ✅ Traded ${positionSize.toFixed(2)} STREAM on ${prediction.prediction}`);
+      return { amount: positionSize, side: prediction.prediction };
+    } else {
+      console.log(`      ❌ Trade execution failed`);
+      return null;
+    }
+  }
+
+  /**
+   * Calculate position size based on agent personality and confidence
+   */
+  private calculatePositionSize(
+    agent: any,
+    confidence: number,
+    market: any
+  ): number {
+    // Base position: scale by confidence above minimum threshold
+    const confidenceAboveMin = confidence - agent.minConfidence;
+    const confidenceRange = 100 - agent.minConfidence;
+    const confidenceFactor = confidenceAboveMin / confidenceRange;
+
+    // Calculate position size (scales from 20% to 100% of max position)
+    const baseSize = agent.maxPositionSize * (0.2 + 0.8 * confidenceFactor);
+
+    // Apply risk tolerance multiplier
+    const riskAdjustedSize = baseSize * agent.riskTolerance;
+
+    // Ensure agent has enough balance
+    const maxAffordable = agent.availableBalance * 0.5; // Never risk more than 50% of balance
+    const finalSize = Math.min(riskAdjustedSize, maxAffordable);
+
+    // Ensure minimum position size (50 STREAM)
+    const MIN_POSITION = 50;
+    return finalSize >= MIN_POSITION ? finalSize : 0;
+  }
+
+  /**
+   * Execute a trade for an AI agent
+   */
+  private async executeTrade(
+    agent: any,
+    market: any,
+    side: 'YES' | 'NO',
+    amount: number,
+    confidence: number,
+    reasoning: string
+  ): Promise<boolean> {
+    try {
+      // Calculate how many shares we can buy with this amount
+      const sharesReceived = ammService.calculateBuyShares(
+        market.yesLiquidity,
+        market.noLiquidity,
+        amount,
+        side
+      );
+
+      if (sharesReceived === 0) {
+        return false;
+      }
+
+      // Calculate new liquidity after trade
+      const { yesLiquidity, noLiquidity } = ammService.executeSwap(
+        market.yesLiquidity,
+        market.noLiquidity,
+        amount,
+        side
+      );
+
+      // Update market liquidity and stats
+      await db
+        .update(predictionMarkets)
+        .set({
+          yesLiquidity,
+          noLiquidity,
+          totalVolume: market.totalVolume + amount,
+          totalTrades: market.totalTrades + 1
+        })
+        .where(eq(predictionMarkets.id, market.id));
+
+      // Update agent balance
+      await db
+        .update(aiAgents)
+        .set({
+          availableBalance: agent.availableBalance - amount,
+          totalTrades: agent.totalTrades + 1
+        })
+        .where(eq(aiAgents.id, agent.id));
+
+      // Create or update position
+      const existingPosition = await db
+        .select()
+        .from(aiPositions)
+        .where(
+          and(
+            eq(aiPositions.agentId, agent.id),
+            eq(aiPositions.marketId, market.id)
+          )
+        )
+        .limit(1);
+
+      if (existingPosition.length > 0) {
+        // Update existing position
+        const pos = existingPosition[0];
+        await db
+          .update(aiPositions)
+          .set({
+            shares: pos.shares + sharesReceived,
+            averagePrice: (pos.averagePrice * pos.shares + amount) / (pos.shares + sharesReceived),
+            updatedAt: new Date()
+          })
+          .where(eq(aiPositions.id, pos.id));
+      } else {
+        // Create new position
+        await db.insert(aiPositions).values({
+          agentId: agent.id,
+          marketId: market.id,
+          side,
+          shares: sharesReceived,
+          averagePrice: amount / sharesReceived,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
+      // Record trade
+      await db.insert(aiTrades).values({
+        agentId: agent.id,
+        marketId: market.id,
+        side,
+        amount,
+        shares: sharesReceived,
+        price: amount / sharesReceived,
+        confidence,
+        reasoning,
+        timestamp: new Date()
+      });
+
+      return true;
+    } catch (error) {
+      console.error('❌ Trade execution error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Calculate current market price (YES percentage)
+   */
+  private calculateMarketPrice(yesLiquidity: number, noLiquidity: number): number {
+    const total = yesLiquidity + noLiquidity;
+    if (total === 0) return 50;
+    return Math.round((yesLiquidity / total) * 100);
+  }
+
+  /**
+   * Get engine status
+   */
+  getStatus() {
+    return {
+      isRunning: this.isRunning,
+      intervalMinutes: this.tradingInterval / 60000
+    };
+  }
+}
+
+export const autonomousTradingEngine = new AutonomousTradingEngine();

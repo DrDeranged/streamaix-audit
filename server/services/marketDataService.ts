@@ -1305,6 +1305,121 @@ export class MarketDataService {
     return [];
   }
 
+  /**
+   * Get comprehensive market context for AI agent trading decisions
+   * Includes crypto prices, stock prices, recent news, and market sentiment
+   */
+  async getMarketContext(): Promise<{
+    cryptoPrices: any[];
+    stockPrices: any[];
+    recentNews: any[];
+    marketSentiment: { overall: 'bullish' | 'bearish' | 'neutral'; confidence: number };
+  }> {
+    const cacheKey = 'market_context';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Fetch top crypto prices
+      const cryptoSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
+      const cryptoPrices = await this.getCryptoQuotes(cryptoSymbols);
+
+      // Fetch crypto-related stock prices
+      const stockPrices = await this.getStockQuotes(this.cryptoStocks.slice(0, 10));
+
+      // Get recent news (placeholder - can be enhanced with real news API)
+      const recentNews = [
+        {
+          title: 'Bitcoin ETF inflows hit record high',
+          source: 'Bloomberg',
+          sentiment: 'positive',
+          relevance: 0.9,
+          timestamp: new Date()
+        },
+        {
+          title: 'Ethereum network upgrade scheduled',
+          source: 'CoinDesk',
+          sentiment: 'positive',
+          relevance: 0.8,
+          timestamp: new Date()
+        },
+        {
+          title: 'Market volatility expected ahead of Fed meeting',
+          source: 'Reuters',
+          sentiment: 'neutral',
+          relevance: 0.7,
+          timestamp: new Date()
+        }
+      ];
+
+      // Calculate market sentiment
+      const marketSentiment = this.calculateSentiment(cryptoPrices, stockPrices, recentNews);
+
+      const context = {
+        cryptoPrices,
+        stockPrices,
+        recentNews,
+        marketSentiment
+      };
+
+      // Cache for 5 minutes
+      this.cache.set(cacheKey, { data: context, timestamp: Date.now(), customTimeout: 300000 });
+      
+      return context;
+    } catch (error) {
+      console.error('❌ Error fetching market context:', error);
+      // Return minimal context on error
+      return {
+        cryptoPrices: [],
+        stockPrices: [],
+        recentNews: [],
+        marketSentiment: { overall: 'neutral', confidence: 50 }
+      };
+    }
+  }
+
+  /**
+   * Calculate overall market sentiment from prices and news
+   */
+  private calculateSentiment(
+    cryptoPrices: any[],
+    stockPrices: any[],
+    news: any[]
+  ): { overall: 'bullish' | 'bearish' | 'neutral'; confidence: number } {
+    // Calculate average price change
+    const allPrices = [...cryptoPrices, ...stockPrices];
+    if (allPrices.length === 0) {
+      return { overall: 'neutral', confidence: 50 };
+    }
+
+    const avgChange = allPrices.reduce((sum, p) => sum + (p.percentChange24h || 0), 0) / allPrices.length;
+
+    // Calculate news sentiment
+    const newsSentiment = news.reduce((sum, n) => {
+      const score = n.sentiment === 'positive' ? 1 : n.sentiment === 'negative' ? -1 : 0;
+      return sum + (score * (n.relevance || 0.5));
+    }, 0) / Math.max(news.length, 1);
+
+    // Combined sentiment score (-1 to +1)
+    const sentimentScore = (avgChange / 10) + newsSentiment;
+
+    let overall: 'bullish' | 'bearish' | 'neutral';
+    let confidence: number;
+
+    if (sentimentScore > 0.3) {
+      overall = 'bullish';
+      confidence = Math.min(Math.abs(sentimentScore) * 100, 100);
+    } else if (sentimentScore < -0.3) {
+      overall = 'bearish';
+      confidence = Math.min(Math.abs(sentimentScore) * 100, 100);
+    } else {
+      overall = 'neutral';
+      confidence = 50;
+    }
+
+    return { overall, confidence };
+  }
+
 }
 
 export const marketDataService = MarketDataService.getInstance();

@@ -30,6 +30,7 @@ import socialTradingRoutes from "./socialTradingRoutes";
 import { bountyHunterService } from "./services/bountyHunterService";
 import { qualityScorerService } from "./services/qualityScorerService";
 import { trendingService } from "./services/trendingService";
+import { autonomousTradingEngine } from "./services/autonomousTradingEngine";
 import passport from "passport";
 import axios from "axios";
 
@@ -1989,6 +1990,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Save market error:', error);
       res.status(500).json({ error: 'Failed to save market' });
+    }
+  }));
+
+  // =====================================================
+  // AUTONOMOUS TRADING ENGINE ROUTES
+  // =====================================================
+
+  // Get trading engine status
+  app.get('/api/trading-engine/status', asyncHandler(async (req: Request, res: Response) => {
+    const status = autonomousTradingEngine.getStatus();
+    res.json(status);
+  }));
+
+  // Start trading engine
+  app.post('/api/trading-engine/start', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    // Only admins can control the trading engine (in production, add role check here)
+    const intervalMinutes = req.body.intervalMinutes || 30;
+    
+    try {
+      autonomousTradingEngine.start(intervalMinutes);
+      res.json({ message: 'Trading engine started', intervalMinutes });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }));
+
+  // Stop trading engine
+  app.post('/api/trading-engine/stop', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      autonomousTradingEngine.stop();
+      res.json({ message: 'Trading engine stopped' });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }));
+
+  // Get recent AI agent trades
+  app.get('/api/ai-agents/trades', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      const trades = await db
+        .select({
+          id: aiTrades.id,
+          agentId: aiTrades.agentId,
+          agentName: aiAgents.name,
+          marketId: aiTrades.marketId,
+          marketQuestion: predictionMarkets.question,
+          side: aiTrades.side,
+          amount: aiTrades.amount,
+          shares: aiTrades.shares,
+          price: aiTrades.price,
+          confidence: aiTrades.confidence,
+          reasoning: aiTrades.reasoning,
+          timestamp: aiTrades.timestamp
+        })
+        .from(aiTrades)
+        .leftJoin(aiAgents, eq(aiTrades.agentId, aiAgents.id))
+        .leftJoin(predictionMarkets, eq(aiTrades.marketId, predictionMarkets.id))
+        .orderBy(desc(aiTrades.timestamp))
+        .limit(limit);
+      
+      res.json({ trades });
+    } catch (error) {
+      console.error('Error fetching AI trades:', error);
+      res.status(500).json({ error: 'Failed to fetch trades' });
+    }
+  }));
+
+  // Get AI agent portfolio/positions
+  app.get('/api/ai-agents/positions', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const positions = await db
+        .select({
+          id: aiPositions.id,
+          agentId: aiPositions.agentId,
+          agentName: aiAgents.name,
+          marketId: aiPositions.marketId,
+          marketQuestion: predictionMarkets.question,
+          side: aiPositions.side,
+          shares: aiPositions.shares,
+          averagePrice: aiPositions.averagePrice,
+          createdAt: aiPositions.createdAt,
+          updatedAt: aiPositions.updatedAt
+        })
+        .from(aiPositions)
+        .leftJoin(aiAgents, eq(aiPositions.agentId, aiAgents.id))
+        .leftJoin(predictionMarkets, eq(aiPositions.marketId, predictionMarkets.id))
+        .orderBy(desc(aiPositions.updatedAt));
+      
+      res.json({ positions });
+    } catch (error) {
+      console.error('Error fetching AI positions:', error);
+      res.status(500).json({ error: 'Failed to fetch positions' });
+    }
+  }));
+
+  // Get AI agent stats
+  app.get('/api/ai-agents/stats', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const agents = await db
+        .select()
+        .from(aiAgents)
+        .orderBy(desc(aiAgents.totalProfit));
+      
+      res.json({ agents });
+    } catch (error) {
+      console.error('Error fetching AI agent stats:', error);
+      res.status(500).json({ error: 'Failed to fetch agent stats' });
     }
   }));
 
