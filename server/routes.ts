@@ -68,7 +68,8 @@ import {
 import { Request, Response } from "express";
 import cors from "cors";
 import { db } from "./db";
-import { predictionMarkets } from "../shared/schema";
+import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades } from "../shared/schema";
+import { eq, and, desc } from "drizzle-orm";
 
 // Helper function to handle validation errors
 const validateRequest = <T>(schema: any, data: any): { success: boolean; data?: T; error?: string } => {
@@ -8065,6 +8066,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({
       success: true,
       market
+    });
+  }));
+  
+  // =============================================================================
+  // AI AGENT TRADING SYSTEM
+  // =============================================================================
+  
+  // Initialize AI agents
+  app.post("/api/ai-agents/initialize", asyncHandler(async (req: Request, res: Response) => {
+    const { aiAgentService } = await import('./services/aiAgentService');
+    const agents = await aiAgentService.initializeAgents();
+    
+    res.json({
+      success: true,
+      agents,
+      message: `Initialized ${agents.length} AI trading agents`
+    });
+  }));
+
+  // Get all AI agents
+  app.get("/api/ai-agents", asyncHandler(async (req: Request, res: Response) => {
+    const agents = await db.select().from(aiAgents).where(eq(aiAgents.isActive, true));
+    
+    res.json({
+      success: true,
+      agents
+    });
+  }));
+
+  // Get AI agent leaderboard
+  app.get("/api/ai-agents/leaderboard", asyncHandler(async (req: Request, res: Response) => {
+    const { aiAgentService } = await import('./services/aiAgentService');
+    const leaderboard = await aiAgentService.getAgentLeaderboard();
+    
+    res.json({
+      success: true,
+      leaderboard
+    });
+  }));
+
+  // Get AI agent stats
+  app.get("/api/ai-agents/:agentId/stats", asyncHandler(async (req: Request, res: Response) => {
+    const { aiAgentService } = await import('./services/aiAgentService');
+    const stats = await aiAgentService.getAgentStats(req.params.agentId);
+    
+    res.json({
+      success: true,
+      stats
+    });
+  }));
+
+  // Generate AI predictions for a market
+  app.post("/api/ai-agents/predict/:marketId", asyncHandler(async (req: Request, res: Response) => {
+    const { aiAgentService } = await import('./services/aiAgentService');
+    const predictions = await aiAgentService.generatePredictionsForMarket(req.params.marketId);
+    
+    res.json({
+      success: true,
+      predictions,
+      message: `Generated ${predictions.length} AI predictions`
+    });
+  }));
+
+  // Get AI predictions for a market
+  app.get("/api/ai-agents/predictions/:marketId", asyncHandler(async (req: Request, res: Response) => {
+    const { aiAgentService } = await import('./services/aiAgentService');
+    const predictions = await aiAgentService.getMarketPredictions(req.params.marketId);
+    
+    res.json({
+      success: true,
+      predictions
+    });
+  }));
+
+  // Execute AI agent trade
+  app.post("/api/ai-agents/:agentId/trade", asyncHandler(async (req: Request, res: Response) => {
+    const { aiAgentService } = await import('./services/aiAgentService');
+    const { marketId, predictionId, shares } = req.body;
+    
+    const result = await aiAgentService.executeTrade(
+      req.params.agentId,
+      marketId,
+      predictionId,
+      shares
+    );
+    
+    res.json({
+      success: true,
+      position: result.position,
+      trade: result.trade,
+      message: "AI trade executed successfully"
+    });
+  }));
+
+  // Get AI positions for a market
+  app.get("/api/ai-agents/positions/:marketId", asyncHandler(async (req: Request, res: Response) => {
+    const positions = await db
+      .select()
+      .from(aiPositions)
+      .leftJoin(aiAgents, eq(aiPositions.agentId, aiAgents.id))
+      .where(
+        and(
+          eq(aiPositions.marketId, req.params.marketId),
+          eq(aiPositions.status, "open")
+        )
+      )
+      .orderBy(desc(aiPositions.totalInvested));
+    
+    res.json({
+      success: true,
+      positions: positions.map(p => ({
+        ...p.ai_positions,
+        agent: p.ai_agents
+      }))
+    });
+  }));
+
+  // Get AI trades for a market
+  app.get("/api/ai-agents/trades/:marketId", asyncHandler(async (req: Request, res: Response) => {
+    const trades = await db
+      .select()
+      .from(aiTrades)
+      .leftJoin(aiAgents, eq(aiTrades.agentId, aiAgents.id))
+      .where(eq(aiTrades.marketId, req.params.marketId))
+      .orderBy(desc(aiTrades.createdAt))
+      .limit(50);
+    
+    res.json({
+      success: true,
+      trades: trades.map(t => ({
+        ...t.ai_trades,
+        agent: t.ai_agents
+      }))
     });
   }));
   
