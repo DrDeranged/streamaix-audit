@@ -440,11 +440,11 @@ export default function Markets() {
         </div>
 
         {/* Main Content: Markets Grid + Activity Feed */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Markets Grid - Left Column */}
-          <div className="flex-1 lg:w-2/3">
+          <div className="flex-1 lg:w-[65%]">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <Card key={i} className="bg-slate-900/50 border-slate-700/50">
                     <CardContent className="p-4 space-y-3">
@@ -463,7 +463,7 @@ export default function Markets() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 gap-5"
               >
                 {filteredMarkets.map((market) => (
                   <MarketCard key={market.id} market={market} />
@@ -491,9 +491,15 @@ export default function Markets() {
           </div>
 
           {/* AI Activity Feed - Right Column */}
-          <div className="lg:w-1/3">
-            <div className="lg:sticky lg:top-24">
-              <MarketActivityFeed limit={15} />
+          <div className="lg:w-[35%]">
+            <div className="lg:sticky lg:top-24 space-y-4">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <MarketActivityFeed limit={15} className="max-w-full" />
+              </motion.div>
             </div>
           </div>
         </div>
