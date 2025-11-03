@@ -2100,6 +2100,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get AI predictions for a specific market
+  app.get('/api/ai-agents/predictions/:marketId', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { marketId } = req.params;
+      
+      const predictions = await db
+        .select({
+          id: aiPredictions.id,
+          agentId: aiPredictions.agentId,
+          agentName: aiAgents.name,
+          agentPersonality: aiAgents.personality,
+          prediction: aiPredictions.prediction,
+          confidence: aiPredictions.confidence,
+          reasoning: aiPredictions.reasoning,
+          createdAt: aiPredictions.createdAt
+        })
+        .from(aiPredictions)
+        .leftJoin(aiAgents, eq(aiPredictions.agentId, aiAgents.id))
+        .where(eq(aiPredictions.marketId, marketId))
+        .orderBy(desc(aiPredictions.createdAt));
+      
+      res.json({ predictions });
+    } catch (error) {
+      console.error('Error fetching AI predictions:', error);
+      res.status(500).json({ error: 'Failed to fetch predictions' });
+    }
+  }));
+
   // Get AI agent stats
   app.get('/api/ai-agents/stats', asyncHandler(async (req: Request, res: Response) => {
     try {
