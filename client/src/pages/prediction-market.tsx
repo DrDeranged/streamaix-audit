@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 
 interface Market {
   id: string;
@@ -215,6 +216,7 @@ export default function PredictionMarket() {
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="bg-purple-900/20 border-b border-purple-500/30">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+                <TabsTrigger value="ai-predictions" data-testid="tab-ai-predictions">AI Predictions</TabsTrigger>
                 <TabsTrigger value="trades" data-testid="tab-trades">Recent Trades</TabsTrigger>
                 <TabsTrigger value="positions" data-testid="tab-positions">Top Positions</TabsTrigger>
               </TabsList>
@@ -264,6 +266,10 @@ export default function PredictionMarket() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="ai-predictions" className="mt-6">
+                <AiAgentPredictions marketId={market.id} />
               </TabsContent>
 
               <TabsContent value="trades" className="mt-6">

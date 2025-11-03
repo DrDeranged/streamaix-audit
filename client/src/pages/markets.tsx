@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreateMarketModal } from "@/components/prediction/CreateMarketModal";
+import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 
@@ -93,16 +94,8 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
               <span className="text-xs text-slate-400">{daysLeft}d left</span>
             </div>
 
-            {/* AI Prediction Indicator */}
-            {hasAiPrediction && (
-              <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30">
-                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-                <span className="text-xs font-medium text-violet-300">AI Predicts:</span>
-                <span className={`text-sm font-bold ${aiPrediction === 'YES' ? 'text-green-400' : 'text-red-400'}`}>
-                  {aiPrediction} {aiConfidence}%
-                </span>
-              </div>
-            )}
+            {/* AI Agent Predictions */}
+            <AiAgentPredictions marketId={market.id} compact />
 
             <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug">
               {market.question}
