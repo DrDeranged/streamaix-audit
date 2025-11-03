@@ -12,7 +12,10 @@ The frontend uses React 18 with TypeScript, styled with TailwindCSS, shadcn/ui, 
 - **Neural Network Background**: Animated nodes with glowing connections, data flow particles, and mouse-reactive interactions
 - **Enhanced Glass Morphism**: Multi-layer frosted glass with iridescent shimmer effects and holographic borders
 - **Advanced Animations**: 3D transforms, floating elements, circular progress visualizations, neural pulse effects, and glow animations
-- **Design System**: Custom CSS utilities for `.neural-glass`, `.iridescent-border`, `.glow-pulse`, `.tilt-hover`, and `.float-3d` effects
+- **Foundation Components**: Reusable ConfidenceRing (Apple Watch-style progress rings), AnimatedCounter (with trend indicators and sparkle effects), Sparkline (mini price charts)
+- **Design System**: Custom CSS utilities for `.neural-glass`, `.iridescent-border`, `.glow-pulse`, `.tilt-hover`, `.float-3d`, `.gradient-border-hot/warm/cool`, `.confidence-ring-high/medium/low`, `.trade-size-small/medium/large` effects
+- **Confidence Color Tiers**: Amber (60-70%), Cyan (70-80%), Emerald (80%+) for consistent AI confidence visualization
+- **AI Agent Visualizations**: Large avatar displays with animated confidence rings, consensus meters showing vote distribution, trade size classification badges
 Offering both light and dark modes with mobile-first responsive layout. Animations powered by Framer Motion and custom CSS keyframes.
 
 ### Technical Implementations
