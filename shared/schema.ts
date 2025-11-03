@@ -4614,6 +4614,83 @@ export const marketPredictors = pgTable("market_predictors", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// =============================================================================
+// AI AGENT TRADING SYSTEM
+// =============================================================================
+
+export const aiAgents = pgTable("ai_agents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  personality: text("personality").notNull(),
+  description: text("description").notNull(),
+  avatar: text("avatar"),
+  strategy: text("strategy").notNull(),
+  riskTolerance: text("risk_tolerance").notNull(),
+  confidenceThreshold: real("confidence_threshold").notNull(),
+  totalPredictions: integer("total_predictions").default(0),
+  correctPredictions: integer("correct_predictions").default(0),
+  accuracyRate: real("accuracy_rate").default(0),
+  totalVolume: integer("total_volume").default(0),
+  totalProfit: integer("total_profit").default(0),
+  totalLoss: integer("total_loss").default(0),
+  netProfit: integer("net_profit").default(0),
+  roi: real("roi").default(0),
+  rank: integer("rank"),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const aiPredictions = pgTable("ai_predictions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  prediction: text("prediction").notNull(),
+  confidence: real("confidence").notNull(),
+  reasoning: text("reasoning").notNull(),
+  analysisData: jsonb("analysis_data"),
+  marketDataSnapshot: jsonb("market_data_snapshot"),
+  outcome: text("outcome"),
+  isCorrect: boolean("is_correct"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const aiPositions = pgTable("ai_positions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  predictionId: varchar("prediction_id").references(() => aiPredictions.id),
+  outcome: text("outcome").notNull(),
+  shares: integer("shares").notNull(),
+  averagePrice: integer("average_price").notNull(),
+  totalInvested: integer("total_invested").notNull(),
+  currentValue: integer("current_value").default(0),
+  realizedPnl: integer("realized_pnl").default(0),
+  unrealizedPnl: integer("unrealized_pnl").default(0),
+  status: text("status").notNull().default("open"),
+  closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const aiTrades = pgTable("ai_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  positionId: varchar("position_id").references(() => aiPositions.id),
+  tradeType: text("trade_type").notNull(),
+  outcome: text("outcome").notNull(),
+  shares: integer("shares").notNull(),
+  price: integer("price").notNull(),
+  streamAmount: integer("stream_amount").notNull(),
+  fee: integer("fee").notNull(),
+  reasoning: text("reasoning"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertPredictionMarketSchema = createInsertSchema(predictionMarkets).omit({
   id: true,
   createdAt: true,
@@ -4648,6 +4725,29 @@ export const insertMarketPredictorSchema = createInsertSchema(marketPredictors).
   updatedAt: true,
 });
 
+export const insertAiAgentSchema = createInsertSchema(aiAgents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiPredictionSchema = createInsertSchema(aiPredictions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiPositionSchema = createInsertSchema(aiPositions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiTradeSchema = createInsertSchema(aiTrades).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertPredictionMarket = z.infer<typeof insertPredictionMarketSchema>;
 export type PredictionMarket = typeof predictionMarkets.$inferSelect;
 
@@ -4665,3 +4765,15 @@ export type LiquidityProvider = typeof liquidityProviders.$inferSelect;
 
 export type InsertMarketPredictor = z.infer<typeof insertMarketPredictorSchema>;
 export type MarketPredictor = typeof marketPredictors.$inferSelect;
+
+export type InsertAiAgent = z.infer<typeof insertAiAgentSchema>;
+export type AiAgent = typeof aiAgents.$inferSelect;
+
+export type InsertAiPrediction = z.infer<typeof insertAiPredictionSchema>;
+export type AiPrediction = typeof aiPredictions.$inferSelect;
+
+export type InsertAiPosition = z.infer<typeof insertAiPositionSchema>;
+export type AiPosition = typeof aiPositions.$inferSelect;
+
+export type InsertAiTrade = z.infer<typeof insertAiTradeSchema>;
+export type AiTrade = typeof aiTrades.$inferSelect;
