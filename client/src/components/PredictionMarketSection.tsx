@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { TrendingUp, Trophy, Clock, Users, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
+import { TrendingUp, Trophy, Clock, Users, ArrowRight, Sparkles, ChevronRight, Activity } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { Sparkline } from "@/components/ui/sparkline";
 
 interface PredictionMarket {
   id: string;
@@ -29,8 +31,8 @@ interface MarketStats {
 }
 
 const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
-  const yesPercentage = (market.yesPrice / 100).toFixed(1);
-  const noPercentage = (market.noPrice / 100).toFixed(1);
+  const yesPercentage = market.yesPrice / 100;
+  const noPercentage = market.noPrice / 100;
   const timeLeft = new Date(market.deadline).getTime() - Date.now();
   const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -39,72 +41,110 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
     const colors: Record<string, string> = {
       crypto: "bg-purple-500/20 text-purple-300 border-purple-500/30",
       defi: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      real_world: "bg-green-500/20 text-green-300 border-green-500/30",
+      real_world: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
       community: "bg-orange-500/20 text-orange-300 border-orange-500/30",
     };
     return colors[category] || colors.community;
   };
 
+  const volumeKSTREAM = market.totalVolume / 1000;
+  const gradientClass = volumeKSTREAM > 100 ? "gradient-border-hot" : volumeKSTREAM > 50 ? "gradient-border-warm" : "gradient-border-cool";
+  
+  const mockVolumeData = Array.from({ length: 10 }, (_, i) => ({
+    value: Math.random() * 100 + (i * 5),
+  }));
+
   return (
     <motion.div
-      whileHover={{ scale: 1.02, y: -4 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ scale: 1.02, y: -6 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="tilt-hover"
     >
-      <Card className="bg-slate-900/85 dark:bg-slate-900/85 backdrop-blur-xl border-purple-500/40 overflow-hidden hover:border-purple-400 dark:hover:border-fuchsia-400 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
+      <Card className={`neural-glass relative overflow-hidden ${gradientClass} hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 group`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 to-slate-800/95 dark:from-slate-900/95 dark:to-slate-800/95" />
+        <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        
         {market.imageUrl && (
-          <div className="h-32 overflow-hidden relative">
+          <div className="relative h-32 overflow-hidden">
             <img 
               src={market.imageUrl} 
               alt={market.question}
-              className="w-full h-full object-cover opacity-70"
+              className="w-full h-full object-cover opacity-70 group-hover:scale-110 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
           </div>
         )}
         
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="relative p-4 space-y-3">
           <div className="flex items-start justify-between gap-2">
             <Badge className={`text-xs ${getCategoryColor(market.category)} border`}>
               {market.category.replace('_', ' ').toUpperCase()}
             </Badge>
-            <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
+            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
               <Clock className="w-3 h-3" />
               <span>{daysLeft}d {hoursLeft}h</span>
             </div>
           </div>
 
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-2 leading-snug">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-purple-400 dark:group-hover:text-cyan-400 transition-colors">
             {market.question}
           </h3>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex gap-2">
-              <div className="flex-1 bg-green-500/20 rounded-lg p-2 border border-green-500/30 hover:bg-green-500/30 transition-colors cursor-pointer">
-                <div className="text-xs text-green-300 font-medium">YES</div>
-                <div className="text-lg font-bold text-green-400">{yesPercentage}%</div>
+              <div className="flex-1 relative overflow-hidden rounded-lg border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 hover:from-emerald-500/20 hover:to-emerald-500/10 transition-all cursor-pointer p-2.5 group/yes">
+                <div className="relative z-10">
+                  <div className="text-xs text-emerald-300 font-medium mb-0.5">YES</div>
+                  <div className="text-xl font-bold text-emerald-400">{yesPercentage.toFixed(1)}%</div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500/20 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${yesPercentage}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  />
+                </div>
               </div>
-              <div className="flex-1 bg-red-500/20 rounded-lg p-2 border border-red-500/30 hover:bg-red-500/30 transition-colors cursor-pointer">
-                <div className="text-xs text-red-300 font-medium">NO</div>
-                <div className="text-lg font-bold text-red-400">{noPercentage}%</div>
+              
+              <div className="flex-1 relative overflow-hidden rounded-lg border border-rose-500/30 bg-gradient-to-br from-rose-500/10 to-rose-500/5 hover:from-rose-500/20 hover:to-rose-500/10 transition-all cursor-pointer p-2.5 group/no">
+                <div className="relative z-10">
+                  <div className="text-xs text-rose-300 font-medium mb-0.5">NO</div>
+                  <div className="text-xl font-bold text-rose-400">{noPercentage.toFixed(1)}%</div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-rose-500/20 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-rose-500 to-rose-400"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${noPercentage}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
-              <div className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                <span>{(market.totalVolume / 1000).toFixed(1)}K STREAM</span>
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="font-medium">{volumeKSTREAM.toFixed(1)}K</span>
+                <Sparkline data={mockVolumeData} width={40} height={16} color="rgb(34, 211, 238)" />
               </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
+              <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                <Users className="w-3.5 h-3.5" />
                 <span>{market.totalTrades} trades</span>
               </div>
             </div>
           </div>
 
           {market.tags && market.tags.length > 0 && (
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex gap-1 flex-wrap pt-1">
               {market.tags.slice(0, 3).map((tag, i) => (
-                <span key={i} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-400 text-xs rounded-full border border-slate-300 dark:border-slate-700/50">
+                <span key={i} className="px-2 py-0.5 bg-slate-800/50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-300 text-xs rounded-full border border-slate-700/50 dark:border-slate-600/50">
                   #{tag}
                 </span>
               ))}
@@ -116,22 +156,39 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
   );
 };
 
-const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) => (
-  <motion.div
-    whileHover={{ scale: 1.05 }}
-    className="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-lg p-4 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
-  >
-    <div className="flex items-center justify-between">
-      <div>
-        <div className="text-sm text-slate-600 dark:text-slate-400">{label}</div>
-        <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{value}</div>
+const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string; value: number; icon: any; color: string; trend?: number }) => {
+  const gradientClass = trend && trend > 0 ? "gradient-border-hot" : trend && trend < 0 ? "gradient-border-cool" : "gradient-border-warm";
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ scale: 1.05, y: -4 }}
+      className={`neural-glass relative overflow-hidden p-4 rounded-xl ${gradientClass} hover:shadow-xl transition-all duration-300`}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 to-slate-800/95 dark:from-slate-900/95 dark:to-slate-800/95" />
+      <div className="absolute inset-0 glow-pulse opacity-0 hover:opacity-100 transition-opacity duration-500" />
+      
+      <div className="relative flex items-center justify-between">
+        <div className="flex-1">
+          <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{label}</div>
+          <div className="flex items-baseline gap-2">
+            <AnimatedCounter 
+              value={value} 
+              className="text-2xl font-bold text-slate-900 dark:text-white"
+              trend={trend}
+              showTrend={true}
+            />
+          </div>
+        </div>
+        <div className={`p-3 rounded-xl ${color} shadow-lg tilt-hover`}>
+          <Icon className="w-5 h-5 text-white" />
+        </div>
       </div>
-      <div className={`p-3 rounded-lg ${color}`}>
-        <Icon className="w-6 h-6 text-white" />
-      </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 export function PredictionMarketSection() {
   const [activeTab, setActiveTab] = useState<"all" | "trending">("trending");
@@ -186,27 +243,31 @@ export function PredictionMarketSection() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <StatCard
                 label="Active Markets"
-                value={stats.activeMarkets.toString()}
+                value={stats.activeMarkets}
                 icon={TrendingUp}
                 color="bg-gradient-to-br from-purple-500 to-purple-600"
+                trend={5.2}
               />
               <StatCard
                 label="Total Volume"
-                value={`${(stats.totalVolume / 1000000).toFixed(1)}M`}
+                value={Math.floor(stats.totalVolume / 1000)}
                 icon={Sparkles}
                 color="bg-gradient-to-br from-cyan-500 to-cyan-600"
+                trend={12.8}
               />
               <StatCard
                 label="Total Trades"
-                value={stats.totalTrades.toLocaleString()}
+                value={stats.totalTrades}
                 icon={Users}
                 color="bg-gradient-to-br from-blue-500 to-blue-600"
+                trend={8.4}
               />
               <StatCard
                 label="Total Markets"
-                value={stats.totalMarkets.toString()}
+                value={stats.totalMarkets}
                 icon={Trophy}
-                color="bg-gradient-to-br from-green-500 to-green-600"
+                color="bg-gradient-to-br from-emerald-500 to-emerald-600"
+                trend={3.1}
               />
             </div>
           )}
