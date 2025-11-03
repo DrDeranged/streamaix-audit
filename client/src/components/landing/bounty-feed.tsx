@@ -329,7 +329,7 @@ export function BountyFeed() {
               asChild
               className="mt-6 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
             >
-              <Link href="/bounty-board">
+              <Link href="/bounties">
                 Create Bounty
               </Link>
             </Button>
