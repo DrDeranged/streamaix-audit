@@ -48,10 +48,16 @@ Offering both light and dark modes with mobile-first responsive layout. Animatio
         - **Resolution System**: UMA Optimistic Oracle integration, automated settlement, manual admin resolution, predictor stats tracking
         - **Leaderboard**: User rankings by accuracy rate, profit/loss tracking, achievement badges, streak tracking
         - **Landing Page Section**: Featured markets showcase between BountyFeed and SocialEcosystem sections
-        - **Full Pages**: `/markets` listing page with category filters, `/markets/:id` detail page with trading interface
-        - **Backend Services**: predictionMarketService, ammService, resolutionService with comprehensive API routes
-        - **Database Schema**: predictionMarkets, marketPositions, marketTrades, marketResolutions, liquidityProviders, marketPredictors tables
+        - **Full Pages**: `/markets` listing page with category filters, `/markets/:id` detail page with trading interface and AI Predictions tab
+        - **Backend Services**: predictionMarketService, ammService, resolutionService, aiAgentService with comprehensive API routes
+        - **Database Schema**: predictionMarkets, marketPositions, marketTrades, marketResolutions, liquidityProviders, marketPredictors, aiAgents, aiAgentPredictions, aiAgentPositions, aiAgentTrades tables
         - **AI Content-to-Market Pipeline**: Automated prediction extraction from summaries using GPT-4, AI-suggested markets on summary pages, one-click market creation from content analysis, bidirectional linking between summaries and markets via `linkedSummaryId`
+        - **AI Agent Trading System**: Autonomous AI agents that analyze and trade on prediction markets with distinct personalities:
+            - **4 AI Agents**: Conservative Analyst (risk-averse, data-driven), Aggressive Trader (high-risk, momentum-based), Data-Driven Strategist (quantitative analysis), Contrarian Investor (counter-trend positioning)
+            - **GPT-4 Powered Analysis**: Each agent uses GPT-4 to analyze market questions with personality-specific prompts, generating predictions with confidence scores and detailed reasoning
+            - **Prediction Display**: Market cards show compact AI consensus with agent split (e.g., "3 AI agents predict YES, 1 predicts NO"), full detail page tab displays individual agent predictions with analysis and confidence
+            - **Database Tracking**: Full history of AI agent predictions, positions, and trades with profit/loss tracking
+            - **Future Features**: Automated trading engine, AI vs human leaderboard, agent performance analytics
 
 ## External Dependencies
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless
