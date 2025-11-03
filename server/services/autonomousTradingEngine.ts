@@ -166,8 +166,9 @@ class AutonomousTradingEngine {
     console.log(`      Prediction: ${prediction.prediction} (${prediction.confidence}% confidence)`);
 
     // Check if confidence exceeds agent's threshold
-    if (prediction.confidence < agent.minConfidence) {
-      console.log(`      ⏭️  Skip - confidence below threshold (${agent.minConfidence}%)`);
+    const confidenceThreshold = agent.confidenceThreshold * 100; // Convert to percentage
+    if (prediction.confidence < confidenceThreshold) {
+      console.log(`      ⏭️  Skip - confidence below threshold (${confidenceThreshold.toFixed(0)}%)`);
       return null;
     }
 
@@ -204,30 +205,36 @@ class AutonomousTradingEngine {
 
   /**
    * Calculate position size based on agent personality and confidence
+   * Phase 1: Fixed position sizing without balances
    */
   private calculatePositionSize(
     agent: any,
     confidence: number,
     market: any
   ): number {
-    // Base position: scale by confidence above minimum threshold
-    const confidenceAboveMin = confidence - agent.minConfidence;
-    const confidenceRange = 100 - agent.minConfidence;
-    const confidenceFactor = confidenceAboveMin / confidenceRange;
+    // Base position size by risk tolerance
+    const BASE_POSITIONS: Record<string, number> = {
+      'low': 300,           // Conservative
+      'medium': 700,        // Data-Driven  
+      'medium-high': 1000,  // Contrarian
+      'high': 1500,         // Aggressive
+    };
 
-    // Calculate position size (scales from 20% to 100% of max position)
-    const baseSize = agent.maxPositionSize * (0.2 + 0.8 * confidenceFactor);
+    const baseSize = BASE_POSITIONS[agent.riskTolerance] || 500;
 
-    // Apply risk tolerance multiplier
-    const riskAdjustedSize = baseSize * agent.riskTolerance;
+    // Scale by confidence (higher confidence = larger position)
+    const confidenceThreshold = agent.confidenceThreshold * 100;
+    const confidenceAboveMin = confidence - confidenceThreshold;
+    const confidenceRange = 100 - confidenceThreshold;
+    const confidenceFactor = Math.min(1, confidenceAboveMin / confidenceRange);
 
-    // Ensure agent has enough balance
-    const maxAffordable = agent.availableBalance * 0.5; // Never risk more than 50% of balance
-    const finalSize = Math.min(riskAdjustedSize, maxAffordable);
+    // Final position: base * (0.5 + 0.5 * confidence factor)
+    // This gives 50-100% of base position depending on confidence
+    const finalSize = baseSize * (0.5 + 0.5 * confidenceFactor);
 
-    // Ensure minimum position size (50 STREAM)
-    const MIN_POSITION = 50;
-    return finalSize >= MIN_POSITION ? finalSize : 0;
+    // Ensure minimum position size (100 STREAM)
+    const MIN_POSITION = 100;
+    return finalSize >= MIN_POSITION ? Math.round(finalSize) : 0;
   }
 
   /**
@@ -273,12 +280,13 @@ class AutonomousTradingEngine {
         })
         .where(eq(predictionMarkets.id, market.id));
 
-      // Update agent balance
+      // Update agent trading volume
       await db
         .update(aiAgents)
         .set({
-          availableBalance: agent.availableBalance - amount,
-          totalTrades: agent.totalTrades + 1
+          totalVolume: agent.totalVolume + amount,
+          totalPredictions: agent.totalPredictions + 1,
+          updatedAt: new Date()
         })
         .where(eq(aiAgents.id, agent.id));
 
