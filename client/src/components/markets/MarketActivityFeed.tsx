@@ -135,7 +135,7 @@ export function MarketActivityFeed({
         </div>
       )}
 
-      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-visible">
         <AnimatePresence mode="popLayout">
           {trades.map((trade, index) => {
             const confidence = extractConfidence(trade.reasoning);

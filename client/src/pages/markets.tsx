@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CreateMarketModal } from "@/components/prediction/CreateMarketModal";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
+import { MarketActivityFeed } from "@/components/markets/MarketActivityFeed";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 
@@ -438,52 +439,64 @@ export default function Markets() {
           </Select>
         </div>
 
-        {/* Markets Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="bg-slate-900/50 border-slate-700/50">
-                <CardContent className="p-4 space-y-3">
-                  <Skeleton className="h-4 w-24 bg-slate-700" />
-                  <Skeleton className="h-12 w-full bg-slate-700" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-16 flex-1 bg-slate-700" />
-                    <Skeleton className="h-16 flex-1 bg-slate-700" />
-                  </div>
-                  <Skeleton className="h-4 w-full bg-slate-700" />
+        {/* Main Content: Markets Grid + Activity Feed */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Markets Grid - Left Column */}
+          <div className="flex-1 lg:w-2/3">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card key={i} className="bg-slate-900/50 border-slate-700/50">
+                    <CardContent className="p-4 space-y-3">
+                      <Skeleton className="h-4 w-24 bg-slate-700" />
+                      <Skeleton className="h-12 w-full bg-slate-700" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-16 flex-1 bg-slate-700" />
+                        <Skeleton className="h-16 flex-1 bg-slate-700" />
+                      </div>
+                      <Skeleton className="h-4 w-full bg-slate-700" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredMarkets.length > 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
+                {filteredMarkets.map((market) => (
+                  <MarketCard key={market.id} market={market} />
+                ))}
+              </motion.div>
+            ) : (
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardContent className="p-12 text-center">
+                  <TrendingUp className="w-16 h-16 mx-auto mb-4 text-slate-600" />
+                  <h3 className="text-xl font-semibold text-white mb-2">No Markets Found</h3>
+                  <p className="text-slate-400 mb-6">
+                    {searchQuery ? "Try a different search term" : "Be the first to create a market"}
+                  </p>
+                  <Button
+                    onClick={() => setCreateModalOpen(true)}
+                    className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0"
+                    data-testid="button-create-first-market"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Market
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
-        ) : filteredMarkets.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredMarkets.map((market) => (
-              <MarketCard key={market.id} market={market} />
-            ))}
-          </motion.div>
-        ) : (
-          <Card className="bg-slate-900/50 border-slate-700/50">
-            <CardContent className="p-12 text-center">
-              <TrendingUp className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Markets Found</h3>
-              <p className="text-slate-400 mb-6">
-                {searchQuery ? "Try a different search term" : "Be the first to create a market"}
-              </p>
-              <Button
-                onClick={() => setCreateModalOpen(true)}
-                className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0"
-                data-testid="button-create-first-market"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Market
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+
+          {/* AI Activity Feed - Right Column */}
+          <div className="lg:w-1/3">
+            <div className="lg:sticky lg:top-24">
+              <MarketActivityFeed limit={15} />
+            </div>
+          </div>
+        </div>
 
         {/* Create Market Modal */}
         <CreateMarketModal
