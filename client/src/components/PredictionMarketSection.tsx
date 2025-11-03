@@ -50,9 +50,9 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
   const volumeKSTREAM = market.totalVolume / 1000;
   const gradientClass = volumeKSTREAM > 100 ? "gradient-border-hot" : volumeKSTREAM > 50 ? "gradient-border-warm" : "gradient-border-cool";
   
-  const mockVolumeData = Array.from({ length: 10 }, (_, i) => ({
-    value: Math.random() * 100 + (i * 5),
-  }));
+  const mockVolumeData = Array.from({ length: 10 }, (_, i) => 
+    Math.random() * 100 + (i * 5)
+  );
 
   return (
     <motion.div
@@ -158,6 +158,7 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
 
 const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string; value: number; icon: any; color: string; trend?: number }) => {
   const gradientClass = trend && trend > 0 ? "gradient-border-hot" : trend && trend < 0 ? "gradient-border-cool" : "gradient-border-warm";
+  const trendDirection = trend && trend > 0 ? "up" : trend && trend < 0 ? "down" : "neutral";
   
   return (
     <motion.div
@@ -177,8 +178,8 @@ const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string; v
             <AnimatedCounter 
               value={value} 
               className="text-2xl font-bold text-slate-900 dark:text-white"
-              trend={trend}
-              showTrend={true}
+              trend={trendDirection as "up" | "down" | "neutral"}
+              trendValue={trend ? `${trend > 0 ? "+" : ""}${trend.toFixed(1)}%` : undefined}
             />
           </div>
         </div>
