@@ -379,8 +379,8 @@ export default function PredictionMarket() {
                     </div>
                     <ConfidenceRing 
                       confidence={parseFloat(yesPercentage)} 
-                      size={60}
-                      strokeWidth={4}
+                      size={40}
+                      strokeWidth={3}
                       showPercentage={false}
                       className="flex-shrink-0"
                     />
@@ -402,8 +402,8 @@ export default function PredictionMarket() {
                     </div>
                     <ConfidenceRing 
                       confidence={parseFloat(noPercentage)} 
-                      size={60}
-                      strokeWidth={4}
+                      size={40}
+                      strokeWidth={3}
                       showPercentage={false}
                       className="flex-shrink-0"
                     />
