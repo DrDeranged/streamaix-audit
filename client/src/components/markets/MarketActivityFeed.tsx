@@ -27,6 +27,7 @@ interface AITrade {
 
 interface MarketActivityFeedProps {
   limit?: number;
+  mobileLimit?: number;
   showHeader?: boolean;
   className?: string;
 }
@@ -47,18 +48,30 @@ const personalityIcons: Record<string, string> = {
 
 export function MarketActivityFeed({ 
   limit = 20, 
+  mobileLimit = 4,
   showHeader = true,
   className = "" 
 }: MarketActivityFeedProps) {
   const [prevTradeCount, setPrevTradeCount] = useState(0);
   const [newTradesCount, setNewTradesCount] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { data, isLoading, refetch } = useQuery<{ trades: AITrade[] }>({
     queryKey: [`/api/ai-agents/trades?limit=${limit}`],
     refetchInterval: 10000, // Refetch every 10 seconds
   });
 
-  const trades = data?.trades || [];
+  // Limit trades based on viewport
+  const allTrades = data?.trades || [];
+  const trades = isMobile ? allTrades.slice(0, mobileLimit) : allTrades;
 
   // Detect new trades
   useEffect(() => {
@@ -70,12 +83,12 @@ export function MarketActivityFeed({
     setPrevTradeCount(trades.length);
   }, [trades.length, prevTradeCount]);
 
-  // Get confidence level styling
+  // Get confidence level styling - using consistent color palette
   const getConfidenceColor = (probability: number): string => {
-    if (probability >= 80) return "bg-green-500/20 text-green-400 border-green-500/30";
-    if (probability >= 65) return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-    if (probability >= 50) return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-    return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+    if (probability >= 80) return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+    if (probability >= 65) return "bg-cyan-500/15 text-cyan-400 border-cyan-500/30";
+    if (probability >= 50) return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    return "bg-orange-500/15 text-orange-400 border-orange-500/30";
   };
 
   if (isLoading) {
@@ -153,8 +166,8 @@ export function MarketActivityFeed({
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 data-testid={`trade-card-${trade.id}`}
               >
-                <Card className="neural-glass p-3.5 hover:shadow-lg transition-all duration-300 hover:scale-[1.01] border iridescent-border">
-                  <div className="flex items-start gap-3">
+                <Card className="neural-glass p-3 lg:p-3.5 hover:shadow-lg transition-all duration-300 hover:scale-[1.01] border iridescent-border">
+                  <div className="flex items-start gap-2.5 lg:gap-3">
                     {/* Agent Icon with Probability Ring */}
                     <div className="flex-shrink-0 relative">
                       <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-lg ${personalityColors[trade.agentPersonality] || personalityColors.quantitative}`}>
@@ -170,25 +183,25 @@ export function MarketActivityFeed({
                     {/* Trade Details */}
                     <div className="flex-1 min-w-0">
                       {/* Agent Name & Time */}
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <span className="font-semibold text-sm truncate" data-testid={`text-agent-name-${trade.id}`}>
                             {trade.agentName}
                           </span>
                           <Badge 
                             variant="outline" 
-                            className={`text-xs flex-shrink-0 ${personalityColors[trade.agentPersonality]}`}
+                            className={`text-[10px] lg:text-xs flex-shrink-0 px-1.5 py-0 ${personalityColors[trade.agentPersonality]}`}
                           >
                             {trade.agentPersonality}
                           </Badge>
                         </div>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                        <span className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                           {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
                         </span>
                       </div>
 
                       {/* Market Question */}
-                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2" data-testid={`text-market-question-${trade.id}`}>
+                      <p className="text-xs lg:text-sm text-muted-foreground mb-2 line-clamp-2" data-testid={`text-market-question-${trade.id}`}>
                         {trade.marketQuestion}
                       </p>
 
@@ -196,34 +209,34 @@ export function MarketActivityFeed({
                       <div className="flex items-center gap-2 flex-wrap">
                         <div className="flex items-center gap-1.5">
                           {isYes ? (
-                            <TrendingUp className="w-4 h-4 text-green-500" />
+                            <TrendingUp className="w-4 h-4 text-emerald-400" />
                           ) : (
-                            <TrendingDown className="w-4 h-4 text-red-500" />
+                            <TrendingDown className="w-4 h-4 text-rose-400" />
                           )}
                           <Badge 
-                            variant={isYes ? "default" : "destructive"}
-                            className="font-semibold"
+                            variant="outline"
+                            className={`font-semibold border ${isYes ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'}`}
                             data-testid={`badge-outcome-${trade.id}`}
                           >
                             {trade.outcome}
                           </Badge>
                         </div>
                         
-                        <span className="text-sm font-mono font-semibold" data-testid={`text-amount-${trade.id}`}>
+                        <span className="text-xs lg:text-sm font-mono font-semibold text-cyan-400" data-testid={`text-amount-${trade.id}`}>
                           {trade.streamAmount.toLocaleString()} STREAM
                         </span>
 
                         {probability && (
                           <Badge 
                             variant="outline" 
-                            className={`text-xs font-semibold border ${getConfidenceColor(probability)}`}
+                            className={`text-[10px] lg:text-xs font-semibold border ${getConfidenceColor(probability)}`}
                             data-testid={`badge-probability-${trade.id}`}
                           >
-                            {probability.toFixed(0)}% confidence
+                            {probability.toFixed(0)}%
                           </Badge>
                         )}
 
-                        <Badge variant="outline" className="text-xs capitalize">
+                        <Badge variant="outline" className="text-[10px] lg:text-xs capitalize bg-slate-500/10 text-slate-400 border-slate-500/20">
                           {trade.marketCategory}
                         </Badge>
                       </div>
@@ -253,24 +266,31 @@ export function MarketActivityFeed({
       <Card className="neural-glass mt-4 p-4">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold" data-testid="text-total-trades">
-              {trades.length}
+            <div className="text-2xl font-bold text-cyan-400" data-testid="text-total-trades">
+              {allTrades.length}
             </div>
             <div className="text-xs text-muted-foreground">Total Trades</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-green-500" data-testid="text-yes-trades">
-              {trades.filter(t => t.outcome === "YES").length}
+            <div className="text-2xl font-bold text-emerald-400" data-testid="text-yes-trades">
+              {allTrades.filter(t => t.outcome === "YES").length}
             </div>
-            <div className="text-xs text-muted-foreground">YES Positions</div>
+            <div className="text-xs text-muted-foreground">YES</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-red-500" data-testid="text-no-trades">
-              {trades.filter(t => t.outcome === "NO").length}
+            <div className="text-2xl font-bold text-rose-400" data-testid="text-no-trades">
+              {allTrades.filter(t => t.outcome === "NO").length}
             </div>
-            <div className="text-xs text-muted-foreground">NO Positions</div>
+            <div className="text-xs text-muted-foreground">NO</div>
           </div>
         </div>
+        {isMobile && allTrades.length > mobileLimit && (
+          <div className="mt-3 pt-3 border-t border-border/50 text-center">
+            <p className="text-xs text-muted-foreground">
+              Showing {mobileLimit} of {allTrades.length} trades
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );
