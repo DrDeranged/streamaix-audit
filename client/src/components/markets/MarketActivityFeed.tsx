@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bot, TrendingUp, TrendingDown, Clock, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Bot, TrendingUp, TrendingDown, Clock, Sparkles, Zap, Shield, BarChart2, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
   Carousel,
@@ -12,6 +12,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { ConfidenceRing } from "@/components/ui/confidence-ring";
 
 interface AITrade {
   id: string;
@@ -39,17 +40,17 @@ interface MarketActivityFeedProps {
 }
 
 const personalityColors: Record<string, string> = {
-  conservative: "bg-blue-500/10 text-blue-400 border-blue-400/20",
-  aggressive: "bg-red-500/10 text-red-400 border-red-400/20",
-  quantitative: "bg-purple-500/10 text-purple-400 border-purple-400/20",
-  contrarian: "bg-orange-500/10 text-orange-400 border-orange-400/20",
+  conservative: "from-blue-500/20 to-indigo-500/20 border-blue-400/30",
+  aggressive: "from-red-500/20 to-orange-500/20 border-red-400/30",
+  quantitative: "from-cyan-500/20 to-blue-500/20 border-cyan-400/30",
+  contrarian: "from-purple-500/20 to-pink-500/20 border-purple-400/30",
 };
 
-const personalityIcons: Record<string, string> = {
-  conservative: "🛡️",
-  aggressive: "⚡",
-  quantitative: "📊",
-  contrarian: "🔄",
+const personalityIcons: Record<string, { emoji: string; icon: typeof Shield }> = {
+  conservative: { emoji: "🛡️", icon: Shield },
+  aggressive: { emoji: "⚡", icon: Zap },
+  quantitative: { emoji: "📊", icon: BarChart2 },
+  contrarian: { emoji: "🔄", icon: RefreshCw },
 };
 
 export function MarketActivityFeed({ 
@@ -60,14 +61,13 @@ export function MarketActivityFeed({
   const [prevTradeCount, setPrevTradeCount] = useState(0);
   const [newTradesCount, setNewTradesCount] = useState(0);
 
-  const { data, isLoading, refetch } = useQuery<{ trades: AITrade[] }>({
+  const { data, isLoading } = useQuery<{ trades: AITrade[] }>({
     queryKey: [`/api/ai-agents/trades?limit=${limit}`],
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: 10000,
   });
 
   const allTrades = data?.trades || [];
 
-  // Detect new trades
   useEffect(() => {
     if (allTrades.length > prevTradeCount && prevTradeCount > 0) {
       const newCount = allTrades.length - prevTradeCount;
@@ -77,12 +77,16 @@ export function MarketActivityFeed({
     setPrevTradeCount(allTrades.length);
   }, [allTrades.length, prevTradeCount]);
 
-  // Get confidence level styling - using consistent color palette
   const getConfidenceColor = (probability: number): string => {
-    if (probability >= 80) return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-    if (probability >= 65) return "bg-cyan-500/15 text-cyan-400 border-cyan-500/30";
-    if (probability >= 50) return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-    return "bg-orange-500/15 text-orange-400 border-orange-500/30";
+    if (probability >= 80) return "text-emerald-400";
+    if (probability >= 70) return "text-cyan-400";
+    return "text-amber-400";
+  };
+
+  const getTradeSizeBadge = (amount: number): { label: string; className: string } => {
+    if (amount >= 1000) return { label: "Large", className: "trade-badge-large" };
+    if (amount >= 500) return { label: "Medium", className: "trade-badge-medium" };
+    return { label: "Small", className: "trade-badge-small" };
   };
 
   if (isLoading) {
@@ -130,17 +134,32 @@ export function MarketActivityFeed({
       {showHeader && (
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary glow-pulse" />
+            <motion.div
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="w-5 h-5 text-purple-400" />
+            </motion.div>
             <h3 className="text-lg font-semibold">AI Trading Activity</h3>
             {newTradesCount > 0 && (
-              <Badge variant="default" className="animate-pulse">
-                +{newTradesCount} new
-              </Badge>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              >
+                <Badge variant="default" className="bg-purple-500/20 border-purple-500/40 animate-pulse">
+                  +{newTradesCount} new
+                </Badge>
+              </motion.div>
             )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>Live</span>
+          <div className="flex items-center gap-2 text-sm">
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-2 h-2 rounded-full bg-emerald-400"
+            />
+            <span className="text-emerald-400 font-semibold">Live</span>
           </div>
         </div>
       )}
@@ -153,140 +172,184 @@ export function MarketActivityFeed({
         className="w-full"
       >
         <CarouselContent className="-ml-2 md:-ml-4">
-          {allTrades.map((trade) => {
+          {allTrades.map((trade, index) => {
             const isYes = trade.outcome === "YES";
-            const probability = trade.probability;
+            const probability = trade.probability || 0;
+            const tradeSizeBadge = getTradeSizeBadge(trade.streamAmount);
+            const personalityInfo = personalityIcons[trade.agentPersonality] || personalityIcons.quantitative;
             
             return (
-              <CarouselItem key={trade.id} className="pl-2 md:pl-4 basis-full" data-testid={`trade-card-${trade.id}`}>
-                <Card className="neural-glass p-3 lg:p-4 border iridescent-border">
-                  <div className="flex items-start gap-2.5 lg:gap-3">
-                    {/* Agent Icon with Probability Ring */}
-                    <div className="flex-shrink-0 relative">
-                      <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center text-xl ${personalityColors[trade.agentPersonality] || personalityColors.quantitative}`}>
-                        {personalityIcons[trade.agentPersonality] || "🤖"}
-                      </div>
-                      {probability && (
-                        <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-background border-2 border-primary/30 flex items-center justify-center shadow-lg">
-                          <span className="text-[10px] font-bold text-primary">{probability.toFixed(0)}%</span>
+              <CarouselItem 
+                key={trade.id} 
+                className="pl-2 md:pl-4 basis-full" 
+                data-testid={`trade-card-${trade.id}`}
+              >
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className="slide-in-trade"
+                >
+                  <Card className={`bg-gradient-to-br ${personalityColors[trade.agentPersonality] || personalityColors.quantitative} border backdrop-blur-sm p-4 card-3d-hover`}>
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 relative">
+                        <ConfidenceRing 
+                          confidence={probability} 
+                          size={64} 
+                          strokeWidth={4}
+                          showPercentage={false}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center text-3xl">
+                          {personalityInfo.emoji}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Trade Details */}
-                    <div className="flex-1 min-w-0">
-                      {/* Agent Name & Time */}
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-semibold text-base truncate" data-testid={`text-agent-name-${trade.id}`}>
-                            {trade.agentName}
+                        <motion.div
+                          className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-background border-2 border-primary/40 flex items-center justify-center shadow-lg"
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <span className={`text-[10px] font-bold ${getConfidenceColor(probability)}`}>
+                            {probability.toFixed(0)}%
                           </span>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs flex-shrink-0 ${personalityColors[trade.agentPersonality]}`}
-                          >
-                            {trade.agentPersonality}
-                          </Badge>
-                        </div>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                          {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
-                        </span>
+                        </motion.div>
                       </div>
 
-                      {/* Market Question */}
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2 leading-relaxed" data-testid={`text-market-question-${trade.id}`}>
-                        {trade.marketQuestion}
-                      </p>
-
-                      {/* Trade Action */}
-                      <div className="flex items-center gap-2.5 flex-wrap mb-3">
-                        <div className="flex items-center gap-1.5">
-                          {isYes ? (
-                            <TrendingUp className="w-5 h-5 text-emerald-400" />
-                          ) : (
-                            <TrendingDown className="w-5 h-5 text-rose-400" />
-                          )}
-                          <Badge 
-                            variant="outline"
-                            className={`font-semibold text-sm border px-3 py-1 ${isYes ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'}`}
-                            data-testid={`badge-outcome-${trade.id}`}
-                          >
-                            {trade.outcome}
-                          </Badge>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-bold text-base truncate" data-testid={`text-agent-name-${trade.id}`}>
+                              {trade.agentName}
+                            </span>
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs flex-shrink-0 bg-slate-700/50 border-slate-600"
+                            >
+                              {trade.agentPersonality}
+                            </Badge>
+                          </div>
+                          <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
+                            {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
+                          </span>
                         </div>
-                        
-                        <span className="text-sm font-mono font-bold text-cyan-400" data-testid={`text-amount-${trade.id}`}>
-                          {trade.streamAmount.toLocaleString()} STREAM
-                        </span>
 
-                        {probability && (
+                        <p className="text-sm text-slate-300 mb-3 line-clamp-2 leading-relaxed" data-testid={`text-market-question-${trade.id}`}>
+                          {trade.marketQuestion}
+                        </p>
+
+                        <div className="flex items-center gap-2 flex-wrap mb-3">
+                          <div className="flex items-center gap-1.5">
+                            {isYes ? (
+                              <TrendingUp className="w-5 h-5 text-emerald-400" />
+                            ) : (
+                              <TrendingDown className="w-5 h-5 text-rose-400" />
+                            )}
+                            <Badge 
+                              variant="outline"
+                              className={`font-bold text-sm px-3 py-1 shadow-lg ${
+                                isYes 
+                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-500/20' 
+                                  : 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-rose-500/20'
+                              }`}
+                              data-testid={`badge-outcome-${trade.id}`}
+                            >
+                              {trade.outcome}
+                            </Badge>
+                          </div>
+                          
+                          <span className="text-sm font-mono font-bold text-cyan-300" data-testid={`text-amount-${trade.id}`}>
+                            {trade.streamAmount.toLocaleString()} STREAM
+                          </span>
+
                           <Badge 
                             variant="outline" 
-                            className={`text-xs font-semibold border px-2.5 py-1 ${getConfidenceColor(probability)}`}
-                            data-testid={`badge-probability-${trade.id}`}
+                            className={`text-xs font-semibold px-2.5 py-1 ${tradeSizeBadge.className}`}
                           >
-                            {probability.toFixed(0)}% confident
+                            {tradeSizeBadge.label} Trade
                           </Badge>
+
+                          <Badge variant="outline" className="text-xs capitalize bg-slate-700/50 border-slate-600">
+                            {trade.marketCategory}
+                          </Badge>
+                        </div>
+
+                        {trade.reasoning && (
+                          <details className="text-xs group">
+                            <summary className="cursor-pointer text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1.5 font-medium">
+                              <Bot className="w-3.5 h-3.5" />
+                              View AI reasoning
+                            </summary>
+                            <motion.p 
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              className="mt-2 pl-4 py-2.5 border-l-2 border-purple-500/40 bg-slate-800/50 rounded-r text-xs leading-relaxed text-slate-300"
+                            >
+                              {trade.reasoning}
+                            </motion.p>
+                          </details>
                         )}
-
-                        <Badge variant="outline" className="text-xs capitalize bg-slate-500/10 text-slate-400 border-slate-500/20">
-                          {trade.marketCategory}
-                        </Badge>
                       </div>
-
-                      {/* Reasoning (expandable) */}
-                      {trade.reasoning && (
-                        <details className="text-xs text-muted-foreground group">
-                          <summary className="cursor-pointer hover:text-foreground transition-colors flex items-center gap-1.5 font-medium">
-                            <Bot className="w-3.5 h-3.5" />
-                            View AI reasoning
-                          </summary>
-                          <p className="mt-2.5 pl-4 py-2.5 border-l-2 border-primary/30 bg-muted/30 rounded-r text-xs leading-relaxed">
-                            {trade.reasoning}
-                          </p>
-                        </details>
-                      )}
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </motion.div>
               </CarouselItem>
             );
           })}
         </CarouselContent>
         
-        {/* Navigation */}
         <div className="flex items-center justify-center gap-4 mt-4">
-          <CarouselPrevious className="relative static translate-y-0 bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50" />
-          <div className="text-xs text-muted-foreground">
+          <CarouselPrevious className="relative static translate-y-0 bg-slate-800/70 border-slate-600/50 hover:bg-slate-700/70 card-3d-hover" />
+          <div className="text-xs text-slate-400 font-semibold">
             {allTrades.length} total trades
           </div>
-          <CarouselNext className="relative static translate-y-0 bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50" />
+          <CarouselNext className="relative static translate-y-0 bg-slate-800/70 border-slate-600/50 hover:bg-slate-700/70 card-3d-hover" />
         </div>
       </Carousel>
 
-      {/* Summary Stats */}
-      <Card className="neural-glass mt-4 p-4">
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-cyan-400" data-testid="text-total-trades">
-              {allTrades.length}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <Card className="neural-glass mt-4 p-4 stat-glow">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <motion.div 
+                className="text-2xl font-bold text-cyan-400" 
+                data-testid="text-total-trades"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+              >
+                {allTrades.length}
+              </motion.div>
+              <div className="text-xs text-slate-400">Total Trades</div>
             </div>
-            <div className="text-xs text-muted-foreground">Total Trades</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-emerald-400" data-testid="text-yes-trades">
-              {allTrades.filter(t => t.outcome === "YES").length}
+            <div>
+              <motion.div 
+                className="text-2xl font-bold text-emerald-400" 
+                data-testid="text-yes-trades"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+              >
+                {allTrades.filter(t => t.outcome === "YES").length}
+              </motion.div>
+              <div className="text-xs text-slate-400">YES</div>
             </div>
-            <div className="text-xs text-muted-foreground">YES</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-rose-400" data-testid="text-no-trades">
-              {allTrades.filter(t => t.outcome === "NO").length}
+            <div>
+              <motion.div 
+                className="text-2xl font-bold text-rose-400" 
+                data-testid="text-no-trades"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
+              >
+                {allTrades.filter(t => t.outcome === "NO").length}
+              </motion.div>
+              <div className="text-xs text-slate-400">NO</div>
             </div>
-            <div className="text-xs text-muted-foreground">NO</div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     </div>
   );
 }
