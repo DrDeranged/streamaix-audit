@@ -27,6 +27,7 @@ import {
 import { CreateMarketModal } from "@/components/prediction/CreateMarketModal";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 import { MarketActivityFeed } from "@/components/markets/MarketActivityFeed";
+import { AIConsensusCard } from "@/components/markets/AIConsensusCard";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 
@@ -95,8 +96,8 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
               <span className="text-xs text-slate-400">{daysLeft}d left</span>
             </div>
 
-            {/* AI Agent Predictions */}
-            <AiAgentPredictions marketId={market.id} compact />
+            {/* AI Consensus Card */}
+            <AIConsensusCard marketId={market.id} compact />
 
             <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug">
               {market.question}
