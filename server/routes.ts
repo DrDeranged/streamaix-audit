@@ -2100,26 +2100,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get AI predictions for a specific market
+  // Get AI predictions for a specific market (derived from trades)
   app.get('/api/ai-agents/predictions/:marketId', asyncHandler(async (req: Request, res: Response) => {
     try {
       const { marketId } = req.params;
       
-      const predictions = await db
+      // Get the most recent trade from each agent for this market
+      const trades = await db
         .select({
-          id: aiPredictions.id,
-          agentId: aiPredictions.agentId,
+          id: aiTrades.id,
+          agentId: aiTrades.agentId,
           agentName: aiAgents.name,
           agentPersonality: aiAgents.personality,
-          prediction: aiPredictions.prediction,
-          confidence: aiPredictions.confidence,
-          reasoning: aiPredictions.reasoning,
-          createdAt: aiPredictions.createdAt
+          prediction: aiTrades.outcome,
+          confidence: aiTrades.probability,
+          reasoning: aiTrades.reasoning,
+          createdAt: aiTrades.createdAt
         })
-        .from(aiPredictions)
-        .leftJoin(aiAgents, eq(aiPredictions.agentId, aiAgents.id))
-        .where(eq(aiPredictions.marketId, marketId))
-        .orderBy(desc(aiPredictions.createdAt));
+        .from(aiTrades)
+        .leftJoin(aiAgents, eq(aiTrades.agentId, aiAgents.id))
+        .where(eq(aiTrades.marketId, marketId))
+        .orderBy(desc(aiTrades.createdAt));
+      
+      // Get only the most recent prediction per agent
+      const latestByAgent = new Map();
+      trades.forEach(trade => {
+        if (!latestByAgent.has(trade.agentId)) {
+          latestByAgent.set(trade.agentId, trade);
+        }
+      });
+      
+      const predictions = Array.from(latestByAgent.values());
       
       res.json({ predictions });
     } catch (error) {
