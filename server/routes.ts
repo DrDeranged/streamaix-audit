@@ -2040,20 +2040,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: aiTrades.id,
           agentId: aiTrades.agentId,
           agentName: aiAgents.name,
+          agentPersonality: aiAgents.personality,
           marketId: aiTrades.marketId,
           marketQuestion: predictionMarkets.question,
-          side: aiTrades.side,
-          amount: aiTrades.amount,
+          marketCategory: predictionMarkets.category,
+          outcome: aiTrades.outcome,
+          tradeType: aiTrades.tradeType,
+          streamAmount: aiTrades.streamAmount,
           shares: aiTrades.shares,
           price: aiTrades.price,
-          confidence: aiTrades.confidence,
+          fee: aiTrades.fee,
           reasoning: aiTrades.reasoning,
-          timestamp: aiTrades.timestamp
+          createdAt: aiTrades.createdAt
         })
         .from(aiTrades)
         .leftJoin(aiAgents, eq(aiTrades.agentId, aiAgents.id))
         .leftJoin(predictionMarkets, eq(aiTrades.marketId, predictionMarkets.id))
-        .orderBy(desc(aiTrades.timestamp))
+        .orderBy(desc(aiTrades.createdAt))
         .limit(limit);
       
       res.json({ trades });
@@ -2071,11 +2074,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: aiPositions.id,
           agentId: aiPositions.agentId,
           agentName: aiAgents.name,
+          agentPersonality: aiAgents.personality,
           marketId: aiPositions.marketId,
           marketQuestion: predictionMarkets.question,
-          side: aiPositions.side,
+          outcome: aiPositions.outcome,
           shares: aiPositions.shares,
           averagePrice: aiPositions.averagePrice,
+          totalInvested: aiPositions.totalInvested,
+          currentValue: aiPositions.currentValue,
+          unrealizedPnl: aiPositions.unrealizedPnl,
+          status: aiPositions.status,
           createdAt: aiPositions.createdAt,
           updatedAt: aiPositions.updatedAt
         })
