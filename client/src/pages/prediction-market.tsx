@@ -365,15 +365,15 @@ export default function PredictionMarket() {
               </CardHeader>
               <CardContent className="space-y-4 relative">
                 {/* YES Price with Confidence Ring */}
-                <div className="relative p-5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 group/yes hover:scale-105 transition-all duration-300">
+                <div className="relative p-3 sm:p-5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 group/yes hover:scale-105 transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent rounded-xl opacity-0 group-hover/yes:opacity-100 transition-opacity" />
-                  <div className="flex items-center justify-between relative">
-                    <div className="flex-1">
-                      <div className="text-xs text-emerald-300 font-medium mb-2 flex items-center gap-1">
+                  <div className="flex items-center justify-between gap-3 relative">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-emerald-300 font-medium mb-1 sm:mb-2 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         YES
                       </div>
-                      <div className="text-3xl font-bold text-emerald-400">
+                      <div className="text-2xl sm:text-3xl font-bold text-emerald-400 truncate">
                         {yesPercentage}%
                       </div>
                     </div>
@@ -388,15 +388,15 @@ export default function PredictionMarket() {
                 </div>
 
                 {/* NO Price with Confidence Ring */}
-                <div className="relative p-5 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/5 border border-rose-500/30 group/no hover:scale-105 transition-all duration-300">
+                <div className="relative p-3 sm:p-5 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/5 border border-rose-500/30 group/no hover:scale-105 transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent rounded-xl opacity-0 group-hover/no:opacity-100 transition-opacity" />
-                  <div className="flex items-center justify-between relative">
-                    <div className="flex-1">
-                      <div className="text-xs text-rose-300 font-medium mb-2 flex items-center gap-1">
+                  <div className="flex items-center justify-between gap-3 relative">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-rose-300 font-medium mb-1 sm:mb-2 flex items-center gap-1">
                         <TrendingDown className="w-3 h-3" />
                         NO
                       </div>
-                      <div className="text-3xl font-bold text-rose-400">
+                      <div className="text-2xl sm:text-3xl font-bold text-rose-400 truncate">
                         {noPercentage}%
                       </div>
                     </div>
