@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   TrendingUp,
+  TrendingDown,
   Users,
   Clock,
   Award,
@@ -13,7 +14,8 @@ import {
   ChevronUp,
   Info,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  Activity
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,8 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { ConfidenceRing } from "@/components/ui/confidence-ring";
 
 interface Market {
   id: string;
@@ -121,6 +125,19 @@ export default function PredictionMarket() {
     return colors[category] || colors.community;
   };
 
+  // Market temperature classification for gradient borders
+  const getMarketTemperature = (volume: number): { label: string; className: string } => {
+    if (volume >= 100000) {
+      return { label: "Hot", className: "gradient-border-hot" };
+    } else if (volume >= 50000) {
+      return { label: "Warm", className: "gradient-border-warm" };
+    } else {
+      return { label: "Cool", className: "gradient-border-cool" };
+    }
+  };
+
+  const marketTemp = getMarketTemperature(market.totalVolume);
+
   const handleTrade = () => {
     if (!amount || parseFloat(amount) <= 0) {
       toast({
@@ -156,7 +173,12 @@ export default function PredictionMarket() {
           {/* Left Column - Market Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Market Header */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 overflow-hidden backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+            <Card className={`neural-glass iridescent-border ${marketTemp.className} overflow-hidden backdrop-blur-sm relative group`}>
               {market.imageUrl && (
                 <div className="h-48 overflow-hidden relative">
                   <img 
@@ -195,22 +217,57 @@ export default function PredictionMarket() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-500/20">
-                  <div>
-                    <div className="text-sm text-slate-400">Total Volume</div>
-                    <div className="text-lg font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{(market.totalVolume / 1000).toFixed(1)}K STREAM</div>
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-700/30">
+                  <div className="relative p-3 rounded-lg neural-glass group hover:scale-105 transition-transform duration-300">
+                    <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative">
+                      <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                        <Activity className="w-3 h-3" />
+                        Total Volume
+                      </div>
+                      <AnimatedCounter 
+                        value={Math.floor(market.totalVolume / 1000)} 
+                        formatValue={(v) => `${v}K`}
+                        className="text-lg font-bold text-slate-100"
+                        trend="up"
+                        trendValue="+8.5%"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm text-slate-400">Total Trades</div>
-                    <div className="text-lg font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{market.totalTrades}</div>
+                  <div className="relative p-3 rounded-lg neural-glass group hover:scale-105 transition-transform duration-300">
+                    <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative">
+                      <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" />
+                        Total Trades
+                      </div>
+                      <AnimatedCounter 
+                        value={market.totalTrades} 
+                        className="text-lg font-bold text-slate-100"
+                        trend="up"
+                        trendValue="+12%"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm text-slate-400">Liquidity</div>
-                    <div className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">{((market.yesLiquidity + market.noLiquidity) / 1000).toFixed(1)}K</div>
+                  <div className="relative p-3 rounded-lg neural-glass group hover:scale-105 transition-transform duration-300">
+                    <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative">
+                      <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        Liquidity
+                      </div>
+                      <AnimatedCounter 
+                        value={Math.floor((market.yesLiquidity + market.noLiquidity) / 1000)} 
+                        formatValue={(v) => `${v}K`}
+                        className="text-lg font-bold text-slate-100"
+                        trend="neutral"
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
 
             {/* Market Details */}
             <Tabs defaultValue="overview" className="w-full">
@@ -293,39 +350,81 @@ export default function PredictionMarket() {
           {/* Right Column - Trading */}
           <div className="space-y-6">
             {/* Price Card */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+            <Card className="neural-glass iridescent-border backdrop-blur-sm relative overflow-hidden group">
+              <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-cyan-400" />
                   Current Prices
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="bg-green-500/20 rounded-lg p-4 border border-green-500/30">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-sm text-green-300 font-medium">YES</div>
-                      <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">{yesPercentage}%</div>
+              <CardContent className="space-y-4 relative">
+                {/* YES Price with Confidence Ring */}
+                <div className="relative p-5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 group/yes hover:scale-105 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent rounded-xl opacity-0 group-hover/yes:opacity-100 transition-opacity" />
+                  <div className="flex items-center justify-between relative">
+                    <div className="flex-1">
+                      <div className="text-xs text-emerald-300 font-medium mb-2 flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        YES
+                      </div>
+                      <div className="text-3xl font-bold text-emerald-400">
+                        {yesPercentage}%
+                      </div>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-green-400" />
+                    <ConfidenceRing 
+                      confidence={parseFloat(yesPercentage)} 
+                      size={60}
+                      strokeWidth={4}
+                      showPercentage={false}
+                      className="flex-shrink-0"
+                    />
                   </div>
                 </div>
-                <div className="bg-red-500/20 rounded-lg p-4 border border-red-500/30">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-sm text-red-300 font-medium">NO</div>
-                      <div className="text-2xl font-bold bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">{noPercentage}%</div>
+
+                {/* NO Price with Confidence Ring */}
+                <div className="relative p-5 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/5 border border-rose-500/30 group/no hover:scale-105 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent rounded-xl opacity-0 group-hover/no:opacity-100 transition-opacity" />
+                  <div className="flex items-center justify-between relative">
+                    <div className="flex-1">
+                      <div className="text-xs text-rose-300 font-medium mb-2 flex items-center gap-1">
+                        <TrendingDown className="w-3 h-3" />
+                        NO
+                      </div>
+                      <div className="text-3xl font-bold text-rose-400">
+                        {noPercentage}%
+                      </div>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-red-400 rotate-180" />
+                    <ConfidenceRing 
+                      confidence={parseFloat(noPercentage)} 
+                      size={60}
+                      strokeWidth={4}
+                      showPercentage={false}
+                      className="flex-shrink-0"
+                    />
                   </div>
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
 
             {/* Trading Card */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+            <Card className="neural-glass iridescent-border backdrop-blur-sm relative overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-white">Trade</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-purple-400" />
+                  Trade
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Trade Type Toggle */}
@@ -361,8 +460,8 @@ export default function PredictionMarket() {
                     <Button
                       variant={outcome === "yes" ? "default" : "outline"}
                       className={outcome === "yes" 
-                        ? "flex-1 bg-green-500/30 text-green-300 border-green-500/50" 
-                        : "flex-1 border-purple-500/30 text-purple-300"
+                        ? "flex-1 bg-emerald-500/30 text-emerald-300 border-emerald-500/50 hover:bg-emerald-500/40" 
+                        : "flex-1 border-purple-500/30 text-purple-300 hover:border-emerald-500/50"
                       }
                       onClick={() => setOutcome("yes")}
                       data-testid="button-outcome-yes"
@@ -372,8 +471,8 @@ export default function PredictionMarket() {
                     <Button
                       variant={outcome === "no" ? "default" : "outline"}
                       className={outcome === "no" 
-                        ? "flex-1 bg-red-500/30 text-red-300 border-red-500/50" 
-                        : "flex-1 border-purple-500/30 text-purple-300"
+                        ? "flex-1 bg-rose-500/30 text-rose-300 border-rose-500/50 hover:bg-rose-500/40" 
+                        : "flex-1 border-purple-500/30 text-purple-300 hover:border-rose-500/50"
                       }
                       onClick={() => setOutcome("no")}
                       data-testid="button-outcome-no"
@@ -451,9 +550,15 @@ export default function PredictionMarket() {
                 </p>
               </CardContent>
             </Card>
+            </motion.div>
 
             {/* Leaderboard Preview */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+            <Card className="neural-glass iridescent-border backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Award className="w-5 h-5 text-fuchsia-400" />
@@ -467,6 +572,7 @@ export default function PredictionMarket() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           </div>
         </div>
       </div>
