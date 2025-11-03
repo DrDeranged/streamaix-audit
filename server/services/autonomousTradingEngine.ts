@@ -93,7 +93,7 @@ class AutonomousTradingEngine {
       }
 
       // Get market context (live prices, news, sentiment)
-      const marketContext = await marketDataService.getInstance().getMarketContext();
+      const marketContext = await marketDataService.getMarketContext();
       console.log(`📈 Market Sentiment: ${marketContext.marketSentiment.overall.toUpperCase()} (${marketContext.marketSentiment.confidence}% confidence)\n`);
 
       let totalTrades = 0;
@@ -155,12 +155,7 @@ class AutonomousTradingEngine {
     }
 
     // Generate prediction using GPT-4
-    const prediction = await aiAgentService.generatePrediction(
-      agent.id,
-      market.id,
-      market.question,
-      marketContext
-    );
+    const prediction = await aiAgentService.analyzeMarket(market, agent.id);
 
     console.log(`   🤖 ${agent.name}:`);
     console.log(`      Prediction: ${prediction.prediction} (${prediction.confidence}% confidence)`);
@@ -239,6 +234,7 @@ class AutonomousTradingEngine {
 
   /**
    * Execute a trade for an AI agent
+   * Phase 1: Simplified trading without AMM calculations
    */
   private async executeTrade(
     agent: any,
@@ -249,32 +245,16 @@ class AutonomousTradingEngine {
     reasoning: string
   ): Promise<boolean> {
     try {
-      // Calculate how many shares we can buy with this amount
-      const sharesReceived = ammService.calculateBuyShares(
-        market.yesLiquidity,
-        market.noLiquidity,
-        amount,
-        side
-      );
+      // Phase 1: Simple position recording without AMM
+      // Calculate shares: 1 STREAM = 1 share (simplified for Phase 1)
+      const sharesReceived = Math.round(amount);
+      const sharePrice = 5000; // 50% in basis points (5000 = 50%)
+      const fee = Math.round(amount * 0.005); // 0.5% platform fee
 
-      if (sharesReceived === 0) {
-        return false;
-      }
-
-      // Calculate new liquidity after trade
-      const { yesLiquidity, noLiquidity } = ammService.executeSwap(
-        market.yesLiquidity,
-        market.noLiquidity,
-        amount,
-        side
-      );
-
-      // Update market liquidity and stats
+      // Update market stats (without AMM liquidity changes for now)
       await db
         .update(predictionMarkets)
         .set({
-          yesLiquidity,
-          noLiquidity,
           totalVolume: market.totalVolume + amount,
           totalTrades: market.totalTrades + 1
         })
@@ -284,7 +264,7 @@ class AutonomousTradingEngine {
       await db
         .update(aiAgents)
         .set({
-          totalVolume: agent.totalVolume + amount,
+          totalVolume: agent.totalVolume + Math.round(amount),
           totalPredictions: agent.totalPredictions + 1,
           updatedAt: new Date()
         })
@@ -297,10 +277,13 @@ class AutonomousTradingEngine {
         .where(
           and(
             eq(aiPositions.agentId, agent.id),
-            eq(aiPositions.marketId, market.id)
+            eq(aiPositions.marketId, market.id),
+            eq(aiPositions.outcome, side)
           )
         )
         .limit(1);
+
+      let positionId: string;
 
       if (existingPosition.length > 0) {
         // Update existing position
@@ -309,34 +292,43 @@ class AutonomousTradingEngine {
           .update(aiPositions)
           .set({
             shares: pos.shares + sharesReceived,
-            averagePrice: (pos.averagePrice * pos.shares + amount) / (pos.shares + sharesReceived),
+            totalInvested: pos.totalInvested + Math.round(amount),
             updatedAt: new Date()
           })
           .where(eq(aiPositions.id, pos.id));
+        positionId = pos.id;
       } else {
         // Create new position
-        await db.insert(aiPositions).values({
+        const [newPosition] = await db.insert(aiPositions).values({
           agentId: agent.id,
           marketId: market.id,
-          side,
+          outcome: side,
           shares: sharesReceived,
-          averagePrice: amount / sharesReceived,
+          averagePrice: sharePrice,
+          totalInvested: Math.round(amount),
+          currentValue: 0,
+          realizedPnl: 0,
+          unrealizedPnl: 0,
+          status: 'open',
           createdAt: new Date(),
           updatedAt: new Date()
-        });
+        }).returning();
+        positionId = newPosition.id;
       }
 
       // Record trade
       await db.insert(aiTrades).values({
         agentId: agent.id,
         marketId: market.id,
-        side,
-        amount,
+        positionId,
+        tradeType: 'buy',
+        outcome: side,
         shares: sharesReceived,
-        price: amount / sharesReceived,
-        confidence,
-        reasoning,
-        timestamp: new Date()
+        price: sharePrice,
+        streamAmount: Math.round(amount),
+        fee,
+        reasoning: `${reasoning} (Confidence: ${confidence.toFixed(1)}%)`,
+        createdAt: new Date()
       });
 
       return true;

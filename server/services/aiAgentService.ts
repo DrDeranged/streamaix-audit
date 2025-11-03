@@ -164,7 +164,7 @@ Provide your analysis in JSON format:
 
       return {
         prediction: analysis.prediction,
-        confidence: analysis.confidence,
+        confidence: analysis.confidence * 100, // Convert from 0-1 to 0-100 percentage
         reasoning: analysis.reasoning,
         analysisData: {
           keyFactors: analysis.keyFactors,
@@ -238,7 +238,7 @@ Provide your analysis in JSON format:
         }).returning();
 
         predictions.push(prediction);
-        console.log(`✅ ${agent.name} predicts ${analysis.prediction} with ${(analysis.confidence * 100).toFixed(1)}% confidence`);
+        console.log(`✅ ${agent.name} predicts ${analysis.prediction} with ${analysis.confidence.toFixed(1)}% confidence`);
 
       } catch (error) {
         console.error(`Error generating prediction for agent ${agent.name}:`, error);
