@@ -8631,6 +8631,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // WAITLIST ROUTES
+  // =============================================================================
+  
+  app.post("/api/waitlist", asyncHandler(async (req: Request, res: Response) => {
+    const { email, name, referralSource } = req.body;
+    
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Check if email already exists
+    const existing = await storage.getWaitlistByEmail(email.toLowerCase());
+    if (existing) {
+      return res.status(409).json({ error: "Email already registered on waitlist" });
+    }
+
+    // Create waitlist entry
+    const entry = await storage.createWaitlistEntry({
+      email: email.toLowerCase(),
+      name: name || null,
+      referralSource: referralSource || 'landing_page'
+    });
+
+    res.json({
+      success: true,
+      message: "Successfully joined the waitlist!",
+      entry: {
+        id: entry.id,
+        email: entry.email,
+        createdAt: entry.createdAt
+      }
+    });
+  }));
+
+  app.get("/api/waitlist/count", asyncHandler(async (req: Request, res: Response) => {
+    const count = await storage.getWaitlistCount();
+    res.json({
+      success: true,
+      count
+    });
+  }));
+
+  // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   
