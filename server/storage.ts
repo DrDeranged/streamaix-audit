@@ -112,7 +112,11 @@ import {
   // Blog Posts
   blogPosts,
   type BlogPost,
-  type InsertBlogPost
+  type InsertBlogPost,
+  // Waitlist
+  waitlist,
+  type Waitlist,
+  type InsertWaitlist
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -469,6 +473,12 @@ export interface IStorage {
     userId: string;
     platform: string;
   }): Promise<any>;
+
+  // Waitlist operations
+  createWaitlistEntry(data: InsertWaitlist): Promise<Waitlist>;
+  getWaitlistEntries(limit?: number, offset?: number): Promise<Waitlist[]>;
+  getWaitlistCount(): Promise<number>;
+  getWaitlistByEmail(email: string): Promise<Waitlist | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2691,6 +2701,39 @@ export class DatabaseStorage implements IStorage {
     
     // Return limited results
     return feedItems.slice(options.offset, options.offset + options.limit);
+  }
+
+  // Waitlist operations
+  async createWaitlistEntry(data: InsertWaitlist): Promise<Waitlist> {
+    const [entry] = await db
+      .insert(waitlist)
+      .values(data)
+      .returning();
+    return entry;
+  }
+
+  async getWaitlistEntries(limit: number = 100, offset: number = 0): Promise<Waitlist[]> {
+    return await db
+      .select()
+      .from(waitlist)
+      .orderBy(desc(waitlist.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getWaitlistCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(waitlist);
+    return result?.count || 0;
+  }
+
+  async getWaitlistByEmail(email: string): Promise<Waitlist | undefined> {
+    const [entry] = await db
+      .select()
+      .from(waitlist)
+      .where(eq(waitlist.email, email));
+    return entry || undefined;
   }
 }
 
