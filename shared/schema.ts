@@ -4749,6 +4749,23 @@ export const insertAiTradeSchema = createInsertSchema(aiTrades).omit({
   createdAt: true,
 });
 
+// Waitlist table for email collection
+export const waitlist = pgTable("waitlist", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  referralSource: text("referral_source"), // landing_page, twitter, direct, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
+export type Waitlist = typeof waitlist.$inferSelect;
+
 export type InsertPredictionMarket = z.infer<typeof insertPredictionMarketSchema>;
 export type PredictionMarket = typeof predictionMarkets.$inferSelect;
 
