@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Mail, Brain, Link2, Shield, Users, Target, TrendingUp, BarChart3, FileText, LayoutDashboard, Sparkles, Hexagon } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { WaitlistModal } from "@/components/WaitlistModal";
 
 export function HeroSection() {
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  
   const scrollToProcessor = () => {
     document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -68,7 +72,7 @@ export function HeroSection() {
             <Button 
               size="lg"
               variant="outline"
-              onClick={() => window.location.href = 'mailto:arslandin.founder@streamaix.com?subject=StreamAiX Waitlist&body=Hi! I would like to join the StreamAiX waitlist.'}
+              onClick={() => setWaitlistOpen(true)}
               className="w-full sm:w-auto px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-white/20 dark:hover:bg-white/10 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               data-testid="button-join-waitlist"
             >
@@ -148,6 +152,9 @@ export function HeroSection() {
           </div>
         </motion.div>
       </div>
+
+      {/* Waitlist Modal */}
+      <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
     </section>
   );
 }
