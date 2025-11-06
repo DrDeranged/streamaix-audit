@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, Eye, Mail, Calendar, CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
 
 const ADMIN_USERNAMES = ['arslan'];
 
@@ -18,9 +19,7 @@ export default function NewsletterAdmin() {
   const [, setLocation] = useLocation();
 
   // Fetch current user
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['/api/users/me'],
-  });
+  const { user, isLoading: userLoading } = useAuth();
 
   // Check if user is admin and redirect if not
   useEffect(() => {
