@@ -479,6 +479,14 @@ export interface IStorage {
   getWaitlistEntries(limit?: number, offset?: number): Promise<Waitlist[]>;
   getWaitlistCount(): Promise<number>;
   getWaitlistByEmail(email: string): Promise<Waitlist | undefined>;
+  getSubscribedWaitlist(): Promise<Waitlist[]>;
+  unsubscribeFromNewsletter(token: string): Promise<boolean>;
+  updateWaitlistUnsubscribeToken(email: string, token: string): Promise<void>;
+  
+  // Newsletter operations
+  createNewsletter(data: any): Promise<any>;
+  getNewsletters(limit?: number, offset?: number): Promise<any[]>;
+  getNewsletterById(id: string): Promise<any | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2734,6 +2742,59 @@ export class DatabaseStorage implements IStorage {
       .from(waitlist)
       .where(eq(waitlist.email, email));
     return entry || undefined;
+  }
+
+  async getSubscribedWaitlist(): Promise<Waitlist[]> {
+    return await db
+      .select()
+      .from(waitlist)
+      .where(eq(waitlist.unsubscribed, false))
+      .orderBy(desc(waitlist.createdAt));
+  }
+
+  async unsubscribeFromNewsletter(token: string): Promise<boolean> {
+    const result = await db
+      .update(waitlist)
+      .set({ unsubscribed: true })
+      .where(eq(waitlist.unsubscribeToken, token))
+      .returning();
+    return result.length > 0;
+  }
+
+  async updateWaitlistUnsubscribeToken(email: string, token: string): Promise<void> {
+    await db
+      .update(waitlist)
+      .set({ unsubscribeToken: token })
+      .where(eq(waitlist.email, email));
+  }
+
+  // Newsletter operations
+  async createNewsletter(data: any): Promise<any> {
+    const { newsletters } = await import('@shared/schema');
+    const [newsletter] = await db
+      .insert(newsletters)
+      .values(data)
+      .returning();
+    return newsletter;
+  }
+
+  async getNewsletters(limit: number = 50, offset: number = 0): Promise<any[]> {
+    const { newsletters } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(newsletters)
+      .orderBy(desc(newsletters.sentAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getNewsletterById(id: string): Promise<any | undefined> {
+    const { newsletters } = await import('@shared/schema');
+    const [newsletter] = await db
+      .select()
+      .from(newsletters)
+      .where(eq(newsletters.id, id));
+    return newsletter || undefined;
   }
 }
 
