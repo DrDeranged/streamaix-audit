@@ -39,6 +39,7 @@ const PredictionMarket = React.lazy(() => import("@/pages/prediction-market"));
 const ChatPage = React.lazy(() => import("@/pages/chat"));
 const Discover = React.lazy(() => import("@/pages/discover"));
 const Summaries = React.lazy(() => import("@/pages/summaries"));
+const NewsletterAdmin = React.lazy(() => import("@/pages/newsletter-admin"));
 
 function Router() {
   return (
@@ -164,6 +165,12 @@ function Router() {
       <Route path="/chat">
         <Suspense fallback={<DashboardSkeleton />}>
           <ChatPage />
+        </Suspense>
+      </Route>
+      
+      <Route path="/newsletter-admin">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <NewsletterAdmin />
         </Suspense>
       </Route>
       

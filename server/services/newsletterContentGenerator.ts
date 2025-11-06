@@ -1,4 +1,4 @@
-import { getTopMovers, getCryptoMarketData } from './cryptoDataService';
+import { marketDataService } from './marketDataService';
 
 export interface MarketHighlight {
   symbol: string;
@@ -24,50 +24,36 @@ export interface NewsletterContent {
  */
 export async function generateNewsletterContent(): Promise<NewsletterContent> {
   try {
-    // Fetch top movers and market data
-    const [topMovers, marketData] = await Promise.all([
-      getTopMovers(10),
-      getCryptoMarketData(['bitcoin', 'ethereum', 'solana', 'cardano', 'polkadot'])
-    ]);
+    // Fetch crypto market data from CoinGecko/CoinMarketCap
+    const cryptoData = await marketDataService.getCryptoQuotes(['bitcoin', 'ethereum', 'solana', 'cardano', 'polkadot', 'ripple', 'dogecoin', 'shiba-inu', 'polygon', 'avalanche']);
+    
+    if (!cryptoData || cryptoData.length === 0) {
+      throw new Error('No crypto data available');
+    }
 
-    // Separate gainers and losers
-    const topGainers = topMovers
-      .filter(coin => coin.changePercent > 0)
-      .slice(0, 3)
-      .map(coin => ({
-        symbol: coin.symbol.toUpperCase(),
-        name: coin.name,
-        price: coin.price,
-        change24h: coin.change24h,
-        changePercent: coin.changePercent,
-        isPositive: true
-      }));
-
-    const topLosers = topMovers
-      .filter(coin => coin.changePercent < 0)
-      .slice(0, 3)
-      .map(coin => ({
-        symbol: coin.symbol.toUpperCase(),
-        name: coin.name,
-        price: coin.price,
-        change24h: coin.change24h,
-        changePercent: coin.changePercent,
-        isPositive: false
-      }));
-
-    // Get major coin highlights
-    const marketHighlights: MarketHighlight[] = marketData.map(coin => ({
+    // Convert to market highlights format
+    const allCoins: MarketHighlight[] = cryptoData.map(coin => ({
       symbol: coin.symbol.toUpperCase(),
       name: coin.name,
       price: coin.price,
-      change24h: coin.change24h,
-      changePercent: coin.changePercent,
-      isPositive: coin.changePercent > 0
+      change24h: (coin.price * coin.percentChange24h) / 100,
+      changePercent: coin.percentChange24h,
+      isPositive: coin.percentChange24h > 0
     }));
 
+    // Separate gainers and losers
+    const gainers = allCoins.filter(c => c.isPositive).sort((a, b) => b.changePercent - a.changePercent);
+    const losers = allCoins.filter(c => !c.isPositive).sort((a, b) => a.changePercent - b.changePercent);
+
+    const topGainers = gainers.slice(0, 3);
+    const topLosers = losers.slice(0, 3);
+
+    // Get major coin highlights (BTC, ETH, SOL)
+    const marketHighlights = allCoins.slice(0, 3);
+
     // Generate market summary
-    const btcData = marketData.find(c => c.symbol === 'btc');
-    const ethData = marketData.find(c => c.symbol === 'eth');
+    const btcData = allCoins.find(c => c.symbol === 'BTC');
+    const ethData = allCoins.find(c => c.symbol === 'ETH');
     
     const marketSummary = generateMarketSummary(btcData, ethData, topGainers, topLosers);
 
