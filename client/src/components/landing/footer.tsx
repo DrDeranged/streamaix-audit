@@ -3,7 +3,7 @@ import { Wallet, Mail, Target, TrendingUp, BarChart3, LayoutDashboard, Sparkles,
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useWeb3 } from "@/hooks/useWeb3";
-import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 
 const ADMIN_USERNAMES = ['arslan'];
 
@@ -11,9 +11,7 @@ export function Footer() {
   const { isConnected, connectWallet } = useWeb3();
   
   // Check if current user is admin
-  const { data: user } = useQuery({
-    queryKey: ['/api/users/me'],
-  });
+  const { user } = useAuth();
   
   const isAdmin = user && ADMIN_USERNAMES.includes(user.username);
   
