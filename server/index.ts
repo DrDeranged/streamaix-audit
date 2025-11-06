@@ -76,6 +76,17 @@ app.use((req, res, next) => {
   // Auto-seed database if empty (runs on every deployment)
   await autoSeedDatabase();
 
+  // Start newsletter scheduler for automated sends
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    console.log('📧 Starting newsletter scheduler...');
+    const { newsletterScheduler } = await import('./services/newsletterScheduler');
+    newsletterScheduler.start();
+    console.log('✅ Newsletter scheduler active - Sends Monday & Friday 8am EST');
+  } else {
+    console.log('⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)');
+  }
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

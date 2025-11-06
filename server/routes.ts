@@ -8653,11 +8653,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(409).json({ error: "Email already registered on waitlist" });
     }
 
+    // Generate unsubscribe token
+    const unsubscribeToken = Math.random().toString(36).substring(2, 15) + 
+                             Math.random().toString(36).substring(2, 15);
+
     // Create waitlist entry
     const entry = await storage.createWaitlistEntry({
       email: email.toLowerCase(),
       name: name || null,
-      referralSource: referralSource || 'landing_page'
+      referralSource: referralSource || 'landing_page',
+      unsubscribed: false,
+      unsubscribeToken
     });
 
     // Send confirmation email to user and notification to admin
@@ -8688,6 +8694,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({
       success: true,
       count
+    });
+  }));
+
+  app.post("/api/waitlist/unsubscribe/:token", asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    
+    if (!token) {
+      return res.status(400).json({ error: "Unsubscribe token is required" });
+    }
+
+    const success = await storage.unsubscribeFromNewsletter(token);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: "Successfully unsubscribed from newsletters"
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: "Invalid unsubscribe token"
+      });
+    }
+  }));
+
+  // =============================================================================
+  // NEWSLETTER ROUTES
+  // =============================================================================
+
+  app.post("/api/newsletter/send", asyncHandler(async (req: Request, res: Response) => {
+    const { newsletterService } = await import('./services/newsletterService');
+    
+    console.log('📧 Manual newsletter send initiated');
+    const result = await newsletterService.sendToWaitlist(storage);
+    
+    res.json({
+      success: result.success,
+      sentCount: result.sentCount,
+      failedCount: result.failedCount,
+      newsletterId: result.newsletterId,
+      errors: result.errors
+    });
+  }));
+
+  app.post("/api/newsletter/test", asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const { newsletterService } = await import('./services/newsletterService');
+    
+    try {
+      await newsletterService.sendTestNewsletter(email);
+      res.json({
+        success: true,
+        message: `Test newsletter sent to ${email}`
+      });
+    } catch (error) {
+      console.error('Test newsletter failed:', error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to send test newsletter"
+      });
+    }
+  }));
+
+  app.get("/api/newsletter/preview", asyncHandler(async (req: Request, res: Response) => {
+    const { generateNewsletterContent } = await import('./services/newsletterContentGenerator');
+    const { generateNewsletterHTML } = await import('./services/newsletterTemplate');
+    
+    const content = await generateNewsletterContent();
+    const html = generateNewsletterHTML(content, 'preview-token-123');
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  }));
+
+  app.get("/api/newsletter/status", asyncHandler(async (req: Request, res: Response) => {
+    const { newsletterScheduler } = await import('./services/newsletterScheduler');
+    const status = newsletterScheduler.getStatus();
+    
+    res.json(status);
+  }));
+
+  app.get("/api/newsletter/history", asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const newsletters = await storage.getNewsletters(limit, offset);
+    
+    res.json({
+      newsletters,
+      limit,
+      offset
     });
   }));
 
