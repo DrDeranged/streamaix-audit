@@ -1,11 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Wallet, Mail, Target, TrendingUp, BarChart3, LayoutDashboard, Sparkles, Box, MessageSquare } from "lucide-react";
+import { Wallet, Mail, Target, TrendingUp, BarChart3, LayoutDashboard, Sparkles, Box, MessageSquare, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useWeb3 } from "@/hooks/useWeb3";
+import { useQuery } from "@tanstack/react-query";
+
+const ADMIN_USERNAMES = ['arslan'];
 
 export function Footer() {
   const { isConnected, connectWallet } = useWeb3();
+  
+  // Check if current user is admin
+  const { data: user } = useQuery({
+    queryKey: ['/api/user'],
+  });
+  
+  const isAdmin = user && ADMIN_USERNAMES.includes(user.username);
   
   return (
     <footer className="py-20 bg-transparent text-slate-900 dark:text-white relative overflow-hidden border-t border-slate-200/50 dark:border-slate-800/50">
@@ -233,10 +243,27 @@ export function Footer() {
           viewport={{ once: true }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-gray-400 text-sm">
-              © 2025 StreamAiX. Built with{" "}
-              <span className="text-red-400 animate-pulse">❤️</span>{" "}
-              for the decentralized future.
+            <div className="text-gray-400 text-sm flex items-center gap-3 flex-wrap justify-center">
+              <span>
+                © 2025 StreamAiX. Built with{" "}
+                <span className="text-red-400 animate-pulse">❤️</span>{" "}
+                for the decentralized future.
+              </span>
+              
+              {/* Admin Link - Only visible to admin users */}
+              {isAdmin && (
+                <>
+                  <span className="text-gray-600">·</span>
+                  <Link 
+                    href="/newsletter-admin" 
+                    className="group inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-r from-amber-500/10 to-orange-600/10 border border-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-amber-200 font-semibold text-xs transition-all duration-200 hover:scale-105"
+                    data-testid="link-admin-panel"
+                  >
+                    <Settings className="w-3 h-3" />
+                    Admin
+                  </Link>
+                </>
+              )}
             </div>
             
             <div className="text-gray-400 text-sm">
