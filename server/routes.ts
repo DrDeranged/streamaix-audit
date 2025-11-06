@@ -8815,6 +8815,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // ADMIN DASHBOARD ENDPOINTS
+  // =============================================================================
+  
+  app.get("/api/admin/stats", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+    // Get platform-wide statistics
+    const stats = await storage.getAdminStats();
+    res.json({ success: true, stats });
+  }));
+  
+  app.get("/api/admin/activity", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    // Get recent platform activity
+    const activities = await storage.getAdminActivity(limit, offset);
+    res.json({ success: true, activities, limit, offset });
+  }));
+
+  // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   

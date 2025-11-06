@@ -487,6 +487,32 @@ export interface IStorage {
   createNewsletter(data: any): Promise<any>;
   getNewsletters(limit?: number, offset?: number): Promise<any[]>;
   getNewsletterById(id: string): Promise<any | undefined>;
+  
+  // Admin Dashboard operations
+  getAdminStats(): Promise<{
+    totalUsers: number;
+    totalSummaries: number;
+    totalBounties: number;
+    totalMarkets: number;
+    totalTrades: number;
+    totalVolume: number;
+    activeUsers24h: number;
+    newUsers24h: number;
+    summariesCreated24h: number;
+    bountiesCreated24h: number;
+    marketsCreated24h: number;
+  }>;
+  getAdminActivity(limit?: number, offset?: number): Promise<Array<{
+    id: string;
+    type: string;
+    title: string;
+    description: string;
+    userId?: string;
+    username?: string;
+    avatar?: string;
+    createdAt: Date;
+    metadata?: any;
+  }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2795,6 +2821,203 @@ export class DatabaseStorage implements IStorage {
       .from(newsletters)
       .where(eq(newsletters.id, id));
     return newsletter || undefined;
+  }
+  
+  // Admin Dashboard operations
+  async getAdminStats() {
+    const { predictionMarkets, marketTrades } = await import('@shared/schema');
+    
+    // Get total counts
+    const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const totalSummaries = await db.select({ count: sql<number>`count(*)` }).from(summaries);
+    const totalBounties = await db.select({ count: sql<number>`count(*)` }).from(bounties);
+    const totalMarkets = await db.select({ count: sql<number>`count(*)` }).from(predictionMarkets);
+    const totalTrades = await db.select({ count: sql<number>`count(*)` }).from(marketTrades);
+    
+    // Get total trading volume
+    const volumeResult = await db
+      .select({ total: sql<number>`COALESCE(SUM(stream_amount), 0)` })
+      .from(marketTrades);
+    
+    // Get 24h activity counts
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
+    const activeUsers24h = await db
+      .select({ count: sql<number>`count(DISTINCT user_id)` })
+      .from(userInteractions)
+      .where(gte(userInteractions.createdAt, oneDayAgo));
+    
+    const newUsers24h = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(gte(users.createdAt, oneDayAgo));
+    
+    const summariesCreated24h = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(summaries)
+      .where(gte(summaries.createdAt, oneDayAgo));
+    
+    const bountiesCreated24h = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(bounties)
+      .where(gte(bounties.createdAt, oneDayAgo));
+    
+    const marketsCreated24h = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(predictionMarkets)
+      .where(gte(predictionMarkets.createdAt, oneDayAgo));
+    
+    return {
+      totalUsers: totalUsers[0]?.count || 0,
+      totalSummaries: totalSummaries[0]?.count || 0,
+      totalBounties: totalBounties[0]?.count || 0,
+      totalMarkets: totalMarkets[0]?.count || 0,
+      totalTrades: totalTrades[0]?.count || 0,
+      totalVolume: volumeResult[0]?.total || 0,
+      activeUsers24h: activeUsers24h[0]?.count || 0,
+      newUsers24h: newUsers24h[0]?.count || 0,
+      summariesCreated24h: summariesCreated24h[0]?.count || 0,
+      bountiesCreated24h: bountiesCreated24h[0]?.count || 0,
+      marketsCreated24h: marketsCreated24h[0]?.count || 0,
+    };
+  }
+  
+  async getAdminActivity(limit: number = 50, offset: number = 0) {
+    const { predictionMarkets } = await import('@shared/schema');
+    
+    // Collect activities from different sources
+    const activities: Array<{
+      id: string;
+      type: string;
+      title: string;
+      description: string;
+      userId?: string;
+      username?: string;
+      avatar?: string;
+      createdAt: Date;
+      metadata?: any;
+    }> = [];
+    
+    // Get recent summaries
+    const recentSummaries = await db
+      .select({
+        id: summaries.id,
+        title: summaries.title,
+        creatorId: summaries.creatorId,
+        createdAt: summaries.createdAt,
+        username: users.username,
+        avatar: users.avatar,
+      })
+      .from(summaries)
+      .leftJoin(users, eq(summaries.creatorId, users.id))
+      .orderBy(desc(summaries.createdAt))
+      .limit(20);
+    
+    recentSummaries.forEach(s => {
+      activities.push({
+        id: s.id,
+        type: 'summary',
+        title: 'New AI Summary Created',
+        description: s.title,
+        userId: s.creatorId || undefined,
+        username: s.username || undefined,
+        avatar: s.avatar || undefined,
+        createdAt: s.createdAt || new Date(),
+      });
+    });
+    
+    // Get recent bounties
+    const recentBounties = await db
+      .select({
+        id: bounties.id,
+        title: bounties.title,
+        creatorId: bounties.creatorId,
+        createdAt: bounties.createdAt,
+        reward: bounties.reward,
+        status: bounties.status,
+        username: users.username,
+        avatar: users.avatar,
+      })
+      .from(bounties)
+      .leftJoin(users, eq(bounties.creatorId, users.id))
+      .orderBy(desc(bounties.createdAt))
+      .limit(20);
+    
+    recentBounties.forEach(b => {
+      activities.push({
+        id: b.id,
+        type: 'bounty',
+        title: `Bounty ${b.status === 'completed' ? 'Completed' : 'Created'}`,
+        description: b.title,
+        userId: b.creatorId || undefined,
+        username: b.username || undefined,
+        avatar: b.avatar || undefined,
+        createdAt: b.createdAt || new Date(),
+        metadata: { reward: b.reward, status: b.status },
+      });
+    });
+    
+    // Get recent prediction markets
+    const recentMarkets = await db
+      .select({
+        id: predictionMarkets.id,
+        question: predictionMarkets.question,
+        creatorId: predictionMarkets.creatorId,
+        createdAt: predictionMarkets.createdAt,
+        status: predictionMarkets.status,
+        username: users.username,
+        avatar: users.avatar,
+      })
+      .from(predictionMarkets)
+      .leftJoin(users, eq(predictionMarkets.creatorId, users.id))
+      .orderBy(desc(predictionMarkets.createdAt))
+      .limit(20);
+    
+    recentMarkets.forEach(m => {
+      activities.push({
+        id: m.id,
+        type: 'market',
+        title: `Prediction Market ${m.status === 'resolved' ? 'Resolved' : 'Created'}`,
+        description: m.question,
+        userId: m.creatorId || undefined,
+        username: m.username || undefined,
+        avatar: m.avatar || undefined,
+        createdAt: m.createdAt || new Date(),
+        metadata: { status: m.status },
+      });
+    });
+    
+    // Get recent user signups
+    const recentUsers = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        avatar: users.avatar,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(15);
+    
+    recentUsers.forEach(u => {
+      activities.push({
+        id: u.id,
+        type: 'user',
+        title: 'New User Joined',
+        description: `@${u.username} joined the platform`,
+        userId: u.id,
+        username: u.username,
+        avatar: u.avatar || undefined,
+        createdAt: u.createdAt || new Date(),
+      });
+    });
+    
+    // Sort all activities by date and apply pagination
+    const sortedActivities = activities
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(offset, offset + limit);
+    
+    return sortedActivities;
   }
 }
 
