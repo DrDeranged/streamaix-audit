@@ -4755,6 +4755,8 @@ export const waitlist = pgTable("waitlist", {
   email: text("email").notNull().unique(),
   name: text("name"),
   referralSource: text("referral_source"), // landing_page, twitter, direct, etc.
+  unsubscribed: boolean("unsubscribed").default(false),
+  unsubscribeToken: text("unsubscribe_token").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -4765,6 +4767,26 @@ export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
 
 export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
 export type Waitlist = typeof waitlist.$inferSelect;
+
+// Newsletter tracking table
+export const newsletters = pgTable("newsletters", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  subject: text("subject").notNull(),
+  content: text("content").notNull(), // HTML content
+  marketData: jsonb("market_data"), // Cached market data used in newsletter
+  sentAt: timestamp("sent_at").defaultNow(),
+  recipientCount: integer("recipient_count").default(0),
+  scheduledFor: timestamp("scheduled_for"),
+  status: text("status").notNull().default("draft"), // draft, scheduled, sent, failed
+});
+
+export const insertNewsletterSchema = createInsertSchema(newsletters).omit({
+  id: true,
+  sentAt: true,
+});
+
+export type InsertNewsletter = z.infer<typeof insertNewsletterSchema>;
+export type Newsletter = typeof newsletters.$inferSelect;
 
 export type InsertPredictionMarket = z.infer<typeof insertPredictionMarketSchema>;
 export type PredictionMarket = typeof predictionMarkets.$inferSelect;
