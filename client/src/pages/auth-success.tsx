@@ -10,8 +10,8 @@ export default function AuthSuccess() {
     const token = urlParams.get('token');
 
     if (token) {
-      // Store the token in localStorage
-      localStorage.setItem('auth-token', token);
+      // Store the token in localStorage (using auth_token key for consistency)
+      localStorage.setItem('auth_token', token);
       
       // Redirect to home page
       setLocation('/');
