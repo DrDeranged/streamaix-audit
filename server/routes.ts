@@ -8660,6 +8660,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       referralSource: referralSource || 'landing_page'
     });
 
+    // Send confirmation email to user and notification to admin
+    try {
+      const { emailService } = await import('./services/emailService');
+      await Promise.all([
+        emailService.sendWaitlistConfirmation(entry.email, entry.name || undefined),
+        emailService.sendAdminNotification(entry.email, entry.name || undefined)
+      ]);
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the request if emails fail - user is still on the waitlist
+    }
+
     res.json({
       success: true,
       message: "Successfully joined the waitlist!",
