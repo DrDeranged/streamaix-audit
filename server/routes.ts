@@ -89,6 +89,26 @@ const asyncHandler = (fn: (req: any, res: Response, next: Function) => Promise<a
     Promise.resolve(fn(req, res, next)).catch((err: any) => next(err));
   };
 
+// Admin usernames allowed to access admin endpoints
+const ADMIN_USERNAMES = ['arslan'];
+
+// Helper function to check if user is admin
+const isAdmin = (req: AuthRequest): boolean => {
+  if (!req.user) return false;
+  return ADMIN_USERNAMES.includes(req.user.username);
+};
+
+// Middleware to require admin access
+const requireAdmin = (req: AuthRequest, res: Response, next: Function) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  if (!isAdmin(req)) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log('\n🚀 ========== STARTING ROUTE REGISTRATION ==========');
   console.log('📂 Current working directory:', process.cwd());
@@ -8720,13 +8740,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
-  // NEWSLETTER ROUTES
+  // NEWSLETTER ROUTES (ADMIN ONLY)
   // =============================================================================
 
-  app.post("/api/newsletter/send", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/newsletter/send", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { newsletterService } = await import('./services/newsletterService');
     
-    console.log('📧 Manual newsletter send initiated');
+    console.log('📧 Manual newsletter send initiated by admin:', req.user?.username);
     const result = await newsletterService.sendToWaitlist(storage);
     
     res.json({
@@ -8738,7 +8758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
-  app.post("/api/newsletter/test", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/newsletter/test", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { email } = req.body;
     
     if (!email) {
@@ -8748,6 +8768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { newsletterService } = await import('./services/newsletterService');
     
     try {
+      console.log('📧 Test newsletter requested by admin:', req.user?.username);
       await newsletterService.sendTestNewsletter(email);
       res.json({
         success: true,
@@ -8762,7 +8783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.get("/api/newsletter/preview", asyncHandler(async (req: Request, res: Response) => {
+  app.get("/api/newsletter/preview", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { generateNewsletterContent } = await import('./services/newsletterContentGenerator');
     const { generateNewsletterHTML } = await import('./services/newsletterTemplate');
     
@@ -8773,14 +8794,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(html);
   }));
 
-  app.get("/api/newsletter/status", asyncHandler(async (req: Request, res: Response) => {
+  app.get("/api/newsletter/status", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { newsletterScheduler } = await import('./services/newsletterScheduler');
     const status = newsletterScheduler.getStatus();
     
     res.json(status);
   }));
 
-  app.get("/api/newsletter/history", asyncHandler(async (req: Request, res: Response) => {
+  app.get("/api/newsletter/history", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     
