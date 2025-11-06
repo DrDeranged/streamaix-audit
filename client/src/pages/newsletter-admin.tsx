@@ -1,17 +1,104 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Eye, Mail, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Send, Eye, Mail, Calendar, CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
+
+const ADMIN_USERNAMES = ['arslan'];
 
 export default function NewsletterAdmin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [testEmail, setTestEmail] = useState('');
+  const [, setLocation] = useLocation();
+
+  // Fetch current user
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/user'],
+  });
+
+  // Check if user is admin and redirect if not
+  useEffect(() => {
+    if (!userLoading && user) {
+      const isAdmin = ADMIN_USERNAMES.includes(user.username);
+      if (!isAdmin) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page",
+          variant: "destructive"
+        });
+        setLocation('/dashboard');
+      }
+    }
+  }, [user, userLoading, setLocation, toast]);
+
+  // Show loading while checking auth
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-white">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Checking permissions...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show unauthorized if not logged in
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-6">
+        <Card className="neural-glass border-red-500/20 max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-400">
+              <ShieldAlert className="w-6 h-6" />
+              Authentication Required
+            </CardTitle>
+            <CardDescription>Please log in to access this page</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => setLocation('/auth')}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show unauthorized if not admin
+  const isAdmin = ADMIN_USERNAMES.includes(user.username);
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-6">
+        <Card className="neural-glass border-red-500/20 max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-400">
+              <ShieldAlert className="w-6 h-6" />
+              Access Denied
+            </CardTitle>
+            <CardDescription>This page is restricted to administrators only</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => setLocation('/dashboard')}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              Go to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Fetch newsletter status
   const { data: status } = useQuery({
