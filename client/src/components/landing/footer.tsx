@@ -12,7 +12,7 @@ export function Footer() {
   
   // Check if current user is admin
   const { data: user } = useQuery({
-    queryKey: ['/api/user'],
+    queryKey: ['/api/users/me'],
   });
   
   const isAdmin = user && ADMIN_USERNAMES.includes(user.username);

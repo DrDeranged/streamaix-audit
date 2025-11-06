@@ -19,7 +19,7 @@ export default function NewsletterAdmin() {
 
   // Fetch current user
   const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['/api/user'],
+    queryKey: ['/api/users/me'],
   });
 
   // Check if user is admin and redirect if not
