@@ -241,7 +241,7 @@ export function BountyFeed() {
           </h2>
 
           <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Earn <span className="text-purple-400 font-semibold">$STREAM tokens</span> by completing bounties.
+            Earn <span className="text-purple-400 font-semibold">STREAM points</span> by completing bounties.
             Create summaries, analyze content, and contribute to the ecosystem.
           </p>
         </motion.div>

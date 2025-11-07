@@ -105,7 +105,7 @@ export function Bounties() {
             Summary Bounty Board
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Earn $STREAM tokens by creating valuable summaries and completing bounties
+            Earn STREAM points by creating valuable summaries and completing bounties
           </p>
         </motion.div>
         

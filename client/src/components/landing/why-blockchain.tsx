@@ -37,7 +37,7 @@ export function WhyBlockchain() {
     {
       icon: Zap,
       title: "Instant Rewards",
-      description: "Earn $STREAM tokens for creating valuable summaries and curating content.",
+      description: "Earn STREAM points for creating valuable summaries and curating content.",
       color: "from-cyan-500 via-fuchsia-500 to-purple-500"
     }
   ];

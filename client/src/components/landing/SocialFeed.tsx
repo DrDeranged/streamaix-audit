@@ -272,7 +272,7 @@ export function SocialFeed() {
             </div>
             <div className="flex-1">
               <h3 className="text-white font-semibold text-xs mb-0.5 flex items-center gap-1.5">
-                Earn STREAM Tokens! 
+                Earn STREAM Points! 
                 <Sparkles className="w-3 h-3 text-yellow-400" />
               </h3>
               <p className="text-gray-300 text-[10px]">
