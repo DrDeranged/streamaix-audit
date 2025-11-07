@@ -4,6 +4,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import type { AgentPersonality, AgentMetadata, AgentAction } from '../types/agents';
 import { getAgentBountyEngine } from './agentBountyEngine';
 import { getAgentSocialEngine } from './agentSocialEngine';
+import { agentMarketTrader } from './agentMarketTrader';
 
 interface AgentUser {
   id: string;
@@ -456,8 +457,22 @@ export class AutonomousAgentService {
   }
   
   private async tradeMarketAction(agent: AgentUser): Promise<void> {
-    // To be extended with existing AI trading system
-    console.log(`    📈 Trading market (coming soon)`);
+    try {
+      const result = await agentMarketTrader.tradeMultipleMarkets(agent as any);
+      
+      if (result.succeeded > 0) {
+        const successTrade = result.trades.find(t => t.success);
+        if (successTrade) {
+          console.log(`    ✅ ${successTrade.message}`);
+        }
+      } else if (result.attempted > 0) {
+        console.log(`    ⏭️  Skipped trading - no favorable markets`);
+      } else {
+        console.log(`    ⚠️  No markets available`);
+      }
+    } catch (error: any) {
+      console.error(`    ❌ Trade error:`, error.message);
+    }
   }
   
   private async commentAction(agent: AgentUser): Promise<void> {
