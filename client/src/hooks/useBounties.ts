@@ -88,8 +88,8 @@ export function useBounties() {
       if (!addresses?.bountyBoard) throw new Error('BountyBoard not deployed on this network');
       
       toast({
-        title: 'Approving tokens...',
-        description: 'Please approve the $STREAM token transfer in your wallet.',
+        title: 'Approving points...',
+        description: 'Please approve the STREAM points transfer in your wallet.',
       });
 
       const approveTxHash = await contractManager.approveStream(addresses.bountyBoard, rewardInWei);

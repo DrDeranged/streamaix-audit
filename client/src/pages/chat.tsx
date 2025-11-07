@@ -97,7 +97,7 @@ export default function ChatPage() {
     "How do bounties work on StreamAiX?",
     "Analyze Bitcoin price trends",
     "What are prediction markets?",
-    "Explain the STREAM token utility",
+    "Explain the STREAM points utility",
     "How do I create AI summaries?",
     "Show me top DeFi opportunities"
   ];

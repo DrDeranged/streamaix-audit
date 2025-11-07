@@ -203,7 +203,7 @@ export class GovernanceManager {
       {
         id: '1',
         title: 'Increase Staking Rewards by 2%',
-        description: 'Proposal to increase STREAM token staking rewards from current 12% APR to 14% APR to incentivize more participation in the protocol.',
+        description: 'Proposal to increase STREAM points staking rewards from current 12% APR to 14% APR to incentivize more participation in the protocol.',
         proposer: '0x742d35Cc6Bf42532e82e94aC2D797F89C2d70c4F',
         proposerEnsName: 'alice.eth',
         category: 'PROTOCOL',
@@ -223,7 +223,7 @@ export class GovernanceManager {
       {
         id: '2',
         title: 'Treasury Allocation for AI Research',
-        description: 'Allocate 500,000 STREAM tokens from treasury to fund advanced AI research and development for next-generation content processing.',
+        description: 'Allocate 500,000 STREAM points from treasury to fund advanced AI research and development for next-generation content processing.',
         proposer: '0x891b23C429C55A987B7c4C72D76C07F47D7A2D80',
         proposerEnsName: 'bob.eth',
         category: 'TREASURY',

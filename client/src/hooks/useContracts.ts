@@ -90,7 +90,7 @@ export function useContracts() {
       
       toast({
         title: 'Transfer Initiated',
-        description: `Transferring ${amount} STREAM tokens`,
+        description: `Transferring ${amount} STREAM points`,
       });
 
       // Wait for transaction confirmation
@@ -98,7 +98,7 @@ export function useContracts() {
       
       toast({
         title: 'Transfer Successful',
-        description: `Successfully transferred ${amount} STREAM tokens`,
+        description: `Successfully transferred ${amount} STREAM points`,
       });
 
       // Reload contract data
@@ -152,14 +152,14 @@ export function useContracts() {
       
       toast({
         title: 'Staking Initiated',
-        description: `Staking ${amount} STREAM tokens`,
+        description: `Staking ${amount} STREAM points`,
       });
 
       await contractManager.waitForTransaction(stakeTxHash);
       
       toast({
         title: 'Staking Successful',
-        description: `Successfully staked ${amount} STREAM tokens`,
+        description: `Successfully staked ${amount} STREAM points`,
       });
 
       // Reload contract data
@@ -198,14 +198,14 @@ export function useContracts() {
       
       toast({
         title: 'Unstaking Initiated',
-        description: `Unstaking ${amount} STREAM tokens`,
+        description: `Unstaking ${amount} STREAM points`,
       });
 
       await contractManager.waitForTransaction(txHash);
       
       toast({
         title: 'Unstaking Successful',
-        description: `Successfully unstaked ${amount} STREAM tokens`,
+        description: `Successfully unstaked ${amount} STREAM points`,
       });
 
       // Reload contract data
