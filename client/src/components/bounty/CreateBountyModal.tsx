@@ -157,7 +157,7 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
           Create New Bounty
         </h2>
         <p className="text-sm text-gray-400">
-          Offer $STREAM tokens to creators who transform your requested content into summaries
+          Offer STREAM points to creators who transform your requested content into summaries
         </p>
       </div>
 
@@ -397,11 +397,11 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-1">
-                    {baseReward} × {tierMultiplier} = {finalReward} tokens
+                    {baseReward} × {tierMultiplier} = {finalReward} points
                   </p>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  You'll need to approve {finalReward} $STREAM tokens
+                  You'll need to approve {finalReward} STREAM points
                 </p>
                 <FormMessage />
               </FormItem>
@@ -541,7 +541,7 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
               • <strong>PREDICTION (2x):</strong> Full analysis + market predictions - maximum value
               <br />
               <br />
-              <strong>Note:</strong> Creating a bounty requires {finalReward} $STREAM tokens and two transactions:
+              <strong>Note:</strong> Creating a bounty requires {finalReward} STREAM points and two transactions:
               <br />
               1. Approve token transfer
               <br />

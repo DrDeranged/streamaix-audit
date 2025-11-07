@@ -235,7 +235,7 @@ export function PredictionMarketSection() {
           </h2>
           
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            Spend your earned STREAM tokens on binary YES/NO markets. Predict crypto trends, DeFi events, 
+            Spend your earned STREAM points on binary YES/NO markets. Predict crypto trends, DeFi events, 
             bounty outcomes, and real-world events. Build your reputation as a top predictor.
           </p>
 

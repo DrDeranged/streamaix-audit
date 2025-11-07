@@ -127,7 +127,7 @@ const steps: OnboardingStep[] = [
       "Track prediction market positions and P&L",
       "Monitor bounty completions and earnings",
       "Check referral stats and bonus rewards",
-      "See your STREAM token balance and staking",
+      "See your STREAM points balance and staking",
       "Export data for tax reporting"
     ],
     action: {
@@ -176,14 +176,14 @@ const steps: OnboardingStep[] = [
   {
     title: "Web3 & Wallet",
     subtitle: "On-Chain Ownership & DeFi Features",
-    description: "Connect your Web3 wallet to unlock decentralized features. Own knowledge assets as NFTs, participate in staking, trade on Base network, and manage your STREAM tokens.",
+    description: "Connect your Web3 wallet to unlock decentralized features. Own knowledge assets as NFTs, participate in staking, trade on Base network, and manage your STREAM points.",
     icon: Wallet,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
       "Click 'Connect Wallet' in the navbar",
       "Approve MetaMask or WalletConnect request",
       "Switch to Base network (Chain ID 8453)",
-      "View STREAM token balance in real-time",
+      "View STREAM points balance in real-time",
       "Mint summaries as tradeable NFTs",
       "Stake tokens for governance and rewards"
     ],
