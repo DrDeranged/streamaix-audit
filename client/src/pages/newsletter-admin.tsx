@@ -391,174 +391,298 @@ export default function NewsletterAdmin() {
 
         {/* Newsletter Section (Collapsible) */}
         <Collapsible open={newsletterOpen} onOpenChange={setNewsletterOpen}>
-          <Card className="neural-glass border-purple-500/20">
+          <Card className="neural-glass gradient-border-hot overflow-hidden">
             <CollapsibleTrigger className="w-full">
-              <CardHeader className="cursor-pointer hover:bg-purple-500/5 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 transition-all duration-300">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-purple-400" />
-                    <CardTitle>Newsletter Management</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 glow-pulse">
+                      <Mail className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <CardTitle className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        Newsletter Management
+                      </CardTitle>
+                      <CardDescription className="text-slate-400">
+                        Automated crypto newsletters & manual controls
+                      </CardDescription>
+                    </div>
                   </div>
-                  {newsletterOpen ? (
-                    <ChevronUp className="w-5 h-5 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-slate-400" />
-                  )}
+                  <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    {newsletterOpen ? (
+                      <ChevronUp className="w-5 h-5 text-purple-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-purple-400" />
+                    )}
+                  </div>
                 </div>
-                <CardDescription>Automated crypto newsletters & manual controls</CardDescription>
               </CardHeader>
             </CollapsibleTrigger>
             
             <CollapsibleContent>
-              <CardContent className="space-y-6 pt-6">
-                {/* Scheduler Status */}
-                <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/10 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-purple-400" />
-                    <h3 className="font-semibold text-white">Scheduler Status</h3>
-                  </div>
-                  <div className="text-sm text-slate-400 mb-4">Automated sends every Monday & Friday at 8am EST</div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        {status?.isRunning ? (
-                          <CheckCircle className="w-4 h-4 text-green-400" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-red-400" />
-                        )}
-                        <span className="font-semibold text-white text-sm">
-                          {status?.isRunning ? 'Active' : 'Inactive'}
-                        </span>
+              <CardContent className="space-y-8 pt-6 pb-8">
+                {/* Scheduler Status - Redesigned */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/40 via-pink-900/30 to-purple-900/40 border border-purple-500/30 p-6">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5" />
+                  <div className="relative space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30">
+                          <Calendar className="w-5 h-5 text-purple-300" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-white text-lg">Automated Scheduler</h3>
+                          <p className="text-sm text-purple-200">Every Monday & Friday at 8am EST</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-400">Scheduler Status</p>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                      <div className="font-semibold text-white text-sm mb-1">
-                        {status?.nextMonday || 'Loading...'}
-                      </div>
-                      <p className="text-xs text-slate-400">Next Monday Send</p>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                      <div className="font-semibold text-white text-sm mb-1">
-                        {status?.nextFriday || 'Loading...'}
-                      </div>
-                      <p className="text-xs text-slate-400">Next Friday Send</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Test Newsletter */}
-                  <div className="p-4 rounded-lg bg-slate-900/50 border border-purple-500/10 space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-5 h-5 text-purple-400" />
-                      <h3 className="font-semibold text-white">Test Newsletter</h3>
-                    </div>
-                    <p className="text-sm text-slate-400">Send a test newsletter to your email</p>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="test-email" className="text-slate-300">Test Email Address</Label>
-                      <Input
-                        id="test-email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={testEmail}
-                        onChange={(e) => setTestEmail(e.target.value)}
-                        className="bg-slate-900/50 border-purple-500/20"
-                      />
-                    </div>
-                    <Button
-                      onClick={handleSendTest}
-                      disabled={!testEmail || sendTestMutation.isPending}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    >
-                      {sendTestMutation.isPending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send Test
-                        </>
+                      {status?.isRunning && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 animate-pulse">
+                          <div className="w-2 h-2 rounded-full bg-emerald-400 glow-pulse" />
+                          <span className="text-sm font-semibold text-emerald-300">LIVE</span>
+                        </div>
                       )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => window.open('/api/newsletter/preview', '_blank')}
-                      className="w-full border-purple-500/20 hover:bg-purple-500/10"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Preview in Browser
-                    </Button>
-                  </div>
-
-                  {/* Send to All */}
-                  <div className="p-4 rounded-lg bg-slate-900/50 border border-purple-500/10 space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-5 h-5 text-purple-400" />
-                      <h3 className="font-semibold text-white">Send to Waitlist</h3>
                     </div>
-                    <p className="text-sm text-slate-400">Manually trigger newsletter send to all subscribers</p>
                     
-                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                      <p className="text-xs text-amber-200">
-                        ⚠️ This will send emails to ALL subscribed waitlist members. Use with caution!
-                      </p>
-                    </div>
-                    <Button
-                      onClick={handleSendAll}
-                      disabled={sendAllMutation.isPending}
-                      variant="destructive"
-                      className="w-full"
-                    >
-                      {sendAllMutation.isPending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Sending to All...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send to All Subscribers
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Newsletter History */}
-                <div className="p-4 rounded-lg bg-slate-900/50 border border-purple-500/10">
-                  <h3 className="font-semibold text-white mb-2">Send History</h3>
-                  <p className="text-sm text-slate-400 mb-4">Recent newsletter sends</p>
-                  
-                  {history?.newsletters?.length > 0 ? (
-                    <div className="space-y-2">
-                      {history.newsletters.slice(0, 5).map((newsletter: any) => (
-                        <div
-                          key={newsletter.id}
-                          className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/10 flex justify-between items-center"
-                        >
-                          <div>
-                            <div className="font-semibold text-white text-sm">{newsletter.subject}</div>
-                            <div className="text-xs text-slate-400">
-                              Sent to {newsletter.recipientCount} recipients
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Status Badge */}
+                      <div className="relative group">
+                        <div className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                          status?.isRunning 
+                            ? 'bg-gradient-to-br from-emerald-900/40 to-green-900/30 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-gradient-to-br from-red-900/40 to-orange-900/30 border-red-500/50'
+                        }`}>
+                          <div className="flex items-center gap-3 mb-2">
+                            {status?.isRunning ? (
+                              <CheckCircle className="w-6 h-6 text-emerald-400" />
+                            ) : (
+                              <XCircle className="w-6 h-6 text-red-400" />
+                            )}
+                            <span className="font-bold text-white text-lg">
+                              {status?.isRunning ? 'Active' : 'Inactive'}
+                            </span>
                           </div>
-                          <div className="text-xs text-slate-500">
-                            {new Date(newsletter.sentAt).toLocaleString()}
+                          <p className="text-xs text-slate-300 uppercase tracking-wide">Scheduler Status</p>
+                        </div>
+                      </div>
+
+                      {/* Next Monday */}
+                      <div className="relative group">
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-blue-900/40 to-indigo-900/30 border-2 border-blue-500/50 transition-all duration-300 hover:border-blue-400/70 hover:shadow-lg hover:shadow-blue-500/20">
+                          <div className="font-bold text-white text-base mb-2">
+                            {status?.nextMonday || 'Loading...'}
+                          </div>
+                          <p className="text-xs text-blue-200 uppercase tracking-wide">Next Monday Send</p>
+                        </div>
+                      </div>
+
+                      {/* Next Friday */}
+                      <div className="relative group">
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-900/40 to-teal-900/30 border-2 border-cyan-500/50 transition-all duration-300 hover:border-cyan-400/70 hover:shadow-lg hover:shadow-cyan-500/20">
+                          <div className="font-bold text-white text-base mb-2">
+                            {status?.nextFriday || 'Loading...'}
+                          </div>
+                          <p className="text-xs text-cyan-200 uppercase tracking-wide">Next Friday Send</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions - Redesigned */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Test Newsletter - Vibrant Design */}
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-indigo-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300" />
+                    <div className="relative p-6 rounded-2xl bg-gradient-to-br from-purple-900/60 via-indigo-900/50 to-purple-900/60 border-2 border-purple-500/40 backdrop-blur-sm space-y-5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30">
+                          <Eye className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-white text-lg">Test Newsletter</h3>
+                          <p className="text-sm text-purple-200">Preview before sending</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Label htmlFor="test-email" className="text-purple-200 font-semibold">Email Address</Label>
+                        <div className="relative">
+                          <Input
+                            id="test-email"
+                            type="email"
+                            placeholder="your@email.com"
+                            value={testEmail}
+                            onChange={(e) => setTestEmail(e.target.value)}
+                            className="bg-slate-950/50 border-2 border-purple-500/30 focus:border-purple-400/60 text-white placeholder:text-slate-500 h-12 text-base rounded-xl transition-all duration-300"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Button
+                          onClick={handleSendTest}
+                          disabled={!testEmail || sendTestMutation.isPending}
+                          className="w-full h-12 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white font-bold text-base rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {sendTestMutation.isPending ? (
+                            <>
+                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                              Sending Test...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-5 h-5 mr-2" />
+                              Send Test Email
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => window.open('/api/newsletter/preview', '_blank')}
+                          className="w-full h-11 border-2 border-purple-500/40 hover:border-purple-400/60 hover:bg-purple-500/10 text-purple-200 font-semibold rounded-xl transition-all duration-300"
+                        >
+                          <Eye className="w-5 h-5 mr-2" />
+                          Preview in Browser
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Send to All - Bold Warning Design */}
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose-600/20 to-orange-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300" />
+                    <div className="relative p-6 rounded-2xl bg-gradient-to-br from-rose-900/60 via-orange-900/50 to-rose-900/60 border-2 border-rose-500/40 backdrop-blur-sm space-y-5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-rose-600 to-orange-600 shadow-lg shadow-rose-500/30 animate-pulse">
+                          <Mail className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-white text-lg">Broadcast Newsletter</h3>
+                          <p className="text-sm text-rose-200">Send to all subscribers</p>
+                        </div>
+                      </div>
+                      
+                      {/* Warning Banner */}
+                      <div className="relative overflow-hidden rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-900/40 to-orange-900/40 p-4">
+                        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10 animate-pulse" />
+                        <div className="relative flex items-start gap-3">
+                          <div className="p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 mt-0.5">
+                            <ShieldAlert className="w-5 h-5 text-amber-300" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-amber-200 mb-1">Critical Action</p>
+                            <p className="text-xs text-amber-300/90 leading-relaxed">
+                              This will immediately send the newsletter to ALL subscribed waitlist members. This action cannot be undone.
+                            </p>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                      
+                      <Button
+                        onClick={handleSendAll}
+                        disabled={sendAllMutation.isPending}
+                        className="w-full h-14 bg-gradient-to-r from-rose-600 via-orange-600 to-rose-600 hover:from-rose-500 hover:via-orange-500 hover:to-rose-500 text-white font-bold text-base rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-rose-400/30"
+                      >
+                        {sendAllMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Broadcasting...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-5 h-5 mr-2" />
+                            Send to All Subscribers
+                          </>
+                        )}
+                      </Button>
                     </div>
-                  ) : (
-                    <p className="text-center text-slate-400 py-4">No newsletters sent yet</p>
-                  )}
+                  </div>
+                </div>
+
+                {/* Newsletter History - Timeline Design */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900/60 to-indigo-950/40 border-2 border-indigo-500/30 p-6">
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5" />
+                  <div className="relative space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30">
+                          <Calendar className="w-5 h-5 text-indigo-300" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-white text-lg">Send History</h3>
+                          <p className="text-sm text-indigo-200">Recent newsletter broadcasts</p>
+                        </div>
+                      </div>
+                      {history?.newsletters?.length > 0 && (
+                        <div className="px-3 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30">
+                          <span className="text-sm font-semibold text-indigo-300">
+                            {history.newsletters.length} Total
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {history?.newsletters?.length > 0 ? (
+                      <div className="space-y-3">
+                        {history.newsletters.slice(0, 5).map((newsletter: any, index: number) => (
+                          <div
+                            key={newsletter.id}
+                            className="group relative"
+                          >
+                            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-500/50 to-purple-500/50" />
+                            <div className="pl-6 relative">
+                              <div className="absolute left-[-4px] top-3 w-2 h-2 rounded-full bg-indigo-400 border-2 border-indigo-900 group-hover:scale-150 group-hover:bg-indigo-300 transition-all duration-300" />
+                              <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-900/40 to-purple-900/30 border border-indigo-500/20 hover:border-indigo-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                      <h4 className="font-bold text-white text-base truncate">
+                                        {newsletter.subject}
+                                      </h4>
+                                    </div>
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                      <div className="flex items-center gap-2">
+                                        <Users className="w-3.5 h-3.5 text-indigo-400" />
+                                        <span className="text-sm text-indigo-200 font-semibold">
+                                          {newsletter.recipientCount} recipients
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                                        <span className="text-xs text-slate-400">
+                                          {new Date(newsletter.sentAt).toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit'
+                                          })}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex-shrink-0">
+                                    <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                                      <span className="text-xs font-bold text-emerald-300">SUCCESS</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-12 px-4">
+                        <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4">
+                          <Mail className="w-8 h-8 text-indigo-400" />
+                        </div>
+                        <p className="text-lg font-semibold text-slate-300 mb-1">No newsletters sent yet</p>
+                        <p className="text-sm text-slate-500">Your send history will appear here</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </CollapsibleContent>
