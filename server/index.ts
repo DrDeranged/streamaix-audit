@@ -87,6 +87,17 @@ app.use((req, res, next) => {
     console.log('⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)');
   }
 
+  // Start autonomous AI agent service (100 agents)
+  if (openaiKey) {
+    console.log('🤖 Starting autonomous AI agent service...');
+    const { getAutonomousAgentService } = await import('./services/autonomousAgentService');
+    const agentService = getAutonomousAgentService();
+    agentService.start(); // Runs continuously with 5-15 min intervals
+    console.log('✅ Autonomous AI agent service active - 100 agents engaging with platform');
+  } else {
+    console.log('⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)');
+  }
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

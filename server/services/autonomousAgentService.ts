@@ -445,8 +445,14 @@ export class AutonomousAgentService {
   }
   
   private async submitSummaryAction(agent: AgentUser): Promise<void> {
-    // To be implemented in agentSummarySubmitter.ts
-    console.log(`    📄 Submitting summary (coming soon)`);
+    const { getAgentSummarySubmitter } = await import('./agentSummarySubmitter');
+    const submitter = getAgentSummarySubmitter();
+    await submitter.submitSummary({
+      agentId: agent.id,
+      username: agent.username,
+      personality: agent.agentPersonality,
+      streamPoints: agent.streamPoints,
+    });
   }
   
   private async tradeMarketAction(agent: AgentUser): Promise<void> {
