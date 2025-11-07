@@ -20,6 +20,11 @@ export const users = pgTable("users", {
   twitterVerified: boolean("twitter_verified").default(false),
   // Auth provider tracking
   authProvider: text("auth_provider").default("local"), // local, twitter, wallet
+  // AI Agent fields
+  isAiAgent: boolean("is_ai_agent").default(false),
+  agentPersonality: jsonb("agent_personality"), // { riskTolerance, activityLevel, expertise, tradingStyle, contentFocus }
+  agentMetadata: jsonb("agent_metadata"), // { timezone, sleepSchedule, skillLevel, behaviorPatterns }
+  streamPoints: integer("stream_points").default(0), // Points balance for future airdrop
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
