@@ -29,7 +29,7 @@ export class AgentMarketAnalyzer {
    */
   getAgentProfile(agent: User): AgentTradingProfile {
     const streamPoints = agent.streamPoints || 0;
-    const personality = agent.agentPersonality || "moderate";
+    const personality = agent.agentPersonality as any;
 
     // Determine tier based on STREAM points
     let tier: "whale" | "power" | "active" | "casual";
@@ -38,32 +38,27 @@ export class AgentMarketAnalyzer {
     else if (streamPoints >= 5000) tier = "active";
     else tier = "casual";
 
-    // Parse personality traits
+    // Extract personality traits from object
     let riskTolerance: "conservative" | "moderate" | "aggressive" = "moderate";
     let tradingStyle = "balanced trader";
     let expertise: string[] = [];
 
-    if (personality) {
-      const lowerPersonality = personality.toLowerCase();
-      
-      // Risk tolerance
-      if (lowerPersonality.includes("conservative") || lowerPersonality.includes("cautious")) {
-        riskTolerance = "conservative";
-      } else if (lowerPersonality.includes("aggressive") || lowerPersonality.includes("risk-taking")) {
-        riskTolerance = "aggressive";
-      }
+    if (personality && typeof personality === 'object') {
+      // Map risk tolerance
+      if (personality.riskTolerance === 'low') riskTolerance = "conservative";
+      else if (personality.riskTolerance === 'high') riskTolerance = "aggressive";
+      else riskTolerance = "moderate";
 
-      // Trading style
-      if (lowerPersonality.includes("contrarian")) tradingStyle = "contrarian trader";
-      else if (lowerPersonality.includes("data-driven") || lowerPersonality.includes("analytical")) tradingStyle = "quantitative trader";
-      else if (lowerPersonality.includes("momentum")) tradingStyle = "momentum trader";
+      // Map trading style
+      if (personality.contrarian) tradingStyle = "contrarian trader";
+      else if (personality.tradingStyle === 'analytical') tradingStyle = "quantitative trader";
+      else if (personality.tradingStyle === 'momentum') tradingStyle = "momentum trader";
+      else tradingStyle = personality.tradingStyle || "balanced trader";
       
-      // Expertise
-      if (lowerPersonality.includes("defi")) expertise.push("DeFi");
-      if (lowerPersonality.includes("nft")) expertise.push("NFTs");
-      if (lowerPersonality.includes("layer 2") || lowerPersonality.includes("scaling")) expertise.push("Layer 2");
-      if (lowerPersonality.includes("bitcoin") || lowerPersonality.includes("btc")) expertise.push("Bitcoin");
-      if (lowerPersonality.includes("ethereum") || lowerPersonality.includes("eth")) expertise.push("Ethereum");
+      // Get expertise
+      if (personality.expertise && Array.isArray(personality.expertise)) {
+        expertise = personality.expertise;
+      }
     }
 
     return { tier, riskTolerance, tradingStyle, expertise };
@@ -132,7 +127,6 @@ Your Profile:
 - Risk Tolerance: ${profile.riskTolerance}
 - Trading Style: ${profile.tradingStyle}
 - Expertise: ${profile.expertise.length > 0 ? profile.expertise.join(", ") : "General markets"}
-- Personality: ${agent.agentPersonality}
 
 You analyze prediction markets and make data-driven trading decisions based on your unique perspective.`;
 

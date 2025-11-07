@@ -139,14 +139,8 @@ export class AgentMarketTrader {
           outcome,
           shares,
           price: currentPrice,
-          amountIn: positionSize,
-          amountOut: 0,
-          fee: platformFee,
-          yesLiquidityBefore: market.yesLiquidity,
-          noLiquidityBefore: market.noLiquidity,
-          yesLiquidityAfter: outcome === "YES" ? market.yesLiquidity + positionSize : market.yesLiquidity,
-          noLiquidityAfter: outcome === "NO" ? market.noLiquidity + positionSize : market.noLiquidity,
-          reasoning: analysis.reasoning
+          streamAmount: positionSize,
+          fee: platformFee
         })
         .returning();
 
