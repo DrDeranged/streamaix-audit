@@ -300,7 +300,7 @@ export default function DeFiDashboard() {
                       Stake STREAM
                     </CardTitle>
                     <p className="text-gray-400 text-sm">
-                      Earn {stakingInfo.apr}% APR by staking your STREAM tokens
+                      Earn {stakingInfo.apr}% APR by staking your STREAM points
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -493,8 +493,8 @@ export default function DeFiDashboard() {
             <TabsContent value="transfer" className="space-y-6">
               <Card className="bg-white/10 border-white/20 backdrop-blur-lg max-w-md mx-auto">
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">Transfer STREAM Tokens</CardTitle>
-                  <p className="text-gray-400 text-sm">Send tokens to another address</p>
+                  <CardTitle className="text-gray-900 dark:text-white">Transfer STREAM Points</CardTitle>
+                  <p className="text-gray-400 text-sm">Send points to another address</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>

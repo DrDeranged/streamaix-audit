@@ -350,7 +350,7 @@ export default function WalletDashboard() {
             <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
               <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
-                  <span className="text-slate-400 text-xs sm:text-sm">STREAM Tokens</span>
+                  <span className="text-slate-400 text-xs sm:text-sm">STREAM Points</span>
                   <Star className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
                 </div>
                 <div className="space-y-1">

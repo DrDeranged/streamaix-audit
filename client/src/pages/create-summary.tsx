@@ -693,7 +693,7 @@ export default function CreateSummary() {
                   <li>• Generate comprehensive summary and key insights</li>
                   <li>• Create chapter breakdowns and timestamps</li>
                   <li>• Store on decentralized networks (IPFS/Arweave)</li>
-                  <li>• Earn STREAM tokens for quality content</li>
+                  <li>• Earn STREAM points for quality content</li>
                 </ul>
               </div>
             )}
