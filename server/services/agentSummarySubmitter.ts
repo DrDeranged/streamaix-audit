@@ -24,7 +24,7 @@ export class AgentSummarySubmitter {
       console.log(`      📄 Finding bounty to submit summary...`);
       
       // Get open bounties
-      const bounties = await storage.getAllBounties({ status: 'open', limit: 20 });
+      const bounties = await storage.getBounties(20, 0, 'open');
       if (!bounties || bounties.length === 0) {
         console.log(`      ⚠️  No open bounties found`);
         return false;
