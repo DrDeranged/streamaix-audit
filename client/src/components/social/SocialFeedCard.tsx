@@ -55,18 +55,27 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
   const [isLiked, setIsLiked] = useState(engagement.isLiked || false);
   const [isSaved, setIsSaved] = useState(engagement.isSaved || false);
 
-  // Map macro/crypto to 'news' for API calls
-  const apiType = (type === 'macro' || type === 'crypto') ? 'news' : type;
+  // Map types to correct API endpoints
+  const getApiEndpoint = (endpoint: string) => {
+    const baseType = (type === 'macro' || type === 'crypto') ? 'news' : type;
+    const typeMap: Record<string, string> = {
+      'bounty': 'bounties',
+      'market': 'prediction-markets',
+      'summary': 'summaries',
+      'news': 'news'
+    };
+    return `/api/${typeMap[baseType]}/${id}/${endpoint}`;
+  };
   
   // Fetch comments when expanded
   const { data: commentsData } = useQuery({
-    queryKey: [`/api/${apiType}s/${id}/comments`],
+    queryKey: [getApiEndpoint('comments')],
     enabled: showComments,
   });
 
   // Fetch likes when dialog is open
   const { data: likesData } = useQuery({
-    queryKey: [`/api/${apiType}s/${id}/likes`],
+    queryKey: [getApiEndpoint('likes')],
     enabled: showLikes,
   });
 
@@ -75,13 +84,13 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
   // Like mutation
   const likeMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/${apiType}s/${id}/like`, { method: 'POST' }),
+    mutationFn: () => apiRequest(getApiEndpoint('like'), { method: 'POST' }),
     onMutate: async () => {
       setIsLiked(!isLiked);
       setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/${apiType}s/${id}/likes`] });
+      queryClient.invalidateQueries({ queryKey: [getApiEndpoint('likes')] });
     },
     onError: () => {
       setIsLiked(isLiked);
@@ -92,7 +101,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
   // Save mutation
   const saveMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/${apiType}s/${id}/save`, { method: 'POST' }),
+    mutationFn: () => apiRequest(getApiEndpoint('save'), { method: 'POST' }),
     onMutate: async () => {
       setIsSaved(!isSaved);
     },
@@ -105,13 +114,13 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
   // Comment mutation
   const commentMutation = useMutation({
     mutationFn: (content: string) => 
-      apiRequest(`/api/${apiType}s/${id}/comment`, { 
+      apiRequest(getApiEndpoint('comment'), { 
         method: 'POST',
         body: JSON.stringify({ content })
       }),
     onSuccess: () => {
       setCommentText('');
-      queryClient.invalidateQueries({ queryKey: [`/api/${apiType}s/${id}/comments`] });
+      queryClient.invalidateQueries({ queryKey: [getApiEndpoint('comments')] });
       toast({ title: 'Comment posted!' });
     },
     onError: () => {
