@@ -69,7 +69,7 @@ import {
 import { Request, Response } from "express";
 import cors from "cors";
 import { db } from "./db";
-import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades } from "../shared/schema";
+import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions } from "../shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 // Helper function to handle validation errors
