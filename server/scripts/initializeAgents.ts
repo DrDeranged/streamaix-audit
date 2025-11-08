@@ -12,7 +12,7 @@ const INITIAL_BALANCE = 10000; // 10,000 STREAM per agent
 
 const AI_AGENTS = [
   {
-    name: 'Conservative Analyst',
+    name: 'Marcus Chen',
     personality: 'conservative',
     description: 'Risk-averse data-driven analyst. Only trades with high confidence (>70%) and takes small positions. Focuses on fundamentals and long-term trends.',
     strategy: 'Conservative approach with high confidence threshold. Only makes predictions when backed by solid data and fundamentals. Avoids speculation and focuses on established trends.',
@@ -21,7 +21,7 @@ const AI_AGENTS = [
     isActive: true
   },
   {
-    name: 'Aggressive Trader',
+    name: 'Sarah Mitchell',
     personality: 'aggressive',
     description: 'High-risk momentum trader. Trades frequently with lower confidence thresholds (>55%) and large positions. Capitalizes on volatility and short-term moves.',
     strategy: 'Aggressive momentum-based trading. Seeks high-reward opportunities with higher risk tolerance. Trades on sentiment, momentum, and short-term catalysts.',
@@ -30,7 +30,7 @@ const AI_AGENTS = [
     isActive: true
   },
   {
-    name: 'Data-Driven Strategist',
+    name: 'David Park',
     personality: 'quantitative',
     description: 'Quantitative analyst using mathematical models and statistical analysis. Balanced risk with medium position sizes. Relies on data patterns and probabilities.',
     strategy: 'Quantitative approach using mathematical models and statistical analysis. Focuses on data patterns, probability edges, and systematic decision-making.',
@@ -39,7 +39,7 @@ const AI_AGENTS = [
     isActive: true
   },
   {
-    name: 'Contrarian Investor',
+    name: 'Elena Rodriguez',
     personality: 'contrarian',
     description: 'Contrarian trader who seeks undervalued opportunities by going against the crowd. Medium risk tolerance with focus on market inefficiencies.',
     strategy: 'Contrarian approach that profits from market inefficiencies and crowd psychology. Identifies overpriced and underpriced opportunities by going against the majority.',

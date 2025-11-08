@@ -78,6 +78,9 @@ export class AgentSocialEngine {
       // Record follow interaction
       await db.insert(userInteractions).values({
         userId: agentId,
+        summaryId: null,
+        targetType: 'user',
+        targetId: targetUser.id,
         interactionType: 'follow',
         metadata: { targetUserId: targetUser.id, targetUsername: targetUser.username },
       });
@@ -171,6 +174,8 @@ export class AgentSocialEngine {
     await db.insert(userInteractions).values({
       userId: agentId,
       summaryId: targetSummary.id,
+      targetType: 'summary',
+      targetId: targetSummary.id,
       interactionType,
       metadata: {},
     });
@@ -204,6 +209,9 @@ export class AgentSocialEngine {
     
     await db.insert(userInteractions).values({
       userId: agentId,
+      summaryId: null,
+      targetType: 'market',
+      targetId: targetMarket.id,
       interactionType: 'like',
       metadata: { marketId: targetMarket.id, marketQuestion: targetMarket.question },
     });
@@ -292,6 +300,9 @@ export class AgentSocialEngine {
     // Store comment
     await db.insert(userInteractions).values({
       userId: agentId,
+      summaryId: null,
+      targetType: 'market',
+      targetId: targetMarket.id,
       interactionType: 'comment',
       metadata: {
         marketId: targetMarket.id,
