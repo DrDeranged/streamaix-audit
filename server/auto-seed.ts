@@ -1,5 +1,6 @@
 import { db } from './db';
-import { knowledgeAvatars } from '@shared/schema';
+import { knowledgeAvatars, users } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const avatarSeedData = [
   {
@@ -312,27 +313,72 @@ const avatarSeedData = [
 
 export async function autoSeedDatabase() {
   try {
-    // Check if database already has avatars
-    const existingCount = await db.query.knowledgeAvatars.findMany({ limit: 1 });
+    // ===== SEED KNOWLEDGE AVATARS =====
+    const existingAvatars = await db.query.knowledgeAvatars.findMany({ limit: 1 });
     
-    if (existingCount.length > 0) {
+    if (existingAvatars.length === 0) {
+      console.log('🌱 Database empty - auto-seeding knowledge avatars...');
+      
+      let seededCount = 0;
+      for (const avatar of avatarSeedData) {
+        try {
+          await db.insert(knowledgeAvatars).values(avatar);
+          seededCount++;
+        } catch (error) {
+          console.error(`❌ Error seeding avatar ${avatar.name}:`, error);
+        }
+      }
+      
+      console.log(`🎉 Auto-seed complete! Added ${seededCount}/${avatarSeedData.length} knowledge avatars`);
+    } else {
       console.log('✅ Database already seeded with knowledge avatars');
-      return;
     }
 
-    console.log('🌱 Database empty - auto-seeding knowledge avatars...');
+    // ===== SEED 100 AUTONOMOUS AI AGENTS =====
+    const existingAgents = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.isAiAgent, true))
+      .limit(1);
     
-    let seededCount = 0;
-    for (const avatar of avatarSeedData) {
-      try {
-        await db.insert(knowledgeAvatars).values(avatar);
-        seededCount++;
-      } catch (error) {
-        console.error(`❌ Error seeding avatar ${avatar.name}:`, error);
+    if (existingAgents.length === 0) {
+      console.log('\n🤖 Initializing 100 autonomous AI agents...');
+      
+      // Import agent initialization function
+      const { generateAgentPersonas } = await import('./services/agentPersonaGenerator');
+      const personas = generateAgentPersonas(100);
+      
+      let agentCount = 0;
+      for (const persona of personas) {
+        try {
+          await db.insert(users).values({
+            username: persona.username,
+            bio: persona.bio,
+            avatar: persona.avatar,
+            isAiAgent: true,
+            agentPersonality: persona.personality,
+            agentMetadata: persona.metadata,
+            streamPoints: persona.streamPoints,
+            authProvider: 'ai-agent',
+            walletAddress: `0x${Buffer.from(persona.username).toString('hex').padEnd(40, '0').substring(0, 40)}`,
+          });
+          
+          agentCount++;
+          if (agentCount % 25 === 0) {
+            console.log(`  ✓ Created ${agentCount}/100 AI agents...`);
+          }
+        } catch (error: any) {
+          console.error(`  ✗ Failed to create agent ${persona.username}:`, error.message);
+        }
       }
+      
+      const totalPoints = personas.reduce((sum, p) => sum + p.streamPoints, 0);
+      console.log(`🎉 Created ${agentCount} autonomous AI agents!`);
+      console.log(`💰 Distributed ${totalPoints.toLocaleString()} STREAM points`);
+      console.log(`🚀 Agents will start engaging with the platform automatically`);
+    } else {
+      console.log('✅ Autonomous AI agents already initialized');
     }
-    
-    console.log(`🎉 Auto-seed complete! Added ${seededCount}/${avatarSeedData.length} knowledge avatars`);
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
     // Don't throw - allow server to start even if seeding fails
