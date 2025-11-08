@@ -183,6 +183,8 @@ export interface IStorage {
   // Summary social engagement
   toggleSummaryLike(userId: string, summaryId: string): Promise<{ liked: boolean; likesCount: number }>;
   toggleSummarySave(userId: string, summaryId: string): Promise<{ saved: boolean }>;
+  createSummaryComment(comment: { summaryId: string; userId: string; content: string; rating?: number }): Promise<any>;
+  getSummaryComments(summaryId: string): Promise<any[]>;
 
   // User interaction operations
   getUserInteractions(userId: string, options?: { summaryId?: string; limit?: number; targetType?: string; since?: Date }): Promise<UserInteraction[]>;
@@ -814,8 +816,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBountyComments(bountyId: string): Promise<any[]> {
-    // Stub implementation - returns empty array
-    return [];
+    const comments = await db
+      .select({
+        id: userInteractions.id,
+        content: userInteractions.metadata,
+        userId: users.id,
+        username: users.username,
+        createdAt: userInteractions.createdAt
+      })
+      .from(userInteractions)
+      .leftJoin(users, eq(userInteractions.userId, users.id))
+      .where(
+        and(
+          eq(userInteractions.targetId, bountyId),
+          eq(userInteractions.targetType, 'bounty'),
+          eq(userInteractions.interactionType, 'comment')
+        )
+      )
+      .orderBy(desc(userInteractions.createdAt));
+    
+    return comments.map(c => ({
+      id: c.id,
+      content: typeof c.content === 'string' ? c.content : (c.content as any)?.comment || '',
+      user: { id: c.userId, username: c.username },
+      createdAt: c.createdAt
+    }));
   }
 
   async toggleMarketLike(userId: string, marketId: string): Promise<{ liked: boolean; likesCount: number }> {
@@ -834,8 +859,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMarketComments(marketId: string): Promise<any[]> {
-    // Stub implementation - returns empty array
-    return [];
+    const comments = await db
+      .select({
+        id: userInteractions.id,
+        content: userInteractions.metadata,
+        userId: users.id,
+        username: users.username,
+        createdAt: userInteractions.createdAt
+      })
+      .from(userInteractions)
+      .leftJoin(users, eq(userInteractions.userId, users.id))
+      .where(
+        and(
+          eq(userInteractions.targetId, marketId),
+          eq(userInteractions.targetType, 'market'),
+          eq(userInteractions.interactionType, 'comment')
+        )
+      )
+      .orderBy(desc(userInteractions.createdAt));
+    
+    return comments.map(c => ({
+      id: c.id,
+      content: typeof c.content === 'string' ? c.content : (c.content as any)?.comment || '',
+      user: { id: c.userId, username: c.username },
+      createdAt: c.createdAt
+    }));
   }
 
   async toggleSummaryLike(userId: string, summaryId: string): Promise<{ liked: boolean; likesCount: number }> {
@@ -846,6 +894,39 @@ export class DatabaseStorage implements IStorage {
   async toggleSummarySave(userId: string, summaryId: string): Promise<{ saved: boolean }> {
     // Stub implementation - returns placeholder data
     return { saved: false };
+  }
+
+  async createSummaryComment(comment: { summaryId: string; userId: string; content: string; rating?: number }): Promise<any> {
+    // Stub implementation - returns placeholder comment
+    return { id: '1', ...comment, createdAt: new Date(), user: { username: 'User' } };
+  }
+
+  async getSummaryComments(summaryId: string): Promise<any[]> {
+    const comments = await db
+      .select({
+        id: userInteractions.id,
+        content: userInteractions.metadata,
+        userId: users.id,
+        username: users.username,
+        createdAt: userInteractions.createdAt
+      })
+      .from(userInteractions)
+      .leftJoin(users, eq(userInteractions.userId, users.id))
+      .where(
+        and(
+          eq(userInteractions.targetId, summaryId),
+          eq(userInteractions.targetType, 'summary'),
+          eq(userInteractions.interactionType, 'comment')
+        )
+      )
+      .orderBy(desc(userInteractions.createdAt));
+    
+    return comments.map(c => ({
+      id: c.id,
+      content: typeof c.content === 'string' ? c.content : (c.content as any)?.comment || '',
+      user: { id: c.userId, username: c.username },
+      createdAt: c.createdAt
+    }));
   }
 
   // User interaction operations
