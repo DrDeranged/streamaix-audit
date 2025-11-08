@@ -8,6 +8,7 @@ import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
 import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
+import { RecentActivity } from "@/components/landing/RecentActivity";
 import { BountyFeed } from "@/components/landing/bounty-feed";
 import { PredictionMarketSection } from "@/components/PredictionMarketSection";
 import { SocialFeed } from "@/components/landing/SocialFeed";
@@ -30,6 +31,7 @@ export default function Landing() {
         <SocialFeed />
         <KnowledgeAvatars />
         <AISuggestions />
+        <RecentActivity />
         <Footer />
       </div>
     </div>
