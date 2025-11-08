@@ -1957,6 +1957,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  app.get('/api/bounties/:id/likes', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const likes = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          createdAt: bountyEngagements.createdAt
+        })
+        .from(bountyEngagements)
+        .innerJoin(users, eq(bountyEngagements.userId, users.id))
+        .where(and(
+          eq(bountyEngagements.bountyId, req.params.id),
+          eq(bountyEngagements.engagementType, 'like')
+        ))
+        .orderBy(desc(bountyEngagements.createdAt));
+      
+      res.json({ likes });
+    } catch (error) {
+      console.error('Get bounty likes error:', error);
+      res.status(500).json({ error: 'Failed to fetch likes' });
+    }
+  }));
+
   // Prediction market social engagement
   app.post('/api/prediction-markets/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
@@ -2010,6 +2033,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Save market error:', error);
       res.status(500).json({ error: 'Failed to save market' });
+    }
+  }));
+
+  app.get('/api/prediction-markets/:id/likes', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const likes = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          createdAt: userInteractions.createdAt
+        })
+        .from(userInteractions)
+        .innerJoin(users, eq(userInteractions.userId, users.id))
+        .where(and(
+          eq(userInteractions.targetId, req.params.id),
+          eq(userInteractions.targetType, 'market'),
+          eq(userInteractions.interactionType, 'like')
+        ))
+        .orderBy(desc(userInteractions.createdAt));
+      
+      res.json({ likes });
+    } catch (error) {
+      console.error('Get market likes error:', error);
+      res.status(500).json({ error: 'Failed to fetch likes' });
     }
   }));
 
@@ -2228,6 +2275,218 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Save summary error:', error);
       res.status(500).json({ error: 'Failed to save summary' });
+    }
+  }));
+
+  app.get('/api/summaries/:id/likes', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const likes = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          createdAt: userInteractions.createdAt
+        })
+        .from(userInteractions)
+        .innerJoin(users, eq(userInteractions.userId, users.id))
+        .where(and(
+          eq(userInteractions.summaryId, req.params.id),
+          eq(userInteractions.interactionType, 'like')
+        ))
+        .orderBy(desc(userInteractions.createdAt));
+      
+      res.json({ likes });
+    } catch (error) {
+      console.error('Get summary likes error:', error);
+      res.status(500).json({ error: 'Failed to fetch likes' });
+    }
+  }));
+
+  // News article engagement (macro/crypto news)
+  app.post('/api/news/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const newsId = req.params.id;
+      
+      // Check if already liked
+      const existing = await db
+        .select()
+        .from(userInteractions)
+        .where(and(
+          eq(userInteractions.userId, req.user.id),
+          eq(userInteractions.targetId, newsId),
+          eq(userInteractions.targetType, 'news'),
+          eq(userInteractions.interactionType, 'like')
+        ))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        // Unlike
+        await db
+          .delete(userInteractions)
+          .where(eq(userInteractions.id, existing[0].id));
+        
+        const likesCount = await db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(userInteractions)
+          .where(and(
+            eq(userInteractions.targetId, newsId),
+            eq(userInteractions.targetType, 'news'),
+            eq(userInteractions.interactionType, 'like')
+          ));
+        
+        res.json({ liked: false, likesCount: likesCount[0]?.count || 0 });
+      } else {
+        // Like
+        await db.insert(userInteractions).values({
+          userId: req.user.id,
+          targetId: newsId,
+          targetType: 'news',
+          interactionType: 'like',
+          metadata: {}
+        });
+        
+        const likesCount = await db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(userInteractions)
+          .where(and(
+            eq(userInteractions.targetId, newsId),
+            eq(userInteractions.targetType, 'news'),
+            eq(userInteractions.interactionType, 'like')
+          ));
+        
+        res.json({ liked: true, likesCount: likesCount[0]?.count || 0 });
+      }
+    } catch (error) {
+      console.error('Like news error:', error);
+      res.status(500).json({ error: 'Failed to like news article' });
+    }
+  }));
+
+  app.post('/api/news/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    const { content } = req.body;
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment content is required' });
+    }
+    
+    try {
+      const [comment] = await db.insert(userInteractions).values({
+        userId: req.user.id,
+        targetId: req.params.id,
+        targetType: 'news',
+        interactionType: 'comment',
+        metadata: { comment: content.trim() }
+      }).returning();
+      
+      // Fetch user info
+      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
+      
+      res.status(201).json({ 
+        comment: {
+          id: comment.id,
+          content: content.trim(),
+          user: { id: user.id, username: user.username },
+          createdAt: comment.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Comment news error:', error);
+      res.status(500).json({ error: 'Failed to comment on news article' });
+    }
+  }));
+
+  app.get('/api/news/:id/comments', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const commentsData = await db
+        .select({
+          id: userInteractions.id,
+          content: userInteractions.metadata,
+          userId: users.id,
+          username: users.username,
+          createdAt: userInteractions.createdAt
+        })
+        .from(userInteractions)
+        .innerJoin(users, eq(userInteractions.userId, users.id))
+        .where(and(
+          eq(userInteractions.targetId, req.params.id),
+          eq(userInteractions.targetType, 'news'),
+          eq(userInteractions.interactionType, 'comment')
+        ))
+        .orderBy(desc(userInteractions.createdAt));
+      
+      const comments = commentsData.map(c => ({
+        id: c.id,
+        content: (c.content as any)?.comment || '',
+        user: { id: c.userId, username: c.username },
+        createdAt: c.createdAt
+      }));
+      
+      res.json({ comments });
+    } catch (error) {
+      console.error('Get news comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  }));
+
+  app.get('/api/news/:id/likes', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const likes = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          createdAt: userInteractions.createdAt
+        })
+        .from(userInteractions)
+        .innerJoin(users, eq(userInteractions.userId, users.id))
+        .where(and(
+          eq(userInteractions.targetId, req.params.id),
+          eq(userInteractions.targetType, 'news'),
+          eq(userInteractions.interactionType, 'like')
+        ))
+        .orderBy(desc(userInteractions.createdAt));
+      
+      res.json({ likes });
+    } catch (error) {
+      console.error('Get news likes error:', error);
+      res.status(500).json({ error: 'Failed to fetch likes' });
+    }
+  }));
+
+  app.post('/api/news/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    
+    try {
+      const newsId = req.params.id;
+      
+      const existing = await db
+        .select()
+        .from(userInteractions)
+        .where(and(
+          eq(userInteractions.userId, req.user.id),
+          eq(userInteractions.targetId, newsId),
+          eq(userInteractions.targetType, 'news'),
+          eq(userInteractions.interactionType, 'bookmark')
+        ))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        await db.delete(userInteractions).where(eq(userInteractions.id, existing[0].id));
+        res.json({ saved: false });
+      } else {
+        await db.insert(userInteractions).values({
+          userId: req.user.id,
+          targetId: newsId,
+          targetType: 'news',
+          interactionType: 'bookmark',
+          metadata: {}
+        });
+        res.json({ saved: true });
+      }
+    } catch (error) {
+      console.error('Save news error:', error);
+      res.status(500).json({ error: 'Failed to save news article' });
     }
   }));
 

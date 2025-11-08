@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -20,13 +21,14 @@ import {
   ArrowUp,
   ArrowDown,
   ExternalLink,
-  Newspaper
+  Newspaper,
+  Users
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface SocialFeedCardProps {
   id: string;
-  type: 'conversation' | 'bounty' | 'market' | 'summary';
+  type: 'conversation' | 'bounty' | 'market' | 'summary' | 'macro' | 'crypto';
   content: {
     title: string;
     description?: string;
@@ -47,25 +49,39 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(false);
+  const [showLikes, setShowLikes] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [likesCount, setLikesCount] = useState(engagement.likesCount);
   const [isLiked, setIsLiked] = useState(engagement.isLiked || false);
   const [isSaved, setIsSaved] = useState(engagement.isSaved || false);
 
+  // Map macro/crypto to 'news' for API calls
+  const apiType = (type === 'macro' || type === 'crypto') ? 'news' : type;
+  
   // Fetch comments when expanded
   const { data: commentsData } = useQuery({
-    queryKey: [`/api/${type}s/${id}/comments`],
+    queryKey: [`/api/${apiType}s/${id}/comments`],
     enabled: showComments,
   });
 
+  // Fetch likes when dialog is open
+  const { data: likesData } = useQuery({
+    queryKey: [`/api/${apiType}s/${id}/likes`],
+    enabled: showLikes,
+  });
+
   const comments = (commentsData as any)?.comments || [];
+  const likes = (likesData as any)?.likes || [];
 
   // Like mutation
   const likeMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/${type}s/${id}/like`, { method: 'POST' }),
+    mutationFn: () => apiRequest(`/api/${apiType}s/${id}/like`, { method: 'POST' }),
     onMutate: async () => {
       setIsLiked(!isLiked);
       setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/${apiType}s/${id}/likes`] });
     },
     onError: () => {
       setIsLiked(isLiked);
@@ -76,7 +92,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
   // Save mutation
   const saveMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/${type}s/${id}/save`, { method: 'POST' }),
+    mutationFn: () => apiRequest(`/api/${apiType}s/${id}/save`, { method: 'POST' }),
     onMutate: async () => {
       setIsSaved(!isSaved);
     },
@@ -89,13 +105,13 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
   // Comment mutation
   const commentMutation = useMutation({
     mutationFn: (content: string) => 
-      apiRequest(`/api/${type}s/${id}/comment`, { 
+      apiRequest(`/api/${apiType}s/${id}/comment`, { 
         method: 'POST',
         body: JSON.stringify({ content })
       }),
     onSuccess: () => {
       setCommentText('');
-      queryClient.invalidateQueries({ queryKey: [`/api/${type}s/${id}/comments`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/${apiType}s/${id}/comments`] });
       toast({ title: 'Comment posted!' });
     },
     onError: () => {
@@ -272,9 +288,55 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
         {/* Engagement Stats */}
         <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mb-1.5 pl-9">
-          <span>{likesCount} likes</span>
+          <Dialog open={showLikes} onOpenChange={setShowLikes}>
+            <DialogTrigger asChild>
+              <button
+                className="hover:text-purple-400 hover:underline cursor-pointer"
+                data-testid={`link-likes-${id}`}
+              >
+                {likesCount} {likesCount === 1 ? 'like' : 'likes'}
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-gray-900/95 backdrop-blur-xl border-purple-500/30 max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Users className="w-4 h-4 text-fuchsia-400" />
+                  Liked by
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
+                {likes.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center py-8">No likes yet</p>
+                ) : (
+                  likes.map((like: any) => (
+                    <Link key={like.id} href={`/hunter/${like.id}`}>
+                      <div className="flex items-center gap-2 p-2 rounded hover:bg-white/5 cursor-pointer transition-colors">
+                        <Avatar className="w-8 h-8 ring-1 ring-purple-500/20">
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-xs">
+                            {(like.username || 'U')[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-white">@{like.username}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatDistanceToNow(new Date(like.createdAt), { addSuffix: true })}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           <span>•</span>
-          <span>{engagement.commentsCount} comments</span>
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="hover:text-purple-400 hover:underline cursor-pointer"
+            data-testid={`link-comments-${id}`}
+          >
+            {engagement.commentsCount} {engagement.commentsCount === 1 ? 'comment' : 'comments'}
+          </button>
         </div>
 
         {/* Action Buttons */}
