@@ -17,6 +17,12 @@ export interface NewsletterContent {
   marketSummary: string;
   totalMarketCap: string;
   btcDominance: string;
+  newsStories: Array<{
+    title: string;
+    url: string;
+    source: string;
+    published: string;
+  }>;
 }
 
 // Meme coin patterns to filter out
@@ -99,6 +105,21 @@ export async function generateNewsletterContent(): Promise<NewsletterContent> {
     
     const marketSummary = generateMarketSummary(btcData, ethData, topGainers, topLosers);
 
+    // Fetch latest crypto news stories
+    let newsStories: Array<{ title: string; url: string; source: string; published: string }> = [];
+    try {
+      const newsArticles = await marketDataService.getFinancialNews(5);
+      newsStories = newsArticles.map(article => ({
+        title: article.title,
+        url: article.url,
+        source: article.source || 'CoinDesk',
+        published: article.published
+      }));
+    } catch (error) {
+      console.error('Error fetching news stories:', error);
+      // Continue without news if fetch fails
+    }
+
     // Format date for subject
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -111,7 +132,8 @@ export async function generateNewsletterContent(): Promise<NewsletterContent> {
       topLosers,
       marketSummary,
       totalMarketCap: '~$2.8T', // You can fetch this from CoinGecko global endpoint
-      btcDominance: btcData ? '~50%' : 'N/A'
+      btcDominance: btcData ? '~50%' : 'N/A',
+      newsStories
     };
   } catch (error) {
     console.error('Error generating newsletter content:', error);
@@ -124,7 +146,8 @@ export async function generateNewsletterContent(): Promise<NewsletterContent> {
       topLosers: [],
       marketSummary: 'Market data temporarily unavailable. Visit StreamAiX to explore our AI-powered prediction markets!',
       totalMarketCap: 'N/A',
-      btcDominance: 'N/A'
+      btcDominance: 'N/A',
+      newsStories: []
     };
   }
 }
