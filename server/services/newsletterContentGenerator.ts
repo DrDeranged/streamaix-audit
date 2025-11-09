@@ -137,7 +137,7 @@ export function getFeatureHighlights(): Array<{ title: string; description: stri
     {
       emoji: '🤖',
       title: 'AI Agent Trading',
-      description: 'Watch our 4 AI agents analyze and trade on prediction markets in real-time'
+      description: 'Watch 50 autonomous AI trading bots analyze and trade on prediction markets 24/7'
     },
     {
       emoji: '📊',
