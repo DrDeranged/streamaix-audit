@@ -17,7 +17,7 @@ export function RecentActivity() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const { data: activityData, isLoading } = useQuery({
-    queryKey: ['/api/admin/activity'],
+    queryKey: ['/api/activity'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 

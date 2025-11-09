@@ -9092,6 +9092,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, activities, limit, offset });
   }));
 
+  // Public activity feed (no authentication required)
+  app.get("/api/activity", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 30, 50); // Max 50
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    // Get recent platform activity (same as admin, but public)
+    const activities = await storage.getAdminActivity(limit, offset);
+    res.json({ success: true, activities, limit, offset });
+  }));
+
   // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================

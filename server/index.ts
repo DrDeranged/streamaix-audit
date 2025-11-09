@@ -98,6 +98,17 @@ app.use((req, res, next) => {
     console.log('⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)');
   }
 
+  // Start AI trading bot service (50 trading bots)
+  if (openaiKey) {
+    console.log('💹 Starting AI trading bot service...');
+    const { getTradingBotService } = await import('./services/aiTradingBotService');
+    const tradingService = getTradingBotService();
+    tradingService.start(); // Runs continuously with 3-8 min intervals
+    console.log('✅ AI trading bot service active - 50 bots analyzing and trading on markets');
+  } else {
+    console.log('⚠️  AI trading bots disabled (requires OPENAI_API_KEY)');
+  }
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

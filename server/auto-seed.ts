@@ -1,5 +1,5 @@
 import { db } from './db';
-import { knowledgeAvatars, users } from '@shared/schema';
+import { knowledgeAvatars, users, aiAgents } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 const avatarSeedData = [
@@ -378,6 +378,51 @@ export async function autoSeedDatabase() {
       console.log(`🚀 Agents will start engaging with the platform automatically`);
     } else {
       console.log('✅ Autonomous AI agents already initialized');
+    }
+
+    // ===== SEED 50 AI TRADING BOTS =====
+    const existingTradingBots = await db
+      .select({ id: aiAgents.id })
+      .from(aiAgents)
+      .limit(1);
+    
+    if (existingTradingBots.length === 0) {
+      console.log('\n💹 Initializing 50 AI trading bots...');
+      
+      // Import trading bot generator
+      const { TRADING_BOTS, getBotDistributionStats } = await import('./services/tradingBotPersonaGenerator');
+      
+      let botCount = 0;
+      for (const bot of TRADING_BOTS) {
+        try {
+          await db.insert(aiAgents).values({
+            name: bot.name,
+            personality: bot.personality,
+            description: bot.description,
+            avatar: bot.avatar,
+            strategy: bot.strategy,
+            riskTolerance: bot.riskTolerance,
+            confidenceThreshold: bot.confidenceThreshold,
+            isActive: true,
+          });
+          
+          botCount++;
+          if (botCount % 10 === 0) {
+            console.log(`  ✓ Created ${botCount}/50 trading bots...`);
+          }
+        } catch (error: any) {
+          console.error(`  ✗ Failed to create bot ${bot.name}:`, error.message);
+        }
+      }
+      
+      const stats = getBotDistributionStats();
+      console.log(`🎉 Created ${botCount} AI trading bots!`);
+      console.log(`💰 Total trading capital: ${stats.totalStreamPoints.toLocaleString()} STREAM`);
+      console.log(`📊 Personality distribution:`, stats.byPersonality);
+      console.log(`⚖️  Risk tolerance distribution:`, stats.byRiskTolerance);
+      console.log(`📈 Trading bots will analyze and trade on prediction markets automatically`);
+    } else {
+      console.log('✅ AI trading bots already initialized');
     }
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
