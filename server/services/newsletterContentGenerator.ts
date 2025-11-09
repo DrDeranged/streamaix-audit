@@ -19,34 +19,76 @@ export interface NewsletterContent {
   btcDominance: string;
 }
 
+// Meme coin patterns to filter out
+const MEME_COIN_PATTERNS = [
+  'inu', 'shib', 'doge', 'pepe', 'elon', 'floki', 'baby', 
+  'moon', 'safe', 'rocket', 'meme', 'wojak', 'chad', 
+  'bonk', 'bome', 'wif', 'pepe2', 'dogelon'
+];
+
+/**
+ * Check if a coin is likely a meme coin based on name patterns
+ */
+function isMemeCoin(name: string, symbol: string): boolean {
+  const lowerName = name.toLowerCase();
+  const lowerSymbol = symbol.toLowerCase();
+  return MEME_COIN_PATTERNS.some(pattern => 
+    lowerName.includes(pattern) || lowerSymbol.includes(pattern)
+  );
+}
+
+/**
+ * Calculate relevance score for a coin based on market cap, volume, and price movement
+ */
+function calculateRelevanceScore(coin: any): number {
+  const marketCapWeight = Math.log10(coin.marketCap || 1);
+  const volumeWeight = Math.log10(coin.volume24h || 1);
+  const priceChangeWeight = Math.abs(coin.percentChange24h);
+  
+  // Higher market cap and volume make the price movement more relevant
+  return marketCapWeight * volumeWeight * priceChangeWeight;
+}
+
 /**
  * Generate newsletter content from live crypto market data
  */
 export async function generateNewsletterContent(): Promise<NewsletterContent> {
   try {
-    // Fetch crypto market data from CoinGecko/CoinMarketCap
-    const cryptoData = await marketDataService.getCryptoQuotes(['bitcoin', 'ethereum', 'solana', 'cardano', 'polkadot', 'ripple', 'dogecoin', 'shiba-inu', 'polygon', 'avalanche']);
+    // Fetch top 50 cryptocurrencies by market cap from CoinMarketCap
+    const cryptoData = await marketDataService.getTopCryptos(50);
     
     if (!cryptoData || cryptoData.length === 0) {
       throw new Error('No crypto data available');
     }
 
-    // Convert to market highlights format
-    const allCoins: MarketHighlight[] = cryptoData.map(coin => ({
+    // Filter out meme coins and convert to market highlights format
+    const filteredCoins = cryptoData.filter(coin => 
+      !isMemeCoin(coin.name, coin.symbol) && 
+      coin.marketCap > 100000000 && // At least $100M market cap
+      coin.volume24h > 1000000 // At least $1M daily volume
+    );
+
+    const allCoins: (MarketHighlight & { relevanceScore: number })[] = filteredCoins.map(coin => ({
       symbol: coin.symbol.toUpperCase(),
       name: coin.name,
       price: coin.price,
       change24h: (coin.price * coin.percentChange24h) / 100,
       changePercent: coin.percentChange24h,
-      isPositive: coin.percentChange24h > 0
+      isPositive: coin.percentChange24h > 0,
+      relevanceScore: calculateRelevanceScore(coin)
     }));
 
-    // Separate gainers and losers
-    const gainers = allCoins.filter(c => c.isPositive).sort((a, b) => b.changePercent - a.changePercent);
-    const losers = allCoins.filter(c => !c.isPositive).sort((a, b) => a.changePercent - b.changePercent);
+    // Separate gainers and losers, sorted by relevance score
+    const gainers = allCoins
+      .filter(c => c.isPositive)
+      .sort((a, b) => b.relevanceScore - a.relevanceScore);
+      
+    const losers = allCoins
+      .filter(c => !c.isPositive)
+      .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    const topGainers = gainers.slice(0, 3);
-    const topLosers = losers.slice(0, 3);
+    const topGainers = gainers.slice(0, 5);
+    const topLosers = losers.slice(0, 5);
 
     // Get major coin highlights (BTC, ETH, SOL)
     const marketHighlights = allCoins.slice(0, 3);
