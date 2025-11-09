@@ -9042,7 +9042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.get("/api/newsletter/preview", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.get("/api/newsletter/preview", asyncHandler(async (req: Request, res: Response) => {
     const { generateNewsletterContent } = await import('./services/newsletterContentGenerator');
     const { generateNewsletterHTML } = await import('./services/newsletterTemplate');
     
