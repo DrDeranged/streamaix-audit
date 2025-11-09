@@ -163,6 +163,49 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
       margin: 20px 0;
       text-align: center;
     }
+    .news-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .news-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    .news-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+    .news-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .news-title a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .news-title a:hover {
+      color: #667eea;
+    }
+    .news-meta {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .news-source {
+      color: #667eea;
+      font-weight: 600;
+    }
     .footer {
       background: rgba(0, 0, 0, 0.3);
       padding: 30px 20px;
@@ -245,6 +288,32 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
       </div>
       ` : ''}
 
+      <!-- Latest Crypto News -->
+      ${content.newsStories && content.newsStories.length > 0 ? `
+      <div class="section">
+        <div class="section-title">📰 Latest Crypto News</div>
+        <div class="news-grid">
+          ${content.newsStories.map(news => {
+            const publishedDate = new Date(news.published);
+            const timeAgo = getTimeAgo(publishedDate);
+            return `
+            <div class="news-card">
+              <div class="news-title">
+                <a href="${news.url}" target="_blank" rel="noopener noreferrer">
+                  ${news.title}
+                </a>
+              </div>
+              <div class="news-meta">
+                <span class="news-source">${news.source}</span>
+                <span>•</span>
+                <span>${timeAgo}</span>
+              </div>
+            </div>
+          `}).join('')}
+        </div>
+      </div>
+      ` : ''}
+
       <!-- StreamAiX Features -->
       <div class="section">
         <div class="section-title">✨ What's on StreamAiX</div>
@@ -288,6 +357,24 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
 </body>
 </html>
   `.trim();
+}
+
+/**
+ * Format time ago from a date
+ */
+function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days > 0) {
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  } else if (hours > 0) {
+    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  } else {
+    return 'Less than 1 hour ago';
+  }
 }
 
 /**
