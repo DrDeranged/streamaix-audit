@@ -215,8 +215,8 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
                 <div class="coin-symbol">${coin.symbol}</div>
               </div>
               <div class="coin-price">
-                <div class="price">$${coin.price.toLocaleString()}</div>
-                <div class="change positive">+${coin.changePercent.toFixed(2)}%</div>
+                <div class="price">$${(coin.price || 0).toLocaleString()}</div>
+                <div class="change positive">+${(coin.changePercent || 0).toFixed(2)}%</div>
               </div>
             </div>
           `).join('')}
@@ -236,8 +236,8 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
                 <div class="coin-symbol">${coin.symbol}</div>
               </div>
               <div class="coin-price">
-                <div class="price">$${coin.price.toLocaleString()}</div>
-                <div class="change negative">${coin.changePercent.toFixed(2)}%</div>
+                <div class="price">$${(coin.price || 0).toLocaleString()}</div>
+                <div class="change negative">${(coin.changePercent || 0).toFixed(2)}%</div>
               </div>
             </div>
           `).join('')}
