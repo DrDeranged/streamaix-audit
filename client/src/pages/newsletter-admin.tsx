@@ -471,7 +471,15 @@ export default function NewsletterAdmin() {
                           <div className="font-bold text-white text-base mb-2">
                             {status?.nextMonday || 'Loading...'}
                           </div>
-                          <p className="text-xs text-blue-200 uppercase tracking-wide">Next Monday Send</p>
+                          <p className="text-xs text-blue-200 uppercase tracking-wide mb-3">Next Monday Send</p>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.open('/api/newsletter/preview', '_blank')}
+                            className="w-full h-8 text-xs border border-blue-500/40 hover:border-blue-400/60 hover:bg-blue-500/10 text-blue-200 font-semibold rounded-lg transition-all duration-300"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Preview
+                          </Button>
                         </div>
                       </div>
 
@@ -481,7 +489,15 @@ export default function NewsletterAdmin() {
                           <div className="font-bold text-white text-base mb-2">
                             {status?.nextFriday || 'Loading...'}
                           </div>
-                          <p className="text-xs text-cyan-200 uppercase tracking-wide">Next Friday Send</p>
+                          <p className="text-xs text-cyan-200 uppercase tracking-wide mb-3">Next Friday Send</p>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.open('/api/newsletter/preview', '_blank')}
+                            className="w-full h-8 text-xs border border-cyan-500/40 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-cyan-200 font-semibold rounded-lg transition-all duration-300"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Preview
+                          </Button>
                         </div>
                       </div>
                     </div>
