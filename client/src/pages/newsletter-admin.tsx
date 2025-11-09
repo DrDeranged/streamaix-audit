@@ -201,7 +201,7 @@ export default function NewsletterAdmin() {
             </div>
           </div>
           <Button
-            onClick={() => setLocation('/dashboard')}
+            onClick={() => setLocation('/')}
             variant="outline"
             className="border-purple-500/40 hover:border-purple-400/60 hover:bg-purple-500/10 text-purple-200 font-semibold"
           >
