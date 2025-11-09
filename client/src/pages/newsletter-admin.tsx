@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Loader2, Send, Eye, Mail, Calendar, CheckCircle, XCircle, ShieldAlert,
   Users, FileText, Target, TrendingUp, Activity, ChevronDown, ChevronUp,
-  LayoutDashboard, BarChart3, UserPlus, Award, Zap
+  LayoutDashboard, BarChart3, UserPlus, Award, Zap, Home
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
@@ -192,12 +192,22 @@ export default function NewsletterAdmin() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <LayoutDashboard className="w-8 h-8 text-purple-400" />
-          <div>
-            <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-slate-400">Platform analytics and newsletter management</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <LayoutDashboard className="w-8 h-8 text-purple-400" />
+            <div>
+              <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+              <p className="text-slate-400">Platform analytics and newsletter management</p>
+            </div>
           </div>
+          <Button
+            onClick={() => setLocation('/dashboard')}
+            variant="outline"
+            className="border-purple-500/40 hover:border-purple-400/60 hover:bg-purple-500/10 text-purple-200 font-semibold"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
         </div>
 
         {/* Platform Overview Stats */}
