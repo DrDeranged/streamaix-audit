@@ -989,10 +989,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                   <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
                                   Performance Analytics
                                 </span>
-                                <span className="text-[8px] font-mono text-muted-foreground/40">v2.1</span>
+                                <span className="text-[8px] font-mono text-muted-foreground/40">v2.2</span>
                               </h4>
                               <div 
-                                className="analytics-scroll-container w-full overflow-x-auto overflow-y-visible lg:overflow-x-visible"
+                                className="analytics-scroll-container w-full overflow-x-auto overflow-y-visible"
                                 style={{
                                   scrollbarWidth: 'thin',
                                   scrollbarColor: 'rgba(147, 197, 253, 0.5) rgba(148, 163, 184, 0.1)',
@@ -1000,15 +1000,15 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 }}
                                 ref={(el) => {
                                   if (el) {
-                                    console.log(`🔍 DEBUG v2.1: Analytics scrollbar container rendered`);
-                                    console.log(`🔍 DEBUG v2.1: Classes applied:`, el.className);
-                                    console.log(`🔍 DEBUG v2.1: Scrollable width: ${el.scrollWidth}px, visible: ${el.clientWidth}px`);
-                                    console.log(`🔍 DEBUG v2.1: Needs scroll:`, el.scrollWidth > el.clientWidth);
+                                    console.log(`🔍 DEBUG v2.2: Analytics scrollbar container rendered`);
+                                    console.log(`🔍 DEBUG v2.2: Classes applied:`, el.className);
+                                    console.log(`🔍 DEBUG v2.2: Scrollable width: ${el.scrollWidth}px, visible: ${el.clientWidth}px`);
+                                    console.log(`🔍 DEBUG v2.2: Needs scroll:`, el.scrollWidth > el.clientWidth);
                                   }
                                 }}
                               >
-                              <div className="flex lg:grid lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-3 lg:pb-0 min-w-max lg:min-w-0">
-                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-blue-500/20 w-[200px] sm:w-[220px] lg:w-auto flex-shrink-0">
+                              <div className="flex gap-2 sm:gap-3 md:gap-4 pb-3 min-w-max">
+                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-blue-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
                                 <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
                                   <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                                     {formatFollowerCount(avatar.followerCount)}
@@ -1019,7 +1019,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 <div className="text-xs text-green-500 mt-1">+12.3% this month</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-green-500/20 w-[200px] sm:w-[220px] lg:w-auto flex-shrink-0">
+                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-green-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
                                 <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
                                   <div className={`text-lg sm:text-xl md:text-2xl font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
@@ -1030,7 +1030,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 <div className="text-xs text-green-500 mt-1">All-time returns</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-purple-500/20 w-[200px] sm:w-[220px] lg:w-auto flex-shrink-0">
+                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-purple-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
                                 <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
                                   <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                                     {accuracyPercentage}%
@@ -1041,7 +1041,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 <div className="text-xs text-purple-500 mt-1">Last 100 predictions</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-orange-500/20 w-[200px] sm:w-[220px] lg:w-auto flex-shrink-0">
+                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-orange-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
                                 <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
                                   <div className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">
                                     {netWorth}
