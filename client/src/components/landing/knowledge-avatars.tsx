@@ -236,6 +236,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const [isMobile, setIsMobile] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
+  // DEBUG: Log component mount with version timestamp
+  useEffect(() => {
+    console.log(`🔍 DEBUG: KnowledgeAvatars v2.1 mounted at ${new Date().toISOString()}`);
+    console.log(`🔍 DEBUG: Using native overflow-x-auto with .scrollbar-visible class`);
+  }, []);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const isTransitioningRef = useRef(false);
@@ -961,11 +967,22 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             
                             {/* Enhanced Analytics Dashboard */}
                             <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-muted/30">
-                              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center">
-                                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
-                                Performance Analytics
+                              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center justify-between">
+                                <span className="flex items-center">
+                                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
+                                  Performance Analytics
+                                </span>
+                                <span className="text-[8px] font-mono text-muted-foreground/40">v2.1</span>
                               </h4>
-                              <div className="w-full overflow-x-auto overflow-y-visible scrollbar-visible lg:overflow-x-visible">
+                              <div 
+                                className="w-full overflow-x-auto overflow-y-visible scrollbar-visible lg:overflow-x-visible"
+                                ref={(el) => {
+                                  if (el) {
+                                    console.log(`🔍 DEBUG: Analytics scrollbar container rendered. Classes:`, el.className);
+                                    console.log(`🔍 DEBUG: Scrollable width: ${el.scrollWidth}px, visible width: ${el.clientWidth}px`);
+                                  }
+                                }}
+                              >
                               <div className="flex lg:grid lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-3 lg:pb-0 min-w-max lg:min-w-0">
                               <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-blue-500/20 w-[200px] sm:w-[220px] lg:w-auto flex-shrink-0">
                                 <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
