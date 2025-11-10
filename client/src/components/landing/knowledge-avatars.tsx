@@ -967,6 +967,23 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             
                             {/* Enhanced Analytics Dashboard */}
                             <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-muted/30">
+                              <style dangerouslySetInnerHTML={{__html: `
+                                .analytics-scroll-container::-webkit-scrollbar {
+                                  height: 8px !important;
+                                  display: block !important;
+                                }
+                                .analytics-scroll-container::-webkit-scrollbar-track {
+                                  background: rgba(148, 163, 184, 0.1) !important;
+                                  border-radius: 10px !important;
+                                }
+                                .analytics-scroll-container::-webkit-scrollbar-thumb {
+                                  background: rgba(147, 197, 253, 0.5) !important;
+                                  border-radius: 10px !important;
+                                }
+                                .analytics-scroll-container::-webkit-scrollbar-thumb:hover {
+                                  background: rgba(147, 197, 253, 0.8) !important;
+                                }
+                              `}} />
                               <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center justify-between">
                                 <span className="flex items-center">
                                   <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
@@ -975,11 +992,18 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 <span className="text-[8px] font-mono text-muted-foreground/40">v2.1</span>
                               </h4>
                               <div 
-                                className="w-full overflow-x-auto overflow-y-visible scrollbar-visible lg:overflow-x-visible"
+                                className="analytics-scroll-container w-full overflow-x-auto overflow-y-visible lg:overflow-x-visible"
+                                style={{
+                                  scrollbarWidth: 'thin',
+                                  scrollbarColor: 'rgba(147, 197, 253, 0.5) rgba(148, 163, 184, 0.1)',
+                                  WebkitOverflowScrolling: 'touch'
+                                }}
                                 ref={(el) => {
                                   if (el) {
-                                    console.log(`🔍 DEBUG: Analytics scrollbar container rendered. Classes:`, el.className);
-                                    console.log(`🔍 DEBUG: Scrollable width: ${el.scrollWidth}px, visible width: ${el.clientWidth}px`);
+                                    console.log(`🔍 DEBUG v2.1: Analytics scrollbar container rendered`);
+                                    console.log(`🔍 DEBUG v2.1: Classes applied:`, el.className);
+                                    console.log(`🔍 DEBUG v2.1: Scrollable width: ${el.scrollWidth}px, visible: ${el.clientWidth}px`);
+                                    console.log(`🔍 DEBUG v2.1: Needs scroll:`, el.scrollWidth > el.clientWidth);
                                   }
                                 }}
                               >
