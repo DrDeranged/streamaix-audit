@@ -166,6 +166,7 @@ Respond in JSON format:
         ],
         response_format: { type: "json_object" },
         temperature: 0.7,
+        max_tokens: 300,
       });
 
       const analysis = JSON.parse(completion.choices[0].message.content || "{}");
