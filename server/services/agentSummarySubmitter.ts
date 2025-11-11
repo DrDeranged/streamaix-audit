@@ -86,6 +86,16 @@ export class AgentSummarySubmitter {
         await this.attemptBountyClaim(bounty.id, params.agentId);
       }
       
+      // Mark bounty as completed
+      await storage.updateBounty(bounty.id, {
+        status: 'completed',
+        completedAt: new Date(),
+        summaryId: summary.id,
+        assigneeId: String(params.agentId),
+      });
+      
+      console.log(`      🎉 Bounty marked as completed`);
+      
       return true;
       
     } catch (error: any) {
