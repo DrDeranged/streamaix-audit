@@ -4,7 +4,6 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
 import LiveCryptoVideos from "@/components/landing/live-crypto-videos";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { WhyBlockchain } from "@/components/landing/why-blockchain";
 import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
 import { AISuggestions } from "@/components/landing/ai-suggestions";
 import { RecentActivity } from "@/components/landing/RecentActivity";
@@ -25,7 +24,6 @@ export default function Landing() {
         <LiveCryptoVideos />
         <BountyFeed />
         <PredictionMarketSection />
-        <WhyBlockchain />
         <SocialFeed />
         <KnowledgeAvatars />
         <AISuggestions />
