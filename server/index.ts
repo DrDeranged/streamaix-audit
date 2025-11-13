@@ -73,9 +73,9 @@ app.use((req, res, next) => {
   
   const server = await registerRoutes(app);
 
-  // Auto-seed database if empty (runs on every deployment)
-  await autoSeedDatabase();
-
+  // Start background services FIRST (before auto-seed to prevent blocking)
+  // This ensures services are running even if seeding takes time or fails
+  
   // Start newsletter scheduler for automated sends
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
@@ -92,7 +92,7 @@ app.use((req, res, next) => {
     console.log('🤖 Starting autonomous AI agent service...');
     const { getAutonomousAgentService } = await import('./services/autonomousAgentService');
     const agentService = getAutonomousAgentService();
-    agentService.start(); // Runs continuously with 5-15 min intervals
+    agentService.start(); // Runs continuously with 20-40 min intervals
     console.log('✅ Autonomous AI agent service active - 100 agents engaging with platform');
   } else {
     console.log('⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)');
@@ -103,11 +103,20 @@ app.use((req, res, next) => {
     console.log('💹 Starting AI trading bot service...');
     const { getTradingBotService } = await import('./services/aiTradingBotService');
     const tradingService = getTradingBotService();
-    tradingService.start(); // Runs continuously with 3-8 min intervals
+    tradingService.start(); // Runs continuously with 15-30 min intervals
     console.log('✅ AI trading bot service active - 50 bots analyzing and trading on markets');
   } else {
     console.log('⚠️  AI trading bots disabled (requires OPENAI_API_KEY)');
   }
+
+  // Auto-seed database in background (non-blocking)
+  // Runs asynchronously so it doesn't delay server startup
+  console.log('🌱 Starting background database seeding...');
+  autoSeedDatabase().then(() => {
+    console.log('✅ Auto-seed completed successfully');
+  }).catch(error => {
+    console.error('⚠️  Auto-seed encountered an error (non-critical):', error.message);
+  });
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
