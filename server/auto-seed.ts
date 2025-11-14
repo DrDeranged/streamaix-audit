@@ -313,14 +313,18 @@ const avatarSeedData = [
 
 export async function autoSeedDatabase() {
   try {
-    // ===== SEED KNOWLEDGE AVATARS =====
-    const existingAvatars = await db.query.knowledgeAvatars.findMany({ limit: 1 });
+    // ===== SEED KNOWLEDGE AVATARS (IDEMPOTENT) =====
+    const existingAvatars = await db.query.knowledgeAvatars.findMany();
+    const targetAvatarCount = avatarSeedData.length;
     
-    if (existingAvatars.length === 0) {
-      console.log('🌱 Database empty - auto-seeding knowledge avatars...');
+    if (existingAvatars.length < targetAvatarCount) {
+      console.log(`🌱 Auto-seeding knowledge avatars (${existingAvatars.length}/${targetAvatarCount} exist)...`);
+      
+      const existingHandles = new Set(existingAvatars.map(a => a.handle));
+      const avatarsToCreate = avatarSeedData.filter(a => !existingHandles.has(a.handle));
       
       let seededCount = 0;
-      for (const avatar of avatarSeedData) {
+      for (const avatar of avatarsToCreate) {
         try {
           await db.insert(knowledgeAvatars).values(avatar);
           seededCount++;
@@ -329,27 +333,33 @@ export async function autoSeedDatabase() {
         }
       }
       
-      console.log(`🎉 Auto-seed complete! Added ${seededCount}/${avatarSeedData.length} knowledge avatars`);
+      console.log(`🎉 Added ${seededCount} new knowledge avatars (${existingAvatars.length + seededCount}/${targetAvatarCount} total)`);
     } else {
-      console.log('✅ Database already seeded with knowledge avatars');
+      console.log(`✅ Knowledge avatars complete (${existingAvatars.length}/${targetAvatarCount})`);
     }
 
-    // ===== SEED 100 AUTONOMOUS AI AGENTS =====
+    // ===== SEED 100 AUTONOMOUS AI AGENTS (IDEMPOTENT) =====
     const existingAgents = await db
-      .select({ id: users.id })
+      .select({ id: users.id, username: users.username })
       .from(users)
-      .where(eq(users.isAiAgent, true))
-      .limit(1);
+      .where(eq(users.isAiAgent, true));
     
-    if (existingAgents.length === 0) {
-      console.log('\n🤖 Initializing 100 autonomous AI agents...');
+    const targetAgentCount = 100;
+    
+    if (existingAgents.length < targetAgentCount) {
+      console.log(`\n🤖 Auto-seeding AI agents (${existingAgents.length}/${targetAgentCount} exist)...`);
+      
+      const agentsNeeded = targetAgentCount - existingAgents.length;
       
       // Import agent initialization function
       const { generateAgentPersonas } = await import('./services/agentPersonaGenerator');
-      const personas = generateAgentPersonas(100);
+      const personas = generateAgentPersonas(agentsNeeded);
+      
+      const existingUsernames = new Set(existingAgents.map(a => a.username));
+      const personasToCreate = personas.filter(p => !existingUsernames.has(p.username));
       
       let agentCount = 0;
-      for (const persona of personas) {
+      for (const persona of personasToCreate) {
         try {
           await db.insert(users).values({
             username: persona.username,
@@ -365,7 +375,7 @@ export async function autoSeedDatabase() {
           
           agentCount++;
           if (agentCount % 25 === 0) {
-            console.log(`  ✓ Created ${agentCount}/100 AI agents...`);
+            console.log(`  ✓ Created ${agentCount}/${agentsNeeded} new AI agents...`);
           }
         } catch (error: any) {
           console.error(`  ✗ Failed to create agent ${persona.username}:`, error.message);
@@ -373,27 +383,30 @@ export async function autoSeedDatabase() {
       }
       
       const totalPoints = personas.reduce((sum, p) => sum + p.streamPoints, 0);
-      console.log(`🎉 Created ${agentCount} autonomous AI agents!`);
-      console.log(`💰 Distributed ${totalPoints.toLocaleString()} STREAM points`);
-      console.log(`🚀 Agents will start engaging with the platform automatically`);
+      console.log(`🎉 Added ${agentCount} new AI agents (${existingAgents.length + agentCount}/${targetAgentCount} total)`);
+      console.log(`💰 Distributed ${totalPoints.toLocaleString()} STREAM points to new agents`);
     } else {
-      console.log('✅ Autonomous AI agents already initialized');
+      console.log(`✅ AI agents complete (${existingAgents.length}/${targetAgentCount})`);
     }
 
-    // ===== SEED 50 AI TRADING BOTS =====
+    // ===== SEED 50 AI TRADING BOTS (IDEMPOTENT) =====
     const existingTradingBots = await db
-      .select({ id: aiAgents.id })
-      .from(aiAgents)
-      .limit(1);
+      .select({ id: aiAgents.id, name: aiAgents.name })
+      .from(aiAgents);
     
-    if (existingTradingBots.length === 0) {
-      console.log('\n💹 Initializing 50 AI trading bots...');
+    const targetBotCount = 50;
+    
+    if (existingTradingBots.length < targetBotCount) {
+      console.log(`\n💹 Auto-seeding trading bots (${existingTradingBots.length}/${targetBotCount} exist)...`);
       
       // Import trading bot generator
       const { TRADING_BOTS, getBotDistributionStats } = await import('./services/tradingBotPersonaGenerator');
       
+      const existingBotNames = new Set(existingTradingBots.map(b => b.name));
+      const botsToCreate = TRADING_BOTS.filter(b => !existingBotNames.has(b.name));
+      
       let botCount = 0;
-      for (const bot of TRADING_BOTS) {
+      for (const bot of botsToCreate) {
         try {
           await db.insert(aiAgents).values({
             name: bot.name,
@@ -408,7 +421,7 @@ export async function autoSeedDatabase() {
           
           botCount++;
           if (botCount % 10 === 0) {
-            console.log(`  ✓ Created ${botCount}/50 trading bots...`);
+            console.log(`  ✓ Created ${botCount}/${botsToCreate.length} new trading bots...`);
           }
         } catch (error: any) {
           console.error(`  ✗ Failed to create bot ${bot.name}:`, error.message);
@@ -416,23 +429,21 @@ export async function autoSeedDatabase() {
       }
       
       const stats = getBotDistributionStats();
-      console.log(`🎉 Created ${botCount} AI trading bots!`);
+      console.log(`🎉 Added ${botCount} new trading bots (${existingTradingBots.length + botCount}/${targetBotCount} total)`);
       console.log(`💰 Total trading capital: ${stats.totalStreamPoints.toLocaleString()} STREAM`);
-      console.log(`📊 Personality distribution:`, stats.byPersonality);
-      console.log(`⚖️  Risk tolerance distribution:`, stats.byRiskTolerance);
-      console.log(`📈 Trading bots will analyze and trade on prediction markets automatically`);
     } else {
-      console.log('✅ AI trading bots already initialized');
+      console.log(`✅ Trading bots complete (${existingTradingBots.length}/${targetBotCount})`);
     }
 
-    // ===== SEED PREDICTION MARKETS =====
+    // ===== SEED PREDICTION MARKETS (IDEMPOTENT) =====
     const existingMarkets = await db
-      .select({ id: predictionMarkets.id })
-      .from(predictionMarkets)
-      .limit(1);
+      .select({ id: predictionMarkets.id, question: predictionMarkets.question })
+      .from(predictionMarkets);
     
-    if (existingMarkets.length === 0) {
-      console.log('\n📊 Initializing prediction markets...');
+    const targetMarketCount = 11;
+    
+    if (existingMarkets.length < targetMarketCount) {
+      console.log(`\n📊 Auto-seeding prediction markets (${existingMarkets.length}/${targetMarketCount} exist)...`);
       
       const marketSeeds = [
         {
@@ -536,14 +547,19 @@ export async function autoSeedDatabase() {
         },
       ];
 
+      const existingQuestions = new Set(existingMarkets.map(m => m.question));
+      const marketsToCreate = marketSeeds.filter(m => !existingQuestions.has(m.question));
+      
       const creatorWallet = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
       let marketCount = 0;
       
-      for (let i = 0; i < marketSeeds.length; i++) {
-        const seed = marketSeeds[i];
+      for (let i = 0; i < marketsToCreate.length; i++) {
+        const seed = marketsToCreate[i];
         try {
+          const nextMarketId = existingMarkets.length + marketCount + 1;
+          
           await db.insert(predictionMarkets).values({
-            contractMarketId: i + 1,
+            contractMarketId: nextMarketId,
             question: seed.question,
             description: seed.description,
             category: seed.category,
@@ -565,17 +581,17 @@ export async function autoSeedDatabase() {
           
           marketCount++;
           if (marketCount % 5 === 0) {
-            console.log(`  ✓ Created ${marketCount}/${marketSeeds.length} prediction markets...`);
+            console.log(`  ✓ Created ${marketCount}/${marketsToCreate.length} new markets...`);
           }
         } catch (error: any) {
           console.error(`  ✗ Failed to create market "${seed.question}":`, error.message);
         }
       }
       
-      console.log(`🎉 Created ${marketCount} prediction markets!`);
+      console.log(`🎉 Added ${marketCount} new prediction markets (${existingMarkets.length + marketCount}/${targetMarketCount} total)`);
       console.log(`📊 AI trading bots will analyze and trade on these markets automatically`);
     } else {
-      console.log('✅ Prediction markets already initialized');
+      console.log(`✅ Prediction markets complete (${existingMarkets.length}/${targetMarketCount})`);
     }
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
