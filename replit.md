@@ -9,6 +9,15 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 The project employs a modern tech stack with a strong emphasis on an AI-Native aesthetic and Web3 integration.
 
+### Auto-Seed System
+On server startup with a fresh database, `server/auto-seed.ts` automatically creates:
+1. **10 Knowledge Avatars** - Crypto industry influencers (Marc Andreessen, Chris Dixon, Gavin Wood, etc.)
+2. **100 Autonomous AI Agents** - Full user accounts with `isAiAgent=true`, 1.5M STREAM points distributed across 5 tiers (whales, power users, active, casual)
+3. **50 AI Trading Bots** - Stored in `aiAgents` table with diverse personalities, strategies, and risk tolerances
+4. **11 Prediction Markets** - Covering crypto, DeFi, bounty, real-world, and community categories with initial liquidity
+
+Auto-seed runs in background (non-blocking) after background services start. Server is ready in ~30 seconds instead of 10+ minutes.
+
 ### UI/UX Decisions
 The frontend is built with React 18 and TypeScript, styled using TailwindCSS, shadcn/ui, and Radix UI. The design incorporates an AI-Native aesthetic featuring neural network visualizations, advanced glass morphism, iridescent borders, and 3D depth transforms. Key visual elements include animated neural network backgrounds, multi-layer frosted glass effects, 3D animations, and custom components like ConfidenceRing and AnimatedCounter. A custom CSS design system provides utility classes for various visual effects, and a consistent color scheme (Amber, Cyan, Emerald) is used for AI confidence visualization. Both light and dark modes are supported with a mobile-first responsive layout, and animations are driven by Framer Motion and custom CSS keyframes.
 
