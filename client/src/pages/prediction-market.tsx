@@ -15,7 +15,9 @@ import {
   Info,
   ExternalLink,
   Sparkles,
-  Activity
+  Activity,
+  Bot,
+  Zap
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,135 @@ import { useToast } from "@/hooks/use-toast";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { ConfidenceRing } from "@/components/ui/confidence-ring";
+import { formatDistanceToNow } from "date-fns";
+
+interface AITrade {
+  id: string;
+  agentId: string;
+  agentName: string;
+  agentPersonality: string;
+  outcome: "YES" | "NO";
+  tradeType: string;
+  streamAmount: number;
+  shares: number;
+  price: number;
+  fee: number;
+  reasoning: string;
+  probability: number | null;
+  createdAt: string;
+}
+
+function MarketTradesTab({ marketId }: { marketId: string }) {
+  const { data, isLoading } = useQuery<{ success: boolean; trades: Array<{ ai_trades: AITrade; ai_agents: any }> }>({
+    queryKey: [`/api/ai-agents/trades/${marketId}`],
+    refetchInterval: 10000,
+  });
+
+  const trades = data?.trades || [];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 p-4 animate-pulse">
+            <div className="h-4 bg-purple-500/20 rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-purple-500/20 rounded w-1/2"></div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (trades.length === 0) {
+    return (
+      <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
+        <CardContent className="p-8 text-center">
+          <Bot className="w-12 h-12 mx-auto mb-3 text-purple-400 opacity-50" />
+          <p className="text-slate-400">No AI trades yet on this market.</p>
+          <p className="text-slate-500 text-sm mt-1">Trading bots cycle every 15-30 minutes</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {trades.map((trade) => {
+        const t = trade.ai_trades;
+        const agent = trade.ai_agents;
+        const isYes = t.outcome === "YES";
+        
+        return (
+          <motion.div
+            key={t.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-purple-400/50 transition-all">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-purple-300" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-white text-sm">{agent?.name || "AI Agent"}</span>
+                        <Badge variant="outline" className="text-xs px-1.5 py-0 border-purple-500/30 text-purple-300">
+                          {agent?.personality || "unknown"}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        {formatDistanceToNow(new Date(t.createdAt), { addSuffix: true })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge className={`${isYes ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30'} border font-bold`}>
+                      {t.outcome}
+                    </Badge>
+                    <div className="text-xs text-slate-400 mt-1">
+                      {Math.floor(t.shares).toLocaleString()} shares
+                    </div>
+                  </div>
+                </div>
+
+                {t.reasoning && (
+                  <div className="bg-slate-900/50 rounded-lg p-3 mb-3 border border-slate-700/50">
+                    <div className="flex items-start gap-2">
+                      <Zap className="w-3 h-3 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-slate-300 leading-relaxed">{t.reasoning}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <span className="text-slate-400">Amount: </span>
+                      <span className="text-purple-300 font-semibold">{Math.floor(t.streamAmount).toLocaleString()} STREAM</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400">Price: </span>
+                      <span className="text-white">{(t.price / 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  {t.probability && (
+                    <div className="flex items-center gap-1">
+                      <ConfidenceRing confidence={t.probability} size={20} strokeWidth={2} showPercentage={false} />
+                      <span className="text-slate-400">{t.probability.toFixed(0)}% confidence</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
 
 interface Market {
   id: string;
@@ -330,11 +461,7 @@ export default function PredictionMarket() {
               </TabsContent>
 
               <TabsContent value="trades" className="mt-6">
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                  <CardContent className="p-6 text-center text-slate-400">
-                    No recent trades available
-                  </CardContent>
-                </Card>
+                <MarketTradesTab marketId={market.id} />
               </TabsContent>
 
               <TabsContent value="positions" className="mt-6">
