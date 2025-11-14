@@ -78,12 +78,7 @@ export class AITradingBotService {
     const markets = await db
       .select()
       .from(predictionMarkets)
-      .where(
-        and(
-          eq(predictionMarkets.status, 'active'),
-          lt(predictionMarkets.deadline, sql`NOW() + INTERVAL '7 days'`)
-        )
-      )
+      .where(eq(predictionMarkets.status, 'active'))
       .limit(20);
 
     console.log(`🎯 Found ${markets.length} active markets`);
