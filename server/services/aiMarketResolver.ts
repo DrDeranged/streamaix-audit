@@ -245,7 +245,8 @@ IMPORTANT:
       .update(predictionMarkets)
       .set({
         status: 'resolved',
-        outcome: resolutionData.outcome,
+        resolution: resolutionData.outcome,
+        resolvedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(predictionMarkets.id, market.id));
@@ -253,10 +254,13 @@ IMPORTANT:
     // Record resolution details
     await db.insert(marketResolutions).values({
       marketId: market.id,
-      outcome: resolutionData.outcome,
-      resolvedBy: 'AI_RESOLVER',
-      resolutionNotes: resolutionData.reasoning,
-      confidence: resolutionData.confidence,
+      resolution: resolutionData.outcome,
+      resolutionSource: `AI_RESOLVER (confidence: ${resolutionData.confidence}%)`,
+      resolutionData: {
+        reasoning: resolutionData.reasoning,
+        confidence: resolutionData.confidence,
+        sources: resolutionData.sources,
+      },
     });
   }
 

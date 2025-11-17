@@ -238,11 +238,7 @@ Provide your analysis in JSON format:
       // Save the trade
       await db.insert(aiTrades).values({
         agentId: bot.id,
-        agentName: bot.name,
-        agentPersonality: bot.personality,
         marketId: market.id,
-        marketQuestion: market.question,
-        marketCategory: market.category,
         outcome: analysis.prediction,
         tradeType: 'BUY',
         streamAmount: tradeAmount,
@@ -260,7 +256,6 @@ Provide your analysis in JSON format:
         prediction: analysis.prediction,
         confidence: analysis.confidence,
         reasoning: analysis.reasoning,
-        status: 'active',
       });
 
       // Update bot stats
