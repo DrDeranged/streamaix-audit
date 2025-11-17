@@ -4822,3 +4822,25 @@ export type AiPosition = typeof aiPositions.$inferSelect;
 
 export type InsertAiTrade = z.infer<typeof insertAiTradeSchema>;
 export type AiTrade = typeof aiTrades.$inferSelect;
+
+// Autonomous AI System Activity Tracking
+export const autonomousSystemLogs = pgTable("autonomous_system_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  systemName: text("system_name").notNull(), // market_resolver, liquidity_provider, trend_spotter, etc.
+  actionType: text("action_type").notNull(), // market_created, market_resolved, liquidity_added, content_moderated, etc.
+  status: text("status").notNull(), // success, failed, partial
+  targetId: text("target_id"), // ID of affected entity (market ID, summary ID, etc.)
+  metadata: jsonb("metadata"), // detailed action data
+  reasoning: text("reasoning"), // GPT-4 reasoning for the action
+  errorMessage: text("error_message"),
+  executionTimeMs: integer("execution_time_ms"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAutonomousSystemLogSchema = createInsertSchema(autonomousSystemLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAutonomousSystemLog = z.infer<typeof insertAutonomousSystemLogSchema>;
+export type AutonomousSystemLog = typeof autonomousSystemLogs.$inferSelect;
