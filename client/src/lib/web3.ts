@@ -56,6 +56,13 @@ export const chains: Record<number, Chain> = {
     rpcUrl: 'https://mainnet.base.org',
     blockExplorer: 'https://basescan.org',
     nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }
+  },
+  84532: {
+    id: 84532,
+    name: 'Base Sepolia',
+    rpcUrl: 'https://sepolia.base.org',
+    blockExplorer: 'https://sepolia.basescan.org',
+    nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }
   }
 };
 
