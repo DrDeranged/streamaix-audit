@@ -10,12 +10,15 @@ import {
   Loader2, Send, Eye, Mail, Calendar, CheckCircle, XCircle, ShieldAlert,
   Users, FileText, Target, TrendingUp, Activity, ChevronDown, ChevronUp,
   LayoutDashboard, BarChart3, UserPlus, Award, Zap, Home, Bot, Brain,
-  Droplet, Sparkles, Shield, DollarSign, ArrowRightLeft, AlertTriangle
+  Droplet, Sparkles, Shield, DollarSign, ArrowRightLeft, AlertTriangle,
+  Wallet, Coins, ExternalLink, Copy, RefreshCw
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow } from 'date-fns';
+import { web3Manager, formatAddress } from '@/lib/web3';
+import { contractManager, formatTokenAmount, parseTokenAmount } from '@/lib/contracts';
 
 const ADMIN_USERNAMES = ['arslan'];
 
@@ -26,6 +29,13 @@ export default function NewsletterAdmin() {
   const [, setLocation] = useLocation();
   const [newsletterOpen, setNewsletterOpen] = useState(false);
   const [systemsOpen, setSystemsOpen] = useState(false);
+  const [contractsOpen, setContractsOpen] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
+  const [chainId, setChainId] = useState(0);
+  const [streamBalance, setStreamBalance] = useState('0');
+  const [totalSupply, setTotalSupply] = useState('0');
+  const [distributionAmount, setDistributionAmount] = useState('1000');
 
   // Fetch current user
   const { user, isLoading: userLoading } = useAuth();
@@ -130,6 +140,74 @@ export default function NewsletterAdmin() {
       sendAllMutation.mutate();
     }
   };
+
+  // Web3 wallet connection
+  const handleConnectWallet = async () => {
+    try {
+      const wallet = await web3Manager.connectMetaMask();
+      setWalletConnected(true);
+      setWalletAddress(wallet.address);
+      setChainId(wallet.chainId);
+      
+      if (wallet.chainId !== 84532 && wallet.chainId !== 8453) {
+        toast({
+          title: "Wrong Network",
+          description: "Please switch to Base Sepolia or Base Mainnet",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to ${formatAddress(wallet.address)}`,
+        });
+        await loadContractData(wallet.address);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Connection Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const loadContractData = async (address: string) => {
+    try {
+      const balance = await contractManager.getStreamBalance(address);
+      setStreamBalance(balance);
+      
+      const supply = await (await contractManager.getStreamTokenContract()).totalSupply();
+      setTotalSupply(supply.toString());
+    } catch (error: any) {
+      console.error('Failed to load contract data:', error);
+    }
+  };
+
+  const handleDisconnectWallet = () => {
+    web3Manager.disconnect();
+    setWalletConnected(false);
+    setWalletAddress('');
+    setChainId(0);
+    setStreamBalance('0');
+    toast({
+      title: "Wallet Disconnected",
+      description: "Successfully disconnected from wallet",
+    });
+  };
+
+  const handleCopyAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    toast({
+      title: "Copied",
+      description: "Address copied to clipboard",
+    });
+  };
+
+  // Fetch AI agents for token distribution
+  const { data: aiAgents } = useQuery({
+    queryKey: ['/api/users/ai-agents'],
+    enabled: walletConnected,
+  });
 
   // Show loading while checking auth
   if (userLoading) {
@@ -954,6 +1032,232 @@ export default function NewsletterAdmin() {
                     )}
                   </div>
                 </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+
+        {/* Smart Contract Management Section (Collapsible) */}
+        <Collapsible open={contractsOpen} onOpenChange={setContractsOpen}>
+          <Card className="neural-glass gradient-border-hot overflow-hidden">
+            <CollapsibleTrigger className="w-full">
+              <CardHeader className="cursor-pointer hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 glow-pulse">
+                      <Coins className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <CardTitle className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        Smart Contract Management
+                      </CardTitle>
+                      <CardDescription className="text-slate-400">
+                        Manage STREAM tokens and Base network contracts
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {walletConnected && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30">
+                        <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                        <span className="text-sm font-semibold text-purple-300">
+                          Connected
+                        </span>
+                      </div>
+                    )}
+                    <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                      {contractsOpen ? (
+                        <ChevronUp className="w-5 h-5 text-purple-400" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-purple-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6 pt-6 pb-8">
+                {/* Wallet Connection */}
+                {!walletConnected ? (
+                  <div className="flex flex-col items-center justify-center py-12 px-4">
+                    <div className="p-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30 mb-6">
+                      <Wallet className="w-12 h-12 text-purple-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Connect Your Wallet</h3>
+                    <p className="text-slate-400 text-center mb-6 max-w-md">
+                      Connect to Base Sepolia testnet to manage smart contracts and distribute STREAM tokens to AI agents
+                    </p>
+                    <Button
+                      onClick={handleConnectWallet}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-8 py-6 text-lg"
+                      data-testid="button-connect-wallet"
+                    >
+                      <Wallet className="w-5 h-5 mr-2" />
+                      Connect MetaMask
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Wallet Info */}
+                    <div className="p-6 rounded-xl bg-gradient-to-r from-purple-900/40 to-pink-900/30 border-2 border-purple-500/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                          <Wallet className="w-5 h-5 text-purple-400" />
+                          Connected Wallet
+                        </h3>
+                        <Button
+                          onClick={handleDisconnectWallet}
+                          variant="outline"
+                          size="sm"
+                          className="border-red-500/40 hover:border-red-400/60 hover:bg-red-500/10 text-red-300"
+                          data-testid="button-disconnect-wallet"
+                        >
+                          Disconnect
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50">
+                          <span className="text-sm text-slate-400">Address</span>
+                          <div className="flex items-center gap-2">
+                            <code className="text-sm text-purple-300 font-mono">{formatAddress(walletAddress)}</code>
+                            <Button
+                              onClick={() => handleCopyAddress(walletAddress)}
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              data-testid="button-copy-address"
+                            >
+                              <Copy className="w-3 h-3 text-slate-400 hover:text-white" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50">
+                          <span className="text-sm text-slate-400">Network</span>
+                          <span className="text-sm text-purple-300 font-semibold">
+                            {chainId === 84532 ? 'Base Sepolia' : chainId === 8453 ? 'Base Mainnet' : 'Unknown'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50">
+                          <span className="text-sm text-slate-400">STREAM Balance</span>
+                          <span className="text-sm text-purple-300 font-semibold">
+                            {formatTokenAmount(streamBalance)} STREAM
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contract Stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-6 rounded-xl bg-gradient-to-br from-purple-900/40 to-violet-900/30 border-2 border-purple-500/50">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Coins className="w-5 h-5 text-purple-400" />
+                          <h4 className="font-semibold text-white">Total Supply</h4>
+                        </div>
+                        <div className="text-3xl font-bold text-purple-300">
+                          {formatTokenAmount(totalSupply)}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">STREAM tokens</div>
+                      </div>
+                      
+                      <div className="p-6 rounded-xl bg-gradient-to-br from-pink-900/40 to-rose-900/30 border-2 border-pink-500/50">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Users className="w-5 h-5 text-pink-400" />
+                          <h4 className="font-semibold text-white">AI Agents</h4>
+                        </div>
+                        <div className="text-3xl font-bold text-pink-300">
+                          {aiAgents?.agents?.length || 100}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">Ready for distribution</div>
+                      </div>
+                    </div>
+
+                    {/* Contract Addresses */}
+                    <div className="p-6 rounded-xl bg-gradient-to-r from-slate-900/60 to-purple-900/30 border border-purple-500/20">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <ExternalLink className="w-5 h-5 text-purple-400" />
+                        Deployed Contracts
+                      </h3>
+                      <div className="space-y-2">
+                        {[
+                          { name: 'STREAM Token', address: '0x490520c8c45e444fFC510B35596eB0D4Fb104ff3' },
+                          { name: 'Summary NFT', address: '0x74AD35278EF4B3f30Fc42F23860E21256cEd4227' },
+                          { name: 'Staking', address: '0x8385D2C8b960A84750bB62101bb64F815901331d' },
+                          { name: 'Bounty Board', address: '0x5F0b11E9A1bb2F16B1c03B92a8C2629e7dAfeF1e' },
+                          { name: 'Prediction Markets', address: '0x5180AcCa81bde90Be8A52f1618c4F821F35E36aA' }
+                        ].map((contract) => (
+                          <div key={contract.name} className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 hover:bg-slate-900/70 transition-colors">
+                            <span className="text-sm text-slate-300 font-medium">{contract.name}</span>
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs text-purple-300 font-mono">{formatAddress(contract.address)}</code>
+                              <Button
+                                onClick={() => handleCopyAddress(contract.address)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                data-testid={`button-copy-${contract.name.toLowerCase().replace(' ', '-')}`}
+                              >
+                                <Copy className="w-3 h-3 text-slate-400 hover:text-white" />
+                              </Button>
+                              <a
+                                href={`https://sepolia.basescan.org/address/${contract.address}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="h-6 w-6 p-0 flex items-center justify-center hover:bg-purple-500/20 rounded transition-colors"
+                              >
+                                <ExternalLink className="w-3 h-3 text-slate-400 hover:text-purple-400" />
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* AI Agent Token Distribution */}
+                    <div className="p-6 rounded-xl bg-gradient-to-r from-amber-900/40 to-orange-900/30 border-2 border-amber-500/50">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <Bot className="w-5 h-5 text-amber-400" />
+                        Distribute STREAM to AI Agents
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="distribution-amount" className="text-sm text-amber-200 mb-2 block">
+                            Amount per Agent (STREAM)
+                          </Label>
+                          <Input
+                            id="distribution-amount"
+                            type="number"
+                            value={distributionAmount}
+                            onChange={(e) => setDistributionAmount(e.target.value)}
+                            placeholder="1000"
+                            className="bg-slate-900/50 border-amber-500/30 text-white"
+                            data-testid="input-distribution-amount"
+                          />
+                        </div>
+                        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-amber-200">Total Distribution:</span>
+                            <span className="text-amber-300 font-bold">
+                              {(parseFloat(distributionAmount) * 100).toLocaleString()} STREAM
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          disabled
+                          className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold"
+                          data-testid="button-distribute-tokens"
+                        >
+                          <Coins className="w-4 h-4 mr-2" />
+                          Distribute to 100 AI Agents (Coming Soon)
+                        </Button>
+                        <p className="text-xs text-amber-200/60 text-center">
+                          This will send {distributionAmount} STREAM to each of the 100 AI agents on the platform
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </CollapsibleContent>
           </Card>
