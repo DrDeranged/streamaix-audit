@@ -4844,3 +4844,140 @@ export const insertAutonomousSystemLogSchema = createInsertSchema(autonomousSyst
 
 export type InsertAutonomousSystemLog = z.infer<typeof insertAutonomousSystemLogSchema>;
 export type AutonomousSystemLog = typeof autonomousSystemLogs.$inferSelect;
+
+// =============================================================================
+// PREDICTION MARKET ENHANCEMENTS - ACHIEVEMENTS & ANALYTICS
+// =============================================================================
+
+// Market price history for charting
+export const marketPriceHistory = pgTable("market_price_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  yesPrice: integer("yes_price").notNull(),
+  noPrice: integer("no_price").notNull(),
+  yesLiquidity: integer("yes_liquidity").notNull(),
+  noLiquidity: integer("no_liquidity").notNull(),
+  totalVolume: integer("total_volume").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Achievement definitions
+export const achievements = pgTable("achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(), // first_trade, prophet_100, whale, win_streak_5, etc
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // trading, prediction, social, milestone
+  tier: text("tier").notNull(), // bronze, silver, gold, platinum
+  iconUrl: text("icon_url"),
+  requirement: jsonb("requirement").notNull(), // { type: 'trade_count', value: 1 } or { type: 'win_streak', value: 5 }
+  reward: integer("reward").default(0), // STREAM token reward
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User achievements unlocked
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  achievementId: varchar("achievement_id").references(() => achievements.id).notNull(),
+  progress: integer("progress").default(0), // for progressive achievements
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Enhanced user trading stats for leaderboards
+export const userTradingStats = pgTable("user_trading_stats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  
+  // Overall stats
+  totalTrades: integer("total_trades").default(0),
+  totalVolume: integer("total_volume").default(0),
+  totalProfit: integer("total_profit").default(0),
+  totalLoss: integer("total_loss").default(0),
+  netProfit: integer("net_profit").default(0),
+  
+  // Win/Loss tracking
+  winningTrades: integer("winning_trades").default(0),
+  losingTrades: integer("losing_trades").default(0),
+  winRate: real("win_rate").default(0), // percentage
+  
+  // Streaks
+  currentWinStreak: integer("current_win_streak").default(0),
+  longestWinStreak: integer("longest_win_streak").default(0),
+  
+  // ROI & Performance
+  roi: real("roi").default(0), // return on investment percentage
+  sharpeRatio: real("sharpe_ratio").default(0), // risk-adjusted returns
+  
+  // Market activity
+  activePositions: integer("active_positions").default(0),
+  marketsTraded: integer("markets_traded").default(0),
+  
+  // Rankings
+  profitRank: integer("profit_rank"),
+  volumeRank: integer("volume_rank"),
+  winRateRank: integer("win_rate_rank"),
+  overallRank: integer("overall_rank"),
+  
+  // Time-based stats
+  weeklyProfit: integer("weekly_profit").default(0),
+  monthlyProfit: integer("monthly_profit").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Leaderboard snapshots for historical tracking
+export const leaderboardSnapshots = pgTable("leaderboard_snapshots", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  period: text("period").notNull(), // daily, weekly, monthly, all_time
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  rankings: jsonb("rankings").notNull(), // [{ userId, rank, score, metric }]
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMarketPriceHistorySchema = createInsertSchema(marketPriceHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserTradingStatsSchema = createInsertSchema(userTradingStats).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLeaderboardSnapshotSchema = createInsertSchema(leaderboardSnapshots).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertMarketPriceHistory = z.infer<typeof insertMarketPriceHistorySchema>;
+export type MarketPriceHistory = typeof marketPriceHistory.$inferSelect;
+
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+
+export type InsertUserTradingStats = z.infer<typeof insertUserTradingStatsSchema>;
+export type UserTradingStats = typeof userTradingStats.$inferSelect;
+
+export type InsertLeaderboardSnapshot = z.infer<typeof insertLeaderboardSnapshotSchema>;
+export type LeaderboardSnapshot = typeof leaderboardSnapshots.$inferSelect;
