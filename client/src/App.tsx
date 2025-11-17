@@ -40,6 +40,8 @@ const ChatPage = React.lazy(() => import("@/pages/chat"));
 const Discover = React.lazy(() => import("@/pages/discover"));
 const Summaries = React.lazy(() => import("@/pages/summaries"));
 const NewsletterAdmin = React.lazy(() => import("@/pages/newsletter-admin"));
+const MarketAchievements = React.lazy(() => import("@/pages/market-achievements"));
+const MarketPortfolio = React.lazy(() => import("@/pages/market-portfolio"));
 
 function Router() {
   return (
@@ -159,6 +161,18 @@ function Router() {
       <Route path="/markets/:id">
         <Suspense fallback={<DashboardSkeleton />}>
           <PredictionMarket />
+        </Suspense>
+      </Route>
+      
+      <Route path="/markets/achievements">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <MarketAchievements />
+        </Suspense>
+      </Route>
+      
+      <Route path="/markets/portfolio">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <MarketPortfolio />
         </Suspense>
       </Route>
       
