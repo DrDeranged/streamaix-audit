@@ -9092,6 +9092,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, activities, limit, offset });
   }));
 
+  // Get autonomous systems status and monitoring data
+  app.get("/api/admin/systems/status", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { autonomousSystemLogs } = await import("../shared/schema");
+    const { sql, desc, count } = await import("drizzle-orm");
+    
+    // Define all 10 autonomous systems
+    const systems = [
+      { name: 'AI Social Agents', key: 'social_agents', description: '100 AI agents creating content and engaging' },
+      { name: 'AI Trading Bots', key: 'trading_bots', description: '50 bots analyzing and trading on markets' },
+      { name: 'Market Resolver', key: 'market_resolver', description: 'Auto-resolves expired prediction markets' },
+      { name: 'Liquidity Provider', key: 'liquidity_provider', description: 'Seeds new markets with balanced liquidity' },
+      { name: 'Trend Spotter', key: 'trend_spotter', description: 'Creates markets from trending crypto topics' },
+      { name: 'Content Moderator', key: 'content_moderator', description: 'Auto-scores and flags content quality' },
+      { name: 'Community Manager', key: 'community_manager', description: 'Engages with users and answers questions' },
+      { name: 'Treasury Manager', key: 'treasury_manager', description: 'Manages platform fees and reinvestment' },
+      { name: 'Meta-Trader', key: 'meta_trader', description: 'Exploits arbitrage opportunities' },
+      { name: 'Newsletter Automation', key: 'newsletter', description: 'Automated newsletter generation and sending' },
+    ];
+    
+    // Get system status from logs
+    const systemsStatus = await Promise.all(systems.map(async (system) => {
+      // Get recent logs for this system (last 24 hours)
+      const recentLogs = await db
+        .select()
+        .from(autonomousSystemLogs)
+        .where(sql`${autonomousSystemLogs.systemName} = ${system.key}`)
+        .orderBy(desc(autonomousSystemLogs.createdAt))
+        .limit(10);
+      
+      // Get last successful run
+      const lastSuccess = recentLogs.find(log => log.status === 'success');
+      
+      // Calculate metrics from last hour of logs
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const hourLogs = recentLogs.filter(log => 
+        log.createdAt && new Date(log.createdAt) > oneHourAgo
+      );
+      
+      const successCount = hourLogs.filter(log => log.status === 'success').length;
+      const failedCount = hourLogs.filter(log => log.status === 'failed').length;
+      const totalCount = hourLogs.length;
+      
+      // Determine system status
+      let status: 'active' | 'warning' | 'error' | 'idle' = 'idle';
+      if (recentLogs.length > 0) {
+        const latestLog = recentLogs[0];
+        const timeSinceLastRun = Date.now() - (latestLog.createdAt ? new Date(latestLog.createdAt).getTime() : 0);
+        
+        // If last run was within 2 hours, system is active
+        if (timeSinceLastRun < 2 * 60 * 60 * 1000) {
+          if (latestLog.status === 'failed') {
+            status = 'error';
+          } else if (failedCount > successCount && totalCount > 0) {
+            status = 'warning';
+          } else {
+            status = 'active';
+          }
+        }
+      }
+      
+      return {
+        name: system.name,
+        key: system.key,
+        description: system.description,
+        status,
+        lastRunTime: recentLogs[0]?.createdAt || null,
+        nextRunTime: null, // Could be calculated based on system schedule
+        metrics: {
+          actionsPerHour: totalCount,
+          successRate: totalCount > 0 ? Math.round((successCount / totalCount) * 100) : 0,
+          errorCount: failedCount,
+          totalActions: recentLogs.length,
+        },
+        recentActions: recentLogs.map(log => ({
+          id: log.id,
+          actionType: log.actionType,
+          status: log.status,
+          targetId: log.targetId,
+          reasoning: log.reasoning,
+          errorMessage: log.errorMessage,
+          executionTimeMs: log.executionTimeMs,
+          createdAt: log.createdAt,
+          metadata: log.metadata,
+        })),
+      };
+    }));
+    
+    // Calculate overall platform metrics
+    const allLogs = await db
+      .select()
+      .from(autonomousSystemLogs)
+      .orderBy(desc(autonomousSystemLogs.createdAt))
+      .limit(100);
+    
+    const platformMetrics = {
+      totalSystems: systems.length,
+      activeSystems: systemsStatus.filter(s => s.status === 'active').length,
+      warningSystems: systemsStatus.filter(s => s.status === 'warning').length,
+      errorSystems: systemsStatus.filter(s => s.status === 'error').length,
+      totalActionsLast24h: allLogs.length,
+      overallSuccessRate: allLogs.length > 0 
+        ? Math.round((allLogs.filter(l => l.status === 'success').length / allLogs.length) * 100)
+        : 0,
+    };
+    
+    res.json({
+      success: true,
+      systems: systemsStatus,
+      platformMetrics,
+      timestamp: new Date().toISOString(),
+    });
+  }));
+
   // Public activity feed (no authentication required)
   app.get("/api/activity", asyncHandler(async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 30, 50); // Max 50

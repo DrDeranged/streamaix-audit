@@ -40,6 +40,7 @@ const ChatPage = React.lazy(() => import("@/pages/chat"));
 const Discover = React.lazy(() => import("@/pages/discover"));
 const Summaries = React.lazy(() => import("@/pages/summaries"));
 const NewsletterAdmin = React.lazy(() => import("@/pages/newsletter-admin"));
+const AdminSystems = React.lazy(() => import("@/pages/AdminSystems"));
 
 function Router() {
   return (
@@ -171,6 +172,12 @@ function Router() {
       <Route path="/newsletter-admin">
         <Suspense fallback={<DashboardSkeleton />}>
           <NewsletterAdmin />
+        </Suspense>
+      </Route>
+      
+      <Route path="/admin/systems">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <AdminSystems />
         </Suspense>
       </Route>
       
