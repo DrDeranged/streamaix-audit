@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle } from "lucide-react";
+import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle, Trophy, Award, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -446,6 +446,97 @@ export default function Markets() {
             </motion.div>
           </motion.div>
         )}
+
+        {/* Market Features Navigation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-6"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="/markets/leaderboard">
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="cursor-pointer"
+              >
+                <Card className="bg-gradient-to-br from-amber-900/20 via-amber-800/10 to-transparent border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 overflow-hidden group">
+                  <CardContent className="p-4 relative">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-amber-500/20 group-hover:bg-amber-500/30 transition-colors">
+                        <Trophy className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Leaderboard</h3>
+                        <p className="text-xs text-slate-400">Top traders & rankings</p>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </Link>
+
+            <Link href="/markets/achievements">
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="cursor-pointer"
+              >
+                <Card className="bg-gradient-to-br from-purple-900/20 via-purple-800/10 to-transparent border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 overflow-hidden group">
+                  <CardContent className="p-4 relative">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors">
+                        <Award className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Achievements</h3>
+                        <p className="text-xs text-slate-400">Unlock badges & rewards</p>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </Link>
+
+            <Link href="/markets/portfolio">
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="cursor-pointer"
+              >
+                <Card className="bg-gradient-to-br from-cyan-900/20 via-cyan-800/10 to-transparent border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300 overflow-hidden group">
+                  <CardContent className="p-4 relative">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/30 transition-colors">
+                        <PieChart className="w-5 h-5 text-cyan-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Portfolio</h3>
+                        <p className="text-xs text-slate-400">Track your P&L & trades</p>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </Link>
+          </div>
+        </motion.div>
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
