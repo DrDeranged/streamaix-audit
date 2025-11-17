@@ -9,7 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Loader2, Send, Eye, Mail, Calendar, CheckCircle, XCircle, ShieldAlert,
   Users, FileText, Target, TrendingUp, Activity, ChevronDown, ChevronUp,
-  LayoutDashboard, BarChart3, UserPlus, Award, Zap, Home
+  LayoutDashboard, BarChart3, UserPlus, Award, Zap, Home, Bot, Brain,
+  Droplet, Sparkles, Shield, DollarSign, ArrowRightLeft, AlertTriangle
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
@@ -24,6 +25,7 @@ export default function NewsletterAdmin() {
   const [testEmail, setTestEmail] = useState('');
   const [, setLocation] = useLocation();
   const [newsletterOpen, setNewsletterOpen] = useState(false);
+  const [systemsOpen, setSystemsOpen] = useState(false);
 
   // Fetch current user
   const { user, isLoading: userLoading } = useAuth();
@@ -63,6 +65,12 @@ export default function NewsletterAdmin() {
   // Fetch newsletter history
   const { data: history } = useQuery({
     queryKey: ['/api/newsletter/history'],
+  });
+
+  // Fetch autonomous systems status with 10-second auto-refresh
+  const { data: systemsData, isLoading: systemsLoading } = useQuery({
+    queryKey: ['/api/admin/systems/status'],
+    refetchInterval: 10000 // Refresh every 10 seconds
   });
 
   // Send test newsletter mutation
@@ -398,6 +406,242 @@ export default function NewsletterAdmin() {
             )}
           </CardContent>
         </Card>
+
+        {/* Autonomous Systems Monitoring Section (Collapsible) */}
+        <Collapsible open={systemsOpen} onOpenChange={setSystemsOpen}>
+          <Card className="neural-glass gradient-border-hot overflow-hidden">
+            <CollapsibleTrigger className="w-full">
+              <CardHeader className="cursor-pointer hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-600 to-blue-600 glow-pulse">
+                      <Bot className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <CardTitle className="text-xl bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                        Autonomous Systems
+                      </CardTitle>
+                      <CardDescription className="text-slate-400">
+                        Real-time monitoring of all 10 AI agents and systems
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {systemsData?.platformMetrics && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-500/30">
+                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                        <span className="text-sm font-semibold text-cyan-300">
+                          {systemsData.platformMetrics.activeSystems}/{systemsData.platformMetrics.totalSystems} Active
+                        </span>
+                      </div>
+                    )}
+                    <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                      {systemsOpen ? (
+                        <ChevronUp className="w-5 h-5 text-cyan-400" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-cyan-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6 pt-6 pb-8">
+                {systemsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+                  </div>
+                ) : systemsData?.systems ? (
+                  <>
+                    {/* Platform Overview */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-900/40 to-green-900/30 border-2 border-emerald-500/50">
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {systemsData.platformMetrics.activeSystems}
+                        </div>
+                        <div className="text-xs text-emerald-200 uppercase tracking-wide">Active Systems</div>
+                      </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-amber-900/40 to-orange-900/30 border-2 border-amber-500/50">
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {systemsData.platformMetrics.warningSystems}
+                        </div>
+                        <div className="text-xs text-amber-200 uppercase tracking-wide">Warning</div>
+                      </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-red-900/40 to-rose-900/30 border-2 border-red-500/50">
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {systemsData.platformMetrics.errorSystems}
+                        </div>
+                        <div className="text-xs text-red-200 uppercase tracking-wide">Errors</div>
+                      </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-blue-900/40 to-indigo-900/30 border-2 border-blue-500/50">
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {systemsData.platformMetrics.overallSuccessRate}%
+                        </div>
+                        <div className="text-xs text-blue-200 uppercase tracking-wide">Success Rate</div>
+                      </div>
+                    </div>
+
+                    {/* Systems Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {systemsData.systems.map((system: any) => {
+                        // Icon mapping for each system
+                        const getSystemIcon = (key: string) => {
+                          const iconMap: any = {
+                            'social_agents': Users,
+                            'trading_bots': TrendingUp,
+                            'market_resolver': Target,
+                            'liquidity_provider': Droplet,
+                            'trend_spotter': Sparkles,
+                            'content_moderator': Shield,
+                            'community_manager': Brain,
+                            'treasury_manager': DollarSign,
+                            'meta_trader': ArrowRightLeft,
+                            'newsletter': Mail,
+                          };
+                          return iconMap[key] || Bot;
+                        };
+
+                        const Icon = getSystemIcon(system.key);
+                        
+                        // Status styling
+                        const statusStyles = {
+                          active: {
+                            bg: 'bg-gradient-to-br from-emerald-900/40 to-green-900/30',
+                            border: 'border-emerald-500/50',
+                            badge: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300',
+                            icon: 'text-emerald-400',
+                            glow: 'shadow-emerald-500/20'
+                          },
+                          warning: {
+                            bg: 'bg-gradient-to-br from-amber-900/40 to-orange-900/30',
+                            border: 'border-amber-500/50',
+                            badge: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
+                            icon: 'text-amber-400',
+                            glow: 'shadow-amber-500/20'
+                          },
+                          error: {
+                            bg: 'bg-gradient-to-br from-red-900/40 to-rose-900/30',
+                            border: 'border-red-500/50',
+                            badge: 'bg-red-500/20 border-red-500/40 text-red-300',
+                            icon: 'text-red-400',
+                            glow: 'shadow-red-500/20'
+                          },
+                          idle: {
+                            bg: 'bg-gradient-to-br from-slate-900/40 to-gray-900/30',
+                            border: 'border-slate-500/50',
+                            badge: 'bg-slate-500/20 border-slate-500/40 text-slate-300',
+                            icon: 'text-slate-400',
+                            glow: 'shadow-slate-500/20'
+                          }
+                        };
+
+                        const style = statusStyles[system.status as keyof typeof statusStyles] || statusStyles.idle;
+
+                        return (
+                          <Card 
+                            key={system.key}
+                            className={`neural-glass ${style.bg} border-2 ${style.border} hover:${style.glow} transition-all duration-300`}
+                          >
+                            <CardContent className="p-5">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-start gap-3">
+                                  <div className={`p-2.5 rounded-lg bg-slate-900/50 border border-slate-700/50`}>
+                                    <Icon className={`w-5 h-5 ${style.icon}`} />
+                                  </div>
+                                  <div>
+                                    <h3 className="font-bold text-white text-sm mb-1">{system.name}</h3>
+                                    <p className="text-xs text-slate-400 leading-relaxed">{system.description}</p>
+                                  </div>
+                                </div>
+                                <div className={`px-2.5 py-1 rounded-full ${style.badge} border text-xs font-semibold uppercase tracking-wide`}>
+                                  {system.status}
+                                </div>
+                              </div>
+
+                              {/* Metrics */}
+                              <div className="grid grid-cols-3 gap-3 mb-4">
+                                <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                                  <div className="text-lg font-bold text-white">
+                                    {system.metrics.actionsPerHour}
+                                  </div>
+                                  <div className="text-xs text-slate-400">Actions/hr</div>
+                                </div>
+                                <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                                  <div className="text-lg font-bold text-white">
+                                    {system.metrics.successRate}%
+                                  </div>
+                                  <div className="text-xs text-slate-400">Success</div>
+                                </div>
+                                <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                                  <div className="text-lg font-bold text-white">
+                                    {system.metrics.errorCount}
+                                  </div>
+                                  <div className="text-xs text-slate-400">Errors</div>
+                                </div>
+                              </div>
+
+                              {/* Recent Activity */}
+                              {system.recentActions && system.recentActions.length > 0 && (
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Activity className="w-3.5 h-3.5 text-slate-400" />
+                                    <span className="text-xs text-slate-400 font-semibold uppercase tracking-wide">
+                                      Recent Activity
+                                    </span>
+                                  </div>
+                                  <div className="space-y-1.5 max-h-32 overflow-y-auto pr-2">
+                                    {system.recentActions.slice(0, 3).map((action: any, idx: number) => (
+                                      <div 
+                                        key={`${system.key}-${action.id}-${idx}`}
+                                        className="p-2 rounded-lg bg-slate-900/30 border border-slate-700/20 text-xs"
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="text-slate-300 font-medium">
+                                            {action.actionType || 'Action'}
+                                          </span>
+                                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                                            action.status === 'success' 
+                                              ? 'bg-emerald-500/20 text-emerald-300'
+                                              : 'bg-red-500/20 text-red-300'
+                                          }`}>
+                                            {action.status}
+                                          </span>
+                                        </div>
+                                        {action.createdAt && (
+                                          <div className="text-[10px] text-slate-500">
+                                            {formatDistanceToNow(new Date(action.createdAt), { addSuffix: true })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Last Run Time */}
+                              {system.lastRunTime && (
+                                <div className="mt-3 pt-3 border-t border-slate-700/30 text-xs text-slate-500">
+                                  Last run: {formatDistanceToNow(new Date(system.lastRunTime), { addSuffix: true })}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                    <p className="text-slate-400">No autonomous systems data available</p>
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Newsletter Section (Collapsible) */}
         <Collapsible open={newsletterOpen} onOpenChange={setNewsletterOpen}>
