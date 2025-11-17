@@ -213,18 +213,22 @@ GUIDELINES:
       .where(eq(summaries.id, summary.id));
 
     // Create quality score record if bounty exists
-    if (summary.creatorId) {
+    if (summary.creatorId && summary.bountyId) {
       try {
         await db.insert(bountyQualityScores).values({
+          bountyId: summary.bountyId,
           summaryId: summary.id,
-          userId: summary.creatorId,
+          aiScore: result.qualityScore,
           accuracyScore: result.categories.accuracy,
-          depthScore: result.categories.depth,
-          clarityScore: (result.categories.relevance + result.categories.originality) / 2,
-          relevanceScore: result.categories.relevance,
-          originalityScore: result.categories.originality,
+          completenessScore: result.categories.depth,
+          readabilityScore: (result.categories.relevance + result.categories.originality) / 2,
           overallScore: result.qualityScore,
           feedback: result.feedback,
+          metadata: {
+            relevance: result.categories.relevance,
+            originality: result.categories.originality,
+            reasoning: result.reasoning,
+          },
         });
       } catch (error) {
         // Ignore if already exists

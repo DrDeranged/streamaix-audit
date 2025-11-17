@@ -233,20 +233,26 @@ GUIDELINES:
     await db.insert(marketTrades).values({
       marketId: market.id,
       userId: this.aiUserId!,
+      userWallet: 'AI_LIQUIDITY_PROVIDER',
+      tradeType: 'BUY',
       outcome: 'YES',
       shares: plan.yesAmount,
       price: market.yesPrice || 5000, // 50% default
       streamAmount: plan.yesAmount,
+      fee: 0, // No fee for liquidity provision
     });
 
     // Add NO liquidity
     await db.insert(marketTrades).values({
       marketId: market.id,
       userId: this.aiUserId!,
+      userWallet: 'AI_LIQUIDITY_PROVIDER',
+      tradeType: 'BUY',
       outcome: 'NO',
       shares: plan.noAmount,
       price: market.noPrice || 5000, // 50% default
       streamAmount: plan.noAmount,
+      fee: 0, // No fee for liquidity provision
     });
 
     // Update market liquidity

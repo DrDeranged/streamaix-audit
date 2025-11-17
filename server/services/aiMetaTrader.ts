@@ -242,15 +242,20 @@ Respond with JSON:
       .where(eq(users.id, this.aiUserId!));
 
     // Record trade
+    const price = outcome === 'YES' ? 
+      (await this.getMarketPrice(opp.marketId, 'yes')) : 
+      (await this.getMarketPrice(opp.marketId, 'no'));
+    
     await db.insert(marketTrades).values({
       marketId: opp.marketId,
       userId: this.aiUserId!,
+      userWallet: 'AI_META_TRADER',
+      tradeType: 'BUY',
       outcome,
       shares: opp.amount,
-      price: outcome === 'YES' ? 
-        (await this.getMarketPrice(opp.marketId, 'yes')) : 
-        (await this.getMarketPrice(opp.marketId, 'no')),
+      price,
       streamAmount: opp.amount,
+      fee: Math.floor(opp.amount * 0.005), // 0.5% fee
     });
 
     // Update market

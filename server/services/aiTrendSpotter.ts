@@ -270,12 +270,18 @@ GUIDELINES:
    * Create a new prediction market
    */
   private async createMarket(idea: MarketIdea) {
+    // Generate unique contract market ID
+    const contractMarketId = Math.floor(Math.random() * 1000000) + 100000;
+    
     await db.insert(predictionMarkets).values({
+      contractMarketId,
       question: idea.question,
       description: idea.description,
       category: idea.category,
       deadline: idea.deadline,
       creatorId: this.aiUserId!,
+      creatorWallet: 'AI_TREND_SPOTTER',
+      initialLiquidity: 0,
       status: 'active',
       yesPrice: 5000, // 50%
       noPrice: 5000, // 50%
@@ -283,7 +289,6 @@ GUIDELINES:
       noLiquidity: 0,
       totalVolume: 0,
       totalTrades: 0,
-      platformFee: 50, // 0.5%
     });
   }
 
