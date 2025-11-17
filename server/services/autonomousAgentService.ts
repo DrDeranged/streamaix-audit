@@ -135,10 +135,15 @@ export class AutonomousAgentService {
       const metadata = agent.agentMetadata;
       const personality = agent.agentPersonality;
       
+      // Skip if missing required data
+      if (!metadata || !personality) return false;
+      
       // Check if agent is sleeping
-      const { start, end } = metadata.sleepSchedule;
-      const isSleeping = this.isInSleepWindow(currentHour, start, end);
-      if (isSleeping) return false;
+      if (metadata.sleepSchedule) {
+        const { start, end } = metadata.sleepSchedule;
+        const isSleeping = this.isInSleepWindow(currentHour, start, end);
+        if (isSleeping) return false;
+      }
       
       // Weekend activity check
       if (isWeekend && !metadata.behaviorPatterns.weekendActivity) {
