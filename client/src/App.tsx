@@ -159,12 +159,6 @@ function Router() {
         </Suspense>
       </Route>
       
-      <Route path="/markets/:id">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <PredictionMarket />
-        </Suspense>
-      </Route>
-      
       <Route path="/markets/leaderboard">
         <Suspense fallback={<DashboardSkeleton />}>
           <MarketLeaderboard />
@@ -180,6 +174,12 @@ function Router() {
       <Route path="/markets/portfolio">
         <Suspense fallback={<DashboardSkeleton />}>
           <MarketPortfolio />
+        </Suspense>
+      </Route>
+      
+      <Route path="/markets/:id">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <PredictionMarket />
         </Suspense>
       </Route>
       
