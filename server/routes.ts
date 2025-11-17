@@ -8642,6 +8642,327 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }))
     });
   }));
+
+  // =============================================================================
+  // PREDICTION MARKET ENHANCEMENTS - LEADERBOARDS, ACHIEVEMENTS, PORTFOLIO
+  // =============================================================================
+
+  const { 
+    marketPriceHistory, 
+    achievements, 
+    userAchievements, 
+    userTradingStats,
+    marketPositions,
+    marketTrades
+  } = await import("../shared/schema");
+
+  // Get enhanced leaderboards with multiple metrics
+  app.get("/api/markets/leaderboards/:metric", asyncHandler(async (req: Request, res: Response) => {
+    const { metric } = req.params;
+    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    let orderByColumn;
+    switch (metric) {
+      case 'profit':
+        orderByColumn = desc(userTradingStats.netProfit);
+        break;
+      case 'volume':
+        orderByColumn = desc(userTradingStats.totalVolume);
+        break;
+      case 'winrate':
+        orderByColumn = desc(userTradingStats.winRate);
+        break;
+      case 'roi':
+        orderByColumn = desc(userTradingStats.roi);
+        break;
+      default:
+        orderByColumn = desc(userTradingStats.netProfit);
+    }
+
+    const leaderboard = await db
+      .select({
+        userId: userTradingStats.userId,
+        username: users.username,
+        avatar: users.avatar,
+        netProfit: userTradingStats.netProfit,
+        totalVolume: userTradingStats.totalVolume,
+        winRate: userTradingStats.winRate,
+        roi: userTradingStats.roi,
+        totalTrades: userTradingStats.totalTrades,
+        winningTrades: userTradingStats.winningTrades,
+        currentWinStreak: userTradingStats.currentWinStreak,
+        longestWinStreak: userTradingStats.longestWinStreak,
+        rank: userTradingStats[`${metric}Rank` as keyof typeof userTradingStats]
+      })
+      .from(userTradingStats)
+      .leftJoin(users, eq(userTradingStats.userId, users.id))
+      .orderBy(orderByColumn)
+      .limit(limit)
+      .offset(offset);
+
+    res.json({
+      success: true,
+      leaderboard,
+      metric,
+      count: leaderboard.length
+    });
+  }));
+
+  // Get user portfolio with positions and P&L
+  app.get("/api/markets/portfolio/:userId", asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+
+    const positions = await db
+      .select({
+        position: marketPositions,
+        market: predictionMarkets
+      })
+      .from(marketPositions)
+      .leftJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
+      .where(eq(marketPositions.userId, userId))
+      .orderBy(desc(marketPositions.updatedAt));
+
+    const stats = await db
+      .select()
+      .from(userTradingStats)
+      .where(eq(userTradingStats.userId, userId))
+      .limit(1);
+
+    const recentTrades = await db
+      .select({
+        trade: marketTrades,
+        market: predictionMarkets
+      })
+      .from(marketTrades)
+      .leftJoin(predictionMarkets, eq(marketTrades.marketId, predictionMarkets.id))
+      .where(eq(marketTrades.userId, userId))
+      .orderBy(desc(marketTrades.createdAt))
+      .limit(20);
+
+    res.json({
+      success: true,
+      portfolio: {
+        positions,
+        stats: stats[0] || null,
+        recentTrades
+      }
+    });
+  }));
+
+  // Get market price history for charts
+  app.get("/api/markets/:marketId/price-history", asyncHandler(async (req: Request, res: Response) => {
+    const { marketId } = req.params;
+    const hours = parseInt(req.query.hours as string) || 24;
+
+    const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+    const history = await db
+      .select()
+      .from(marketPriceHistory)
+      .where(
+        and(
+          eq(marketPriceHistory.marketId, marketId),
+          sql`${marketPriceHistory.createdAt} >= ${cutoffTime}`
+        )
+      )
+      .orderBy(marketPriceHistory.createdAt);
+
+    res.json({
+      success: true,
+      history,
+      count: history.length
+    });
+  }));
+
+  // Record price snapshot (called by trade execution)
+  app.post("/api/markets/:marketId/price-snapshot", asyncHandler(async (req: Request, res: Response) => {
+    const { marketId } = req.params;
+
+    const market = await db
+      .select()
+      .from(predictionMarkets)
+      .where(eq(predictionMarkets.id, marketId))
+      .limit(1);
+
+    if (!market[0]) {
+      return res.status(404).json({ error: "Market not found" });
+    }
+
+    const snapshot = await db.insert(marketPriceHistory).values({
+      marketId,
+      yesPrice: market[0].yesPrice,
+      noPrice: market[0].noPrice,
+      yesLiquidity: market[0].yesLiquidity,
+      noLiquidity: market[0].noLiquidity,
+      totalVolume: market[0].totalVolume
+    }).returning();
+
+    res.json({
+      success: true,
+      snapshot: snapshot[0]
+    });
+  }));
+
+  // Get all achievements
+  app.get("/api/achievements", asyncHandler(async (req: Request, res: Response) => {
+    const allAchievements = await db
+      .select()
+      .from(achievements)
+      .orderBy(achievements.category, achievements.tier);
+
+    res.json({
+      success: true,
+      achievements: allAchievements
+    });
+  }));
+
+  // Get user achievements
+  app.get("/api/achievements/user/:userId", asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+
+    const userAchievementsList = await db
+      .select({
+        userAchievement: userAchievements,
+        achievement: achievements
+      })
+      .from(userAchievements)
+      .leftJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.completedAt));
+
+    const completed = userAchievementsList.filter(ua => ua.userAchievement.isCompleted);
+    const inProgress = userAchievementsList.filter(ua => !ua.userAchievement.isCompleted);
+
+    res.json({
+      success: true,
+      achievements: {
+        completed,
+        inProgress,
+        total: userAchievementsList.length
+      }
+    });
+  }));
+
+  // Initialize base achievements (admin only)
+  app.post("/api/achievements/initialize", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const baseAchievements = [
+      {
+        key: 'first_trade',
+        name: 'First Trade',
+        description: 'Execute your first prediction market trade',
+        category: 'trading',
+        tier: 'bronze',
+        requirement: { type: 'trade_count', value: 1 },
+        reward: 100
+      },
+      {
+        key: 'volume_1k',
+        name: 'Market Participant',
+        description: 'Trade 1,000 STREAM in volume',
+        category: 'trading',
+        tier: 'bronze',
+        requirement: { type: 'volume', value: 1000 },
+        reward: 250
+      },
+      {
+        key: 'volume_10k',
+        name: 'Active Trader',
+        description: 'Trade 10,000 STREAM in volume',
+        category: 'trading',
+        tier: 'silver',
+        requirement: { type: 'volume', value: 10000 },
+        reward: 1000
+      },
+      {
+        key: 'volume_100k',
+        name: 'Whale Trader',
+        description: 'Trade 100,000 STREAM in volume',
+        category: 'trading',
+        tier: 'gold',
+        requirement: { type: 'volume', value: 100000 },
+        reward: 5000
+      },
+      {
+        key: 'profit_1k',
+        name: 'Profitable Trader',
+        description: 'Earn 1,000 STREAM in profit',
+        category: 'prediction',
+        tier: 'bronze',
+        requirement: { type: 'profit', value: 1000 },
+        reward: 500
+      },
+      {
+        key: 'profit_10k',
+        name: 'Market Oracle',
+        description: 'Earn 10,000 STREAM in profit',
+        category: 'prediction',
+        tier: 'silver',
+        requirement: { type: 'profit', value: 10000 },
+        reward: 2000
+      },
+      {
+        key: 'profit_100k',
+        name: 'Prophet',
+        description: 'Earn 100,000 STREAM in profit',
+        category: 'prediction',
+        tier: 'gold',
+        requirement: { type: 'profit', value: 100000 },
+        reward: 10000
+      },
+      {
+        key: 'win_streak_5',
+        name: 'Hot Streak',
+        description: 'Win 5 trades in a row',
+        category: 'prediction',
+        tier: 'silver',
+        requirement: { type: 'win_streak', value: 5 },
+        reward: 1500
+      },
+      {
+        key: 'win_streak_10',
+        name: 'Unstoppable',
+        description: 'Win 10 trades in a row',
+        category: 'prediction',
+        tier: 'gold',
+        requirement: { type: 'win_streak', value: 10 },
+        reward: 5000
+      },
+      {
+        key: 'winrate_70',
+        name: 'Consistent Winner',
+        description: 'Achieve 70% win rate with 20+ trades',
+        category: 'prediction',
+        tier: 'platinum',
+        requirement: { type: 'winrate', value: 70, min_trades: 20 },
+        reward: 15000
+      }
+    ];
+
+    const inserted = [];
+    for (const ach of baseAchievements) {
+      try {
+        const existing = await db
+          .select()
+          .from(achievements)
+          .where(eq(achievements.key, ach.key))
+          .limit(1);
+
+        if (existing.length === 0) {
+          const result = await db.insert(achievements).values(ach).returning();
+          inserted.push(result[0]);
+        }
+      } catch (error) {
+        console.error(`Error inserting achievement ${ach.key}:`, error);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Initialized ${inserted.length} achievements`,
+      achievements: inserted
+    });
+  }));
   
   // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
