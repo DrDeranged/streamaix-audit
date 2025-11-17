@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { ConfidenceRing } from "@/components/ui/confidence-ring";
+import { PriceChart } from "@/components/market/PriceChart";
 import { formatDistanceToNow } from "date-fns";
 
 interface AITrade {
@@ -409,7 +410,9 @@ export default function PredictionMarket() {
                 <TabsTrigger value="positions" data-testid="tab-positions">Top Positions</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="overview" className="mt-6">
+              <TabsContent value="overview" className="mt-6 space-y-6">
+                <PriceChart marketId={market.id} hours={24} />
+                
                 <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
