@@ -15,8 +15,8 @@ type Achievement = {
   description: string;
   category: 'trading' | 'prediction' | 'social' | 'milestone';
   tier: 'bronze' | 'silver' | 'gold' | 'platinum';
-  rewardAmount: number;
-  requirement: number;
+  reward: number;
+  requirement: { type: string; value: number };
   progress?: number;
   completed?: boolean;
   unlockedAt?: string;
@@ -98,7 +98,8 @@ export default function MarketAchievements() {
     }
   };
 
-  const formatNumber = (num: number) => {
+  const formatNumber = (num: number | undefined) => {
+    if (!num) return '0';
     if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
     return num.toFixed(0);
@@ -304,11 +305,11 @@ export default function MarketAchievements() {
                                     <div className="flex items-center justify-between text-xs">
                                       <span className="text-slate-500">Progress</span>
                                       <span className="text-slate-400">
-                                        <AnimatedCounter value={achievement.progress} formatValue={(v) => v.toFixed(0)} /> / {formatNumber(achievement.requirement)}
+                                        <AnimatedCounter value={achievement.progress || 0} formatValue={(v) => v.toFixed(0)} /> / {formatNumber(achievement.requirement?.value)}
                                       </span>
                                     </div>
                                     <Progress 
-                                      value={(achievement.progress / achievement.requirement) * 100} 
+                                      value={achievement.requirement?.value ? ((achievement.progress || 0) / achievement.requirement.value) * 100 : 0} 
                                       className="h-2 bg-slate-800"
                                     />
                                   </div>
