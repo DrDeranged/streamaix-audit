@@ -267,7 +267,7 @@ export default function MarketAchievements() {
                                     <div className="flex items-center justify-between text-xs">
                                       <span className="text-slate-500">Progress</span>
                                       <span className="text-slate-400">
-                                        <AnimatedCounter value={achievement.progress} /> / {formatNumber(achievement.requirement)}
+                                        <AnimatedCounter value={achievement.progress} formatValue={(v) => v.toFixed(0)} /> / {formatNumber(achievement.requirement)}
                                       </span>
                                     </div>
                                     <Progress 

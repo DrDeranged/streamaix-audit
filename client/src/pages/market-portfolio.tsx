@@ -180,7 +180,7 @@ export default function MarketPortfolio() {
                     <h3 className="text-sm font-medium text-slate-400">Win Rate</h3>
                   </div>
                   <div className="text-3xl font-bold text-emerald-400" data-testid="win-rate">
-                    <AnimatedCounter value={p.winRate} decimals={1} suffix="%" />
+                    <AnimatedCounter value={p.winRate} formatValue={(v) => `${v.toFixed(1)}%`} />
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
                     {p.winningTrades} / {p.totalTrades} trades
@@ -202,7 +202,7 @@ export default function MarketPortfolio() {
                     <h3 className="text-sm font-medium text-slate-400">ROI</h3>
                   </div>
                   <div className={`text-3xl font-bold ${getPnLColor(p.roi)}`} data-testid="roi">
-                    <AnimatedCounter value={p.roi} decimals={1} formatValue={(v) => formatCurrency(v)} suffix="%" />
+                    <AnimatedCounter value={p.roi} formatValue={(v) => `${formatCurrency(v)}%`} />
                   </div>
                   <div className="text-xs text-slate-500 mt-1">return on investment</div>
                 </div>
@@ -243,7 +243,7 @@ export default function MarketPortfolio() {
                 <h3 className="text-sm font-medium text-slate-400">Total Trades</h3>
               </div>
               <div className="text-3xl font-bold text-cyan-400" data-testid="total-trades">
-                <AnimatedCounter value={p.totalTrades} />
+                <AnimatedCounter value={p.totalTrades} formatValue={(v) => v.toFixed(0)} />
               </div>
             </Card>
 
@@ -253,7 +253,7 @@ export default function MarketPortfolio() {
                 <h3 className="text-sm font-medium text-slate-400">Winning Trades</h3>
               </div>
               <div className="text-3xl font-bold text-emerald-400" data-testid="winning-trades">
-                <AnimatedCounter value={p.winningTrades} />
+                <AnimatedCounter value={p.winningTrades} formatValue={(v) => v.toFixed(0)} />
               </div>
             </Card>
 
@@ -264,7 +264,7 @@ export default function MarketPortfolio() {
                 <h3 className="text-sm font-medium text-slate-400">Current Streak</h3>
               </div>
               <div className="text-3xl font-bold text-amber-400" data-testid="current-streak">
-                <AnimatedCounter value={Math.abs(p.currentStreak)} prefix={p.currentStreak > 0 ? '🔥 ' : ''} />
+                <AnimatedCounter value={Math.abs(p.currentStreak)} formatValue={(v) => p.currentStreak > 0 ? `🔥 ${v.toFixed(0)}` : v.toFixed(0)} />
               </div>
             </Card>
           </motion.div>
@@ -318,7 +318,7 @@ export default function MarketPortfolio() {
                                     {position.outcome}
                                   </span>
                                   <span className="text-sm text-slate-400">
-                                    <AnimatedCounter value={position.shares} /> shares @ {position.avgPrice.toFixed(2)}
+                                    <AnimatedCounter value={position.shares} formatValue={(v) => v.toFixed(0)} /> shares @ {position.avgPrice.toFixed(2)}
                                   </span>
                                 </div>
                               </div>
