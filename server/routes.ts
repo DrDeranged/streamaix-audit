@@ -8680,6 +8680,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderByColumn = desc(userTradingStats.netProfit);
     }
 
+    // Map metric to correct rank column name
+    let rankColumn;
+    switch (metric) {
+      case 'profit':
+        rankColumn = userTradingStats.profitRank;
+        break;
+      case 'volume':
+        rankColumn = userTradingStats.volumeRank;
+        break;
+      case 'winrate':
+        rankColumn = userTradingStats.winRateRank;
+        break;
+      case 'roi':
+        rankColumn = userTradingStats.roiRank;
+        break;
+      default:
+        rankColumn = userTradingStats.profitRank;
+    }
+
     const leaderboard = await db
       .select({
         userId: userTradingStats.userId,
@@ -8693,7 +8712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         winningTrades: userTradingStats.winningTrades,
         currentWinStreak: userTradingStats.currentWinStreak,
         longestWinStreak: userTradingStats.longestWinStreak,
-        rank: userTradingStats[`${metric}Rank` as keyof typeof userTradingStats]
+        rank: rankColumn
       })
       .from(userTradingStats)
       .leftJoin(users, eq(userTradingStats.userId, users.id))
