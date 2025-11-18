@@ -4920,6 +4920,7 @@ export const userTradingStats = pgTable("user_trading_stats", {
   profitRank: integer("profit_rank"),
   volumeRank: integer("volume_rank"),
   winRateRank: integer("win_rate_rank"),
+  roiRank: integer("roi_rank"),
   overallRank: integer("overall_rank"),
   
   // Time-based stats
