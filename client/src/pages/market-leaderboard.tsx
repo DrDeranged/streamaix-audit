@@ -59,7 +59,8 @@ export default function MarketLeaderboard() {
     return <span className="text-lg font-bold text-cyan-400">#{rank}</span>;
   };
 
-  const formatNumber = (num: number) => {
+  const formatNumber = (num: number | undefined | null) => {
+    if (num == null) return '0';
     if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
     return num.toFixed(0);
