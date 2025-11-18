@@ -31,10 +31,31 @@ export default function MarketAchievements() {
     refetchInterval: 30000
   });
 
-  const { data: userAchievements } = useQuery<{ achievements: Achievement[] }>({
+  const { data: userAchievementsData } = useQuery<{ 
+    achievements: { 
+      completed: Array<{ userAchievement: any; achievement: Achievement }>;
+      inProgress: Array<{ userAchievement: any; achievement: Achievement }>;
+      total: number;
+    } 
+  }>({
     queryKey: ['/api/achievements/user', userId],
     refetchInterval: 30000
   });
+
+  // Merge completed and in-progress into a single array for filtering
+  const allUserAchievements = [
+    ...(userAchievementsData?.achievements.completed.map(ua => ({
+      ...ua.achievement,
+      completed: true,
+      unlockedAt: ua.userAchievement.completedAt,
+      progress: ua.userAchievement.progress
+    })) || []),
+    ...(userAchievementsData?.achievements.inProgress.map(ua => ({
+      ...ua.achievement,
+      completed: false,
+      progress: ua.userAchievement.progress
+    })) || [])
+  ];
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -83,9 +104,25 @@ export default function MarketAchievements() {
     return num.toFixed(0);
   };
 
-  const filteredAchievements = achievements?.achievements.filter(
+  // Create a map of user achievements for quick lookup
+  const userAchievementMap = new Map(
+    allUserAchievements.map(ua => [ua.id, ua])
+  );
+
+  // Merge all achievements with user progress data
+  const mergedAchievements = achievements?.achievements.map(achievement => {
+    const userAchievement = userAchievementMap.get(achievement.id);
+    return {
+      ...achievement,
+      completed: userAchievement?.completed || false,
+      progress: userAchievement?.progress || 0,
+      unlockedAt: userAchievement?.unlockedAt
+    };
+  }) || [];
+
+  const filteredAchievements = mergedAchievements.filter(
     achievement => activeCategory === 'all' || achievement.category === activeCategory
-  ) || [];
+  );
 
   const completedCount = filteredAchievements.filter(a => a.completed).length;
   const totalCount = filteredAchievements.length;
