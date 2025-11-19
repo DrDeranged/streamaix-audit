@@ -327,12 +327,12 @@ export default function MarketPortfolio() {
                               <div className="flex items-center gap-4 text-sm">
                                 <div>
                                   <span className="text-slate-500">Current:</span>{' '}
-                                  <span className="text-white font-medium">{position.currentPrice.toFixed(2)}</span>
+                                  <span className="text-white font-medium">{(position.currentPrice ?? 0).toFixed(2)}</span>
                                 </div>
                                 <div>
                                   <span className="text-slate-500">Change:</span>{' '}
                                   <span className={getPnLColor(position.percentChange)}>
-                                    {position.percentChange >= 0 ? '+' : ''}{position.percentChange.toFixed(1)}%
+                                    {position.percentChange >= 0 ? '+' : ''}{(position.percentChange ?? 0).toFixed(1)}%
                                   </span>
                                 </div>
                               </div>
@@ -428,7 +428,7 @@ export default function MarketPortfolio() {
                             {trade.shares}
                           </td>
                           <td className="py-3 px-2 text-sm text-right text-white">
-                            {trade.price.toFixed(2)}
+                            {(trade.price ?? 0).toFixed(2)}
                           </td>
                           <td className={`py-3 px-2 text-sm text-right font-medium ${trade.pnl ? getPnLColor(trade.pnl) : 'text-slate-400'}`}>
                             {trade.pnl ? formatCurrency(trade.pnl) : '-'}
