@@ -181,7 +181,7 @@ export default function MarketPortfolio() {
                     <h3 className="text-sm font-medium text-slate-400">Win Rate</h3>
                   </div>
                   <div className="text-3xl font-bold text-emerald-400" data-testid="win-rate">
-                    <AnimatedCounter value={p.winRate} formatValue={(v) => `${v.toFixed(1)}%`} />
+                    <AnimatedCounter value={p.winRate} formatValue={(v) => `${(v ?? 0).toFixed(1)}%`} />
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
                     {p.winningTrades} / {p.totalTrades} trades
@@ -244,7 +244,7 @@ export default function MarketPortfolio() {
                 <h3 className="text-sm font-medium text-slate-400">Total Trades</h3>
               </div>
               <div className="text-3xl font-bold text-cyan-400" data-testid="total-trades">
-                <AnimatedCounter value={p.totalTrades} formatValue={(v) => v.toFixed(0)} />
+                <AnimatedCounter value={p.totalTrades} formatValue={(v) => (v ?? 0).toFixed(0)} />
               </div>
             </Card>
 
@@ -254,7 +254,7 @@ export default function MarketPortfolio() {
                 <h3 className="text-sm font-medium text-slate-400">Winning Trades</h3>
               </div>
               <div className="text-3xl font-bold text-emerald-400" data-testid="winning-trades">
-                <AnimatedCounter value={p.winningTrades} formatValue={(v) => v.toFixed(0)} />
+                <AnimatedCounter value={p.winningTrades} formatValue={(v) => (v ?? 0).toFixed(0)} />
               </div>
             </Card>
 
@@ -265,7 +265,7 @@ export default function MarketPortfolio() {
                 <h3 className="text-sm font-medium text-slate-400">Current Streak</h3>
               </div>
               <div className="text-3xl font-bold text-amber-400" data-testid="current-streak">
-                <AnimatedCounter value={Math.abs(p.currentStreak)} formatValue={(v) => p.currentStreak > 0 ? `🔥 ${v.toFixed(0)}` : v.toFixed(0)} />
+                <AnimatedCounter value={Math.abs(p.currentStreak)} formatValue={(v) => p.currentStreak > 0 ? `🔥 ${(v ?? 0).toFixed(0)}` : (v ?? 0).toFixed(0)} />
               </div>
             </Card>
           </motion.div>
@@ -319,7 +319,7 @@ export default function MarketPortfolio() {
                                     {position.outcome}
                                   </span>
                                   <span className="text-sm text-slate-400">
-                                    <AnimatedCounter value={position.shares} formatValue={(v) => v.toFixed(0)} /> shares @ {position.avgPrice.toFixed(2)}
+                                    <AnimatedCounter value={position.shares} formatValue={(v) => (v ?? 0).toFixed(0)} /> shares @ {(position.avgPrice ?? 0).toFixed(2)}
                                   </span>
                                 </div>
                               </div>
