@@ -236,19 +236,7 @@ export function SocialFeed() {
         feed.push({
           id: m.id,
           type: 'market',
-          content: {
-            title: m.question,
-            description: m.description,
-            author: {
-              id: m.creatorId,
-              username: m.creator?.username || 'AI Hunter',
-            },
-            createdAt: m.createdAt,
-            metadata: {
-              yesPrice: m.yesPrice,
-              yesPercentage,
-            },
-          },
+          content: m, // Pass the full market object, not restructured
           engagement: {
             likesCount: m.likesCount || 0,
             commentsCount: m.commentsCount || 0,

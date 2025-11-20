@@ -45,6 +45,12 @@ export function InlineMarketCard({
   const { toast } = useToast();
   const [tradeAmount, setTradeAmount] = useState<number>(100);
 
+  // Safety check: ensure market has required fields
+  if (!market || !market.id || !market.question || !market.deadline) {
+    console.error('InlineMarketCard: Invalid market data', market);
+    return null;
+  }
+
   // Calculate display values
   const yesPrice = market.yesPrice || 500000; // Default 50%
   const noPrice = market.noPrice || 500000;
