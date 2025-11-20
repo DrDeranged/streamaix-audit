@@ -910,17 +910,17 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                         </div>
                       </DialogTrigger>
                       
-                      {/* Compact Popup Modal - No Scrolling */}
-                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0" style={{ height: '75vh', maxHeight: '75vh' }}>
-                        {/* Two-Column Grid Layout */}
-                        <div className="grid grid-cols-[30%_70%] h-full">
+                      {/* Compact Popup Modal - Responsive */}
+                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[75vh] md:h-[75vh] max-h-[90vh]">
+                        {/* Two-Column Grid Layout - Stacks on Mobile */}
+                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full overflow-y-auto md:overflow-hidden">
                           
                           {/* LEFT SIDEBAR - Compact Profile */}
-                          <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-4 border-r border-muted/30 flex flex-col">
+                          <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-3 md:p-4 border-b md:border-b-0 md:border-r border-muted/30 flex flex-col">
                             {/* Avatar */}
-                            <div className="flex flex-col items-center mb-4">
+                            <div className="flex flex-col items-center mb-3 md:mb-4">
                               <div className="relative">
-                                <Avatar className="w-16 h-16 ring-2 ring-primary/20 border-2 border-white/10 shadow-lg">
+                                <Avatar className="w-12 h-12 md:w-16 md:h-16 ring-2 ring-primary/20 border-2 border-white/10 shadow-lg">
                                   <AvatarImage 
                                     src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                                     alt={`${avatar.name} avatar`}
@@ -937,11 +937,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                               </div>
                               
                               {/* Name & Handle */}
-                              <h3 className="text-base font-bold text-foreground mt-2 text-center">{avatar.name}</h3>
-                              <p className="text-xs text-muted-foreground">@{avatar.handle}</p>
+                              <h3 className="text-sm md:text-base font-bold text-foreground mt-2 text-center">{avatar.name}</h3>
+                              <p className="text-[10px] md:text-xs text-muted-foreground">@{avatar.handle}</p>
                               
                               {/* Influence Badge */}
-                              <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-xs mt-2">
+                              <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-[10px] md:text-xs mt-1.5 md:mt-2">
                                 Influence: {influenceScore}
                               </Badge>
                               
@@ -954,35 +954,35 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                             
                             {/* Mini Stats Pills */}
-                            <div className="space-y-2 mb-4">
-                              <div className="bg-blue-500/10 rounded-lg p-2 border border-blue-500/20">
+                            <div className="grid grid-cols-3 md:grid-cols-1 gap-1.5 md:gap-2 mb-3 md:mb-4">
+                              <div className="bg-blue-500/10 rounded-lg p-1.5 md:p-2 border border-blue-500/20">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">Followers</span>
-                                  <Users className="h-3 w-3 text-blue-500" />
+                                  <span className="text-[10px] md:text-xs text-muted-foreground">Followers</span>
+                                  <Users className="h-2.5 w-2.5 md:h-3 md:w-3 text-blue-500" />
                                 </div>
-                                <div className="text-sm font-bold text-foreground mt-0.5">{formatFollowerCount(avatar.followerCount)}</div>
+                                <div className="text-xs md:text-sm font-bold text-foreground mt-0.5">{formatFollowerCount(avatar.followerCount)}</div>
                               </div>
                               
-                              <div className="bg-green-500/10 rounded-lg p-2 border border-green-500/20">
+                              <div className="bg-green-500/10 rounded-lg p-1.5 md:p-2 border border-green-500/20">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">Investments</span>
-                                  <Building2 className="h-3 w-3 text-green-500" />
+                                  <span className="text-[10px] md:text-xs text-muted-foreground">Investments</span>
+                                  <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
                                 </div>
-                                <div className="text-sm font-bold text-foreground mt-0.5">{avatar.notableInvestments?.length || 0}</div>
+                                <div className="text-xs md:text-sm font-bold text-foreground mt-0.5">{avatar.notableInvestments?.length || 0}</div>
                               </div>
                               
-                              <div className="bg-orange-500/10 rounded-lg p-2 border border-orange-500/20">
+                              <div className="bg-orange-500/10 rounded-lg p-1.5 md:p-2 border border-orange-500/20">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">Net Worth</span>
-                                  <DollarSign className="h-3 w-3 text-orange-500" />
+                                  <span className="text-[10px] md:text-xs text-muted-foreground">Net Worth</span>
+                                  <DollarSign className="h-2.5 w-2.5 md:h-3 md:w-3 text-orange-500" />
                                 </div>
-                                <div className="text-sm font-bold text-foreground mt-0.5">{netWorth}</div>
+                                <div className="text-xs md:text-sm font-bold text-foreground mt-0.5">{netWorth}</div>
                               </div>
                             </div>
                             
                             {/* Investment Thesis - Condensed */}
                             {avatar.investmentThesis && (
-                              <div className="mt-auto">
+                              <div className="mt-auto hidden md:block">
                                 <div className="flex items-center gap-1 mb-1">
                                   <Target className="h-3 w-3 text-purple-500" />
                                   <span className="text-xs font-semibold text-foreground">Investment Thesis</span>
