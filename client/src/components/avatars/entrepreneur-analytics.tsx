@@ -205,11 +205,11 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
 
       {/* Tabbed Analytics */}
       <Tabs defaultValue="performance" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="best">Best Calls</TabsTrigger>
-          <TabsTrigger value="worst">Worst Calls</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 text-[10px] md:text-sm">
+          <TabsTrigger value="performance" className="px-1 md:px-3">Performance</TabsTrigger>
+          <TabsTrigger value="best" className="px-1 md:px-3">Best Calls</TabsTrigger>
+          <TabsTrigger value="worst" className="px-1 md:px-3">Worst Calls</TabsTrigger>
+          <TabsTrigger value="activity" className="px-1 md:px-3">Recent Activity</TabsTrigger>
         </TabsList>
 
         {/* Performance Chart */}
@@ -223,7 +223,7 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
             </CardHeader>
             <CardContent>
               {performanceData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={200} className="md:!h-[300px]">
                   <BarChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                     <XAxis 
@@ -261,7 +261,7 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[200px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                   No quantifiable performance data available
                 </div>
               )}
