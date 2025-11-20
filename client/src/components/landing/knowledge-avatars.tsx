@@ -912,7 +912,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       
                       {/* Enhanced Popup Modal Content */}
                       <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl h-[90vh] max-h-[90vh] bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl p-0 flex flex-col">
-                        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+                        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-h-0" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y' } as React.CSSProperties}>
                           <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-8">
                           {/* Premium Header */}
                           <div className="relative">
