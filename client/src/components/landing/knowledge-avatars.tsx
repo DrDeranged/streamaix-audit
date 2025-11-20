@@ -996,47 +996,47 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                           <div className="p-3 flex flex-col gap-2 overflow-hidden">
                             
                             {/* Compact Performance Cards - 2x2 Grid */}
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-2 gap-1.5 md:gap-2">
                               {/* Total Followers Card */}
-                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-500/20">
-                                <div className="flex items-center justify-between mb-1">
-                                  <div className="text-lg font-bold text-foreground">{formatFollowerCount(avatar.followerCount)}</div>
-                                  <Users className="h-4 w-4 text-blue-500" />
+                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg p-2 md:p-3 border border-blue-500/20">
+                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                                  <div className="text-sm md:text-lg font-bold text-foreground">{formatFollowerCount(avatar.followerCount)}</div>
+                                  <Users className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
                                 </div>
-                                <div className="text-xs text-muted-foreground">Total Followers</div>
-                                <div className="text-xs text-green-500">+12.3% this month</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">Total Followers</div>
+                                <div className="text-[10px] md:text-xs text-green-500">+12.3% this month</div>
                               </div>
                               
                               {/* Portfolio ROI Card */}
-                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-3 border border-green-500/20">
-                                <div className="flex items-center justify-between mb-1">
-                                  <div className={`text-lg font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-2 md:p-3 border border-green-500/20">
+                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                                  <div className={`text-sm md:text-lg font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                   </div>
-                                  <TrendingUp className="h-4 w-4 text-green-500" />
+                                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
                                 </div>
-                                <div className="text-xs text-muted-foreground">Portfolio ROI</div>
-                                <div className="text-xs text-green-500">All-time returns</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">Portfolio ROI</div>
+                                <div className="text-[10px] md:text-xs text-green-500">All-time returns</div>
                               </div>
                               
                               {/* Prediction Accuracy Card */}
-                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg p-3 border border-purple-500/20">
-                                <div className="flex items-center justify-between mb-1">
-                                  <div className="text-lg font-bold text-foreground">{accuracyPercentage}%</div>
-                                  <Target className="h-4 w-4 text-purple-500" />
+                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg p-2 md:p-3 border border-purple-500/20">
+                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                                  <div className="text-sm md:text-lg font-bold text-foreground">{accuracyPercentage}%</div>
+                                  <Target className="h-3 w-3 md:h-4 md:w-4 text-purple-500" />
                                 </div>
-                                <div className="text-xs text-muted-foreground">Prediction Accuracy</div>
-                                <div className="text-xs text-purple-500">Last 100 predictions</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">Prediction Accuracy</div>
+                                <div className="text-[10px] md:text-xs text-purple-500">Last 100 predictions</div>
                               </div>
                               
                               {/* Assets Under Management Card */}
-                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg p-3 border border-orange-500/20">
-                                <div className="flex items-center justify-between mb-1">
-                                  <div className="text-base font-bold text-foreground truncate">{netWorth}</div>
-                                  <PieChart className="h-4 w-4 text-orange-500" />
+                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg p-2 md:p-3 border border-orange-500/20">
+                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                                  <div className="text-xs md:text-base font-bold text-foreground truncate">{netWorth}</div>
+                                  <PieChart className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
                                 </div>
-                                <div className="text-xs text-muted-foreground">Assets Under Management</div>
-                                <div className="text-xs text-orange-500">Public portfolio value</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">Assets Under Management</div>
+                                <div className="text-[10px] md:text-xs text-orange-500">Public portfolio value</div>
                               </div>
                             </div>
                             
