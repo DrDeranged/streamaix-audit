@@ -3493,6 +3493,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Generate prediction markets from news articles
+  app.post('/api/news/generate-markets', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { socialMarketGenerator } = await import('./services/socialMarketGenerator');
+      const { articles, maxMarkets = 3 } = req.body;
+      
+      if (!articles || !Array.isArray(articles)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Articles array is required' 
+        });
+      }
+
+      const result = await socialMarketGenerator.createMarketsFromNewsFeed(articles, maxMarkets);
+      
+      res.json({ 
+        success: true,
+        ...result,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Market generation error:', error);
+      res.status(500).json({ 
+        success: false,
+        created: 0,
+        failed: 0,
+        markets: [],
+        error: 'Failed to generate markets', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get markets generated from social content
+  app.get('/api/news/markets', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { socialMarketGenerator } = await import('./services/socialMarketGenerator');
+      const limit = parseInt(req.query.limit as string) || 10;
+      const markets = await socialMarketGenerator.getSocialMarkets(limit);
+      
+      res.json({ 
+        success: true,
+        markets,
+        count: markets.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Social markets error:', error);
+      res.status(500).json({ 
+        success: false,
+        markets: [],
+        error: 'Failed to fetch social markets', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Get user engagement predictions
   app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
