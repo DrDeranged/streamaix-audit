@@ -910,154 +910,139 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                         </div>
                       </DialogTrigger>
                       
-                      {/* Enhanced Popup Modal Content */}
-                      <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden flex flex-col p-0" style={{ height: '90vh', maxHeight: '90vh' }}>
-                        <div className="flex-1 overflow-y-scroll px-4 sm:px-6 py-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-                          <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-20">
-                          {/* Premium Header */}
-                          <div className="relative">
-                            <div className={`h-24 sm:h-32 md:h-40 bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-80 rounded-t-lg relative overflow-hidden`}>
-                              <div className="absolute inset-0 bg-black/40" />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      {/* Compact Popup Modal - No Scrolling */}
+                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0" style={{ height: '75vh', maxHeight: '75vh' }}>
+                        {/* Two-Column Grid Layout */}
+                        <div className="grid grid-cols-[30%_70%] h-full">
+                          
+                          {/* LEFT SIDEBAR - Compact Profile */}
+                          <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-4 border-r border-muted/30 flex flex-col">
+                            {/* Avatar */}
+                            <div className="flex flex-col items-center mb-4">
+                              <div className="relative">
+                                <Avatar className="w-16 h-16 ring-2 ring-primary/20 border-2 border-white/10 shadow-lg">
+                                  <AvatarImage 
+                                    src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
+                                    alt={`${avatar.name} avatar`}
+                                  />
+                                  <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                                    {avatar.name.split(' ').map(n => n[0]).join('')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {avatar.verificationStatus === 'verified' && (
+                                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
+                                    <CheckCircle className="h-3 w-3 text-white" />
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Name & Handle */}
+                              <h3 className="text-base font-bold text-foreground mt-2 text-center">{avatar.name}</h3>
+                              <p className="text-xs text-muted-foreground">@{avatar.handle}</p>
+                              
+                              {/* Influence Badge */}
+                              <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-xs mt-2">
+                                Influence: {influenceScore}
+                              </Badge>
+                              
+                              {/* Follow Button */}
+                              <FollowButton
+                                avatarId={avatar.id}
+                                avatarName={avatar.name}
+                                className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white text-xs px-4 py-1.5 mt-2 w-full`}
+                              />
                             </div>
-                            <div className="absolute -bottom-8 sm:-bottom-10 md:-bottom-12 left-4 sm:left-6 md:left-8">
-                              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 ring-4 sm:ring-6 ring-card border-2 sm:border-4 border-white/20 shadow-2xl">
-                                <AvatarImage 
-                                  src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
-                                  alt={`${avatar.name} avatar`}
-                                />
-                                <AvatarFallback className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                                  {avatar.name.split(' ').map(n => n[0]).join('')}
-                                </AvatarFallback>
-                              </Avatar>
-                              {avatar.verificationStatus === 'verified' && (
-                                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-blue-500 rounded-full p-1 sm:p-2">
-                                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
+                            
+                            {/* Mini Stats Pills */}
+                            <div className="space-y-2 mb-4">
+                              <div className="bg-blue-500/10 rounded-lg p-2 border border-blue-500/20">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">Followers</span>
+                                  <Users className="h-3 w-3 text-blue-500" />
                                 </div>
-                              )}
+                                <div className="text-sm font-bold text-foreground mt-0.5">{formatFollowerCount(avatar.followerCount)}</div>
+                              </div>
+                              
+                              <div className="bg-green-500/10 rounded-lg p-2 border border-green-500/20">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">Investments</span>
+                                  <Building2 className="h-3 w-3 text-green-500" />
+                                </div>
+                                <div className="text-sm font-bold text-foreground mt-0.5">{avatar.notableInvestments?.length || 0}</div>
+                              </div>
+                              
+                              <div className="bg-orange-500/10 rounded-lg p-2 border border-orange-500/20">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">Net Worth</span>
+                                  <DollarSign className="h-3 w-3 text-orange-500" />
+                                </div>
+                                <div className="text-sm font-bold text-foreground mt-0.5">{netWorth}</div>
+                              </div>
                             </div>
+                            
+                            {/* Investment Thesis - Condensed */}
+                            {avatar.investmentThesis && (
+                              <div className="mt-auto">
+                                <div className="flex items-center gap-1 mb-1">
+                                  <Target className="h-3 w-3 text-purple-500" />
+                                  <span className="text-xs font-semibold text-foreground">Investment Thesis</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{avatar.investmentThesis}</p>
+                              </div>
+                            )}
                           </div>
                           
-                          {/* Profile Header */}
-                          <div className="pt-8 sm:pt-10 md:pt-12 px-3 sm:px-4 md:px-8">
-                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0 mb-4 sm:mb-6 md:mb-8">
-                              <div className="space-y-1 sm:space-y-2">
-                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{avatar.name}</h3>
-                                <p className="text-sm sm:text-base md:text-lg text-muted-foreground">@{avatar.handle}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  <Badge variant="secondary" className="bg-primary/10 text-primary text-xs sm:text-sm">
-                                    {avatar.expertise}
-                                  </Badge>
-                                  <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm">
-                                    Influence: {influenceScore}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-                                <FollowButton
-                                  avatarId={avatar.id}
-                                  avatarName={avatar.name}
-                                  className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white px-4 sm:px-6 text-sm sm:text-base w-full`}
-                                />
-                              </div>
-                            </div>
+                          {/* RIGHT CONTENT AREA */}
+                          <div className="p-4 flex flex-col gap-3 overflow-hidden">
                             
-                            {/* Bio */}
-                            <p className="text-muted-foreground mb-4 sm:mb-6 md:mb-8 text-sm sm:text-base md:text-lg leading-relaxed">{avatar.bio}</p>
-                            
-                            {/* Enhanced Analytics Dashboard */}
-                            <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-muted/30">
-                              <style dangerouslySetInnerHTML={{__html: `
-                                .analytics-scroll-container::-webkit-scrollbar {
-                                  height: 8px !important;
-                                  display: block !important;
-                                }
-                                .analytics-scroll-container::-webkit-scrollbar-track {
-                                  background: rgba(148, 163, 184, 0.1) !important;
-                                  border-radius: 10px !important;
-                                }
-                                .analytics-scroll-container::-webkit-scrollbar-thumb {
-                                  background: rgba(147, 197, 253, 0.5) !important;
-                                  border-radius: 10px !important;
-                                }
-                                .analytics-scroll-container::-webkit-scrollbar-thumb:hover {
-                                  background: rgba(147, 197, 253, 0.8) !important;
-                                }
-                              `}} />
-                              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center justify-between">
-                                <span className="flex items-center">
-                                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
-                                  Performance Analytics
-                                </span>
-                                <span className="text-[8px] font-mono text-muted-foreground/40">v2.2</span>
-                              </h4>
-                              <div 
-                                className="analytics-scroll-container w-full overflow-x-auto overflow-y-visible"
-                                style={{
-                                  scrollbarWidth: 'thin',
-                                  scrollbarColor: 'rgba(147, 197, 253, 0.5) rgba(148, 163, 184, 0.1)',
-                                  WebkitOverflowScrolling: 'touch'
-                                }}
-                                ref={(el) => {
-                                  if (el) {
-                                    console.log(`🔍 DEBUG v2.2: Analytics scrollbar container rendered`);
-                                    console.log(`🔍 DEBUG v2.2: Classes applied:`, el.className);
-                                    console.log(`🔍 DEBUG v2.2: Scrollable width: ${el.scrollWidth}px, visible: ${el.clientWidth}px`);
-                                    console.log(`🔍 DEBUG v2.2: Needs scroll:`, el.scrollWidth > el.clientWidth);
-                                  }
-                                }}
-                              >
-                              <div className="flex gap-2 sm:gap-3 md:gap-4 pb-3 min-w-max">
-                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-blue-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
-                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
-                                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
-                                    {formatFollowerCount(avatar.followerCount)}
-                                  </div>
-                                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+                            {/* Compact Performance Cards - 2x2 Grid */}
+                            <div className="grid grid-cols-2 gap-2">
+                              {/* Total Followers Card */}
+                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-500/20">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="text-lg font-bold text-foreground">{formatFollowerCount(avatar.followerCount)}</div>
+                                  <Users className="h-4 w-4 text-blue-500" />
                                 </div>
-                                <div className="text-xs sm:text-sm text-muted-foreground">Total Followers</div>
-                                <div className="text-xs text-green-500 mt-1">+12.3% this month</div>
+                                <div className="text-xs text-muted-foreground">Total Followers</div>
+                                <div className="text-xs text-green-500">+12.3% this month</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-green-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
-                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
-                                  <div className={`text-lg sm:text-xl md:text-2xl font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              {/* Portfolio ROI Card */}
+                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-3 border border-green-500/20">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className={`text-lg font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                                   </div>
-                                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
+                                  <TrendingUp className="h-4 w-4 text-green-500" />
                                 </div>
-                                <div className="text-xs sm:text-sm text-muted-foreground">Portfolio ROI</div>
-                                <div className="text-xs text-green-500 mt-1">All-time returns</div>
+                                <div className="text-xs text-muted-foreground">Portfolio ROI</div>
+                                <div className="text-xs text-green-500">All-time returns</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-purple-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
-                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
-                                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
-                                    {accuracyPercentage}%
-                                  </div>
-                                  <Target className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+                              {/* Prediction Accuracy Card */}
+                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg p-3 border border-purple-500/20">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="text-lg font-bold text-foreground">{accuracyPercentage}%</div>
+                                  <Target className="h-4 w-4 text-purple-500" />
                                 </div>
-                                <div className="text-xs sm:text-sm text-muted-foreground">Prediction Accuracy</div>
-                                <div className="text-xs text-purple-500 mt-1">Last 100 predictions</div>
+                                <div className="text-xs text-muted-foreground">Prediction Accuracy</div>
+                                <div className="text-xs text-purple-500">Last 100 predictions</div>
                               </div>
                               
-                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-3 sm:p-4 md:p-6 border border-orange-500/20 w-[200px] sm:w-[220px] md:w-[240px] flex-shrink-0">
-                                <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
-                                  <div className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">
-                                    {netWorth}
-                                  </div>
-                                  <PieChart className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500" />
+                              {/* Assets Under Management Card */}
+                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg p-3 border border-orange-500/20">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="text-base font-bold text-foreground truncate">{netWorth}</div>
+                                  <PieChart className="h-4 w-4 text-orange-500" />
                                 </div>
-                                <div className="text-xs sm:text-sm text-muted-foreground">Assets Under Management</div>
-                                <div className="text-xs text-orange-500 mt-1">Public portfolio value</div>
+                                <div className="text-xs text-muted-foreground">Assets Under Management</div>
+                                <div className="text-xs text-orange-500">Public portfolio value</div>
                               </div>
-                            </div>
-                            </div>
                             </div>
                             
-                            {/* Bloomberg Terminal-Style Deep Analytics */}
+                            {/* Compact Analytics Chart Section */}
                             {avatar.investmentThesis && avatar.bestCalls && avatar.bestCalls.length > 0 && (
-                              <div className="mb-8">
+                              <div className="flex-1 min-h-0 overflow-hidden">
                                 <EntrepreneurAnalytics 
                                   entrepreneur={{
                                     name: avatar.name,
@@ -1075,6 +1060,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 />
                               </div>
                             )}
+                          </div>
+                        </div>
                             
                             {/* Enhanced Investment Portfolio Section */}
                             {avatar.notableInvestments && avatar.notableInvestments.length > 0 && (
