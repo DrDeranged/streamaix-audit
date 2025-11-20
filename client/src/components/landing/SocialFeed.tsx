@@ -104,9 +104,9 @@ export function SocialFeed() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch prediction markets
+  // Fetch news-generated prediction markets
   const { data: markets, isLoading: marketsLoading, error: marketsError } = useQuery<{ markets: any[] }>({
-    queryKey: ['/api/prediction-markets'],
+    queryKey: ['/api/news/predictions'],
     enabled: activeTab === 'predictions',
   });
 
