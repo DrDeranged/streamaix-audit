@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { SocialFeedCard } from '@/components/social/SocialFeedCard';
+import { InlineMarketCard } from '@/components/prediction/InlineMarketCard';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   TrendingUp, 
@@ -121,6 +122,12 @@ export function SocialFeed() {
     enabled: activeTab === 'crypto',
   });
 
+  // Fetch social-generated markets (for inline display)
+  const { data: socialMarkets, isLoading: socialMarketsLoading } = useQuery<{ markets: any[] }>({
+    queryKey: ['/api/news/markets'],
+    enabled: activeTab !== 'predictions', // Show in MACRO and CRYPTO tabs
+  });
+
   // Build feed based on active tab
   const buildFeed = (): FeedItem[] => {
     const feed: FeedItem[] = [];
@@ -151,6 +158,27 @@ export function SocialFeed() {
           timestamp: new Date(article.published).getTime(),
         });
       });
+
+      // Inject markets every 2-3 posts (only for macro/crypto tabs)
+      if (socialMarkets?.markets && socialMarkets.markets.length > 0) {
+        const marketsToInject = socialMarkets.markets.filter(m => 
+          m.category === 'macro' || m.category === 'real_world'
+        ).slice(0, 2);
+        
+        marketsToInject.forEach((market, idx) => {
+          feed.splice(2 + (idx * 3), 0, {
+            id: `market-${market.id}`,
+            type: 'market',
+            content: market,
+            engagement: {
+              likesCount: market.likesCount || 0,
+              commentsCount: market.commentsCount || 0,
+            },
+            score: 95 - (idx * 5),
+            timestamp: new Date(market.createdAt).getTime(),
+          });
+        });
+      }
     }
 
     if (activeTab === 'crypto' && cryptoNews?.articles) {
@@ -179,6 +207,27 @@ export function SocialFeed() {
           timestamp: new Date(article.published).getTime(),
         });
       });
+
+      // Inject crypto-related markets every 2-3 posts
+      if (socialMarkets?.markets && socialMarkets.markets.length > 0) {
+        const marketsToInject = socialMarkets.markets.filter(m => 
+          m.category === 'crypto' || m.category === 'defi'
+        ).slice(0, 2);
+        
+        marketsToInject.forEach((market, idx) => {
+          feed.splice(2 + (idx * 3), 0, {
+            id: `market-${market.id}`,
+            type: 'market',
+            content: market,
+            engagement: {
+              likesCount: market.likesCount || 0,
+              commentsCount: market.commentsCount || 0,
+            },
+            score: 95 - (idx * 5),
+            timestamp: new Date(market.createdAt).getTime(),
+          });
+        });
+      }
     }
 
     if (activeTab === 'predictions' && markets?.markets) {
@@ -385,14 +434,29 @@ export function SocialFeed() {
               transition={{ duration: 0.3 }}
               className="space-y-2"
             >
-              {feedItems.slice(0, 5).map((item) => (
-                <SocialFeedCard
-                  key={`${item.type}-${item.id}`}
-                  id={item.id}
-                  type={item.type as any}
-                  content={item.content}
-                  engagement={item.engagement}
-                />
+              {feedItems.slice(0, 8).map((item) => (
+                item.type === 'market' ? (
+                  <motion.div
+                    key={`${item.type}-${item.id}`}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InlineMarketCard
+                      market={item.content}
+                      variant="compact"
+                      context="social"
+                    />
+                  </motion.div>
+                ) : (
+                  <SocialFeedCard
+                    key={`${item.type}-${item.id}`}
+                    id={item.id}
+                    type={item.type as any}
+                    content={item.content}
+                    engagement={item.engagement}
+                  />
+                )
               ))}
             </motion.div>
           ) : (
