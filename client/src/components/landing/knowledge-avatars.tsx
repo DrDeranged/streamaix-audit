@@ -1057,6 +1057,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     netWorth: netWorth,
                                     portfolioRoi: portfolioRoi
                                   }}
+                                  showThesis={false}
+                                  showMetrics={false}
                                 />
                               </div>
                             )}

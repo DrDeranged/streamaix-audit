@@ -76,9 +76,11 @@ interface EntrepreneurAnalyticsProps {
     netWorth: string;
     portfolioRoi: number;
   };
+  showThesis?: boolean;
+  showMetrics?: boolean;
 }
 
-export function EntrepreneurAnalytics({ entrepreneur }: EntrepreneurAnalyticsProps) {
+export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMetrics = true }: EntrepreneurAnalyticsProps) {
   // Parse numeric values from roi strings
   const parseROI = (roi: string): number | null => {
     if (!roi || roi === 'Ongoing' || roi === 'Founder' || roi === 'CEO') return null;
@@ -136,22 +138,25 @@ export function EntrepreneurAnalytics({ entrepreneur }: EntrepreneurAnalyticsPro
   return (
     <div className="space-y-6">
       {/* Investment Thesis Section */}
-      <Card className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border-blue-500/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-blue-500" />
-            Investment Thesis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {entrepreneur.investmentThesis}
-          </p>
-        </CardContent>
-      </Card>
+      {showThesis && (
+        <Card className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border-blue-500/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-blue-500" />
+              Investment Thesis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {entrepreneur.investmentThesis}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {showMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-green-500/20 bg-green-500/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -195,7 +200,8 @@ export function EntrepreneurAnalytics({ entrepreneur }: EntrepreneurAnalyticsPro
             <p className={`text-xs mt-1 ${riskAssessment.color}`}>{riskAssessment.level}</p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      )}
 
       {/* Tabbed Analytics */}
       <Tabs defaultValue="performance" className="w-full">
