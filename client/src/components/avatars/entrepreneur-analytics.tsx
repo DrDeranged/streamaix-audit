@@ -136,7 +136,7 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
   const riskAssessment = getRiskLevel(entrepreneur.riskScore);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Investment Thesis Section */}
       {showThesis && (
         <Card className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border-blue-500/20">

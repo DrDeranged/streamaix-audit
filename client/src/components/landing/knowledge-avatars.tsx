@@ -993,7 +993,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                           </div>
                           
                           {/* RIGHT CONTENT AREA */}
-                          <div className="p-4 flex flex-col gap-3 overflow-hidden">
+                          <div className="p-3 flex flex-col gap-2 overflow-hidden">
                             
                             {/* Compact Performance Cards - 2x2 Grid */}
                             <div className="grid grid-cols-2 gap-2">
