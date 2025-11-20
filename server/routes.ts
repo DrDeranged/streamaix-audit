@@ -3493,6 +3493,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get prediction markets generated from CoinDesk news
+  app.get('/api/news/predictions', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { newsService } = await import('./services/newsService');
+      const { socialMarketGenerator } = await import('./services/socialMarketGenerator');
+      
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      // Fetch latest CoinDesk news
+      const articles = await newsService.getCoinDeskNews();
+      
+      // Generate or retrieve markets from these articles
+      const result = await socialMarketGenerator.createMarketsFromNewsFeed(
+        articles.slice(0, limit),
+        limit
+      );
+      
+      res.json({ 
+        success: true,
+        markets: result.markets,
+        count: result.markets.length,
+        created: result.created,
+        cached: result.markets.length - result.created,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('News predictions error:', error);
+      res.status(500).json({ 
+        success: false,
+        markets: [],
+        error: 'Failed to generate prediction markets from news', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Generate prediction markets from news articles
   app.post('/api/news/generate-markets', asyncHandler(async (req: Request, res: Response) => {
     try {
