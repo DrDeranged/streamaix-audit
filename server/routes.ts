@@ -3550,6 +3550,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Generate prediction markets for an avatar
+  app.post('/api/avatars/:avatarId/generate-markets', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { avatarMarketGenerator } = await import('./services/avatarMarketGenerator');
+      const result = await avatarMarketGenerator.createMarketsForAvatar(req.params.avatarId);
+      
+      res.json({ 
+        success: true,
+        ...result,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Avatar market generation error:', error);
+      res.status(500).json({ 
+        success: false,
+        created: 0,
+        markets: [],
+        error: 'Failed to generate avatar markets', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get markets for a specific avatar
+  app.get('/api/avatars/:avatarId/markets', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { avatarMarketGenerator } = await import('./services/avatarMarketGenerator');
+      const limit = parseInt(req.query.limit as string) || 3;
+      const markets = await avatarMarketGenerator.getMarketsForAvatar(req.params.avatarId, limit);
+      
+      res.json({ 
+        success: true,
+        markets,
+        count: markets.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Avatar markets fetch error:', error);
+      res.status(500).json({ 
+        success: false,
+        markets: [],
+        error: 'Failed to fetch avatar markets', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Get user engagement predictions
   app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;

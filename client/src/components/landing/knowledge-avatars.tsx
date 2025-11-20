@@ -50,6 +50,7 @@ import { EntrepreneurAnalytics } from "@/components/avatars/entrepreneur-analyti
 import { ComparativeDashboard } from "@/components/avatars/comparative-dashboard";
 import { FollowButton } from "@/components/avatars/follow-button";
 import { PortfolioSimulator } from "@/components/avatars/portfolio-simulator";
+import { InlineMarketCard } from "@/components/prediction/InlineMarketCard";
 
 interface DatabaseAvatar {
   id: string;
@@ -229,6 +230,43 @@ const getRecentActivity = (name: string) => {
     { type: 'market', text: 'Market commentary published', time: '3d ago', impact: 'low' }
   ];
 };
+
+// Avatar Markets Section Component
+function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avatarName: string }) {
+  const { data: marketsData, isLoading } = useQuery<{ markets: any[] }>({
+    queryKey: ['/api/avatars', avatarId, 'markets'],
+    enabled: !!avatarId,
+  });
+
+  const markets = marketsData?.markets || [];
+
+  if (isLoading || markets.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1.5 px-1">
+        <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
+        <span className="text-xs font-semibold text-foreground">Live Prediction Markets</span>
+        <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-[10px] ml-auto">
+          {markets.length} Active
+        </Badge>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-1.5">
+        {markets.slice(0, 2).map((market) => (
+          <InlineMarketCard
+            key={market.id}
+            market={market}
+            variant="mini"
+            context="avatar"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -1039,6 +1077,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 <div className="text-[10px] md:text-xs text-orange-500">Public portfolio value</div>
                               </div>
                             </div>
+                            
+                            {/* Prediction Markets Section */}
+                            <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
                             
                             {/* Compact Analytics Chart Section */}
                             {avatar.investmentThesis && avatar.bestCalls && avatar.bestCalls.length > 0 && (
