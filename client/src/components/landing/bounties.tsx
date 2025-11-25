@@ -87,7 +87,13 @@ export function Bounties() {
     },
   });
 
-  const bounties = bountiesData?.bounties || [];
+  // Filter out expired bounties on the frontend as a safety fallback
+  const now = new Date();
+  const bounties = (bountiesData?.bounties || []).filter(bounty => {
+    if (!bounty.deadline) return true; // No deadline = still active
+    const deadline = typeof bounty.deadline === 'string' ? new Date(bounty.deadline) : bounty.deadline;
+    return deadline > now;
+  });
   const stats = statsData?.stats;
 
   return (
