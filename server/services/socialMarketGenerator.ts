@@ -173,6 +173,8 @@ Format your response as JSON:
           }
 
           // Create the market in the database
+          // Note: sourceContentId is NOT used for news-generated markets as news article IDs
+          // are not in the summaries table (sourceContentId references summaries.id)
           const newMarket = await db.insert(predictionMarkets).values({
             question: generatedMarket.question,
             description: generatedMarket.description,
@@ -192,7 +194,7 @@ Format your response as JSON:
             tags: generatedMarket.tags,
             aiProbability: generatedMarket.aiProbability,
             aiReasoning: generatedMarket.reasoning,
-            sourceContentId: article.id,
+            // Store news article source info in aiReasoning field instead
           }).returning();
 
           createdMarkets.push(newMarket[0]);
