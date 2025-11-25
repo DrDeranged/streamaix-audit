@@ -4514,12 +4514,12 @@ export type VolatilityForecastingDashboard = {
 
 export const predictionMarkets = pgTable("prediction_markets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  contractMarketId: integer("contract_market_id").notNull().unique(),
+  contractMarketId: integer("contract_market_id").unique(), // Nullable for AI-generated markets without on-chain contracts
   question: text("question").notNull(),
   description: text("description"),
   category: text("category").notNull(),
   creatorId: varchar("creator_id").references(() => users.id),
-  creatorWallet: text("creator_wallet").notNull(),
+  creatorWallet: text("creator_wallet"),
   deadline: timestamp("deadline").notNull(),
   resolutionSource: text("resolution_source"),
   sourceContentId: varchar("source_content_id").references(() => summaries.id),

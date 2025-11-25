@@ -3496,19 +3496,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get prediction markets generated from CoinDesk news
   app.get('/api/news/predictions', asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { newsService } = await import('./services/newsService');
-      const { socialMarketGenerator } = await import('./services/socialMarketGenerator');
+      const { NewsService } = await import('./services/newsService');
+      const { SocialMarketGenerator } = await import('./services/socialMarketGenerator');
+      
+      const newsService = NewsService.getInstance();
+      const socialMarketGenerator = new SocialMarketGenerator();
       
       const limit = parseInt(req.query.limit as string) || 10;
       
+      console.log('📰 Fetching CoinDesk news for prediction generation...');
+      
       // Fetch latest CoinDesk news
-      const articles = await newsService.getCoinDeskNews();
+      const articles = await newsService.fetchCoinDeskNews();
+      
+      console.log(`📰 Fetched ${articles.length} articles, generating up to ${limit} markets...`);
       
       // Generate or retrieve markets from these articles
       const result = await socialMarketGenerator.createMarketsFromNewsFeed(
         articles.slice(0, limit),
         limit
       );
+      
+      console.log(`✅ Generated ${result.created} new markets, ${result.markets.length} total`);
       
       res.json({ 
         success: true,

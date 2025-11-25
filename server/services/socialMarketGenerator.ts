@@ -178,12 +178,14 @@ Format your response as JSON:
             description: generatedMarket.description,
             category: generatedMarket.category as any,
             creatorId,
+            creatorWallet: '', // AI-generated markets don't have a wallet
             deadline: generatedMarket.deadline,
             resolutionSource: 'oracle',
             yesPrice: 500000, // Start at 50%
             noPrice: 500000,
             yesLiquidity: 5000, // Initial liquidity
             noLiquidity: 5000,
+            initialLiquidity: 10000, // 10K STREAM initial liquidity
             totalVolume: 0,
             totalTrades: 0,
             status: 'active',
@@ -191,8 +193,6 @@ Format your response as JSON:
             aiProbability: generatedMarket.aiProbability,
             aiReasoning: generatedMarket.reasoning,
             sourceContentId: article.id,
-            likesCount: 0,
-            commentsCount: 0,
           }).returning();
 
           createdMarkets.push(newMarket[0]);
