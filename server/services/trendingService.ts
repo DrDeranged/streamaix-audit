@@ -71,9 +71,17 @@ export class TrendingService {
       .from(bounties)
       .where(eq(bounties.status, 'open'));
 
+    const now = new Date();
+
+    // Filter out expired bounties (deadline has passed)
+    const activeBounties = openBounties.filter(bounty => {
+      if (!bounty.deadline) return true; // No deadline = still active
+      return new Date(bounty.deadline) > now;
+    });
+
     // Calculate trending score for each
     const bountiesWithScores = await Promise.all(
-      openBounties.map(async (bounty) => {
+      activeBounties.map(async (bounty) => {
         const score = await this.calculateTrendingScore(bounty.id);
         return {
           ...bounty,
