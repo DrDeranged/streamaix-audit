@@ -424,50 +424,50 @@ export default function Discover() {
       {/* Enhanced Header */}
       <div className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95" />
-        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5 relative">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5 relative">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <Link href="/">
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-gray-400 hover:text-white hover:bg-white/5 rounded-xl h-10 w-10 p-0"
+                  className="text-gray-400 hover:text-white hover:bg-white/5 rounded-xl h-8 w-8 sm:h-10 sm:w-10 p-0 flex-shrink-0"
                   data-testid="button-back-home"
                 >
-                  <Home className="w-5 h-5" />
+                  <Home className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-3">
-                <div className="relative">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="relative flex-shrink-0 hidden xs:block sm:block">
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-xl blur-lg opacity-50" />
-                  <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10">
-                    <Brain className="w-6 h-6 text-white" />
+                  <div className="relative p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10">
+                    <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent truncate">
                     Discover
                   </h1>
-                  <p className="text-xs sm:text-sm text-gray-400 hidden sm:block">
+                  <p className="text-xs sm:text-sm text-gray-400 hidden md:block">
                     AI-Powered Market Intelligence
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 text-xs font-medium">
-                <Radio className="w-2.5 h-2.5 mr-1.5 animate-pulse" />
+            <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+              <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium">
+                <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 sm:mr-1.5 animate-pulse" />
                 <span>Live</span>
               </Badge>
               <Link href="/markets">
                 <Button 
                   size="sm"
-                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white border-0 rounded-xl h-9 px-4 text-xs font-medium shadow-lg shadow-purple-500/20"
+                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white border-0 rounded-xl h-8 sm:h-9 px-2.5 sm:px-4 text-[10px] sm:text-xs font-medium shadow-lg shadow-purple-500/20"
                   data-testid="button-explore-markets"
                 >
-                  <Rocket className="w-3.5 h-3.5 mr-1.5" />
-                  Markets
+                  <Rocket className="w-3 h-3 sm:w-3.5 sm:h-3.5 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Markets</span>
                 </Button>
               </Link>
             </div>
