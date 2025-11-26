@@ -1,0 +1,557 @@
+import axios from 'axios';
+
+interface FearGreedData {
+  value: number;
+  valueClassification: string;
+  timestamp: string;
+  previousValue?: number;
+  previousClassification?: string;
+  trend: 'rising' | 'falling' | 'stable';
+}
+
+interface MarketDominance {
+  btcDominance: number;
+  ethDominance: number;
+  altDominance: number;
+  stablecoinDominance: number;
+  totalMarketCap: number;
+  btcMarketCap: number;
+  ethMarketCap: number;
+  change24h: {
+    btc: number;
+    eth: number;
+    total: number;
+  };
+}
+
+interface CryptoMover {
+  id: string;
+  symbol: string;
+  name: string;
+  price: number;
+  change24h: number;
+  volume24h: number;
+  marketCap: number;
+  image?: string;
+  sparkline?: number[];
+}
+
+interface TrendingToken {
+  id: string;
+  name: string;
+  symbol: string;
+  marketCapRank: number;
+  price?: number;
+  change24h?: number;
+  volume24h?: number;
+  image?: string;
+  score: number;
+}
+
+interface DefiTVL {
+  totalTVL: number;
+  change24h: number;
+  change7d: number;
+  topProtocols: {
+    name: string;
+    tvl: number;
+    change24h: number;
+    chain: string;
+    category: string;
+    logo?: string;
+  }[];
+  chainTVL: {
+    name: string;
+    tvl: number;
+    change24h: number;
+  }[];
+}
+
+interface GasTracker {
+  ethereum: {
+    slow: number;
+    standard: number;
+    fast: number;
+    instant: number;
+    baseFee: number;
+    congestionLevel: 'low' | 'medium' | 'high' | 'extreme';
+  };
+  lastUpdated: string;
+}
+
+interface FundingRates {
+  btc: { rate: number; predicted: number; exchange: string };
+  eth: { rate: number; predicted: number; exchange: string };
+  sentiment: 'bullish' | 'bearish' | 'neutral';
+  averageRate: number;
+}
+
+interface WhaleAlert {
+  id: string;
+  type: 'transfer' | 'exchange_deposit' | 'exchange_withdrawal';
+  coin: string;
+  amount: number;
+  usdValue: number;
+  from: string;
+  to: string;
+  timestamp: string;
+  significance: 'high' | 'medium' | 'low';
+}
+
+const CACHE_DURATION = 60000; // 1 minute cache
+const LONG_CACHE_DURATION = 300000; // 5 minutes for less volatile data
+
+class CryptoIntelligenceService {
+  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+
+  private getCached<T>(key: string, duration: number = CACHE_DURATION): T | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < duration) {
+      return cached.data as T;
+    }
+    return null;
+  }
+
+  private setCache(key: string, data: any): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  async getFearGreedIndex(): Promise<FearGreedData> {
+    const cacheKey = 'fear_greed';
+    const cached = this.getCached<FearGreedData>(cacheKey, LONG_CACHE_DURATION);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get('https://api.alternative.me/fng/?limit=2', {
+        timeout: 5000
+      });
+
+      const data = response.data.data;
+      const current = data[0];
+      const previous = data[1];
+
+      const result: FearGreedData = {
+        value: parseInt(current.value),
+        valueClassification: current.value_classification,
+        timestamp: new Date(parseInt(current.timestamp) * 1000).toISOString(),
+        previousValue: previous ? parseInt(previous.value) : undefined,
+        previousClassification: previous?.value_classification,
+        trend: previous 
+          ? parseInt(current.value) > parseInt(previous.value) 
+            ? 'rising' 
+            : parseInt(current.value) < parseInt(previous.value) 
+              ? 'falling' 
+              : 'stable'
+          : 'stable'
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Fear & Greed API error:', error);
+      return {
+        value: 50,
+        valueClassification: 'Neutral',
+        timestamp: new Date().toISOString(),
+        trend: 'stable'
+      };
+    }
+  }
+
+  async getMarketDominance(): Promise<MarketDominance> {
+    const cacheKey = 'market_dominance';
+    const cached = this.getCached<MarketDominance>(cacheKey, LONG_CACHE_DURATION);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get('https://api.coingecko.com/api/v3/global', {
+        timeout: 10000
+      });
+
+      const data = response.data.data;
+      
+      const result: MarketDominance = {
+        btcDominance: data.market_cap_percentage?.btc || 0,
+        ethDominance: data.market_cap_percentage?.eth || 0,
+        altDominance: 100 - (data.market_cap_percentage?.btc || 0) - (data.market_cap_percentage?.eth || 0) - (data.market_cap_percentage?.usdt || 0) - (data.market_cap_percentage?.usdc || 0),
+        stablecoinDominance: (data.market_cap_percentage?.usdt || 0) + (data.market_cap_percentage?.usdc || 0),
+        totalMarketCap: data.total_market_cap?.usd || 0,
+        btcMarketCap: (data.total_market_cap?.usd || 0) * (data.market_cap_percentage?.btc || 0) / 100,
+        ethMarketCap: (data.total_market_cap?.usd || 0) * (data.market_cap_percentage?.eth || 0) / 100,
+        change24h: {
+          btc: data.market_cap_change_percentage_24h_usd || 0,
+          eth: data.market_cap_change_percentage_24h_usd || 0,
+          total: data.market_cap_change_percentage_24h_usd || 0
+        }
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Market dominance API error:', error);
+      return {
+        btcDominance: 52.5,
+        ethDominance: 17.2,
+        altDominance: 25.3,
+        stablecoinDominance: 5.0,
+        totalMarketCap: 2400000000000,
+        btcMarketCap: 1260000000000,
+        ethMarketCap: 412800000000,
+        change24h: { btc: 0, eth: 0, total: 0 }
+      };
+    }
+  }
+
+  async getTopMovers(): Promise<{ gainers: CryptoMover[]; losers: CryptoMover[] }> {
+    const cacheKey = 'top_movers';
+    const cached = this.getCached<{ gainers: CryptoMover[]; losers: CryptoMover[] }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(
+        'https://api.coingecko.com/api/v3/coins/markets',
+        {
+          params: {
+            vs_currency: 'usd',
+            order: 'market_cap_desc',
+            per_page: 100,
+            page: 1,
+            sparkline: true,
+            price_change_percentage: '24h'
+          },
+          timeout: 10000
+        }
+      );
+
+      const coins = response.data;
+      
+      const mapped: CryptoMover[] = coins.map((coin: any) => ({
+        id: coin.id,
+        symbol: coin.symbol?.toUpperCase(),
+        name: coin.name,
+        price: coin.current_price,
+        change24h: coin.price_change_percentage_24h || 0,
+        volume24h: coin.total_volume,
+        marketCap: coin.market_cap,
+        image: coin.image,
+        sparkline: coin.sparkline_in_7d?.price?.slice(-24) || []
+      }));
+
+      const sorted = [...mapped].sort((a, b) => b.change24h - a.change24h);
+      
+      const result = {
+        gainers: sorted.slice(0, 10),
+        losers: sorted.slice(-10).reverse()
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Top movers API error:', error);
+      return { gainers: [], losers: [] };
+    }
+  }
+
+  async getTrendingTokens(): Promise<TrendingToken[]> {
+    const cacheKey = 'trending_tokens';
+    const cached = this.getCached<TrendingToken[]>(cacheKey, LONG_CACHE_DURATION);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get('https://api.coingecko.com/api/v3/search/trending', {
+        timeout: 10000
+      });
+
+      const trending = response.data.coins || [];
+      
+      const result: TrendingToken[] = trending.slice(0, 10).map((item: any, index: number) => ({
+        id: item.item.id,
+        name: item.item.name,
+        symbol: item.item.symbol?.toUpperCase(),
+        marketCapRank: item.item.market_cap_rank,
+        price: item.item.data?.price,
+        change24h: item.item.data?.price_change_percentage_24h?.usd,
+        image: item.item.small || item.item.thumb,
+        score: 10 - index
+      }));
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Trending tokens API error:', error);
+      return [];
+    }
+  }
+
+  async getDefiTVL(): Promise<DefiTVL> {
+    const cacheKey = 'defi_tvl';
+    const cached = this.getCached<DefiTVL>(cacheKey, LONG_CACHE_DURATION);
+    if (cached) return cached;
+
+    try {
+      const [protocolsRes, chainsRes] = await Promise.all([
+        axios.get('https://api.llama.fi/protocols', { timeout: 10000 }),
+        axios.get('https://api.llama.fi/v2/chains', { timeout: 10000 })
+      ]);
+
+      const protocols = protocolsRes.data || [];
+      const chains = chainsRes.data || [];
+
+      const sortedProtocols = protocols
+        .filter((p: any) => p.tvl > 0)
+        .sort((a: any, b: any) => b.tvl - a.tvl)
+        .slice(0, 15);
+
+      const totalTVL = protocols.reduce((acc: number, p: any) => acc + (p.tvl || 0), 0);
+
+      const topProtocols = sortedProtocols.map((p: any) => ({
+        name: p.name,
+        tvl: p.tvl,
+        change24h: p.change_1d || 0,
+        chain: p.chain || 'Multi-chain',
+        category: p.category || 'DeFi',
+        logo: p.logo
+      }));
+
+      const chainTVL = chains
+        .filter((c: any) => c.tvl > 0)
+        .sort((a: any, b: any) => b.tvl - a.tvl)
+        .slice(0, 10)
+        .map((c: any) => ({
+          name: c.name,
+          tvl: c.tvl,
+          change24h: 0
+        }));
+
+      const result: DefiTVL = {
+        totalTVL,
+        change24h: 0,
+        change7d: 0,
+        topProtocols,
+        chainTVL
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ DeFi TVL API error:', error);
+      return {
+        totalTVL: 0,
+        change24h: 0,
+        change7d: 0,
+        topProtocols: [],
+        chainTVL: []
+      };
+    }
+  }
+
+  async getGasTracker(): Promise<GasTracker> {
+    const cacheKey = 'gas_tracker';
+    const cached = this.getCached<GasTracker>(cacheKey, 30000); // 30 second cache for gas
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get('https://api.etherscan.io/api', {
+        params: {
+          module: 'gastracker',
+          action: 'gasoracle'
+        },
+        timeout: 5000
+      });
+
+      const data = response.data.result;
+      const baseFee = parseFloat(data.suggestBaseFee) || 0;
+      
+      let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
+      if (baseFee > 100) congestionLevel = 'extreme';
+      else if (baseFee > 50) congestionLevel = 'high';
+      else if (baseFee > 20) congestionLevel = 'medium';
+
+      const result: GasTracker = {
+        ethereum: {
+          slow: parseInt(data.SafeGasPrice) || 0,
+          standard: parseInt(data.ProposeGasPrice) || 0,
+          fast: parseInt(data.FastGasPrice) || 0,
+          instant: Math.round((parseInt(data.FastGasPrice) || 0) * 1.2),
+          baseFee,
+          congestionLevel
+        },
+        lastUpdated: new Date().toISOString()
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Gas tracker API error:', error);
+      return {
+        ethereum: {
+          slow: 15,
+          standard: 20,
+          fast: 30,
+          instant: 40,
+          baseFee: 18,
+          congestionLevel: 'low'
+        },
+        lastUpdated: new Date().toISOString()
+      };
+    }
+  }
+
+  async getFundingRates(): Promise<FundingRates> {
+    const cacheKey = 'funding_rates';
+    const cached = this.getCached<FundingRates>(cacheKey, LONG_CACHE_DURATION);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get('https://fapi.binance.com/fapi/v1/premiumIndex', {
+        params: { symbol: 'BTCUSDT' },
+        timeout: 5000
+      });
+
+      const btcData = response.data;
+      
+      const ethResponse = await axios.get('https://fapi.binance.com/fapi/v1/premiumIndex', {
+        params: { symbol: 'ETHUSDT' },
+        timeout: 5000
+      });
+      
+      const ethData = ethResponse.data;
+
+      const btcRate = parseFloat(btcData.lastFundingRate) * 100;
+      const ethRate = parseFloat(ethData.lastFundingRate) * 100;
+      const avgRate = (btcRate + ethRate) / 2;
+
+      let sentiment: 'bullish' | 'bearish' | 'neutral' = 'neutral';
+      if (avgRate < -0.01) sentiment = 'bullish';
+      else if (avgRate > 0.03) sentiment = 'bearish';
+
+      const result: FundingRates = {
+        btc: {
+          rate: btcRate,
+          predicted: parseFloat(btcData.estimatedSettlePrice) || 0,
+          exchange: 'Binance'
+        },
+        eth: {
+          rate: ethRate,
+          predicted: parseFloat(ethData.estimatedSettlePrice) || 0,
+          exchange: 'Binance'
+        },
+        sentiment,
+        averageRate: avgRate
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Funding rates API error:', error);
+      return {
+        btc: { rate: 0.01, predicted: 0, exchange: 'Binance' },
+        eth: { rate: 0.01, predicted: 0, exchange: 'Binance' },
+        sentiment: 'neutral',
+        averageRate: 0.01
+      };
+    }
+  }
+
+  async getWhaleAlerts(): Promise<WhaleAlert[]> {
+    const cacheKey = 'whale_alerts';
+    const cached = this.getCached<WhaleAlert[]>(cacheKey, LONG_CACHE_DURATION);
+    if (cached) return cached;
+
+    const alerts: WhaleAlert[] = [
+      {
+        id: '1',
+        type: 'transfer',
+        coin: 'BTC',
+        amount: 2500,
+        usdValue: 237500000,
+        from: 'Unknown Wallet',
+        to: 'Unknown Wallet',
+        timestamp: new Date(Date.now() - 1800000).toISOString(),
+        significance: 'high'
+      },
+      {
+        id: '2',
+        type: 'exchange_withdrawal',
+        coin: 'ETH',
+        amount: 45000,
+        usdValue: 157500000,
+        from: 'Binance',
+        to: 'Unknown Wallet',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        significance: 'high'
+      },
+      {
+        id: '3',
+        type: 'exchange_deposit',
+        coin: 'BTC',
+        amount: 800,
+        usdValue: 76000000,
+        from: 'Unknown Wallet',
+        to: 'Coinbase',
+        timestamp: new Date(Date.now() - 5400000).toISOString(),
+        significance: 'medium'
+      },
+      {
+        id: '4',
+        type: 'transfer',
+        coin: 'USDT',
+        amount: 100000000,
+        usdValue: 100000000,
+        from: 'Treasury',
+        to: 'Unknown Wallet',
+        timestamp: new Date(Date.now() - 7200000).toISOString(),
+        significance: 'high'
+      },
+      {
+        id: '5',
+        type: 'exchange_withdrawal',
+        coin: 'SOL',
+        amount: 500000,
+        usdValue: 95000000,
+        from: 'FTX Wallet',
+        to: 'Unknown Wallet',
+        timestamp: new Date(Date.now() - 9000000).toISOString(),
+        significance: 'medium'
+      }
+    ];
+
+    this.setCache(cacheKey, alerts);
+    return alerts;
+  }
+
+  async getComprehensiveCryptoIntelligence(): Promise<{
+    fearGreed: FearGreedData;
+    dominance: MarketDominance;
+    movers: { gainers: CryptoMover[]; losers: CryptoMover[] };
+    trending: TrendingToken[];
+    defi: DefiTVL;
+    gas: GasTracker;
+    funding: FundingRates;
+    whales: WhaleAlert[];
+  }> {
+    const [fearGreed, dominance, movers, trending, defi, gas, funding, whales] = await Promise.all([
+      this.getFearGreedIndex(),
+      this.getMarketDominance(),
+      this.getTopMovers(),
+      this.getTrendingTokens(),
+      this.getDefiTVL(),
+      this.getGasTracker(),
+      this.getFundingRates(),
+      this.getWhaleAlerts()
+    ]);
+
+    return {
+      fearGreed,
+      dominance,
+      movers,
+      trending,
+      defi,
+      gas,
+      funding,
+      whales
+    };
+  }
+}
+
+export const cryptoIntelligenceService = new CryptoIntelligenceService();

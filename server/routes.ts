@@ -25,6 +25,7 @@ import { VolatilityForecastingService } from "./services/volatilityForecastingSe
 import { marketEventModelingService } from "./services/marketEventModelingService";
 import { patternRecognitionService } from "./services/patternRecognitionService";
 import { RecommendationEngine } from "./recommendation-engine";
+import { cryptoIntelligenceService } from "./services/cryptoIntelligenceService";
 import { registerWeb3Routes } from "./web3Routes";
 import socialTradingRoutes from "./socialTradingRoutes";
 import { bountyHunterService } from "./services/bountyHunterService";
@@ -10557,6 +10558,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error fetching Fed watch data:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch Fed watch data' });
+    }
+  }));
+
+  // =============================================================================
+  // CRYPTO INTELLIGENCE ENDPOINTS
+  // =============================================================================
+
+  // Fear & Greed Index
+  app.get("/api/crypto/fear-greed", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getFearGreedIndex();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching fear & greed:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch fear & greed index' });
+    }
+  }));
+
+  // Market Dominance (BTC, ETH, ALT)
+  app.get("/api/crypto/dominance", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getMarketDominance();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching market dominance:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch market dominance' });
+    }
+  }));
+
+  // Top Movers (Gainers/Losers)
+  app.get("/api/crypto/movers", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getTopMovers();
+      res.json({ success: true, ...data });
+    } catch (error: any) {
+      console.error('Error fetching top movers:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch top movers' });
+    }
+  }));
+
+  // Trending Tokens
+  app.get("/api/crypto/trending", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getTrendingTokens();
+      res.json({ success: true, tokens: data });
+    } catch (error: any) {
+      console.error('Error fetching trending tokens:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch trending tokens' });
+    }
+  }));
+
+  // DeFi TVL Dashboard
+  app.get("/api/crypto/defi-tvl", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getDefiTVL();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching DeFi TVL:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch DeFi TVL' });
+    }
+  }));
+
+  // Ethereum Gas Tracker
+  app.get("/api/crypto/gas", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getGasTracker();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching gas tracker:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch gas tracker' });
+    }
+  }));
+
+  // Funding Rates
+  app.get("/api/crypto/funding-rates", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getFundingRates();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching funding rates:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch funding rates' });
+    }
+  }));
+
+  // Whale Alerts
+  app.get("/api/crypto/whale-alerts", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getWhaleAlerts();
+      res.json({ success: true, alerts: data });
+    } catch (error: any) {
+      console.error('Error fetching whale alerts:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch whale alerts' });
+    }
+  }));
+
+  // Comprehensive Crypto Intelligence (all data in one call)
+  app.get("/api/crypto/intelligence", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await cryptoIntelligenceService.getComprehensiveCryptoIntelligence();
+      res.json({ success: true, ...data });
+    } catch (error: any) {
+      console.error('Error fetching crypto intelligence:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch crypto intelligence' });
     }
   }));
 
