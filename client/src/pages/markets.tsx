@@ -711,6 +711,108 @@ export default function Markets() {
               >
                 <MarketActivityFeed limit={15} className="max-w-full" />
               </motion.div>
+              
+              {/* Engagement Section - Leagues, Achievements, Leaderboard */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="space-y-3"
+              >
+                {/* Quick Engagement Links */}
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <h4 className="text-sm font-semibold text-slate-300">Compete & Earn</h4>
+                </div>
+                
+                {/* Leagues Card */}
+                <Link href="/leagues">
+                  <Card className="bg-gradient-to-br from-fuchsia-900/30 via-fuchsia-800/20 to-slate-900/50 border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all cursor-pointer group">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-fuchsia-500/20">
+                            <Swords className="w-4 h-4 text-fuchsia-400" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-white">Prediction Leagues</span>
+                              {aiStats && aiStats.totalAiInLeagues > 0 && (
+                                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 px-1 py-0 text-[10px]">
+                                  <Bot className="w-2.5 h-2.5 mr-0.5" />
+                                  {aiStats.totalAiInLeagues}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-400">Compete for STREAM prizes</p>
+                          </div>
+                        </div>
+                        <TrendingUp className="w-4 h-4 text-fuchsia-400 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                
+                {/* Leaderboard Card */}
+                <Link href="/markets/leaderboard">
+                  <Card className="bg-gradient-to-br from-amber-900/30 via-amber-800/20 to-slate-900/50 border-amber-500/30 hover:border-amber-400/50 transition-all cursor-pointer group">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-amber-500/20">
+                            <Trophy className="w-4 h-4 text-amber-400" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-white block">Leaderboard</span>
+                            <p className="text-xs text-slate-400">Top traders & rankings</p>
+                          </div>
+                        </div>
+                        <TrendingUp className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                
+                {/* Achievements Card */}
+                <Link href="/markets/achievements">
+                  <Card className="bg-gradient-to-br from-purple-900/30 via-purple-800/20 to-slate-900/50 border-purple-500/30 hover:border-purple-400/50 transition-all cursor-pointer group">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-purple-500/20">
+                            <Award className="w-4 h-4 text-purple-400" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-white block">Achievements</span>
+                            <p className="text-xs text-slate-400">Unlock badges & rewards</p>
+                          </div>
+                        </div>
+                        <TrendingUp className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                
+                {/* Portfolio Card */}
+                <Link href="/markets/portfolio">
+                  <Card className="bg-gradient-to-br from-cyan-900/30 via-cyan-800/20 to-slate-900/50 border-cyan-500/30 hover:border-cyan-400/50 transition-all cursor-pointer group">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-cyan-500/20">
+                            <PieChart className="w-4 h-4 text-cyan-400" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-white block">Portfolio</span>
+                            <p className="text-xs text-slate-400">Track your P&L</p>
+                          </div>
+                        </div>
+                        <TrendingUp className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
             </div>
           </div>
         </div>
