@@ -240,6 +240,42 @@ export default function Discover() {
     refetchInterval: 60000,
   });
 
+  // Advanced Market Intelligence Data
+  const { data: exchangeReservesData } = useQuery({
+    queryKey: ['/api/intel/exchange-reserves'],
+    refetchInterval: 300000,
+  });
+
+  const { data: stablecoinFlowsData } = useQuery({
+    queryKey: ['/api/intel/stablecoin-flows'],
+    refetchInterval: 300000,
+  });
+
+  const { data: altcoinSeasonData } = useQuery({
+    queryKey: ['/api/intel/altcoin-season'],
+    refetchInterval: 300000,
+  });
+
+  const { data: btcLiquidationsData } = useQuery({
+    queryKey: ['/api/intel/liquidations/BTC'],
+    refetchInterval: 60000,
+  });
+
+  const { data: smartMoneyData } = useQuery({
+    queryKey: ['/api/intel/smart-money'],
+    refetchInterval: 300000,
+  });
+
+  const { data: etfData } = useQuery({
+    queryKey: ['/api/intel/etfs'],
+    refetchInterval: 60000,
+  });
+
+  const { data: optionsData } = useQuery({
+    queryKey: ['/api/intel/options'],
+    refetchInterval: 300000,
+  });
+
   // Extract data
   const markets = (marketsData as any)?.markets || [];
   const leaderboard = (leaderboardData as any)?.leaderboard || [];
@@ -274,6 +310,15 @@ export default function Discover() {
   const gasTracker = (gasTrackerData as any)?.data?.ethereum || { slow: 0, standard: 0, fast: 0, congestionLevel: 'low' };
   const fundingRates = (fundingRatesData as any)?.data || { btc: { rate: 0 }, eth: { rate: 0 }, sentiment: 'neutral' };
   const whaleAlerts = (whaleAlertsData as any)?.alerts || [];
+
+  // Advanced Market Intelligence data
+  const exchangeReserves = (exchangeReservesData as any)?.reserves || [];
+  const stablecoinFlows = (stablecoinFlowsData as any)?.flows || [];
+  const altcoinSeason = (altcoinSeasonData as any)?.data || { score: 50, season: 'neutral', description: 'Loading...' };
+  const btcLiquidations = (btcLiquidationsData as any)?.data || { levels: [], currentPrice: 0, riskBias: 'balanced' };
+  const smartMoney = (smartMoneyData as any)?.traders || [];
+  const etfs = (etfData as any)?.etfs || [];
+  const optionsInfo = (optionsData as any)?.options || [];
 
   // Process markets data
   const activeMarkets = markets.filter((m: PredictionMarket) => m.status === 'active');
@@ -874,6 +919,377 @@ export default function Discover() {
                     <p className="text-xs text-gray-500 truncate mt-1">
                       {alert.from} → {alert.to}
                     </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* =================================================================== */}
+        {/* ADVANCED MARKET INTELLIGENCE */}
+        {/* =================================================================== */}
+        
+        <section className="space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/20">
+              <Cpu className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-orbitron font-bold text-white">Advanced Intelligence</h2>
+              <p className="text-sm text-gray-400">Institutional-grade market signals</p>
+            </div>
+          </div>
+
+          {/* Row 1: ETF Dashboard */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Building className="w-5 h-5 text-blue-400" />
+              <h3 className="text-sm font-bold text-white">Crypto ETF Dashboard</h3>
+              <Badge className="ml-auto bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
+                Institutional
+              </Badge>
+            </div>
+            
+            {/* ETF Tabs */}
+            <div className="mb-4 flex gap-2">
+              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">BTC ETFs</Badge>
+              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">ETH ETFs</Badge>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-2 text-gray-500 font-medium">ETF</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">Price</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">24h</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">AUM</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">Flow 24h</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">Holdings</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {etfs.length === 0 ? (
+                    <tr><td colSpan={6} className="text-center py-4 text-gray-400">Loading ETF data...</td></tr>
+                  ) : (
+                    etfs.slice(0, 8).map((etf: any, idx: number) => (
+                      <tr key={etf.ticker || idx} className="hover:bg-white/5 transition-colors">
+                        <td className="py-2">
+                          <div className="flex items-center gap-2">
+                            <Badge className={`text-xs px-1.5 py-0.5 ${etf.asset === 'BTC' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                              {etf.asset}
+                            </Badge>
+                            <span className="font-medium text-white">{etf.ticker}</span>
+                          </div>
+                        </td>
+                        <td className="text-right text-white">${etf.price?.toFixed(2)}</td>
+                        <td className={`text-right ${etf.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {etf.change24h >= 0 ? '+' : ''}{etf.change24h?.toFixed(2)}%
+                        </td>
+                        <td className="text-right text-white">${(etf.aum / 1e9)?.toFixed(1)}B</td>
+                        <td className={`text-right ${etf.flow24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {etf.flow24h >= 0 ? '+' : ''}${(etf.flow24h / 1e6)?.toFixed(0)}M
+                        </td>
+                        <td className="text-right text-gray-400">{(etf.holdings / 1000)?.toFixed(1)}K</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* ETF Flow Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-white/10">
+              <div className="text-center p-2 rounded-lg bg-white/5">
+                <p className="text-xs text-gray-500">Total BTC ETF AUM</p>
+                <p className="text-lg font-bold text-orange-400">
+                  ${(etfs.filter((e: any) => e.asset === 'BTC').reduce((sum: number, e: any) => sum + (e.aum || 0), 0) / 1e9).toFixed(1)}B
+                </p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-white/5">
+                <p className="text-xs text-gray-500">BTC 24h Net Flow</p>
+                <p className={`text-lg font-bold ${etfs.filter((e: any) => e.asset === 'BTC').reduce((sum: number, e: any) => sum + (e.flow24h || 0), 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  ${(etfs.filter((e: any) => e.asset === 'BTC').reduce((sum: number, e: any) => sum + (e.flow24h || 0), 0) / 1e6).toFixed(0)}M
+                </p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-white/5">
+                <p className="text-xs text-gray-500">Total ETH ETF AUM</p>
+                <p className="text-lg font-bold text-blue-400">
+                  ${(etfs.filter((e: any) => e.asset === 'ETH').reduce((sum: number, e: any) => sum + (e.aum || 0), 0) / 1e9).toFixed(1)}B
+                </p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-white/5">
+                <p className="text-xs text-gray-500">ETH 24h Net Flow</p>
+                <p className={`text-lg font-bold ${etfs.filter((e: any) => e.asset === 'ETH').reduce((sum: number, e: any) => sum + (e.flow24h || 0), 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  ${(etfs.filter((e: any) => e.asset === 'ETH').reduce((sum: number, e: any) => sum + (e.flow24h || 0), 0) / 1e6).toFixed(0)}M
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Exchange Reserves & Stablecoin Flows */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* Exchange Reserves */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Wallet className="w-5 h-5 text-amber-400" />
+                <h3 className="text-sm font-bold text-white">Exchange Reserves</h3>
+                <Badge className="ml-auto bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
+                  On-Chain
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                {exchangeReserves.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading reserves...</p>
+                ) : (
+                  exchangeReserves.slice(0, 5).map((reserve: any, idx: number) => (
+                    <div key={reserve.exchange || idx} className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-white">{reserve.exchange}</span>
+                        <Badge className={`text-xs ${
+                          reserve.trend === 'accumulating' ? 'bg-emerald-500/20 text-emerald-400' :
+                          reserve.trend === 'distributing' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {reserve.trend}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <span className="text-orange-400">BTC: </span>
+                          <span className="text-white">{(reserve.btcReserve / 1000)?.toFixed(1)}K</span>
+                          <span className={`ml-1 ${reserve.btcChange24h < 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            ({reserve.btcChange24h < 0 ? '' : '+'}{reserve.btcChange24h?.toFixed(0)})
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-blue-400">ETH: </span>
+                          <span className="text-white">{(reserve.ethReserve / 1000000)?.toFixed(2)}M</span>
+                          <span className={`ml-1 ${reserve.ethChange24h < 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            ({reserve.ethChange24h < 0 ? '' : '+'}{(reserve.ethChange24h / 1000)?.toFixed(1)}K)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-3 text-center">
+                📉 Outflows = Accumulation (Bullish) | 📈 Inflows = Selling Pressure
+              </p>
+            </div>
+
+            {/* Stablecoin Flows */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <CircleDollarSign className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white">Stablecoin Flows</h3>
+                <Badge className="ml-auto bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+                  Liquidity
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                {stablecoinFlows.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading stablecoin data...</p>
+                ) : (
+                  stablecoinFlows.map((flow: any, idx: number) => (
+                    <div key={flow.coin || idx} className="p-3 rounded-lg bg-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-white">{flow.coin}</span>
+                          <Badge className={`text-xs ${
+                            flow.marketImpact === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' :
+                            flow.marketImpact === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                            'bg-gray-500/20 text-gray-400'
+                          }`}>
+                            {flow.marketImpact}
+                          </Badge>
+                        </div>
+                        <span className="text-sm text-white">${(flow.totalSupply / 1e9)?.toFixed(1)}B</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">24h Net Flow:</span>
+                        <span className={flow.netFlow >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                          {flow.netFlow >= 0 ? '+' : ''}${(flow.netFlow / 1e6)?.toFixed(0)}M
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-2">
+                        <div 
+                          className={`h-full rounded-full ${flow.netFlow >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min(Math.abs(flow.netFlow) / 5e8 * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-3 text-center">
+                🟢 Minting = Fresh buying power | 🔴 Burning = Capital exit
+              </p>
+            </div>
+          </div>
+
+          {/* Row 3: Altcoin Season, Options, Liquidations */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Altcoin Season Indicator */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-fuchsia-400" />
+                <h3 className="text-sm font-bold text-white">Altcoin Season</h3>
+              </div>
+              <div className="text-center mb-4">
+                <div className="relative w-24 h-24 mx-auto">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                    <circle 
+                      cx="48" cy="48" r="40" fill="none" 
+                      stroke={altcoinSeason.season === 'alt' ? '#a855f7' : altcoinSeason.season === 'btc' ? '#f97316' : '#6b7280'}
+                      strokeWidth="8"
+                      strokeDasharray={`${(altcoinSeason.score / 100) * 251.2} 251.2`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center flex-col">
+                    <span className="text-2xl font-bold text-white">{altcoinSeason.score}</span>
+                    <span className="text-xs text-gray-500">/100</span>
+                  </div>
+                </div>
+              </div>
+              <Badge className={`w-full justify-center py-1.5 ${
+                altcoinSeason.season === 'alt' ? 'bg-fuchsia-500/20 text-fuchsia-400' :
+                altcoinSeason.season === 'btc' ? 'bg-orange-500/20 text-orange-400' :
+                'bg-gray-500/20 text-gray-400'
+              }`}>
+                {altcoinSeason.season === 'alt' ? '🚀 Altseason' : 
+                 altcoinSeason.season === 'btc' ? '₿ Bitcoin Season' : 
+                 '⚖️ Neutral Market'}
+              </Badge>
+              <p className="text-xs text-gray-500 text-center mt-2">{altcoinSeason.description}</p>
+            </div>
+
+            {/* Options Put/Call */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Scale className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-sm font-bold text-white">Options P/C Ratio</h3>
+              </div>
+              <div className="space-y-4">
+                {optionsInfo.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading options...</p>
+                ) : (
+                  optionsInfo.map((opt: any, idx: number) => (
+                    <div key={opt.asset || idx} className="p-3 rounded-lg bg-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-sm font-bold ${opt.asset === 'BTC' ? 'text-orange-400' : 'text-blue-400'}`}>
+                          {opt.asset}
+                        </span>
+                        <Badge className={`text-xs ${
+                          opt.sentiment === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' :
+                          opt.sentiment === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {opt.sentiment}
+                        </Badge>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-2xl font-bold text-white">{opt.putCallRatio?.toFixed(2)}</span>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Max Pain: ${opt.maxPainPrice?.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                {'<'}0.7 = Bullish | {'>'}1.0 = Bearish
+              </p>
+            </div>
+
+            {/* Liquidation Risk */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-5 h-5 text-red-400" />
+                <h3 className="text-sm font-bold text-white">BTC Liquidations</h3>
+              </div>
+              <div className="text-center mb-3">
+                <p className="text-xs text-gray-500">Current Price</p>
+                <p className="text-xl font-bold text-white">${btcLiquidations.currentPrice?.toLocaleString()}</p>
+              </div>
+              <div className="space-y-1">
+                {btcLiquidations.levels?.slice(0, 6).map((level: any, idx: number) => {
+                  const isAbove = level.price > btcLiquidations.currentPrice;
+                  return (
+                    <div key={idx} className="flex items-center gap-2 text-xs">
+                      <span className="w-16 text-right text-gray-400">${(level.price / 1000)?.toFixed(1)}K</span>
+                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full ${isAbove ? 'bg-red-500' : 'bg-emerald-500'}`}
+                          style={{ width: `${Math.min((level.totalValue / 5e8) * 100, 100)}%` }}
+                        />
+                      </div>
+                      <span className="w-12 text-gray-500">${(level.totalValue / 1e6)?.toFixed(0)}M</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <Badge className={`w-full justify-center mt-3 ${
+                btcLiquidations.riskBias === 'long_heavy' ? 'bg-red-500/20 text-red-400' :
+                btcLiquidations.riskBias === 'short_heavy' ? 'bg-emerald-500/20 text-emerald-400' :
+                'bg-gray-500/20 text-gray-400'
+              }`}>
+                {btcLiquidations.riskBias === 'long_heavy' ? 'Heavy Long Exposure' :
+                 btcLiquidations.riskBias === 'short_heavy' ? 'Heavy Short Exposure' :
+                 'Balanced Positioning'}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Row 4: Smart Money Tracker */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              <h3 className="text-sm font-bold text-white">Smart Money Tracker</h3>
+              <Badge className="ml-auto bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
+                Top Traders
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {smartMoney.length === 0 ? (
+                <p className="col-span-full text-sm text-gray-400 text-center py-4">Loading smart money data...</p>
+              ) : (
+                smartMoney.slice(0, 6).map((trader: any, idx: number) => (
+                  <div key={trader.traderName || idx} className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                          idx === 0 ? 'bg-amber-500/30 text-amber-400' :
+                          idx === 1 ? 'bg-gray-400/30 text-gray-300' :
+                          idx === 2 ? 'bg-orange-700/30 text-orange-400' :
+                          'bg-white/10 text-gray-400'
+                        }`}>
+                          {idx + 1}
+                        </div>
+                        <span className="text-sm font-medium text-white">{trader.traderName}</span>
+                        {trader.isAiAgent && <Bot className="w-3 h-3 text-purple-400" />}
+                      </div>
+                      <Badge className={`text-xs ${trader.winRate >= 60 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                        {trader.winRate}% Win
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-gray-500">Trades: </span>
+                        <span className="text-white">{trader.recentTrades}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Streak: </span>
+                        <span className="text-emerald-400">🔥 {trader.streak}</span>
+                      </div>
+                    </div>
                   </div>
                 ))
               )}

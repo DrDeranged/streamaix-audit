@@ -26,6 +26,7 @@ import { marketEventModelingService } from "./services/marketEventModelingServic
 import { patternRecognitionService } from "./services/patternRecognitionService";
 import { RecommendationEngine } from "./recommendation-engine";
 import { cryptoIntelligenceService } from "./services/cryptoIntelligenceService";
+import { advancedMarketIntelService } from "./services/advancedMarketIntelService";
 import { registerWeb3Routes } from "./web3Routes";
 import socialTradingRoutes from "./socialTradingRoutes";
 import { bountyHunterService } from "./services/bountyHunterService";
@@ -10661,6 +10662,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error fetching crypto intelligence:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch crypto intelligence' });
+    }
+  }));
+
+  // =============================================================================
+  // ADVANCED MARKET INTELLIGENCE ENDPOINTS
+  // =============================================================================
+
+  // Exchange Reserves
+  app.get("/api/intel/exchange-reserves", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getExchangeReserves();
+      res.json({ success: true, reserves: data });
+    } catch (error: any) {
+      console.error('Error fetching exchange reserves:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch exchange reserves' });
+    }
+  }));
+
+  // Stablecoin Flows
+  app.get("/api/intel/stablecoin-flows", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getStablecoinFlows();
+      res.json({ success: true, flows: data });
+    } catch (error: any) {
+      console.error('Error fetching stablecoin flows:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch stablecoin flows' });
+    }
+  }));
+
+  // Altcoin Season Index
+  app.get("/api/intel/altcoin-season", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getAltcoinSeasonIndex();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching altcoin season:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch altcoin season' });
+    }
+  }));
+
+  // Liquidation Heatmap
+  app.get("/api/intel/liquidations/:asset", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const asset = req.params.asset?.toUpperCase() || 'BTC';
+      const data = await advancedMarketIntelService.getLiquidationHeatmap(asset);
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error('Error fetching liquidation heatmap:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch liquidation heatmap' });
+    }
+  }));
+
+  // Smart Money Tracker
+  app.get("/api/intel/smart-money", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getSmartMoneyPositions();
+      res.json({ success: true, traders: data });
+    } catch (error: any) {
+      console.error('Error fetching smart money:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch smart money' });
+    }
+  }));
+
+  // ETF Data
+  app.get("/api/intel/etfs", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getETFData();
+      res.json({ success: true, etfs: data });
+    } catch (error: any) {
+      console.error('Error fetching ETF data:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch ETF data' });
+    }
+  }));
+
+  // Options Data
+  app.get("/api/intel/options", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getOptionsData();
+      res.json({ success: true, options: data });
+    } catch (error: any) {
+      console.error('Error fetching options data:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch options data' });
+    }
+  }));
+
+  // Comprehensive Advanced Intelligence
+  app.get("/api/intel/comprehensive", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await advancedMarketIntelService.getComprehensiveAdvancedIntel();
+      res.json({ success: true, ...data });
+    } catch (error: any) {
+      console.error('Error fetching comprehensive intel:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch comprehensive intel' });
     }
   }));
 
