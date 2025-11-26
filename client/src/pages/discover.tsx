@@ -886,7 +886,7 @@ export default function Discover() {
                 Live
               </Badge>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {whaleAlerts.length === 0 ? (
                 <p className="col-span-full text-sm text-gray-400 text-center py-4">No recent whale activity</p>
               ) : (
@@ -957,7 +957,47 @@ export default function Discover() {
               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">ETH ETFs</Badge>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile: Card Layout */}
+            <div className="md:hidden space-y-2">
+              {etfs.length === 0 ? (
+                <p className="text-center py-4 text-gray-400">Loading ETF data...</p>
+              ) : (
+                etfs.slice(0, 6).map((etf: any, idx: number) => (
+                  <div key={etf.ticker || idx} className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-xs px-1.5 py-0.5 ${etf.asset === 'BTC' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                          {etf.asset}
+                        </Badge>
+                        <span className="font-medium text-white text-sm">{etf.ticker}</span>
+                      </div>
+                      <span className={`text-sm font-bold ${etf.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {etf.change24h >= 0 ? '+' : ''}{etf.change24h?.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <span className="text-gray-500 block">Price</span>
+                        <span className="text-white">${etf.price?.toFixed(2)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">AUM</span>
+                        <span className="text-white">${(etf.aum / 1e9)?.toFixed(1)}B</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">Flow 24h</span>
+                        <span className={etf.flow24h >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                          {etf.flow24h >= 0 ? '+' : ''}${(etf.flow24h / 1e6)?.toFixed(0)}M
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop: Table Layout */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-white/10">
@@ -1132,7 +1172,7 @@ export default function Discover() {
           </div>
 
           {/* Row 3: Altcoin Season, Options, Liquidations */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             
             {/* Altcoin Season Indicator */}
             <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
@@ -1257,7 +1297,7 @@ export default function Discover() {
                 Top Traders
               </Badge>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {smartMoney.length === 0 ? (
                 <p className="col-span-full text-sm text-gray-400 text-center py-4">Loading smart money data...</p>
               ) : (
@@ -1298,7 +1338,7 @@ export default function Discover() {
         </section>
 
         {/* Three Column Layout: Activity Feed, Whale Tracker, Resolution History */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
           {/* Real-time Activity Feed */}
           <section className="lg:col-span-1">
