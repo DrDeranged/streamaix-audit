@@ -199,6 +199,47 @@ export default function Discover() {
     refetchInterval: 10000,
   });
 
+  // Crypto Intelligence Data
+  const { data: fearGreedData } = useQuery({
+    queryKey: ['/api/crypto/fear-greed'],
+    refetchInterval: 300000,
+  });
+
+  const { data: dominanceData } = useQuery({
+    queryKey: ['/api/crypto/dominance'],
+    refetchInterval: 300000,
+  });
+
+  const { data: cryptoMoversData } = useQuery({
+    queryKey: ['/api/crypto/movers'],
+    refetchInterval: 60000,
+  });
+
+  const { data: trendingTokensData } = useQuery({
+    queryKey: ['/api/crypto/trending'],
+    refetchInterval: 300000,
+  });
+
+  const { data: defiTvlData } = useQuery({
+    queryKey: ['/api/crypto/defi-tvl'],
+    refetchInterval: 300000,
+  });
+
+  const { data: gasTrackerData } = useQuery({
+    queryKey: ['/api/crypto/gas'],
+    refetchInterval: 30000,
+  });
+
+  const { data: fundingRatesData } = useQuery({
+    queryKey: ['/api/crypto/funding-rates'],
+    refetchInterval: 300000,
+  });
+
+  const { data: whaleAlertsData } = useQuery({
+    queryKey: ['/api/crypto/whale-alerts'],
+    refetchInterval: 60000,
+  });
+
   // Extract data
   const markets = (marketsData as any)?.markets || [];
   const leaderboard = (leaderboardData as any)?.leaderboard || [];
@@ -222,6 +263,17 @@ export default function Discover() {
   const globalM2 = (globalLiquidityData as any)?.globalM2 || {};
   const macroCalendar = (macroCalendarData as any)?.events || [];
   const fedWatch = (fedWatchData as any)?.fedWatch || {};
+
+  // Crypto Intelligence data
+  const fearGreed = (fearGreedData as any)?.data || { value: 50, valueClassification: 'Neutral', trend: 'stable' };
+  const dominance = (dominanceData as any)?.data || { btcDominance: 52, ethDominance: 17, altDominance: 26, totalMarketCap: 0 };
+  const cryptoGainers = (cryptoMoversData as any)?.gainers || [];
+  const cryptoLosers = (cryptoMoversData as any)?.losers || [];
+  const trendingTokens = (trendingTokensData as any)?.tokens || [];
+  const defiTvl = (defiTvlData as any)?.data || { totalTVL: 0, topProtocols: [], chainTVL: [] };
+  const gasTracker = (gasTrackerData as any)?.data?.ethereum || { slow: 0, standard: 0, fast: 0, congestionLevel: 'low' };
+  const fundingRates = (fundingRatesData as any)?.data || { btc: { rate: 0 }, eth: { rate: 0 }, sentiment: 'neutral' };
+  const whaleAlerts = (whaleAlertsData as any)?.alerts || [];
 
   // Process markets data
   const activeMarkets = markets.filter((m: PredictionMarket) => m.status === 'active');
@@ -478,6 +530,356 @@ export default function Discover() {
             </div>
           </div>
         </div>
+
+        {/* =================================================================== */}
+        {/* CRYPTO INTELLIGENCE DASHBOARD */}
+        {/* =================================================================== */}
+        
+        <section className="space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/20">
+              <Flame className="w-6 h-6 text-orange-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-orbitron font-bold text-white">Crypto Intelligence</h2>
+              <p className="text-sm text-gray-400">Real-time market sentiment & analytics</p>
+            </div>
+          </div>
+
+          {/* Row 1: Fear & Greed, Market Dominance, Gas Tracker, Funding Rates */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            {/* Fear & Greed Index */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-orange-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">Fear & Greed</span>
+                  <Badge className={`text-xs px-2 py-0.5 ${
+                    fearGreed.value <= 25 ? 'bg-red-500/20 text-red-400' :
+                    fearGreed.value <= 45 ? 'bg-orange-500/20 text-orange-400' :
+                    fearGreed.value <= 55 ? 'bg-yellow-500/20 text-yellow-400' :
+                    fearGreed.value <= 75 ? 'bg-lime-500/20 text-lime-400' :
+                    'bg-emerald-500/20 text-emerald-400'
+                  }`}>
+                    {fearGreed.valueClassification}
+                  </Badge>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-3xl font-bold text-white">{fearGreed.value}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      {fearGreed.trend === 'rising' ? (
+                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                      ) : fearGreed.trend === 'falling' ? (
+                        <TrendingDown className="w-3 h-3 text-red-400" />
+                      ) : (
+                        <Activity className="w-3 h-3 text-gray-400" />
+                      )}
+                      <span className="text-xs text-gray-500 capitalize">{fearGreed.trend}</span>
+                    </div>
+                  </div>
+                  <div className="w-16 h-16">
+                    <div 
+                      className="w-full h-full rounded-full border-4"
+                      style={{
+                        borderColor: `hsl(${fearGreed.value * 1.2}, 70%, 50%)`,
+                        background: `conic-gradient(hsl(${fearGreed.value * 1.2}, 70%, 50%) ${fearGreed.value}%, transparent ${fearGreed.value}%)`
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Market Dominance */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-yellow-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-amber-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">Market Dominance</span>
+                  <Crown className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-orange-400">BTC</span>
+                    <span className="text-sm font-bold text-white">{dominance.btcDominance?.toFixed(1)}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style={{ width: `${dominance.btcDominance}%` }} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-blue-400">ETH</span>
+                    <span className="text-sm font-bold text-white">{dominance.ethDominance?.toFixed(1)}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: `${dominance.ethDominance}%` }} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-purple-400">Alts</span>
+                    <span className="text-sm font-bold text-white">{dominance.altDominance?.toFixed(1)}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-full" style={{ width: `${dominance.altDominance}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Gas Tracker */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-cyan-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">ETH Gas</span>
+                  <Badge className={`text-xs px-2 py-0.5 ${
+                    gasTracker.congestionLevel === 'low' ? 'bg-emerald-500/20 text-emerald-400' :
+                    gasTracker.congestionLevel === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                    gasTracker.congestionLevel === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                    'bg-red-500/20 text-red-400'
+                  }`}>
+                    {gasTracker.congestionLevel}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 rounded-lg bg-white/5">
+                    <p className="text-xs text-gray-500">Slow</p>
+                    <p className="text-sm font-bold text-emerald-400">{gasTracker.slow}</p>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-white/5">
+                    <p className="text-xs text-gray-500">Std</p>
+                    <p className="text-sm font-bold text-yellow-400">{gasTracker.standard}</p>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-white/5">
+                    <p className="text-xs text-gray-500">Fast</p>
+                    <p className="text-sm font-bold text-orange-400">{gasTracker.fast}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center mt-2">gwei</p>
+              </div>
+            </div>
+
+            {/* Funding Rates */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-fuchsia-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">Funding Rates</span>
+                  <Badge className={`text-xs px-2 py-0.5 ${
+                    fundingRates.sentiment === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' :
+                    fundingRates.sentiment === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                    'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {fundingRates.sentiment}
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-orange-400">BTC</span>
+                    <span className={`text-sm font-bold ${fundingRates.btc?.rate >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {fundingRates.btc?.rate >= 0 ? '+' : ''}{fundingRates.btc?.rate?.toFixed(4)}%
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-blue-400">ETH</span>
+                    <span className={`text-sm font-bold ${fundingRates.eth?.rate >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {fundingRates.eth?.rate >= 0 ? '+' : ''}{fundingRates.eth?.rate?.toFixed(4)}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 text-center">
+                    {fundingRates.sentiment === 'bullish' ? 'Shorts paying longs' : 
+                     fundingRates.sentiment === 'bearish' ? 'Longs paying shorts' : 
+                     'Neutral funding'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Top Gainers & Losers */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* Top Gainers */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white">Top Gainers (24h)</h3>
+              </div>
+              <div className="space-y-2">
+                {cryptoGainers.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading gainers...</p>
+                ) : (
+                  cryptoGainers.slice(0, 5).map((coin: any, idx: number) => (
+                    <div key={coin.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                        {coin.image && <img src={coin.image} alt={coin.symbol} className="w-6 h-6 rounded-full" />}
+                        <div>
+                          <p className="text-sm font-medium text-white">{coin.symbol}</p>
+                          <p className="text-xs text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-0">
+                        +{coin.change24h?.toFixed(2)}%
+                      </Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Top Losers */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingDown className="w-5 h-5 text-red-400" />
+                <h3 className="text-sm font-bold text-white">Top Losers (24h)</h3>
+              </div>
+              <div className="space-y-2">
+                {cryptoLosers.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading losers...</p>
+                ) : (
+                  cryptoLosers.slice(0, 5).map((coin: any, idx: number) => (
+                    <div key={coin.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                        {coin.image && <img src={coin.image} alt={coin.symbol} className="w-6 h-6 rounded-full" />}
+                        <div>
+                          <p className="text-sm font-medium text-white">{coin.symbol}</p>
+                          <p className="text-xs text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-red-500/20 text-red-400 border-0">
+                        {coin.change24h?.toFixed(2)}%
+                      </Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Row 3: Trending Tokens & DeFi TVL */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* Trending Tokens */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Rocket className="w-5 h-5 text-fuchsia-400" />
+                <h3 className="text-sm font-bold text-white">Trending Tokens</h3>
+                <Badge className="ml-auto bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30 text-xs">
+                  CoinGecko
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {trendingTokens.length === 0 ? (
+                  <p className="col-span-2 text-sm text-gray-400 text-center py-4">Loading trending...</p>
+                ) : (
+                  trendingTokens.slice(0, 6).map((token: any, idx: number) => (
+                    <div key={token.id || idx} className="flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      {token.image && <img src={token.image} alt={token.symbol} className="w-5 h-5 rounded-full" />}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-white truncate">{token.symbol}</p>
+                        <p className="text-xs text-gray-500">#{token.marketCapRank || '-'}</p>
+                      </div>
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-fuchsia-500/30 to-purple-500/30 flex items-center justify-center">
+                        <span className="text-xs text-fuchsia-400">{10 - idx}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* DeFi TVL */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Droplet className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-sm font-bold text-white">DeFi TVL</h3>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-white">
+                    ${(defiTvl.totalTVL / 1e9)?.toFixed(2)}B
+                  </p>
+                  <p className="text-xs text-gray-500">Total Locked</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {defiTvl.topProtocols?.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading protocols...</p>
+                ) : (
+                  defiTvl.topProtocols?.slice(0, 5).map((protocol: any, idx: number) => (
+                    <div key={protocol.name || idx} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                        {protocol.logo && <img src={protocol.logo} alt={protocol.name} className="w-5 h-5 rounded-full" />}
+                        <div>
+                          <p className="text-xs font-medium text-white">{protocol.name}</p>
+                          <p className="text-xs text-gray-500">{protocol.chain}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-white">${(protocol.tvl / 1e9)?.toFixed(2)}B</p>
+                        <p className={`text-xs ${protocol.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {protocol.change24h >= 0 ? '+' : ''}{protocol.change24h?.toFixed(2)}%
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Row 4: Whale Alerts */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Waves className="w-5 h-5 text-blue-400" />
+              <h3 className="text-sm font-bold text-white">Whale Alerts</h3>
+              <Badge className="ml-auto bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
+                <Radio className="w-2 h-2 mr-1 animate-pulse" />
+                Live
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {whaleAlerts.length === 0 ? (
+                <p className="col-span-full text-sm text-gray-400 text-center py-4">No recent whale activity</p>
+              ) : (
+                whaleAlerts.slice(0, 6).map((alert: any, idx: number) => (
+                  <div key={alert.id || idx} className={`p-3 rounded-lg border ${
+                    alert.significance === 'high' ? 'bg-red-500/10 border-red-500/30' :
+                    alert.significance === 'medium' ? 'bg-amber-500/10 border-amber-500/30' :
+                    'bg-white/5 border-white/10'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge className={`text-xs ${
+                        alert.type === 'exchange_deposit' ? 'bg-red-500/20 text-red-400' :
+                        alert.type === 'exchange_withdrawal' ? 'bg-emerald-500/20 text-emerald-400' :
+                        'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {alert.type === 'exchange_deposit' ? 'Exchange In' :
+                         alert.type === 'exchange_withdrawal' ? 'Exchange Out' :
+                         'Transfer'}
+                      </Badge>
+                      <span className="text-xs text-gray-500">{timeAgo(alert.timestamp)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-white">
+                        {alert.amount?.toLocaleString()} {alert.coin}
+                      </p>
+                      <span className="text-xs text-gray-500">
+                        (${(alert.usdValue / 1e6)?.toFixed(1)}M)
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate mt-1">
+                      {alert.from} → {alert.to}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* Three Column Layout: Activity Feed, Whale Tracker, Resolution History */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
