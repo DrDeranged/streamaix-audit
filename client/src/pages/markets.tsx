@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle, Trophy, Award, PieChart } from "lucide-react";
+import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle, Trophy, Award, PieChart, Bot, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -163,8 +163,13 @@ export default function Markets() {
     queryKey: ["/api/prediction-markets/stats"],
   });
 
+  const { data: aiStatsData } = useQuery<{ totalAiInLeagues: number; activeLeagues: number }>({
+    queryKey: ["/api/prediction-leagues/ai-stats"],
+  });
+
   const markets = marketsData?.markets || [];
   const stats = statsData?.stats;
+  const aiStats = aiStatsData;
 
   const filteredMarkets = markets.filter((market) => {
     const matchesSearch = searchQuery === "" || market.question.toLowerCase().includes(searchQuery.toLowerCase());
@@ -454,7 +459,42 @@ export default function Markets() {
           transition={{ delay: 0.3 }}
           className="mb-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/leagues">
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="cursor-pointer"
+              >
+                <Card className="bg-gradient-to-br from-fuchsia-900/20 via-fuchsia-800/10 to-transparent border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all duration-300 overflow-hidden group">
+                  <CardContent className="p-4 relative">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-fuchsia-500/20 group-hover:bg-fuchsia-500/30 transition-colors">
+                        <Swords className="w-5 h-5 text-fuchsia-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                          Prediction Leagues
+                          {aiStats && aiStats.totalAiInLeagues > 0 && (
+                            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 px-1.5 py-0 text-[10px]">
+                              <Bot className="w-2.5 h-2.5 mr-0.5" />
+                              {aiStats.totalAiInLeagues} AI
+                            </Badge>
+                          )}
+                        </h3>
+                        <p className="text-xs text-slate-400">Compete for prizes</p>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-fuchsia-500/10 rounded-full blur-2xl"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 3, repeat: Infinity, delay: 0.25 }}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </Link>
+
             <Link href="/markets/leaderboard">
               <motion.div
                 whileHover={{ scale: 1.02, y: -2 }}

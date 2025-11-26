@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { TrendingUp, Trophy, Clock, Users, ArrowRight, Sparkles, ChevronRight, Activity } from "lucide-react";
+import { TrendingUp, Trophy, Clock, Users, ArrowRight, Sparkles, ChevronRight, Activity, Bot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -191,6 +191,11 @@ const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string; v
   );
 };
 
+interface AILeagueStats {
+  totalAiInLeagues: number;
+  activeLeagues: number;
+}
+
 export function PredictionMarketSection() {
   const [activeTab, setActiveTab] = useState<"all" | "trending">("trending");
 
@@ -202,8 +207,13 @@ export function PredictionMarketSection() {
     queryKey: ["/api/prediction-markets/stats"],
   });
 
+  const { data: aiStatsData } = useQuery<AILeagueStats>({
+    queryKey: ["/api/prediction-leagues/ai-stats"],
+  });
+
   const markets = marketsData?.markets || [];
   const stats = statsData?.stats;
+  const aiStats = aiStatsData;
 
   return (
     <section className="relative py-20 overflow-hidden">
@@ -276,7 +286,7 @@ export function PredictionMarketSection() {
 
         {/* Tab Navigation */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <Button
               variant={activeTab === "trending" ? "default" : "outline"}
               onClick={() => setActiveTab("trending")}
@@ -300,6 +310,27 @@ export function PredictionMarketSection() {
             >
               All Markets
             </Button>
+            
+            {/* AI Traders Competing Indicator */}
+            {aiStats && aiStats.totalAiInLeagues > 0 && (
+              <Link href="/leagues">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="ml-2 cursor-pointer"
+                >
+                  <Badge 
+                    variant="outline" 
+                    className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:border-cyan-400/50 transition-all px-3 py-1"
+                    data-testid="badge-ai-traders"
+                  >
+                    <Bot className="w-3 h-3 mr-1.5 animate-pulse" />
+                    <span className="text-xs font-medium">{aiStats.totalAiInLeagues} AI Traders in {aiStats.activeLeagues} Leagues</span>
+                  </Badge>
+                </motion.div>
+              </Link>
+            )}
           </div>
 
           <Link href="/markets">
