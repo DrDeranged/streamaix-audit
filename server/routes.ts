@@ -8645,6 +8645,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Recent prediction market trades across all markets (MUST be before /:marketId)
+  app.get("/api/prediction-markets/recent-trades", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    
+    const trades = await db
+      .select({
+        id: marketTrades.id,
+        marketId: marketTrades.marketId,
+        userId: marketTrades.userId,
+        outcome: marketTrades.outcome,
+        tradeType: marketTrades.tradeType,
+        shares: marketTrades.shares,
+        price: marketTrades.price,
+        streamAmount: marketTrades.streamAmount,
+        createdAt: marketTrades.createdAt,
+        marketQuestion: predictionMarkets.question,
+        marketCategory: predictionMarkets.category,
+      })
+      .from(marketTrades)
+      .leftJoin(predictionMarkets, eq(marketTrades.marketId, predictionMarkets.id))
+      .orderBy(desc(marketTrades.createdAt))
+      .limit(limit);
+
+    const userIds = [...new Set(trades.map(t => t.userId).filter(Boolean))];
+    const usernames: Record<string, string> = {};
+    for (const userId of userIds) {
+      const user = await storage.getUser(userId as string);
+      if (user) {
+        usernames[userId as string] = user.displayName || user.username || 'Anonymous';
+      }
+    }
+
+    const enrichedTrades = trades.map(t => ({
+      ...t,
+      username: t.userId ? usernames[t.userId] || 'Anonymous' : 'Anonymous'
+    }));
+
+    res.json({ success: true, trades: enrichedTrades });
+  }));
+
+  // Top predictors (whale tracker) with their positions (MUST be before /:marketId)
+  app.get("/api/prediction-markets/whales", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+
+    const topTraders = await db
+      .select({
+        userId: marketPositions.userId,
+        totalShares: sql<number>`SUM(${marketPositions.shares})::int`,
+        totalInvested: sql<number>`SUM(${marketPositions.totalInvested})::int`,
+        positionCount: sql<number>`COUNT(*)::int`,
+      })
+      .from(marketPositions)
+      .where(sql`${marketPositions.shares} > 0`)
+      .groupBy(marketPositions.userId)
+      .orderBy(desc(sql`SUM(${marketPositions.totalInvested})`))
+      .limit(limit);
+
+    const enrichedWhales = await Promise.all(topTraders.map(async (whale) => {
+      const user = await storage.getUser(whale.userId);
+      
+      const positions = await db
+        .select({
+          marketId: marketPositions.marketId,
+          outcome: marketPositions.outcome,
+          shares: marketPositions.shares,
+          totalInvested: marketPositions.totalInvested,
+          marketQuestion: predictionMarkets.question,
+          marketCategory: predictionMarkets.category,
+          yesPrice: predictionMarkets.yesPrice,
+        })
+        .from(marketPositions)
+        .leftJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
+        .where(and(
+          eq(marketPositions.userId, whale.userId),
+          sql`${marketPositions.shares} > 0`
+        ))
+        .orderBy(desc(marketPositions.totalInvested))
+        .limit(3);
+
+      return {
+        userId: whale.userId,
+        username: user?.displayName || user?.username || 'Anonymous',
+        isAiAgent: user?.isAiAgent || false,
+        totalInvested: whale.totalInvested,
+        totalShares: whale.totalShares,
+        positionCount: whale.positionCount,
+        topPositions: positions,
+      };
+    }));
+
+    res.json({ success: true, whales: enrichedWhales });
+  }));
+
+  // Recently resolved markets (MUST be before /:marketId)
+  app.get("/api/prediction-markets/resolved", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+
+      const resolvedMarkets = await db
+        .select({
+          id: predictionMarkets.id,
+          question: predictionMarkets.question,
+          category: predictionMarkets.category,
+          outcome: predictionMarkets.resolution,
+          finalYesPrice: predictionMarkets.yesPrice,
+          totalVolume: predictionMarkets.totalVolume,
+          totalTrades: predictionMarkets.totalTrades,
+          resolvedAt: predictionMarkets.resolvedAt,
+          deadline: predictionMarkets.deadline,
+        })
+        .from(predictionMarkets)
+        .where(eq(predictionMarkets.status, 'resolved'))
+        .orderBy(desc(predictionMarkets.resolvedAt))
+        .limit(limit);
+
+      res.json({ success: true, markets: resolvedMarkets || [] });
+    } catch (error: any) {
+      console.error('Error fetching resolved markets:', error);
+      res.json({ success: true, markets: [] });
+    }
+  }));
+
   // Get single market details (MUST be last - dynamic route)
   app.get("/api/prediction-markets/:marketId", asyncHandler(async (req: Request, res: Response) => {
     const market = await predictionMarketService.getMarket(req.params.marketId);
@@ -10072,131 +10194,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Get recent platform activity (same as admin, but public)
     const activities = await storage.getAdminActivity(limit, offset);
     res.json({ success: true, activities, limit, offset });
-  }));
-
-  // =============================================================================
-  // ENHANCED DISCOVER PAGE ENDPOINTS
-  // =============================================================================
-
-  // Recent prediction market trades across all markets
-  app.get("/api/prediction-markets/recent-trades", asyncHandler(async (req: Request, res: Response) => {
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
-    
-    const trades = await db
-      .select({
-        id: marketTrades.id,
-        marketId: marketTrades.marketId,
-        userId: marketTrades.userId,
-        outcome: marketTrades.outcome,
-        tradeType: marketTrades.tradeType,
-        shares: marketTrades.shares,
-        price: marketTrades.price,
-        streamAmount: marketTrades.streamAmount,
-        createdAt: marketTrades.createdAt,
-        marketQuestion: predictionMarkets.question,
-        marketCategory: predictionMarkets.category,
-      })
-      .from(marketTrades)
-      .leftJoin(predictionMarkets, eq(marketTrades.marketId, predictionMarkets.id))
-      .orderBy(desc(marketTrades.createdAt))
-      .limit(limit);
-
-    // Get usernames for trades
-    const userIds = [...new Set(trades.map(t => t.userId).filter(Boolean))];
-    const usernames: Record<string, string> = {};
-    for (const userId of userIds) {
-      const user = await storage.getUser(userId as string);
-      if (user) {
-        usernames[userId as string] = user.displayName || user.username || 'Anonymous';
-      }
-    }
-
-    const enrichedTrades = trades.map(t => ({
-      ...t,
-      username: t.userId ? usernames[t.userId] || 'Anonymous' : 'Anonymous'
-    }));
-
-    res.json({ success: true, trades: enrichedTrades });
-  }));
-
-  // Top predictors (whale tracker) with their positions
-  app.get("/api/prediction-markets/whales", asyncHandler(async (req: Request, res: Response) => {
-    const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
-
-    // Get top traders by total invested
-    const topTraders = await db
-      .select({
-        userId: marketPositions.userId,
-        totalShares: sql<number>`SUM(${marketPositions.shares})::int`,
-        totalInvested: sql<number>`SUM(${marketPositions.totalInvested})::int`,
-        positionCount: sql<number>`COUNT(*)::int`,
-      })
-      .from(marketPositions)
-      .where(sql`${marketPositions.shares} > 0`)
-      .groupBy(marketPositions.userId)
-      .orderBy(desc(sql`SUM(${marketPositions.totalInvested})`))
-      .limit(limit);
-
-    // Enrich with user info and recent positions
-    const enrichedWhales = await Promise.all(topTraders.map(async (whale) => {
-      const user = await storage.getUser(whale.userId);
-      
-      // Get their top 3 positions
-      const positions = await db
-        .select({
-          marketId: marketPositions.marketId,
-          outcome: marketPositions.outcome,
-          shares: marketPositions.shares,
-          totalInvested: marketPositions.totalInvested,
-          marketQuestion: predictionMarkets.question,
-          marketCategory: predictionMarkets.category,
-          yesPrice: predictionMarkets.yesPrice,
-        })
-        .from(marketPositions)
-        .leftJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
-        .where(and(
-          eq(marketPositions.userId, whale.userId),
-          sql`${marketPositions.shares} > 0`
-        ))
-        .orderBy(desc(marketPositions.totalInvested))
-        .limit(3);
-
-      return {
-        userId: whale.userId,
-        username: user?.displayName || user?.username || 'Anonymous',
-        isAiAgent: user?.isAiAgent || false,
-        totalInvested: whale.totalInvested,
-        totalShares: whale.totalShares,
-        positionCount: whale.positionCount,
-        topPositions: positions,
-      };
-    }));
-
-    res.json({ success: true, whales: enrichedWhales });
-  }));
-
-  // Recently resolved markets
-  app.get("/api/prediction-markets/resolved", asyncHandler(async (req: Request, res: Response) => {
-    const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
-
-    const resolvedMarkets = await db
-      .select({
-        id: predictionMarkets.id,
-        question: predictionMarkets.question,
-        category: predictionMarkets.category,
-        outcome: predictionMarkets.outcome,
-        finalYesPrice: predictionMarkets.yesPrice,
-        totalVolume: predictionMarkets.totalVolume,
-        totalTrades: predictionMarkets.totalTrades,
-        resolvedAt: predictionMarkets.updatedAt,
-        deadline: predictionMarkets.deadline,
-      })
-      .from(predictionMarkets)
-      .where(eq(predictionMarkets.status, 'resolved'))
-      .orderBy(desc(predictionMarkets.updatedAt))
-      .limit(limit);
-
-    res.json({ success: true, markets: resolvedMarkets });
   }));
 
   // =============================================================================
