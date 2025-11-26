@@ -4982,3 +4982,119 @@ export type UserTradingStats = typeof userTradingStats.$inferSelect;
 
 export type InsertLeaderboardSnapshot = z.infer<typeof insertLeaderboardSnapshotSchema>;
 export type LeaderboardSnapshot = typeof leaderboardSnapshots.$inferSelect;
+
+// =============================================================================
+// PREDICTION LEAGUES - COMPETITIVE TRADING COMPETITIONS
+// =============================================================================
+
+export const predictionLeagues = pgTable("prediction_leagues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  
+  // League timing
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  
+  // Entry requirements
+  entryFee: integer("entry_fee").default(0), // STREAM points to join (0 = free)
+  maxParticipants: integer("max_participants"), // null = unlimited
+  minTrades: integer("min_trades").default(1), // minimum trades to qualify for prizes
+  
+  // Prize pool
+  prizePool: integer("prize_pool").default(0), // total STREAM to distribute
+  prizeDistribution: jsonb("prize_distribution"), // [{ rank: 1, percentage: 50 }, { rank: 2, percentage: 30 }, ...]
+  
+  // League type
+  leagueType: text("league_type").notNull().default("weekly"), // weekly, monthly, special
+  isRecurring: boolean("is_recurring").default(false), // auto-create next league when this ends
+  
+  // Status
+  status: text("status").notNull().default("upcoming"), // upcoming, active, completed, cancelled
+  
+  // Stats
+  totalParticipants: integer("total_participants").default(0),
+  totalVolume: integer("total_volume").default(0),
+  
+  // Creator info
+  creatorId: varchar("creator_id").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const leagueParticipants = pgTable("league_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => predictionLeagues.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Entry tracking
+  entryFeePaid: integer("entry_fee_paid").default(0),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  
+  // Performance during league
+  totalTrades: integer("total_trades").default(0),
+  totalVolume: integer("total_volume").default(0),
+  totalProfit: integer("total_profit").default(0),
+  totalLoss: integer("total_loss").default(0),
+  netProfit: integer("net_profit").default(0),
+  winningTrades: integer("winning_trades").default(0),
+  losingTrades: integer("losing_trades").default(0),
+  winRate: real("win_rate").default(0),
+  roi: real("roi").default(0),
+  
+  // Current rank (updated as league progresses)
+  currentRank: integer("current_rank"),
+  
+  // Prize info (set when league ends)
+  finalRank: integer("final_rank"),
+  prizeWon: integer("prize_won").default(0),
+  prizeClaimed: boolean("prize_claimed").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const leagueTrades = pgTable("league_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => predictionLeagues.id).notNull(),
+  participantId: varchar("participant_id").references(() => leagueParticipants.id).notNull(),
+  marketTradeId: varchar("market_trade_id").references(() => marketTrades.id).notNull(),
+  
+  // Trade snapshot for scoring
+  streamAmount: integer("stream_amount").notNull(),
+  outcome: text("outcome").notNull(), // YES or NO
+  price: integer("price").notNull(),
+  
+  // Result (set when market resolves)
+  profitLoss: integer("profit_loss"),
+  isWin: boolean("is_win"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPredictionLeagueSchema = createInsertSchema(predictionLeagues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLeagueParticipantSchema = createInsertSchema(leagueParticipants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLeagueTradeSchema = createInsertSchema(leagueTrades).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPredictionLeague = z.infer<typeof insertPredictionLeagueSchema>;
+export type PredictionLeague = typeof predictionLeagues.$inferSelect;
+
+export type InsertLeagueParticipant = z.infer<typeof insertLeagueParticipantSchema>;
+export type LeagueParticipant = typeof leagueParticipants.$inferSelect;
+
+export type InsertLeagueTrade = z.infer<typeof insertLeagueTradeSchema>;
+export type LeagueTrade = typeof leagueTrades.$inferSelect;
