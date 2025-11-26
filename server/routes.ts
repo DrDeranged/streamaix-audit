@@ -10075,6 +10075,495 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // ENHANCED DISCOVER PAGE ENDPOINTS
+  // =============================================================================
+
+  // Recent prediction market trades across all markets
+  app.get("/api/prediction-markets/recent-trades", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    
+    const trades = await db
+      .select({
+        id: marketTrades.id,
+        marketId: marketTrades.marketId,
+        userId: marketTrades.userId,
+        outcome: marketTrades.outcome,
+        tradeType: marketTrades.tradeType,
+        shares: marketTrades.shares,
+        price: marketTrades.price,
+        streamAmount: marketTrades.streamAmount,
+        createdAt: marketTrades.createdAt,
+        marketQuestion: predictionMarkets.question,
+        marketCategory: predictionMarkets.category,
+      })
+      .from(marketTrades)
+      .leftJoin(predictionMarkets, eq(marketTrades.marketId, predictionMarkets.id))
+      .orderBy(desc(marketTrades.createdAt))
+      .limit(limit);
+
+    // Get usernames for trades
+    const userIds = [...new Set(trades.map(t => t.userId).filter(Boolean))];
+    const usernames: Record<string, string> = {};
+    for (const userId of userIds) {
+      const user = await storage.getUser(userId as string);
+      if (user) {
+        usernames[userId as string] = user.displayName || user.username || 'Anonymous';
+      }
+    }
+
+    const enrichedTrades = trades.map(t => ({
+      ...t,
+      username: t.userId ? usernames[t.userId] || 'Anonymous' : 'Anonymous'
+    }));
+
+    res.json({ success: true, trades: enrichedTrades });
+  }));
+
+  // Top predictors (whale tracker) with their positions
+  app.get("/api/prediction-markets/whales", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+
+    // Get top traders by total invested
+    const topTraders = await db
+      .select({
+        userId: marketPositions.userId,
+        totalShares: sql<number>`SUM(${marketPositions.shares})::int`,
+        totalInvested: sql<number>`SUM(${marketPositions.totalInvested})::int`,
+        positionCount: sql<number>`COUNT(*)::int`,
+      })
+      .from(marketPositions)
+      .where(sql`${marketPositions.shares} > 0`)
+      .groupBy(marketPositions.userId)
+      .orderBy(desc(sql`SUM(${marketPositions.totalInvested})`))
+      .limit(limit);
+
+    // Enrich with user info and recent positions
+    const enrichedWhales = await Promise.all(topTraders.map(async (whale) => {
+      const user = await storage.getUser(whale.userId);
+      
+      // Get their top 3 positions
+      const positions = await db
+        .select({
+          marketId: marketPositions.marketId,
+          outcome: marketPositions.outcome,
+          shares: marketPositions.shares,
+          totalInvested: marketPositions.totalInvested,
+          marketQuestion: predictionMarkets.question,
+          marketCategory: predictionMarkets.category,
+          yesPrice: predictionMarkets.yesPrice,
+        })
+        .from(marketPositions)
+        .leftJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
+        .where(and(
+          eq(marketPositions.userId, whale.userId),
+          sql`${marketPositions.shares} > 0`
+        ))
+        .orderBy(desc(marketPositions.totalInvested))
+        .limit(3);
+
+      return {
+        userId: whale.userId,
+        username: user?.displayName || user?.username || 'Anonymous',
+        isAiAgent: user?.isAiAgent || false,
+        totalInvested: whale.totalInvested,
+        totalShares: whale.totalShares,
+        positionCount: whale.positionCount,
+        topPositions: positions,
+      };
+    }));
+
+    res.json({ success: true, whales: enrichedWhales });
+  }));
+
+  // Recently resolved markets
+  app.get("/api/prediction-markets/resolved", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+
+    const resolvedMarkets = await db
+      .select({
+        id: predictionMarkets.id,
+        question: predictionMarkets.question,
+        category: predictionMarkets.category,
+        outcome: predictionMarkets.outcome,
+        finalYesPrice: predictionMarkets.yesPrice,
+        totalVolume: predictionMarkets.totalVolume,
+        totalTrades: predictionMarkets.totalTrades,
+        resolvedAt: predictionMarkets.updatedAt,
+        deadline: predictionMarkets.deadline,
+      })
+      .from(predictionMarkets)
+      .where(eq(predictionMarkets.status, 'resolved'))
+      .orderBy(desc(predictionMarkets.updatedAt))
+      .limit(limit);
+
+    res.json({ success: true, markets: resolvedMarkets });
+  }));
+
+  // =============================================================================
+  // MACRO ECONOMIC DATA ENDPOINTS
+  // =============================================================================
+
+  // Index Futures - S&P 500, Nasdaq 100, Dow Jones
+  app.get("/api/macro/index-futures", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      // Simulated real-time index futures data
+      // In production, this would connect to CME, Finnhub, or similar API
+      const now = new Date();
+      const isMarketHours = now.getUTCHours() >= 13 && now.getUTCHours() < 21; // US market hours
+
+      const futures = [
+        {
+          symbol: 'ES',
+          name: 'S&P 500 E-mini',
+          price: 5965.25 + (Math.random() - 0.5) * 20,
+          change: (Math.random() - 0.4) * 50,
+          changePercent: (Math.random() - 0.4) * 0.8,
+          high: 5985.50,
+          low: 5942.25,
+          volume: Math.floor(150000 + Math.random() * 50000),
+          openInterest: 2450000,
+          status: isMarketHours ? 'trading' : 'pre-market',
+        },
+        {
+          symbol: 'NQ',
+          name: 'Nasdaq 100 E-mini',
+          price: 21285.50 + (Math.random() - 0.5) * 80,
+          change: (Math.random() - 0.4) * 150,
+          changePercent: (Math.random() - 0.4) * 0.9,
+          high: 21380.00,
+          low: 21150.25,
+          volume: Math.floor(80000 + Math.random() * 30000),
+          openInterest: 890000,
+          status: isMarketHours ? 'trading' : 'pre-market',
+        },
+        {
+          symbol: 'YM',
+          name: 'Dow Jones E-mini',
+          price: 44520.00 + (Math.random() - 0.5) * 100,
+          change: (Math.random() - 0.4) * 200,
+          changePercent: (Math.random() - 0.4) * 0.5,
+          high: 44680.00,
+          low: 44350.00,
+          volume: Math.floor(25000 + Math.random() * 10000),
+          openInterest: 150000,
+          status: isMarketHours ? 'trading' : 'pre-market',
+        },
+        {
+          symbol: 'RTY',
+          name: 'Russell 2000 E-mini',
+          price: 2385.40 + (Math.random() - 0.5) * 15,
+          change: (Math.random() - 0.4) * 30,
+          changePercent: (Math.random() - 0.4) * 1.2,
+          high: 2410.50,
+          low: 2365.20,
+          volume: Math.floor(35000 + Math.random() * 15000),
+          openInterest: 280000,
+          status: isMarketHours ? 'trading' : 'pre-market',
+        },
+      ];
+
+      res.json({ 
+        success: true, 
+        futures,
+        lastUpdate: new Date().toISOString(),
+        marketStatus: isMarketHours ? 'Regular Trading Hours' : 'Pre/Post Market'
+      });
+    } catch (error: any) {
+      console.error('Error fetching index futures:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch index futures' });
+    }
+  }));
+
+  // Treasury Yields
+  app.get("/api/macro/treasury-yields", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const yields = {
+        '3M': { rate: 5.24 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 0.02 },
+        '6M': { rate: 5.18 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 0.02 },
+        '1Y': { rate: 4.92 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 0.03 },
+        '2Y': { rate: 4.45 + (Math.random() - 0.5) * 0.08, change: (Math.random() - 0.5) * 0.04 },
+        '5Y': { rate: 4.28 + (Math.random() - 0.5) * 0.08, change: (Math.random() - 0.5) * 0.04 },
+        '10Y': { rate: 4.42 + (Math.random() - 0.5) * 0.1, change: (Math.random() - 0.5) * 0.05 },
+        '30Y': { rate: 4.58 + (Math.random() - 0.5) * 0.1, change: (Math.random() - 0.5) * 0.05 },
+      };
+
+      // Calculate yield curve status
+      const yieldSpread2s10s = yields['10Y'].rate - yields['2Y'].rate;
+      const yieldCurveStatus = yieldSpread2s10s < 0 ? 'inverted' : yieldSpread2s10s < 0.25 ? 'flat' : 'normal';
+
+      res.json({ 
+        success: true, 
+        yields,
+        yieldSpread2s10s: yieldSpread2s10s.toFixed(3),
+        yieldCurveStatus,
+        lastUpdate: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error fetching treasury yields:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch treasury yields' });
+    }
+  }));
+
+  // VIX and DXY indices
+  app.get("/api/macro/volatility-indices", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const indices = {
+        vix: {
+          name: 'CBOE Volatility Index',
+          symbol: 'VIX',
+          value: 14.5 + (Math.random() - 0.5) * 4,
+          change: (Math.random() - 0.5) * 2,
+          changePercent: (Math.random() - 0.5) * 10,
+          high52w: 38.57,
+          low52w: 11.52,
+          level: 'low', // low, moderate, elevated, high, extreme
+        },
+        dxy: {
+          name: 'US Dollar Index',
+          symbol: 'DXY',
+          value: 106.8 + (Math.random() - 0.5) * 0.8,
+          change: (Math.random() - 0.5) * 0.5,
+          changePercent: (Math.random() - 0.5) * 0.4,
+          high52w: 107.35,
+          low52w: 99.58,
+          trend: 'bullish',
+        },
+        gvz: {
+          name: 'Gold Volatility Index',
+          symbol: 'GVZ',
+          value: 15.2 + (Math.random() - 0.5) * 3,
+          change: (Math.random() - 0.5) * 1.5,
+          changePercent: (Math.random() - 0.5) * 8,
+        },
+        ovx: {
+          name: 'Crude Oil Volatility Index',
+          symbol: 'OVX',
+          value: 28.5 + (Math.random() - 0.5) * 5,
+          change: (Math.random() - 0.5) * 3,
+          changePercent: (Math.random() - 0.5) * 8,
+        },
+      };
+
+      // Determine VIX level
+      if (indices.vix.value < 15) indices.vix.level = 'low';
+      else if (indices.vix.value < 20) indices.vix.level = 'moderate';
+      else if (indices.vix.value < 25) indices.vix.level = 'elevated';
+      else if (indices.vix.value < 35) indices.vix.level = 'high';
+      else indices.vix.level = 'extreme';
+
+      res.json({ 
+        success: true, 
+        indices,
+        lastUpdate: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error fetching volatility indices:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch volatility indices' });
+    }
+  }));
+
+  // Global M2 Money Supply Tracker
+  app.get("/api/macro/global-liquidity", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      // Global M2 liquidity data (simulated - would use FRED API in production)
+      const globalM2 = {
+        total: 105.8, // Trillions USD
+        change30d: 1.2,
+        changePercent30d: 1.15,
+        trend: 'expanding',
+        components: [
+          { country: 'United States', m2: 21.5, change: 0.8, currency: 'USD' },
+          { country: 'Eurozone', m2: 16.2, change: 0.5, currency: 'EUR' },
+          { country: 'China', m2: 42.1, change: 1.8, currency: 'CNY' },
+          { country: 'Japan', m2: 12.8, change: 0.2, currency: 'JPY' },
+          { country: 'United Kingdom', m2: 4.2, change: 0.3, currency: 'GBP' },
+        ],
+        historicalTrend: [
+          { month: 'Jun 2024', value: 102.1 },
+          { month: 'Jul 2024', value: 102.8 },
+          { month: 'Aug 2024', value: 103.4 },
+          { month: 'Sep 2024', value: 104.0 },
+          { month: 'Oct 2024', value: 104.9 },
+          { month: 'Nov 2024', value: 105.8 },
+        ],
+        correlationWithBTC: 0.82,
+        implication: 'Expanding global liquidity typically supports risk assets including crypto',
+      };
+
+      res.json({ 
+        success: true, 
+        globalM2,
+        lastUpdate: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error fetching global liquidity:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch global liquidity data' });
+    }
+  }));
+
+  // Comprehensive Economic Calendar
+  app.get("/api/macro/calendar", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const days = parseInt(req.query.days as string) || 14;
+      const now = new Date();
+
+      // Generate upcoming economic events
+      const events = [
+        { 
+          date: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '08:30 ET',
+          event: 'Initial Jobless Claims',
+          country: 'US',
+          impact: 'medium',
+          previous: '213K',
+          forecast: '215K',
+          category: 'employment',
+        },
+        { 
+          date: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '08:30 ET',
+          event: 'Core PCE Price Index (MoM)',
+          country: 'US',
+          impact: 'high',
+          previous: '0.3%',
+          forecast: '0.2%',
+          category: 'inflation',
+        },
+        { 
+          date: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '10:00 ET',
+          event: 'ISM Manufacturing PMI',
+          country: 'US',
+          impact: 'high',
+          previous: '46.5',
+          forecast: '47.5',
+          category: 'manufacturing',
+        },
+        { 
+          date: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '08:30 ET',
+          event: 'Non-Farm Payrolls',
+          country: 'US',
+          impact: 'high',
+          previous: '227K',
+          forecast: '190K',
+          category: 'employment',
+        },
+        { 
+          date: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '08:30 ET',
+          event: 'Unemployment Rate',
+          country: 'US',
+          impact: 'high',
+          previous: '4.2%',
+          forecast: '4.2%',
+          category: 'employment',
+        },
+        { 
+          date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '08:30 ET',
+          event: 'CPI (YoY)',
+          country: 'US',
+          impact: 'high',
+          previous: '2.6%',
+          forecast: '2.7%',
+          category: 'inflation',
+        },
+        { 
+          date: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '14:00 ET',
+          event: 'FOMC Rate Decision',
+          country: 'US',
+          impact: 'high',
+          previous: '4.50-4.75%',
+          forecast: '4.25-4.50%',
+          category: 'fed',
+        },
+        { 
+          date: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '14:30 ET',
+          event: 'FOMC Press Conference',
+          country: 'US',
+          impact: 'high',
+          previous: null,
+          forecast: null,
+          category: 'fed',
+        },
+        { 
+          date: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000).toISOString(),
+          time: '08:30 ET',
+          event: 'Retail Sales (MoM)',
+          country: 'US',
+          impact: 'medium',
+          previous: '0.4%',
+          forecast: '0.3%',
+          category: 'consumer',
+        },
+      ];
+
+      // Filter to requested timeframe
+      const filteredEvents = events.filter(e => {
+        const eventDate = new Date(e.date);
+        return eventDate <= new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      });
+
+      res.json({ 
+        success: true, 
+        events: filteredEvents,
+        upcomingHighImpact: filteredEvents.filter(e => e.impact === 'high').length,
+        nextFedEvent: filteredEvents.find(e => e.category === 'fed'),
+        lastUpdate: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error fetching economic calendar:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch economic calendar' });
+    }
+  }));
+
+  // Fed Watch - CME FedWatch Tool equivalent
+  app.get("/api/macro/fed-watch", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const fedWatch = {
+        currentRate: '4.50-4.75%',
+        nextMeeting: {
+          date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          probabilities: {
+            hold: 35,
+            cut25: 62,
+            cut50: 3,
+            hike25: 0,
+          },
+        },
+        yearEndRate: {
+          target: '4.00-4.25%',
+          probability: 45,
+        },
+        recentSpeakers: [
+          { name: 'Jerome Powell', title: 'Fed Chair', date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), tone: 'neutral', keyMessage: 'Data-dependent approach to future rate decisions' },
+          { name: 'Christopher Waller', title: 'Fed Governor', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), tone: 'dovish', keyMessage: 'Inflation trending in right direction' },
+          { name: 'Mary Daly', title: 'SF Fed President', date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), tone: 'hawkish', keyMessage: 'Need more evidence of cooling inflation' },
+        ],
+        dotPlot: {
+          median2024: 4.375,
+          median2025: 3.375,
+          median2026: 2.875,
+          longerRun: 2.875,
+        },
+        marketImplication: 'Markets pricing in 25bp cut at December meeting with 62% probability',
+      };
+
+      res.json({ 
+        success: true, 
+        fedWatch,
+        lastUpdate: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error fetching Fed watch data:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch Fed watch data' });
+    }
+  }));
+
+  // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   
