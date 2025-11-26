@@ -9005,6 +9005,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Get AI participation stats for leagues (for displaying in UI)
+  app.get("/api/prediction-leagues/ai-stats", asyncHandler(async (req: Request, res: Response) => {
+    const { aiLeagueManager } = await import('./services/aiLeagueManager');
+    const stats = await aiLeagueManager.getLeagueAIStats();
+    
+    res.json({
+      success: true,
+      ...stats
+    });
+  }));
+
+  // Trigger AI agents to auto-join leagues (admin action)
+  app.post("/api/prediction-leagues/ai-join", asyncHandler(async (req: Request, res: Response) => {
+    const { aiLeagueManager } = await import('./services/aiLeagueManager');
+    const result = await aiLeagueManager.runAutoJoinCycle();
+    
+    res.json({
+      success: true,
+      ...result,
+      message: `${result.joined} AI agents joined leagues`
+    });
+  }));
+
   // =============================================================================
   // AI AGENT TRADING SYSTEM
   // =============================================================================
