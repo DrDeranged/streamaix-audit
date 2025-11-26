@@ -8711,6 +8711,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Get AI participation stats for leagues (for displaying in UI)
+  // NOTE: This must be BEFORE the :leagueId route to avoid being caught by it
+  app.get("/api/prediction-leagues/ai-stats", asyncHandler(async (req: Request, res: Response) => {
+    const { aiLeagueManager } = await import('./services/aiLeagueManager');
+    const stats = await aiLeagueManager.getLeagueAIStats();
+    
+    res.json({
+      success: true,
+      ...stats
+    });
+  }));
+
+  // Trigger AI agents to auto-join leagues (admin action)
+  app.post("/api/prediction-leagues/ai-join", asyncHandler(async (req: Request, res: Response) => {
+    const { aiLeagueManager } = await import('./services/aiLeagueManager');
+    const result = await aiLeagueManager.runAutoJoinCycle();
+    
+    res.json({
+      success: true,
+      ...result,
+      message: `${result.joined} AI agents joined leagues`
+    });
+  }));
+
   // Get single league with standings
   app.get("/api/prediction-leagues/:leagueId", asyncHandler(async (req: Request, res: Response) => {
     const { leagueId } = req.params;
@@ -9002,29 +9026,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({
       success: true,
       leaderboard
-    });
-  }));
-
-  // Get AI participation stats for leagues (for displaying in UI)
-  app.get("/api/prediction-leagues/ai-stats", asyncHandler(async (req: Request, res: Response) => {
-    const { aiLeagueManager } = await import('./services/aiLeagueManager');
-    const stats = await aiLeagueManager.getLeagueAIStats();
-    
-    res.json({
-      success: true,
-      ...stats
-    });
-  }));
-
-  // Trigger AI agents to auto-join leagues (admin action)
-  app.post("/api/prediction-leagues/ai-join", asyncHandler(async (req: Request, res: Response) => {
-    const { aiLeagueManager } = await import('./services/aiLeagueManager');
-    const result = await aiLeagueManager.runAutoJoinCycle();
-    
-    res.json({
-      success: true,
-      ...result,
-      message: `${result.joined} AI agents joined leagues`
     });
   }));
 
