@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -140,6 +140,8 @@ export default function Markets() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [showAllMarkets, setShowAllMarkets] = useState(false);
+  const INITIAL_MARKET_COUNT = 8;
   
   const { toast } = useToast();
   const {
@@ -171,6 +173,11 @@ export default function Markets() {
   const stats = statsData?.stats;
   const aiStats = aiStatsData;
 
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const filteredMarkets = markets.filter((market) => {
     const matchesSearch = searchQuery === "" || market.question.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSource = sourceFilter === "all" || 
@@ -178,6 +185,9 @@ export default function Markets() {
       (sourceFilter === "community" && !market.sourceContentId);
     return matchesSearch && matchesSource;
   });
+
+  const displayedMarkets = showAllMarkets ? filteredMarkets : filteredMarkets.slice(0, INITIAL_MARKET_COUNT);
+  const hasMoreMarkets = filteredMarkets.length > INITIAL_MARKET_COUNT;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
@@ -637,15 +647,39 @@ export default function Markets() {
                 ))}
               </div>
             ) : filteredMarkets.length > 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-5"
-              >
-                {filteredMarkets.map((market) => (
-                  <MarketCard key={market.id} market={market} />
-                ))}
-              </motion.div>
+              <div className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                >
+                  {displayedMarkets.map((market) => (
+                    <MarketCard key={market.id} market={market} />
+                  ))}
+                </motion.div>
+                
+                {/* View All / Show Less Button */}
+                {hasMoreMarkets && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-center pt-4"
+                  >
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAllMarkets(!showAllMarkets)}
+                      className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 transition-all"
+                      data-testid="button-toggle-markets"
+                    >
+                      {showAllMarkets ? (
+                        <>Show Less Markets</>
+                      ) : (
+                        <>View All {filteredMarkets.length} Markets</>
+                      )}
+                    </Button>
+                  </motion.div>
+                )}
+              </div>
             ) : (
               <Card className="bg-slate-900/50 border-slate-700/50">
                 <CardContent className="p-12 text-center">
