@@ -155,7 +155,7 @@ Format your response as JSON array:
             continue;
           }
 
-          // Create the market
+          // Create the market (use tags to link to avatar, not sourceContentId which is FK constrained)
           const newMarket = await db.insert(predictionMarkets).values({
             question: market.question,
             description: market.description,
@@ -167,15 +167,13 @@ Format your response as JSON array:
             noPrice: 500000,
             yesLiquidity: 3000,
             noLiquidity: 3000,
+            initialLiquidity: 6000,
             totalVolume: 0,
             totalTrades: 0,
             status: 'active',
-            tags: market.tags,
+            tags: market.tags, // Tags include avatar name for linking
             aiProbability: market.aiProbability,
             aiReasoning: market.reasoning,
-            sourceContentId: avatarId,
-            likesCount: 0,
-            commentsCount: 0,
           }).returning();
 
           createdMarkets.push(newMarket[0]);
@@ -196,17 +194,40 @@ Format your response as JSON array:
   }
 
   /**
-   * Get markets for a specific avatar
+   * Get markets for a specific avatar by looking at tags that include the avatar name
    */
   async getMarketsForAvatar(avatarId: string, limit: number = 3): Promise<any[]> {
     try {
+      // First get the avatar name
+      const avatar = await db
+        .select({ name: knowledgeAvatars.name })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, avatarId))
+        .limit(1);
+
+      if (avatar.length === 0) {
+        return [];
+      }
+
+      const avatarName = avatar[0].name;
+
+      // Get markets that have this avatar's name in tags or in category 'avatar'
       const markets = await db
         .select()
         .from(predictionMarkets)
-        .where(eq(predictionMarkets.sourceContentId, avatarId))
-        .limit(limit);
+        .where(eq(predictionMarkets.category, 'avatar'))
+        .limit(20); // Get more and filter
 
-      return markets;
+      // Filter by avatar name in tags
+      const avatarMarkets = markets.filter(m => {
+        if (!m.tags || m.tags.length === 0) return false;
+        return m.tags.some(tag => 
+          tag.toLowerCase().includes(avatarName.toLowerCase()) ||
+          avatarName.toLowerCase().includes(tag.toLowerCase())
+        );
+      });
+
+      return avatarMarkets.slice(0, limit);
     } catch (error: any) {
       console.error('❌ Error fetching avatar markets:', error);
       return [];
