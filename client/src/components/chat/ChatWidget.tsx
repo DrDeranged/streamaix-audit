@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Sparkles, Loader2, LogIn } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +9,250 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthToken } from '@/lib/auth';
 import { Link } from 'wouter';
+
+const AGENT_MESSAGES = [
+  "Need help?",
+  "Ask me anything",
+  "100+ agents online",
+  "AI-powered insights",
+  "Let's chat!",
+  "I'm here to help",
+];
+
+function EnergyOrbButton({ onClick }: { onClick: () => void }) {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [showMessage, setShowMessage] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowMessage(false);
+      setTimeout(() => {
+        setMessageIndex((prev) => (prev + 1) % AGENT_MESSAGES.length);
+        setShowMessage(true);
+      }, 300);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative">
+      {/* Speech Bubble */}
+      <AnimatePresence>
+        {showMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.8 }}
+            className="absolute -top-12 right-0 whitespace-nowrap"
+          >
+            <div className="relative bg-slate-900/95 backdrop-blur-xl border border-purple-500/40 rounded-xl px-4 py-2 shadow-lg shadow-purple-500/20">
+              <span className="text-sm font-medium bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                {AGENT_MESSAGES[messageIndex]}
+              </span>
+              {/* Speech bubble tail */}
+              <div className="absolute -bottom-2 right-6 w-4 h-4 bg-slate-900/95 border-r border-b border-purple-500/40 transform rotate-45" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Energy Orb Container */}
+      <motion.button
+        onClick={onClick}
+        className="relative w-16 h-16 rounded-full cursor-pointer focus:outline-none group"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        animate={{
+          y: [0, -6, 0],
+        }}
+        transition={{
+          y: {
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
+        data-testid="button-open-chat"
+      >
+        {/* Outer Pulsing Glow Ring */}
+        <motion.div
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 opacity-40 blur-xl"
+          animate={{
+            scale: [1, 1.4, 1],
+            opacity: [0.4, 0.2, 0.4],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        {/* Secondary Glow Ring */}
+        <motion.div
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 opacity-30 blur-lg"
+          animate={{
+            scale: [1.1, 1.3, 1.1],
+            opacity: [0.3, 0.15, 0.3],
+            rotate: [0, 180, 360],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+
+        {/* Orbiting Particles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50"
+            style={{
+              left: '50%',
+              top: '50%',
+              marginLeft: '-3px',
+              marginTop: '-3px',
+            }}
+            animate={{
+              x: [
+                Math.cos((i * 60 * Math.PI) / 180) * 28,
+                Math.cos(((i * 60 + 180) * Math.PI) / 180) * 28,
+                Math.cos(((i * 60 + 360) * Math.PI) / 180) * 28,
+              ],
+              y: [
+                Math.sin((i * 60 * Math.PI) / 180) * 28,
+                Math.sin(((i * 60 + 180) * Math.PI) / 180) * 28,
+                Math.sin(((i * 60 + 360) * Math.PI) / 180) * 28,
+              ],
+              opacity: [0.8, 0.4, 0.8],
+              scale: [1, 0.6, 1],
+            }}
+            transition={{
+              duration: 3 + i * 0.3,
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * 0.2,
+            }}
+          />
+        ))}
+
+        {/* Inner Orbiting Ring */}
+        <motion.div
+          className="absolute inset-2 rounded-full border border-purple-400/30"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        >
+          <div className="absolute -top-0.5 left-1/2 w-1 h-1 rounded-full bg-purple-400 -translate-x-1/2" />
+        </motion.div>
+
+        {/* Orb Base with Gradient */}
+        <div className="absolute inset-1 rounded-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-purple-500/50 shadow-inner overflow-hidden">
+          {/* Swirling Energy Effect */}
+          <motion.div
+            className="absolute inset-0 opacity-80"
+            style={{
+              background: 'conic-gradient(from 0deg, transparent, #a855f7, transparent, #06b6d4, transparent, #d946ef, transparent)',
+            }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+          />
+          
+          {/* Inner Glow */}
+          <div className="absolute inset-0 bg-gradient-radial from-purple-500/30 via-transparent to-transparent" />
+          
+          {/* Core Energy */}
+          <motion.div
+            className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-500/40 via-fuchsia-500/30 to-cyan-500/40 backdrop-blur-sm"
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.6, 0.9, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* AI Symbol - Stylized "S" or Neural Node */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              className="relative"
+              animate={{
+                scale: [1, 1.05, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              {/* Neural network node design */}
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" strokeWidth="1.5">
+                {/* Central node */}
+                <circle cx="12" cy="12" r="3" fill="currentColor" className="opacity-90" />
+                {/* Outer nodes */}
+                <circle cx="12" cy="4" r="1.5" fill="currentColor" className="opacity-70" />
+                <circle cx="19" cy="8" r="1.5" fill="currentColor" className="opacity-70" />
+                <circle cx="19" cy="16" r="1.5" fill="currentColor" className="opacity-70" />
+                <circle cx="12" cy="20" r="1.5" fill="currentColor" className="opacity-70" />
+                <circle cx="5" cy="16" r="1.5" fill="currentColor" className="opacity-70" />
+                <circle cx="5" cy="8" r="1.5" fill="currentColor" className="opacity-70" />
+                {/* Connection lines */}
+                <path d="M12 7 L12 9" strokeLinecap="round" className="opacity-60" />
+                <path d="M12 15 L12 17" strokeLinecap="round" className="opacity-60" />
+                <path d="M9 10.5 L7 9" strokeLinecap="round" className="opacity-60" />
+                <path d="M15 10.5 L17 9" strokeLinecap="round" className="opacity-60" />
+                <path d="M9 13.5 L7 15" strokeLinecap="round" className="opacity-60" />
+                <path d="M15 13.5 L17 15" strokeLinecap="round" className="opacity-60" />
+              </svg>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Scan Line Effect */}
+        <motion.div
+          className="absolute inset-1 rounded-full overflow-hidden pointer-events-none"
+          style={{ mixBlendMode: 'overlay' }}
+        >
+          <motion.div
+            className="w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+            animate={{
+              y: [0, 56, 0],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        </motion.div>
+
+        {/* Hover Highlight */}
+        <div className="absolute inset-1 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
+      </motion.button>
+
+      {/* Status Indicator */}
+      <motion.div
+        className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-900 shadow-lg"
+        animate={{
+          scale: [1, 1.2, 1],
+          boxShadow: [
+            '0 0 0 0 rgba(16, 185, 129, 0.4)',
+            '0 0 0 6px rgba(16, 185, 129, 0)',
+            '0 0 0 0 rgba(16, 185, 129, 0.4)',
+          ],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+    </div>
+  );
+}
 
 interface ChatMessage {
   id: string;
@@ -75,7 +319,7 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Energy Orb AI Agent Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -84,14 +328,7 @@ export function ChatWidget() {
             exit={{ scale: 0, opacity: 0 }}
             className="fixed bottom-6 right-6 z-50"
           >
-            <Button
-              onClick={() => setIsOpen(true)}
-              size="lg"
-              className="h-14 w-14 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-lg shadow-purple-500/50"
-              data-testid="button-open-chat"
-            >
-              <MessageCircle className="h-6 w-6" />
-            </Button>
+            <EnergyOrbButton onClick={() => setIsOpen(true)} />
           </motion.div>
         )}
       </AnimatePresence>
