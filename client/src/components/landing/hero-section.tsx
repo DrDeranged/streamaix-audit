@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles } from "lucide-react";
+import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { WaitlistModal } from "@/components/WaitlistModal";
@@ -49,7 +49,7 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-base sm:text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light"
           >
-            AI Content Intelligence • Prediction Markets • DeFi Bounties
+            Crowdsourced intelligence. On-chain rewards.
           </motion.p>
 
           {/* Sleek horizontal button row */}
@@ -107,6 +107,31 @@ export function HeroSection() {
               >
                 <Brain className="w-4 h-4 mr-2 text-emerald-400 group-hover:text-emerald-300" />
                 AI Analysis
+              </Button>
+            </motion.div>
+
+            <Link href="/dashboard">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="outline"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-slate-300 hover:text-indigo-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  data-testid="button-social-feed"
+                >
+                  <Users className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-300" />
+                  Social Feed
+                </Button>
+              </motion.div>
+            </Link>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline"
+                onClick={() => document.getElementById('knowledge-avatars')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-amber-500/50 hover:bg-amber-500/5 text-slate-300 hover:text-amber-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                data-testid="button-knowledge-avatars"
+              >
+                <Bot className="w-4 h-4 mr-2 text-amber-400 group-hover:text-amber-300" />
+                Knowledge Avatars
               </Button>
             </motion.div>
           </motion.div>
