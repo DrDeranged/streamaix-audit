@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Sparkles, Loader2, LogIn } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, LogIn, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +9,162 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthToken } from '@/lib/auth';
 import { Link } from 'wouter';
+
+function parseMarkdown(text: string): JSX.Element[] {
+  const lines = text.split('\n');
+  const elements: JSX.Element[] = [];
+  let listItems: string[] = [];
+  let listType: 'ul' | 'ol' | null = null;
+  let currentIndex = 0;
+
+  const flushList = () => {
+    if (listItems.length > 0 && listType) {
+      const items = listItems.map((item, i) => (
+        <li key={i} className="ml-4 mb-1">{parseInlineMarkdown(item)}</li>
+      ));
+      if (listType === 'ul') {
+        elements.push(<ul key={`list-${currentIndex++}`} className="list-disc pl-4 my-2 space-y-1">{items}</ul>);
+      } else {
+        elements.push(<ol key={`list-${currentIndex++}`} className="list-decimal pl-4 my-2 space-y-1">{items}</ol>);
+      }
+      listItems = [];
+      listType = null;
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    if (trimmedLine.match(/^#{1,3}\s+/)) {
+      flushList();
+      const level = (trimmedLine.match(/^#+/) || [''])[0].length;
+      const content = trimmedLine.replace(/^#+\s+/, '');
+      const className = level === 1 ? 'text-base font-bold mt-3 mb-2' : 
+                       level === 2 ? 'text-sm font-semibold mt-2 mb-1' : 
+                       'text-sm font-medium mt-2 mb-1';
+      elements.push(<div key={`h-${currentIndex++}`} className={className}>{parseInlineMarkdown(content)}</div>);
+    }
+    else if (trimmedLine.match(/^[-*]\s+/)) {
+      if (listType !== 'ul') {
+        flushList();
+        listType = 'ul';
+      }
+      listItems.push(trimmedLine.replace(/^[-*]\s+/, ''));
+    }
+    else if (trimmedLine.match(/^\d+\.\s+/)) {
+      if (listType !== 'ol') {
+        flushList();
+        listType = 'ol';
+      }
+      listItems.push(trimmedLine.replace(/^\d+\.\s+/, ''));
+    }
+    else if (trimmedLine === '') {
+      flushList();
+      if (i > 0 && i < lines.length - 1) {
+        elements.push(<div key={`br-${currentIndex++}`} className="h-2" />);
+      }
+    }
+    else {
+      flushList();
+      elements.push(<p key={`p-${currentIndex++}`} className="mb-2 leading-relaxed">{parseInlineMarkdown(trimmedLine)}</p>);
+    }
+  }
+
+  flushList();
+  return elements;
+}
+
+function parseInlineMarkdown(text: string): (string | JSX.Element)[] {
+  const result: (string | JSX.Element)[] = [];
+  let remaining = text;
+  let keyIndex = 0;
+
+  while (remaining.length > 0) {
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    const codeMatch = remaining.match(/`([^`]+)`/);
+
+    let firstMatch: { type: 'bold' | 'code'; index: number; match: RegExpMatchArray } | null = null;
+
+    if (boldMatch && boldMatch.index !== undefined) {
+      firstMatch = { type: 'bold', index: boldMatch.index, match: boldMatch };
+    }
+    if (codeMatch && codeMatch.index !== undefined) {
+      if (!firstMatch || codeMatch.index < firstMatch.index) {
+        firstMatch = { type: 'code', index: codeMatch.index, match: codeMatch };
+      }
+    }
+
+    if (firstMatch) {
+      if (firstMatch.index > 0) {
+        result.push(remaining.substring(0, firstMatch.index));
+      }
+
+      if (firstMatch.type === 'bold') {
+        result.push(
+          <strong key={`bold-${keyIndex++}`} className="font-semibold text-purple-300">
+            {firstMatch.match[1]}
+          </strong>
+        );
+      } else if (firstMatch.type === 'code') {
+        result.push(
+          <code key={`code-${keyIndex++}`} className="bg-slate-700/50 px-1.5 py-0.5 rounded text-cyan-300 text-xs font-mono">
+            {firstMatch.match[1]}
+          </code>
+        );
+      }
+
+      remaining = remaining.substring(firstMatch.index + firstMatch.match[0].length);
+    } else {
+      result.push(remaining);
+      break;
+    }
+  }
+
+  return result;
+}
+
+function ChatMessage({ message, role, timestamp }: { message: string; role: 'user' | 'assistant'; timestamp: string }) {
+  const parsedContent = useMemo(() => {
+    if (role === 'user') return null;
+    return parseMarkdown(message);
+  }, [message, role]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex gap-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`}
+    >
+      {role === 'assistant' && (
+        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <Bot className="w-4 h-4 text-white" />
+        </div>
+      )}
+      <div
+        className={`max-w-[85%] rounded-2xl shadow-lg ${
+          role === 'user'
+            ? 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white px-4 py-2.5'
+            : 'bg-slate-800/90 border border-slate-700/50 text-slate-100 px-4 py-3'
+        }`}
+      >
+        {role === 'user' ? (
+          <p className="text-sm leading-relaxed">{message}</p>
+        ) : (
+          <div className="text-sm chat-content">
+            {parsedContent}
+          </div>
+        )}
+        <p className={`text-[10px] mt-1.5 ${role === 'user' ? 'text-white/60' : 'text-slate-500'}`}>
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
 
 const AGENT_MESSAGES = [
   "Need help?",
@@ -340,24 +496,28 @@ export function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-96 h-[600px] bg-background border border-border rounded-lg shadow-2xl flex flex-col"
+            className="fixed bottom-6 right-6 z-50 w-[420px] h-[650px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 flex flex-col overflow-hidden"
             data-testid="chat-panel"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-purple-500/10 via-fuchsia-500/10 to-cyan-500/10">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-white" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-cyan-500/10">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                    <Bot className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm">StreamAiX Assistant</h3>
-                  <p className="text-xs text-muted-foreground">AI-powered help & insights</p>
+                  <h3 className="font-semibold text-sm text-white">StreamAiX Assistant</h3>
+                  <p className="text-xs text-slate-400">AI-powered help & insights</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
+                className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl"
                 data-testid="button-close-chat"
               >
                 <X className="h-4 w-4" />
@@ -368,18 +528,27 @@ export function ChatWidget() {
             {!isAuthenticated ? (
               // Unauthenticated: Show signup prompt
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center mb-6">
-                  <Sparkles className="h-8 w-8 text-white" />
+                <div className="relative mb-6">
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
+                    <div className="h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                      <Bot className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-purple-500/30"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-bold text-white mb-3">
                   Unlock Your AI Assistant
                 </h3>
-                <p className="text-muted-foreground mb-6 max-w-sm">
+                <p className="text-slate-400 mb-6 max-w-[280px] text-sm leading-relaxed">
                   Sign up to chat with our AI-powered assistant and get help with platform features, investing insights, and crypto questions.
                 </p>
                 <Link href="/auth">
                   <Button 
-                    className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                    className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 shadow-lg shadow-purple-500/20 rounded-xl px-6"
                     data-testid="button-signup-chat"
                   >
                     <LogIn className="h-4 w-4 mr-2" />
@@ -391,86 +560,107 @@ export function ChatWidget() {
               // Authenticated: Show full chat interface
               <>
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+                <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
                   {isLoading ? (
                     <div className="flex items-center justify-center h-full">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="relative">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 animate-pulse" />
+                          <Loader2 className="absolute inset-0 m-auto h-5 w-5 animate-spin text-white" />
+                        </div>
+                        <p className="text-xs text-slate-500">Loading messages...</p>
+                      </div>
                     </div>
                   ) : chatHistory?.messages && chatHistory.messages.length > 0 ? (
                     <div className="space-y-4">
                       {chatHistory.messages.map((msg) => (
-                        <div
-                          key={msg.id}
-                          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                          data-testid={`message-${msg.role}-${msg.id}`}
-                        >
-                          <div
-                            className={`max-w-[80%] rounded-lg p-3 ${
-                              msg.role === 'user'
-                                ? 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
-                                : 'bg-muted text-foreground'
-                            }`}
-                          >
-                            <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                            <p className="text-xs mt-1 opacity-70">
-                              {new Date(msg.createdAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </p>
-                          </div>
+                        <div key={msg.id} data-testid={`message-${msg.role}-${msg.id}`}>
+                          <ChatMessage
+                            message={msg.message}
+                            role={msg.role}
+                            timestamp={msg.createdAt}
+                          />
                         </div>
                       ))}
                       {sendMessageMutation.isPending && (
-                        <div className="flex justify-start">
-                          <div className="bg-muted rounded-lg p-3">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex gap-3 justify-start"
+                        >
+                          <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center">
+                            <Bot className="w-4 h-4 text-white" />
                           </div>
-                        </div>
+                          <div className="bg-slate-800/90 border border-slate-700/50 rounded-2xl px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="flex gap-1">
+                                <motion.div
+                                  className="w-2 h-2 rounded-full bg-purple-400"
+                                  animate={{ scale: [1, 1.3, 1] }}
+                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                                />
+                                <motion.div
+                                  className="w-2 h-2 rounded-full bg-fuchsia-400"
+                                  animate={{ scale: [1, 1.3, 1] }}
+                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                                />
+                                <motion.div
+                                  className="w-2 h-2 rounded-full bg-cyan-400"
+                                  animate={{ scale: [1, 1.3, 1] }}
+                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                                />
+                              </div>
+                              <span className="text-xs text-slate-500">Thinking...</span>
+                            </div>
+                          </div>
+                        </motion.div>
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                      <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h4 className="font-semibold mb-2">Welcome to StreamAiX Assistant!</h4>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Ask me about the platform, bounties, investing, or any crypto questions!
+                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                      <div className="relative mb-6">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
+                          <Sparkles className="h-8 w-8 text-purple-400" />
+                        </div>
+                        <motion.div
+                          className="absolute inset-0 rounded-full border border-purple-500/30"
+                          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      </div>
+                      <h4 className="font-semibold text-white mb-2">Welcome to StreamAiX Assistant!</h4>
+                      <p className="text-sm text-slate-400 mb-6 max-w-[280px]">
+                        Ask me about the platform, bounties, prediction markets, or crypto insights!
                       </p>
-                      <div className="space-y-2 w-full">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start text-xs"
+                      <div className="space-y-2 w-full max-w-[300px]">
+                        <button
+                          className="w-full text-left px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
                           onClick={() => setInputMessage('How do bounties work?')}
                           data-testid="button-quick-bounties"
                         >
-                          How do bounties work?
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start text-xs"
-                          onClick={() => setInputMessage('What are the best investment strategies?')}
-                          data-testid="button-quick-investing"
+                          <span className="text-sm text-slate-300 group-hover:text-white transition-colors">How do bounties work?</span>
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
+                          onClick={() => setInputMessage('Explain prediction markets')}
+                          data-testid="button-quick-markets"
                         >
-                          Best investment strategies?
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start text-xs"
+                          <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Explain prediction markets</span>
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
                           onClick={() => setInputMessage('How do I create a summary?')}
                           data-testid="button-quick-summary"
                         >
-                          How to create a summary?
-                        </Button>
+                          <span className="text-sm text-slate-300 group-hover:text-white transition-colors">How do I create a summary?</span>
+                        </button>
                       </div>
                     </div>
                   )}
                 </ScrollArea>
 
                 {/* Input */}
-                <div className="p-4 border-t border-border">
+                <div className="p-4 border-t border-slate-700/50 bg-slate-800/30">
                   <div className="flex gap-2">
                     <Input
                       placeholder="Ask me anything..."
@@ -478,14 +668,14 @@ export function ChatWidget() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       disabled={sendMessageMutation.isPending}
-                      className="flex-1"
+                      className="flex-1 bg-slate-800/80 border-slate-700/50 focus:border-purple-500/50 text-white placeholder:text-slate-500 rounded-xl"
                       data-testid="input-chat-message"
                     />
                     <Button
                       onClick={handleSendMessage}
                       disabled={!inputMessage.trim() || sendMessageMutation.isPending}
                       size="icon"
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50"
                       data-testid="button-send-message"
                     >
                       {sendMessageMutation.isPending ? (
@@ -495,7 +685,7 @@ export function ChatWidget() {
                       )}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-[10px] text-slate-500 mt-2 text-center">
                     Powered by GPT-4o • Press Enter to send
                   </p>
                 </div>
