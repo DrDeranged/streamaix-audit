@@ -23,9 +23,9 @@ export class AutonomousAgentCron {
 
   /**
    * Start the background service
-   * Runs every 10 minutes by default
+   * Runs every 30 minutes by default (COST OPTIMIZATION: 3x fewer API calls)
    */
-  start(intervalMinutes: number = 10): void {
+  start(intervalMinutes: number = 30): void {
     if (this.isRunning) {
       console.log('⚠️  Autonomous agent cron is already running');
       return;

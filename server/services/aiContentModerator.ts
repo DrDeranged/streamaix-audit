@@ -44,9 +44,9 @@ export class AIContentModerator {
       try {
         await this.moderateContent();
 
-        // Run every 30 minutes
-        const delayMs = 30 * 60 * 1000;
-        console.log(`⏱️  Content moderator sleeping for 30 minutes...`);
+        // Run every 90 minutes (COST OPTIMIZATION: 3x fewer API calls)
+        const delayMs = 90 * 60 * 1000;
+        console.log(`⏱️  Content moderator sleeping for 90 minutes...`);
         await this.sleep(delayMs);
 
       } catch (error) {

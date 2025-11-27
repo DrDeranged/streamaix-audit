@@ -30,9 +30,9 @@ export class AICommunityManager {
       try {
         await this.manageCommunity();
 
-        // Run every 60 minutes
-        const delayMs = 60 * 60 * 1000;
-        console.log(`⏱️  Community manager sleeping for 60 minutes...`);
+        // Run every 2 hours (COST OPTIMIZATION: 2x fewer API calls)
+        const delayMs = 120 * 60 * 1000;
+        console.log(`⏱️  Community manager sleeping for 2 hours...`);
         await this.sleep(delayMs);
 
       } catch (error) {
