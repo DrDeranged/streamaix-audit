@@ -165,34 +165,46 @@ export class RebuiltContentProcessor {
         createdAt: new Date().toISOString()
       };
       
-      // ⚡ SPEED OPTIMIZATION: Run storage uploads AND prediction extraction in PARALLEL
-      console.log(`⚡ Running storage uploads + prediction extraction in PARALLEL for faster processing...`);
+      // ⚡ SPEED OPTIMIZATION v2: Use prediction markets from unified AI response (no 2nd GPT-4 call!)
+      let suggestedMarkets: any[] = analysis.predictionMarkets || [];
+      console.log(`🔮 Using ${suggestedMarkets.length} prediction markets from unified AI response (saved GPT-4 call!)`);
+      
+      // Only fall back to separate extraction if unified response had no markets
+      const needsFallbackExtraction = suggestedMarkets.length === 0;
+      
+      console.log(`⚡ Running storage uploads${needsFallbackExtraction ? ' + fallback prediction extraction' : ''} in PARALLEL...`);
       const parallelStartTime = Date.now();
       
       const Web3Service = (await import('./web3Service')).Web3Service;
-      const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
       
-      // Execute all 3 operations simultaneously
-      const [ipfsHash, arweaveId, predictionResult] = await Promise.all([
+      // Execute storage uploads (and fallback extraction only if needed)
+      const parallelPromises: Promise<any>[] = [
         Web3Service.storeOnIPFS(summaryData),
-        Web3Service.storeOnArweave(summaryData),
-        extractPredictionsFromSummary(analysis.summary, metadata.title, url).catch((err: any) => {
-          console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, err.message);
-          return { predictions: [] };
-        })
-      ]);
+        Web3Service.storeOnArweave(summaryData)
+      ];
+      
+      if (needsFallbackExtraction) {
+        const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
+        parallelPromises.push(
+          extractPredictionsFromSummary(analysis.summary, metadata.title, url).catch((err: any) => {
+            console.error(`⚠️ Fallback prediction extraction failed for ${summaryId}:`, err.message);
+            return { predictions: [] };
+          })
+        );
+      }
+      
+      const results = await Promise.all(parallelPromises);
+      const ipfsHash = results[0];
+      const arweaveId = results[1];
+      
+      // Use fallback predictions only if unified response had none
+      if (needsFallbackExtraction && results[2]?.predictions?.length > 0) {
+        suggestedMarkets = results[2].predictions;
+        console.log(`✅ Fallback extracted ${suggestedMarkets.length} prediction markets for ${summaryId}`);
+      }
       
       const parallelTime = ((Date.now() - parallelStartTime) / 1000).toFixed(1);
-      console.log(`✅ Parallel operations complete in ${parallelTime}s: IPFS=${ipfsHash}, Arweave=${arweaveId}`);
-      
-      // Extract markets from prediction result
-      let suggestedMarkets: any[] = [];
-      if (predictionResult?.predictions && predictionResult.predictions.length > 0) {
-        suggestedMarkets = predictionResult.predictions;
-        console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
-      } else {
-        console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
-      }
+      console.log(`✅ Parallel operations complete in ${parallelTime}s: IPFS=${ipfsHash}, Arweave=${arweaveId}, Markets=${suggestedMarkets.length}`)
       
       // Now save everything INCLUDING markets in one atomic update with status=completed
       await this.storage.updateSummary(summaryId, {
@@ -652,8 +664,31 @@ Generate expert-level institutional analysis in this exact JSON format:
   ],
   "chapters": [DYNAMIC_CHAPTERS_PLACEHOLDER],
   "tags": ["institutional-grade", "market-intelligence", "investment-strategy"],
-  "accuracy": 95
+  "accuracy": 95,
+  "predictionMarkets": [
+    {
+      "question": "Will [specific outcome from video content] happen by [date]?",
+      "description": "Detailed market description with resolution criteria based on video predictions",
+      "category": "crypto|defi|tech|macro|community",
+      "deadline": "ISO 8601 date string (e.g., 2025-12-31T23:59:59Z)",
+      "aiPrediction": "YES|NO",
+      "aiProbability": 65,
+      "confidence": 70,
+      "aiReasoning": "100-150 word explanation of prediction based on video content, expert opinions mentioned, and market analysis",
+      "resolutionSource": "Specific data source for market resolution (e.g., CoinGecko, Bloomberg, company announcements)",
+      "rationale": "Why this prediction is interesting and tradeable",
+      "tags": ["relevant", "topic", "tags"]
+    }
+  ]
 }
+
+🔮 PREDICTION MARKETS REQUIREMENTS:
+- Generate 2-4 high-quality prediction markets based on specific claims, timelines, or forecasts made in the video
+- Each market must have a clear YES/NO resolution criteria with specific deadlines
+- Categories: crypto (price predictions), defi (protocol milestones), tech (product launches), macro (economic events), community (engagement metrics)
+- Set deadlines based on timelines mentioned in video, or use reasonable defaults (30-90 days for short-term, 6-12 months for medium-term)
+- Confidence should reflect how explicitly the prediction is stated in video (70+ for explicit claims, 50-70 for inferred)
+- Generate markets that would be interesting to trade on based on video insights
 
 CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 
@@ -688,11 +723,11 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are an expert business analyst. Provide detailed, accurate analysis based on the video content." },
+          { role: "system", content: "You are an expert business analyst and prediction market specialist. Provide detailed, accurate analysis based on the video content, including tradeable prediction markets." },
           { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 3000
+        max_tokens: 4000  // Increased for unified response with prediction markets
       });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
@@ -715,6 +750,10 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         }];
       }
 
+      // Extract prediction markets from unified response (saves 2nd GPT-4 call!)
+      const predictionMarkets = result.predictionMarkets || [];
+      console.log(`🔮 Extracted ${predictionMarkets.length} prediction markets from unified AI response`);
+
       return {
         summary: result.summary,
         tldrSummary: result.tldrSummary,
@@ -727,7 +766,8 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
         keyQuotes: result.keyQuotes || [],
         chapters: chapters,
         tags: result.tags || [],
-        accuracy: result.accuracy || 85
+        accuracy: result.accuracy || 85,
+        predictionMarkets: predictionMarkets
       };
       
     } catch (error: any) {
