@@ -1,22 +1,81 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Mail, Brain, Link2, Shield, Users, Target, TrendingUp, BarChart3, FileText, LayoutDashboard, Sparkles, Hexagon } from "lucide-react";
+import { Play, Mail, Brain, Link2, Shield, Users, Target, TrendingUp, BarChart3, FileText, MessageCircle, Sparkles, Hexagon, Zap, Trophy, Bot, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { WaitlistModal } from "@/components/WaitlistModal";
 
+const featureCards = [
+  {
+    icon: Brain,
+    title: "AI Analysis",
+    description: "Transform videos into insights",
+    href: "#ai-processor",
+    color: "from-purple-500 to-fuchsia-500",
+    bgGlow: "purple",
+    isScroll: true
+  },
+  {
+    icon: TrendingUp,
+    title: "Prediction Markets",
+    description: "Trade on future outcomes",
+    href: "/markets",
+    color: "from-cyan-500 to-blue-500",
+    bgGlow: "cyan",
+    isScroll: false
+  },
+  {
+    icon: Target,
+    title: "Bounty Board",
+    description: "Earn rewards for content",
+    href: "/bounties",
+    color: "from-fuchsia-500 to-pink-500",
+    bgGlow: "fuchsia",
+    isScroll: false
+  },
+  {
+    icon: BarChart3,
+    title: "Discover",
+    description: "Market intelligence hub",
+    href: "/discover",
+    color: "from-emerald-500 to-teal-500",
+    bgGlow: "emerald",
+    isScroll: false
+  },
+  {
+    icon: Bot,
+    title: "Knowledge Avatars",
+    description: "AI-powered personas",
+    href: "#knowledge-avatars",
+    color: "from-amber-500 to-orange-500",
+    bgGlow: "amber",
+    isScroll: true
+  },
+  {
+    icon: Users,
+    title: "Community",
+    description: "Connect & collaborate",
+    href: "/dashboard",
+    color: "from-indigo-500 to-violet-500",
+    bgGlow: "indigo",
+    isScroll: false
+  }
+];
+
 export function HeroSection() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   
-  const scrollToProcessor = () => {
-    document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' });
+  const handleFeatureClick = (feature: typeof featureCards[0]) => {
+    if (feature.isScroll) {
+      const sectionId = feature.href.replace('#', '');
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16 bg-transparent">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-40 dark:opacity-50">
-        {/* Animated waveform */}
         <div className="absolute bottom-20 left-0 right-0 flex items-end justify-center space-x-2 opacity-50">
           {Array.from({ length: 12 }).map((_, i) => (
             <motion.div
@@ -52,22 +111,98 @@ export function HeroSection() {
             </span>
           </h1>
           
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
             <span className="gradient-text-primary font-bold">Your Web3 Hub for AI Content, Prediction Markets, DeFi Bounties & Market Intelligence</span>
             <br/>
             <span className="text-fuchsia-400 font-semibold block mt-1">Decentralized. Monetizable. Ownable.</span>
           </p>
+
+          {/* Feature Grid - Equal Spotlight on All Sections */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 max-w-6xl mx-auto mb-10 px-2"
+          >
+            {featureCards.map((feature, index) => {
+              const Icon = feature.icon;
+              const CardWrapper = feature.isScroll ? 'button' : Link;
+              const cardProps = feature.isScroll 
+                ? { onClick: () => handleFeatureClick(feature), type: "button" as const }
+                : { href: feature.href };
+              
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 * index }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative group"
+                >
+                  {feature.isScroll ? (
+                    <button
+                      onClick={() => handleFeatureClick(feature)}
+                      type="button"
+                      className="w-full block p-4 rounded-xl bg-white/5 dark:bg-slate-900/50 backdrop-blur-sm border border-white/10 dark:border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
+                      data-testid={`feature-card-${feature.title.toLowerCase().replace(' ', '-')}`}
+                    >
+                      <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                      <div className={`absolute -inset-0.5 rounded-xl bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-30 blur-lg transition-opacity duration-300`} />
+                      <div className="relative">
+                        <div className={`w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-lg`}>
+                          <Icon className="w-5 h-5 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">{feature.title}</h3>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 line-clamp-1">{feature.description}</p>
+                      </div>
+                    </button>
+                  ) : (
+                    <Link
+                      href={feature.href}
+                      className="block p-4 rounded-xl bg-white/5 dark:bg-slate-900/50 backdrop-blur-sm border border-white/10 dark:border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
+                      data-testid={`feature-card-${feature.title.toLowerCase().replace(' ', '-')}`}
+                    >
+                      <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                      <div className={`absolute -inset-0.5 rounded-xl bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-30 blur-lg transition-opacity duration-300`} />
+                      <div className="relative">
+                        <div className={`w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-lg`}>
+                          <Icon className="w-5 h-5 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">{feature.title}</h3>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 line-clamp-1">{feature.description}</p>
+                      </div>
+                    </Link>
+                  )}
+                </motion.div>
+              );
+            })}
+          </motion.div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 px-4">
+          {/* Primary CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10 px-4">
             <Button 
               size="lg"
-              onClick={scrollToProcessor}
+              onClick={() => document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' })}
               className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-gradient focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               data-testid="button-try-ai"
             >
               <Play className="w-5 h-5 mr-2" />
               Try AI Analysis
             </Button>
+            
+            <Link href="/markets">
+              <Button 
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto px-8 py-6 text-base font-semibold glass-bg glass-border hover:bg-cyan-500/20 dark:hover:bg-cyan-500/10 border-cyan-500/30 hover:border-cyan-500/50 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
+                data-testid="button-explore-markets"
+              >
+                <TrendingUp className="w-5 h-5 mr-2 text-cyan-400" />
+                Explore Markets
+              </Button>
+            </Link>
             
             <Button 
               size="lg"
@@ -81,53 +216,24 @@ export function HeroSection() {
             </Button>
           </div>
 
-          {/* Elegant Navigation Pills */}
+          {/* Live Stats Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-8"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-wrap items-center justify-center gap-6 mb-8 px-4"
           >
-            <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-400">
-              <Link href="/bounties" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-bounties">
-                <Target className="w-3.5 h-3.5" />
-                <span>Bounties</span>
-              </Link>
-              
-              <span className="text-gray-600">•</span>
-              
-              <Link href="/markets" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-markets">
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>Markets</span>
-              </Link>
-              
-              <span className="text-gray-600">•</span>
-              
-              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-fuchsia-500/20 hover:text-fuchsia-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-analytics">
-                <BarChart3 className="w-3.5 h-3.5" />
-                <span>Analytics</span>
-              </Link>
-              
-              <span className="text-gray-600">•</span>
-              
-              <Link href="/summaries" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-summaries">
-                <FileText className="w-3.5 h-3.5" />
-                <span>Summaries</span>
-              </Link>
-              
-              <span className="text-gray-600">•</span>
-              
-              <Link href="/dashboard" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-dashboard">
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>Dashboard</span>
-              </Link>
-              
-              <span className="text-gray-600">•</span>
-              
-              <Link href="/discover" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all duration-300 cursor-pointer" data-testid="link-nav-discover">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Discover</span>
-              </Link>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 dark:bg-slate-900/50 border border-purple-500/20">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs text-gray-600 dark:text-slate-400">100+ AI Agents Active</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 dark:bg-slate-900/50 border border-cyan-500/20">
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-xs text-gray-600 dark:text-slate-400">1.5M+ STREAM Distributed</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 dark:bg-slate-900/50 border border-fuchsia-500/20">
+              <Globe className="w-3.5 h-3.5 text-fuchsia-400" />
+              <span className="text-xs text-gray-600 dark:text-slate-400">Powered by Base</span>
             </div>
           </motion.div>
           

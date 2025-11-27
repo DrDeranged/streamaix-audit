@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth, useLogout } from "@/hooks/useAuth";
 import { useWeb3 } from "@/hooks/useWeb3";
@@ -37,7 +36,16 @@ import {
   Trophy,
   ChevronDown,
   LineChart,
-  PieChart
+  PieChart,
+  FileText,
+  MessageCircle,
+  Bot,
+  Users,
+  Vote,
+  Briefcase,
+  Award,
+  Play,
+  Video
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,7 +58,6 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   
-  // Web3 integration
   const { 
     wallet, 
     isConnected, 
@@ -61,14 +68,6 @@ export function Navigation() {
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
-  };
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-    setMobileMenuOpen(false);
   };
 
   return (
@@ -96,34 +95,49 @@ export function Navigation() {
           
           <div className="flex items-center space-x-3 sm:space-x-6">
             {/* Desktop Navigation with Icons */}
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
-              {/* Bounties Dropdown */}
+            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
+              {/* Discover Dropdown (formerly Analytics) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 to-fuchsia-500/0 group-hover:from-fuchsia-500/20 group-hover:to-fuchsia-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/20 group-hover:to-cyan-500/10 transition-all duration-300 rounded-lg" />
                     <div className="relative flex items-center gap-1.5">
-                      <Target className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-colors" />
-                      <span className="font-medium">Bounties</span>
+                      <Compass className="w-4 h-4 text-cyan-500 dark:text-cyan-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors" />
+                      <span className="font-medium">Discover</span>
                       <ChevronDown className="w-3 h-3" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
-                      <Target className="w-4 h-4 text-fuchsia-400" />
-                      <span className="font-medium">Browse Bounties</span>
+                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Compass className="w-4 h-4 text-cyan-400" />
+                      <div>
+                        <span className="font-medium block">Market Intelligence</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Real-time analytics</span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-yellow-500/20 transition-all duration-200 rounded-md mx-1">
-                      <Trophy className="w-4 h-4 text-yellow-400" />
-                      <span className="font-medium">Leaderboard</span>
+                    <Link href="/insights" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Brain className="w-4 h-4 text-blue-400" />
+                      <div>
+                        <span className="font-medium block">AI Insights</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Smart signals</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/analytics-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
+                      <PieChart className="w-4 h-4 text-green-400" />
+                      <div>
+                        <span className="font-medium block">Platform Stats</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Engagement metrics</span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -145,49 +159,182 @@ export function Navigation() {
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
                       <TrendingUp className="w-4 h-4 text-purple-400" />
-                      <span className="font-medium">Prediction Markets</span>
+                      <div>
+                        <span className="font-medium block">Prediction Markets</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Trade outcomes</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/market-portfolio" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Briefcase className="w-4 h-4 text-fuchsia-400" />
+                      <div>
+                        <span className="font-medium block">Portfolio</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Your positions</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/market-leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <div>
+                        <span className="font-medium block">Leaderboard</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Top traders</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/market-achievements" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Award className="w-4 h-4 text-cyan-400" />
+                      <div>
+                        <span className="font-medium block">Achievements</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Badges & rewards</span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Analytics Dropdown */}
+              {/* Bounties Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-fuchsia-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/20 group-hover:to-cyan-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 to-fuchsia-500/0 group-hover:from-fuchsia-500/20 group-hover:to-fuchsia-500/10 transition-all duration-300 rounded-lg" />
                     <div className="relative flex items-center gap-1.5">
-                      <BarChart3 className="w-4 h-4 text-cyan-500 dark:text-cyan-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors" />
-                      <span className="font-medium">Analytics</span>
+                      <Target className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-colors" />
+                      <span className="font-medium">Bounties</span>
                       <ChevronDown className="w-3 h-3" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
-                      <Compass className="w-4 h-4 text-cyan-400" />
-                      <span className="font-medium">Discover</span>
+                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Target className="w-4 h-4 text-fuchsia-400" />
+                      <div>
+                        <span className="font-medium block">Browse Bounties</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Find opportunities</span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
-                      <Brain className="w-4 h-4 text-blue-400" />
-                      <span className="font-medium">AI Insights</span>
+                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-yellow-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Trophy className="w-4 h-4 text-yellow-400" />
+                      <div>
+                        <span className="font-medium block">Hunter Leaderboard</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Top contributors</span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
-                      <PieChart className="w-4 h-4 text-green-400" />
-                      <span className="font-medium">Platform Stats</span>
+                    <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                      <FileText className="w-4 h-4 text-purple-400" />
+                      <div>
+                        <span className="font-medium block">Summaries</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">AI-generated content</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Content Dropdown (NEW) */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/20 group-hover:to-emerald-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="relative flex items-center gap-1.5">
+                      <Brain className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors" />
+                      <span className="font-medium">AI</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/create-summary" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-emerald-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Play className="w-4 h-4 text-emerald-400" />
+                      <div>
+                        <span className="font-medium block">AI Analysis</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Process videos</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/chat" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                      <MessageCircle className="w-4 h-4 text-blue-400" />
+                      <div>
+                        <span className="font-medium block">AI Chat</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Ask anything</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Bot className="w-4 h-4 text-amber-400" />
+                      <div>
+                        <span className="font-medium block">Knowledge Avatars</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">AI personas</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Community Dropdown (NEW) */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-indigo-500/0 group-hover:from-indigo-500/20 group-hover:to-indigo-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="relative flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors" />
+                      <span className="font-medium">Community</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-indigo-500/20 transition-all duration-200 rounded-md mx-1">
+                      <LayoutDashboard className="w-4 h-4 text-indigo-400" />
+                      <div>
+                        <span className="font-medium block">Dashboard</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Your activity</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/governance" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-violet-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Vote className="w-4 h-4 text-violet-400" />
+                      <div>
+                        <span className="font-medium block">Governance</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Vote on proposals</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/leagues" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-orange-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Trophy className="w-4 h-4 text-orange-400" />
+                      <div>
+                        <span className="font-medium block">Leagues</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Compete & earn</span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -212,7 +359,6 @@ export function Navigation() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="end" forceMount>
-                    {/* User Info Header */}
                     <div className="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-purple-500/20">
                       <Avatar className="h-10 w-10 ring-2 ring-purple-500/30">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
@@ -226,7 +372,6 @@ export function Navigation() {
                       </div>
                     </div>
 
-                    {/* Menu Items with Icons */}
                     <div className="py-2">
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
@@ -254,7 +399,6 @@ export function Navigation() {
 
                     <DropdownMenuSeparator className="bg-purple-500/20" />
 
-                    {/* Logout */}
                     <div className="py-1">
                       <DropdownMenuItem 
                         className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
@@ -284,7 +428,7 @@ export function Navigation() {
               )}
             </div>
             
-            {/* Theme Toggle with Enhanced Styling */}
+            {/* Theme Toggle */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
@@ -300,7 +444,7 @@ export function Navigation() {
               </Button>
             </motion.div>
             
-            {/* Web3 Wallet Connection - Enhanced */}
+            {/* Web3 Wallet Connection */}
             <div className="hidden md:block">
               {isConnected && wallet ? (
                 <DropdownMenu>
@@ -323,7 +467,6 @@ export function Navigation() {
                     </motion.div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="end">
-                    {/* Wallet Header */}
                     <div className="p-4 border-b border-gray-200 dark:border-purple-500/20">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-gray-600 dark:text-slate-400 uppercase tracking-wider">Connected Wallet</span>
@@ -341,7 +484,6 @@ export function Navigation() {
                       </div>
                     </div>
 
-                    {/* Menu Items */}
                     <div className="py-2">
                       <DropdownMenuItem asChild>
                         <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
@@ -357,7 +499,6 @@ export function Navigation() {
 
                     <DropdownMenuSeparator className="bg-purple-500/20" />
 
-                    {/* Disconnect */}
                     <div className="py-1">
                       <DropdownMenuItem 
                         className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
@@ -411,7 +552,7 @@ export function Navigation() {
           </div>
         </div>
 
-        {/* Mobile Menu - Enhanced */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -421,9 +562,51 @@ export function Navigation() {
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="md:hidden mt-4 py-4 border-t border-purple-500/30 bg-slate-900/90 backdrop-blur-xl rounded-lg mx-2 shadow-xl shadow-purple-500/10"
             >
-              <div className="flex flex-col space-y-1 px-4">
+              <div className="flex flex-col space-y-1 px-4 max-h-[70vh] overflow-y-auto">
+                {/* Discover Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">Discover</div>
+                <Link href="/discover" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-cyan-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Compass className="w-4 h-4 text-cyan-400" />
+                    Market Intelligence
+                  </button>
+                </Link>
+                <Link href="/insights" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-blue-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Brain className="w-4 h-4 text-blue-400" />
+                    AI Insights
+                  </button>
+                </Link>
+
+                {/* Markets Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Markets</div>
+                <Link href="/markets" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <TrendingUp className="w-4 h-4 text-purple-400" />
+                    Prediction Markets
+                  </button>
+                </Link>
+                <Link href="/market-portfolio" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Briefcase className="w-4 h-4 text-fuchsia-400" />
+                    Portfolio
+                  </button>
+                </Link>
+
                 {/* Bounties Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">Bounties</div>
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Bounties</div>
                 <Link href="/bounties" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
@@ -443,45 +626,45 @@ export function Navigation() {
                   </button>
                 </Link>
 
-                {/* Markets Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Markets</div>
-                <Link href="/markets" className="block">
+                {/* AI Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">AI</div>
+                <Link href="/create-summary" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-emerald-500/20 transition-all duration-200 font-medium text-sm"
                   >
-                    <TrendingUp className="w-4 h-4 text-purple-400" />
-                    Prediction Markets
+                    <Play className="w-4 h-4 text-emerald-400" />
+                    AI Analysis
                   </button>
                 </Link>
-
-                {/* Analytics Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Analytics</div>
-                <Link href="/discover" className="block">
-                  <button 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-cyan-500/20 transition-all duration-200 font-medium text-sm"
-                  >
-                    <Compass className="w-4 h-4 text-cyan-400" />
-                    Discover
-                  </button>
-                </Link>
-                <Link href="/discover" className="block">
+                <Link href="/chat" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-blue-500/20 transition-all duration-200 font-medium text-sm"
                   >
-                    <Brain className="w-4 h-4 text-blue-400" />
-                    AI Insights
+                    <MessageCircle className="w-4 h-4 text-blue-400" />
+                    AI Chat
                   </button>
                 </Link>
-                <Link href="/discover" className="block">
+
+                {/* Community Section */}
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Community</div>
+                <Link href="/dashboard" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-green-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-indigo-500/20 transition-all duration-200 font-medium text-sm"
                   >
-                    <PieChart className="w-4 h-4 text-green-400" />
-                    Platform Stats
+                    <LayoutDashboard className="w-4 h-4 text-indigo-400" />
+                    Dashboard
+                  </button>
+                </Link>
+                <Link href="/governance" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-violet-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Vote className="w-4 h-4 text-violet-400" />
+                    Governance
                   </button>
                 </Link>
                 
@@ -508,12 +691,6 @@ export function Navigation() {
                       </Avatar>
                       <span className="text-white font-medium text-sm">{user?.username}</span>
                     </div>
-                    <Link href="/dashboard" className="block">
-                      <button className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm">
-                        <LayoutDashboard className="w-4 h-4 text-purple-400" />
-                        Dashboard
-                      </button>
-                    </Link>
                     <Link href="/wallet-dashboard" className="block">
                       <button className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm">
                         <Wallet className="w-4 h-4 text-fuchsia-400" />
