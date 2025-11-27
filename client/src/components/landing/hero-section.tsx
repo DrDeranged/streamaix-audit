@@ -49,7 +49,7 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-base sm:text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light"
           >
-            Crowdsourced intelligence. On-chain rewards.
+            Autonomous intelligence. On-chain rewards.
           </motion.p>
 
           {/* Sleek horizontal button row */}
