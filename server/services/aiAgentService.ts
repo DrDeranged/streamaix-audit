@@ -151,7 +151,7 @@ Provide your analysis in JSON format:
 
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for agent analysis
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -171,7 +171,7 @@ Provide your analysis in JSON format:
           riskAssessment: analysis.riskAssessment,
           marketSentiment: analysis.marketSentiment,
           timestamp: new Date().toISOString(),
-          modelUsed: "gpt-4o"
+          modelUsed: "gpt-4o-mini"
         }
       };
     } catch (error) {

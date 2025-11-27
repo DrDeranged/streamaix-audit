@@ -124,11 +124,11 @@ export class AIService {
     const startTime = Date.now();
 
     try {
-      // Run all 4 API calls in PARALLEL for ~40% faster processing
+      // Run all 4 API calls in PARALLEL for ~40% faster processing - ALL use GPT-4o-mini for 90% cost savings
       const [summaryResponse, insightsResponse, chaptersResponse, tagsResponse] = await Promise.all([
-        // Generate main summary (GPT-4o for quality)
+        // Generate main summary (GPT-4o-mini - cost optimized)
         client.chat.completions.create({
-          model: 'gpt-4o',
+          model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper
           messages: [
             {
               role: 'system',
@@ -143,9 +143,9 @@ export class AIService {
           max_tokens: targetLength === 'long' ? 1500 : targetLength === 'medium' ? 1000 : 600
         }),
         
-        // Extract key insights (GPT-4o for quality)
+        // Extract key insights (GPT-4o-mini - cost optimized)
         client.chat.completions.create({
-          model: 'gpt-4o',
+          model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper
           messages: [
             {
               role: 'system',
@@ -160,9 +160,9 @@ export class AIService {
           max_tokens: 800
         }),
         
-        // Generate chapter breakdown (GPT-4o for accuracy)
+        // Generate chapter breakdown (GPT-4o-mini - cost optimized)
         client.chat.completions.create({
-          model: 'gpt-4o',
+          model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper
           messages: [
             {
               role: 'system',
@@ -422,7 +422,7 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
     
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for chapter generation
         messages: [
           {
             role: 'system',
@@ -461,7 +461,7 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
 
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for recommendations
         messages: [
           {
             role: 'system',
@@ -663,7 +663,7 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
 
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for sentiment analysis
         messages: [
           {
             role: 'system',
@@ -718,7 +718,7 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
 
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for credibility analysis
         messages: [
           {
             role: 'system',

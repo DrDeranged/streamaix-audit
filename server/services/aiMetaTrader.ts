@@ -197,7 +197,7 @@ Respond with JSON:
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for trading analysis
       messages: [
         { role: "system", content: "You are an arbitrage expert. Always return valid JSON." },
         { role: "user", content: prompt }

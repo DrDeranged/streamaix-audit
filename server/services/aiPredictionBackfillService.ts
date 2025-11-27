@@ -31,7 +31,7 @@ Format your response as JSON:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for prediction backfill
         messages: [
           {
             role: 'system',

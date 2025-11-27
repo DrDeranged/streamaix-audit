@@ -224,7 +224,7 @@ GUIDELINES:
 - Make questions specific and measurable`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for trend spotting
       messages: [
         { role: "system", content: "You are a prediction market creator. Always return valid JSON array." },
         { role: "user", content: prompt }

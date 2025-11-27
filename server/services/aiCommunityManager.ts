@@ -168,7 +168,7 @@ Generate a helpful, friendly reply that:
 Keep it natural and conversational. Don't be overly formal or robotic.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for community replies
       messages: [
         { role: "system", content: "You are a helpful community manager. Be friendly and concise." },
         { role: "user", content: prompt }

@@ -161,7 +161,7 @@ Return ONLY valid JSON in this exact format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for prediction extraction
       messages: [
         {
           role: 'system',

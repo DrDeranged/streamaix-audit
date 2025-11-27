@@ -186,7 +186,7 @@ GUIDELINES:
 - More liquidity for high-interest categories (crypto, defi)`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for liquidity decisions
       messages: [
         { role: "system", content: "You are a liquidity provider. Always return valid JSON." },
         { role: "user", content: prompt }

@@ -170,7 +170,7 @@ IMPORTANT:
 - Be conservative - if unsure, lower the confidence score`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for market resolution
       messages: [
         { role: "system", content: "You are an expert prediction market resolver. Always return valid JSON." },
         { role: "user", content: prompt }

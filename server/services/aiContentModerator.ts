@@ -171,7 +171,7 @@ GUIDELINES:
 - Be fair but maintain quality standards`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for moderation
       messages: [
         { role: "system", content: "You are a content moderator. Always return valid JSON." },
         { role: "user", content: prompt }

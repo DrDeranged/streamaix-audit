@@ -95,7 +95,7 @@ export async function generateChatResponse(
     }
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for chat
       messages: [systemMessage, ...messages],
       temperature: 0.7,
       max_tokens: 1000,
@@ -124,7 +124,7 @@ export async function generateStreamingChatResponse(
     }
 
     const stream = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for chat
       messages: [systemMessage, ...messages],
       temperature: 0.7,
       max_tokens: 1000,

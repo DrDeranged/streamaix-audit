@@ -72,7 +72,7 @@ Format your response as JSON:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for market generation
         messages: [
           {
             role: 'system',

@@ -150,7 +150,7 @@ GUIDELINES:
 - Prioritize high-volume markets for liquidity additions`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for treasury management
       messages: [
         { role: "system", content: "You are a treasury manager. Always return valid JSON." },
         { role: "user", content: prompt }
