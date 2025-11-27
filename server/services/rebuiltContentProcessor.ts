@@ -165,35 +165,33 @@ export class RebuiltContentProcessor {
         createdAt: new Date().toISOString()
       };
       
-      // Upload to IPFS and Arweave in parallel
-      console.log(`☁️ Uploading to decentralized storage...`);
-      const Web3Service = (await import('./web3Service')).Web3Service;
-      const [ipfsHash, arweaveId] = await Promise.all([
-        Web3Service.storeOnIPFS(summaryData),
-        Web3Service.storeOnArweave(summaryData)
-      ]);
-      console.log(`✅ Decentralized storage complete: IPFS=${ipfsHash}, Arweave=${arweaveId}`);
+      // ⚡ SPEED OPTIMIZATION: Run storage uploads AND prediction extraction in PARALLEL
+      console.log(`⚡ Running storage uploads + prediction extraction in PARALLEL for faster processing...`);
+      const parallelStartTime = Date.now();
       
-      // CRITICAL FIX: Extract AI prediction markets BEFORE marking as completed
+      const Web3Service = (await import('./web3Service')).Web3Service;
+      const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
+      
+      // Execute all 3 operations simultaneously
+      const [ipfsHash, arweaveId, predictionResult] = await Promise.all([
+        Web3Service.storeOnIPFS(summaryData),
+        Web3Service.storeOnArweave(summaryData),
+        extractPredictionsFromSummary(analysis.summary, metadata.title, url).catch((err: any) => {
+          console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, err.message);
+          return { predictions: [] };
+        })
+      ]);
+      
+      const parallelTime = ((Date.now() - parallelStartTime) / 1000).toFixed(1);
+      console.log(`✅ Parallel operations complete in ${parallelTime}s: IPFS=${ipfsHash}, Arweave=${arweaveId}`);
+      
+      // Extract markets from prediction result
       let suggestedMarkets: any[] = [];
-      try {
-        console.log(`🔮 Extracting AI prediction markets for ${summaryId}...`);
-        const { extractPredictionsFromSummary } = await import('./predictionExtractionService');
-        const predictionResult = await extractPredictionsFromSummary(
-          analysis.summary,
-          metadata.title,
-          url
-        );
-        
-        if (predictionResult.predictions && predictionResult.predictions.length > 0) {
-          suggestedMarkets = predictionResult.predictions;
-          console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
-        } else {
-          console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
-        }
-      } catch (predictionError: any) {
-        console.error(`⚠️ Failed to extract predictions for ${summaryId}:`, predictionError.message);
-        // Continue with empty markets array - don't fail the whole process
+      if (predictionResult?.predictions && predictionResult.predictions.length > 0) {
+        suggestedMarkets = predictionResult.predictions;
+        console.log(`✅ Extracted ${predictionResult.predictions.length} prediction markets for ${summaryId}`);
+      } else {
+        console.log(`ℹ️ No prediction markets found in content for ${summaryId}`);
       }
       
       // Now save everything INCLUDING markets in one atomic update with status=completed
