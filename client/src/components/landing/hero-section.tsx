@@ -110,18 +110,17 @@ export function HeroSection() {
               </Button>
             </motion.div>
 
-            <Link href="/dashboard">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button 
-                  variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-slate-300 hover:text-indigo-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
-                  data-testid="button-social-feed"
-                >
-                  <Users className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-300" />
-                  Social Feed
-                </Button>
-              </motion.div>
-            </Link>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline"
+                onClick={() => document.getElementById('social-feed')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-slate-300 hover:text-indigo-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                data-testid="button-social-feed"
+              >
+                <Users className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-300" />
+                Social Feed
+              </Button>
+            </motion.div>
 
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
