@@ -663,15 +663,41 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             </>
           )}
           
-          {/* Working Carousel with Overflow Hidden */}
-          <div className="overflow-hidden px-4 md:px-12" ref={containerRef}>
-            {/* Mobile Indicators */}
+          {/* Working Carousel - CSS scroll-snap for mobile, transforms for desktop */}
+          <div 
+            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory' : 'overflow-hidden'} px-4 md:px-12`}
+            ref={containerRef}
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}
+            onScroll={isMobile ? (e) => {
+              const container = e.currentTarget;
+              const scrollLeft = container.scrollLeft;
+              const cardWidth = container.offsetWidth;
+              const newIndex = Math.round(scrollLeft / cardWidth);
+              if (newIndex !== currentIndex && newIndex >= 0 && newIndex < avatars.length) {
+                setCurrentIndex(newIndex);
+              }
+            } : undefined}
+          >
+            {/* Mobile Indicators - sync with scroll position */}
             {isMobile && avatars.length > 1 && (
-              <div className="flex justify-center gap-2 mb-6">
+              <div className="flex justify-center gap-2 mb-6 sticky top-0 z-10">
                 {avatars.map((_, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCurrentIndex(idx)}
+                    onClick={() => {
+                      setCurrentIndex(idx);
+                      if (containerRef.current) {
+                        const cardWidth = containerRef.current.offsetWidth;
+                        containerRef.current.scrollTo({
+                          left: idx * cardWidth,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
                     className={`transition-all duration-300 rounded-full ${
                       idx === currentIndex 
                         ? 'w-8 h-2 bg-primary' 
@@ -683,19 +709,13 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               </div>
             )}
             
-            {/* Carousel Track */}
+            {/* Carousel Track - uses native scroll on mobile, transforms on desktop */}
             <div 
-              className="flex transition-transform duration-500 ease-out"
+              className={`flex ${isMobile ? '' : 'transition-transform duration-500 ease-out'}`}
               style={{
                 gap: isMobile ? '0' : '1.5rem',
-                transform: isMobile 
-                  ? `translateX(-${currentIndex * 100}%)`
-                  : `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                touchAction: 'pan-y'
+                transform: isMobile ? 'none' : `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
               }}
-              onTouchStart={isMobile ? onTouchStart : undefined}
-              onTouchMove={isMobile ? onTouchMove : undefined}
-              onTouchEnd={isMobile ? onTouchEnd : undefined}
             >
               {avatars.map((avatar, index) => {
                 // Use real database values instead of hardcoded data
@@ -717,9 +737,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 return (
                   <div 
                     key={avatar.id} 
-                    className="flex-shrink-0 relative z-10"
+                    className={`flex-shrink-0 relative z-10 ${isMobile ? 'snap-start snap-always' : ''}`}
                     style={{
-                      width: isMobile ? '100%' : `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 1.5}rem / ${itemsPerView})`
+                      width: isMobile ? '100%' : `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 1.5}rem / ${itemsPerView})`,
+                      minWidth: isMobile ? '100%' : 'auto'
                     }}
                   >
                     <Dialog>
