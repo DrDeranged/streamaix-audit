@@ -496,7 +496,7 @@ export function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-3 right-3 left-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 w-auto sm:w-[380px] h-[70vh] sm:h-[500px] max-h-[600px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 flex flex-col overflow-hidden"
+            className="fixed bottom-2 right-2 left-2 sm:left-auto sm:right-6 sm:bottom-6 z-50 w-auto sm:w-[360px] h-[55vh] sm:h-[480px] max-h-[500px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 flex flex-col overflow-hidden"
             data-testid="chat-panel"
           >
             {/* Header */}
@@ -524,44 +524,11 @@ export function ChatWidget() {
               </Button>
             </div>
 
-            {/* Content - Different UI for authenticated vs unauthenticated users */}
-            {!isAuthenticated ? (
-              // Unauthenticated: Show signup prompt
-              <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-center">
-                <div className="relative mb-4 sm:mb-6">
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
-                    <div className="h-11 w-11 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                      <Bot className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
-                    </div>
-                  </div>
-                  <motion.div
-                    className="absolute inset-0 rounded-full border border-purple-500/30"
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">
-                  Unlock Your AI Assistant
-                </h3>
-                <p className="text-slate-400 mb-4 sm:mb-6 max-w-[260px] text-xs sm:text-sm leading-relaxed">
-                  Sign up to chat with our AI assistant for help with platform features and crypto insights.
-                </p>
-                <Link href="/auth">
-                  <Button 
-                    className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 shadow-lg shadow-purple-500/20 rounded-xl px-5 h-9 text-sm"
-                    data-testid="button-signup-chat"
-                  >
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign Up / Log In
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              // Authenticated: Show full chat interface
-              <>
-                {/* Messages */}
-                <ScrollArea className="flex-1 px-3 sm:px-4 py-3" ref={scrollRef}>
-                  {isLoading ? (
+            {/* Chat interface - available for everyone */}
+            <>
+              {/* Messages */}
+              <ScrollArea className="flex-1 px-3 sm:px-4 py-3" ref={scrollRef}>
+                {isLoading && isAuthenticated ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="flex flex-col items-center gap-3">
                         <div className="relative">
@@ -689,8 +656,7 @@ export function ChatWidget() {
                     Powered by GPT-4o • Press Enter to send
                   </p>
                 </div>
-              </>
-            )}
+            </>
           </motion.div>
         )}
       </AnimatePresence>
