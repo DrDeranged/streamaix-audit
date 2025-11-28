@@ -25,53 +25,46 @@ interface OnboardingStep {
 const steps: OnboardingStep[] = [
   {
     title: "Welcome to StreamAiX",
-    subtitle: "Your Web3 Hub for AI Content, DeFi Bounties, and Market Intelligence",
-    description: "StreamAiX combines AI-powered content processing, prediction markets, institutional-grade analytics, and gamified bounties on the Base network. Turn content into markets, earn tokens, and access real-time intelligence—all on-chain.",
+    subtitle: "AI-Powered Prediction Markets on Base",
+    description: "Turn videos into insights, trade on predictions, and compete in leagues. 100+ AI agents trading 24/7.",
     icon: Sparkles,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Navigate through each feature by clicking 'Next'",
-      "Visit actual pages with 'Try It' buttons",
-      "Learn hands-on by interacting with real features",
-      "Complete the tour to unlock your first rewards"
+      "Explore each feature with 'Try It' buttons",
+      "Earn STREAM points for activity",
+      "Join leagues to compete for prizes"
     ],
     action: {
-      label: "Start Your Journey",
+      label: "Let's Go →",
       path: "/"
     }
   },
   {
-    title: "AI-Powered Summaries",
-    subtitle: "Transform Content Into Knowledge Assets & Markets",
-    description: "Convert podcasts, videos, and livestreams into comprehensive summaries using OpenAI Whisper + GPT-4o. Then instantly turn insights into prediction markets—creating tradeable forecasts from content analysis.",
+    title: "AI Content Processor",
+    subtitle: "Video → Summary → Market",
+    description: "Paste any YouTube URL. AI extracts insights and creates tradeable prediction markets automatically.",
     icon: Zap,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Paste any YouTube, podcast, or Twitch URL",
-      "AI transcribes with 98% accuracy using Whisper",
-      "GPT-4o generates chapters and key insights",
-      "One-click to create prediction markets from content",
-      "Markets auto-link to summaries for context",
-      "Store forever on Arweave/IPFS decentralized storage"
+      "Paste a YouTube or podcast URL",
+      "AI generates summary + key predictions",
+      "One-click to launch a prediction market"
     ],
     action: {
-      label: "Try AI Summaries →",
+      label: "Try AI Processor →",
       path: "/create-summary"
     }
   },
   {
     title: "Prediction Markets",
-    subtitle: "Trade on Future Outcomes with Real Money",
-    description: "Binary YES/NO markets powered by smart contracts on Base. AMM-based pricing, real-time trading, and automated settlement. Create markets from AI summaries or trade on community predictions.",
+    subtitle: "Trade YES/NO on Future Outcomes",
+    description: "Buy positions on crypto prices, DeFi events, and more. Real-time pricing, instant settlement.",
     icon: TrendingUp,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Browse crypto, DeFi, and real-world event markets",
-      "Buy YES/NO positions with instant pricing",
-      "AMM automatically adjusts prices (x*y=k formula)",
-      "Track your positions and P&L in real-time",
-      "Earn from accurate predictions when markets resolve",
-      "Build reputation on the predictor leaderboard"
+      "Browse markets by category",
+      "Buy YES or NO positions",
+      "Track your P&L in real-time"
     ],
     action: {
       label: "Explore Markets →",
@@ -79,136 +72,51 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Discovery & Analytics",
-    subtitle: "Institutional-Grade Market Intelligence",
-    description: "Access 9 analytics categories with 67+ live endpoints. AI trading signals, volatility forecasting, pattern recognition, and cross-market correlations. 3-tier API fallback ensures uninterrupted data flow.",
+    title: "Prediction Leagues",
+    subtitle: "Compete for Weekly Prizes",
+    description: "Join leagues, make predictions, climb leaderboards. Win from prize pools up to 100K STREAM.",
+    icon: Trophy,
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    instructions: [
+      "Join weekly or monthly leagues",
+      "Entry fees from 100-500 STREAM",
+      "Top predictors win big rewards"
+    ],
+    action: {
+      label: "View Leagues →",
+      path: "/leagues"
+    }
+  },
+  {
+    title: "Discover & Analytics",
+    subtitle: "Real-Time Crypto Intelligence",
+    description: "Live prices, AI signals, sentiment analysis. Everything you need to make informed predictions.",
     icon: BarChart3,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Explore volatility forecasting with ML models",
-      "View AI-powered Smart Insights with confidence scores",
-      "Analyze real-time charts and trading signals",
-      "Check sentiment analysis across social media",
-      "Monitor cross-market correlations and regime detection",
-      "Get personalized recommendations based on activity"
+      "View live crypto prices and charts",
+      "Check AI-powered trading signals",
+      "Analyze market sentiment"
     ],
     action: {
-      label: "Open Analytics →",
+      label: "Open Discover →",
       path: "/discover"
     }
   },
   {
-    title: "AI Chat Assistant",
-    subtitle: "Your Personal Investment & Platform Guide",
-    description: "GPT-4o powered assistant providing platform help, investment insights, market analysis, and personalized recommendations. Ask anything about features, strategies, or crypto trends.",
-    icon: Bot,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "Type questions in natural language",
-      "Get platform help: 'How do bounties work?'",
-      "Request market insights: 'Analyze Bitcoin trends'",
-      "Ask about DeFi: 'What's happening with Uniswap?'",
-      "Receive investment ideas based on your portfolio",
-      "Chat history saved for easy reference"
-    ],
-    action: {
-      label: "Chat with AI →",
-      path: "/chat"
-    }
-  },
-  {
-    title: "Personal Dashboard",
-    subtitle: "Your Summaries, Markets & Portfolio",
-    description: "Track all your created summaries, active prediction market positions, bounty progress, and earnings in one place. Monitor your knowledge assets, P&L, and Web3 reputation.",
-    icon: Crown,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "View all your AI summaries and NFTs",
-      "Track prediction market positions and P&L",
-      "Monitor bounty completions and earnings",
-      "Check referral stats and bonus rewards",
-      "See your STREAM points balance and staking",
-      "Export data for tax reporting"
-    ],
-    action: {
-      label: "View Dashboard →",
-      path: "/dashboard"
-    }
-  },
-  {
-    title: "Social Integration",
-    subtitle: "Connect & Share Across Web3",
-    description: "Link Twitter, Lens Protocol, and Farcaster accounts. Share summaries across platforms, build Web3 reputation, and engage with decentralized social networks—all with one click.",
-    icon: Share2,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "Connect Twitter via OAuth for social sharing",
-      "Link Lens Protocol for Web3 social graph",
-      "Join Farcaster for decentralized posting",
-      "Share summaries across all platforms at once",
-      "Build cross-platform reputation and followers",
-      "Earn from social engagement and referrals"
-    ],
-    action: {
-      label: "Connect Social →",
-      path: "/dashboard"
-    }
-  },
-  {
-    title: "Bounty System",
-    subtitle: "Earn STREAM, ETH & USDC for Contributions",
-    description: "Complete tasks, create content, and contribute to the ecosystem. Gamified with reputation levels, badges, streaks, and AI-powered quality scoring. Multi-token rewards distributed instantly.",
-    icon: Coins,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "Browse available bounties sorted by reward",
-      "Accept tasks that match your skills",
-      "Collaborate in real-time with WebSocket sync",
-      "Submit work and earn multi-token rewards",
-      "Level up reputation and unlock badges",
-      "Climb the global bounty leaderboard"
-    ],
-    action: {
-      label: "Explore Bounties →",
-      path: "/bounties"
-    }
-  },
-  {
-    title: "Web3 & Wallet",
-    subtitle: "On-Chain Ownership & DeFi Features",
-    description: "Connect your Web3 wallet to unlock decentralized features. Own knowledge assets as NFTs, participate in staking, trade on Base network, and manage your STREAM points.",
-    icon: Wallet,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "Click 'Connect Wallet' in the navbar",
-      "Approve MetaMask or WalletConnect request",
-      "Switch to Base network (Chain ID 8453)",
-      "View STREAM points balance in real-time",
-      "Mint summaries as tradeable NFTs",
-      "Stake tokens for governance and rewards"
-    ],
-    action: {
-      label: "Connect Wallet →",
-      path: "/"
-    }
-  },
-  {
-    title: "You're All Set!",
-    subtitle: "Start Building Your Web3 Empire",
-    description: "You've completed the StreamAiX tour! Create AI summaries, launch prediction markets, earn through bounties, access analytics, and build your decentralized portfolio. Let's go!",
+    title: "You're Ready!",
+    subtitle: "Start Earning STREAM",
+    description: "Create summaries, trade markets, win leagues. Your dashboard tracks everything.",
     icon: Rocket,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Install StreamAiX as a PWA on any device",
-      "Create your first AI summary and market",
-      "Complete bounties to earn tokens daily",
-      "Use analytics for smarter trading decisions",
-      "Invite friends with your referral code",
-      "Join our Discord and Twitter communities"
+      "Visit your Dashboard to track progress",
+      "Complete bounties for bonus rewards",
+      "Invite friends to earn referral bonuses"
     ],
     action: {
-      label: "Start Building →",
-      path: "/"
+      label: "Go to Dashboard →",
+      path: "/dashboard"
     }
   }
 ];
