@@ -52,10 +52,25 @@ export function InlineMarketCard({
   }
 
   // Calculate display values
-  const yesPrice = market.yesPrice || 500000; // Default 50%
-  const noPrice = market.noPrice || 500000;
-  const yesPricePercent = Math.round((yesPrice / 1000000) * 100);
-  const noPricePercent = Math.round((noPrice / 1000000) * 100);
+  // Prices can be stored in different formats:
+  // - Basis points (10000 = 100%): values typically 0-10000
+  // - Micro-units (1000000 = 100%): values typically 0-1000000
+  const rawYesPrice = market.yesPrice || 5000;
+  const rawNoPrice = market.noPrice || 5000;
+  
+  // Normalize to percentage (detect format based on value range)
+  const normalizePrice = (price: number): number => {
+    if (price > 10000) {
+      // Micro-units format (1000000 = 100%)
+      return Math.round((price / 1000000) * 100);
+    } else {
+      // Basis points format (10000 = 100%)
+      return Math.round((price / 10000) * 100);
+    }
+  };
+  
+  const yesPricePercent = normalizePrice(rawYesPrice);
+  const noPricePercent = normalizePrice(rawNoPrice);
   const totalVolume = market.totalVolume || 0;
 
   // Category styling
