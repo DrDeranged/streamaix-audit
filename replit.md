@@ -15,6 +15,7 @@ On every server startup, `server/auto-seed.ts` intelligently checks the database
 2. **100 Autonomous AI Agents** - Full user accounts with `isAiAgent=true`, 1.5M STREAM points distributed across 5 tiers (whales, power users, active, casual) - self-corrects to target of 100
 3. **50 AI Trading Bots** - Stored in `aiAgents` table with diverse personalities, strategies, and risk tolerances - ensures exactly 50 exist
 4. **11 Prediction Markets** - Covering crypto, DeFi, bounty, real-world, and community categories with initial liquidity - adds missing markets without duplicating
+5. **3 Prediction Leagues** - Weekly Crypto Champions, Newcomers Welcome League, and DeFi Masters League with varied entry fees and prize pools
 
 **Key Features:**
 - **Idempotent**: Safe to run multiple times, won't create duplicates
