@@ -708,6 +708,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 const sentimentLoading = sentimentData?.isLoading;
                 const influenceScore = avatar.influenceScore || socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 
+                // Use database recentActivity or fallback to static helper function
+                const recentActivityData = (avatar.recentActivity && avatar.recentActivity.length > 0) 
+                  ? avatar.recentActivity 
+                  : getRecentActivity(avatar.name);
+                
                 return (
                   <div 
                     key={avatar.id} 
@@ -867,33 +872,33 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                               </div>
                             </div>
                             
-                            {/* Terminal Activity Feed - Only show if we have real activity data from DB */}
-                            {avatar.recentActivity && avatar.recentActivity.length > 0 && (
+                            {/* Terminal Activity Feed - Use database or fallback to helper */}
+                            {recentActivityData && recentActivityData.length > 0 && (
                               <div className="space-y-2 flex-shrink-0">
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-1.5 text-xs text-blue-400/80 font-mono uppercase tracking-wider">
+                                  <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-blue-400/80 font-mono uppercase tracking-wider">
                                     <Activity className="h-3 w-3" />
                                     Live Feed
                                   </div>
                                   <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                                    avatar.recentActivity[0].impact === 'high' ? 'bg-red-400' :
-                                    avatar.recentActivity[0].impact === 'medium' ? 'bg-yellow-400' : 'bg-emerald-400'
+                                    recentActivityData[0].impact === 'high' ? 'bg-red-400' :
+                                    recentActivityData[0].impact === 'medium' ? 'bg-yellow-400' : 'bg-emerald-400'
                                   }`} />
                                 </div>
-                                <div className="bg-slate-950/60 border border-blue-500/30 rounded-lg p-3 hover:border-blue-400/50 hover:bg-slate-950/80 transition-all duration-300 cursor-pointer">
-                                  <div className="text-xs text-blue-200/90 line-clamp-2 font-medium">
-                                    {avatar.recentActivity[0].text}
+                                <div className="bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-blue-500/30 rounded-lg p-2.5 sm:p-3 hover:border-slate-300 dark:hover:border-blue-400/50 hover:bg-slate-50 dark:hover:bg-slate-950/80 transition-all duration-300 cursor-pointer">
+                                  <div className="text-xs text-slate-700 dark:text-blue-200/90 line-clamp-2 font-medium">
+                                    {recentActivityData[0].text}
                                   </div>
                                   <div className="flex items-center justify-between mt-2">
-                                    <div className="text-xs text-blue-400/60 font-mono">
-                                      {avatar.recentActivity[0].time}
+                                    <div className="text-xs text-slate-500 dark:text-blue-400/60 font-mono">
+                                      {recentActivityData[0].time}
                                     </div>
                                     <div className={`text-xs px-2 py-0.5 rounded font-mono uppercase tracking-wider ${
-                                      avatar.recentActivity[0].impact === 'high' ? 'bg-red-500/20 text-red-400' :
-                                      avatar.recentActivity[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 
+                                      recentActivityData[0].impact === 'high' ? 'bg-red-500/20 text-red-400' :
+                                      recentActivityData[0].impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 
                                       'bg-emerald-500/20 text-emerald-400'
                                     }`}>
-                                      {avatar.recentActivity[0].impact}
+                                      {recentActivityData[0].impact}
                                     </div>
                                   </div>
                                 </div>
