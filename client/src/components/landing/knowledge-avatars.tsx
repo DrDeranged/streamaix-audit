@@ -685,10 +685,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             
             {/* Carousel Track */}
             <div 
-              className="flex transition-transform duration-500 ease-out gap-6"
+              className="flex transition-transform duration-500 ease-out"
               style={{
-                transform: isMobile && containerWidth > 0
-                  ? `translateX(-${currentIndex * (containerWidth)}px)`
+                gap: isMobile ? '0' : '1.5rem',
+                transform: isMobile 
+                  ? `translateX(-${currentIndex * 100}%)`
                   : `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
                 touchAction: 'pan-y'
               }}
