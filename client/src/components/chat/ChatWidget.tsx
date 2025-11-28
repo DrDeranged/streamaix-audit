@@ -389,23 +389,6 @@ function EnergyOrbButton({ onClick }: { onClick: () => void }) {
         <div className="absolute inset-1 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
       </motion.button>
 
-      {/* Status Indicator */}
-      <motion.div
-        className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-900 shadow-lg"
-        animate={{
-          scale: [1, 1.2, 1],
-          boxShadow: [
-            '0 0 0 0 rgba(16, 185, 129, 0.4)',
-            '0 0 0 6px rgba(16, 185, 129, 0)',
-            '0 0 0 0 rgba(16, 185, 129, 0.4)',
-          ],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
     </div>
   );
 }
@@ -502,11 +485,8 @@ export function ChatWidget() {
             {/* Header */}
             <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-slate-700/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-cyan-500/10">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="relative">
-                  <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900" />
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                  <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm text-white">StreamAiX Assistant</h3>
