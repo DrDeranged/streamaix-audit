@@ -1,5 +1,5 @@
 import { db } from './db';
-import { knowledgeAvatars, users, aiAgents, predictionMarkets } from '@shared/schema';
+import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 const avatarSeedData = [
@@ -593,6 +593,111 @@ export async function autoSeedDatabase() {
     } else {
       console.log(`✅ Prediction markets complete (${existingMarkets.length}/${targetMarketCount})`);
     }
+    
+    // ===== STAGE 5: SEED PREDICTION LEAGUES =====
+    console.log('\n🏆 Stage 5: Seeding Prediction Leagues...');
+    
+    const existingLeagues = await db.select().from(predictionLeagues);
+    const targetLeagueCount = 3;
+    
+    if (existingLeagues.length < targetLeagueCount) {
+      const now = new Date();
+      const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const threeWeeksFromNow = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000);
+      const fourWeeksFromNow = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000);
+      
+      const leagueSeeds = [
+        {
+          name: 'Weekly Crypto Champions',
+          description: 'Compete weekly for the highest prediction market profits. Trade any market and climb the leaderboard!',
+          startDate: now,
+          endDate: oneWeekFromNow,
+          entryFee: 100,
+          maxParticipants: 50,
+          minTrades: 3,
+          prizePool: 10000,
+          prizeDistribution: [
+            { rank: 1, percentage: 50 },
+            { rank: 2, percentage: 30 },
+            { rank: 3, percentage: 20 }
+          ],
+          leagueType: 'weekly',
+          status: 'active',
+        },
+        {
+          name: 'Newcomers Welcome League',
+          description: 'Perfect for beginners! No entry fee, learn the ropes and compete for prizes.',
+          startDate: now,
+          endDate: twoWeeksFromNow,
+          entryFee: 0,
+          maxParticipants: 100,
+          minTrades: 1,
+          prizePool: 5000,
+          prizeDistribution: [
+            { rank: 1, percentage: 40 },
+            { rank: 2, percentage: 25 },
+            { rank: 3, percentage: 15 },
+            { rank: 4, percentage: 10 },
+            { rank: 5, percentage: 10 }
+          ],
+          leagueType: 'beginner',
+          status: 'active',
+        },
+        {
+          name: 'DeFi Masters League',
+          description: 'For serious DeFi enthusiasts. Predict the future of decentralized finance and win big!',
+          startDate: now,
+          endDate: fourWeeksFromNow,
+          entryFee: 500,
+          maxParticipants: 30,
+          minTrades: 5,
+          prizePool: 50000,
+          prizeDistribution: [
+            { rank: 1, percentage: 50 },
+            { rank: 2, percentage: 25 },
+            { rank: 3, percentage: 15 },
+            { rank: 4, percentage: 5 },
+            { rank: 5, percentage: 5 }
+          ],
+          leagueType: 'defi',
+          status: 'active',
+        },
+      ];
+      
+      const existingNames = new Set(existingLeagues.map(l => l.name));
+      const leaguesToCreate = leagueSeeds.filter(l => !existingNames.has(l.name));
+      let leagueCount = 0;
+      
+      for (const seed of leaguesToCreate) {
+        try {
+          await db.insert(predictionLeagues).values({
+            name: seed.name,
+            description: seed.description,
+            startDate: seed.startDate,
+            endDate: seed.endDate,
+            entryFee: seed.entryFee,
+            maxParticipants: seed.maxParticipants,
+            minTrades: seed.minTrades,
+            prizePool: seed.prizePool,
+            prizeDistribution: seed.prizeDistribution,
+            leagueType: seed.leagueType,
+            status: seed.status as 'upcoming' | 'active' | 'completed' | 'cancelled',
+            totalParticipants: 0,
+            totalVolume: 0,
+          });
+          leagueCount++;
+          console.log(`  ✓ Created league: "${seed.name}"`);
+        } catch (error: any) {
+          console.error(`  ✗ Failed to create league "${seed.name}":`, error.message);
+        }
+      }
+      
+      console.log(`🎉 Added ${leagueCount} new prediction leagues (${existingLeagues.length + leagueCount}/${targetLeagueCount} total)`);
+    } else {
+      console.log(`✅ Prediction leagues complete (${existingLeagues.length}/${targetLeagueCount})`);
+    }
+    
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
     // Don't throw - allow server to start even if seeding fails
