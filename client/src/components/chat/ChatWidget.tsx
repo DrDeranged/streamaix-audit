@@ -496,28 +496,28 @@ export function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[420px] h-[650px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 flex flex-col overflow-hidden"
+            className="fixed bottom-3 right-3 left-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 w-auto sm:w-[380px] h-[70vh] sm:h-[500px] max-h-[600px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 flex flex-col overflow-hidden"
             data-testid="chat-panel"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-cyan-500/10">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-slate-700/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-cyan-500/10">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="relative">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <Bot className="h-5 w-5 text-white" />
+                  <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                    <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm text-white">StreamAiX Assistant</h3>
-                  <p className="text-xs text-slate-400">AI-powered help & insights</p>
+                  <p className="text-[11px] text-slate-400 hidden sm:block">AI-powered help & insights</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl"
+                className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl h-8 w-8"
                 data-testid="button-close-chat"
               >
                 <X className="h-4 w-4" />
@@ -527,11 +527,11 @@ export function ChatWidget() {
             {/* Content - Different UI for authenticated vs unauthenticated users */}
             {!isAuthenticated ? (
               // Unauthenticated: Show signup prompt
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                <div className="relative mb-6">
-                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
-                    <div className="h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                      <Bot className="h-7 w-7 text-white" />
+              <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-center">
+                <div className="relative mb-4 sm:mb-6">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
+                    <div className="h-11 w-11 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                      <Bot className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                     </div>
                   </div>
                   <motion.div
@@ -540,15 +540,15 @@ export function ChatWidget() {
                     transition={{ duration: 2, repeat: Infinity }}
                   />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">
                   Unlock Your AI Assistant
                 </h3>
-                <p className="text-slate-400 mb-6 max-w-[280px] text-sm leading-relaxed">
-                  Sign up to chat with our AI-powered assistant and get help with platform features, investing insights, and crypto questions.
+                <p className="text-slate-400 mb-4 sm:mb-6 max-w-[260px] text-xs sm:text-sm leading-relaxed">
+                  Sign up to chat with our AI assistant for help with platform features and crypto insights.
                 </p>
                 <Link href="/auth">
                   <Button 
-                    className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 shadow-lg shadow-purple-500/20 rounded-xl px-6"
+                    className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 shadow-lg shadow-purple-500/20 rounded-xl px-5 h-9 text-sm"
                     data-testid="button-signup-chat"
                   >
                     <LogIn className="h-4 w-4 mr-2" />
@@ -560,7 +560,7 @@ export function ChatWidget() {
               // Authenticated: Show full chat interface
               <>
                 {/* Messages */}
-                <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
+                <ScrollArea className="flex-1 px-3 sm:px-4 py-3" ref={scrollRef}>
                   {isLoading ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="flex flex-col items-center gap-3">
@@ -617,10 +617,10 @@ export function ChatWidget() {
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                      <div className="relative mb-6">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
-                          <Sparkles className="h-8 w-8 text-purple-400" />
+                    <div className="flex flex-col items-center justify-center h-full text-center px-2 sm:px-4">
+                      <div className="relative mb-4 sm:mb-5">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 flex items-center justify-center">
+                          <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-purple-400" />
                         </div>
                         <motion.div
                           className="absolute inset-0 rounded-full border border-purple-500/30"
@@ -628,31 +628,31 @@ export function ChatWidget() {
                           transition={{ duration: 2, repeat: Infinity }}
                         />
                       </div>
-                      <h4 className="font-semibold text-white mb-2">Welcome to StreamAiX Assistant!</h4>
-                      <p className="text-sm text-slate-400 mb-6 max-w-[280px]">
-                        Ask me about the platform, bounties, prediction markets, or crypto insights!
+                      <h4 className="font-semibold text-white mb-1.5 text-sm sm:text-base">Welcome to StreamAiX Assistant!</h4>
+                      <p className="text-xs sm:text-sm text-slate-400 mb-4 sm:mb-5 max-w-[260px]">
+                        Ask me about bounties, markets, or crypto!
                       </p>
-                      <div className="space-y-2 w-full max-w-[300px]">
+                      <div className="space-y-1.5 sm:space-y-2 w-full max-w-[280px]">
                         <button
-                          className="w-full text-left px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
+                          className="w-full text-left px-3 sm:px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
                           onClick={() => setInputMessage('How do bounties work?')}
                           data-testid="button-quick-bounties"
                         >
-                          <span className="text-sm text-slate-300 group-hover:text-white transition-colors">How do bounties work?</span>
+                          <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white transition-colors">How do bounties work?</span>
                         </button>
                         <button
-                          className="w-full text-left px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
+                          className="w-full text-left px-3 sm:px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
                           onClick={() => setInputMessage('Explain prediction markets')}
                           data-testid="button-quick-markets"
                         >
-                          <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Explain prediction markets</span>
+                          <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white transition-colors">Explain prediction markets</span>
                         </button>
                         <button
-                          className="w-full text-left px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
+                          className="w-full text-left px-3 sm:px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800 transition-all group"
                           onClick={() => setInputMessage('How do I create a summary?')}
                           data-testid="button-quick-summary"
                         >
-                          <span className="text-sm text-slate-300 group-hover:text-white transition-colors">How do I create a summary?</span>
+                          <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white transition-colors">How to create a summary?</span>
                         </button>
                       </div>
                     </div>
@@ -660,7 +660,7 @@ export function ChatWidget() {
                 </ScrollArea>
 
                 {/* Input */}
-                <div className="p-4 border-t border-slate-700/50 bg-slate-800/30">
+                <div className="p-3 sm:p-4 border-t border-slate-700/50 bg-slate-800/30">
                   <div className="flex gap-2">
                     <Input
                       placeholder="Ask me anything..."
@@ -668,14 +668,14 @@ export function ChatWidget() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       disabled={sendMessageMutation.isPending}
-                      className="flex-1 bg-slate-800/80 border-slate-700/50 focus:border-purple-500/50 text-white placeholder:text-slate-500 rounded-xl"
+                      className="flex-1 bg-slate-800/80 border-slate-700/50 focus:border-purple-500/50 text-white placeholder:text-slate-500 rounded-xl text-sm h-10"
                       data-testid="input-chat-message"
                     />
                     <Button
                       onClick={handleSendMessage}
                       disabled={!inputMessage.trim() || sendMessageMutation.isPending}
                       size="icon"
-                      className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50"
+                      className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50 h-10 w-10"
                       data-testid="button-send-message"
                     >
                       {sendMessageMutation.isPending ? (
@@ -685,7 +685,7 @@ export function ChatWidget() {
                       )}
                     </Button>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-2 text-center">
+                  <p className="text-[10px] text-slate-500 mt-1.5 text-center hidden sm:block">
                     Powered by GPT-4o • Press Enter to send
                   </p>
                 </div>
