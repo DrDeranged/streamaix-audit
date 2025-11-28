@@ -79,11 +79,16 @@ export function EnhancedPredictionMarketCard({
     enabled: !!market.id,
   });
 
-  // Calculate display values
+  // Calculate display values - prices stored as basis points (5000 = 50%)
+  // Handle edge cases where prices might be stored incorrectly
+  const normalizePrice = (price: number) => {
+    if (price > 10000) return 50; // Invalid, default to 50%
+    return price / 100;
+  };
   const yesPrice = market.yesPrice || 5000; // Default 50%
   const noPrice = market.noPrice || 5000;
-  const yesPricePercent = Math.round((yesPrice / 100));
-  const noPricePercent = Math.round((noPrice / 100));
+  const yesPricePercent = Math.round(normalizePrice(yesPrice));
+  const noPricePercent = Math.round(normalizePrice(noPrice));
   const confidence = market.confidence || 70;
   const totalVolume = market.totalVolume || 0;
   const totalTrades = market.totalTrades || 0;
