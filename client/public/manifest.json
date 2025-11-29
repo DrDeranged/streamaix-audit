@@ -1,40 +1,143 @@
 {
-  "name": "StreamAiX",
+  "name": "StreamAiX - AI Prediction Markets",
   "short_name": "StreamAiX",
   "description": "AI-powered Web3 platform with autonomous prediction markets, 100+ AI agents, real-time crypto analytics, and STREAM token rewards",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0F172A",
   "theme_color": "#8B5CF6",
   "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
+    {
+      "src": "/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "education", "entertainment"],
+  "categories": ["finance", "productivity", "education", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "Markets",
+      "short_name": "Markets",
+      "description": "Browse prediction markets",
+      "url": "/markets",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your portfolio",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Discover",
+      "short_name": "Discover",
+      "description": "Explore crypto analytics",
+      "url": "/discover",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Bounties",
+      "short_name": "Bounties",
+      "description": "Complete bounties for rewards",
+      "url": "/bounty-board",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
   "screenshots": [
     {
-      "src": "/screenshot-1.png",
+      "src": "/screenshot-wide.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "label": "StreamAiX Dashboard"
+      "form_factor": "wide",
+      "label": "StreamAiX Dashboard - Desktop"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "StreamAiX Markets - Mobile"
     }
   ],
   "share_target": {
     "action": "/create-summary",
     "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
     "params": {
-      "url": "url"
+      "url": "url",
+      "title": "title",
+      "text": "text"
     }
-  }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+streamaix",
+      "url": "/%s"
+    }
+  ],
+  "related_applications": [],
+  "handle_links": "preferred"
 }

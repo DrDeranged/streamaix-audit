@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DashboardSkeleton, TradingSkeleton } from "@/components/LazyWrapper";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { PWAInstallPrompt, PWAUpdatePrompt } from "@/components/pwa/PWAInstallPrompt";
 
 // Immediate load for critical pages
 import Landing from "@/pages/landing";
@@ -247,6 +248,8 @@ function App() {
             <Router />
             <ChatWidget />
             <OnboardingTour />
+            <PWAInstallPrompt />
+            <PWAUpdatePrompt />
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
