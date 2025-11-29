@@ -689,15 +689,15 @@ export default function Discover() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center p-2 rounded-lg bg-white/5">
                     <p className="text-xs text-gray-500">Slow</p>
-                    <p className="text-sm font-bold text-emerald-400">{gasTracker.slow}</p>
+                    <p className="text-sm font-bold text-emerald-400">{gasTracker.slow > 0 ? gasTracker.slow : '—'}</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-white/5">
                     <p className="text-xs text-gray-500">Std</p>
-                    <p className="text-sm font-bold text-yellow-400">{gasTracker.standard}</p>
+                    <p className="text-sm font-bold text-yellow-400">{gasTracker.standard > 0 ? gasTracker.standard : '—'}</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-white/5">
                     <p className="text-xs text-gray-500">Fast</p>
-                    <p className="text-sm font-bold text-orange-400">{gasTracker.fast}</p>
+                    <p className="text-sm font-bold text-orange-400">{gasTracker.fast > 0 ? gasTracker.fast : '—'}</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 text-center mt-2">gwei</p>
@@ -844,7 +844,7 @@ export default function Discover() {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-white">
-                    ${(defiTvl.totalTVL / 1e9)?.toFixed(2)}B
+                    {defiTvl.totalTVL > 0 ? `$${(defiTvl.totalTVL / 1e9)?.toFixed(2)}B` : '—'}
                   </p>
                   <p className="text-xs text-gray-500">Total Locked</p>
                 </div>
