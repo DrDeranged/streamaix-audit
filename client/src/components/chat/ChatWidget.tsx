@@ -192,14 +192,14 @@ function EnergyOrbButton({ onClick }: { onClick: () => void }) {
 
   return (
     <div className="relative">
-      {/* Speech Bubble */}
+      {/* Speech Bubble - Hidden on mobile to prevent overlap */}
       <AnimatePresence>
         {showMessage && (
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.8 }}
-            className="absolute -top-12 right-0 whitespace-nowrap"
+            className="absolute -top-12 right-0 whitespace-nowrap hidden sm:block"
           >
             <div className="relative bg-slate-900/95 backdrop-blur-xl border border-purple-500/40 rounded-xl px-4 py-2 shadow-lg shadow-purple-500/20">
               <span className="text-sm font-medium bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
@@ -212,14 +212,14 @@ function EnergyOrbButton({ onClick }: { onClick: () => void }) {
         )}
       </AnimatePresence>
 
-      {/* Energy Orb Container */}
+      {/* Energy Orb Container - Smaller on mobile */}
       <motion.button
         onClick={onClick}
-        className="relative w-16 h-16 rounded-full cursor-pointer focus:outline-none group"
+        className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full cursor-pointer focus:outline-none group"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         animate={{
-          y: [0, -6, 0],
+          y: [0, -4, 0],
         }}
         transition={{
           y: {
@@ -465,7 +465,7 @@ export function ChatWidget() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
           >
             <EnergyOrbButton onClick={() => setIsOpen(true)} />
           </motion.div>

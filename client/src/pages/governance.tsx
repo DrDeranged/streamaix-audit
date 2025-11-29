@@ -212,7 +212,7 @@ export default function GovernancePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-24 sm:pb-8">
         {/* Header Section - Mobile Optimized */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
