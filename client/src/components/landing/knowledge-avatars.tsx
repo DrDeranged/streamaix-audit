@@ -873,17 +873,17 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     <div className="animate-spin rounded-full h-3 w-3 border-2 border-cyan-400/30 border-t-cyan-400" />
                                   )}
                                 </div>
-                                {socialSentiment && (
+                                {socialSentiment?.profile && socialSentiment?.sentiment && (
                                   <div className="flex items-center gap-2">
                                     <div className="text-xs text-blue-400/70 font-mono">
                                       {formatFollowerCount(socialSentiment.profile.followers)}
                                     </div>
                                     <div className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-mono ${
-                                      socialSentiment.sentiment.sentimentScore > 0.7 ? 'bg-emerald-500/20 text-emerald-400' :
-                                      socialSentiment.sentiment.sentimentScore > 0.3 ? 'bg-yellow-500/20 text-yellow-400' :
+                                      (socialSentiment.sentiment?.sentimentScore ?? 0) > 0.7 ? 'bg-emerald-500/20 text-emerald-400' :
+                                      (socialSentiment.sentiment?.sentimentScore ?? 0) > 0.3 ? 'bg-yellow-500/20 text-yellow-400' :
                                       'bg-red-500/20 text-red-400'
                                     }`}>
-                                      {Math.round(socialSentiment.sentiment.sentimentScore * 100)}%
+                                      {Math.round((socialSentiment.sentiment?.sentimentScore ?? 0) * 100)}%
                                     </div>
                                   </div>
                                 )}
