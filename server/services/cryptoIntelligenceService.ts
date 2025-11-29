@@ -98,8 +98,9 @@ interface WhaleAlert {
   significance: 'high' | 'medium' | 'low';
 }
 
-const CACHE_DURATION = 60000; // 1 minute cache
-const LONG_CACHE_DURATION = 300000; // 5 minutes for less volatile data
+const CACHE_DURATION = 300000; // 5 minutes cache (increased from 1 min to reduce API calls)
+const LONG_CACHE_DURATION = 900000; // 15 minutes for less volatile data (increased from 5 min)
+const STALE_CACHE_DURATION = 3600000; // 1 hour - return stale data if fresh fetch fails
 
 class CryptoIntelligenceService {
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
@@ -107,6 +108,14 @@ class CryptoIntelligenceService {
   private getCached<T>(key: string, duration: number = CACHE_DURATION): T | null {
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < duration) {
+      return cached.data as T;
+    }
+    return null;
+  }
+
+  private getStaleCache<T>(key: string): T | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < STALE_CACHE_DURATION) {
       return cached.data as T;
     }
     return null;
