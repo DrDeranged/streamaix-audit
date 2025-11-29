@@ -54,24 +54,26 @@ export default function AnalyticsDashboard() {
   const bounties = bountiesData?.bounties || [];
   const summaries = summariesData?.summaries || [];
   const stats = statsData?.stats || {};
+  
+  const COLORS = ['#a78bfa', '#e879f9', '#22d3ee', '#c084fc', '#d946ef'];
 
-  const activityData = [
-    { date: 'Mon', bounties: 12, summaries: 8, tips: 450 },
-    { date: 'Tue', bounties: 19, summaries: 14, tips: 680 },
-    { date: 'Wed', bounties: 15, summaries: 11, tips: 520 },
-    { date: 'Thu', bounties: 22, summaries: 18, tips: 890 },
-    { date: 'Fri', bounties: 28, summaries: 22, tips: 1200 },
-    { date: 'Sat', bounties: 18, summaries: 15, tips: 750 },
-    { date: 'Sun', bounties: 14, summaries: 9, tips: 580 },
+  // Use real activity data from API, or fallback to empty
+  const activityData = stats.activityData || [
+    { date: 'Mon', bounties: 0, summaries: 0, tips: 0 },
+    { date: 'Tue', bounties: 0, summaries: 0, tips: 0 },
+    { date: 'Wed', bounties: 0, summaries: 0, tips: 0 },
+    { date: 'Thu', bounties: 0, summaries: 0, tips: 0 },
+    { date: 'Fri', bounties: 0, summaries: 0, tips: 0 },
+    { date: 'Sat', bounties: 0, summaries: 0, tips: 0 },
+    { date: 'Sun', bounties: 0, summaries: 0, tips: 0 },
   ];
 
-  const categoryData = [
-    { name: 'DeFi', value: 35, color: '#a78bfa' },
-    { name: 'NFT', value: 25, color: '#e879f9' },
-    { name: 'Gaming', value: 20, color: '#22d3ee' },
-    { name: 'Layer2', value: 15, color: '#c084fc' },
-    { name: 'Infrastructure', value: 5, color: '#d946ef' },
-  ];
+  // Use real category distribution from API
+  const categoryData = (stats.categoryDistribution || []).map((cat: any, idx: number) => ({
+    name: cat.name,
+    value: cat.value,
+    color: COLORS[idx % COLORS.length]
+  }));
 
   const rewardDistribution = [
     { range: '0-500', count: 15 },
@@ -87,8 +89,6 @@ export default function AnalyticsDashboard() {
     { metric: 'Comments', value: 1890, change: -2.1 },
     { metric: 'Shares', value: 945, change: 15.7 },
   ];
-
-  const COLORS = ['#a78bfa', '#e879f9', '#22d3ee', '#c084fc', '#d946ef'];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
@@ -116,9 +116,9 @@ export default function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{stats.activeBounties || 0}</div>
-              <div className="flex items-center gap-1 text-xs text-cyan-400 mt-1">
-                <ArrowUpRight className="h-3 w-3" />
-                <span>+12% this week</span>
+              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.bounties || 0) >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
+                {(stats.changes?.bounties || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                <span>{(stats.changes?.bounties || 0) >= 0 ? '+' : ''}{stats.changes?.bounties || 0}% this week</span>
               </div>
             </CardContent>
           </Card>
@@ -134,9 +134,9 @@ export default function AnalyticsDashboard() {
               <div className="text-3xl font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
                 {(stats.totalRewards || 0).toLocaleString()} STREAM
               </div>
-              <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
-                <ArrowUpRight className="h-3 w-3" />
-                <span>+28% this week</span>
+              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.rewards || 0) >= 0 ? 'text-purple-400' : 'text-red-400'}`}>
+                {(stats.changes?.rewards || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                <span>{(stats.changes?.rewards || 0) >= 0 ? '+' : ''}{stats.changes?.rewards || 0}% this week</span>
               </div>
             </CardContent>
           </Card>
@@ -150,11 +150,11 @@ export default function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                {Math.floor(Math.random() * 500) + 250}
+                {stats.activeUsers || 0}
               </div>
-              <div className="flex items-center gap-1 text-xs text-fuchsia-400 mt-1">
-                <ArrowUpRight className="h-3 w-3" />
-                <span>+18% this week</span>
+              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.users || 0) >= 0 ? 'text-fuchsia-400' : 'text-red-400'}`}>
+                {(stats.changes?.users || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                <span>{(stats.changes?.users || 0) >= 0 ? '+' : ''}{stats.changes?.users || 0}% this week</span>
               </div>
             </CardContent>
           </Card>
@@ -168,11 +168,11 @@ export default function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                {bounties.filter(b => b.status === 'completed').length}
+                {stats.completedBounties || 0}
               </div>
-              <div className="flex items-center gap-1 text-xs text-cyan-400 mt-1">
-                <ArrowUpRight className="h-3 w-3" />
-                <span>+15% this week</span>
+              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.completed || 0) >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
+                {(stats.changes?.completed || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                <span>{(stats.changes?.completed || 0) >= 0 ? '+' : ''}{stats.changes?.completed || 0}% this week</span>
               </div>
             </CardContent>
           </Card>

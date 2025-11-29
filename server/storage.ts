@@ -130,6 +130,7 @@ export interface IStorage {
   getUserByTwitterId?(twitterId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
 
   // Summary operations
   getSummary(id: string): Promise<Summary | undefined>;
@@ -554,6 +555,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user || undefined;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 
   // Summary operations
