@@ -970,17 +970,191 @@ export default function Discover() {
         </section>
 
         {/* =================================================================== */}
+        {/* MACRO INTELLIGENCE DASHBOARD - Moved higher for better visibility */}
+        {/* =================================================================== */}
+        
+        <section>
+          <div
+            onClick={() => toggleSection('macro')}
+            className="flex items-center gap-2 mb-3 cursor-pointer group p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all backdrop-blur-sm"
+            data-testid="toggle-macro-dashboard"
+          >
+            <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/30">
+              <Globe className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-orbitron font-bold text-white">Macro Intelligence</h2>
+              <p className="text-xs text-gray-400">Global liquidity, Fed watch, treasury yields, economic calendar</p>
+            </div>
+            {macroExpanded ? (
+              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+            ) : (
+              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+            )}
+          </div>
+
+          {macroExpanded && (
+            <div className="space-y-3">
+              {/* Index Futures Row - Compact */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {indexFutures.map((future: any) => (
+                  <div key={future.symbol} className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-blue-500/30 transition-all">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-400">{future.symbol}</span>
+                      <Badge className={`text-[10px] px-1.5 ${future.change >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {future.change >= 0 ? '+' : ''}{future.changePercent?.toFixed(2)}%
+                      </Badge>
+                    </div>
+                    <p className="text-lg font-bold text-white">{future.price?.toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Treasury Yields + VIX/DXY + Fed Watch - Compact */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {/* Treasury Yields */}
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Landmark className="w-4 h-4 text-cyan-400" />
+                    <h3 className="text-xs font-medium text-white">Treasury Yields</h3>
+                    <Badge className={`ml-auto text-[10px] px-1.5 ${
+                      yieldCurveStatus === 'inverted' ? 'bg-red-500/20 text-red-400' :
+                      yieldCurveStatus === 'flat' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-emerald-500/20 text-emerald-400'
+                    }`}>
+                      {yieldCurveStatus}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {Object.entries(treasuryYields).slice(0, 4).map(([term, data]: [string, any]) => (
+                      <div key={term} className="text-center p-1.5 rounded bg-slate-800/50">
+                        <p className="text-[10px] text-gray-400">{term}</p>
+                        <p className="text-xs font-bold text-white">{data.rate?.toFixed(2)}%</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* VIX & DXY - Compact */}
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Gauge className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-xs font-medium text-white">Volatility</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {volatilityIndices.vix && (
+                      <div className="p-2 rounded-lg bg-slate-800/50">
+                        <p className="text-[10px] text-gray-400">VIX</p>
+                        <p className="text-lg font-bold text-white">{volatilityIndices.vix.value?.toFixed(1)}</p>
+                        <Badge className={`text-[10px] px-1 ${
+                          volatilityIndices.vix.level === 'low' ? 'bg-emerald-500/20 text-emerald-400' :
+                          volatilityIndices.vix.level === 'moderate' ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          {volatilityIndices.vix.level}
+                        </Badge>
+                      </div>
+                    )}
+                    {volatilityIndices.dxy && (
+                      <div className="p-2 rounded-lg bg-slate-800/50">
+                        <p className="text-[10px] text-gray-400">DXY</p>
+                        <p className="text-lg font-bold text-white">{volatilityIndices.dxy.value?.toFixed(2)}</p>
+                        <span className={`text-[10px] ${volatilityIndices.dxy.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {volatilityIndices.dxy.change >= 0 ? '+' : ''}{volatilityIndices.dxy.changePercent?.toFixed(2)}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Fed Watch - Compact */}
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Building className="w-4 h-4 text-purple-400" />
+                    <h3 className="text-xs font-medium text-white">Fed Watch</h3>
+                  </div>
+                  {fedWatch.nextMeeting && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-gray-400">Current Rate</span>
+                        <span className="text-xs font-bold text-white">{fedWatch.currentRate}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                        <div className="p-1.5 rounded bg-slate-800/50 flex justify-between">
+                          <span className="text-gray-400">Hold</span>
+                          <span className="text-white">{fedWatch.nextMeeting.probabilities?.hold}%</span>
+                        </div>
+                        <div className="p-1.5 rounded bg-slate-800/50 flex justify-between">
+                          <span className="text-emerald-400">-25bp</span>
+                          <span className="text-white">{fedWatch.nextMeeting.probabilities?.cut25}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Global M2 + Calendar - Compact */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {/* Global M2 */}
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <PiggyBank className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xs font-medium text-white">Global M2 Liquidity</h3>
+                    <Badge className={`ml-auto text-[10px] px-1.5 ${
+                      globalM2.trend === 'expanding' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                    }`}>
+                      {globalM2.trend}
+                    </Badge>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-white">${globalM2.total?.toFixed(1)}</span>
+                    <span className="text-xs text-gray-400">Trillion</span>
+                    <span className={`text-xs ${globalM2.changePercent30d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {globalM2.changePercent30d >= 0 ? '+' : ''}{globalM2.changePercent30d}% (30d)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Economic Calendar */}
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-4 h-4 text-orange-400" />
+                    <h3 className="text-xs font-medium text-white">Economic Calendar</h3>
+                    <Badge className="ml-auto text-[10px] px-1.5 bg-orange-500/20 text-orange-400">
+                      {macroCalendar.filter((e: any) => e.impact === 'high').length} High Impact
+                    </Badge>
+                  </div>
+                  <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                    {macroCalendar.slice(0, 4).map((event: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2 p-1.5 rounded bg-slate-800/30">
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          event.impact === 'high' ? 'bg-red-400' :
+                          event.impact === 'medium' ? 'bg-yellow-400' : 'bg-gray-400'
+                        }`} />
+                        <p className="text-[10px] text-white truncate flex-1">{event.event}</p>
+                        <span className="text-[10px] text-gray-500">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* =================================================================== */}
         {/* ADVANCED MARKET INTELLIGENCE */}
         {/* =================================================================== */}
         
-        <section className="space-y-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/20">
-              <Cpu className="w-6 h-6 text-purple-400" />
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/20">
+              <Cpu className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-xl font-orbitron font-bold text-white">Advanced Intelligence</h2>
-              <p className="text-sm text-gray-400">Institutional-grade market signals</p>
+              <h2 className="text-lg font-orbitron font-bold text-white">Advanced Intelligence</h2>
+              <p className="text-xs text-gray-400">Institutional-grade market signals</p>
             </div>
           </div>
 
@@ -1580,217 +1754,6 @@ export default function Discover() {
             </div>
           </section>
         </div>
-
-        {/* Macro Intelligence Dashboard */}
-        <section>
-          <div
-            onClick={() => toggleSection('macro')}
-            className="flex items-center gap-3 mb-4 cursor-pointer group p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all backdrop-blur-sm"
-            data-testid="toggle-macro-dashboard"
-          >
-            <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/30">
-              <Globe className="w-5 h-5 text-blue-400" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-orbitron font-bold text-white">Macro Intelligence</h2>
-              <p className="text-xs text-gray-400">Global liquidity, Fed watch, treasury yields, economic calendar</p>
-            </div>
-            {macroExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
-            ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
-            )}
-          </div>
-
-          {macroExpanded && (
-            <div className="space-y-4">
-              {/* Index Futures Row */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {indexFutures.map((future: any) => (
-                  <div key={future.symbol} className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-blue-500/30 transition-all">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <span className="text-xs text-gray-400">{future.symbol}</span>
-                        <p className="text-sm font-medium text-white">{future.name}</p>
-                      </div>
-                      <Badge className={`text-xs ${future.change >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                        {future.change >= 0 ? '+' : ''}{future.changePercent?.toFixed(2)}%
-                      </Badge>
-                    </div>
-                    <p className="text-2xl font-bold text-white mb-1">{future.price?.toFixed(2)}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <span>Vol: {(future.volume / 1000).toFixed(0)}K</span>
-                      <Badge variant="outline" className="text-xs">{future.status}</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Treasury Yields + VIX/DXY + Fed Watch */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Treasury Yields */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Landmark className="w-4 h-4 text-cyan-400" />
-                    <h3 className="text-sm font-medium text-white">Treasury Yields</h3>
-                    <Badge className={`ml-auto text-xs ${
-                      yieldCurveStatus === 'inverted' ? 'bg-red-500/20 text-red-400' :
-                      yieldCurveStatus === 'flat' ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-emerald-500/20 text-emerald-400'
-                    }`}>
-                      {yieldCurveStatus}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {Object.entries(treasuryYields).slice(0, 4).map(([term, data]: [string, any]) => (
-                      <div key={term} className="text-center p-2 rounded bg-slate-800/50">
-                        <p className="text-xs text-gray-400">{term}</p>
-                        <p className="text-sm font-bold text-white">{data.rate?.toFixed(2)}%</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-white/5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-400">2s10s Spread</span>
-                      <span className={`font-medium ${parseFloat((treasuryYieldsData as any)?.yieldSpread2s10s || 0) < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                        {(treasuryYieldsData as any)?.yieldSpread2s10s}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* VIX & Volatility */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Gauge className="w-4 h-4 text-amber-400" />
-                    <h3 className="text-sm font-medium text-white">Volatility & Fear</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {volatilityIndices.vix && (
-                      <div className="p-3 rounded-lg bg-slate-800/50">
-                        <p className="text-xs text-gray-400 mb-1">VIX</p>
-                        <p className="text-xl font-bold text-white">{volatilityIndices.vix.value?.toFixed(1)}</p>
-                        <Badge className={`mt-1 text-xs ${
-                          volatilityIndices.vix.level === 'low' ? 'bg-emerald-500/20 text-emerald-400' :
-                          volatilityIndices.vix.level === 'moderate' ? 'bg-yellow-500/20 text-yellow-400' :
-                          volatilityIndices.vix.level === 'elevated' ? 'bg-orange-500/20 text-orange-400' :
-                          'bg-red-500/20 text-red-400'
-                        }`}>
-                          {volatilityIndices.vix.level}
-                        </Badge>
-                      </div>
-                    )}
-                    {volatilityIndices.dxy && (
-                      <div className="p-3 rounded-lg bg-slate-800/50">
-                        <p className="text-xs text-gray-400 mb-1">DXY</p>
-                        <p className="text-xl font-bold text-white">{volatilityIndices.dxy.value?.toFixed(2)}</p>
-                        <span className={`text-xs ${volatilityIndices.dxy.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {volatilityIndices.dxy.change >= 0 ? '+' : ''}{volatilityIndices.dxy.changePercent?.toFixed(2)}%
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Fed Watch */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Building className="w-4 h-4 text-purple-400" />
-                    <h3 className="text-sm font-medium text-white">Fed Watch</h3>
-                  </div>
-                  {fedWatch.nextMeeting && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400">Current Rate</span>
-                        <span className="text-sm font-bold text-white">{fedWatch.currentRate}</span>
-                      </div>
-                      <div className="p-2 rounded bg-slate-800/50">
-                        <p className="text-xs text-gray-400 mb-2">Next Meeting Probabilities</p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Hold</span>
-                            <span className="text-white">{fedWatch.nextMeeting.probabilities?.hold}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-emerald-400">-25bp</span>
-                            <span className="text-white">{fedWatch.nextMeeting.probabilities?.cut25}%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Global M2 Liquidity + Economic Calendar */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Global M2 Liquidity */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <PiggyBank className="w-4 h-4 text-emerald-400" />
-                    <h3 className="text-sm font-medium text-white">Global M2 Liquidity</h3>
-                    <Badge className={`ml-auto text-xs ${
-                      globalM2.trend === 'expanding' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {globalM2.trend}
-                    </Badge>
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-3xl font-bold text-white">${globalM2.total?.toFixed(1)}</span>
-                    <span className="text-sm text-gray-400">Trillion</span>
-                    <span className={`text-sm ${globalM2.changePercent30d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {globalM2.changePercent30d >= 0 ? '+' : ''}{globalM2.changePercent30d}% (30d)
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-2 text-xs">
-                    {globalM2.components?.slice(0, 5).map((comp: any) => (
-                      <div key={comp.country} className="text-center p-2 rounded bg-slate-800/50">
-                        <p className="text-gray-400 truncate">{comp.country.slice(0, 5)}</p>
-                        <p className="text-white font-medium">${comp.m2?.toFixed(1)}T</p>
-                      </div>
-                    ))}
-                  </div>
-                  {globalM2.implication && (
-                    <p className="mt-3 text-xs text-gray-400 italic border-t border-white/5 pt-3">
-                      {globalM2.implication}
-                    </p>
-                  )}
-                </div>
-
-                {/* Economic Calendar */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-4 h-4 text-orange-400" />
-                    <h3 className="text-sm font-medium text-white">Economic Calendar</h3>
-                    <Badge className="ml-auto text-xs bg-orange-500/20 text-orange-400">
-                      {macroCalendar.filter((e: any) => e.impact === 'high').length} High Impact
-                    </Badge>
-                  </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {macroCalendar.slice(0, 6).map((event: any, idx: number) => (
-                      <div key={idx} className="flex items-start gap-3 p-2 rounded bg-slate-800/30">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                          event.impact === 'high' ? 'bg-red-400' :
-                          event.impact === 'medium' ? 'bg-yellow-400' : 'bg-gray-400'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-white truncate">{event.event}</p>
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <span>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                            <span>{event.time}</span>
-                            {event.forecast && (
-                              <span className="text-gray-500">Est: {event.forecast}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
 
         {/* Trending Markets Heat Map */}
         <section>
