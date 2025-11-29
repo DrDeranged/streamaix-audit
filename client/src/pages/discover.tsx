@@ -577,17 +577,60 @@ export default function Discover() {
         </div>
 
         {/* =================================================================== */}
+        {/* TOP 10 CRYPTO BY MARKET CAP - HORIZONTAL SLIDER */}
+        {/* =================================================================== */}
+        
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-3">
+            <Crown className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-medium text-gray-400">Top 10 by Market Cap</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            {cryptoAssets.length > 0 ? (
+              cryptoAssets.slice(0, 10).map((coin: any, idx: number) => (
+                <div 
+                  key={coin.symbol || idx}
+                  className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all min-w-[140px]"
+                >
+                  <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                  {coin.image && <img src={coin.image} alt={coin.symbol} className="w-5 h-5 rounded-full" />}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-white">{coin.symbol}</p>
+                    <p className="text-[10px] text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <span className={`text-[10px] font-medium ${coin.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {coin.change24h >= 0 ? '+' : ''}{coin.change24h?.toFixed(1)}%
+                  </span>
+                </div>
+              ))
+            ) : (
+              Array.from({ length: 10 }).map((_, idx) => (
+                <div key={idx} className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 min-w-[140px] animate-pulse">
+                  <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                  <div className="w-5 h-5 rounded-full bg-white/10" />
+                  <div className="flex-1">
+                    <div className="h-3 w-12 bg-white/10 rounded mb-1" />
+                    <div className="h-2 w-16 bg-white/10 rounded" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* =================================================================== */}
         {/* CRYPTO INTELLIGENCE DASHBOARD */}
         {/* =================================================================== */}
         
-        <section className="space-y-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/20">
-              <Flame className="w-6 h-6 text-orange-400" />
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/20">
+              <Flame className="w-5 h-5 text-orange-400" />
             </div>
             <div>
-              <h2 className="text-xl font-orbitron font-bold text-white">Crypto Intelligence</h2>
-              <p className="text-sm text-gray-400">Real-time market sentiment & analytics</p>
+              <h2 className="text-lg font-orbitron font-bold text-white">Crypto Intelligence</h2>
+              <p className="text-xs text-gray-400">Real-time market sentiment & analytics</p>
             </div>
           </div>
 
