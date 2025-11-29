@@ -99,8 +99,8 @@ const steps: OnboardingStep[] = [
       "Invite friends to earn referral bonuses"
     ],
     action: {
-      label: "Go to Dashboard →",
-      path: "/dashboard"
+      label: "Start Exploring →",
+      path: "/"
     }
   }
 ];
