@@ -56,35 +56,19 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Prediction Markets",
-    subtitle: "Trade YES/NO on Future Outcomes",
-    description: "Buy positions on crypto prices, DeFi events, and more. Real-time pricing, instant settlement.",
+    title: "Markets & Leagues",
+    subtitle: "Trade Predictions, Win Prizes",
+    description: "Trade YES/NO on crypto, DeFi, and events. Join leagues to compete for prize pools up to 100K STREAM.",
     icon: TrendingUp,
     gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
     instructions: [
-      "Browse markets by category",
-      "Buy YES or NO positions",
-      "Track your P&L in real-time"
+      "Trade YES/NO positions on any market",
+      "Join leagues and climb leaderboards",
+      "Win from weekly prize pools"
     ],
     action: {
       label: "Explore Markets →",
       path: "/markets"
-    }
-  },
-  {
-    title: "Prediction Leagues",
-    subtitle: "Compete for Weekly Prizes",
-    description: "Join leagues, make predictions, climb leaderboards. Win from prize pools up to 100K STREAM.",
-    icon: Trophy,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "Join weekly or monthly leagues",
-      "Entry fees from 100-500 STREAM",
-      "Top predictors win big rewards"
-    ],
-    action: {
-      label: "View Leagues →",
-      path: "/leagues"
     }
   },
   {
