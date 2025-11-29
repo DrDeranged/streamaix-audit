@@ -116,7 +116,14 @@ import {
   // Waitlist
   waitlist,
   type Waitlist,
-  type InsertWaitlist
+  type InsertWaitlist,
+  // Governance
+  governanceProposals,
+  governanceVotes,
+  type GovernanceProposal,
+  type GovernanceVote,
+  type InsertGovernanceProposal,
+  type InsertGovernanceVote,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -516,6 +523,17 @@ export interface IStorage {
     createdAt: Date;
     metadata?: any;
   }>>;
+  
+  // Governance operations
+  getGovernanceProposals(options?: { status?: string; category?: string; limit?: number }): Promise<any[]>;
+  getGovernanceProposal(id: string): Promise<any | undefined>;
+  createGovernanceProposal(data: any): Promise<any>;
+  updateGovernanceProposal(id: string, updates: any): Promise<any | undefined>;
+  castVote(data: { proposalId: string; voterId: string; support: string; votingPower: number; reason?: string }): Promise<any>;
+  getVotesByProposal(proposalId: string): Promise<any[]>;
+  getVotesByUser(userId: string): Promise<any[]>;
+  getUserVoteOnProposal(proposalId: string, userId: string): Promise<any | undefined>;
+  getGovernanceStats(): Promise<{ totalProposals: number; activeProposals: number; totalVoters: number; participationRate: number; successRate: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3104,6 +3122,116 @@ export class DatabaseStorage implements IStorage {
       .slice(offset, offset + limit);
     
     return sortedActivities;
+  }
+
+  // Governance operations
+  async getGovernanceProposals(options?: { status?: string; category?: string; limit?: number }): Promise<GovernanceProposal[]> {
+    const limit = options?.limit || 50;
+    let query = db.select().from(governanceProposals).orderBy(desc(governanceProposals.createdAt));
+    
+    if (options?.status) {
+      query = query.where(eq(governanceProposals.status, options.status)) as typeof query;
+    }
+    if (options?.category) {
+      query = query.where(eq(governanceProposals.category, options.category)) as typeof query;
+    }
+    
+    return await query.limit(limit);
+  }
+
+  async getGovernanceProposal(id: string): Promise<GovernanceProposal | undefined> {
+    const [proposal] = await db.select().from(governanceProposals).where(eq(governanceProposals.id, id));
+    return proposal;
+  }
+
+  async createGovernanceProposal(data: InsertGovernanceProposal): Promise<GovernanceProposal> {
+    const [proposal] = await db.insert(governanceProposals).values(data).returning();
+    return proposal;
+  }
+
+  async updateGovernanceProposal(id: string, updates: Partial<InsertGovernanceProposal>): Promise<GovernanceProposal | undefined> {
+    const [updated] = await db.update(governanceProposals)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(governanceProposals.id, id))
+      .returning();
+    return updated;
+  }
+
+  async castVote(data: { proposalId: string; voterId: string; support: string; votingPower: number; reason?: string; voterAddress?: string }): Promise<GovernanceVote> {
+    // Check if user already voted
+    const existingVote = await this.getUserVoteOnProposal(data.proposalId, data.voterId);
+    if (existingVote) {
+      throw new Error('You have already voted on this proposal');
+    }
+    
+    // Insert vote
+    const [vote] = await db.insert(governanceVotes).values({
+      proposalId: data.proposalId,
+      voterId: data.voterId,
+      support: data.support,
+      votingPower: data.votingPower,
+      reason: data.reason,
+      voterAddress: data.voterAddress,
+    }).returning();
+    
+    // Update proposal vote counts
+    const proposal = await this.getGovernanceProposal(data.proposalId);
+    if (proposal) {
+      const updates: any = {};
+      if (data.support === 'FOR') {
+        updates.votesFor = (proposal.votesFor || 0) + data.votingPower;
+      } else if (data.support === 'AGAINST') {
+        updates.votesAgainst = (proposal.votesAgainst || 0) + data.votingPower;
+      } else {
+        updates.votesAbstain = (proposal.votesAbstain || 0) + data.votingPower;
+      }
+      await this.updateGovernanceProposal(data.proposalId, updates);
+    }
+    
+    return vote;
+  }
+
+  async getVotesByProposal(proposalId: string): Promise<GovernanceVote[]> {
+    return await db.select().from(governanceVotes)
+      .where(eq(governanceVotes.proposalId, proposalId))
+      .orderBy(desc(governanceVotes.createdAt));
+  }
+
+  async getVotesByUser(userId: string): Promise<GovernanceVote[]> {
+    return await db.select().from(governanceVotes)
+      .where(eq(governanceVotes.voterId, userId))
+      .orderBy(desc(governanceVotes.createdAt));
+  }
+
+  async getUserVoteOnProposal(proposalId: string, userId: string): Promise<GovernanceVote | undefined> {
+    const [vote] = await db.select().from(governanceVotes)
+      .where(and(
+        eq(governanceVotes.proposalId, proposalId),
+        eq(governanceVotes.voterId, userId)
+      ));
+    return vote;
+  }
+
+  async getGovernanceStats(): Promise<{ totalProposals: number; activeProposals: number; totalVoters: number; participationRate: number; successRate: number }> {
+    const allProposals = await db.select().from(governanceProposals);
+    const activeProposals = allProposals.filter(p => p.status === 'ACTIVE');
+    const succeededProposals = allProposals.filter(p => p.status === 'SUCCEEDED' || p.status === 'EXECUTED');
+    const completedProposals = allProposals.filter(p => p.status !== 'ACTIVE' && p.status !== 'DRAFT');
+    
+    const allVotes = await db.select().from(governanceVotes);
+    const uniqueVoters = new Set(allVotes.map(v => v.voterId));
+    
+    const allUsers = await this.getAllUsers();
+    const participationRate = allUsers.length > 0 ? uniqueVoters.size / allUsers.length : 0;
+    const successRate = completedProposals.length > 0 ? succeededProposals.length / completedProposals.length : 0;
+    
+    return {
+      totalProposals: allProposals.length,
+      activeProposals: activeProposals.length,
+      totalVoters: uniqueVoters.size,
+      participationRate,
+      successRate,
+    };
   }
 }
 

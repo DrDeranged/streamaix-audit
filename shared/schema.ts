@@ -5098,3 +5098,67 @@ export type LeagueParticipant = typeof leagueParticipants.$inferSelect;
 
 export type InsertLeagueTrade = z.infer<typeof insertLeagueTradeSchema>;
 export type LeagueTrade = typeof leagueTrades.$inferSelect;
+
+// ==================== GOVERNANCE SYSTEM ====================
+
+export const governanceProposals = pgTable("governance_proposals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  proposerId: varchar("proposer_id").references(() => users.id).notNull(),
+  proposerAddress: text("proposer_address"),
+  category: text("category").notNull().default("COMMUNITY"), // PROTOCOL, TREASURY, GOVERNANCE, COMMUNITY, TECHNICAL
+  status: text("status").notNull().default("ACTIVE"), // DRAFT, ACTIVE, SUCCEEDED, FAILED, EXECUTED, CANCELLED
+  
+  // Voting stats (updated on each vote)
+  votesFor: integer("votes_for").default(0),
+  votesAgainst: integer("votes_against").default(0),
+  votesAbstain: integer("votes_abstain").default(0),
+  quorumRequired: integer("quorum_required").default(10000), // Minimum votes needed
+  
+  // Execution details (for on-chain proposals)
+  targets: text("targets").array(),
+  values: text("values").array(),
+  signatures: text("signatures").array(),
+  calldatas: text("calldatas").array(),
+  executionTxHash: text("execution_tx_hash"),
+  
+  // Timing
+  startTime: timestamp("start_time").defaultNow(),
+  endTime: timestamp("end_time"),
+  executedAt: timestamp("executed_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const governanceVotes = pgTable("governance_votes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  proposalId: varchar("proposal_id").references(() => governanceProposals.id).notNull(),
+  voterId: varchar("voter_id").references(() => users.id).notNull(),
+  voterAddress: text("voter_address"),
+  
+  support: text("support").notNull(), // FOR, AGAINST, ABSTAIN
+  votingPower: integer("voting_power").notNull().default(1), // Based on STREAM points
+  reason: text("reason"),
+  
+  txHash: text("tx_hash"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertGovernanceProposalSchema = createInsertSchema(governanceProposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertGovernanceVoteSchema = createInsertSchema(governanceVotes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertGovernanceProposal = z.infer<typeof insertGovernanceProposalSchema>;
+export type GovernanceProposal = typeof governanceProposals.$inferSelect;
+
+export type InsertGovernanceVote = z.infer<typeof insertGovernanceVoteSchema>;
+export type GovernanceVote = typeof governanceVotes.$inferSelect;

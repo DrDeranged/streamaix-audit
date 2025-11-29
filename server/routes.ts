@@ -10829,6 +10829,169 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // GOVERNANCE API - DAO Proposals & Voting
+  // =============================================================================
+
+  // Get all governance proposals (public, no auth required)
+  app.get("/api/governance/proposals", asyncHandler(async (req: Request, res: Response) => {
+    const { status, category, limit } = req.query;
+    const proposals = await storage.getGovernanceProposals({
+      status: status as string,
+      category: category as string,
+      limit: limit ? parseInt(limit as string) : 50,
+    });
+    
+    // Enrich with proposer info
+    const enrichedProposals = await Promise.all(proposals.map(async (p) => {
+      const proposer = await storage.getUser(p.proposerId);
+      return {
+        ...p,
+        proposerUsername: proposer?.username,
+        proposerAvatar: proposer?.avatar,
+        proposerEnsName: proposer?.ensName,
+      };
+    }));
+    
+    res.json({ success: true, proposals: enrichedProposals });
+  }));
+
+  // Get governance stats (public)
+  app.get("/api/governance/stats", asyncHandler(async (req: Request, res: Response) => {
+    const stats = await storage.getGovernanceStats();
+    res.json({ success: true, stats });
+  }));
+
+  // Get single proposal with votes
+  app.get("/api/governance/proposals/:id", asyncHandler(async (req: Request, res: Response) => {
+    const proposal = await storage.getGovernanceProposal(req.params.id);
+    if (!proposal) {
+      return res.status(404).json({ success: false, error: 'Proposal not found' });
+    }
+    
+    const votes = await storage.getVotesByProposal(req.params.id);
+    const proposer = await storage.getUser(proposal.proposerId);
+    
+    // Enrich votes with user info
+    const enrichedVotes = await Promise.all(votes.map(async (v) => {
+      const voter = await storage.getUser(v.voterId);
+      return {
+        ...v,
+        voterUsername: voter?.username,
+        voterAvatar: voter?.avatar,
+        voterEnsName: voter?.ensName,
+      };
+    }));
+    
+    res.json({
+      success: true,
+      proposal: {
+        ...proposal,
+        proposerUsername: proposer?.username,
+        proposerAvatar: proposer?.avatar,
+        proposerEnsName: proposer?.ensName,
+      },
+      votes: enrichedVotes,
+    });
+  }));
+
+  // Create a new proposal (requires auth)
+  app.post("/api/governance/proposals", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { title, description, category, endTime } = req.body;
+    
+    if (!title || !description) {
+      return res.status(400).json({ success: false, error: 'Title and description are required' });
+    }
+    
+    const proposal = await storage.createGovernanceProposal({
+      title,
+      description,
+      category: category || 'COMMUNITY',
+      proposerId: req.user.id,
+      proposerAddress: req.user.walletAddress,
+      endTime: endTime ? new Date(endTime) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days default
+      status: 'ACTIVE',
+    });
+    
+    res.json({ success: true, proposal });
+  }));
+
+  // Cast a vote (requires auth)
+  app.post("/api/governance/proposals/:id/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { support, reason } = req.body;
+    
+    if (!support || !['FOR', 'AGAINST', 'ABSTAIN'].includes(support)) {
+      return res.status(400).json({ success: false, error: 'Invalid vote support value' });
+    }
+    
+    const proposal = await storage.getGovernanceProposal(req.params.id);
+    if (!proposal) {
+      return res.status(404).json({ success: false, error: 'Proposal not found' });
+    }
+    
+    if (proposal.status !== 'ACTIVE') {
+      return res.status(400).json({ success: false, error: 'Voting is closed for this proposal' });
+    }
+    
+    // Calculate voting power based on STREAM points
+    const user = await storage.getUser(req.user.id);
+    const votingPower = Math.max(1, Math.floor((user?.streamPoints || 0) / 100)); // 1 vote per 100 STREAM points, minimum 1
+    
+    try {
+      const vote = await storage.castVote({
+        proposalId: req.params.id,
+        voterId: req.user.id,
+        support,
+        votingPower,
+        reason,
+        voterAddress: req.user.walletAddress,
+      });
+      
+      res.json({ success: true, vote, votingPower });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }));
+
+  // Get user's voting history
+  app.get("/api/governance/my-votes", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const votes = await storage.getVotesByUser(req.user.id);
+    
+    // Enrich with proposal info
+    const enrichedVotes = await Promise.all(votes.map(async (v) => {
+      const proposal = await storage.getGovernanceProposal(v.proposalId);
+      return {
+        ...v,
+        proposalTitle: proposal?.title,
+        proposalStatus: proposal?.status,
+      };
+    }));
+    
+    res.json({ success: true, votes: enrichedVotes });
+  }));
+
+  // Check if user voted on a proposal
+  app.get("/api/governance/proposals/:id/my-vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const vote = await storage.getUserVoteOnProposal(req.params.id, req.user.id);
+    res.json({ success: true, vote: vote || null, hasVoted: !!vote });
+  }));
+
+  // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   
