@@ -429,11 +429,26 @@ export function ChatWidget() {
       setInputMessage('');
     },
     onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to send message',
-        variant: 'destructive',
-      });
+      const errorMsg = error.message || '';
+      if (errorMsg.includes('401') || errorMsg.includes('Unauthorized') || errorMsg.includes('No authentication token')) {
+        toast({
+          title: 'Sign in required',
+          description: 'Please sign in to chat with the AI assistant and save your conversation history.',
+          variant: 'default',
+        });
+      } else if (errorMsg.includes('OPENAI') || errorMsg.includes('API key')) {
+        toast({
+          title: 'Service temporarily unavailable',
+          description: 'The AI service is currently unavailable. Please try again in a moment.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to send message. Please try again.',
+          variant: 'destructive',
+        });
+      }
     },
   });
 
