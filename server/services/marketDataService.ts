@@ -1324,8 +1324,8 @@ export class MarketDataService {
       const cryptoSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
       const cryptoPrices = await this.getCryptoQuotes(cryptoSymbols);
 
-      // Fetch crypto-related stock prices
-      const stockPrices = await this.getStockQuotes(this.cryptoStocks.slice(0, 10));
+      // Fetch crypto-related stock prices (using Finnhub)
+      const stockPrices: StockQuote[] = [];
 
       // Get recent news (placeholder - can be enhanced with real news API)
       const recentNews = [

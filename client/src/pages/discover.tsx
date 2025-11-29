@@ -129,7 +129,7 @@ export default function Discover() {
   // New endpoints for enhanced features
   const { data: recentTradesData } = useQuery({
     queryKey: ['/api/prediction-markets/recent-trades'],
-    refetchInterval: 15000,
+    refetchInterval: 60000, // 1 minute
   });
 
   const { data: whalesData } = useQuery({
@@ -143,17 +143,17 @@ export default function Discover() {
   // Macro Economic Data
   const { data: indexFuturesData } = useQuery({
     queryKey: ['/api/macro/index-futures'],
-    refetchInterval: 30000,
+    refetchInterval: 120000, // 2 minutes
   });
 
   const { data: treasuryYieldsData } = useQuery({
     queryKey: ['/api/macro/treasury-yields'],
-    refetchInterval: 60000,
+    refetchInterval: 300000, // 5 minutes
   });
 
   const { data: volatilityIndicesData } = useQuery({
     queryKey: ['/api/macro/volatility-indices'],
-    refetchInterval: 30000,
+    refetchInterval: 120000, // 2 minutes
   });
 
   const { data: globalLiquidityData } = useQuery({
@@ -196,7 +196,7 @@ export default function Discover() {
 
   const { data: activityData } = useQuery({
     queryKey: ['/api/activity'],
-    refetchInterval: 10000,
+    refetchInterval: 30000, // 30 seconds
   });
 
   // Crypto Intelligence Data
@@ -212,7 +212,7 @@ export default function Discover() {
 
   const { data: cryptoMoversData } = useQuery({
     queryKey: ['/api/crypto/movers'],
-    refetchInterval: 60000,
+    refetchInterval: 120000, // 2 minutes
   });
 
   const { data: trendingTokensData } = useQuery({
@@ -227,7 +227,7 @@ export default function Discover() {
 
   const { data: gasTrackerData } = useQuery({
     queryKey: ['/api/crypto/gas'],
-    refetchInterval: 30000,
+    refetchInterval: 60000, // 1 minute
   });
 
   const { data: fundingRatesData } = useQuery({
@@ -237,7 +237,7 @@ export default function Discover() {
 
   const { data: whaleAlertsData } = useQuery({
     queryKey: ['/api/crypto/whale-alerts'],
-    refetchInterval: 60000,
+    refetchInterval: 120000, // 2 minutes
   });
 
   // Advanced Market Intelligence Data
@@ -258,7 +258,7 @@ export default function Discover() {
 
   const { data: btcLiquidationsData } = useQuery({
     queryKey: ['/api/intel/liquidations/BTC'],
-    refetchInterval: 60000,
+    refetchInterval: 120000, // 2 minutes
   });
 
   const { data: smartMoneyData } = useQuery({
@@ -268,7 +268,7 @@ export default function Discover() {
 
   const { data: etfData } = useQuery({
     queryKey: ['/api/intel/etfs'],
-    refetchInterval: 60000,
+    refetchInterval: 120000, // 2 minutes
   });
 
   const { data: optionsData } = useQuery({
