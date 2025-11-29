@@ -39,7 +39,15 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
       setTimeout(() => setShowPrompt(true), 3000);
     };
     
+    const handleInstalled = () => {
+      setShowPrompt(false);
+      setDismissed(true);
+      localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+    };
+    
     window.addEventListener('pwa-installable', handleInstallable);
+    window.addEventListener('pwa-installed', handleInstalled);
+    window.addEventListener('appinstalled', handleInstalled);
     
     if (canInstallPWA()) {
       setTimeout(() => setShowPrompt(true), 3000);
@@ -51,6 +59,8 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
     
     return () => {
       window.removeEventListener('pwa-installable', handleInstallable);
+      window.removeEventListener('pwa-installed', handleInstalled);
+      window.removeEventListener('appinstalled', handleInstalled);
     };
   }, []);
 
