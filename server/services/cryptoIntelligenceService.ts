@@ -350,51 +350,134 @@ class CryptoIntelligenceService {
     const cached = this.getCached<GasTracker>(cacheKey, 30000); // 30 second cache for gas
     if (cached) return cached;
 
-    try {
-      const response = await axios.get('https://api.etherscan.io/api', {
-        params: {
-          module: 'gastracker',
-          action: 'gasoracle'
-        },
-        timeout: 5000
-      });
+    // Try multiple gas APIs in order of reliability
+    const gasApis = [
+      this.fetchGasFromOwlracle.bind(this),
+      this.fetchGasFromBlocknative.bind(this),
+      this.fetchGasFromEthGasStation.bind(this)
+    ];
 
-      const data = response.data.result;
-      const baseFee = parseFloat(data.suggestBaseFee) || 0;
-      
-      let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
-      if (baseFee > 100) congestionLevel = 'extreme';
-      else if (baseFee > 50) congestionLevel = 'high';
-      else if (baseFee > 20) congestionLevel = 'medium';
-
-      const result: GasTracker = {
-        ethereum: {
-          slow: parseInt(data.SafeGasPrice) || 0,
-          standard: parseInt(data.ProposeGasPrice) || 0,
-          fast: parseInt(data.FastGasPrice) || 0,
-          instant: Math.round((parseInt(data.FastGasPrice) || 0) * 1.2),
-          baseFee,
-          congestionLevel
-        },
-        lastUpdated: new Date().toISOString()
-      };
-
-      this.setCache(cacheKey, result);
-      return result;
-    } catch (error) {
-      console.error('❌ Gas tracker API error:', error);
-      return {
-        ethereum: {
-          slow: 15,
-          standard: 20,
-          fast: 30,
-          instant: 40,
-          baseFee: 18,
-          congestionLevel: 'low'
-        },
-        lastUpdated: new Date().toISOString()
-      };
+    for (const fetchGas of gasApis) {
+      try {
+        const result = await fetchGas();
+        if (result && result.ethereum.standard > 0) {
+          this.setCache(cacheKey, result);
+          return result;
+        }
+      } catch (error) {
+        continue;
+      }
     }
+
+    // Fallback with reasonable defaults
+    console.log('⚠️ All gas APIs failed, using estimated values');
+    return {
+      ethereum: {
+        slow: 12,
+        standard: 18,
+        fast: 25,
+        instant: 35,
+        baseFee: 15,
+        congestionLevel: 'low'
+      },
+      lastUpdated: new Date().toISOString()
+    };
+  }
+
+  private async fetchGasFromOwlracle(): Promise<GasTracker> {
+    // Owlracle - Free gas API
+    const response = await axios.get('https://api.owlracle.info/v4/eth/gas', {
+      params: { accept: '100' },
+      timeout: 5000
+    });
+
+    const data = response.data;
+    const speeds = data.speeds || [];
+    const slow = speeds.find((s: any) => s.acceptance >= 0.35)?.gasPrice || 0;
+    const standard = speeds.find((s: any) => s.acceptance >= 0.60)?.gasPrice || 0;
+    const fast = speeds.find((s: any) => s.acceptance >= 0.90)?.gasPrice || 0;
+    const instant = speeds.find((s: any) => s.acceptance >= 0.99)?.gasPrice || fast * 1.2;
+    const baseFee = data.baseFee || standard * 0.8;
+
+    let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
+    if (baseFee > 100) congestionLevel = 'extreme';
+    else if (baseFee > 50) congestionLevel = 'high';
+    else if (baseFee > 20) congestionLevel = 'medium';
+
+    return {
+      ethereum: {
+        slow: Math.round(slow),
+        standard: Math.round(standard),
+        fast: Math.round(fast),
+        instant: Math.round(instant),
+        baseFee: Math.round(baseFee),
+        congestionLevel
+      },
+      lastUpdated: new Date().toISOString()
+    };
+  }
+
+  private async fetchGasFromBlocknative(): Promise<GasTracker> {
+    // Blocknative Gas Platform - free tier
+    const response = await axios.get('https://api.blocknative.com/gasprices/blockprices', {
+      timeout: 5000
+    });
+
+    const data = response.data;
+    const prices = data.blockPrices?.[0]?.estimatedPrices || [];
+    const slow = prices.find((p: any) => p.confidence >= 70)?.price || 0;
+    const standard = prices.find((p: any) => p.confidence >= 90)?.price || 0;
+    const fast = prices.find((p: any) => p.confidence >= 95)?.price || 0;
+    const instant = prices.find((p: any) => p.confidence >= 99)?.price || fast * 1.2;
+    const baseFee = data.blockPrices?.[0]?.baseFeePerGas || standard * 0.8;
+
+    let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
+    if (baseFee > 100) congestionLevel = 'extreme';
+    else if (baseFee > 50) congestionLevel = 'high';
+    else if (baseFee > 20) congestionLevel = 'medium';
+
+    return {
+      ethereum: {
+        slow: Math.round(slow),
+        standard: Math.round(standard),
+        fast: Math.round(fast),
+        instant: Math.round(instant),
+        baseFee: Math.round(baseFee),
+        congestionLevel
+      },
+      lastUpdated: new Date().toISOString()
+    };
+  }
+
+  private async fetchGasFromEthGasStation(): Promise<GasTracker> {
+    // ETH Gas Station alternative via beaconcha.in
+    const response = await axios.get('https://beaconcha.in/api/v1/execution/gasnow', {
+      timeout: 5000
+    });
+
+    const data = response.data?.data || {};
+    const slow = (data.slow || 0) / 1e9;
+    const standard = (data.standard || 0) / 1e9;
+    const fast = (data.fast || 0) / 1e9;
+    const instant = (data.rapid || fast * 1.2) / 1e9;
+    const baseFee = standard * 0.8;
+
+    let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
+    if (baseFee > 100) congestionLevel = 'extreme';
+    else if (baseFee > 50) congestionLevel = 'high';
+    else if (baseFee > 20) congestionLevel = 'medium';
+
+    return {
+      ethereum: {
+        slow: Math.round(slow),
+        standard: Math.round(standard),
+        fast: Math.round(fast),
+        instant: Math.round(instant),
+        baseFee: Math.round(baseFee),
+        congestionLevel
+      },
+      lastUpdated: new Date().toISOString()
+    };
   }
 
   async getFundingRates(): Promise<FundingRates> {
