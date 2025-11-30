@@ -633,7 +633,6 @@ export default function Discover() {
             </div>
             <div>
               <h2 className="text-lg font-orbitron font-bold text-white">Crypto Intelligence</h2>
-              <p className="text-xs text-gray-400">Real-time market sentiment & analytics</p>
             </div>
           </div>
 
@@ -987,7 +986,6 @@ export default function Discover() {
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-orbitron font-bold text-white">Macro Intelligence</h2>
-              <p className="text-xs text-gray-400">Global liquidity, Fed watch, treasury yields, economic calendar</p>
             </div>
             {macroExpanded ? (
               <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
@@ -1181,7 +1179,6 @@ export default function Discover() {
             </div>
             <div>
               <h2 className="text-lg font-orbitron font-bold text-white">Advanced Intelligence</h2>
-              <p className="text-xs text-gray-400">Institutional-grade market signals</p>
             </div>
           </div>
 
