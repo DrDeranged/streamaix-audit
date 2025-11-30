@@ -135,7 +135,7 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
           
-          {/* Themed Join Waitlist CTA */}
+          {/* Glassmorphism Join Waitlist CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -143,22 +143,40 @@ export function HeroSection() {
             className="flex justify-center"
           >
             <motion.div 
-              whileHover={{ scale: 1.05 }} 
+              whileHover={{ scale: 1.03 }} 
               whileTap={{ scale: 0.98 }}
-              className="relative group"
+              className="relative group cursor-pointer"
+              onClick={() => setWaitlistOpen(true)}
             >
-              {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-600 rounded-xl blur-lg opacity-40 group-hover:opacity-70 transition-opacity duration-500" />
+              {/* Animated outer glow */}
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-2xl opacity-60 group-hover:opacity-100 blur-sm transition-all duration-500 animate-gradient" />
               
-              <Button 
-                size="lg"
-                onClick={() => setWaitlistOpen(true)}
-                className="relative px-8 sm:px-10 py-6 sm:py-7 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-600 hover:from-purple-500 hover:via-fuchsia-500 hover:to-cyan-500 text-white shadow-2xl shadow-purple-500/25 transition-all duration-500 rounded-xl border-0"
-                data-testid="button-join-waitlist"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Join the Waitlist
-              </Button>
+              {/* Iridescent border ring */}
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 rounded-2xl opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              {/* Glass button container */}
+              <div className="relative px-8 sm:px-12 py-5 sm:py-6 rounded-2xl bg-slate-900/60 dark:bg-slate-900/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-500">
+                {/* Inner glass highlight */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-60" />
+                
+                {/* Animated shimmer effect */}
+                <div className="absolute inset-0 rounded-2xl overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                </div>
+                
+                {/* Button content */}
+                <div className="relative flex items-center justify-center gap-3 text-white">
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Sparkles className="w-5 h-5 text-amber-300 group-hover:text-amber-200 transition-colors" />
+                  </motion.div>
+                  <span className="text-base sm:text-lg font-semibold tracking-wide bg-gradient-to-r from-white via-purple-100 to-cyan-100 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
+                    Join the Waitlist
+                  </span>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
 

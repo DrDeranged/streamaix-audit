@@ -78,12 +78,20 @@ export function Navigation() {
     <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-purple-500/30 transition-all duration-300 shadow-lg dark:shadow-purple-500/10">
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          {/* Logo with Animated Glow */}
+          {/* Logo with Animated Glow - Tap to scroll to top on mobile */}
           <Link href="/">
             <motion.div 
               className="flex items-center space-x-3 cursor-pointer group"
               whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
+              onClick={(e) => {
+                // On mobile, scroll to top when tapping the header
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse" />
