@@ -11194,6 +11194,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // PUSH NOTIFICATIONS API
+  // =============================================================================
+  
+  const { pushNotificationService } = await import('./services/pushNotificationService');
+
+  // Get VAPID public key for client
+  app.get("/api/push/vapid-key", asyncHandler(async (req: Request, res: Response) => {
+    const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+    if (!vapidPublicKey) {
+      return res.status(500).json({ success: false, error: 'Push notifications not configured' });
+    }
+    res.json({ success: true, vapidPublicKey });
+  }));
+
+  // Subscribe to push notifications
+  app.post("/api/push/subscribe", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { subscription, deviceInfo } = req.body;
+    
+    if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+      return res.status(400).json({ success: false, error: 'Invalid subscription data' });
+    }
+
+    const result = await pushNotificationService.saveSubscription(
+      req.user.id,
+      subscription,
+      deviceInfo
+    );
+
+    res.json({ success: true, ...result });
+  }));
+
+  // Unsubscribe from push notifications
+  app.post("/api/push/unsubscribe", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { endpoint } = req.body;
+    
+    if (!endpoint) {
+      return res.status(400).json({ success: false, error: 'Endpoint required' });
+    }
+
+    const result = await pushNotificationService.removeSubscription(endpoint);
+    res.json({ success: true, ...result });
+  }));
+
+  // Get user's push subscriptions
+  app.get("/api/push/subscriptions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const subscriptions = await pushNotificationService.getSubscriptions(req.user.id);
+    res.json({ 
+      success: true, 
+      subscriptions: subscriptions.map(s => ({
+        id: s.id,
+        deviceInfo: s.deviceInfo,
+        marketResolutions: s.marketResolutions,
+        priceAlerts: s.priceAlerts,
+        bountyUpdates: s.bountyUpdates,
+        tradeConfirmations: s.tradeConfirmations,
+        aiAgentActivity: s.aiAgentActivity,
+        weeklyDigest: s.weeklyDigest,
+        lastUsed: s.lastUsed,
+      }))
+    });
+  }));
+
+  // Update notification preferences
+  app.patch("/api/push/preferences", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { marketResolutions, priceAlerts, bountyUpdates, tradeConfirmations, aiAgentActivity, weeklyDigest } = req.body;
+
+    const result = await pushNotificationService.updatePreferences(req.user.id, {
+      marketResolutions,
+      priceAlerts,
+      bountyUpdates,
+      tradeConfirmations,
+      aiAgentActivity,
+      weeklyDigest,
+    });
+
+    res.json({ success: true, ...result });
+  }));
+
+  // Test push notification (for debugging)
+  app.post("/api/push/test", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const result = await pushNotificationService.sendToUser(req.user.id, {
+      title: '🔔 Test Notification',
+      body: 'Push notifications are working! You will receive updates about markets, bounties, and more.',
+      url: '/dashboard',
+      tag: 'test-notification',
+    });
+
+    res.json({ success: true, ...result });
+  }));
+
+  // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   
