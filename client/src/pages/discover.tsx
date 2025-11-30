@@ -577,46 +577,39 @@ export default function Discover() {
         </div>
 
         {/* =================================================================== */}
-        {/* TOP 10 CRYPTO BY MARKET CAP - HORIZONTAL SLIDER */}
+        {/* TOP 20 CRYPTO BY MARKET CAP - HORIZONTAL SLIDER (NO TITLE) */}
         {/* =================================================================== */}
         
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-3">
-            <Crown className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-medium text-gray-400">Top 10 by Market Cap</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-            {cryptoAssets.length > 0 ? (
-              cryptoAssets.slice(0, 10).map((coin: any, idx: number) => (
-                <div 
-                  key={coin.symbol || idx}
-                  className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all min-w-[140px]"
-                >
-                  <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
-                  {coin.image && <img src={coin.image} alt={coin.symbol} className="w-5 h-5 rounded-full" />}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-white">{coin.symbol}</p>
-                    <p className="text-[10px] text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
-                  </div>
-                  <span className={`text-[10px] font-medium ${coin.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {coin.change24h >= 0 ? '+' : ''}{coin.change24h?.toFixed(1)}%
-                  </span>
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          {cryptoAssets.length > 0 ? (
+            cryptoAssets.slice(0, 20).map((coin: any, idx: number) => (
+              <div 
+                key={coin.symbol || idx}
+                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all min-w-[150px]"
+              >
+                <span className="text-xs text-gray-500 w-5">#{idx + 1}</span>
+                {coin.image && <img src={coin.image} alt={coin.symbol} className="w-6 h-6 rounded-full" />}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{coin.symbol}</p>
+                  <p className="text-xs text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                 </div>
-              ))
-            ) : (
-              Array.from({ length: 10 }).map((_, idx) => (
-                <div key={idx} className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 min-w-[140px] animate-pulse">
-                  <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
-                  <div className="w-5 h-5 rounded-full bg-white/10" />
-                  <div className="flex-1">
-                    <div className="h-3 w-12 bg-white/10 rounded mb-1" />
-                    <div className="h-2 w-16 bg-white/10 rounded" />
-                  </div>
+                <span className={`text-xs font-medium ${coin.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {coin.change24h >= 0 ? '+' : ''}{coin.change24h?.toFixed(1)}%
+                </span>
+              </div>
+            ))
+          ) : (
+            Array.from({ length: 20 }).map((_, idx) => (
+              <div key={idx} className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 min-w-[150px] animate-pulse">
+                <span className="text-xs text-gray-500 w-5">#{idx + 1}</span>
+                <div className="w-6 h-6 rounded-full bg-white/10" />
+                <div className="flex-1">
+                  <div className="h-4 w-12 bg-white/10 rounded mb-1" />
+                  <div className="h-3 w-16 bg-white/10 rounded" />
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* =================================================================== */}
@@ -640,10 +633,10 @@ export default function Discover() {
             {/* Fear & Greed Index */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-orange-500/30 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-medium text-gray-400">Fear & Greed</span>
-                  <Badge className={`text-[10px] px-1.5 py-0 ${
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-orange-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">Fear & Greed</span>
+                  <Badge className={`text-xs px-2 py-0.5 ${
                     fearGreed.value <= 25 ? 'bg-red-500/20 text-red-400' :
                     fearGreed.value <= 45 ? 'bg-orange-500/20 text-orange-400' :
                     fearGreed.value <= 55 ? 'bg-yellow-500/20 text-yellow-400' :
@@ -655,21 +648,21 @@ export default function Discover() {
                 </div>
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-white">{fearGreed.value}</p>
-                    <div className="flex items-center gap-1">
+                    <p className="text-3xl font-bold text-white">{fearGreed.value}</p>
+                    <div className="flex items-center gap-1 mt-1">
                       {fearGreed.trend === 'rising' ? (
-                        <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
+                        <TrendingUp className="w-3 h-3 text-emerald-400" />
                       ) : fearGreed.trend === 'falling' ? (
-                        <TrendingDown className="w-2.5 h-2.5 text-red-400" />
+                        <TrendingDown className="w-3 h-3 text-red-400" />
                       ) : (
-                        <Activity className="w-2.5 h-2.5 text-gray-400" />
+                        <Activity className="w-3 h-3 text-gray-400" />
                       )}
-                      <span className="text-[10px] text-gray-500 capitalize">{fearGreed.trend}</span>
+                      <span className="text-xs text-gray-500 capitalize">{fearGreed.trend}</span>
                     </div>
                   </div>
-                  <div className="w-12 h-12">
+                  <div className="w-16 h-16">
                     <div 
-                      className="w-full h-full rounded-full border-[3px]"
+                      className="w-full h-full rounded-full border-4"
                       style={{
                         borderColor: `hsl(${fearGreed.value * 1.2}, 70%, 50%)`,
                         background: `conic-gradient(hsl(${fearGreed.value * 1.2}, 70%, 50%) ${fearGreed.value}%, transparent ${fearGreed.value}%)`
@@ -683,31 +676,31 @@ export default function Discover() {
             {/* Market Dominance */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-yellow-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-amber-500/30 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-medium text-gray-400">Market Dominance</span>
-                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-amber-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">Market Dominance</span>
+                  <Crown className="w-4 h-4 text-amber-400" />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-orange-400">BTC</span>
-                    <span className="text-xs font-bold text-white">{dominance.btcDominance?.toFixed(1)}%</span>
+                    <span className="text-xs text-orange-400">BTC</span>
+                    <span className="text-sm font-bold text-white">{dominance.btcDominance?.toFixed(1)}%</span>
                   </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style={{ width: `${dominance.btcDominance}%` }} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-blue-400">ETH</span>
-                    <span className="text-xs font-bold text-white">{dominance.ethDominance?.toFixed(1)}%</span>
+                    <span className="text-xs text-blue-400">ETH</span>
+                    <span className="text-sm font-bold text-white">{dominance.ethDominance?.toFixed(1)}%</span>
                   </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: `${dominance.ethDominance}%` }} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-purple-400">Alts</span>
-                    <span className="text-xs font-bold text-white">{dominance.altDominance?.toFixed(1)}%</span>
+                    <span className="text-xs text-purple-400">Alts</span>
+                    <span className="text-sm font-bold text-white">{dominance.altDominance?.toFixed(1)}%</span>
                   </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-full" style={{ width: `${dominance.altDominance}%` }} />
                   </div>
                 </div>
@@ -717,10 +710,10 @@ export default function Discover() {
             {/* Gas Tracker */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-cyan-500/30 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-medium text-gray-400">ETH Gas</span>
-                  <Badge className={`text-[10px] px-1.5 py-0 ${
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-cyan-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">ETH Gas</span>
+                  <Badge className={`text-xs px-2 py-0.5 ${
                     gasTracker.congestionLevel === 'low' ? 'bg-emerald-500/20 text-emerald-400' :
                     gasTracker.congestionLevel === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
                     gasTracker.congestionLevel === 'high' ? 'bg-orange-500/20 text-orange-400' :
@@ -729,31 +722,31 @@ export default function Discover() {
                     {gasTracker.congestionLevel}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  <div className="text-center p-1.5 rounded-lg bg-white/5">
-                    <p className="text-[10px] text-gray-500">Slow</p>
-                    <p className="text-xs font-bold text-emerald-400">{gasTracker.slow > 0 ? gasTracker.slow : '—'}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 rounded-lg bg-white/5">
+                    <p className="text-xs text-gray-500">Slow</p>
+                    <p className="text-sm font-bold text-emerald-400">{gasTracker.slow > 0 ? gasTracker.slow : '—'}</p>
                   </div>
-                  <div className="text-center p-1.5 rounded-lg bg-white/5">
-                    <p className="text-[10px] text-gray-500">Std</p>
-                    <p className="text-xs font-bold text-yellow-400">{gasTracker.standard > 0 ? gasTracker.standard : '—'}</p>
+                  <div className="text-center p-2 rounded-lg bg-white/5">
+                    <p className="text-xs text-gray-500">Std</p>
+                    <p className="text-sm font-bold text-yellow-400">{gasTracker.standard > 0 ? gasTracker.standard : '—'}</p>
                   </div>
-                  <div className="text-center p-1.5 rounded-lg bg-white/5">
-                    <p className="text-[10px] text-gray-500">Fast</p>
-                    <p className="text-xs font-bold text-orange-400">{gasTracker.fast > 0 ? gasTracker.fast : '—'}</p>
+                  <div className="text-center p-2 rounded-lg bg-white/5">
+                    <p className="text-xs text-gray-500">Fast</p>
+                    <p className="text-sm font-bold text-orange-400">{gasTracker.fast > 0 ? gasTracker.fast : '—'}</p>
                   </div>
                 </div>
-                <p className="text-[10px] text-gray-500 text-center mt-1">gwei</p>
+                <p className="text-xs text-gray-500 text-center mt-2">gwei</p>
               </div>
             </div>
 
             {/* Funding Rates */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-fuchsia-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-medium text-gray-400">Funding Rates</span>
-                  <Badge className={`text-[10px] px-1.5 py-0 ${
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-gray-400">Funding Rates</span>
+                  <Badge className={`text-xs px-2 py-0.5 ${
                     fundingRates.sentiment === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' :
                     fundingRates.sentiment === 'bearish' ? 'bg-red-500/20 text-red-400' :
                     'bg-gray-500/20 text-gray-400'
@@ -761,20 +754,20 @@ export default function Discover() {
                     {fundingRates.sentiment}
                   </Badge>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-orange-400">BTC</span>
-                    <span className={`text-xs font-bold ${fundingRates.btc?.rate >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className="text-xs text-orange-400">BTC</span>
+                    <span className={`text-sm font-bold ${fundingRates.btc?.rate >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                       {fundingRates.btc?.rate >= 0 ? '+' : ''}{fundingRates.btc?.rate?.toFixed(4)}%
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-blue-400">ETH</span>
-                    <span className={`text-xs font-bold ${fundingRates.eth?.rate >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className="text-xs text-blue-400">ETH</span>
+                    <span className={`text-sm font-bold ${fundingRates.eth?.rate >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                       {fundingRates.eth?.rate >= 0 ? '+' : ''}{fundingRates.eth?.rate?.toFixed(4)}%
                     </span>
                   </div>
-                  <p className="text-[10px] text-gray-500 text-center">
+                  <p className="text-xs text-gray-500 text-center">
                     {fundingRates.sentiment === 'bullish' ? 'Shorts paying longs' : 
                      fundingRates.sentiment === 'bearish' ? 'Longs paying shorts' : 
                      'Neutral funding'}
@@ -788,27 +781,27 @@ export default function Discover() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             
             {/* Top Gainers */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-xs font-bold text-white">Top Gainers (24h)</h3>
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white">Top Gainers (24h)</h3>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {cryptoGainers.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-2">Loading gainers...</p>
+                  <p className="text-sm text-gray-400 text-center py-4">Loading gainers...</p>
                 ) : (
                   cryptoGainers.slice(0, 4).map((coin: any, idx: number) => (
-                    <div key={coin.id || idx} className="flex items-center justify-between p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-500 w-3">#{idx + 1}</span>
-                        {coin.image && <img src={coin.image} alt={coin.symbol} className="w-5 h-5 rounded-full" />}
+                    <div key={coin.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                        {coin.image && <img src={coin.image} alt={coin.symbol} className="w-6 h-6 rounded-full" />}
                         <div>
-                          <p className="text-xs font-medium text-white">{coin.symbol}</p>
-                          <p className="text-[10px] text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                          <p className="text-sm font-medium text-white">{coin.symbol}</p>
+                          <p className="text-xs text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                         </div>
                       </div>
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-0 text-[10px] px-1.5">
-                        +{coin.change24h?.toFixed(1)}%
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-0">
+                        +{coin.change24h?.toFixed(2)}%
                       </Badge>
                     </div>
                   ))
@@ -817,27 +810,27 @@ export default function Discover() {
             </div>
 
             {/* Top Losers */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingDown className="w-4 h-4 text-red-400" />
-                <h3 className="text-xs font-bold text-white">Top Losers (24h)</h3>
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingDown className="w-5 h-5 text-red-400" />
+                <h3 className="text-sm font-bold text-white">Top Losers (24h)</h3>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {cryptoLosers.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-2">Loading losers...</p>
+                  <p className="text-sm text-gray-400 text-center py-4">Loading losers...</p>
                 ) : (
                   cryptoLosers.slice(0, 4).map((coin: any, idx: number) => (
-                    <div key={coin.id || idx} className="flex items-center justify-between p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-500 w-3">#{idx + 1}</span>
-                        {coin.image && <img src={coin.image} alt={coin.symbol} className="w-5 h-5 rounded-full" />}
+                    <div key={coin.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                        {coin.image && <img src={coin.image} alt={coin.symbol} className="w-6 h-6 rounded-full" />}
                         <div>
-                          <p className="text-xs font-medium text-white">{coin.symbol}</p>
-                          <p className="text-[10px] text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                          <p className="text-sm font-medium text-white">{coin.symbol}</p>
+                          <p className="text-xs text-gray-500">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                         </div>
                       </div>
-                      <Badge className="bg-red-500/20 text-red-400 border-0 text-[10px] px-1.5">
-                        {coin.change24h?.toFixed(1)}%
+                      <Badge className="bg-red-500/20 text-red-400 border-0">
+                        {coin.change24h?.toFixed(2)}%
                       </Badge>
                     </div>
                   ))
@@ -850,24 +843,27 @@ export default function Discover() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             
             {/* Trending Tokens */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Rocket className="w-4 h-4 text-fuchsia-400" />
-                <h3 className="text-xs font-bold text-white">Trending Tokens</h3>
-                <Badge className="ml-auto bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30 text-[10px] px-1.5">
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Rocket className="w-5 h-5 text-fuchsia-400" />
+                <h3 className="text-sm font-bold text-white">Trending Tokens</h3>
+                <Badge className="ml-auto bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30 text-xs">
                   CoinGecko
                 </Badge>
               </div>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-2 gap-2">
                 {trendingTokens.length === 0 ? (
-                  <p className="col-span-2 text-xs text-gray-400 text-center py-2">Loading trending...</p>
+                  <p className="col-span-2 text-sm text-gray-400 text-center py-4">Loading trending...</p>
                 ) : (
                   trendingTokens.slice(0, 6).map((token: any, idx: number) => (
-                    <div key={token.id || idx} className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                      {token.image && <img src={token.image} alt={token.symbol} className="w-4 h-4 rounded-full" />}
+                    <div key={token.id || idx} className="flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      {token.image && <img src={token.image} alt={token.symbol} className="w-5 h-5 rounded-full" />}
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-medium text-white truncate">{token.symbol}</p>
-                        <p className="text-[10px] text-gray-500">#{token.marketCapRank || '-'}</p>
+                        <p className="text-xs font-medium text-white truncate">{token.symbol}</p>
+                        <p className="text-xs text-gray-500">#{token.marketCapRank || '-'}</p>
+                      </div>
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-fuchsia-500/30 to-purple-500/30 flex items-center justify-center">
+                        <span className="text-xs text-fuchsia-400">{10 - idx}</span>
                       </div>
                     </div>
                   ))
@@ -876,33 +872,37 @@ export default function Discover() {
             </div>
 
             {/* DeFi TVL */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3">
-              <div className="flex items-center justify-between mb-2">
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Droplet className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-xs font-bold text-white">DeFi TVL</h3>
+                  <Droplet className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-sm font-bold text-white">DeFi TVL</h3>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-white">
+                  <p className="text-lg font-bold text-white">
                     {defiTvl.totalTVL > 0 ? `$${(defiTvl.totalTVL / 1e9)?.toFixed(2)}B` : '—'}
                   </p>
+                  <p className="text-xs text-gray-500">Total Locked</p>
                 </div>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {defiTvl.topProtocols?.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-2">Loading protocols...</p>
+                  <p className="text-sm text-gray-400 text-center py-4">Loading protocols...</p>
                 ) : (
                   defiTvl.topProtocols?.slice(0, 4).map((protocol: any, idx: number) => (
-                    <div key={protocol.name || idx} className="flex items-center justify-between p-1.5 rounded-lg bg-white/5">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-gray-500 w-3">#{idx + 1}</span>
-                        {protocol.logo && <img src={protocol.logo} alt={protocol.name} className="w-4 h-4 rounded-full" />}
-                        <p className="text-[10px] font-medium text-white">{protocol.name}</p>
+                    <div key={protocol.name || idx} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                        {protocol.logo && <img src={protocol.logo} alt={protocol.name} className="w-5 h-5 rounded-full" />}
+                        <div>
+                          <p className="text-xs font-medium text-white">{protocol.name}</p>
+                          <p className="text-xs text-gray-500">{protocol.chain}</p>
+                        </div>
                       </div>
-                      <div className="text-right flex items-center gap-2">
-                        <p className="text-[10px] font-medium text-white">${(protocol.tvl / 1e9)?.toFixed(2)}B</p>
-                        <p className={`text-[10px] ${protocol.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {protocol.change24h >= 0 ? '+' : ''}{protocol.change24h?.toFixed(1)}%
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-white">${(protocol.tvl / 1e9)?.toFixed(2)}B</p>
+                        <p className={`text-xs ${protocol.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {protocol.change24h >= 0 ? '+' : ''}{protocol.change24h?.toFixed(2)}%
                         </p>
                       </div>
                     </div>
