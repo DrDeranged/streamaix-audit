@@ -135,7 +135,7 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
           
-          {/* Glassmorphism Join Waitlist CTA - Compact & Transparent */}
+          {/* Glassmorphism Join Waitlist CTA - Ultra Compact */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -143,44 +143,44 @@ export function HeroSection() {
             className="flex justify-center"
           >
             <motion.div 
-              whileHover={{ scale: 1.04 }} 
+              whileHover={{ scale: 1.03 }} 
               whileTap={{ scale: 0.97 }}
               className="relative group cursor-pointer"
               onClick={() => setWaitlistOpen(true)}
               data-testid="button-join-waitlist"
             >
               {/* Subtle outer glow */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400/60 via-purple-500/60 to-fuchsia-500/60 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition-all duration-500" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400/50 via-purple-500/50 to-fuchsia-500/50 rounded-lg blur-sm opacity-30 group-hover:opacity-60 transition-all duration-500" />
               
               {/* Thin gradient border */}
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 rounded-xl opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 rounded-lg opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
               
-              {/* Glass container - smaller and more transparent */}
+              {/* Glass container - ultra compact */}
               <div 
-                className="relative px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl overflow-hidden"
+                className="relative px-5 py-2.5 rounded-lg overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.5) 0%, rgba(30, 20, 50, 0.55) 50%, rgba(15, 23, 42, 0.5) 100%)',
-                  backdropFilter: 'blur(20px) saturate(150%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 20, 50, 0.45) 50%, rgba(15, 23, 42, 0.4) 100%)',
+                  backdropFilter: 'blur(16px) saturate(140%)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(140%)',
                 }}
               >
                 {/* Top highlight */}
-                <div className="absolute top-0 left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                <div className="absolute top-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                 
                 {/* Shimmer on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
                 </div>
                 
-                {/* Button content - smaller text */}
-                <div className="relative flex items-center justify-center gap-2">
+                {/* Button content - compact */}
+                <div className="relative flex items-center justify-center gap-1.5">
                   <motion.div
-                    animate={{ rotate: [0, 8, -8, 0] }}
+                    animate={{ rotate: [0, 6, -6, 0] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Sparkles className="w-4 h-4 text-amber-400/90" />
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400/80" />
                   </motion.div>
-                  <span className="text-sm sm:text-base font-semibold tracking-wide text-white/95">
+                  <span className="text-xs sm:text-sm font-medium text-white/90">
                     Join the Waitlist
                   </span>
                 </div>
