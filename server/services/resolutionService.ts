@@ -99,10 +99,53 @@ export class ResolutionService {
       // Update predictor stats
       await this.updatePredictorStats(marketId, resolution);
       
+      // Send push notifications to participants (non-blocking)
+      this.sendResolutionNotifications(marketId, market[0].question, resolution).catch(err => 
+        console.log('Push notification for resolution skipped:', err.message)
+      );
+      
       console.log(`✅ Market ${marketId} resolved as ${resolution}`);
     } catch (error: any) {
       console.error('❌ Error resolving market:', error);
       throw new Error(`Failed to resolve market: ${error.message}`);
+    }
+  }
+
+  /**
+   * Send push notifications to market participants
+   */
+  private async sendResolutionNotifications(
+    marketId: string, 
+    question: string, 
+    resolution: string
+  ): Promise<void> {
+    try {
+      const { pushNotificationService } = await import('./pushNotificationService');
+      
+      // Get all positions for this market
+      const positions = await db
+        .select()
+        .from(marketPositions)
+        .where(eq(marketPositions.marketId, marketId));
+      
+      const outcome = resolution.toUpperCase();
+      
+      for (const position of positions) {
+        if (!position.userId) continue;
+        
+        const isWinner = position.outcome === resolution;
+        const winnings = isWinner ? position.shares : 0;
+        
+        await pushNotificationService.notifyMarketResolution(
+          position.userId,
+          question,
+          outcome,
+          winnings
+        );
+      }
+    } catch (error) {
+      // Silently fail - notifications are best effort
+      console.log('Failed to send resolution notifications:', error);
     }
   }
 

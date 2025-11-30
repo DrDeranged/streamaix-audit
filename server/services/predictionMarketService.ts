@@ -428,10 +428,37 @@ export class PredictionMarketService {
         trade.streamAmount
       );
       
+      // Send push notification for trade confirmation (non-blocking)
+      if (trade.userId) {
+        this.sendTradeNotification(trade).catch(err => 
+          console.log('Push notification skipped:', err.message)
+        );
+      }
+      
       return newTrade;
     } catch (error: any) {
       console.error('❌ Error recording trade:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Send push notification for trade confirmation
+   */
+  private async sendTradeNotification(trade: InsertMarketTrade): Promise<void> {
+    try {
+      const { pushNotificationService } = await import('./pushNotificationService');
+      const market = await this.getMarket(trade.marketId);
+      if (market && trade.userId) {
+        await pushNotificationService.notifyTradeConfirmation(
+          trade.userId,
+          market.question,
+          trade.outcome,
+          trade.streamAmount
+        );
+      }
+    } catch (error) {
+      // Silently fail - notifications are best effort
     }
   }
 
