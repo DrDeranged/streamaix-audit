@@ -143,36 +143,50 @@ export function HeroSection() {
             className="flex justify-center"
           >
             <motion.div 
-              whileHover={{ scale: 1.03 }} 
+              whileHover={{ scale: 1.05, y: -2 }} 
               whileTap={{ scale: 0.98 }}
               className="relative group cursor-pointer"
               onClick={() => setWaitlistOpen(true)}
+              data-testid="button-join-waitlist"
             >
-              {/* Animated outer glow */}
-              <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-2xl opacity-60 group-hover:opacity-100 blur-sm transition-all duration-500 animate-gradient" />
+              {/* Outer animated glow ring */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-80 transition-all duration-700 animate-pulse" />
               
-              {/* Iridescent border ring */}
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 rounded-2xl opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+              {/* Gradient border */}
+              <div className="absolute -inset-[1.5px] bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 rounded-2xl opacity-90" />
               
-              {/* Glass button container */}
-              <div className="relative px-8 sm:px-12 py-5 sm:py-6 rounded-2xl bg-slate-900/60 dark:bg-slate-900/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-500">
-                {/* Inner glass highlight */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-60" />
+              {/* Glass container with frosted effect */}
+              <div 
+                className="relative px-10 sm:px-14 py-5 sm:py-6 rounded-2xl overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 20, 50, 0.9) 50%, rgba(15, 23, 42, 0.85) 100%)',
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                }}
+              >
+                {/* Top highlight bar */}
+                <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                 
-                {/* Animated shimmer effect */}
-                <div className="absolute inset-0 rounded-2xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                {/* Inner glow */}
+                <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-cyan-500/5" />
+                
+                {/* Shimmer on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </div>
                 
                 {/* Button content */}
-                <div className="relative flex items-center justify-center gap-3 text-white">
+                <div className="relative flex items-center justify-center gap-3">
                   <motion.div
-                    animate={{ rotate: [0, 15, -15, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    animate={{ 
+                      rotate: [0, 10, -10, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Sparkles className="w-5 h-5 text-amber-300 group-hover:text-amber-200 transition-colors" />
+                    <Sparkles className="w-5 h-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
                   </motion.div>
-                  <span className="text-base sm:text-lg font-semibold tracking-wide bg-gradient-to-r from-white via-purple-100 to-cyan-100 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
+                  <span className="text-base sm:text-lg font-bold tracking-wide text-white drop-shadow-lg">
                     Join the Waitlist
                   </span>
                 </div>
