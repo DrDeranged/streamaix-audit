@@ -72,7 +72,7 @@ import {
 import { Request, Response } from "express";
 import cors from "cors";
 import { db } from "./db";
-import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions, predictionLeagues, leagueParticipants, leagueTrades, marketTrades } from "../shared/schema";
+import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions, predictionLeagues, leagueParticipants, leagueTrades, marketTrades, pushSubscriptions } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
 // Helper function to handle validation errors
