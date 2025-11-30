@@ -61,7 +61,12 @@ import {
   Trash2,
   Trophy,
   Bell,
-  Settings
+  Settings,
+  Compass,
+  Search,
+  HelpCircle,
+  Sparkles,
+  PlayCircle
 } from 'lucide-react';
 
 interface Summary {
@@ -1201,18 +1206,81 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="bg-slate-950/40 border border-purple-500/20 backdrop-blur-xl">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-sm">Quick Actions</CardTitle>
+                  <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-purple-400" />
+                    Quick Actions
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
+                  {/* Create Summary - Primary Action */}
+                  <Link to="/create-summary">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white shadow-lg shadow-purple-500/20 transition-all duration-200 font-semibold touch-manipulation py-3"
+                      data-testid="button-create-summary"
+                    >
+                      <PlayCircle className="h-4 w-4 mr-2" />
+                      Create Summary
+                    </Button>
+                  </Link>
+
+                  {/* Browse Markets */}
+                  <Link to="/markets">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      data-testid="button-browse-markets"
+                    >
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Browse Markets
+                    </Button>
+                  </Link>
+
+                  {/* Find Bounties */}
+                  <Link to="/bounties">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      data-testid="button-find-bounties"
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Find Bounties
+                    </Button>
+                  </Link>
+
+                  {/* Discover Analytics */}
+                  <Link to="/discover">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      data-testid="button-discover"
+                    >
+                      <Compass className="h-4 w-4 mr-2" />
+                      Discover Analytics
+                    </Button>
+                  </Link>
+
+                  {/* Explore Avatars */}
+                  <Link to="/landing#knowledge-avatars">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg shadow-pink-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      data-testid="button-explore-avatars"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Explore Avatars
+                    </Button>
+                  </Link>
+
+                  {/* Divider */}
+                  <div className="border-t border-purple-500/20 my-3" />
+
+                  {/* Add Note */}
                   <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full bg-blue-600/80 hover:bg-blue-500 text-white border-2 border-blue-400 shadow-lg transition-all duration-200 font-semibold touch-manipulation py-3"
+                        variant="outline"
+                        className="w-full bg-white/5 border-blue-500/30 hover:bg-blue-500/20 text-white transition-all duration-200 font-medium touch-manipulation py-2.5"
                         data-testid="button-add-note"
                       >
-                        <BookmarkPlus className="h-4 w-4 mr-2" />
+                        <BookmarkPlus className="h-4 w-4 mr-2 text-blue-400" />
                         Add Note
                       </Button>
                     </DialogTrigger>
@@ -1262,13 +1330,16 @@ export default function Dashboard() {
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Share Profile */}
                   <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full bg-green-600/80 hover:bg-green-500 text-white border-2 border-green-400 shadow-lg transition-all duration-200 font-semibold touch-manipulation py-3"
+                        variant="outline"
+                        className="w-full bg-white/5 border-green-500/30 hover:bg-green-500/20 text-white transition-all duration-200 font-medium touch-manipulation py-2.5"
                         data-testid="button-share-profile"
                       >
-                        <Share className="h-4 w-4 mr-2" />
+                        <Share className="h-4 w-4 mr-2 text-green-400" />
                         Share Profile
                       </Button>
                     </DialogTrigger>
@@ -1311,6 +1382,23 @@ export default function Dashboard() {
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Divider */}
+                  <div className="border-t border-purple-500/20 my-3" />
+
+                  {/* Start Tour - Help for new users */}
+                  <Button 
+                    variant="ghost"
+                    className="w-full bg-white/5 hover:bg-purple-500/20 text-gray-300 hover:text-white transition-all duration-200 font-medium touch-manipulation py-2.5"
+                    data-testid="button-start-tour"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('triggerOnboardingTour'));
+                      toast({ title: "Tour Started!", description: "Follow the guide to learn about StreamAiX features." });
+                    }}
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2 text-purple-400" />
+                    Take a Tour
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
