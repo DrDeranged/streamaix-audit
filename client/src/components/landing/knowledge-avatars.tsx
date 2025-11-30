@@ -1224,15 +1224,19 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
                             
                             {/* Compact Analytics Chart Section */}
-                            {avatar.investmentThesis && avatar.bestCalls && avatar.bestCalls.length > 0 && (
+                            {avatar.investmentThesis && (
                               <div className="flex-1 min-h-0 overflow-hidden">
                                 <EntrepreneurAnalytics 
                                   entrepreneur={{
                                     name: avatar.name,
                                     investmentThesis: avatar.investmentThesis || '',
-                                    bestCalls: avatar.bestCalls || [],
-                                    worstCalls: avatar.worstCalls || [],
-                                    recentActivity: avatar.recentActivity || [],
+                                    bestCalls: bestCallsData,
+                                    worstCalls: worstCallsData,
+                                    recentActivity: recentActivityData.map(activity => ({
+                                      date: activity.time,
+                                      action: activity.text,
+                                      details: `${activity.type.toUpperCase()} - Market impact: ${activity.impact}`
+                                    })),
                                     category: avatar.category || '',
                                     riskScore: avatar.riskScore || 50,
                                     volatility: avatar.volatility || 50,

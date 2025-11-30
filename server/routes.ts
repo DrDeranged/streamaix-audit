@@ -1585,22 +1585,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Check follow status
-  app.get('/api/avatars/:handle/follow-status', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { handle } = req.params;
+  app.get('/api/avatars/:id/follow-status', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
     
     try {
-      const avatar = await storage.getKnowledgeAvatarByHandle(handle);
+      const avatar = await storage.getKnowledgeAvatar(id);
       if (!avatar) {
         return res.status(404).json({ error: 'Avatar not found' });
       }
 
-      const isFollowing = await storage.isFollowingAvatar(req.user!.id, avatar.id);
+      const isFollowing = await storage.isFollowingAvatar(req.user!.id, id);
       
       // Get follow details if following
       let notificationsEnabled = false;
       if (isFollowing) {
         const followedAvatars = await storage.getUserFollowedAvatars(req.user!.id);
-        const followData = followedAvatars.find(f => f.avatarId === avatar.id);
+        const followData = followedAvatars.find(f => f.avatarId === id);
         notificationsEnabled = followData?.notificationsEnabled || false;
       }
 
