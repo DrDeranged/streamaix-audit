@@ -410,45 +410,6 @@ export default function Dashboard() {
         opacity: 0.5
       }}></div>
       
-      {/* ENHANCED CRYPTO TICKER - Darker, more visible, continuous */}
-      <div className="relative z-20 bg-gradient-to-r from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 backdrop-blur-md border-b border-purple-500/20">
-        <div className="overflow-hidden py-3">
-          <motion.div 
-            className="flex space-x-8 sm:space-x-12 text-xs sm:text-sm opacity-95"
-            animate={{ x: "-100%" }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 120, 
-              ease: "linear" 
-            }}
-            style={{ width: "400%" }}
-          >
-            {cryptoQuotes.length > 0 ? (
-              [...cryptoQuotes, ...cryptoQuotes, ...cryptoQuotes, ...cryptoQuotes].map((quote: CryptoQuote, index: number) => {
-                const ChangeIcon = getChangeIcon(quote.percentChange24h);
-                return (
-                  <div key={index} className="flex items-center space-x-2 sm:space-x-3 text-white whitespace-nowrap">
-                    <span className="font-bold text-orange-300 text-xs sm:text-sm">{quote.symbol}</span>
-                    <span className="font-semibold text-xs sm:text-sm">{formatPrice(quote.price)}</span>
-                    <span className={`flex items-center font-medium text-xs sm:text-sm ${getChangeColor(quote.percentChange24h)}`}>
-                      {ChangeIcon && <ChangeIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />}
-                      {(quote.percentChange24h || 0).toFixed(1)}%
-                    </span>
-                  </div>
-                );
-              })
-            ) : (
-              // Fallback placeholder while loading
-              [...Array(25)].map((_, index) => (
-                <div key={index} className="flex items-center space-x-3 text-white whitespace-nowrap">
-                  <span className="font-bold text-orange-300/60">●●●</span>
-                  <span className="font-medium text-gray-300">Loading crypto data...</span>
-                </div>
-              ))
-            )}
-          </motion.div>
-        </div>
-      </div>
 
       {/* ENHANCED FINANCIAL NEWS SECTION */}
       <div className="relative z-10 bg-gradient-to-r from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border-b border-purple-500/10">
@@ -539,52 +500,76 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Mobile-Optimized Stats Cards */}
+        {/* Glassmorphism Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
-            <CardContent className="p-4">
-              <div className="text-center">
-                <BarChart3 className="h-6 w-6 text-purple-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-xs">Summaries</p>
-                <p className="text-white text-lg font-bold">{stats.totalSummaries}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Summaries Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-purple-500/20 backdrop-blur-xl hover:border-purple-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center mx-auto mb-3">
+                    <BarChart3 className="h-6 w-6 text-purple-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Summaries</p>
+                  <p className="text-white text-xl font-bold">{stats.totalSummaries}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
-            <CardContent className="p-4">
-              <div className="text-center">
-                <Eye className="h-6 w-6 text-blue-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-xs">Views</p>
-                <p className="text-white text-lg font-bold">{stats.totalViews}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Views Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-blue-500/20 backdrop-blur-xl hover:border-blue-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-3">
+                    <Eye className="h-6 w-6 text-blue-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Views</p>
+                  <p className="text-white text-xl font-bold">{stats.totalViews}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
-            <CardContent className="p-4">
-              <div className="text-center">
-                <Wallet className="h-6 w-6 text-green-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-xs">STREAM</p>
-                <p className="text-white text-lg font-bold">{balance.streamTokens.toFixed(0)}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* STREAM Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-emerald-500/20 backdrop-blur-xl hover:border-emerald-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mx-auto mb-3">
+                    <Wallet className="h-6 w-6 text-emerald-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">STREAM</p>
+                  <p className="text-white text-xl font-bold">{balance.streamTokens.toFixed(0)}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg touch-manipulation">
-            <CardContent className="p-4">
-              <div className="text-center">
-                <Award className="h-6 w-6 text-yellow-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-xs">Rank</p>
-                <p className="text-white text-sm font-bold">{stats.level.split(' ')[0]}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Rank Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-amber-500/20 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mx-auto mb-3">
+                    <Award className="h-6 w-6 text-amber-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Rank</p>
+                  <p className="text-white text-xl font-bold">{stats.level}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </motion.div>
 
         {/* Mobile-First Main Content Layout */}
@@ -1330,85 +1315,6 @@ export default function Dashboard() {
               </Card>
             </motion.div>
 
-            {/* Live Crypto Stocks - Always show section */}
-            {true && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="lg:block"
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-sm flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-indigo-400" />
-                      Live Crypto Stocks
-                      {isWebSocketConnected && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live data" />}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="lg:space-y-1 lg:max-h-96 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5 hover:scrollbar-thumb-white/30">
-                    {/* Mobile: Horizontal scroll */}
-                    <div className="lg:hidden">
-                      {/* Mobile: Vertical Grid for Better Usability */}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {displayStocks.length > 0 ? displayStocks.slice(0, 9).map((stock: any) => {
-                          const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
-                          return (
-                            <div
-                              key={stock.symbol}
-                              className="bg-white/5 rounded-lg p-3 border border-white/10 touch-manipulation"
-                              data-testid={`mobile-stock-${stock.symbol}`}
-                            >
-                              <div className="text-center">
-                                <div className="text-white font-medium text-sm">{stock.symbol}</div>
-                                <div className="text-gray-400 text-xs">{formatPrice(stock.price)}</div>
-                                <div className={`font-medium text-xs ${getChangeColor(changePercent)}`}>
-                                  {changePercent > 0 ? '+' : ''}{(changePercent || 0).toFixed(1)}%
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        }) : (
-                          <div className="text-center py-6 text-gray-400 text-sm">
-                            <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                            <p>Live stock data temporarily unavailable</p>
-                            <p className="text-xs">API rate limit reached - refreshing...</p>
-                          </div>
-                        )}
-                    </div>
-                    </div>
-                    {/* Desktop: Vertical list */}
-                    <div className="hidden lg:block">
-                      {displayStocks.length > 0 ? displayStocks.slice(0, 25).map((stock: any, index: number) => {
-                        const changePercent = stock.changePercent ?? stock.percentChange24h ?? 0;
-                        
-                        return (
-                          <div
-                            key={stock.symbol}
-                            className="flex items-center justify-between py-1 px-2 rounded text-xs hover:bg-white/5 transition-colors"
-                            data-testid={`sidebar-stock-${stock.symbol}`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-white font-medium">{stock.symbol}</span>
-                              <span className="text-gray-400 truncate">{formatPrice(stock.price)}</span>
-                            </div>
-                            <span className={`font-medium whitespace-nowrap ${getChangeColor(changePercent)}`}>
-                              {changePercent > 0 ? '+' : ''}{(changePercent || 0).toFixed(1)}%
-                            </span>
-                          </div>
-                        );
-                      }) : (
-                        <div className="text-center py-6 text-gray-400 text-sm">
-                          <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                          <p>Live stock data temporarily unavailable</p>
-                          <p className="text-xs">API rate limit reached - refreshing...</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
           </div>
         </div>
       </div>
