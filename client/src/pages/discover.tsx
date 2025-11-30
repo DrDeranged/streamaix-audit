@@ -169,10 +169,12 @@ export default function Discover() {
 
   const { data: macroCalendarData } = useQuery({
     queryKey: ['/api/macro/calendar'],
+    refetchInterval: 300000, // 5 minutes - calendar events don't change frequently
   });
 
   const { data: fedWatchData } = useQuery({
     queryKey: ['/api/macro/fed-watch'],
+    refetchInterval: 300000, // 5 minutes - Fed probabilities update periodically
   });
 
   // Market Data Queries
