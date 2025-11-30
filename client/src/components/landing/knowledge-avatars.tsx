@@ -1233,9 +1233,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                     bestCalls: bestCallsData,
                                     worstCalls: worstCallsData,
                                     recentActivity: recentActivityData.map(activity => ({
-                                      date: activity.time,
-                                      action: activity.text,
-                                      details: `${activity.type.toUpperCase()} - Market impact: ${activity.impact}`
+                                      date: activity.time || 'Recent',
+                                      action: activity.text || 'Activity update',
+                                      details: `${(activity.type || 'update').toUpperCase()} - Market impact: ${activity.impact || 'medium'}`
                                     })),
                                     category: avatar.category || '',
                                     riskScore: avatar.riskScore || 50,

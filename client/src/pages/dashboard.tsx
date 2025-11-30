@@ -582,32 +582,32 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-white/5 border border-white/20 touch-manipulation">
-                  <TabsTrigger value="summaries" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 bg-slate-950/60 backdrop-blur-xl border border-purple-500/20 rounded-xl p-1 touch-manipulation">
+                  <TabsTrigger value="summaries" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-fuchsia-500/30 data-[state=active]:border-purple-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <FileText className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Summaries</span>
                   </TabsTrigger>
-                  <TabsTrigger value="markets" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                  <TabsTrigger value="markets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500/30 data-[state=active]:to-cyan-500/30 data-[state=active]:border-emerald-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <TrendingUp className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Markets</span>
                   </TabsTrigger>
-                  <TabsTrigger value="avatars" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                  <TabsTrigger value="avatars" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-purple-500/30 data-[state=active]:border-blue-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <Users className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Avatars</span>
                   </TabsTrigger>
-                  <TabsTrigger value="notes" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                  <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:border-amber-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-amber-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <BookmarkPlus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
+                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/30 data-[state=active]:to-emerald-500/30 data-[state=active]:border-green-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <Wallet className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Wallet</span>
                   </TabsTrigger>
-                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/30 data-[state=active]:to-rose-500/30 data-[state=active]:border-pink-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/20 rounded-lg px-3 py-3 text-xs font-medium text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <Target className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Bounties</span>
                   </TabsTrigger>
-                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
+                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:border-cyan-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/20 rounded-lg px-3 py-3 text-xs font-medium text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <Activity className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Overview</span>
                   </TabsTrigger>

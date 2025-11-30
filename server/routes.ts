@@ -1548,6 +1548,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get trending avatars - MUST be before /:handle to avoid route matching issues
+  app.get('/api/avatars/trending', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 6;
+    
+    try {
+      const trendingIds = await recommendationEngine.getTrendingAvatars(limit);
+      
+      // Fetch full avatar data
+      const trending = await Promise.all(
+        trendingIds.map(id => storage.getKnowledgeAvatar(id))
+      );
+      
+      res.json({ trending: trending.filter(Boolean) });
+    } catch (error) {
+      console.error('Error fetching trending avatars:', error);
+      res.status(500).json({ error: 'Failed to fetch trending avatars' });
+    }
+  }));
+
   // Get avatar by handle
   app.get('/api/avatars/:handle', asyncHandler(async (req: Request, res: Response) => {
     const { handle } = req.params;
@@ -1786,25 +1805,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching similar avatars:', error);
       res.status(500).json({ error: 'Failed to fetch similar avatars' });
-    }
-  }));
-
-  // Get trending avatars
-  app.get('/api/avatars/trending', asyncHandler(async (req: Request, res: Response) => {
-    const limit = parseInt(req.query.limit as string) || 6;
-    
-    try {
-      const trendingIds = await recommendationEngine.getTrendingAvatars(limit);
-      
-      // Fetch full avatar data
-      const trending = await Promise.all(
-        trendingIds.map(id => storage.getKnowledgeAvatar(id))
-      );
-      
-      res.json({ trending: trending.filter(Boolean) });
-    } catch (error) {
-      console.error('Error fetching trending avatars:', error);
-      res.status(500).json({ error: 'Failed to fetch trending avatars' });
     }
   }));
 
