@@ -211,9 +211,9 @@ class CryptoIntelligenceService {
     }
   }
 
-  async getTopMovers(): Promise<{ gainers: CryptoMover[]; losers: CryptoMover[] }> {
+  async getTopMovers(): Promise<{ gainers: CryptoMover[]; losers: CryptoMover[]; topByMarketCap: CryptoMover[] }> {
     const cacheKey = 'top_movers';
-    const cached = this.getCached<{ gainers: CryptoMover[]; losers: CryptoMover[] }>(cacheKey);
+    const cached = this.getCached<{ gainers: CryptoMover[]; losers: CryptoMover[]; topByMarketCap: CryptoMover[] }>(cacheKey);
     if (cached) return cached;
 
     try {
@@ -250,14 +250,15 @@ class CryptoIntelligenceService {
       
       const result = {
         gainers: sorted.slice(0, 10),
-        losers: sorted.slice(-10).reverse()
+        losers: sorted.slice(-10).reverse(),
+        topByMarketCap: mapped.slice(0, 20)
       };
 
       this.setCache(cacheKey, result);
       return result;
     } catch (error) {
       console.error('❌ Top movers API error:', error);
-      return { gainers: [], losers: [] };
+      return { gainers: [], losers: [], topByMarketCap: [] };
     }
   }
 
