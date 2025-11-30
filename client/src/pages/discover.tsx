@@ -60,7 +60,8 @@ import {
   PiggyBank,
   Landmark,
   BarChart2,
-  Gauge
+  Gauge,
+  Coins
 } from "lucide-react";
 
 interface PredictionMarket {
@@ -153,6 +154,11 @@ export default function Discover() {
 
   const { data: volatilityIndicesData } = useQuery({
     queryKey: ['/api/macro/volatility-indices'],
+    refetchInterval: 120000, // 2 minutes
+  });
+
+  const { data: preciousMetalsData } = useQuery({
+    queryKey: ['/api/macro/precious-metals'],
     refetchInterval: 120000, // 2 minutes
   });
 
@@ -296,6 +302,7 @@ export default function Discover() {
   const treasuryYields = (treasuryYieldsData as any)?.yields || {};
   const yieldCurveStatus = (treasuryYieldsData as any)?.yieldCurveStatus || 'unknown';
   const volatilityIndices = (volatilityIndicesData as any)?.indices || {};
+  const preciousMetals = (preciousMetalsData as any)?.metals || {};
   const globalM2 = (globalLiquidityData as any)?.globalM2 || {};
   const macroCalendar = (macroCalendarData as any)?.events || [];
   const fedWatch = (fedWatchData as any)?.fedWatch || {};
@@ -1029,32 +1036,28 @@ export default function Discover() {
                   </div>
                 </div>
 
-                {/* VIX & DXY - Compact */}
+                {/* Precious Metals - Gold & Silver */}
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
                   <div className="flex items-center gap-2 mb-2">
-                    <Gauge className="w-4 h-4 text-amber-400" />
-                    <h3 className="text-xs font-medium text-white">Volatility</h3>
+                    <Coins className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-xs font-medium text-white">Precious Metals</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    {volatilityIndices.vix && (
+                    {preciousMetals.gold && (
                       <div className="p-2 rounded-lg bg-slate-800/50">
-                        <p className="text-[10px] text-gray-400">VIX</p>
-                        <p className="text-lg font-bold text-white">{volatilityIndices.vix.value?.toFixed(1)}</p>
-                        <Badge className={`text-[10px] px-1 ${
-                          volatilityIndices.vix.level === 'low' ? 'bg-emerald-500/20 text-emerald-400' :
-                          volatilityIndices.vix.level === 'moderate' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
-                        }`}>
-                          {volatilityIndices.vix.level}
-                        </Badge>
+                        <p className="text-[10px] text-gray-400">Gold (XAU)</p>
+                        <p className="text-lg font-bold text-amber-400">${preciousMetals.gold.price?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                        <span className={`text-[10px] ${preciousMetals.gold.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {preciousMetals.gold.change >= 0 ? '+' : ''}{preciousMetals.gold.changePercent?.toFixed(2)}%
+                        </span>
                       </div>
                     )}
-                    {volatilityIndices.dxy && (
+                    {preciousMetals.silver && (
                       <div className="p-2 rounded-lg bg-slate-800/50">
-                        <p className="text-[10px] text-gray-400">DXY</p>
-                        <p className="text-lg font-bold text-white">{volatilityIndices.dxy.value?.toFixed(2)}</p>
-                        <span className={`text-[10px] ${volatilityIndices.dxy.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {volatilityIndices.dxy.change >= 0 ? '+' : ''}{volatilityIndices.dxy.changePercent?.toFixed(2)}%
+                        <p className="text-[10px] text-gray-400">Silver (XAG)</p>
+                        <p className="text-lg font-bold text-gray-300">${preciousMetals.silver.price?.toFixed(2)}</p>
+                        <span className={`text-[10px] ${preciousMetals.silver.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {preciousMetals.silver.change >= 0 ? '+' : ''}{preciousMetals.silver.changePercent?.toFixed(2)}%
                         </span>
                       </div>
                     )}
@@ -1096,18 +1099,42 @@ export default function Discover() {
                     <PiggyBank className="w-4 h-4 text-emerald-400" />
                     <h3 className="text-xs font-medium text-white">Global M2 Liquidity</h3>
                     <Badge className={`ml-auto text-[10px] px-1.5 ${
-                      globalM2.trend === 'expanding' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                      globalM2.global?.trend === 'expanding' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
                     }`}>
-                      {globalM2.trend}
+                      {globalM2.global?.trend || 'neutral'}
                     </Badge>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-white">${globalM2.total?.toFixed(1)}</span>
-                    <span className="text-xs text-gray-400">Trillion</span>
-                    <span className={`text-xs ${globalM2.changePercent30d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {globalM2.changePercent30d >= 0 ? '+' : ''}{globalM2.changePercent30d}% (30d)
-                    </span>
-                  </div>
+                  {globalM2.dataAvailable && globalM2.global ? (
+                    <div className="space-y-2">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-white">${globalM2.global.value?.toFixed(1)}</span>
+                        <span className="text-xs text-gray-400">Trillion</span>
+                        <span className={`text-xs ${globalM2.global.change30d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          +{globalM2.global.change30d}% (30d)
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-1 text-[9px]">
+                        <div className="p-1 rounded bg-slate-800/50 text-center">
+                          <span className="text-gray-400">US</span>
+                          <p className="text-white font-medium">${globalM2.us?.value}T</p>
+                        </div>
+                        <div className="p-1 rounded bg-slate-800/50 text-center">
+                          <span className="text-gray-400">CN</span>
+                          <p className="text-white font-medium">${globalM2.china?.value}T</p>
+                        </div>
+                        <div className="p-1 rounded bg-slate-800/50 text-center">
+                          <span className="text-gray-400">EU</span>
+                          <p className="text-white font-medium">${globalM2.eurozone?.value}T</p>
+                        </div>
+                        <div className="p-1 rounded bg-slate-800/50 text-center">
+                          <span className="text-gray-400">JP</span>
+                          <p className="text-white font-medium">${globalM2.japan?.value}T</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500">Loading liquidity data...</p>
+                  )}
                 </div>
 
                 {/* Economic Calendar */}
@@ -1120,16 +1147,20 @@ export default function Discover() {
                     </Badge>
                   </div>
                   <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                    {macroCalendar.slice(0, 4).map((event: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-2 p-1.5 rounded bg-slate-800/30">
-                        <div className={`w-1.5 h-1.5 rounded-full ${
-                          event.impact === 'high' ? 'bg-red-400' :
-                          event.impact === 'medium' ? 'bg-yellow-400' : 'bg-gray-400'
-                        }`} />
-                        <p className="text-[10px] text-white truncate flex-1">{event.event}</p>
-                        <span className="text-[10px] text-gray-500">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                      </div>
-                    ))}
+                    {macroCalendar.length > 0 ? (
+                      macroCalendar.slice(0, 4).map((event: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 p-1.5 rounded bg-slate-800/30">
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            event.impact === 'high' ? 'bg-red-400' :
+                            event.impact === 'medium' ? 'bg-yellow-400' : 'bg-gray-400'
+                          }`} />
+                          <p className="text-[10px] text-white truncate flex-1">{event.event}</p>
+                          <span className="text-[10px] text-gray-500">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-500 text-center py-2">No events scheduled</p>
+                    )}
                   </div>
                 </div>
               </div>

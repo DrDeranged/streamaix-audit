@@ -234,7 +234,26 @@ class CryptoIntelligenceService {
 
       const coins = response.data;
       
-      const mapped: CryptoMover[] = coins.map((coin: any) => ({
+      // Filter out wrapped, staked, and derivative tokens for cleaner display
+      const wrappedStakedPatterns = [
+        /^wrapped/i, /^staked/i, /^w[A-Z]{2,}/i,  // wBTC, wETH, etc.
+        /steth/i, /wsteth/i, /weth/i, /wbtc/i, /wbeth/i,
+        /cbeth/i, /reth/i, /sfrxeth/i, /frxeth/i,
+        /^st[A-Z]/i, // stSOL, stETH, etc.
+        /liquid.*staking/i,
+        /^bridged/i, /^matic/i, // Polygon bridged tokens
+        /bitcoin.*bep/i, /ethereum.*bep/i, // Binance bridged versions
+        /^lido/i // Lido staked versions
+      ];
+      
+      const excludedIds = [
+        'wrapped-bitcoin', 'wrapped-steth', 'staked-ether', 'wrapped-ether',
+        'lido-staked-ether', 'coinbase-wrapped-staked-eth', 'rocket-pool-eth',
+        'frax-ether', 'frax-staked-ether', 'wrapped-beacon-eth', 'binance-eth',
+        'bitcoin-bep2', 'wrapped-eeth', 'mantle-staked-ether', 'renzo-restaked-eth'
+      ];
+      
+      const allMapped: CryptoMover[] = coins.map((coin: any) => ({
         id: coin.id,
         symbol: coin.symbol?.toUpperCase(),
         name: coin.name,
@@ -245,13 +264,32 @@ class CryptoIntelligenceService {
         image: coin.image,
         sparkline: coin.sparkline_in_7d?.price?.slice(-24) || []
       }));
+      
+      // Filter for top 20 market cap - exclude wrapped/staked tokens
+      const filteredForMarketCap = allMapped.filter((coin) => {
+        const id = coin.id?.toLowerCase() || '';
+        const name = coin.name?.toLowerCase() || '';
+        const symbol = coin.symbol?.toLowerCase() || '';
+        
+        // Check if in exclusion list
+        if (excludedIds.includes(id)) return false;
+        
+        // Check patterns
+        for (const pattern of wrappedStakedPatterns) {
+          if (pattern.test(name) || pattern.test(symbol) || pattern.test(id)) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
 
-      const sorted = [...mapped].sort((a, b) => b.change24h - a.change24h);
+      const sorted = [...allMapped].sort((a, b) => b.change24h - a.change24h);
       
       const result = {
         gainers: sorted.slice(0, 10),
         losers: sorted.slice(-10).reverse(),
-        topByMarketCap: mapped.slice(0, 20)
+        topByMarketCap: filteredForMarketCap.slice(0, 20)
       };
 
       this.setCache(cacheKey, result);

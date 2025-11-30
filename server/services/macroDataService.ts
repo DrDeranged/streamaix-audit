@@ -293,6 +293,52 @@ class MacroDataService {
     return result;
   }
 
+  async getPreciousMetals(): Promise<{
+    gold: { price: number; change: number; changePercent: number };
+    silver: { price: number; change: number; changePercent: number };
+    lastUpdate: string;
+    source: string;
+  }> {
+    const cacheKey = 'precious_metals';
+    const cached = this.getCached<{
+      gold: { price: number; change: number; changePercent: number };
+      silver: { price: number; change: number; changePercent: number };
+      lastUpdate: string;
+      source: string;
+    }>(cacheKey);
+    if (cached) return cached;
+
+    const now = new Date().toISOString();
+
+    // Yahoo Finance symbols for gold and silver futures
+    const [goldQuote, silverQuote] = await Promise.all([
+      this.fetchYahooQuote('GC=F'),  // Gold futures
+      this.fetchYahooQuote('SI=F'),  // Silver futures
+    ]);
+
+    const result = {
+      gold: {
+        price: goldQuote?.price || 0,
+        change: goldQuote?.change || 0,
+        changePercent: goldQuote?.changePercent || 0
+      },
+      silver: {
+        price: silverQuote?.price || 0,
+        change: silverQuote?.change || 0,
+        changePercent: silverQuote?.changePercent || 0
+      },
+      lastUpdate: now,
+      source: 'Yahoo Finance'
+    };
+
+    if (goldQuote || silverQuote) {
+      console.log(`✅ Precious metals fetched: Gold=$${goldQuote?.price?.toFixed(2) || '0'}, Silver=$${silverQuote?.price?.toFixed(2) || '0'}`);
+      this.setCache(cacheKey, result);
+    }
+
+    return result;
+  }
+
   async getFearGreedIndex(): Promise<FearGreedData> {
     const cacheKey = 'fear_greed';
     const cached = this.getCached<FearGreedData>(cacheKey, this.longCacheTimeout);
