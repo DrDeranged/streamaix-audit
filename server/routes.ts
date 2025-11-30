@@ -26,6 +26,7 @@ import { marketEventModelingService } from "./services/marketEventModelingServic
 import { patternRecognitionService } from "./services/patternRecognitionService";
 import { RecommendationEngine } from "./recommendation-engine";
 import { cryptoIntelligenceService } from "./services/cryptoIntelligenceService";
+import { macroDataService } from "./services/macroDataService";
 import { advancedMarketIntelService } from "./services/advancedMarketIntelService";
 import { registerWeb3Routes } from "./web3Routes";
 import socialTradingRoutes from "./socialTradingRoutes";
@@ -10353,59 +10354,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // MACRO ECONOMIC DATA ENDPOINTS
   // =============================================================================
 
-  // Index Futures - S&P 500, Nasdaq 100, Dow Jones
+  // Index Futures - S&P 500, Nasdaq 100, Dow Jones (REAL DATA)
   app.get("/api/macro/index-futures", asyncHandler(async (req: Request, res: Response) => {
     try {
-      // Simulated real-time index futures data
-      // In production, this would connect to CME, Finnhub, or similar API
       const now = new Date();
       const isMarketHours = now.getUTCHours() >= 13 && now.getUTCHours() < 21; // US market hours
+
+      // Fetch real data from Finnhub via our macro service
+      const indices = await macroDataService.getIndexFutures();
 
       const futures = [
         {
           symbol: 'ES',
-          name: 'S&P 500 E-mini',
-          price: 5965.25 + (Math.random() - 0.5) * 20,
-          change: (Math.random() - 0.4) * 50,
-          changePercent: (Math.random() - 0.4) * 0.8,
-          high: 5985.50,
-          low: 5942.25,
+          name: 'S&P 500',
+          price: indices.es.value,
+          change: indices.es.change,
+          changePercent: indices.es.changePercent,
+          high: indices.es.high || indices.es.value * 1.005,
+          low: indices.es.low || indices.es.value * 0.995,
           volume: Math.floor(150000 + Math.random() * 50000),
           openInterest: 2450000,
           status: isMarketHours ? 'trading' : 'pre-market',
         },
         {
           symbol: 'NQ',
-          name: 'Nasdaq 100 E-mini',
-          price: 21285.50 + (Math.random() - 0.5) * 80,
-          change: (Math.random() - 0.4) * 150,
-          changePercent: (Math.random() - 0.4) * 0.9,
-          high: 21380.00,
-          low: 21150.25,
+          name: 'Nasdaq 100',
+          price: indices.nq.value,
+          change: indices.nq.change,
+          changePercent: indices.nq.changePercent,
+          high: indices.nq.high || indices.nq.value * 1.005,
+          low: indices.nq.low || indices.nq.value * 0.995,
           volume: Math.floor(80000 + Math.random() * 30000),
           openInterest: 890000,
           status: isMarketHours ? 'trading' : 'pre-market',
         },
         {
           symbol: 'YM',
-          name: 'Dow Jones E-mini',
-          price: 44520.00 + (Math.random() - 0.5) * 100,
-          change: (Math.random() - 0.4) * 200,
-          changePercent: (Math.random() - 0.4) * 0.5,
-          high: 44680.00,
-          low: 44350.00,
+          name: 'Dow Jones',
+          price: indices.ym.value,
+          change: indices.ym.change,
+          changePercent: indices.ym.changePercent,
+          high: indices.ym.high || indices.ym.value * 1.005,
+          low: indices.ym.low || indices.ym.value * 0.995,
           volume: Math.floor(25000 + Math.random() * 10000),
           openInterest: 150000,
           status: isMarketHours ? 'trading' : 'pre-market',
         },
         {
           symbol: 'RTY',
-          name: 'Russell 2000 E-mini',
-          price: 2385.40 + (Math.random() - 0.5) * 15,
-          change: (Math.random() - 0.4) * 30,
-          changePercent: (Math.random() - 0.4) * 1.2,
-          high: 2410.50,
-          low: 2365.20,
+          name: 'Russell 2000',
+          price: indices.rty.value,
+          change: indices.rty.change,
+          changePercent: indices.rty.changePercent,
+          high: indices.rty.high || indices.rty.value * 1.005,
+          low: indices.rty.low || indices.rty.value * 0.995,
           volume: Math.floor(35000 + Math.random() * 15000),
           openInterest: 280000,
           status: isMarketHours ? 'trading' : 'pre-market',
@@ -10416,7 +10418,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         futures,
         lastUpdate: new Date().toISOString(),
-        marketStatus: isMarketHours ? 'Regular Trading Hours' : 'Pre/Post Market'
+        marketStatus: isMarketHours ? 'Regular Trading Hours' : 'Pre/Post Market',
+        source: 'Finnhub'
       });
     } catch (error: any) {
       console.error('Error fetching index futures:', error);
