@@ -60,6 +60,7 @@ export function NotificationSettings() {
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [diagnosticSteps, setDiagnosticSteps] = useState<DiagnosticStep[]>([]);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     marketResolutions: true,
     priceAlerts: true,
@@ -394,12 +395,21 @@ export function NotificationSettings() {
   const testNotificationMutation = useMutation({
     mutationFn: async () => {
       console.log('🔔 [Test] Sending test notification...');
+      setTestResult({ status: 'pending', message: 'Sending test notification...' });
       const response = await apiRequest('/api/push/test-detailed', { method: 'POST' });
       console.log('🔔 [Test] Response:', response);
       return response;
     },
     onSuccess: (data: any) => {
       console.log('🔔 [Test] Result:', data);
+      setTestResult({
+        status: data.success ? 'success' : 'failed',
+        message: data.finalStatus || (data.success ? 'Sent!' : 'Failed'),
+        testId: data.testId,
+        steps: data.steps,
+        sendResults: data.sendResults,
+        hint: data.hint,
+      });
       if (data.success) {
         toast({
           title: 'Test notification sent!',
@@ -415,6 +425,11 @@ export function NotificationSettings() {
     },
     onError: (error: any) => {
       console.error('🔔 [Test] Error:', error);
+      setTestResult({
+        status: 'error',
+        message: error.message || 'Network error',
+        error: String(error),
+      });
       toast({
         title: 'Failed to send test',
         description: error.message || 'Please try again.',
@@ -605,6 +620,70 @@ export function NotificationSettings() {
                   {showDebug ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
                 </Button>
               </div>
+
+              {/* Test Result Display */}
+              {testResult && (
+                <div className={`mt-3 p-3 rounded-lg text-xs font-mono ${
+                  testResult.status === 'success' ? 'bg-green-500/10 border border-green-500/20' :
+                  testResult.status === 'pending' ? 'bg-blue-500/10 border border-blue-500/20' :
+                  'bg-red-500/10 border border-red-500/20'
+                }`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {testResult.status === 'success' && <CheckCircle className="w-4 h-4 text-green-400" />}
+                    {testResult.status === 'pending' && <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />}
+                    {(testResult.status === 'failed' || testResult.status === 'error') && <XCircle className="w-4 h-4 text-red-400" />}
+                    <span className={`font-medium ${
+                      testResult.status === 'success' ? 'text-green-400' :
+                      testResult.status === 'pending' ? 'text-blue-400' : 'text-red-400'
+                    }`}>
+                      {testResult.message}
+                    </span>
+                  </div>
+                  {testResult.testId && (
+                    <div className="text-muted-foreground mb-1">Test ID: {testResult.testId}</div>
+                  )}
+                  {testResult.hint && (
+                    <div className="text-amber-400 mb-2">{testResult.hint}</div>
+                  )}
+                  {testResult.steps && testResult.steps.length > 0 && (
+                    <div className="space-y-1 mt-2 border-t border-white/10 pt-2">
+                      <div className="text-muted-foreground mb-1">Steps:</div>
+                      {testResult.steps.map((step: any, i: number) => (
+                        <div key={i} className="flex items-start gap-2">
+                          {step.status === 'success' && <span className="text-green-400">✓</span>}
+                          {step.status === 'failed' && <span className="text-red-400">✗</span>}
+                          {step.status === 'skipped' && <span className="text-gray-400">○</span>}
+                          <span className="text-muted-foreground">{step.step}:</span>
+                          <span className={step.status === 'failed' ? 'text-red-400' : ''}>{step.details}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {testResult.sendResults && testResult.sendResults.length > 0 && (
+                    <div className="space-y-1 mt-2 border-t border-white/10 pt-2">
+                      <div className="text-muted-foreground mb-1">Send Results:</div>
+                      {testResult.sendResults.map((result: any, i: number) => (
+                        <div key={i} className="flex items-start gap-2">
+                          {result.success ? <span className="text-green-400">✓</span> : <span className="text-red-400">✗</span>}
+                          <span className="truncate">{result.endpoint}</span>
+                          {result.error && <span className="text-red-400 ml-2">{result.error}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {testResult.error && (
+                    <div className="text-red-400 mt-2">Error: {testResult.error}</div>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTestResult(null)}
+                    className="mt-2 text-xs"
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </motion.div>
         )}
