@@ -37,17 +37,12 @@ class MacroDataService {
   private static instance: MacroDataService;
   private finnhubApiKey: string;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private cacheTimeout = 60000; // 1 minute cache for real-time data
-  private longCacheTimeout = 300000; // 5 minutes for less volatile data
+  private cacheTimeout = 120000; // 2 minute cache for real-time data (reduced API calls)
+  private longCacheTimeout = 600000; // 10 minutes for less volatile data
 
   constructor() {
     this.finnhubApiKey = process.env.FINNHUB_API_KEY || '';
-    
-    if (this.finnhubApiKey) {
-      console.log('📊 Macro Data Service initialized with Finnhub API');
-    } else {
-      console.warn('⚠️ Macro Data Service: FINNHUB_API_KEY not found');
-    }
+    console.log('📊 Macro Data Service initialized (using Yahoo Finance + Finnhub fallback)');
   }
 
   static getInstance(): MacroDataService {
@@ -67,6 +62,49 @@ class MacroDataService {
 
   private setCache(key: string, data: any): void {
     this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  private async fetchYahooQuote(symbol: string): Promise<{
+    price: number;
+    change: number;
+    changePercent: number;
+    high: number;
+    low: number;
+    previousClose: number;
+  } | null> {
+    try {
+      const response = await axios.get(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`, {
+        params: {
+          interval: '1d',
+          range: '1d'
+        },
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        timeout: 8000
+      });
+
+      const result = response.data?.chart?.result?.[0];
+      if (!result?.meta) return null;
+
+      const meta = result.meta;
+      const previousClose = meta.chartPreviousClose || meta.previousClose || 0;
+      const currentPrice = meta.regularMarketPrice || 0;
+      const change = currentPrice - previousClose;
+      const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0;
+
+      return {
+        price: currentPrice,
+        change,
+        changePercent,
+        high: meta.regularMarketDayHigh || currentPrice * 1.005,
+        low: meta.regularMarketDayLow || currentPrice * 0.995,
+        previousClose
+      };
+    } catch (error: any) {
+      console.warn(`⚠️ Yahoo Finance failed for ${symbol}:`, error.message);
+      return null;
+    }
   }
 
   private async fetchFinnhubQuote(symbol: string): Promise<{
@@ -95,11 +133,38 @@ class MacroDataService {
       }
       return null;
     } catch (error: any) {
-      if (error.response?.status !== 429) {
-        console.warn(`⚠️ Failed to fetch ${symbol} from Finnhub:`, error.message);
-      }
       return null;
     }
+  }
+
+  private async fetchQuoteWithFallback(symbol: string, yahooSymbol?: string): Promise<{
+    price: number;
+    change: number;
+    changePercent: number;
+    high: number;
+    low: number;
+    previousClose: number;
+  } | null> {
+    const ySymbol = yahooSymbol || symbol;
+    
+    const yahooData = await this.fetchYahooQuote(ySymbol);
+    if (yahooData && yahooData.price > 0) {
+      return yahooData;
+    }
+
+    const finnhubData = await this.fetchFinnhubQuote(symbol);
+    if (finnhubData && finnhubData.c > 0) {
+      return {
+        price: finnhubData.c,
+        change: finnhubData.d || 0,
+        changePercent: finnhubData.dp || 0,
+        high: finnhubData.h || finnhubData.c,
+        low: finnhubData.l || finnhubData.c,
+        previousClose: finnhubData.pc || finnhubData.c
+      };
+    }
+
+    return null;
   }
 
   async getIndexFutures(): Promise<IndexFutures> {
@@ -110,60 +175,61 @@ class MacroDataService {
     const now = new Date().toISOString();
 
     const [spyQuote, qqqQuote, diaQuote, iwmQuote] = await Promise.all([
-      this.fetchFinnhubQuote('SPY'),  // S&P 500 ETF
-      this.fetchFinnhubQuote('QQQ'),  // Nasdaq 100 ETF
-      this.fetchFinnhubQuote('DIA'),  // Dow Jones ETF
-      this.fetchFinnhubQuote('IWM'),  // Russell 2000 ETF
+      this.fetchYahooQuote('^GSPC'),  // S&P 500 Index (not ETF)
+      this.fetchYahooQuote('^NDX'),   // Nasdaq 100 Index (not ETF)
+      this.fetchYahooQuote('^DJI'),   // Dow Jones Industrial Average
+      this.fetchYahooQuote('^RUT'),   // Russell 2000 Index
     ]);
 
     const result: IndexFutures = {
       es: {
         symbol: 'ES',
         name: 'S&P 500',
-        value: spyQuote ? spyQuote.c : 0,
-        change: spyQuote ? spyQuote.d : 0,
-        changePercent: spyQuote ? spyQuote.dp : 0,
-        high: spyQuote?.h,
-        low: spyQuote?.l,
-        previousClose: spyQuote?.pc,
+        value: spyQuote?.price || 0,
+        change: spyQuote?.change || 0,
+        changePercent: spyQuote?.changePercent || 0,
+        high: spyQuote?.high,
+        low: spyQuote?.low,
+        previousClose: spyQuote?.previousClose,
         lastUpdate: now
       },
       nq: {
         symbol: 'NQ',
         name: 'Nasdaq 100',
-        value: qqqQuote ? qqqQuote.c : 0,
-        change: qqqQuote ? qqqQuote.d : 0,
-        changePercent: qqqQuote ? qqqQuote.dp : 0,
-        high: qqqQuote?.h,
-        low: qqqQuote?.l,
-        previousClose: qqqQuote?.pc,
+        value: qqqQuote?.price || 0,
+        change: qqqQuote?.change || 0,
+        changePercent: qqqQuote?.changePercent || 0,
+        high: qqqQuote?.high,
+        low: qqqQuote?.low,
+        previousClose: qqqQuote?.previousClose,
         lastUpdate: now
       },
       ym: {
         symbol: 'YM',
         name: 'Dow Jones',
-        value: diaQuote ? diaQuote.c : 0,
-        change: diaQuote ? diaQuote.d : 0,
-        changePercent: diaQuote ? diaQuote.dp : 0,
-        high: diaQuote?.h,
-        low: diaQuote?.l,
-        previousClose: diaQuote?.pc,
+        value: diaQuote?.price || 0,
+        change: diaQuote?.change || 0,
+        changePercent: diaQuote?.changePercent || 0,
+        high: diaQuote?.high,
+        low: diaQuote?.low,
+        previousClose: diaQuote?.previousClose,
         lastUpdate: now
       },
       rty: {
         symbol: 'RTY',
         name: 'Russell 2000',
-        value: iwmQuote ? iwmQuote.c : 0,
-        change: iwmQuote ? iwmQuote.d : 0,
-        changePercent: iwmQuote ? iwmQuote.dp : 0,
-        high: iwmQuote?.h,
-        low: iwmQuote?.l,
-        previousClose: iwmQuote?.pc,
+        value: iwmQuote?.price || 0,
+        change: iwmQuote?.change || 0,
+        changePercent: iwmQuote?.changePercent || 0,
+        high: iwmQuote?.high,
+        low: iwmQuote?.low,
+        previousClose: iwmQuote?.previousClose,
         lastUpdate: now
       }
     };
 
     if (spyQuote || qqqQuote || diaQuote || iwmQuote) {
+      console.log(`✅ Macro indices fetched: SPY=$${spyQuote?.price?.toFixed(2) || '0'}, QQQ=$${qqqQuote?.price?.toFixed(2) || '0'}`);
       this.setCache(cacheKey, result);
     }
 
@@ -177,19 +243,19 @@ class MacroDataService {
 
     const now = new Date().toISOString();
 
-    const [vixQuote, uupQuote] = await Promise.all([
-      this.fetchFinnhubQuote('VIX'),  // VIX - CBOE Volatility Index
-      this.fetchFinnhubQuote('UUP'),  // Dollar Index ETF (proxy for DXY)
+    const [vixQuote, dxyQuote] = await Promise.all([
+      this.fetchYahooQuote('^VIX'),  // VIX - CBOE Volatility Index (Yahoo symbol)
+      this.fetchYahooQuote('DX-Y.NYB'),  // DXY - US Dollar Index (Yahoo symbol)
     ]);
 
-    const vixValue = vixQuote?.c || 0;
+    const vixValue = vixQuote?.price || 0;
     let vixLevel = 'low';
     if (vixValue >= 35) vixLevel = 'extreme';
     else if (vixValue >= 25) vixLevel = 'high';
     else if (vixValue >= 20) vixLevel = 'elevated';
     else if (vixValue >= 15) vixLevel = 'moderate';
 
-    const dxyChange = uupQuote?.dp || 0;
+    const dxyChange = dxyQuote?.changePercent || 0;
     const dxyTrend = dxyChange > 0.1 ? 'bullish' : dxyChange < -0.1 ? 'bearish' : 'neutral';
 
     const result: VolatilityIndices = {
@@ -197,37 +263,34 @@ class MacroDataService {
         symbol: 'VIX',
         name: 'CBOE Volatility Index',
         value: vixValue,
-        change: vixQuote?.d || 0,
-        changePercent: vixQuote?.dp || 0,
-        high: vixQuote?.h,
-        low: vixQuote?.l,
-        previousClose: vixQuote?.pc,
+        change: vixQuote?.change || 0,
+        changePercent: vixQuote?.changePercent || 0,
+        high: vixQuote?.high,
+        low: vixQuote?.low,
+        previousClose: vixQuote?.previousClose,
         lastUpdate: now,
         level: vixLevel
       },
       dxy: {
         symbol: 'DXY',
         name: 'US Dollar Index',
-        value: uupQuote ? this.convertUUPtoDXY(uupQuote.c) : 0,
-        change: uupQuote?.d ? uupQuote.d * 4 : 0, // Scale change
-        changePercent: uupQuote?.dp || 0,
-        high: uupQuote?.h ? this.convertUUPtoDXY(uupQuote.h) : undefined,
-        low: uupQuote?.l ? this.convertUUPtoDXY(uupQuote.l) : undefined,
-        previousClose: uupQuote?.pc ? this.convertUUPtoDXY(uupQuote.pc) : undefined,
+        value: dxyQuote?.price || 0,
+        change: dxyQuote?.change || 0,
+        changePercent: dxyQuote?.changePercent || 0,
+        high: dxyQuote?.high,
+        low: dxyQuote?.low,
+        previousClose: dxyQuote?.previousClose,
         lastUpdate: now,
         trend: dxyTrend
       }
     };
 
-    if (vixQuote || uupQuote) {
+    if (vixQuote || dxyQuote) {
+      console.log(`✅ Volatility indices fetched: VIX=${vixValue?.toFixed(2) || '0'}, DXY=${dxyQuote?.price?.toFixed(2) || '0'}`);
       this.setCache(cacheKey, result);
     }
 
     return result;
-  }
-
-  private convertUUPtoDXY(uupPrice: number): number {
-    return uupPrice * 3.75 + 10;
   }
 
   async getFearGreedIndex(): Promise<FearGreedData> {
