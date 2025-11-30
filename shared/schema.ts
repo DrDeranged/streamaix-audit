@@ -810,6 +810,42 @@ export const tradingAlerts = pgTable("trading_alerts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Push Notification Subscriptions
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Push subscription data from browser
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(), // Public key
+  auth: text("auth").notNull(), // Auth secret
+  
+  // Notification preferences
+  marketResolutions: boolean("market_resolutions").default(true),
+  priceAlerts: boolean("price_alerts").default(true),
+  bountyUpdates: boolean("bounty_updates").default(true),
+  tradeConfirmations: boolean("trade_confirmations").default(true),
+  aiAgentActivity: boolean("ai_agent_activity").default(false),
+  weeklyDigest: boolean("weekly_digest").default(true),
+  
+  // Metadata
+  deviceInfo: text("device_info"), // Browser/device info
+  isActive: boolean("is_active").default(true),
+  lastUsed: timestamp("last_used").defaultNow(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastUsed: true,
+});
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   summaries: many(summaries),
