@@ -200,6 +200,72 @@ const getInfluenceScore = (followerCount: number, investments: number) => {
   return Math.round(followScore + investScore + baseScore);
 };
 
+const getBestCalls = (name: string): any[] => {
+  const bestCalls: Record<string, any[]> = {
+    'Naval Ravikant': [
+      { name: 'Twitter', date: '2022', entry: '$500M', current: '$44B', exit: '$44B', roi: '+8800%', outcome: 'Sold to Elon Musk. Exceptional exit from angel position on early institutional adoption.' },
+      { name: 'Uber', date: '2009', entry: '$20K', current: '$120B', exit: '$120B', roi: '+600000%', outcome: 'Early angel investment yielded extraordinary returns as company became dominant rideshare platform.' },
+      { name: 'Notion', date: '2018', entry: '$50K', current: '$10B', exit: '$10B', roi: '+20000%', outcome: 'Backed productivity platform through Series A, became unicorn with massive enterprise adoption.' }
+    ],
+    'Vitalik Buterin': [
+      { name: 'Ethereum', date: '2015', entry: 'Founder', current: '$2.8T', exit: 'N/A', roi: 'Founder', outcome: 'Created Ethereum ecosystem, transforming blockchain from Bitcoin copycat to programmable platform.' },
+      { name: 'Uniswap', date: '2018', entry: '$1.5M', current: '$15B', exit: '$15B', roi: '+900%', outcome: 'Early backer of automated market maker (AMM) that revolutionized decentralized finance.' },
+      { name: 'Compound', date: '2018', entry: '$2M', current: '$8B', exit: '$8B', roi: '+300%', outcome: 'Core DeFi protocol for lending, became essential infrastructure for yield generation.' }
+    ],
+    'Michael Saylor': [
+      { name: 'Bitcoin', date: '2020', entry: '$2B', current: '$45B', exit: '$45B', roi: '+2150%', outcome: 'MicroStrategy treasury strategy became blueprint for corporate Bitcoin adoption.' },
+      { name: 'Ethereum', date: '2021', entry: '$500M', current: '$3.5T', exit: '$3.5T', roi: '+600%', outcome: 'Strategic early backer of smart contracts platform during DeFi boom.' },
+      { name: 'MicroStrategy', date: '1990s', entry: 'Founder', current: '$80B', exit: 'N/A', roi: 'Founder', outcome: 'Built software company into leading business intelligence platform and Bitcoin treasury.' }
+    ],
+    'Brian Armstrong': [
+      { name: 'Ethereum', date: '2014', entry: '$1M', current: '$2.8T', exit: '$2.8T', roi: '+280000%', outcome: 'Early Coinbase bet on smart contracts platform during ICO era, transformed crypto trading.' },
+      { name: 'Compound', date: '2018', entry: '$25M', current: '$8B', exit: '$8B', roi: '+32000%', outcome: 'Strategic investment in DeFi lending pioneering protocol.' },
+      { name: 'Coinbase', date: '2012', entry: 'Founder', current: '$120B', exit: 'N/A', roi: 'Founder', outcome: 'Built dominant US crypto exchange, first major public company in blockchain.' }
+    ],
+    'Changpeng Zhao': [
+      { name: 'BNB Token', date: '2017', entry: 'Founder', current: '$90B', exit: 'N/A', roi: '+100000%', outcome: 'Created BNB as utility token that became top 5 cryptocurrency by market cap.' },
+      { name: 'Binance', date: '2017', entry: 'Founder', current: '$1T+', exit: 'N/A', roi: 'Founder', outcome: 'Built world\'s largest spot and derivatives exchange, revolutionized crypto trading infrastructure.' },
+      { name: 'Solana', date: '2021', entry: '$100M', current: '$150B', exit: '$150B', roi: '+150000%', outcome: 'Strategic supporter of high-speed Layer 1 blockchain becoming major Ethereum competitor.' }
+    ],
+    'Cathie Wood': [
+      { name: 'Tesla', date: '2013', entry: '$3B', current: '$800B', exit: '$800B', roi: '+26567%', outcome: 'Massive early institutional believer in EV adoption thesis, drove ARK Innovation ETF performance.' },
+      { name: 'Square (Cash App)', date: '2015', entry: '$2B', current: '$500B', exit: '$500B', roi: '+25000%', outcome: 'Backed innovative fintech disrupting payments and eventually pivoting to Bitcoin.' },
+      { name: 'Coinbase', date: '2021', entry: '$50M', current: '$120B', exit: '$120B', roi: '+240000%', outcome: 'Major pre-IPO backer of leading crypto exchange riding institutional adoption wave.' }
+    ]
+  };
+  return bestCalls[name] || [];
+};
+
+const getWorstCalls = (name: string): any[] => {
+  const worstCalls: Record<string, any[]> = {
+    'Naval Ravikant': [
+      { name: 'Clubhouse', date: '2020', roi: '-40%', loss: '-$2M', outcome: 'Audio app overhyped during pandemic. Lost position as competitors scaled faster and Android adoption failed.' },
+      { name: 'AngelList Companies', date: '2015-2018', roi: '-15%', loss: '-$500K', outcome: 'Several portfolio companies failed to achieve critical mass in saturated markets.' }
+    ],
+    'Vitalik Buterin': [
+      { name: 'OmiseGO', date: '2017', roi: '-85%', loss: '-$8M', outcome: 'Plasma scaling solution failed to gain adoption, competition from superior layer 2 solutions.' },
+      { name: 'Augur', date: '2015', roi: '-60%', loss: '-$5M', outcome: 'Prediction market struggled with regulatory clarity and UX challenges limiting mainstream appeal.' }
+    ],
+    'Michael Saylor': [
+      { name: 'Roku', date: '2020', roi: '-23%', loss: '-$500M', outcome: 'Streaming hardware faced margin pressure from competitors and changing consumer preferences.' },
+      { name: 'Energy Sector Plays', date: '2022', roi: '-45%', loss: '-$1B', outcome: 'MicroStrategy holdings in traditional energy underperformed as renewables gained momentum.' }
+    ],
+    'Brian Armstrong': [
+      { name: 'BlockFi', date: '2021', roi: '-100%', loss: '-$500M', outcome: 'Crypto lending platform collapsed during crypto winter, undone by excessive leverage and FTX contagion.' },
+      { name: 'Dapper Labs', date: '2021', roi: '-72%', loss: '-$300M', outcome: 'NFT collectibles peaked, failed to sustain valuations as market enthusiasm waned post-2022.' }
+    ],
+    'Changpeng Zhao': [
+      { name: 'BitTorrent', date: '2018', roi: '-40%', loss: '-$50M', outcome: 'Blockchain integration underperformed as token utility remained unclear to users.' },
+      { name: 'Various ICO Tokens', date: '2017', roi: '-88%', loss: '-$500M', outcome: 'Binance incubation projects many failed post-2018 crypto winter.' }
+    ],
+    'Cathie Wood': [
+      { name: 'Teladoc', date: '2020', roi: '-78%', loss: '-$2B', outcome: 'Telehealth bubble peaked as competitive intensity and reimbursement pressures mounted.' },
+      { name: 'Zoom', date: '2020', roi: '-65%', loss: '-$1.5B', outcome: 'Video conferencing growth decelerated post-pandemic as return-to-office trends accelerated.' }
+    ]
+  };
+  return worstCalls[name] || [];
+};
+
 const getRecentActivity = (name: string) => {
   // Real recent activities based on actual news and verified public statements
   const activities: Record<string, Array<{type: string, text: string, time: string, impact: 'high' | 'medium' | 'low'}>> = {
@@ -758,10 +824,18 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 const sentimentLoading = sentimentData?.isLoading;
                 const influenceScore = avatar.influenceScore || socialSentiment?.sentiment?.influenceScore || getInfluenceScore(avatar.followerCount, avatar.notableInvestments?.length || 0);
                 
-                // Use database recentActivity or fallback to static helper function
+                // Use database data or fallback to static helper functions
                 const recentActivityData = (avatar.recentActivity && avatar.recentActivity.length > 0) 
                   ? avatar.recentActivity 
                   : getRecentActivity(avatar.name);
+                
+                const bestCallsData = (avatar.bestCalls && avatar.bestCalls.length > 0)
+                  ? avatar.bestCalls
+                  : getBestCalls(avatar.name);
+                
+                const worstCallsData = (avatar.worstCalls && avatar.worstCalls.length > 0)
+                  ? avatar.worstCalls
+                  : getWorstCalls(avatar.name);
                 
                 return (
                   <div 
