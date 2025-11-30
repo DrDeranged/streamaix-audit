@@ -50,7 +50,7 @@ export function Footer() {
               <div className="font-orbitron font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">
                 StreamAiX
               </div>
-              <p className="text-gray-300 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+              <p className="text-slate-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
                 Your Web3 Hub for AI Content, Prediction Markets, DeFi Bounties & Market Intelligence.
               </p>
               
@@ -84,48 +84,48 @@ export function Footer() {
               <li>
                 <Link 
                   href="/bounties" 
-                  className="group flex items-center text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-400 hover:to-fuchsia-400 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
                 >
-                  <Target className="w-3.5 h-3.5 mr-2 group-hover:text-purple-400 transition-colors" />
+                  <Target className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
                   <span className="relative">
                     Bounties
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-fuchsia-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/markets" 
-                  className="group flex items-center text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-400 hover:to-fuchsia-400 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
                 >
-                  <TrendingUp className="w-3.5 h-3.5 mr-2 group-hover:text-purple-400 transition-colors" />
+                  <TrendingUp className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
                   <span className="relative">
                     Prediction Markets
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-fuchsia-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/discover" 
-                  className="group flex items-center text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-400 hover:to-fuchsia-400 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
                 >
-                  <BarChart3 className="w-3.5 h-3.5 mr-2 group-hover:text-purple-400 transition-colors" />
+                  <BarChart3 className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
                   <span className="relative">
                     Analytics
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-fuchsia-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/dashboard" 
-                  className="group flex items-center text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-400 hover:to-fuchsia-400 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 mr-2 group-hover:text-purple-400 transition-colors" />
+                  <LayoutDashboard className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
                   <span className="relative">
                     Dashboard
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-fuchsia-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </Link>
               </li>
@@ -148,44 +148,44 @@ export function Footer() {
               <li>
                 <Link 
                   href="/auth" 
-                  className="group text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-400 hover:to-cyan-400 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
                 >
                   <span className="relative">
                     Sign Up
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-400 to-cyan-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/auth" 
-                  className="group text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-400 hover:to-cyan-400 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
                 >
                   <span className="relative">
                     Sign In
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-400 to-cyan-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </Link>
               </li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=StreamAiX%20Support" 
-                  className="group text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-400 hover:to-cyan-400 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
                 >
                   <span className="relative">
                     Support
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-400 to-cyan-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </a>
               </li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=StreamAiX%20Waitlist" 
-                  className="group text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-400 hover:to-cyan-400 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
                 >
                   <span className="relative">
                     Join Waitlist
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-400 to-cyan-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </a>
               </li>
@@ -208,23 +208,23 @@ export function Footer() {
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com" 
-                  className="group flex items-center text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-cyan-400 hover:to-purple-400 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-cyan-500 hover:to-purple-500 hover:bg-clip-text transition-all duration-200"
                 >
-                  <Mail className="w-4 h-4 mr-2 group-hover:text-cyan-400 transition-colors" />
+                  <Mail className="w-4 h-4 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-cyan-500 transition-colors" />
                   <span className="relative">
                     Email Us
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </a>
               </li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=Partnership%20Inquiry" 
-                  className="group text-gray-300 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-cyan-400 hover:to-purple-400 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-cyan-500 hover:to-purple-500 hover:bg-clip-text transition-all duration-200 inline-block"
                 >
                   <span className="relative">
                     Partnerships
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 group-hover:w-full transition-all duration-300" />
                   </span>
                 </a>
               </li>
@@ -241,10 +241,10 @@ export function Footer() {
           viewport={{ once: true }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-gray-400 text-sm flex items-center gap-3 flex-wrap justify-center">
+            <div className="text-slate-500 dark:text-gray-400 text-sm flex items-center gap-3 flex-wrap justify-center">
               <span>
                 © 2025 StreamAiX. Built with{" "}
-                <span className="text-red-400 animate-pulse">❤️</span>{" "}
+                <span className="text-red-500 dark:text-red-400 animate-pulse">❤️</span>{" "}
                 for the decentralized future.
               </span>
               
@@ -264,14 +264,14 @@ export function Footer() {
               )}
             </div>
             
-            <div className="text-gray-400 text-sm">
+            <div className="text-slate-500 dark:text-gray-400 text-sm">
               <span className="inline-flex items-center gap-2 flex-wrap justify-center">
-                <span className="text-gray-500">Powered by</span>
-                <span className="px-2 py-1 rounded-md bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 text-purple-300 font-semibold text-xs">
+                <span className="text-slate-400 dark:text-gray-500">Powered by</span>
+                <span className="px-2 py-1 rounded-md bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/30 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 font-semibold text-xs">
                   OpenAI
                 </span>
-                <span className="text-gray-600">·</span>
-                <span className="px-2 py-1 rounded-md bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/20 text-cyan-300 font-semibold text-xs">
+                <span className="text-slate-400 dark:text-gray-600">·</span>
+                <span className="px-2 py-1 rounded-md bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-300 font-semibold text-xs">
                   Base Network
                 </span>
               </span>

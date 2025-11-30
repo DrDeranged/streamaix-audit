@@ -229,19 +229,19 @@ export function BountyFeed() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-purple-500/20 border border-purple-indigo-500/30 backdrop-blur-sm mb-6">
-            <Target className="w-5 h-5 text-purple-400" />
-            <span className="text-sm font-medium text-purple-300">Live Bounties</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-purple-500/20 border border-purple-500/30 backdrop-blur-sm mb-6">
+            <Target className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+            <span className="text-sm font-medium text-purple-600 dark:text-purple-300">Live Bounties</span>
           </div>
 
           <h2 className="text-3xl font-orbitron font-bold mb-6">
-            <span className="bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 dark:from-white dark:via-indigo-200 dark:to-purple-300 bg-clip-text text-transparent">
               Bounty Feed
             </span>
           </h2>
 
-          <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Earn <span className="text-purple-400 font-semibold">STREAM points</span> by completing bounties.
+          <p className="text-lg sm:text-xl text-slate-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            Earn <span className="text-purple-600 dark:text-purple-400 font-semibold">STREAM points</span> by completing bounties.
             Create summaries, analyze content, and contribute to the ecosystem.
           </p>
         </motion.div>
@@ -255,27 +255,27 @@ export function BountyFeed() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-wrap justify-center gap-6 mb-12"
           >
-            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
-              <Flame className="w-5 h-5 text-orange-400" />
+            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
+              <Flame className="w-5 h-5 text-orange-500 dark:text-orange-400" />
               <div>
-                <div className="text-2xl font-bold text-white">{stats.activeBounties}</div>
-                <div className="text-xs text-gray-400">Active Bounties</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.activeBounties}</div>
+                <div className="text-xs text-slate-500 dark:text-gray-400">Active Bounties</div>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
-              <Coins className="w-5 h-5 text-yellow-400" />
+            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
+              <Coins className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
               <div>
-                <div className="text-2xl font-bold text-white">{stats.totalRewards.toLocaleString()}</div>
-                <div className="text-xs text-gray-400">Total Rewards</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalRewards.toLocaleString()}</div>
+                <div className="text-xs text-slate-500 dark:text-gray-400">Total Rewards</div>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
-              <TrendingUp className="w-5 h-5 text-green-400" />
+            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
+              <TrendingUp className="w-5 h-5 text-green-500 dark:text-green-400" />
               <div>
-                <div className="text-2xl font-bold text-white">{stats.summariesCreated}</div>
-                <div className="text-xs text-gray-400">Completed</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.summariesCreated}</div>
+                <div className="text-xs text-slate-500 dark:text-gray-400">Completed</div>
               </div>
             </div>
           </motion.div>
