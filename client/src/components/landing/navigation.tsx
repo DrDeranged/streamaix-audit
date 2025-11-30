@@ -75,8 +75,26 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-purple-500/30 transition-all duration-300 shadow-lg dark:shadow-purple-500/10">
-      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+    <nav className="fixed top-0 w-full z-50 transition-all duration-300">
+      {/* Glass background layer */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        }}
+      />
+      {/* Light mode background */}
+      <div className="absolute inset-0 bg-white/70 dark:bg-transparent" />
+      {/* Gradient bottom border */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent dark:via-purple-500/40" />
+      {/* Top highlight */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
+      {/* Subtle inner glow */}
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 via-transparent to-transparent dark:from-purple-500/10 pointer-events-none" />
+      
+      <div className="relative container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo with Animated Glow - Tap to scroll to top on mobile */}
           <Link href="/">
@@ -112,15 +130,18 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/20 group-hover:to-cyan-500/10 transition-all duration-300 rounded-lg" />
+                    {/* Glass hover background */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(6,182,212,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    {/* Bottom highlight on hover */}
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Compass className="w-4 h-4 text-cyan-500 dark:text-cyan-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors" />
-                      <span className="font-medium">Discover</span>
-                      <ChevronDown className="w-3 h-3" />
+                      <Compass className="w-4 h-4 text-cyan-500 dark:text-cyan-400 group-hover:text-cyan-400 dark:group-hover:text-cyan-300 transition-colors drop-shadow-sm" />
+                      <span className="font-medium text-sm">Discover</span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
@@ -159,15 +180,16 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/20 group-hover:to-purple-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-purple-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors" />
-                      <span className="font-medium">Markets</span>
-                      <ChevronDown className="w-3 h-3" />
+                      <TrendingUp className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:text-purple-400 dark:group-hover:text-purple-300 transition-colors drop-shadow-sm" />
+                      <span className="font-medium text-sm">Markets</span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
@@ -215,15 +237,16 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-fuchsia-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-fuchsia-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 to-fuchsia-500/0 group-hover:from-fuchsia-500/20 group-hover:to-fuchsia-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(217,70,239,0.15) 0%, rgba(217,70,239,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Target className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-colors" />
-                      <span className="font-medium">Bounties</span>
-                      <ChevronDown className="w-3 h-3" />
+                      <Target className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400 group-hover:text-fuchsia-400 dark:group-hover:text-fuchsia-300 transition-colors drop-shadow-sm" />
+                      <span className="font-medium text-sm">Bounties</span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
@@ -262,15 +285,16 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/20 group-hover:to-emerald-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Brain className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors" />
-                      <span className="font-medium">AI</span>
-                      <ChevronDown className="w-3 h-3" />
+                      <Brain className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-400 dark:group-hover:text-emerald-300 transition-colors drop-shadow-sm" />
+                      <span className="font-medium text-sm">AI</span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
@@ -309,15 +333,16 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-4 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-indigo-500/0 group-hover:from-indigo-500/20 group-hover:to-indigo-500/10 transition-all duration-300 rounded-lg" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors" />
-                      <span className="font-medium">Community</span>
-                      <ChevronDown className="w-3 h-3" />
+                      <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-400 dark:group-hover:text-indigo-300 transition-colors drop-shadow-sm" />
+                      <span className="font-medium text-sm">Community</span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
