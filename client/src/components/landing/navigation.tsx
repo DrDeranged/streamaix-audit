@@ -377,19 +377,25 @@ export function Navigation() {
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              {/* Authentication */}
+              {/* Authentication - Glassmorphism Avatar */}
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-purple-500/50 transition-all duration-200">
-                      <Avatar className="h-10 w-10 ring-2 ring-purple-500/30 hover:ring-purple-500/60 transition-all duration-200">
-                        <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 text-white font-semibold">
-                          {user?.username?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                    <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0 hover:bg-transparent transition-all duration-200 group">
+                      {/* Animated gradient border ring */}
+                      <div className="absolute -inset-[2px] rounded-full bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[2px] animate-gradient-x transition-opacity duration-300" />
+                      {/* Glass container */}
+                      <div className="relative h-10 w-10 rounded-full bg-white/20 dark:bg-slate-900/40 backdrop-blur-xl p-[2px]">
+                        <Avatar className="h-full w-full">
+                          <AvatarImage src={user?.avatar} alt={user?.username} />
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 text-white font-semibold text-sm">
+                            {user?.username?.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      {/* Online indicator */}
                       <motion.div 
-                        className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-slate-950 rounded-full"
+                        className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-950 rounded-full shadow-lg shadow-emerald-500/50"
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
