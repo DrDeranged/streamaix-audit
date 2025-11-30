@@ -472,16 +472,17 @@ export function Navigation() {
               )}
             </div>
             
-            {/* Theme Toggle */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* Theme Toggle - Glassmorphism */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
+              <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
               <Button
                 variant="outline"
                 size="icon"
                 onClick={toggleTheme}
-                className="bg-slate-900/50 border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all duration-300"
+                className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300"
               >
                 {theme === "light" ? (
-                  <Sun className="w-5 h-5 text-yellow-500" />
+                  <Sun className="w-5 h-5 text-amber-500" />
                 ) : (
                   <Moon className="w-5 h-5 text-purple-400" />
                 )}
@@ -493,19 +494,20 @@ export function Navigation() {
               {isConnected && wallet ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <motion.div whileHover={{ scale: 1.02 }}>
-                      <Button variant="outline" className="relative bg-slate-900/50 border-purple-500/40 hover:bg-purple-500/20 hover:border-purple-500/60 transition-all duration-300 overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-fuchsia-500/0 to-cyan-500/0 group-hover:from-purple-500/20 group-hover:via-fuchsia-500/10 group-hover:to-cyan-500/20 transition-all duration-500" />
+                    <motion.div whileHover={{ scale: 1.02 }} className="relative group">
+                      <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
+                      <Button variant="outline" className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                         <div className="relative flex items-center gap-2">
                           <div className="relative">
-                            <Wallet className="w-4 h-4 text-purple-400" />
+                            <Wallet className="w-4 h-4 text-purple-500 dark:text-purple-400" />
                             <motion.div 
                               className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"
                               animate={{ scale: [1, 1.3, 1] }}
                               transition={{ duration: 2, repeat: Infinity }}
                             />
                           </div>
-                          <span className="font-mono text-sm text-slate-200">{formatAddress(wallet.address)}</span>
+                          <span className="font-mono text-sm text-slate-800 dark:text-slate-200">{formatAddress(wallet.address)}</span>
                         </div>
                       </Button>
                     </motion.div>
@@ -556,25 +558,28 @@ export function Navigation() {
                 </DropdownMenu>
               ) : (
                 <motion.div 
-                  whileHover={{ scale: 1.05 }} 
-                  whileTap={{ scale: 0.95 }}
-                  className="relative"
+                  whileHover={{ scale: 1.03 }} 
+                  whileTap={{ scale: 0.97 }}
+                  className="relative group"
                 >
+                  {/* Animated gradient border */}
+                  <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 group-hover:opacity-100 blur-[1px] animate-gradient-x transition-opacity duration-300" />
                   <Button 
                     onClick={() => setWalletModalOpen(true)}
                     disabled={isConnecting}
-                    className="relative bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-lg shadow-purple-500/30 overflow-hidden group"
+                    className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-4 py-2"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     {isConnecting ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        <span className="relative z-10">Connecting...</span>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin text-purple-500" />
+                        <span className="relative z-10 font-medium">Connecting...</span>
                       </>
                     ) : (
                       <>
-                        <Wallet className="w-4 h-4 mr-2" />
-                        <span className="relative z-10">Connect Wallet</span>
+                        <Wallet className="w-4 h-4 mr-2 text-purple-500" />
+                        <span className="relative z-10 font-medium">Connect Wallet</span>
                       </>
                     )}
                   </Button>
