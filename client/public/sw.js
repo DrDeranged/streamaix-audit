@@ -382,22 +382,40 @@ self.addEventListener('push', (event) => {
   try {
     const data = event.data.json();
     
+    const vibrationPatterns = {
+      win: [200, 100, 200, 100, 300],
+      trade: [100, 50, 100],
+      alert: [300, 100, 300],
+      default: [100, 50, 100]
+    };
+
+    const getVibrationPattern = (tag) => {
+      if (tag?.includes('resolution') && data.data?.winnings > 0) return vibrationPatterns.win;
+      if (tag?.includes('trade')) return vibrationPatterns.trade;
+      if (tag?.includes('alert')) return vibrationPatterns.alert;
+      return vibrationPatterns.default;
+    };
+    
     const options = {
       body: data.body || 'New update from StreamAiX',
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
-      vibrate: [100, 50, 100],
+      icon: data.icon || '/icon-192.png',
+      badge: data.badge || '/icon-192.png',
+      image: data.image,
+      vibrate: getVibrationPattern(data.tag),
       data: {
         url: data.url || '/',
-        dateOfArrival: Date.now()
+        dateOfArrival: Date.now(),
+        ...data.data
       },
       actions: data.actions || [
-        { action: 'open', title: 'View' },
-        { action: 'dismiss', title: 'Dismiss' }
+        { action: 'open', title: '👀 View' },
+        { action: 'dismiss', title: '✓ Dismiss' }
       ],
       tag: data.tag || 'streamaix-notification',
       renotify: true,
-      requireInteraction: data.requireInteraction || false
+      requireInteraction: data.requireInteraction || false,
+      timestamp: data.timestamp || Date.now(),
+      silent: data.silent || false
     };
 
     event.waitUntil(
@@ -411,11 +429,40 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  if (event.action === 'dismiss') {
+  const action = event.action;
+  const notificationData = event.notification.data || {};
+
+  if (action === 'dismiss' || action === 'later') {
     return;
   }
 
-  const urlToOpen = event.notification.data?.url || '/';
+  const actionRoutes = {
+    'view_position': '/dashboard',
+    'view_winnings': '/dashboard',
+    'trade_more': '/markets',
+    'trade_now': '/markets',
+    'view': notificationData.url || '/',
+    'explore': '/markets',
+    'explore_markets': '/markets',
+    'view_chart': '/discover',
+    'start_work': notificationData.url || '/bounty-board',
+    'view_details': notificationData.url || '/bounty-board',
+    'claim_reward': '/dashboard',
+    'find_more': '/bounty-board',
+    'view_balance': '/dashboard',
+    'review': notificationData.url || '/bounty-board',
+    'view_dashboard': '/dashboard',
+    'open': notificationData.url || '/'
+  };
+
+  let urlToOpen = actionRoutes[action] || notificationData.url || '/';
+
+  if (notificationData.marketId && (action === 'view_position' || action === 'trade_more')) {
+    urlToOpen = `/markets/${notificationData.marketId}`;
+  }
+  if (notificationData.bountyId && (action === 'view_details' || action === 'start_work')) {
+    urlToOpen = `/bounty-board/${notificationData.bountyId}`;
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
