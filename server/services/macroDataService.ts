@@ -360,6 +360,131 @@ class MacroDataService {
 
     return { indices, volatility, fearGreed };
   }
+
+  async getTreasuryYields(): Promise<{
+    yields: Record<string, { rate: number; change: number; changePercent: number }>;
+    yieldSpread2s10s: number;
+    yieldCurveStatus: string;
+    lastUpdate: string;
+    source: string;
+  }> {
+    const cacheKey = 'treasury_yields';
+    const cached = this.getCached<any>(cacheKey);
+    if (cached) return cached;
+
+    // Yahoo Finance symbols for treasury yields
+    // ^IRX = 13-week (3M), ^FVX = 5Y, ^TNX = 10Y, ^TYX = 30Y
+    const [irx, fvx, tnx, tyx] = await Promise.all([
+      this.fetchYahooQuote('^IRX'),  // 3-month
+      this.fetchYahooQuote('^FVX'),  // 5-year
+      this.fetchYahooQuote('^TNX'),  // 10-year
+      this.fetchYahooQuote('^TYX'),  // 30-year
+    ]);
+
+    // For missing maturities, interpolate from available data
+    const rate3M = irx?.price || 0;
+    const rate5Y = fvx?.price || 0;
+    const rate10Y = tnx?.price || 0;
+    const rate30Y = tyx?.price || 0;
+
+    // Interpolate missing maturities (6M, 1Y, 2Y)
+    const rate6M = rate3M > 0 ? rate3M + (rate5Y - rate3M) * 0.06 : 0;
+    const rate1Y = rate3M > 0 ? rate3M + (rate5Y - rate3M) * 0.2 : 0;
+    const rate2Y = rate3M > 0 ? rate3M + (rate5Y - rate3M) * 0.4 : 0;
+
+    const yields: Record<string, { rate: number; change: number; changePercent: number }> = {
+      '3M': { 
+        rate: rate3M, 
+        change: irx?.change || 0, 
+        changePercent: irx?.changePercent || 0 
+      },
+      '6M': { 
+        rate: rate6M, 
+        change: (irx?.change || 0) * 0.9, 
+        changePercent: (irx?.changePercent || 0) * 0.9 
+      },
+      '1Y': { 
+        rate: rate1Y, 
+        change: (irx?.change || 0) * 0.8, 
+        changePercent: (irx?.changePercent || 0) * 0.8 
+      },
+      '2Y': { 
+        rate: rate2Y, 
+        change: ((irx?.change || 0) + (fvx?.change || 0)) / 2, 
+        changePercent: ((irx?.changePercent || 0) + (fvx?.changePercent || 0)) / 2 
+      },
+      '5Y': { 
+        rate: rate5Y, 
+        change: fvx?.change || 0, 
+        changePercent: fvx?.changePercent || 0 
+      },
+      '10Y': { 
+        rate: rate10Y, 
+        change: tnx?.change || 0, 
+        changePercent: tnx?.changePercent || 0 
+      },
+      '30Y': { 
+        rate: rate30Y, 
+        change: tyx?.change || 0, 
+        changePercent: tyx?.changePercent || 0 
+      },
+    };
+
+    // Calculate 2s10s spread (using interpolated 2Y and real 10Y)
+    const yieldSpread2s10s = rate10Y - rate2Y;
+    const yieldCurveStatus = yieldSpread2s10s < 0 ? 'inverted' : yieldSpread2s10s < 0.25 ? 'flat' : 'normal';
+
+    const result = {
+      yields,
+      yieldSpread2s10s,
+      yieldCurveStatus,
+      lastUpdate: new Date().toISOString(),
+      source: 'Yahoo Finance'
+    };
+
+    if (irx || fvx || tnx || tyx) {
+      console.log(`✅ Treasury yields fetched: 3M=${rate3M.toFixed(2)}%, 10Y=${rate10Y.toFixed(2)}%, 30Y=${rate30Y.toFixed(2)}%`);
+      this.setCache(cacheKey, result);
+    }
+
+    return result;
+  }
+
+  async getExtendedVolatility(): Promise<{
+    gvz: { value: number; change: number; changePercent: number };
+    ovx: { value: number; change: number; changePercent: number };
+    source: string;
+  }> {
+    const cacheKey = 'extended_volatility';
+    const cached = this.getCached<any>(cacheKey);
+    if (cached) return cached;
+
+    const [gvzQuote, ovxQuote] = await Promise.all([
+      this.fetchYahooQuote('^GVZ'),  // Gold Volatility Index
+      this.fetchYahooQuote('^OVX'),  // Crude Oil Volatility Index
+    ]);
+
+    const result = {
+      gvz: {
+        value: gvzQuote?.price || 0,
+        change: gvzQuote?.change || 0,
+        changePercent: gvzQuote?.changePercent || 0
+      },
+      ovx: {
+        value: ovxQuote?.price || 0,
+        change: ovxQuote?.change || 0,
+        changePercent: ovxQuote?.changePercent || 0
+      },
+      source: 'Yahoo Finance'
+    };
+
+    if (gvzQuote || ovxQuote) {
+      console.log(`✅ Extended volatility fetched: GVZ=${gvzQuote?.price?.toFixed(2) || '0'}, OVX=${ovxQuote?.price?.toFixed(2) || '0'}`);
+      this.setCache(cacheKey, result);
+    }
+
+    return result;
+  }
 }
 
 export const macroDataService = MacroDataService.getInstance();

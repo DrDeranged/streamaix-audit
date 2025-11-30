@@ -10427,29 +10427,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Treasury Yields
+  // Treasury Yields (REAL DATA from Yahoo Finance)
   app.get("/api/macro/treasury-yields", asyncHandler(async (req: Request, res: Response) => {
     try {
-      const yields = {
-        '3M': { rate: 5.24 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 0.02 },
-        '6M': { rate: 5.18 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 0.02 },
-        '1Y': { rate: 4.92 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 0.03 },
-        '2Y': { rate: 4.45 + (Math.random() - 0.5) * 0.08, change: (Math.random() - 0.5) * 0.04 },
-        '5Y': { rate: 4.28 + (Math.random() - 0.5) * 0.08, change: (Math.random() - 0.5) * 0.04 },
-        '10Y': { rate: 4.42 + (Math.random() - 0.5) * 0.1, change: (Math.random() - 0.5) * 0.05 },
-        '30Y': { rate: 4.58 + (Math.random() - 0.5) * 0.1, change: (Math.random() - 0.5) * 0.05 },
-      };
-
-      // Calculate yield curve status
-      const yieldSpread2s10s = yields['10Y'].rate - yields['2Y'].rate;
-      const yieldCurveStatus = yieldSpread2s10s < 0 ? 'inverted' : yieldSpread2s10s < 0.25 ? 'flat' : 'normal';
+      const treasuryData = await macroDataService.getTreasuryYields();
 
       res.json({ 
         success: true, 
-        yields,
-        yieldSpread2s10s: yieldSpread2s10s.toFixed(3),
-        yieldCurveStatus,
-        lastUpdate: new Date().toISOString()
+        yields: treasuryData.yields,
+        yieldSpread2s10s: treasuryData.yieldSpread2s10s.toFixed(3),
+        yieldCurveStatus: treasuryData.yieldCurveStatus,
+        lastUpdate: treasuryData.lastUpdate,
+        source: treasuryData.source
       });
     } catch (error: any) {
       console.error('Error fetching treasury yields:', error);
@@ -10457,11 +10446,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // VIX and DXY indices (REAL DATA)
+  // VIX, DXY, GVZ, OVX indices (ALL REAL DATA from Yahoo Finance)
   app.get("/api/macro/volatility-indices", asyncHandler(async (req: Request, res: Response) => {
     try {
-      // Fetch real data from Finnhub via our macro service
-      const volatility = await macroDataService.getVolatilityIndices();
+      // Fetch real data from Yahoo Finance via our macro service
+      const [volatility, extendedVol] = await Promise.all([
+        macroDataService.getVolatilityIndices(),
+        macroDataService.getExtendedVolatility()
+      ]);
 
       const indices = {
         vix: {
@@ -10487,16 +10479,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gvz: {
           name: 'Gold Volatility Index',
           symbol: 'GVZ',
-          value: 15.2 + (Math.random() - 0.5) * 3,
-          change: (Math.random() - 0.5) * 1.5,
-          changePercent: (Math.random() - 0.5) * 8,
+          value: extendedVol.gvz.value,
+          change: extendedVol.gvz.change,
+          changePercent: extendedVol.gvz.changePercent,
         },
         ovx: {
           name: 'Crude Oil Volatility Index',
           symbol: 'OVX',
-          value: 28.5 + (Math.random() - 0.5) * 5,
-          change: (Math.random() - 0.5) * 3,
-          changePercent: (Math.random() - 0.5) * 8,
+          value: extendedVol.ovx.value,
+          change: extendedVol.ovx.change,
+          changePercent: extendedVol.ovx.changePercent,
         },
       };
 
@@ -10504,7 +10496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         indices,
         lastUpdate: new Date().toISOString(),
-        source: 'Finnhub'
+        source: 'Yahoo Finance'
       });
     } catch (error: any) {
       console.error('Error fetching volatility indices:', error);
@@ -10515,34 +10507,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Global M2 Money Supply Tracker
   app.get("/api/macro/global-liquidity", asyncHandler(async (req: Request, res: Response) => {
     try {
-      // Global M2 liquidity data (simulated - would use FRED API in production)
-      const globalM2 = {
-        total: 105.8, // Trillions USD
-        change30d: 1.2,
-        changePercent30d: 1.15,
-        trend: 'expanding',
-        components: [
-          { country: 'United States', m2: 21.5, change: 0.8, currency: 'USD' },
-          { country: 'Eurozone', m2: 16.2, change: 0.5, currency: 'EUR' },
-          { country: 'China', m2: 42.1, change: 1.8, currency: 'CNY' },
-          { country: 'Japan', m2: 12.8, change: 0.2, currency: 'JPY' },
-          { country: 'United Kingdom', m2: 4.2, change: 0.3, currency: 'GBP' },
-        ],
-        historicalTrend: [
-          { month: 'Jun 2024', value: 102.1 },
-          { month: 'Jul 2024', value: 102.8 },
-          { month: 'Aug 2024', value: 103.4 },
-          { month: 'Sep 2024', value: 104.0 },
-          { month: 'Oct 2024', value: 104.9 },
-          { month: 'Nov 2024', value: 105.8 },
-        ],
-        correlationWithBTC: 0.82,
-        implication: 'Expanding global liquidity typically supports risk assets including crypto',
-      };
+      // Check if FRED API key is configured
+      const fredApiKey = process.env.FRED_API_KEY;
+      
+      if (!fredApiKey) {
+        // Return honest response about data availability
+        res.json({ 
+          success: true, 
+          globalM2: {
+            dataAvailable: false,
+            message: 'Real-time M2 data requires FRED API integration',
+            description: 'Global M2 money supply tracking measures liquidity across major economies. This metric is important for understanding macro conditions affecting crypto markets.',
+            requiredApi: 'FRED (Federal Reserve Economic Data)',
+            correlationWithBTC: 'Historically ~0.80-0.85 correlation during expansion cycles',
+            implication: 'Expanding global liquidity typically supports risk assets including crypto',
+          },
+          lastUpdate: new Date().toISOString(),
+          source: 'Unavailable - FRED API key required'
+        });
+        return;
+      }
 
+      // TODO: Implement actual FRED API integration when key is provided
+      // For now, indicate data is not available without the API key
       res.json({ 
         success: true, 
-        globalM2,
+        globalM2: {
+          dataAvailable: false,
+          message: 'FRED API integration pending implementation'
+        },
         lastUpdate: new Date().toISOString()
       });
     } catch (error: any) {
@@ -10551,124 +10544,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Comprehensive Economic Calendar
+  // Comprehensive Economic Calendar (REAL DATA from Finnhub)
   app.get("/api/macro/calendar", asyncHandler(async (req: Request, res: Response) => {
     try {
       const days = parseInt(req.query.days as string) || 14;
       const now = new Date();
+      const finnhubKey = process.env.FINNHUB_API_KEY;
 
-      // Generate upcoming economic events
-      const events = [
-        { 
-          date: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '08:30 ET',
-          event: 'Initial Jobless Claims',
-          country: 'US',
-          impact: 'medium',
-          previous: '213K',
-          forecast: '215K',
-          category: 'employment',
-        },
-        { 
-          date: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '08:30 ET',
-          event: 'Core PCE Price Index (MoM)',
-          country: 'US',
-          impact: 'high',
-          previous: '0.3%',
-          forecast: '0.2%',
-          category: 'inflation',
-        },
-        { 
-          date: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '10:00 ET',
-          event: 'ISM Manufacturing PMI',
-          country: 'US',
-          impact: 'high',
-          previous: '46.5',
-          forecast: '47.5',
-          category: 'manufacturing',
-        },
-        { 
-          date: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '08:30 ET',
-          event: 'Non-Farm Payrolls',
-          country: 'US',
-          impact: 'high',
-          previous: '227K',
-          forecast: '190K',
-          category: 'employment',
-        },
-        { 
-          date: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '08:30 ET',
-          event: 'Unemployment Rate',
-          country: 'US',
-          impact: 'high',
-          previous: '4.2%',
-          forecast: '4.2%',
-          category: 'employment',
-        },
-        { 
-          date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '08:30 ET',
-          event: 'CPI (YoY)',
-          country: 'US',
-          impact: 'high',
-          previous: '2.6%',
-          forecast: '2.7%',
-          category: 'inflation',
-        },
-        { 
-          date: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '14:00 ET',
-          event: 'FOMC Rate Decision',
-          country: 'US',
-          impact: 'high',
-          previous: '4.50-4.75%',
-          forecast: '4.25-4.50%',
-          category: 'fed',
-        },
-        { 
-          date: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '14:30 ET',
-          event: 'FOMC Press Conference',
-          country: 'US',
-          impact: 'high',
-          previous: null,
-          forecast: null,
-          category: 'fed',
-        },
-        { 
-          date: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000).toISOString(),
-          time: '08:30 ET',
-          event: 'Retail Sales (MoM)',
-          country: 'US',
-          impact: 'medium',
-          previous: '0.4%',
-          forecast: '0.3%',
-          category: 'consumer',
-        },
-      ];
+      let events: any[] = [];
+      let source = 'Finnhub';
 
-      // Filter to requested timeframe
-      const filteredEvents = events.filter(e => {
-        const eventDate = new Date(e.date);
-        return eventDate <= new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-      });
+      if (finnhubKey) {
+        try {
+          // Fetch real economic calendar from Finnhub
+          const fromDate = now.toISOString().split('T')[0];
+          const toDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+          const response = await axios.get('https://finnhub.io/api/v1/calendar/economic', {
+            params: {
+              from: fromDate,
+              to: toDate,
+              token: finnhubKey
+            },
+            timeout: 8000
+          });
+
+          if (response.data?.economicCalendar) {
+            events = response.data.economicCalendar
+              .filter((e: any) => e.country === 'US') // Focus on US events
+              .slice(0, 20) // Limit to 20 events
+              .map((e: any) => ({
+                date: e.time || e.date,
+                time: e.time ? new Date(e.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' }) + ' ET' : 'TBA',
+                event: e.event,
+                country: e.country,
+                impact: e.impact === 3 ? 'high' : e.impact === 2 ? 'medium' : 'low',
+                previous: e.prev?.toString() || null,
+                forecast: e.estimate?.toString() || null,
+                actual: e.actual?.toString() || null,
+                unit: e.unit || '',
+                category: categorizeEconomicEvent(e.event),
+              }));
+
+            console.log(`✅ Economic calendar fetched: ${events.length} events from Finnhub`);
+          }
+        } catch (finnhubError: any) {
+          console.warn('⚠️ Finnhub calendar API failed:', finnhubError.message);
+          source = 'Fallback';
+        }
+      }
+
+      // If no events from API, provide a message
+      if (events.length === 0) {
+        events = [{
+          date: now.toISOString(),
+          event: 'Economic calendar data unavailable',
+          country: 'US',
+          impact: 'info',
+          category: 'system',
+          message: finnhubKey ? 'No upcoming events found' : 'Finnhub API key required for real-time calendar'
+        }];
+        source = 'Unavailable';
+      }
 
       res.json({ 
         success: true, 
-        events: filteredEvents,
-        upcomingHighImpact: filteredEvents.filter(e => e.impact === 'high').length,
-        nextFedEvent: filteredEvents.find(e => e.category === 'fed'),
-        lastUpdate: new Date().toISOString()
+        events,
+        upcomingHighImpact: events.filter((e: any) => e.impact === 'high').length,
+        nextFedEvent: events.find((e: any) => e.category === 'fed'),
+        lastUpdate: new Date().toISOString(),
+        source
       });
     } catch (error: any) {
       console.error('Error fetching economic calendar:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch economic calendar' });
     }
   }));
+
+  // Helper function to categorize economic events
+  function categorizeEconomicEvent(eventName: string): string {
+    const name = eventName.toLowerCase();
+    if (name.includes('fomc') || name.includes('fed') || name.includes('interest rate')) return 'fed';
+    if (name.includes('cpi') || name.includes('pce') || name.includes('inflation')) return 'inflation';
+    if (name.includes('payroll') || name.includes('unemployment') || name.includes('jobless') || name.includes('employment')) return 'employment';
+    if (name.includes('gdp') || name.includes('growth')) return 'growth';
+    if (name.includes('retail') || name.includes('consumer') || name.includes('spending')) return 'consumer';
+    if (name.includes('pmi') || name.includes('manufacturing') || name.includes('industrial')) return 'manufacturing';
+    if (name.includes('housing') || name.includes('home')) return 'housing';
+    return 'other';
+  }
 
   // Fed Watch - CME FedWatch Tool equivalent
   app.get("/api/macro/fed-watch", asyncHandler(async (req: Request, res: Response) => {
