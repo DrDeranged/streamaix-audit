@@ -63,7 +63,6 @@ import {
   Bell,
   Settings
 } from 'lucide-react';
-import { NotificationSettings } from '@/components/NotificationSettings';
 
 interface Summary {
   id: string;
@@ -626,10 +625,6 @@ export default function Dashboard() {
                   <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-purple-500/30 px-3 py-3 text-xs font-medium">
                     <Activity className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Overview</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="settings" className="data-[state=active]:bg-purple-500/30 px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px]">
-                    <Bell className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Alerts</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -1209,15 +1204,6 @@ export default function Dashboard() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="settings" className="space-y-6 mt-6">
-                  <div className="space-y-4">
-                    <h2 className="text-white text-lg font-bold flex items-center gap-2">
-                      <Bell className="h-5 w-5 text-cyan-400" />
-                      Notification Settings
-                    </h2>
-                    <NotificationSettings />
-                  </div>
-                </TabsContent>
               </Tabs>
             </motion.div>
           </div>

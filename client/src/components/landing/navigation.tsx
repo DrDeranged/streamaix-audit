@@ -45,8 +45,11 @@ import {
   Briefcase,
   Award,
   Play,
-  Video
+  Video,
+  Bell
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { NotificationSettings } from "@/components/NotificationSettings";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -57,6 +60,7 @@ export function Navigation() {
   const logoutMutation = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   
   const { 
     wallet, 
@@ -395,6 +399,13 @@ export function Navigation() {
                         <UserCircle className="w-4 h-4 text-blue-400" />
                         <span className="font-medium">Profile</span>
                       </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1"
+                        onClick={() => setNotificationsOpen(true)}
+                      >
+                        <Bell className="w-4 h-4 text-amber-400" />
+                        <span className="font-medium">Notifications</span>
+                      </DropdownMenuItem>
                     </div>
 
                     <DropdownMenuSeparator className="bg-purple-500/20" />
@@ -667,6 +678,16 @@ export function Navigation() {
                     Governance
                   </button>
                 </Link>
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setNotificationsOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
+                >
+                  <Bell className="w-4 h-4 text-amber-400" />
+                  Notifications
+                </button>
                 
                 {/* Mobile Authentication */}
                 {!isAuthenticated && (
@@ -762,6 +783,19 @@ export function Navigation() {
         onOpenChange={setWalletModalOpen}
         onWalletConnected={() => setMobileMenuOpen(false)}
       />
+
+      {/* Notifications Dialog */}
+      <Dialog open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+        <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Bell className="w-5 h-5 text-amber-400" />
+              Notification Settings
+            </DialogTitle>
+          </DialogHeader>
+          <NotificationSettings />
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
