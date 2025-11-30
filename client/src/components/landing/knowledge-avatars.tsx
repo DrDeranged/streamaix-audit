@@ -965,39 +965,51 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                               </div>
                             )}
                             
-                            {/* Professional Action Buttons */}
-                            <div className="flex gap-2 pt-3 mt-auto border-t border-blue-500/20">
+                            {/* Professional Action Buttons - Glassmorphism */}
+                            <div className="flex gap-2 pt-3 mt-auto border-t border-slate-200 dark:border-blue-500/20">
                               <FollowButton
                                 avatarId={avatar.id}
                                 avatarName={avatar.name}
                                 size="sm"
-                                className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white transition-all duration-300 text-xs font-mono font-semibold shadow-lg hover:shadow-blue-500/40 uppercase tracking-wider"
+                                className="flex-1"
                               />
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleComparison(avatar.id);
-                                }}
-                                size="sm"
-                                variant={selectedForComparison.includes(avatar.id) ? "default" : "outline"}
-                                className={`px-4 text-xs font-mono transition-all duration-300 ${
+                              {/* Compare Button with Glassmorphism */}
+                              <div className="relative group">
+                                <div className={`absolute -inset-[1px] rounded-lg bg-gradient-to-r ${
                                   selectedForComparison.includes(avatar.id) 
-                                    ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/40' 
-                                    : 'border-blue-500/40 bg-slate-900/60 text-blue-300 hover:bg-blue-950/80 hover:border-blue-400/60'
-                                } backdrop-blur-sm hover:shadow-lg hover:shadow-blue-500/20`}
-                                data-testid={`button-compare-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
-                              >
-                                <BarChart3 className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                onClick={(e) => e.stopPropagation()}
-                                size="sm"
-                                variant="outline"
-                                className="px-4 text-xs font-mono border-blue-500/40 bg-slate-900/60 text-blue-300 hover:bg-blue-950/80 hover:border-blue-400/60 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
-                                data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                              </Button>
+                                    ? 'from-purple-500 to-fuchsia-500 opacity-100' 
+                                    : 'from-cyan-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-70'
+                                } blur-[1px] transition-opacity duration-300`} />
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleComparison(avatar.id);
+                                  }}
+                                  size="sm"
+                                  variant="outline"
+                                  className={`relative px-3 text-xs font-mono transition-all duration-300 ${
+                                    selectedForComparison.includes(avatar.id) 
+                                      ? 'bg-purple-500/20 dark:bg-purple-600/30 border-0 text-purple-600 dark:text-white' 
+                                      : 'bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-700 dark:text-blue-300 hover:bg-white/50 dark:hover:bg-slate-900/60'
+                                  }`}
+                                  data-testid={`button-compare-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                >
+                                  <BarChart3 className={`h-3.5 w-3.5 ${selectedForComparison.includes(avatar.id) ? 'text-purple-500' : 'text-purple-500 dark:text-purple-400'}`} />
+                                </Button>
+                              </div>
+                              {/* Eye/View Button with Glassmorphism */}
+                              <div className="relative group">
+                                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-70 blur-[1px] transition-opacity duration-300" />
+                                <Button
+                                  onClick={(e) => e.stopPropagation()}
+                                  size="sm"
+                                  variant="outline"
+                                  className="relative px-3 text-xs font-mono bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-700 dark:text-blue-300 hover:bg-white/50 dark:hover:bg-slate-900/60 transition-all duration-300"
+                                  data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                >
+                                  <Eye className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
+                                </Button>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>

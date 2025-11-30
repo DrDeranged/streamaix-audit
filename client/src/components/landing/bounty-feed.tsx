@@ -150,17 +150,20 @@ function BountyCard({ bounty, index }: BountyCardProps) {
               {formatTimeLeft(bounty.deadline)}
             </div>
             
-            <Button
-              asChild
-              size="sm"
-              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 group/btn"
-              data-testid={`button-view-bounty-${bounty.id}`}
-            >
-              <Link href={`/bounties/${bounty.id}`}>
-                <span>View</span>
-                <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
+            <Link href={`/bounties/${bounty.id}`}>
+              <div className="relative group/btn inline-block">
+                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover/btn:opacity-100 blur-[1px] transition-opacity duration-300" />
+                <Button
+                  size="sm"
+                  className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-3"
+                  data-testid={`button-view-bounty-${bounty.id}`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500" />
+                  <span className="relative z-10 font-medium">View</span>
+                  <ArrowRight className="w-4 h-4 ml-1 text-purple-500 group-hover/btn:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            </Link>
           </div>
         </CardContent>
       </Card>
@@ -299,7 +302,7 @@ export function BountyFeed() {
               ))}
             </div>
 
-            {/* View All Button */}
+            {/* View All Button - Glassmorphism */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -307,17 +310,26 @@ export function BountyFeed() {
               transition={{ duration: 0.6 }}
               className="text-center"
             >
-              <Button
-                asChild
-                size="lg"
-                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 shadow-lg shadow-purple-indigo-500/25 group"
-                data-testid="button-explore-all-bounties"
-              >
-                <Link href="/bounties">
-                  <span>Explore All Bounties</span>
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
+              <Link href="/bounties">
+                <motion.div 
+                  whileHover={{ scale: 1.03 }} 
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-block relative group"
+                >
+                  {/* Animated gradient border */}
+                  <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 group-hover:opacity-100 blur-[2px] animate-gradient-x transition-opacity duration-300" />
+                  <Button
+                    size="lg"
+                    className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-6 py-3"
+                    data-testid="button-explore-all-bounties"
+                  >
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <span className="relative z-10 font-medium">Explore All Bounties</span>
+                    <ArrowRight className="w-5 h-5 ml-2 text-purple-500 dark:text-purple-400 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
+              </Link>
             </motion.div>
           </>
         ) : (

@@ -85,23 +85,39 @@ export function FollowButton({
     followMutation.mutate();
   };
 
+  const baseClassName = isFollowing 
+    ? "relative bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+    : "relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60";
+
   return (
-    <Button
-      onClick={handleClick}
-      disabled={isLoading || followMutation.isPending}
-      variant={isFollowing ? "outline" : variant}
-      size={size}
-      className={className}
-      data-testid={`button-follow-${avatarId}`}
-    >
-      {showIcon && (
-        isFollowing ? (
-          <UserCheck className="w-4 h-4 mr-2" />
-        ) : (
-          <UserPlus className="w-4 h-4 mr-2" />
-        )
+    <div className={`relative group inline-block ${className}`}>
+      {/* Gradient border glow */}
+      {!isFollowing && (
+        <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-emerald-500 to-purple-500 opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
       )}
-      {followMutation.isPending ? "..." : isFollowing ? "Following" : "Follow"}
-    </Button>
+      <Button
+        onClick={handleClick}
+        disabled={isLoading || followMutation.isPending}
+        variant="ghost"
+        size={size}
+        className={`${baseClassName} transition-all duration-300 overflow-hidden`}
+        data-testid={`button-follow-${avatarId}`}
+      >
+        {/* Shimmer effect */}
+        {!isFollowing && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+        )}
+        {showIcon && (
+          isFollowing ? (
+            <UserCheck className="w-4 h-4 mr-2 text-emerald-500" />
+          ) : (
+            <UserPlus className="w-4 h-4 mr-2 text-emerald-500" />
+          )
+        )}
+        <span className="relative z-10 font-medium">
+          {followMutation.isPending ? "..." : isFollowing ? "Following" : "Follow"}
+        </span>
+      </Button>
+    </div>
   );
 }

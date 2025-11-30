@@ -387,6 +387,22 @@
   100% { background-position: 0% 50%; }
 }
 
+/* Animated gradient border for glassmorphism buttons */
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
 @keyframes shimmer-rotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

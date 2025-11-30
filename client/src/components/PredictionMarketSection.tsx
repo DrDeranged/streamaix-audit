@@ -286,34 +286,46 @@ export function PredictionMarketSection() {
           )}
         </motion.div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation - Glassmorphism */}
         <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-8">
           <div className="flex gap-1.5 sm:gap-2 items-center flex-wrap">
-            <Button
-              variant={activeTab === "trending" ? "default" : "outline"}
-              onClick={() => setActiveTab("trending")}
-              size="sm"
-              className={activeTab === "trending" 
-                ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0 text-xs sm:text-sm px-2.5 sm:px-4" 
-                : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-600 text-xs sm:text-sm px-2.5 sm:px-4"
-              }
-              data-testid="button-trending-markets"
-            >
-              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              Trending
-            </Button>
-            <Button
-              variant={activeTab === "all" ? "default" : "outline"}
-              onClick={() => setActiveTab("all")}
-              size="sm"
-              className={activeTab === "all" 
-                ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0 text-xs sm:text-sm px-2.5 sm:px-4" 
-                : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-600 text-xs sm:text-sm px-2.5 sm:px-4"
-              }
-              data-testid="button-all-markets"
-            >
-              All Markets
-            </Button>
+            {/* Trending Tab */}
+            <div className={`relative group ${activeTab === "trending" ? "" : "cursor-pointer"}`}>
+              {activeTab === "trending" && (
+                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 blur-[1px]" />
+              )}
+              <Button
+                variant="outline"
+                onClick={() => setActiveTab("trending")}
+                size="sm"
+                className={activeTab === "trending" 
+                  ? "relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white text-xs sm:text-sm px-2.5 sm:px-4" 
+                  : "bg-white/20 dark:bg-slate-800/30 backdrop-blur-sm border-slate-300/50 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-purple-400/50 hover:bg-white/40 dark:hover:bg-slate-800/50 text-xs sm:text-sm px-2.5 sm:px-4 transition-all duration-200"
+                }
+                data-testid="button-trending-markets"
+              >
+                <TrendingUp className={`w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2 ${activeTab === "trending" ? "text-purple-500" : ""}`} />
+                Trending
+              </Button>
+            </div>
+            {/* All Markets Tab */}
+            <div className={`relative group ${activeTab === "all" ? "" : "cursor-pointer"}`}>
+              {activeTab === "all" && (
+                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 blur-[1px]" />
+              )}
+              <Button
+                variant="outline"
+                onClick={() => setActiveTab("all")}
+                size="sm"
+                className={activeTab === "all" 
+                  ? "relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white text-xs sm:text-sm px-2.5 sm:px-4" 
+                  : "bg-white/20 dark:bg-slate-800/30 backdrop-blur-sm border-slate-300/50 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-purple-400/50 hover:bg-white/40 dark:hover:bg-slate-800/50 text-xs sm:text-sm px-2.5 sm:px-4 transition-all duration-200"
+                }
+                data-testid="button-all-markets"
+              >
+                All Markets
+              </Button>
+            </div>
             
             {/* AI Traders Competing Indicator */}
             {aiStats && aiStats.totalAiInLeagues > 0 && (
@@ -338,16 +350,23 @@ export function PredictionMarketSection() {
           </div>
 
           <Link href="/markets">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-500/10 text-xs sm:text-sm px-2 sm:px-4"
-              data-testid="link-view-all-markets"
+            <motion.div 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }}
+              className="relative group"
             >
-              <span className="hidden sm:inline">View All Markets</span>
-              <span className="sm:hidden">View All</span>
-              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 sm:ml-1" />
-            </Button>
+              <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 to-purple-500 opacity-0 group-hover:opacity-70 blur-[1px] transition-opacity duration-300" />
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="relative bg-transparent hover:bg-white/30 dark:hover:bg-slate-800/30 backdrop-blur-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 text-xs sm:text-sm px-2 sm:px-4 border border-transparent hover:border-cyan-400/30 transition-all duration-200"
+                data-testid="link-view-all-markets"
+              >
+                <span className="hidden sm:inline">View All Markets</span>
+                <span className="sm:hidden">View All</span>
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 sm:ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </Button>
+            </motion.div>
           </Link>
         </div>
 
@@ -400,7 +419,7 @@ export function PredictionMarketSection() {
           </motion.div>
         )}
 
-        {/* CTA */}
+        {/* CTA - Glassmorphism Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -408,15 +427,25 @@ export function PredictionMarketSection() {
           className="mt-12 text-center"
         >
           <Link href="/markets">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 text-white border-0 hover:shadow-lg hover:shadow-purple-500/50 transition-all"
-              data-testid="button-explore-markets"
+            <motion.div 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }}
+              className="inline-block relative group"
             >
-              <Trophy className="w-5 h-5 mr-2" />
-              Explore All Prediction Markets
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+              {/* Animated gradient border */}
+              <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 group-hover:opacity-100 blur-[2px] animate-gradient-x transition-opacity duration-300" />
+              <Button 
+                size="lg" 
+                className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-6 py-3"
+                data-testid="button-explore-markets"
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <Trophy className="w-5 h-5 mr-2 text-purple-500 dark:text-purple-400" />
+                <span className="relative z-10 font-medium">Explore All Prediction Markets</span>
+                <ArrowRight className="w-5 h-5 ml-2 text-cyan-500 dark:text-cyan-400 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
           </Link>
         </motion.div>
       </div>
