@@ -153,22 +153,34 @@ class PushNotificationService {
 
   async sendToUser(userId: string, payload: PushPayload, notificationType?: string) {
     if (!this.initialized) {
-      console.warn('Push notifications not initialized');
-      return { success: false, sent: 0 };
+      console.warn('🔔 Push notifications not initialized - VAPID keys missing');
+      return { success: false, sent: 0, error: 'Push notifications not configured' };
     }
 
     try {
       const subscriptions = await this.getSubscriptions(userId);
+      console.log(`🔔 [sendToUser] Found ${subscriptions.length} active subscriptions for user ${userId}`);
+      
+      if (subscriptions.length === 0) {
+        console.log(`🔔 [sendToUser] No subscriptions found for user ${userId}`);
+        return { success: true, sent: 0, failed: 0, reason: 'No active subscriptions' };
+      }
+      
       let sent = 0;
       let failed = 0;
 
       for (const sub of subscriptions) {
         if (notificationType) {
           const shouldSend = this.checkNotificationPreference(sub, notificationType);
-          if (!shouldSend) continue;
+          if (!shouldSend) {
+            console.log(`🔔 [sendToUser] Skipping notification type ${notificationType} - disabled by user`);
+            continue;
+          }
         }
 
         try {
+          console.log(`🔔 [sendToUser] Sending to endpoint: ${sub.endpoint.substring(0, 50)}...`);
+          
           await webpush.sendNotification(
             {
               endpoint: sub.endpoint,
@@ -185,6 +197,8 @@ class PushNotificationService {
               tag: payload.tag || 'streamaix-notification',
               requireInteraction: payload.requireInteraction || false,
               actions: payload.actions,
+              timestamp: payload.timestamp || Date.now(),
+              data: payload.data,
             })
           );
 
@@ -194,17 +208,21 @@ class PushNotificationService {
             .where(eq(pushSubscriptions.id, sub.id));
 
           sent++;
+          console.log(`🔔 [sendToUser] ✅ Successfully sent notification`);
         } catch (error: any) {
+          console.error(`🔔 [sendToUser] ❌ Failed to send:`, error.statusCode, error.message);
           if (error.statusCode === 410 || error.statusCode === 404) {
+            console.log(`🔔 [sendToUser] Removing stale subscription`);
             await this.removeSubscription(sub.endpoint);
           }
           failed++;
         }
       }
 
+      console.log(`🔔 [sendToUser] Final result: sent=${sent}, failed=${failed}`);
       return { success: true, sent, failed };
     } catch (error: any) {
-      console.error('Failed to send push notification:', error);
+      console.error('🔔 [sendToUser] Failed to send push notification:', error);
       return { success: false, sent: 0, error: error.message };
     }
   }

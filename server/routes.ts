@@ -11294,12 +11294,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
+    console.log(`🔔 [Push Test] Sending test notification to user: ${req.user.id}`);
+
     const result = await pushNotificationService.sendToUser(req.user.id, {
-      title: '🔔 Test Notification',
-      body: 'Push notifications are working! You will receive updates about markets, bounties, and more.',
+      title: '🎉 StreamAiX Notifications Active!',
+      body: 'You\'re all set! You\'ll now receive alerts about market resolutions, trades, bounties, and more.',
       url: '/dashboard',
       tag: 'test-notification',
+      actions: [
+        { action: 'view_dashboard', title: '📊 Dashboard' },
+        { action: 'dismiss', title: '✓ Got it' }
+      ],
     });
+
+    console.log(`🔔 [Push Test] Result for user ${req.user.id}:`, JSON.stringify(result));
+
+    if (result.sent === 0 && result.success) {
+      return res.json({ 
+        success: false, 
+        error: 'No active subscriptions found. Please enable notifications first.',
+        ...result 
+      });
+    }
 
     res.json({ success: true, ...result });
   }));

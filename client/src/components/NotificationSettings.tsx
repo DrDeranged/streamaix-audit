@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Bell, BellOff, Smartphone, Check, X, Send } from 'lucide-react';
+import { Bell, BellOff, Smartphone, Check, X, Send, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'wouter';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -30,6 +32,7 @@ interface NotificationPreferences {
 
 export function NotificationSettings() {
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,9 +127,22 @@ export function NotificationSettings() {
     },
     onError: (error: any) => {
       console.error('Subscribe error:', error);
+      
+      let errorMessage = 'Please check your browser settings and try again.';
+      
+      if (error.message?.includes('denied') || error.name === 'NotAllowedError') {
+        errorMessage = 'Notification permission was denied. Please allow notifications in your browser settings.';
+      } else if (error.message?.includes('401') || error.message?.includes('Authentication')) {
+        errorMessage = 'Please sign in to enable push notifications.';
+      } else if (error.message?.includes('not configured')) {
+        errorMessage = 'Push notifications are not available at this time. Please try again later.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Failed to enable notifications',
-        description: error.message || 'Please check your browser settings and try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -221,6 +237,41 @@ export function NotificationSettings() {
             Your browser doesn't support push notifications. Try using a modern browser like Chrome, Firefox, or Edge.
           </CardDescription>
         </CardHeader>
+      </Card>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="glass-card border-cyan-500/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Bell className="w-5 h-5 text-cyan-400" />
+            Push Notifications
+          </CardTitle>
+          <CardDescription className="mt-1">
+            Get real-time alerts for market updates, bounties, and more
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="flex flex-col items-center gap-4 py-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <LogIn className="w-6 h-6 text-cyan-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white mb-1">Sign in to enable notifications</p>
+              <p className="text-xs text-muted-foreground">
+                Create an account or sign in to receive push notifications about your markets, bounties, and earnings.
+              </p>
+            </div>
+            <Link href="/auth">
+              <Button className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600">
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
       </Card>
     );
   }
