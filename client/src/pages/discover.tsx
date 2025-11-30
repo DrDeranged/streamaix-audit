@@ -305,6 +305,7 @@ export default function Discover() {
   const dominance = (dominanceData as any)?.data || { btcDominance: 52, ethDominance: 17, altDominance: 26, totalMarketCap: 0 };
   const cryptoGainers = (cryptoMoversData as any)?.gainers || [];
   const cryptoLosers = (cryptoMoversData as any)?.losers || [];
+  const topByMarketCap = (cryptoMoversData as any)?.topByMarketCap || [];
   const trendingTokens = (trendingTokensData as any)?.tokens || [];
   const defiTvl = (defiTvlData as any)?.data || { totalTVL: 0, topProtocols: [], chainTVL: [] };
   const gasTracker = (gasTrackerData as any)?.data?.ethereum || { slow: 0, standard: 0, fast: 0, congestionLevel: 'low' };
@@ -581,14 +582,8 @@ export default function Discover() {
         {/* =================================================================== */}
         
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          {(cryptoGainers.length > 0 || cryptoLosers.length > 0) ? (
-            [...cryptoGainers, ...cryptoLosers]
-              .filter((coin: any, index: number, self: any[]) => 
-                index === self.findIndex((c: any) => c.symbol === coin.symbol)
-              )
-              .sort((a: any, b: any) => (b.marketCap || 0) - (a.marketCap || 0))
-              .slice(0, 20)
-              .map((coin: any, idx: number) => (
+          {topByMarketCap.length > 0 ? (
+            topByMarketCap.map((coin: any, idx: number) => (
               <div 
                 key={coin.symbol || idx}
                 className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all min-w-[150px]"
