@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Bell, BellOff, Smartphone, Check, X, Send, LogIn } from 'lucide-react';
+import { Bell, BellOff, Smartphone, Check, X, Send, LogIn, Bug, AlertTriangle, CheckCircle, XCircle, Loader2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +30,25 @@ interface NotificationPreferences {
   weeklyDigest: boolean;
 }
 
+interface DiagnosticStep {
+  step: string;
+  status: 'success' | 'failed' | 'pending' | 'checking';
+  details: string;
+}
+
+interface DebugInfo {
+  swSupported: boolean;
+  swRegistered: boolean;
+  swActive: boolean;
+  pushManagerSupported: boolean;
+  notificationPermission: NotificationPermission | 'unsupported';
+  hasSubscription: boolean;
+  subscriptionEndpoint: string | null;
+  isIOS: boolean;
+  isPWA: boolean;
+  browserInfo: string;
+}
+
 export function NotificationSettings() {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
@@ -37,6 +56,10 @@ export function NotificationSettings() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSubscription, setCurrentSubscription] = useState<PushSubscription | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+  const [diagnosticSteps, setDiagnosticSteps] = useState<DiagnosticStep[]>([]);
+  const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     marketResolutions: true,
     priceAlerts: true,
@@ -48,23 +71,185 @@ export function NotificationSettings() {
 
   const { data: subscriptionsData } = useQuery<{ success: boolean; subscriptions: any[] }>({
     queryKey: ['/api/push/subscriptions'],
-    enabled: isSubscribed,
+    enabled: isSubscribed && isAuthenticated,
   });
+
+  const { data: serverDebugData, refetch: refetchDebug } = useQuery<{ success: boolean; diagnostics: any }>({
+    queryKey: ['/api/push/debug'],
+    enabled: showDebug && isAuthenticated,
+  });
+
+  const runDiagnostics = async () => {
+    setIsRunningDiagnostics(true);
+    const steps: DiagnosticStep[] = [];
+    
+    const addStep = (step: string, status: DiagnosticStep['status'], details: string) => {
+      const newStep = { step, status, details };
+      steps.push(newStep);
+      setDiagnosticSteps([...steps]);
+      console.log(`🔔 [Diagnostics] ${step}: ${status} - ${details}`);
+    };
+
+    try {
+      // Step 1: Check Service Worker support
+      addStep('Service Worker Support', 'checking', 'Checking browser support...');
+      await new Promise(r => setTimeout(r, 300));
+      if ('serviceWorker' in navigator) {
+        addStep('Service Worker Support', 'success', 'Browser supports Service Workers');
+      } else {
+        addStep('Service Worker Support', 'failed', 'Browser does NOT support Service Workers');
+        setIsRunningDiagnostics(false);
+        return;
+      }
+
+      // Step 2: Check SW Registration
+      addStep('SW Registration', 'checking', 'Checking if Service Worker is registered...');
+      await new Promise(r => setTimeout(r, 300));
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      if (registrations.length > 0) {
+        addStep('SW Registration', 'success', `Found ${registrations.length} registration(s), scope: ${registrations[0].scope}`);
+      } else {
+        addStep('SW Registration', 'failed', 'No Service Worker registered! SW needs to be registered first.');
+        setIsRunningDiagnostics(false);
+        return;
+      }
+
+      // Step 3: Check SW is active
+      addStep('SW Active State', 'checking', 'Checking if Service Worker is active...');
+      await new Promise(r => setTimeout(r, 300));
+      const registration = await navigator.serviceWorker.ready;
+      if (registration.active) {
+        addStep('SW Active State', 'success', `Service Worker is active (state: ${registration.active.state})`);
+      } else {
+        addStep('SW Active State', 'failed', 'Service Worker is not active');
+      }
+
+      // Step 4: Check PushManager support
+      addStep('PushManager Support', 'checking', 'Checking Push API support...');
+      await new Promise(r => setTimeout(r, 300));
+      if ('PushManager' in window) {
+        addStep('PushManager Support', 'success', 'Browser supports Push API');
+      } else {
+        addStep('PushManager Support', 'failed', 'Browser does NOT support Push API');
+        setIsRunningDiagnostics(false);
+        return;
+      }
+
+      // Step 5: Check Notification permission
+      addStep('Notification Permission', 'checking', 'Checking notification permission...');
+      await new Promise(r => setTimeout(r, 300));
+      if ('Notification' in window) {
+        const permission = Notification.permission;
+        if (permission === 'granted') {
+          addStep('Notification Permission', 'success', 'Permission GRANTED');
+        } else if (permission === 'denied') {
+          addStep('Notification Permission', 'failed', 'Permission DENIED - User blocked notifications');
+        } else {
+          addStep('Notification Permission', 'pending', 'Permission not yet requested (default)');
+        }
+      } else {
+        addStep('Notification Permission', 'failed', 'Notification API not supported');
+      }
+
+      // Step 6: Check existing subscription
+      addStep('Push Subscription', 'checking', 'Checking for existing push subscription...');
+      await new Promise(r => setTimeout(r, 300));
+      const existingSub = await registration.pushManager.getSubscription();
+      if (existingSub) {
+        const endpoint = existingSub.endpoint;
+        const type = endpoint.includes('fcm.googleapis.com') ? 'Chrome/FCM' 
+          : endpoint.includes('mozilla') ? 'Firefox'
+          : endpoint.includes('apple') ? 'Safari/iOS'
+          : 'Unknown';
+        addStep('Push Subscription', 'success', `Active subscription found (${type})`);
+      } else {
+        addStep('Push Subscription', 'pending', 'No active subscription - needs to be created');
+      }
+
+      // Step 7: Check VAPID key from server
+      addStep('VAPID Key Fetch', 'checking', 'Fetching VAPID public key from server...');
+      await new Promise(r => setTimeout(r, 300));
+      try {
+        const vapidResponse = await fetch('/api/push/vapid-key');
+        const vapidData = await vapidResponse.json();
+        if (vapidData.vapidPublicKey) {
+          addStep('VAPID Key Fetch', 'success', `VAPID key received (${vapidData.vapidPublicKey.substring(0, 20)}...)`);
+        } else {
+          addStep('VAPID Key Fetch', 'failed', 'Server returned no VAPID key');
+        }
+      } catch (error: any) {
+        addStep('VAPID Key Fetch', 'failed', `Error: ${error.message}`);
+      }
+
+      // Step 8: Check iOS/PWA status
+      addStep('Platform Check', 'checking', 'Checking platform compatibility...');
+      await new Promise(r => setTimeout(r, 300));
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua);
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+      
+      if (isIOS && !isPWA) {
+        addStep('Platform Check', 'failed', 'iOS detected but NOT installed as PWA. Add to Home Screen first!');
+      } else if (isIOS && isPWA) {
+        addStep('Platform Check', 'success', 'iOS PWA - Push notifications should work (iOS 16.4+)');
+      } else {
+        addStep('Platform Check', 'success', `Platform: ${isIOS ? 'iOS' : 'Desktop/Android'}, PWA: ${isPWA ? 'Yes' : 'No'}`);
+      }
+
+    } catch (error: any) {
+      addStep('Diagnostics Error', 'failed', error.message);
+    }
+
+    setIsRunningDiagnostics(false);
+  };
 
   useEffect(() => {
     const checkSupport = async () => {
+      console.log('🔔 [NotificationSettings] Starting support check...');
+      
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua);
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+      
+      const debug: DebugInfo = {
+        swSupported: 'serviceWorker' in navigator,
+        swRegistered: false,
+        swActive: false,
+        pushManagerSupported: 'PushManager' in window,
+        notificationPermission: 'Notification' in window ? Notification.permission : 'unsupported',
+        hasSubscription: false,
+        subscriptionEndpoint: null,
+        isIOS,
+        isPWA,
+        browserInfo: ua.substring(0, 100),
+      };
+
       if ('serviceWorker' in navigator && 'PushManager' in window) {
         setIsSupported(true);
         
         try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          debug.swRegistered = registrations.length > 0;
+          
           const registration = await navigator.serviceWorker.ready;
+          debug.swActive = !!registration.active;
+          
           const subscription = await registration.pushManager.getSubscription();
+          debug.hasSubscription = !!subscription;
+          debug.subscriptionEndpoint = subscription?.endpoint?.substring(0, 60) || null;
+          
           setIsSubscribed(!!subscription);
           setCurrentSubscription(subscription);
+          
+          console.log('🔔 [NotificationSettings] Debug info:', debug);
         } catch (error) {
-          console.error('Error checking subscription:', error);
+          console.error('🔔 [NotificationSettings] Error checking subscription:', error);
         }
+      } else {
+        console.log('🔔 [NotificationSettings] Push not supported:', { sw: 'serviceWorker' in navigator, pm: 'PushManager' in window });
       }
+      
+      setDebugInfo(debug);
       setIsLoading(false);
     };
 
@@ -87,22 +272,36 @@ export function NotificationSettings() {
 
   const subscribeMutation = useMutation({
     mutationFn: async () => {
+      console.log('🔔 [Subscribe] Starting subscription flow...');
+      
+      // Step 1: Fetch VAPID key
+      console.log('🔔 [Subscribe] Step 1: Fetching VAPID key...');
       const vapidResponse = await fetch('/api/push/vapid-key');
       const { vapidPublicKey } = await vapidResponse.json();
       
       if (!vapidPublicKey) {
-        throw new Error('Push notifications not configured');
+        console.error('🔔 [Subscribe] No VAPID key returned from server');
+        throw new Error('Push notifications not configured on server');
       }
+      console.log('🔔 [Subscribe] VAPID key received:', vapidPublicKey.substring(0, 20) + '...');
 
+      // Step 2: Get SW registration
+      console.log('🔔 [Subscribe] Step 2: Getting SW registration...');
       const registration = await navigator.serviceWorker.ready;
+      console.log('🔔 [Subscribe] SW ready, scope:', registration.scope);
       
+      // Step 3: Subscribe to push
+      console.log('🔔 [Subscribe] Step 3: Creating push subscription...');
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
+      console.log('🔔 [Subscribe] Subscription created:', subscription.endpoint.substring(0, 50) + '...');
 
       const subscriptionJSON = subscription.toJSON();
       
+      // Step 4: Save to backend
+      console.log('🔔 [Subscribe] Step 4: Saving subscription to backend...');
       await apiRequest('/api/push/subscribe', {
         method: 'POST',
         body: JSON.stringify({
@@ -113,10 +312,12 @@ export function NotificationSettings() {
           deviceInfo: navigator.userAgent,
         }),
       });
+      console.log('🔔 [Subscribe] Subscription saved to backend successfully!');
 
       return subscription;
     },
     onSuccess: (subscription) => {
+      console.log('🔔 [Subscribe] SUCCESS - Notifications enabled');
       setIsSubscribed(true);
       setCurrentSubscription(subscription);
       queryClient.invalidateQueries({ queryKey: ['/api/push/subscriptions'] });
@@ -126,7 +327,7 @@ export function NotificationSettings() {
       });
     },
     onError: (error: any) => {
-      console.error('Subscribe error:', error);
+      console.error('🔔 [Subscribe] ERROR:', error);
       
       let errorMessage = 'Please check your browser settings and try again.';
       
@@ -150,12 +351,14 @@ export function NotificationSettings() {
 
   const unsubscribeMutation = useMutation({
     mutationFn: async () => {
+      console.log('🔔 [Unsubscribe] Starting unsubscribe flow...');
       if (currentSubscription) {
         await apiRequest('/api/push/unsubscribe', {
           method: 'POST',
           body: JSON.stringify({ endpoint: currentSubscription.endpoint }),
         });
         await currentSubscription.unsubscribe();
+        console.log('🔔 [Unsubscribe] Successfully unsubscribed');
       }
     },
     onSuccess: () => {
@@ -190,18 +393,31 @@ export function NotificationSettings() {
 
   const testNotificationMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('/api/push/test', { method: 'POST' });
+      console.log('🔔 [Test] Sending test notification...');
+      const response = await apiRequest('/api/push/test-detailed', { method: 'POST' });
+      console.log('🔔 [Test] Response:', response);
+      return response;
     },
-    onSuccess: () => {
-      toast({
-        title: 'Test sent',
-        description: 'Check your notifications!',
-      });
+    onSuccess: (data: any) => {
+      console.log('🔔 [Test] Result:', data);
+      if (data.success) {
+        toast({
+          title: 'Test notification sent!',
+          description: data.finalStatus || 'Check your device for the notification.',
+        });
+      } else {
+        toast({
+          title: 'Test failed',
+          description: data.hint || data.finalStatus || 'No active subscriptions found.',
+          variant: 'destructive',
+        });
+      }
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('🔔 [Test] Error:', error);
       toast({
         title: 'Failed to send test',
-        description: 'Please try again.',
+        description: error.message || 'Please try again.',
         variant: 'destructive',
       });
     },
@@ -217,8 +433,8 @@ export function NotificationSettings() {
       <Card className="glass-card">
         <CardContent className="p-6">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-            <div className="h-6 w-40 bg-muted animate-pulse rounded" />
+            <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+            <span className="text-sm text-muted-foreground">Checking notification support...</span>
           </div>
         </CardContent>
       </Card>
@@ -234,9 +450,22 @@ export function NotificationSettings() {
             Push Notifications Not Supported
           </CardTitle>
           <CardDescription>
-            Your browser doesn't support push notifications. Try using a modern browser like Chrome, Firefox, or Edge.
+            {debugInfo?.isIOS && !debugInfo?.isPWA 
+              ? 'On iOS, you must first install this app to your Home Screen. Open Safari, tap Share, then "Add to Home Screen".'
+              : 'Your browser doesn\'t support push notifications. Try using a modern browser like Chrome, Firefox, or Edge.'}
           </CardDescription>
         </CardHeader>
+        {debugInfo && (
+          <CardContent className="pt-0">
+            <div className="text-xs text-muted-foreground space-y-1 font-mono bg-black/20 p-3 rounded-lg">
+              <div>SW Support: {debugInfo.swSupported ? '✅' : '❌'}</div>
+              <div>PushManager: {debugInfo.pushManagerSupported ? '✅' : '❌'}</div>
+              <div>iOS: {debugInfo.isIOS ? 'Yes' : 'No'}</div>
+              <div>PWA: {debugInfo.isPWA ? 'Yes' : 'No'}</div>
+              <div className="truncate">Browser: {debugInfo.browserInfo}</div>
+            </div>
+          </CardContent>
+        )}
       </Card>
     );
   }
@@ -349,7 +578,7 @@ export function NotificationSettings() {
                 </div>
               </div>
 
-              <div className="pt-2 flex gap-2">
+              <div className="pt-2 flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -357,10 +586,157 @@ export function NotificationSettings() {
                   disabled={testNotificationMutation.isPending}
                   data-testid="button-test-notification"
                 >
-                  <Send className="w-4 h-4 mr-2" />
+                  {testNotificationMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
                   Send Test
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="text-muted-foreground"
+                  data-testid="button-toggle-debug"
+                >
+                  <Bug className="w-4 h-4 mr-2" />
+                  Debug
+                  {showDebug ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                </Button>
               </div>
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Debug Panel - Always available when authenticated */}
+      {!isSubscribed && isAuthenticated && (
+        <CardContent className="pt-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowDebug(!showDebug)}
+            className="text-muted-foreground w-full justify-start"
+            data-testid="button-toggle-debug-unsubscribed"
+          >
+            <Bug className="w-4 h-4 mr-2" />
+            Troubleshoot Notifications
+            {showDebug ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+          </Button>
+        </CardContent>
+      )}
+
+      <AnimatePresence>
+        {showDebug && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CardContent className="pt-2 space-y-4 border-t border-cyan-500/10">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-amber-400 flex items-center gap-2">
+                  <Bug className="w-4 h-4" />
+                  Push Notification Diagnostics
+                </h4>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={runDiagnostics}
+                    disabled={isRunningDiagnostics}
+                  >
+                    {isRunningDiagnostics ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                    )}
+                    Run Diagnostics
+                  </Button>
+                </div>
+              </div>
+
+              {/* Quick Status */}
+              {debugInfo && (
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className={`p-2 rounded ${debugInfo.swSupported && debugInfo.swRegistered ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                    Service Worker: {debugInfo.swRegistered ? 'Registered' : 'Not Registered'}
+                  </div>
+                  <div className={`p-2 rounded ${debugInfo.pushManagerSupported ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                    Push API: {debugInfo.pushManagerSupported ? 'Supported' : 'Not Supported'}
+                  </div>
+                  <div className={`p-2 rounded ${debugInfo.notificationPermission === 'granted' ? 'bg-green-500/10 text-green-400' : debugInfo.notificationPermission === 'denied' ? 'bg-red-500/10 text-red-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                    Permission: {debugInfo.notificationPermission}
+                  </div>
+                  <div className={`p-2 rounded ${debugInfo.hasSubscription ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                    Subscription: {debugInfo.hasSubscription ? 'Active' : 'None'}
+                  </div>
+                  {debugInfo.isIOS && (
+                    <div className={`p-2 rounded col-span-2 ${debugInfo.isPWA ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                      iOS PWA: {debugInfo.isPWA ? 'Installed (Good!)' : 'NOT Installed - Add to Home Screen first!'}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Diagnostic Steps */}
+              {diagnosticSteps.length > 0 && (
+                <div className="space-y-2 text-xs font-mono bg-black/30 p-3 rounded-lg max-h-60 overflow-y-auto">
+                  {diagnosticSteps.map((step, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      {step.status === 'success' && <CheckCircle className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />}
+                      {step.status === 'failed' && <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />}
+                      {step.status === 'pending' && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />}
+                      {step.status === 'checking' && <Loader2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5 animate-spin" />}
+                      <div>
+                        <span className={step.status === 'success' ? 'text-green-400' : step.status === 'failed' ? 'text-red-400' : step.status === 'pending' ? 'text-amber-400' : 'text-cyan-400'}>
+                          {step.step}:
+                        </span>
+                        <span className="text-muted-foreground ml-1">{step.details}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Server Debug Info */}
+              {serverDebugData?.diagnostics && (
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-muted-foreground">Server Status</h5>
+                  <div className="text-xs font-mono bg-black/30 p-3 rounded-lg space-y-1">
+                    <div>VAPID Configured: {serverDebugData.diagnostics.serverConfig.serviceInitialized ? '✅' : '❌'}</div>
+                    <div>Your Subscriptions: {serverDebugData.diagnostics.userSubscriptions.count}</div>
+                    <div>Platform Total: {serverDebugData.diagnostics.platformStats.totalActiveSubscriptions}</div>
+                    <div className="text-muted-foreground">
+                      Chrome: {serverDebugData.diagnostics.platformStats.subscriptionsByType.chrome}, 
+                      Firefox: {serverDebugData.diagnostics.platformStats.subscriptionsByType.firefox}, 
+                      Safari: {serverDebugData.diagnostics.platformStats.subscriptionsByType.safari}
+                    </div>
+                    {serverDebugData.diagnostics.troubleshooting.length > 0 && (
+                      <div className="text-amber-400 mt-2">
+                        Tips: {serverDebugData.diagnostics.troubleshooting.join(' | ')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* iOS-specific instructions */}
+              {debugInfo?.isIOS && !debugInfo?.isPWA && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs">
+                  <h5 className="font-medium text-amber-400 mb-2">iOS Push Notification Requirements:</h5>
+                  <ol className="list-decimal list-inside space-y-1 text-amber-200">
+                    <li>Open this website in <strong>Safari</strong> (not Chrome or Firefox)</li>
+                    <li>Tap the <strong>Share</strong> button (square with arrow)</li>
+                    <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                    <li>Open the app from your Home Screen</li>
+                    <li>Return here and enable notifications</li>
+                  </ol>
+                  <p className="mt-2 text-muted-foreground">Note: Requires iOS 16.4 or later</p>
+                </div>
+              )}
             </CardContent>
           </motion.div>
         )}

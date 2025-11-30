@@ -14,7 +14,8 @@ const API_CACHE_DURATION = 5 * 60 * 1000;
 const IMAGE_CACHE_DURATION = 24 * 60 * 60 * 1000;
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] 🔧 Installing service worker v2...');
+  console.log('[SW] Push notification support:', 'PushManager' in self);
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -22,12 +23,15 @@ self.addEventListener('install', (event) => {
         return cache.addAll(STATIC_ASSETS)
           .catch(err => console.log('[SW] Some assets failed to cache:', err));
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('[SW] ✅ Install complete, skipping waiting');
+        return self.skipWaiting();
+      })
   );
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] 🚀 Activating service worker...');
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -45,7 +49,13 @@ self.addEventListener('activate', (event) => {
             })
         );
       })
-      .then(() => self.clients.claim())
+      .then(() => {
+        console.log('[SW] ✅ Activation complete, claiming clients');
+        return self.clients.claim();
+      })
+      .then(() => {
+        console.log('[SW] 📱 Service Worker ready for push notifications');
+      })
   );
 });
 
@@ -377,10 +387,20 @@ function getOfflineHTML() {
 }
 
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
+  console.log('[SW] 🔔 Push event received!');
+  console.log('[SW] Push event data exists:', !!event.data);
+  
+  if (!event.data) {
+    console.log('[SW] ❌ No push data, ignoring');
+    return;
+  }
 
   try {
-    const data = event.data.json();
+    const rawData = event.data.text();
+    console.log('[SW] Raw push data:', rawData.substring(0, 200));
+    
+    const data = JSON.parse(rawData);
+    console.log('[SW] Parsed push data:', JSON.stringify(data, null, 2));
     
     const vibrationPatterns = {
       win: [200, 100, 200, 100, 300],
@@ -418,11 +438,32 @@ self.addEventListener('push', (event) => {
       silent: data.silent || false
     };
 
+    console.log('[SW] 📱 Showing notification with options:', JSON.stringify({
+      title: data.title || 'StreamAiX',
+      body: options.body,
+      tag: options.tag
+    }));
+
     event.waitUntil(
       self.registration.showNotification(data.title || 'StreamAiX', options)
+        .then(() => {
+          console.log('[SW] ✅ Notification displayed successfully!');
+        })
+        .catch((err) => {
+          console.error('[SW] ❌ Failed to show notification:', err);
+        })
     );
   } catch (error) {
-    console.error('[SW] Push notification error:', error);
+    console.error('[SW] ❌ Push notification error:', error);
+    console.error('[SW] Error stack:', error.stack);
+    
+    // Attempt to show a fallback notification
+    event.waitUntil(
+      self.registration.showNotification('StreamAiX', {
+        body: 'You have a new notification',
+        icon: '/icon-192.png'
+      }).catch(e => console.error('[SW] Fallback notification also failed:', e))
+    );
   }
 });
 
