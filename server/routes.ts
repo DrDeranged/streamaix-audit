@@ -10457,29 +10457,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // VIX and DXY indices
+  // VIX and DXY indices (REAL DATA)
   app.get("/api/macro/volatility-indices", asyncHandler(async (req: Request, res: Response) => {
     try {
+      // Fetch real data from Finnhub via our macro service
+      const volatility = await macroDataService.getVolatilityIndices();
+
       const indices = {
         vix: {
           name: 'CBOE Volatility Index',
           symbol: 'VIX',
-          value: 14.5 + (Math.random() - 0.5) * 4,
-          change: (Math.random() - 0.5) * 2,
-          changePercent: (Math.random() - 0.5) * 10,
+          value: volatility.vix.value,
+          change: volatility.vix.change,
+          changePercent: volatility.vix.changePercent,
           high52w: 38.57,
           low52w: 11.52,
-          level: 'low', // low, moderate, elevated, high, extreme
+          level: volatility.vix.level,
         },
         dxy: {
           name: 'US Dollar Index',
           symbol: 'DXY',
-          value: 106.8 + (Math.random() - 0.5) * 0.8,
-          change: (Math.random() - 0.5) * 0.5,
-          changePercent: (Math.random() - 0.5) * 0.4,
+          value: volatility.dxy.value,
+          change: volatility.dxy.change,
+          changePercent: volatility.dxy.changePercent,
           high52w: 107.35,
           low52w: 99.58,
-          trend: 'bullish',
+          trend: volatility.dxy.trend,
         },
         gvz: {
           name: 'Gold Volatility Index',
@@ -10497,17 +10500,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       };
 
-      // Determine VIX level
-      if (indices.vix.value < 15) indices.vix.level = 'low';
-      else if (indices.vix.value < 20) indices.vix.level = 'moderate';
-      else if (indices.vix.value < 25) indices.vix.level = 'elevated';
-      else if (indices.vix.value < 35) indices.vix.level = 'high';
-      else indices.vix.level = 'extreme';
-
       res.json({ 
         success: true, 
         indices,
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
+        source: 'Finnhub'
       });
     } catch (error: any) {
       console.error('Error fetching volatility indices:', error);
