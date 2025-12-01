@@ -365,8 +365,8 @@ export class OnChainAnalyticsService {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
       return response.data.ethereum.usd;
     } catch (error) {
-      console.warn('Failed to fetch ETH price, using fallback');
-      return 3000; // Fallback price
+      console.warn('❌ Failed to fetch ETH price - no real data available');
+      throw new Error('ETH price unavailable - API failed');
     }
   }
 

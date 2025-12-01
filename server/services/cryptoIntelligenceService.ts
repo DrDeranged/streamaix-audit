@@ -417,19 +417,9 @@ class CryptoIntelligenceService {
       }
     }
 
-    // Fallback with reasonable defaults
-    console.log('⚠️ All gas APIs failed, using estimated values');
-    return {
-      ethereum: {
-        slow: 12,
-        standard: 18,
-        fast: 25,
-        instant: 35,
-        baseFee: 15,
-        congestionLevel: 'low'
-      },
-      lastUpdated: new Date().toISOString()
-    };
+    // No mock data - throw error when all APIs fail
+    console.log('❌ All gas APIs failed - no real gas data available');
+    throw new Error('Gas data unavailable - all APIs failed');
   }
 
   private async fetchGasFromOwlracle(): Promise<GasTracker> {

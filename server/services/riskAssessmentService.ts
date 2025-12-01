@@ -105,7 +105,7 @@ export interface StressTestResult {
 
 export interface PositionSizingRecommendation {
   symbol: string;
-  assetType: 'crypto' | 'stock' | 'commodity';
+  assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
   currentAllocation: number;
   recommendedAllocation: number;
   rationale: string;
@@ -292,97 +292,16 @@ export class RiskAssessmentService {
   }
 
   /**
-   * Generate mock portfolio for demonstration
-   * In production, this would fetch user's actual portfolio
+   * Get user's actual portfolio - returns empty portfolio when no real data available
+   * Portfolio integration required for real data
    */
-  private generateMockPortfolio(): PortfolioMetrics {
-    const mockPositions: PortfolioPosition[] = [
-      {
-        symbol: 'BTC',
-        assetType: 'crypto',
-        allocation: 25.0,
-        currentPrice: 45000,
-        quantity: 0.5556,
-        value: 25000,
-        costBasis: 40000,
-        unrealizedPnL: 2778,
-        unrealizedPnLPercent: 12.5
-      },
-      {
-        symbol: 'ETH',
-        assetType: 'crypto',
-        allocation: 20.0,
-        currentPrice: 3200,
-        quantity: 6.25,
-        value: 20000,
-        costBasis: 2800,
-        unrealizedPnL: 2500,
-        unrealizedPnLPercent: 14.3
-      },
-      {
-        symbol: 'NVDA',
-        assetType: 'stock',
-        allocation: 15.0,
-        currentPrice: 875,
-        quantity: 17.14,
-        value: 15000,
-        costBasis: 820,
-        unrealizedPnL: 943,
-        unrealizedPnLPercent: 6.7
-      },
-      {
-        symbol: 'TSLA',
-        assetType: 'stock',
-        allocation: 12.0,
-        currentPrice: 240,
-        quantity: 50,
-        value: 12000,
-        costBasis: 280,
-        unrealizedPnL: -2000,
-        unrealizedPnLPercent: -14.3
-      },
-      {
-        symbol: 'SOL',
-        assetType: 'crypto',
-        allocation: 10.0,
-        currentPrice: 100,
-        quantity: 100,
-        value: 10000,
-        costBasis: 85,
-        unrealizedPnL: 1500,
-        unrealizedPnLPercent: 17.6
-      },
-      {
-        symbol: 'AAPL',
-        assetType: 'stock',
-        allocation: 8.0,
-        currentPrice: 190,
-        quantity: 42.11,
-        value: 8000,
-        costBasis: 175,
-        unrealizedPnL: 632,
-        unrealizedPnLPercent: 8.6
-      },
-      {
-        symbol: 'GLD',
-        assetType: 'commodity',
-        allocation: 5.0,
-        currentPrice: 185,
-        quantity: 27.03,
-        value: 5000,
-        costBasis: 180,
-        unrealizedPnL: 135,
-        unrealizedPnLPercent: 2.8
-      }
-    ];
-
-    const totalValue = mockPositions.reduce((sum, pos) => sum + pos.value, 0);
-
+  private getEmptyPortfolio(): PortfolioMetrics {
+    console.log('⚠️ No real portfolio data available - user portfolio integration required');
     return {
-      totalValue,
-      totalAllocated: 95.0, // 95% allocated, 5% cash
-      availableCash: 5000,
-      positions: mockPositions,
+      totalValue: 0,
+      totalAllocated: 0,
+      availableCash: 0,
+      positions: [],
       lastUpdated: new Date().toISOString()
     };
   }
@@ -714,10 +633,11 @@ export class RiskAssessmentService {
     const totalValue = portfolio.totalValue;
 
     // Define target allocations for different asset types
-    const targetAllocations = {
+    const targetAllocations: Record<string, { min: number; max: number; target: number }> = {
       crypto: { min: 20, max: 40, target: 30 },
       stock: { min: 40, max: 70, target: 55 },
       commodity: { min: 5, max: 15, target: 10 },
+      currency: { min: 5, max: 20, target: 10 },
       cash: { min: 5, max: 15, target: 5 }
     };
 
@@ -1119,7 +1039,7 @@ export class RiskAssessmentService {
     riskAlerts: RiskAlert[];
     composition: PortfolioComposition;
   }> {
-    const portfolio = this.generateMockPortfolio();
+    const portfolio = this.getEmptyPortfolio();
     
     const [riskMetrics, stressTests, positionSizing, composition] = await Promise.all([
       this.calculatePortfolioRiskMetrics(portfolio),
