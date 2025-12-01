@@ -606,7 +606,43 @@ export function NotificationSettings() {
                   ) : (
                     <Send className="w-4 h-4 mr-2" />
                   )}
-                  Send Test
+                  Send Test (Push)
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    console.log('🔔 [Direct Test] Testing browser notification directly...');
+                    if (!('Notification' in window)) {
+                      toast({ title: 'Not supported', description: 'Browser does not support notifications', variant: 'destructive' });
+                      return;
+                    }
+                    if (Notification.permission !== 'granted') {
+                      toast({ title: 'Permission denied', description: `Notification permission is: ${Notification.permission}`, variant: 'destructive' });
+                      return;
+                    }
+                    try {
+                      const notification = new Notification('🧪 Direct Browser Test', {
+                        body: `Test at ${new Date().toLocaleTimeString()} - If you see this, browser notifications work!`,
+                        icon: '/icon-192.png',
+                        tag: 'direct-test-' + Date.now(),
+                        requireInteraction: false,
+                      });
+                      notification.onclick = () => {
+                        console.log('🔔 [Direct Test] Notification clicked!');
+                        notification.close();
+                      };
+                      toast({ title: 'Direct notification sent!', description: 'Check if you see it on screen' });
+                      console.log('🔔 [Direct Test] Notification created successfully:', notification);
+                    } catch (err: any) {
+                      console.error('🔔 [Direct Test] Failed:', err);
+                      toast({ title: 'Failed to create notification', description: err.message, variant: 'destructive' });
+                    }
+                  }}
+                  data-testid="button-test-direct-notification"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  Test Browser (Direct)
                 </Button>
                 <Button
                   variant="ghost"
