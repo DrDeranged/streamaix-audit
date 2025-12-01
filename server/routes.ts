@@ -1188,6 +1188,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       metadata: { wallet: claimerWallet, txHash: blockchainTxHash },
     });
 
+    // Send push notification to the claimer (assigned)
+    try {
+      const { pushNotificationService } = await import('./services/pushNotificationService');
+      await pushNotificationService.notifyBountyUpdate(
+        req.user!.id,
+        bounty.title,
+        'assigned',
+        bounty.reward,
+        bounty.id
+      );
+    } catch (err) {
+      console.log('Push notification skipped:', err);
+    }
+
     res.json({
       message: 'Bounty claimed successfully',
       bounty: updatedBounty,
@@ -1273,6 +1287,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error('Error extracting predictions:', error);
             // Don't fail the completion if AI extraction fails
           }
+        }
+
+        // Send push notification to the hunter (completed/reward)
+        try {
+          const { pushNotificationService } = await import('./services/pushNotificationService');
+          await pushNotificationService.notifyBountyUpdate(
+            bounty.assigneeId,
+            bounty.title,
+            'completed',
+            bounty.reward + (bounty.tipPool || 0),
+            bounty.id
+          );
+        } catch (err) {
+          console.log('Push notification skipped:', err);
         }
 
         res.json({
