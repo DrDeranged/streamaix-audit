@@ -331,8 +331,8 @@ function useSocialMutations() {
     onError: (err, variables, context) => {
       queryClient.setQueryData(['/api/top-accounts'], context?.previousData);
       toast({
-        title: "Error",
-        description: "Failed to follow user",
+        title: "Unable to follow",
+        description: "Please try again.",
         variant: "destructive",
       });
     },
@@ -386,8 +386,8 @@ function useSocialMutations() {
         });
       }
       toast({
-        title: "Error",
-        description: "Failed to like cast",
+        title: "Unable to like",
+        description: "Please try again.",
         variant: "destructive",
       });
     },
@@ -437,8 +437,8 @@ function useSocialMutations() {
         });
       }
       toast({
-        title: "Error",
-        description: "Failed to recast",
+        title: "Unable to recast",
+        description: "Please try again.",
         variant: "destructive",
       });
     },
@@ -487,8 +487,8 @@ function useSocialMutations() {
         });
       }
       toast({
-        title: "Error",
-        description: "Failed to post reply",
+        title: "Unable to post reply",
+        description: "Please try again.",
         variant: "destructive",
       });
     },

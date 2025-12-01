@@ -245,7 +245,7 @@ export default function InvestmentJournal() {
       toast({ title: 'Success!', description: 'Journal entry saved successfully.' });
     },
     onError: () => {
-      toast({ title: 'Error', description: 'Failed to save journal entry.', variant: 'destructive' });
+      toast({ title: 'Unable to save', description: 'Your journal entry could not be saved. Please try again.', variant: 'destructive' });
     },
   });
 
@@ -262,7 +262,7 @@ export default function InvestmentJournal() {
       toast({ title: 'Success!', description: 'Journal entry deleted successfully.' });
     },
     onError: () => {
-      toast({ title: 'Error', description: 'Failed to delete journal entry.', variant: 'destructive' });
+      toast({ title: 'Unable to delete', description: 'Your journal entry could not be deleted. Please try again.', variant: 'destructive' });
     },
   });
 

@@ -112,8 +112,8 @@ export function InlineMarketCard({
     },
     onError: (error: any) => {
       toast({
-        title: 'Trade Failed',
-        description: error.message || 'Unable to execute trade',
+        title: 'Unable to complete trade',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },

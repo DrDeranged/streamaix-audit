@@ -106,8 +106,8 @@ export default function LiveCryptoVideos() {
     } catch (error) {
       console.error('Processing error:', error);
       toast({
-        title: "Processing Failed",
-        description: "Failed to start AI analysis. Please try again.",
+        title: "Unable to process video",
+        description: "Please try again.",
         variant: "destructive"
       });
     } finally {

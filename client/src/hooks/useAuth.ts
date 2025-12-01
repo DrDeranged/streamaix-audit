@@ -37,8 +37,8 @@ export function useLogin() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Login failed',
-        description: error.message || 'Invalid credentials',
+        title: 'Unable to sign in',
+        description: error.message || 'Please check your username and password.',
         variant: 'destructive',
       });
     },
@@ -71,8 +71,8 @@ export function useRegister() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Registration failed',
-        description: error.message || 'Failed to create account',
+        title: 'Unable to create account',
+        description: error.message || 'Please check your details and try again.',
         variant: 'destructive',
       });
     },
@@ -100,8 +100,8 @@ export function useWalletLogin() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Wallet login failed',
-        description: error.message || 'Failed to connect wallet',
+        title: 'Unable to connect wallet',
+        description: error.message || 'Please try connecting your wallet again.',
         variant: 'destructive',
       });
     },
@@ -149,8 +149,8 @@ export function useUpdateProfile() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Update failed',
-        description: error.message || 'Failed to update profile',
+        title: 'Unable to update profile',
+        description: error.message || 'Please try again.',
         variant: 'destructive',
       });
     },
@@ -200,8 +200,8 @@ export function useDisconnectWallet() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Disconnect failed',
-        description: error.message || 'Failed to disconnect wallet',
+        title: 'Unable to disconnect wallet',
+        description: error.message || 'Please try again.',
         variant: 'destructive',
       });
     },

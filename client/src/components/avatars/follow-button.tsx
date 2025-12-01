@@ -65,8 +65,8 @@ export function FollowButton({
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update follow status",
+        title: "Unable to update follow status",
+        description: "Please try again.",
         variant: "destructive",
       });
     },

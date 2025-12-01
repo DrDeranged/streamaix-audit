@@ -188,8 +188,8 @@ export default function MultiAssetChart({
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch comparison data",
+        title: "Unable to load chart data",
+        description: "Please try again.",
         variant: "destructive"
       });
     }

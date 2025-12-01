@@ -543,8 +543,8 @@ export function RealAIProcessor() {
       setIsProcessing(false);
       setProgress(0);
       toast({
-        title: "Processing Failed",
-        description: err.message || "Failed to process content. Please try again.",
+        title: "Unable to process content",
+        description: "Please check the URL and try again.",
         variant: "destructive"
       });
     }

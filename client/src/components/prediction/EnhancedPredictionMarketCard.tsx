@@ -152,8 +152,8 @@ export function EnhancedPredictionMarketCard({
         });
       } else {
         toast({
-          title: 'Failed to Create Market',
-          description: error.message || 'An error occurred while creating the market',
+          title: 'Unable to create market',
+          description: 'Please try again.',
           variant: 'destructive',
         });
       }

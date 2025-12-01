@@ -195,7 +195,7 @@ export default function SummaryView() {
       toast({ title: 'Success!', description: 'Note created successfully.' });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: 'Failed to create note.', variant: 'destructive' });
+      toast({ title: 'Unable to create note', description: 'Please try again.', variant: 'destructive' });
     },
   });
 
@@ -213,7 +213,7 @@ export default function SummaryView() {
       toast({ title: 'Success!', description: 'Note updated successfully.' });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: 'Failed to update note.', variant: 'destructive' });
+      toast({ title: 'Unable to update note', description: 'Please try again.', variant: 'destructive' });
     },
   });
 
@@ -229,7 +229,7 @@ export default function SummaryView() {
       toast({ title: 'Success!', description: 'Note deleted successfully.' });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: 'Failed to delete note.', variant: 'destructive' });
+      toast({ title: 'Unable to delete note', description: 'Please try again.', variant: 'destructive' });
     },
   });
 
@@ -241,7 +241,7 @@ export default function SummaryView() {
       toast({ title: 'Copied!', description: 'Content copied to clipboard.' });
     } catch (err) {
       console.error('Failed to copy:', err);
-      toast({ title: 'Error', description: 'Failed to copy content.', variant: 'destructive' });
+      toast({ title: 'Unable to copy', description: 'Please try copying manually.', variant: 'destructive' });
     }
   };
 

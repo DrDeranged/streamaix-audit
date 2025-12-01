@@ -95,7 +95,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
     onError: () => {
       setIsLiked(isLiked);
       setLikesCount(likesCount);
-      toast({ title: 'Failed to like', variant: 'destructive' });
+      toast({ title: 'Unable to like', description: 'Please try again.', variant: 'destructive' });
     },
   });
 
@@ -107,7 +107,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
     },
     onError: () => {
       setIsSaved(isSaved);
-      toast({ title: 'Failed to save', variant: 'destructive' });
+      toast({ title: 'Unable to save', description: 'Please try again.', variant: 'destructive' });
     },
   });
 
@@ -124,13 +124,13 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
       toast({ title: 'Comment posted!' });
     },
     onError: () => {
-      toast({ title: 'Failed to comment', variant: 'destructive' });
+      toast({ title: 'Unable to post comment', description: 'Please try again.', variant: 'destructive' });
     },
   });
 
   const handleLike = () => {
     if (!isAuthenticated) {
-      toast({ title: 'Sign in to like', variant: 'destructive' });
+      toast({ title: 'Please sign in', description: 'You need to be signed in to like posts.', variant: 'destructive' });
       return;
     }
     likeMutation.mutate();
@@ -138,7 +138,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
   const handleSave = () => {
     if (!isAuthenticated) {
-      toast({ title: 'Sign in to save', variant: 'destructive' });
+      toast({ title: 'Please sign in', description: 'You need to be signed in to save posts.', variant: 'destructive' });
       return;
     }
     saveMutation.mutate();
@@ -146,7 +146,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
 
   const handleComment = () => {
     if (!isAuthenticated) {
-      toast({ title: 'Sign in to comment', variant: 'destructive' });
+      toast({ title: 'Please sign in', description: 'You need to be signed in to comment.', variant: 'destructive' });
       return;
     }
     if (commentText.trim()) {

@@ -50,8 +50,8 @@ export default function ChatPage() {
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to send message',
+        title: 'Unable to send message',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },

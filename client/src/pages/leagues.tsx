@@ -273,8 +273,8 @@ export default function LeaguesPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to Join",
-        description: error.message || "Could not join the league. Please try again.",
+        title: "Unable to join league",
+        description: "Please try again.",
         variant: "destructive",
       });
     },

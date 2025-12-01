@@ -94,8 +94,8 @@ export function WalletConnector({
       }
     } catch (error: any) {
       toast({
-        title: 'Authentication Failed',
-        description: error.message || 'Failed to sign authentication message',
+        title: 'Unable to authenticate',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -112,8 +112,8 @@ export function WalletConnector({
       });
     } catch (error) {
       toast({
-        title: 'Copy Failed',
-        description: 'Failed to copy address',
+        title: 'Unable to copy',
+        description: 'Please try copying manually.',
         variant: 'destructive',
       });
     }

@@ -50,8 +50,8 @@ export default function UserNotesModal({ isOpen, onClose, summaryId, summaryTitl
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to save note",
-        description: error.message || "Please try again later.",
+        title: "Unable to save note",
+        description: "Please try again.",
         variant: "destructive",
       });
     },

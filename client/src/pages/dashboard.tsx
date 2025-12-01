@@ -245,8 +245,8 @@ export default function Dashboard() {
     },
     onError: (error: any) => {
       toast({ 
-        title: "Failed to create note", 
-        description: error.message,
+        title: "Unable to save note", 
+        description: "Please try again.",
         variant: "destructive" 
       });
     }
@@ -265,8 +265,8 @@ export default function Dashboard() {
     },
     onError: (error: any) => {
       toast({ 
-        title: "Failed to delete summary", 
-        description: error.message,
+        title: "Unable to delete summary", 
+        description: "Please try again.",
         variant: "destructive" 
       });
     }

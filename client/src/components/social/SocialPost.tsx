@@ -79,7 +79,8 @@ export function SocialPost({
       setIsLiked(isLiked);
       setLikesCount(likesCount);
       toast({
-        title: 'Failed to like post',
+        title: 'Unable to like post',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },
@@ -105,7 +106,8 @@ export function SocialPost({
     },
     onError: () => {
       toast({
-        title: 'Failed to post comment',
+        title: 'Unable to post comment',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },

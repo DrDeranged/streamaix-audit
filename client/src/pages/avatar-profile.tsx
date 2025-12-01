@@ -468,8 +468,8 @@ export default function AvatarProfile() {
     },
     onError: () => {
       toast({
-        title: 'Error',
-        description: 'Please sign in to follow avatars',
+        title: 'Unable to update follow status',
+        description: 'Please sign in and try again.',
         variant: 'destructive',
       });
     },

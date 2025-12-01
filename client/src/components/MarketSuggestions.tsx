@@ -52,8 +52,8 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
       });
     } catch (error: any) {
       toast({
-        title: "Extraction failed",
-        description: error.message,
+        title: "Unable to extract predictions",
+        description: "Please try again.",
         variant: "destructive"
       });
     } finally {

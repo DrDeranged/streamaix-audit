@@ -168,8 +168,8 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: 'Connection Failed',
-        description: error.message || 'Failed to connect wallet',
+        title: 'Unable to connect wallet',
+        description: 'Please check your wallet and try again.',
         variant: 'destructive',
       });
     } finally {

@@ -444,8 +444,8 @@ export function ChatWidget() {
         });
       } else {
         toast({
-          title: 'Error',
-          description: 'Failed to send message. Please try again.',
+          title: 'Unable to send message',
+          description: 'Please try again.',
           variant: 'destructive',
         });
       }

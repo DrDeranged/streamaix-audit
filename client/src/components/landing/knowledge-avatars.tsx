@@ -548,8 +548,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
       }
     } catch (error) {
       toast({ 
-        title: "Error", 
-        description: "Failed to follow avatar",
+        title: "Unable to follow", 
+        description: "Please try again.",
         variant: "destructive"
       });
     }

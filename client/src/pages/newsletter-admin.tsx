@@ -99,8 +99,8 @@ export default function NewsletterAdmin() {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to send test newsletter",
+        title: "Unable to send test email",
+        description: "Please check the email address and try again.",
         variant: "destructive"
       });
     }
@@ -122,8 +122,8 @@ export default function NewsletterAdmin() {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to send newsletter",
+        title: "Unable to send newsletter",
+        description: "Please try again later.",
         variant: "destructive"
       });
     }
@@ -164,8 +164,8 @@ export default function NewsletterAdmin() {
       }
     } catch (error: any) {
       toast({
-        title: "Connection Failed",
-        description: error.message,
+        title: "Unable to connect wallet",
+        description: "Please check your wallet and try again.",
         variant: "destructive"
       });
     }

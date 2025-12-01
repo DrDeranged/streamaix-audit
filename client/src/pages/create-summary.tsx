@@ -329,8 +329,8 @@ export default function CreateSummary() {
       setProgress(0);
       setProcessingStatus("");
       toast({
-        title: 'Processing Failed',
-        description: error.message || 'Failed to start content processing.',
+        title: 'Unable to process content',
+        description: 'Please check the URL and try again.',
         variant: 'destructive',
       });
     }

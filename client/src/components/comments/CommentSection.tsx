@@ -81,8 +81,8 @@ export function CommentSection({ entityType, entityId, className = "" }: Comment
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to post comment",
-        description: error.message || "Please try again.",
+        title: "Unable to post comment",
+        description: "Please try again.",
         variant: "destructive",
       });
     },

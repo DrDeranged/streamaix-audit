@@ -264,8 +264,8 @@ export default function BountyDetail() {
       });
     } catch (error) {
       toast({
-        title: 'Failed to claim',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        title: 'Unable to claim bounty',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     }
@@ -274,8 +274,8 @@ export default function BountyDetail() {
   const handleSubmit = async () => {
     if (!submissionUrl.trim()) {
       toast({
-        title: 'Error',
-        description: 'Please provide a content URL for your submission',
+        title: 'URL required',
+        description: 'Please provide a content URL for your submission.',
         variant: 'destructive',
       });
       return;
@@ -355,8 +355,8 @@ export default function BountyDetail() {
       }
     } catch (error) {
       toast({
-        title: 'Submission failed',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        title: 'Unable to submit',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -380,8 +380,8 @@ export default function BountyDetail() {
       setTipAmount('');
     } catch (error) {
       toast({
-        title: 'Failed to add tip',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        title: 'Unable to add tip',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     }
@@ -407,8 +407,8 @@ export default function BountyDetail() {
     },
     onError: (error: Error) => {
       toast({
-        title: 'Failed to complete',
-        description: error.message,
+        title: 'Unable to complete bounty',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },

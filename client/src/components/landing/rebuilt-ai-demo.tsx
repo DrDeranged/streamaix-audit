@@ -308,8 +308,8 @@ export function AIProcessor() {
       console.error('🔴 Processing error:', error);
       console.error('🔴 Error details:', lastError);
       toast({
-        title: "Processing Failed",
-        description: error.message || "Failed to start processing",
+        title: "Unable to process content",
+        description: "Please check the URL and try again.",
         variant: "destructive"
       });
       setIsProcessing(false);

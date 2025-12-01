@@ -44,10 +44,9 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
       }, 3000);
     },
     onError: (error: any) => {
-      const message = error.message || "Failed to join waitlist. Please try again.";
       toast({
-        title: "Error",
-        description: message,
+        title: "Unable to join waitlist",
+        description: "Please check your email and try again.",
         variant: "destructive",
       });
     },

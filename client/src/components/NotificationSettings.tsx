@@ -373,7 +373,7 @@ export function NotificationSettings() {
       }
       
       toast({
-        title: 'Failed to enable notifications',
+        title: 'Unable to enable notifications',
         description: errorMessage,
         variant: 'destructive',
       });
@@ -403,8 +403,8 @@ export function NotificationSettings() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Failed to disable notifications',
-        description: error.message,
+        title: 'Unable to disable notifications',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },
@@ -447,8 +447,8 @@ export function NotificationSettings() {
         });
       } else {
         toast({
-          title: 'Test failed',
-          description: data.hint || data.finalStatus || 'No active subscriptions found.',
+          title: 'Unable to send test',
+          description: 'Please ensure notifications are enabled and try again.',
           variant: 'destructive',
         });
       }
@@ -461,8 +461,8 @@ export function NotificationSettings() {
         error: String(error),
       });
       toast({
-        title: 'Failed to send test',
-        description: error.message || 'Please try again.',
+        title: 'Unable to send test',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },
@@ -760,7 +760,7 @@ export function NotificationSettings() {
                       console.log('🔔 [Direct Test] Notification created successfully:', notification);
                     } catch (err: any) {
                       console.error('🔔 [Direct Test] Failed:', err);
-                      toast({ title: 'Failed to create notification', description: err.message, variant: 'destructive' });
+                      toast({ title: 'Unable to send notification', description: 'Please check your browser permissions and try again.', variant: 'destructive' });
                     }
                   }}
                   data-testid="button-test-direct-notification"

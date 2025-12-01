@@ -40,8 +40,8 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
     },
     onError: (error: any) => {
       toast({
-        title: 'Failed to create post',
-        description: error.message || 'Something went wrong',
+        title: 'Unable to create post',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },

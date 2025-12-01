@@ -123,8 +123,8 @@ export default function GovernancePage() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create proposal',
+        title: 'Unable to create proposal',
+        description: 'Please check your input and try again.',
         variant: 'destructive',
       });
     },
@@ -150,8 +150,8 @@ export default function GovernancePage() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Voting Failed',
-        description: error.message || 'Failed to submit vote',
+        title: 'Unable to submit vote',
+        description: 'Please try again.',
         variant: 'destructive',
       });
     },
