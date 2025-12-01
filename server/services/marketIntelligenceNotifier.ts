@@ -172,35 +172,36 @@ class MarketIntelligenceNotifier {
         return eventDate.toDateString() === today.toDateString();
       }).slice(0, 2);
 
-      let body = `${sentiment} Morning\n\n`;
+      // Build clean, scannable body
+      let body = '';
       
-      if (btc) {
-        body += `₿ BTC: $${this.formatPrice(btc.price)} (${this.formatChange(btc.percentChange24h)})\n`;
-      }
-      if (eth) {
-        body += `Ξ ETH: $${this.formatPrice(eth.price)} (${this.formatChange(eth.percentChange24h)})\n`;
+      if (btc && eth) {
+        body += `₿ $${this.formatPrice(btc.price)} ${this.formatChangeCompact(btc.percentChange24h)}  ·  Ξ $${this.formatPrice(eth.price)} ${this.formatChangeCompact(eth.percentChange24h)}\n\n`;
       }
       
-      body += `\n🏆 Top Gainer: ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}`;
-      body += `\n📉 Top Loser: ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
+      body += `🏆 ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}  ·  📉 ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
       
       if (todayEvents.length > 0) {
-        body += `\n\n📅 Today: ${todayEvents.map(e => e.title).join(', ')}`;
+        body += `\n\n📅 ${todayEvents[0].title}`;
       }
 
-      // Add top news headline
       if (topNews.length > 0) {
-        body += `\n\n📰 ${topNews[0].title.substring(0, 60)}...`;
+        body += `\n\n📰 ${topNews[0].title.substring(0, 55)}...`;
       }
+
+      // Dynamic title based on market sentiment
+      const title = sentiment === '🟢 Bullish' ? '🟢 Markets Up · Morning Brief' :
+                    sentiment === '🔴 Bearish' ? '🔴 Markets Down · Morning Brief' :
+                    '☀️ Morning Brief';
 
       await pushNotificationService.sendToAll({
-        title: '🌅 Good Morning! Your Market Briefing',
+        title,
         body,
         url: '/discover',
         tag: `morning-briefing-${new Date().toDateString()}`,
         requireInteraction: false,
         actions: [
-          { action: 'view_markets', title: '📊 Markets' },
+          { action: 'view_markets', title: '📊 View' },
           { action: 'start_trading', title: '⚡ Trade' }
         ]
       }, 'morning_briefing');
@@ -231,29 +232,34 @@ class MarketIntelligenceNotifier {
       const gainers = sorted.filter(c => c.percentChange24h > 0).slice(0, 3);
       const losers = sorted.filter(c => c.percentChange24h < 0).slice(0, 3);
 
-      let body = '🚀 TOP GAINERS\n';
-      gainers.forEach(g => {
-        body += `${g.symbol}: ${this.formatChange(g.percentChange24h)} ($${this.formatPrice(g.price)})\n`;
-      });
-
-      body += '\n📉 TOP LOSERS\n';
-      losers.forEach(l => {
-        body += `${l.symbol}: ${this.formatChange(l.percentChange24h)} ($${this.formatPrice(l.price)})\n`;
-      });
+      // Clean, scannable format with visual separators
+      let body = '';
+      
+      if (gainers.length > 0) {
+        body += `🟢 ${gainers.map(g => `${g.symbol} ${this.formatChange(g.percentChange24h)}`).join('  ·  ')}\n\n`;
+      }
+      
+      if (losers.length > 0) {
+        body += `🔴 ${losers.map(l => `${l.symbol} ${this.formatChange(l.percentChange24h)}`).join('  ·  ')}`;
+      }
 
       // Overall market direction
       const avgChange = cryptoData.reduce((sum, c) => sum + c.percentChange24h, 0) / cryptoData.length;
-      const marketEmoji = avgChange > 1 ? '🟢' : avgChange < -1 ? '🔴' : '🟡';
-      body += `\n${marketEmoji} Market avg: ${this.formatChange(avgChange)}`;
+      const marketTrend = avgChange > 1 ? '📈 Trending up' : avgChange < -1 ? '📉 Trending down' : '➡️ Sideways';
+      body += `\n\n${marketTrend} ${this.formatChange(avgChange)}`;
+
+      const title = avgChange > 2 ? '🚀 Markets Pumping' : 
+                    avgChange < -2 ? '💥 Markets Dumping' : 
+                    '📊 Market Update';
 
       await pushNotificationService.sendToAll({
-        title: '📊 Market Movers Update',
+        title,
         body,
         url: '/discover',
         tag: `market-movers-${Date.now()}`,
         requireInteraction: false,
         actions: [
-          { action: 'view_all', title: '📈 View All' },
+          { action: 'view_all', title: '📈 View' },
           { action: 'trade', title: '⚡ Trade' }
         ]
       }, 'market_movers');
@@ -301,17 +307,22 @@ class MarketIntelligenceNotifier {
         if (now - lastAlert < this.ALERT_COOLDOWN) continue;
 
         if (Math.abs(hourlyChange) >= this.PRICE_ALERT_THRESHOLD) {
-          const direction = hourlyChange > 0 ? '🚀' : '💥';
-          const moveType = hourlyChange > 0 ? 'surging' : 'plunging';
+          const isUp = hourlyChange > 0;
+          const emoji = isUp ? '🚀' : '💥';
+          const direction = isUp ? 'UP' : 'DOWN';
+          
+          // Clean, impactful format
+          const title = `${emoji} ${crypto.symbol} ${direction} ${Math.abs(hourlyChange).toFixed(1)}%`;
+          const body = `$${this.formatPrice(oldestPrice)} → $${this.formatPrice(currentPrice)} in 1hr\n\n24h: ${this.formatChangeCompact(crypto.percentChange24h)}`;
           
           await pushNotificationService.sendToAll({
-            title: `${direction} ${crypto.symbol} ${moveType.toUpperCase()}!`,
-            body: `${this.formatChange(hourlyChange)} in the last hour!\n$${this.formatPrice(oldestPrice)} → $${this.formatPrice(currentPrice)}\n\n24h: ${this.formatChange(crypto.percentChange24h)}`,
+            title,
+            body,
             url: '/discover',
             tag: `price-surge-${key}`,
             requireInteraction: true,
             actions: [
-              { action: 'trade_now', title: '⚡ Trade Now' },
+              { action: 'trade_now', title: '⚡ Trade' },
               { action: 'view_chart', title: '📊 Chart' }
             ]
           }, 'price_alert');
@@ -347,15 +358,20 @@ class MarketIntelligenceNotifier {
                            event.category === 'inflation' ? '📈' :
                            event.category === 'employment' ? '👥' : '📊';
 
+        // Concise, actionable format
+        const title = `${impactEmoji} ${event.title.substring(0, 40)}`;
+        const timeLabel = minutesUntil <= 60 ? `${minutesUntil}min` : `${Math.round(minutesUntil/60)}hr`;
+        const body = `⏰ ${timeLabel} away\n\n⚠️ High-impact · Expect volatility`;
+
         await pushNotificationService.sendToAll({
-          title: `${impactEmoji} Macro Alert: ${event.title}`,
-          body: `⏰ In ${minutesUntil} minutes\n${event.description || ''}\n\n💡 High-impact event - volatility expected`,
+          title,
+          body,
           url: '/discover',
           tag: `macro-${event.id || Date.now()}`,
           requireInteraction: true,
           actions: [
             { action: 'prepare', title: '🎯 Prepare' },
-            { action: 'dismiss', title: '✓ Got it' }
+            { action: 'dismiss', title: '✓ OK' }
           ]
         }, 'macro_alerts');
 
@@ -388,35 +404,34 @@ class MarketIntelligenceNotifier {
       const topLoser = cryptoData.reduce((min, c) => 
         (c.percentChange24h < (min?.percentChange24h || Infinity)) ? c : min, cryptoData[0]);
 
-      let body = `${marketStatus}\n\n`;
+      // Clean, compact evening summary
+      let body = '';
       
-      if (btc) {
-        body += `₿ BTC closed: $${this.formatPrice(btc.price)} (${this.formatChange(btc.percentChange24h)})\n`;
-      }
-      if (eth) {
-        body += `Ξ ETH closed: $${this.formatPrice(eth.price)} (${this.formatChange(eth.percentChange24h)})\n`;
+      if (btc && eth) {
+        body += `₿ $${this.formatPrice(btc.price)} ${this.formatChangeCompact(btc.percentChange24h)}  ·  Ξ $${this.formatPrice(eth.price)} ${this.formatChangeCompact(eth.percentChange24h)}\n\n`;
       }
       
-      body += `\n📊 Market Average: ${this.formatChange(avgChange)}`;
-      body += `\n🏆 Star of the Day: ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}`;
-      body += `\n📉 Laggard: ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
+      body += `🏆 ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}  ·  📉 ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
 
-      // Add trading metrics summary
-      if (tradingMetrics) {
-        body += `\n\n📈 TRADING METRICS`;
-        body += `\n💰 Funding: ${tradingMetrics.avgFundingRate > 0 ? '+' : ''}${(tradingMetrics.avgFundingRate * 100).toFixed(3)}%`;
-        body += `\n💥 Liquidations: $${this.formatLargeNumber(tradingMetrics.totalLiquidations)}`;
+      // Add trading metrics summary if available
+      if (tradingMetrics && tradingMetrics.totalLiquidations > 1000000) {
+        body += `\n\n💥 $${this.formatLargeNumber(tradingMetrics.totalLiquidations)} liquidated today`;
       }
+
+      // Dynamic title based on market performance
+      const title = marketStatus === '🟢 Great day!' ? '🟢 Great Day · Evening Recap' :
+                    marketStatus === '🔴 Rough day' ? '🔴 Rough Day · Evening Recap' :
+                    '🌙 Evening Recap';
 
       await pushNotificationService.sendToAll({
-        title: '🌆 Evening Market Recap',
+        title,
         body,
         url: '/discover',
         tag: `evening-recap-${new Date().toDateString()}`,
         requireInteraction: false,
         actions: [
-          { action: 'view_summary', title: '📊 Full Summary' },
-          { action: 'set_alerts', title: '⚡ Set Alerts' }
+          { action: 'view_summary', title: '📊 Details' },
+          { action: 'set_alerts', title: '🔔 Alerts' }
         ]
       }, 'evening_recap');
 
@@ -444,28 +459,25 @@ class MarketIntelligenceNotifier {
       const cryptoData = await marketDataService.getCryptoQuotes(['BTC', 'ETH']);
       const btc = cryptoData.find(c => c.symbol === 'BTC');
 
-      let body = '📅 KEY EVENTS THIS WEEK\n\n';
+      // Compact weekly preview
+      let body = '';
       
       if (weekEvents.length > 0) {
-        weekEvents.forEach(e => {
+        body += weekEvents.slice(0, 3).map(e => {
           const date = new Date(e.scheduledDate);
           const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-          body += `${dayName}: ${e.title}\n`;
-        });
+          return `${dayName}: ${e.title.substring(0, 35)}`;
+        }).join('\n');
       } else {
-        body += 'No major economic events scheduled\n';
+        body += 'No major events scheduled';
       }
 
-      body += '\n📊 CURRENT LEVELS\n';
       if (btc) {
-        body += `BTC: $${this.formatPrice(btc.price)}\n`;
-        body += `7-day: ${this.formatChange(btc.percentChange7d || 0)}\n`;
+        body += `\n\n₿ $${this.formatPrice(btc.price)} · 7d: ${this.formatChange(btc.percentChange7d || 0)}`;
       }
-
-      body += '\n💡 Stay alert for opportunities!';
 
       await pushNotificationService.sendToAll({
-        title: '📅 Your Week Ahead in Crypto',
+        title: '📅 Week Ahead',
         body,
         url: '/discover',
         tag: 'weekly-preview',
@@ -512,15 +524,19 @@ class MarketIntelligenceNotifier {
       for (const article of newArticles.slice(0, 2)) {
         const emoji = this.getNewsEmoji(article.category);
         
+        // Clean, focused news format
+        const title = `${emoji} ${article.title.substring(0, 55)}${article.title.length > 55 ? '...' : ''}`;
+        const body = article.summary.substring(0, 100) + '...';
+        
         await pushNotificationService.sendToAll({
-          title: `${emoji} CoinDesk: ${article.title.substring(0, 50)}${article.title.length > 50 ? '...' : ''}`,
-          body: `${article.summary.substring(0, 120)}...\n\n📰 Source: ${article.source} | ${article.category}`,
+          title,
+          body,
           url: article.url,
           tag: `coindesk-${article.id}`,
           requireInteraction: false,
           actions: [
-            { action: 'read_more', title: '📖 Read More' },
-            { action: 'dismiss', title: '✓ Dismiss' }
+            { action: 'read_more', title: '📖 Read' },
+            { action: 'dismiss', title: '✓ OK' }
           ]
         }, 'coindesk_news');
 
@@ -642,12 +658,18 @@ class MarketIntelligenceNotifier {
 
         const absRate = Math.abs(fundingRate);
         if (absRate >= this.FUNDING_RATE_EXTREME_THRESHOLD) {
-          const direction = fundingRate > 0 ? '🔥 LONGS PAYING' : '❄️ SHORTS PAYING';
-          const sentiment = fundingRate > 0 ? 'extremely bullish' : 'extremely bearish';
+          const isLongsPaying = fundingRate > 0;
+          const emoji = isLongsPaying ? '🔥' : '❄️';
+          const direction = isLongsPaying ? 'Longs paying' : 'Shorts paying';
+          const annualized = Math.round(absRate * 3 * 365);
+          
+          // Clean, impactful funding rate alert
+          const title = `${emoji} ${symbol} Funding ${(fundingRate * 100).toFixed(2)}%`;
+          const body = `${direction} · ${annualized}% APR\n\n⚠️ Extreme sentiment · Potential reversal`;
           
           await pushNotificationService.sendToAll({
-            title: `${direction} - ${symbol} Funding Rate Alert!`,
-            body: `Funding Rate: ${(fundingRate * 100).toFixed(3)}%\n\nMarket is ${sentiment}!\n\n⚠️ This is ~${Math.round(absRate * 3 * 365)}% annualized - potential reversal signal`,
+            title,
+            body,
             url: '/discover',
             tag: `funding-${symbol}`,
             requireInteraction: true,
@@ -689,17 +711,22 @@ class MarketIntelligenceNotifier {
         if (now - lastAlert < 30 * 60 * 1000) continue;
 
         if (totalLiquidations >= this.LIQUIDATION_SPIKE_THRESHOLD) {
-          const dominantSide = data.liquidations24h.long > data.liquidations24h.short ? 'LONGS' : 'SHORTS';
-          const emoji = dominantSide === 'LONGS' ? '🔴' : '🟢';
+          const isLongsRekt = data.liquidations24h.long > data.liquidations24h.short;
+          const emoji = isLongsRekt ? '🔴' : '🟢';
+          const rektSide = isLongsRekt ? 'Longs rekt' : 'Shorts rekt';
+          
+          // Clean, impactful liquidation alert
+          const title = `💥 ${symbol} $${this.formatLargeNumber(totalLiquidations)} Liquidated`;
+          const body = `${emoji} ${rektSide}\n\nLongs: $${this.formatLargeNumber(data.liquidations24h.long)} · Shorts: $${this.formatLargeNumber(data.liquidations24h.short)}`;
           
           await pushNotificationService.sendToAll({
-            title: `💥 ${symbol} Liquidation Cascade!`,
-            body: `$${this.formatLargeNumber(totalLiquidations)} liquidated in 24h!\n\n${emoji} ${dominantSide} getting rekt\n📊 Longs: $${this.formatLargeNumber(data.liquidations24h.long)}\n📊 Shorts: $${this.formatLargeNumber(data.liquidations24h.short)}`,
+            title,
+            body,
             url: '/discover',
             tag: `liquidation-${symbol}`,
             requireInteraction: true,
             actions: [
-              { action: 'view_heatmap', title: '🔥 Heatmap' },
+              { action: 'view_heatmap', title: '🔥 View' },
               { action: 'trade', title: '⚡ Trade' }
             ]
           }, 'liquidation_alerts');
@@ -734,15 +761,17 @@ class MarketIntelligenceNotifier {
         
         if (lastAlert) continue; // Already sent for this transaction
 
-        const direction = whale.type === 'accumulation' ? '🐋 WHALE BUYING' : 
-                         whale.type === 'distribution' ? '🐋 WHALE SELLING' : '🐋 WHALE ALERT';
+        const isBuying = whale.type === 'accumulation';
+        const emoji = isBuying ? '🟢' : whale.type === 'distribution' ? '🔴' : '🐋';
+        const action = isBuying ? 'Buying' : whale.type === 'distribution' ? 'Selling' : 'Moving';
         
-        const sentiment = whale.type === 'accumulation' ? '🟢 Bullish' : 
-                         whale.type === 'distribution' ? '🔴 Bearish' : '🟡 Neutral';
+        // Clean, impactful whale alert
+        const title = `🐋 $${this.formatLargeNumber(whale.value)} ${whale.asset || 'Crypto'} ${action}`;
+        const body = `${emoji} ${isBuying ? 'Bullish' : whale.type === 'distribution' ? 'Bearish' : 'Neutral'} signal\n\n${this.truncateAddress(whale.from)} → ${this.truncateAddress(whale.to)}`;
 
         await pushNotificationService.sendToAll({
-          title: `${direction} - $${this.formatLargeNumber(whale.value)}`,
-          body: `${whale.asset || 'Crypto'} moved!\n\n${sentiment} signal\n📍 From: ${this.truncateAddress(whale.from)}\n📍 To: ${this.truncateAddress(whale.to)}\n\n🎯 Impact: ${whale.impact?.toUpperCase() || 'SIGNIFICANT'}`,
+          title,
+          body,
           url: '/discover',
           tag: `whale-${alertKey}`,
           requireInteraction: true,
@@ -807,6 +836,12 @@ class MarketIntelligenceNotifier {
   private formatChange(change: number): string {
     const sign = change >= 0 ? '+' : '';
     return `${sign}${change.toFixed(1)}%`;
+  }
+
+  private formatChangeCompact(change: number): string {
+    const emoji = change >= 2 ? '🟢' : change <= -2 ? '🔴' : '';
+    const sign = change >= 0 ? '+' : '';
+    return `${emoji}${sign}${change.toFixed(1)}%`;
   }
 
   private formatLargeNumber(num: number): string {

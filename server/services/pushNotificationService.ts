@@ -350,19 +350,19 @@ class PushNotificationService {
     let actions: Array<{ action: string; title: string }>;
 
     if (winnings && winnings > 0) {
-      const returnText = percentReturn ? ` (+${percentReturn.toFixed(0)}% return)` : '';
-      title = winnings >= 1000 ? '🚀 Massive Win!' : '🎉 You Won!';
-      body = `+${formatNumber(winnings)} STREAM${returnText}\n"${this.truncate(marketQuestion, 50)}" resolved ${outcome.toUpperCase()}`;
+      const returnPct = percentReturn ? ` · +${percentReturn.toFixed(0)}%` : '';
+      title = winnings >= 1000 ? `🚀 +${formatNumber(winnings)} STREAM${returnPct}` : `🎉 +${formatNumber(winnings)} STREAM${returnPct}`;
+      body = `${outcome.toUpperCase()} won\n\n${this.truncate(marketQuestion, 55)}`;
       actions = [
-        { action: 'view_position', title: '💰 View Winnings' },
-        { action: 'trade_more', title: '📈 Trade More' }
+        { action: 'view_position', title: '💰 View' },
+        { action: 'trade_more', title: '📈 Trade' }
       ];
     } else {
-      title = '📊 Market Resolved';
-      body = `"${this.truncate(marketQuestion, 60)}" resolved ${outcome.toUpperCase()}`;
+      title = `📊 Resolved ${outcome.toUpperCase()}`;
+      body = this.truncate(marketQuestion, 70);
       actions = [
-        { action: 'view', title: '📊 View Result' },
-        { action: 'explore', title: '🔍 Find Markets' }
+        { action: 'view', title: '📊 View' },
+        { action: 'explore', title: '🔍 Markets' }
       ];
     }
 
@@ -396,43 +396,43 @@ class PushNotificationService {
     
     const configs = {
       assigned: {
-        title: '🎯 New Assignment!',
-        body: `You've been assigned to:\n"${this.truncate(bountyTitle, 50)}"`,
+        title: '🎯 New Assignment',
+        body: this.truncate(bountyTitle, 60),
         actions: [
-          { action: 'start_work', title: '🚀 Start Working' },
-          { action: 'view_details', title: '📋 View Details' }
+          { action: 'start_work', title: '🚀 Start' },
+          { action: 'view_details', title: '📋 Details' }
         ]
       },
       completed: {
-        title: '✅ Submission Approved!',
-        body: `Great work! Your submission for "${this.truncate(bountyTitle, 45)}" was approved${rewardAmount ? ` • +${formatNumber(rewardAmount)} STREAM incoming!` : ''}`,
+        title: rewardAmount ? `✅ Approved · +${formatNumber(rewardAmount)} STREAM` : '✅ Approved',
+        body: this.truncate(bountyTitle, 60),
         actions: [
-          { action: 'claim_reward', title: '💰 Claim Reward' },
-          { action: 'find_more', title: '🔍 Find More Bounties' }
+          { action: 'claim_reward', title: '💰 Claim' },
+          { action: 'find_more', title: '🔍 More' }
         ]
       },
       reward: {
-        title: '💰 Reward Claimed!',
-        body: `+${rewardAmount ? formatNumber(rewardAmount) : '???'} STREAM\nFrom: "${this.truncate(bountyTitle, 45)}"`,
+        title: `💰 +${rewardAmount ? formatNumber(rewardAmount) : '???'} STREAM`,
+        body: `Reward claimed\n\n${this.truncate(bountyTitle, 50)}`,
         actions: [
-          { action: 'view_balance', title: '💎 View Balance' },
-          { action: 'find_more', title: '🎯 More Bounties' }
+          { action: 'view_balance', title: '💎 Balance' },
+          { action: 'find_more', title: '🎯 More' }
         ]
       },
       new_submission: {
-        title: '📝 New Submission!',
-        body: `Someone submitted work for "${this.truncate(bountyTitle, 50)}"`,
+        title: '📝 New Submission',
+        body: this.truncate(bountyTitle, 60),
         actions: [
-          { action: 'review', title: '👀 Review Now' },
+          { action: 'review', title: '👀 Review' },
           { action: 'later', title: '⏰ Later' }
         ]
       },
       comment: {
         title: '💬 New Comment',
-        body: `Activity on "${this.truncate(bountyTitle, 55)}"`,
+        body: this.truncate(bountyTitle, 60),
         actions: [
           { action: 'view', title: '💬 View' },
-          { action: 'dismiss', title: '✓ Dismiss' }
+          { action: 'dismiss', title: '✓ OK' }
         ]
       }
     };
@@ -477,13 +477,13 @@ class PushNotificationService {
     }
 
     const payload: PushPayload = {
-      title: `${positionEmoji} Trade Executed`,
-      body: `${formatNumber(amount)} STREAM → ${positionColor}${sharesInfo}\n"${this.truncate(marketQuestion, 45)}"`,
+      title: `${positionEmoji} ${positionColor} · ${formatNumber(amount)} STREAM`,
+      body: `${shares ? formatNumber(shares) + ' shares' : ''}${priceInfo}\n\n${this.truncate(marketQuestion, 50)}`,
       url: marketId ? `/markets/${marketId}` : '/markets',
       tag: `trade-${marketId || Date.now()}`,
       actions: [
-        { action: 'view_position', title: '📊 View Position' },
-        { action: 'trade_more', title: '📈 Trade More' }
+        { action: 'view_position', title: '📊 View' },
+        { action: 'trade_more', title: '📈 Trade' }
       ],
       timestamp: Date.now(),
       data: { type: 'trade_confirmation', marketId, position, amount, shares, avgPrice }
@@ -515,15 +515,16 @@ class PushNotificationService {
       changeText = ` (${sign}${percentChange.toFixed(1)}%)`;
     }
 
+    const levelType = direction === 'above' ? 'resistance' : 'support';
     const payload: PushPayload = {
-      title: `${alertEmoji} ${asset} ${direction === 'above' ? 'Breakout!' : 'Breakdown!'}`,
-      body: `${directionEmoji} ${formatPrice(price)}${changeText}\nCrossed your ${formatPrice(threshold)} ${direction === 'above' ? 'resistance' : 'support'} level`,
+      title: `${alertEmoji} ${asset} ${direction === 'above' ? '↗️' : '↘️'} ${formatPrice(price)}`,
+      body: `Crossed ${formatPrice(threshold)} ${levelType}${changeText}`,
       url: '/discover',
       tag: `price-alert-${asset.toLowerCase()}`,
       requireInteraction: true,
       actions: [
-        { action: 'trade_now', title: '⚡ Trade Now' },
-        { action: 'view_chart', title: '📊 View Chart' }
+        { action: 'trade_now', title: '⚡ Trade' },
+        { action: 'view_chart', title: '📊 Chart' }
       ],
       timestamp: Date.now(),
       data: { type: 'price_alert', asset, price, direction, threshold, percentChange }
@@ -541,33 +542,28 @@ class PushNotificationService {
   ) {
     const configs = {
       trade: {
-        title: '🤖 AI Agent Trade',
+        title: `🤖 @${agentName} traded`,
         emoji: '📈',
-        actionText: 'executed a trade',
         url: '/markets'
       },
       bounty: {
-        title: '🤖 AI Bounty Activity',
+        title: `🤖 @${agentName} submitted`,
         emoji: '🎯',
-        actionText: 'submitted work',
         url: '/bounty-board'
       },
       comment: {
-        title: '🤖 AI Comment',
+        title: `💬 @${agentName} commented`,
         emoji: '💬',
-        actionText: 'commented',
         url: '/community'
       },
       follow: {
-        title: '🤖 New AI Follower',
+        title: `👤 @${agentName} followed you`,
         emoji: '👤',
-        actionText: 'started following you',
         url: '/profile'
       },
       market_created: {
-        title: '🤖 New AI Market',
+        title: `🎲 @${agentName} created market`,
         emoji: '🎲',
-        actionText: 'created a prediction market',
         url: '/markets'
       }
     };
@@ -576,12 +572,12 @@ class PushNotificationService {
 
     const payload: PushPayload = {
       title: config.title,
-      body: `${config.emoji} @${agentName} ${config.actionText}\n${this.truncate(details, 60)}`,
+      body: this.truncate(details, 70),
       url: relatedId ? `${config.url}/${relatedId}` : config.url,
       tag: `ai-activity-${activityType}`,
       actions: [
         { action: 'view', title: '👀 View' },
-        { action: 'dismiss', title: '✓ Got it' }
+        { action: 'dismiss', title: '✓ OK' }
       ],
       timestamp: Date.now(),
       data: { type: 'ai_agent_activity', activityType, agentName, relatedId }
@@ -614,13 +610,13 @@ class PushNotificationService {
     }
 
     const payload: PushPayload = {
-      title: '📬 Your Weekly StreamAiX Digest',
+      title: '📬 Weekly Digest',
       body,
       url: '/dashboard',
       tag: 'weekly-digest',
       requireInteraction: false,
       actions: [
-        { action: 'view_dashboard', title: '📊 Dashboard' },
+        { action: 'view_dashboard', title: '📊 View' },
         { action: 'explore_markets', title: '🎲 Explore' }
       ],
       timestamp: Date.now(),
