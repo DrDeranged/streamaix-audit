@@ -246,7 +246,7 @@ export class InstitutionalFlowService {
 
     } catch (error) {
       console.error('❌ Failed to fetch smart money movements:', error);
-      return this.generateMockSmartMoneyData();
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -290,7 +290,7 @@ export class InstitutionalFlowService {
 
     } catch (error) {
       console.error('❌ Failed to fetch institutional fund flows:', error);
-      return this.generateMockFundFlowData();
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -314,7 +314,7 @@ export class InstitutionalFlowService {
       const distributionScore = this.calculateDistributionScore(smartMoney, fundFlows);
       const exchangeFlowScore = this.calculateExchangeFlowScore(fundFlows);
       const whaleActivityScore = this.calculateWhaleActivityScore(whaleMovements);
-      const corporateAdoptionScore = 75; // Mock for now - would track corporate announcements
+      const corporateAdoptionScore = 0; // No data available without corporate announcement API
 
       // Overall sentiment calculation
       const indicators = {
@@ -343,7 +343,21 @@ export class InstitutionalFlowService {
 
     } catch (error) {
       console.error('❌ Failed to calculate institutional sentiment:', error);
-      return this.generateMockSentimentData(timeframe);
+      // Return neutral sentiment with zero confidence when no data available
+      return {
+        overall: 0,
+        confidence: 0,
+        trend: 'stable' as const,
+        indicators: {
+          accumulation_score: 0,
+          distribution_score: 0,
+          exchange_flows: 0,
+          whale_activity: 0,
+          corporate_adoption: 0
+        },
+        timeframe,
+        lastUpdated: new Date().toISOString()
+      };
     }
   }
 
@@ -391,7 +405,7 @@ export class InstitutionalFlowService {
 
     } catch (error) {
       console.error('❌ Failed to get institutional positioning:', error);
-      return this.generateMockPositioningData(assets);
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -492,13 +506,21 @@ export class InstitutionalFlowService {
   }
 
   private async getMarketContext(timestamp: string) {
-    // Mock market context - would fetch real price data
-    return {
-      preBTC: 67000,
-      postBTC: 67200,
-      priceImpact: 0.3,
-      volumeContext: 'high'
-    };
+    // Real market context - requires API data
+    try {
+      const btcData = await this.marketDataService.getCryptoQuotes(['BTC']);
+      if (btcData.length > 0) {
+        return {
+          preBTC: btcData[0].price,
+          postBTC: btcData[0].price,
+          priceImpact: 0,
+          volumeContext: btcData[0].volume24h > 30000000000 ? 'high' : 'normal'
+        };
+      }
+    } catch (error) {
+      console.error('Failed to get market context:', error);
+    }
+    return null; // No data available
   }
 
   private calculateInstitutionalScore(flow: any): number {
@@ -534,12 +556,9 @@ export class InstitutionalFlowService {
   }
 
   private analyzeMarketTiming(timestamp: string, symbol: string): 'pre_pump' | 'during_pump' | 'post_pump' | 'accumulation' | 'distribution' {
-    // Mock timing analysis - would analyze price movements
-    const random = Math.random();
-    if (random > 0.7) return 'pre_pump';
-    if (random > 0.5) return 'accumulation';
-    if (random > 0.3) return 'distribution';
-    return 'during_pump';
+    // Without historical price data, we cannot determine market timing
+    // Return 'accumulation' as neutral default
+    return 'accumulation';
   }
 
   private calculateAccumulationScore(smartMoney: SmartMoneyTransaction[], fundFlows: FundFlow[]): number {
@@ -571,17 +590,13 @@ export class InstitutionalFlowService {
   }
 
   private async getAssetFlows(asset: string, timeframe: string): Promise<FundFlow[]> {
-    // Mock asset flows - would implement real data fetching
-    return this.generateMockFundFlowData().filter(flow => flow.asset === asset);
+    // Return empty array - no real data source available without premium API
+    return [];
   }
 
   private async getLargestHolders(asset: string) {
-    // Mock largest holders - would fetch from blockchain
-    return [
-      { address: '0x123...', name: 'Binance', holdings: 150000, percentage: 12.5, change24h: 2.3 },
-      { address: '0x456...', name: 'Coinbase', holdings: 120000, percentage: 10.0, change24h: -1.8 },
-      { address: '0x789...', name: 'Grayscale', holdings: 80000, percentage: 6.7, change24h: 0.5 }
-    ];
+    // Return empty array - requires premium blockchain analytics API (Glassnode, Nansen)
+    return [];
   }
 
   private calculateConcentration(holders: any[]): number {
@@ -589,92 +604,11 @@ export class InstitutionalFlowService {
     return Math.min(100, totalPercentage);
   }
 
-  // Modeled data generators - clearly labeled as estimates based on market patterns
-  // These provide directional signals based on historical patterns, not real-time transactions
-  private generateMockSmartMoneyData(): SmartMoneyTransaction[] {
-    const assets = ['BTC', 'ETH', 'USDT', 'USDC'];
-    const types: ('accumulation' | 'distribution' | 'transfer' | 'arbitrage')[] = ['accumulation', 'distribution', 'transfer', 'arbitrage'];
-    const impacts: ('low' | 'medium' | 'high' | 'critical')[] = ['low', 'medium', 'high', 'critical'];
-    
-    return Array.from({ length: 8 }, (_, i) => ({
-      hash: `modeled_${Math.random().toString(16).substr(2, 16)}`,
-      from: `wallet_${Math.random().toString(16).substr(2, 8)}`,
-      to: `wallet_${Math.random().toString(16).substr(2, 8)}`,
-      value: Math.random() * 50000000 + 1000000,
-      asset: assets[Math.floor(Math.random() * assets.length)],
-      timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-      type: types[Math.floor(Math.random() * types.length)],
-      confidence: Math.floor(Math.random() * 40) + 60,
-      impact: impacts[Math.floor(Math.random() * impacts.length)],
-      fromType: Math.random() > 0.5 ? 'exchange' : 'unknown',
-      toType: Math.random() > 0.5 ? 'fund' : 'unknown',
-      strategy: 'Pattern-based estimate'
-    }));
-  }
-
-  // Fund flow estimates based on exchange reserve patterns
-  private generateMockFundFlowData(): FundFlow[] {
-    const exchanges = ['Binance', 'Coinbase', 'Kraken', 'OKX', 'Bitfinex'];
-    const assets = ['BTC', 'ETH', 'USDT', 'USDC'];
-    const flowTypes: ('inflow' | 'outflow' | 'internal_transfer')[] = ['inflow', 'outflow', 'internal_transfer'];
-    
-    return Array.from({ length: 6 }, (_, i) => ({
-      id: `estimate_${Date.now()}_${i}`,
-      sourceExchange: exchanges[Math.floor(Math.random() * exchanges.length)],
-      destinationExchange: exchanges[Math.floor(Math.random() * exchanges.length)],
-      asset: assets[Math.floor(Math.random() * assets.length)],
-      amount: Math.random() * 10000 + 100,
-      value: Math.random() * 20000000 + 1000000,
-      timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-      flowType: flowTypes[Math.floor(Math.random() * flowTypes.length)],
-      institutionalScore: Math.floor(Math.random() * 50) + 50,
-      significance: 'major' as const,
-      marketTiming: 'accumulation' as const
-    }));
-  }
-
-  // Sentiment model based on market indicators (not real-time institutional data)
-  private generateMockSentimentData(timeframe: '1d' | '7d' | '30d'): InstitutionalSentiment {
-    const overall = (Math.random() - 0.5) * 1.6; // -0.8 to 0.8
-    return {
-      overall,
-      confidence: Math.floor(Math.random() * 30) + 70,
-      trend: overall > 0.3 ? 'increasingly_bullish' : overall < -0.3 ? 'increasingly_bearish' : 'stable',
-      indicators: {
-        accumulation_score: Math.floor(Math.random() * 40) + 60,
-        distribution_score: Math.floor(Math.random() * 40) + 30,
-        exchange_flows: Math.floor(Math.random() * 30) + 70,
-        whale_activity: Math.floor(Math.random() * 40) + 50,
-        corporate_adoption: Math.floor(Math.random() * 20) + 75
-      },
-      timeframe,
-      lastUpdated: new Date().toISOString()
-    };
-  }
-
-  // Positioning estimates based on market analysis models
-  private generateMockPositioningData(assets: string[]): InstitutionalPositioning[] {
-    return assets.map(asset => ({
-      asset,
-      netFlow: (Math.random() - 0.5) * 100000000,
-      flow24h: Math.random() * 50000000 + 10000000,
-      flow7d: Math.random() * 200000000 + 50000000,
-      flow30d: Math.random() * 800000000 + 200000000,
-      largestHolders: [
-        { address: 'Known Exchange', name: 'Binance (est.)', holdings: 150000, percentage: 12.5, change24h: 2.3 },
-        { address: 'Known Exchange', name: 'Coinbase (est.)', holdings: 120000, percentage: 10.0, change24h: -1.8 }
-      ],
-      concentration: Math.floor(Math.random() * 40) + 40,
-      sentiment: Math.random() > 0.5 ? 'accumulating' as const : 'distributing' as const,
-      strength: Math.floor(Math.random() * 60) + 40
-    }));
-  }
-
   // Get data source indicator for transparency
-  getDataSourceInfo(): { type: 'modeled' | 'real-time'; disclaimer: string } {
+  getDataSourceInfo(): { type: 'real-time' | 'unavailable'; disclaimer: string } {
     return {
-      type: 'modeled',
-      disclaimer: 'Institutional flow data is estimated based on market patterns and historical analysis. For real-time on-chain data, integration with premium blockchain analytics APIs (Glassnode, Nansen) is required.'
+      type: 'unavailable',
+      disclaimer: 'Real-time institutional flow tracking requires premium blockchain analytics APIs (Glassnode, Nansen, Arkham). Contact us to enable this feature.'
     };
   }
 }
