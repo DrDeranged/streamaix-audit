@@ -835,6 +835,15 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   macroAlerts: boolean("macro_alerts").default(true),
   breakingNews: boolean("breaking_news").default(true),
   
+  // CoinDesk & News notifications
+  coindeskNews: boolean("coindesk_news").default(true),
+  
+  // Trading Metrics notifications
+  tradingMetrics: boolean("trading_metrics").default(true),
+  whaleAlerts: boolean("whale_alerts").default(true),
+  liquidationAlerts: boolean("liquidation_alerts").default(true),
+  fundingRateAlerts: boolean("funding_rate_alerts").default(true),
+  
   // Metadata
   deviceInfo: text("device_info"), // Browser/device info
   isActive: boolean("is_active").default(true),

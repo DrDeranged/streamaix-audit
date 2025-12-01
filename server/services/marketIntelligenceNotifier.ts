@@ -1,6 +1,9 @@
 import cron from 'node-cron';
 import { pushNotificationService } from './pushNotificationService';
 import { marketDataService } from './marketDataService';
+import { newsService } from './newsService';
+import { derivativesAnalyticsService } from './derivativesAnalyticsService';
+import { institutionalFlowService } from './institutionalFlowService';
 import { db } from '../db';
 import { pushSubscriptions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -19,15 +22,40 @@ interface MarketMover {
   volume24h: number;
 }
 
+interface SentNewsArticle {
+  id: string;
+  sentAt: number;
+}
+
+interface TradingMetricSnapshot {
+  symbol: string;
+  fundingRate: number;
+  openInterest: number;
+  liquidations24h: number;
+  timestamp: number;
+}
+
 class MarketIntelligenceNotifier {
   private isStarted = false;
   private priceSnapshots: Map<string, PriceSnapshot[]> = new Map();
   private lastPriceAlerts: Map<string, number> = new Map();
+  private sentNewsArticles: SentNewsArticle[] = [];
+  private tradingMetricSnapshots: Map<string, TradingMetricSnapshot[]> = new Map();
+  private lastFundingRateAlerts: Map<string, number> = new Map();
+  private lastLiquidationAlerts: Map<string, number> = new Map();
+  private lastWhaleAlerts: Map<string, number> = new Map();
   
   private readonly TRACKED_CRYPTO = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
   private readonly TRACKED_STOCKS = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'TSLA'];
   private readonly PRICE_ALERT_THRESHOLD = 3; // 3% in 1 hour
   private readonly ALERT_COOLDOWN = 30 * 60 * 1000; // 30 min cooldown per asset
+  private readonly NEWS_ARTICLE_RETENTION = 24 * 60 * 60 * 1000; // 24 hours
+  
+  // Trading metric thresholds
+  private readonly FUNDING_RATE_EXTREME_THRESHOLD = 0.05; // 0.05% per 8h (annualized ~18%)
+  private readonly FUNDING_RATE_HIGH_THRESHOLD = 0.03; // 0.03% per 8h
+  private readonly LIQUIDATION_SPIKE_THRESHOLD = 50_000_000; // $50M in liquidations
+  private readonly WHALE_ALERT_THRESHOLD = 10_000_000; // $10M whale movement
 
   start(): void {
     if (this.isStarted) {
@@ -70,9 +98,29 @@ class MarketIntelligenceNotifier {
       await this.sendWeeklyPreview();
     }, { timezone: "America/New_York" });
 
-    // Breaking News Check - Every 30 minutes
+    // CoinDesk Breaking News - Every 15 minutes
+    cron.schedule('*/15 * * * *', async () => {
+      await this.checkCoinDeskNews();
+    }, { timezone: "America/New_York" });
+
+    // Trading Metrics Monitor - Every 10 minutes
+    cron.schedule('*/10 * * * *', async () => {
+      await this.checkTradingMetrics();
+    }, { timezone: "America/New_York" });
+
+    // Whale Alert Monitor - Every 5 minutes
+    cron.schedule('*/5 * * * *', async () => {
+      await this.checkWhaleAlerts();
+    }, { timezone: "America/New_York" });
+
+    // Liquidation Alert Monitor - Every 5 minutes
+    cron.schedule('*/5 * * * *', async () => {
+      await this.checkLiquidationAlerts();
+    }, { timezone: "America/New_York" });
+
+    // Funding Rate Monitor - Every 30 minutes
     cron.schedule('*/30 * * * *', async () => {
-      await this.checkBreakingNews();
+      await this.checkFundingRateAlerts();
     }, { timezone: "America/New_York" });
 
     this.isStarted = true;
@@ -83,6 +131,11 @@ class MarketIntelligenceNotifier {
     console.log('   🏛️ Macro Alerts: Every 2 hours');
     console.log('   🌆 Evening Recap: 6pm EST (Mon-Fri)');
     console.log('   📅 Weekly Preview: Sunday 7pm EST');
+    console.log('   📰 CoinDesk News: Every 15 min');
+    console.log('   📈 Trading Metrics: Every 10 min');
+    console.log('   🐋 Whale Alerts: Every 5 min');
+    console.log('   💥 Liquidation Alerts: Every 5 min');
+    console.log('   💰 Funding Rate Alerts: Every 30 min');
   }
 
   stop(): void {
@@ -92,10 +145,11 @@ class MarketIntelligenceNotifier {
 
   async sendMorningBriefing(): Promise<void> {
     try {
-      const [cryptoData, stockData, economicEvents] = await Promise.all([
+      const [cryptoData, stockData, economicEvents, topNews] = await Promise.all([
         marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO),
         marketDataService.getCryptoStocks(),
-        marketDataService.getEconomicCalendar({ timeRange: '1d', impact: ['high'] })
+        marketDataService.getEconomicCalendar({ timeRange: '1d', impact: ['high'] }),
+        newsService.getCryptoNews(3)
       ]);
 
       // Find biggest movers
@@ -132,6 +186,11 @@ class MarketIntelligenceNotifier {
       
       if (todayEvents.length > 0) {
         body += `\n\n📅 Today: ${todayEvents.map(e => e.title).join(', ')}`;
+      }
+
+      // Add top news headline
+      if (topNews.length > 0) {
+        body += `\n\n📰 ${topNews[0].title.substring(0, 60)}...`;
       }
 
       await pushNotificationService.sendToAll({
@@ -309,7 +368,10 @@ class MarketIntelligenceNotifier {
 
   async sendEveningRecap(): Promise<void> {
     try {
-      const cryptoData = await marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO);
+      const [cryptoData, tradingMetrics] = await Promise.all([
+        marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO),
+        this.getTradingMetricsSummary()
+      ]);
       
       const btc = cryptoData.find(c => c.symbol === 'BTC');
       const eth = cryptoData.find(c => c.symbol === 'ETH');
@@ -338,6 +400,13 @@ class MarketIntelligenceNotifier {
       body += `\n📊 Market Average: ${this.formatChange(avgChange)}`;
       body += `\n🏆 Star of the Day: ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}`;
       body += `\n📉 Laggard: ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
+
+      // Add trading metrics summary
+      if (tradingMetrics) {
+        body += `\n\n📈 TRADING METRICS`;
+        body += `\n💰 Funding: ${tradingMetrics.avgFundingRate > 0 ? '+' : ''}${(tradingMetrics.avgFundingRate * 100).toFixed(3)}%`;
+        body += `\n💥 Liquidations: $${this.formatLargeNumber(tradingMetrics.totalLiquidations)}`;
+      }
 
       await pushNotificationService.sendToAll({
         title: '🌆 Evening Market Recap',
@@ -413,9 +482,303 @@ class MarketIntelligenceNotifier {
     }
   }
 
-  async checkBreakingNews(): Promise<void> {
-    // This could be expanded to check RSS feeds or news APIs
-    // For now, we'll rely on the price alerts for breaking moves
+  // ============================================================================
+  // COINDESK NEWS ALERTS
+  // ============================================================================
+
+  async checkCoinDeskNews(): Promise<void> {
+    try {
+      const articles = await newsService.fetchCoinDeskNews();
+      const now = Date.now();
+      
+      // Clean up old sent articles (older than 24 hours)
+      this.sentNewsArticles = this.sentNewsArticles.filter(
+        a => now - a.sentAt < this.NEWS_ARTICLE_RETENTION
+      );
+
+      // Find new breaking stories (published within last 30 minutes)
+      const thirtyMinutesAgo = now - 30 * 60 * 1000;
+      const newArticles = articles.filter(article => {
+        const pubDate = new Date(article.published).getTime();
+        const isRecent = pubDate > thirtyMinutesAgo;
+        const notSent = !this.sentNewsArticles.some(sent => sent.id === article.id);
+        const isImportant = this.isImportantNews(article.title, article.summary);
+        return isRecent && notSent && isImportant;
+      });
+
+      if (newArticles.length === 0) return;
+
+      // Send top 2 most important stories
+      for (const article of newArticles.slice(0, 2)) {
+        const emoji = this.getNewsEmoji(article.category);
+        
+        await pushNotificationService.sendToAll({
+          title: `${emoji} CoinDesk: ${article.title.substring(0, 50)}${article.title.length > 50 ? '...' : ''}`,
+          body: `${article.summary.substring(0, 120)}...\n\n📰 Source: ${article.source} | ${article.category}`,
+          url: article.url,
+          tag: `coindesk-${article.id}`,
+          requireInteraction: false,
+          actions: [
+            { action: 'read_more', title: '📖 Read More' },
+            { action: 'dismiss', title: '✓ Dismiss' }
+          ]
+        }, 'coindesk_news');
+
+        this.sentNewsArticles.push({ id: article.id, sentAt: now });
+        console.log(`📰 CoinDesk alert sent: ${article.title.substring(0, 40)}...`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check CoinDesk news:', error);
+    }
+  }
+
+  private isImportantNews(title: string, summary: string): boolean {
+    const text = `${title} ${summary}`.toLowerCase();
+    const importantKeywords = [
+      'breaking', 'just in', 'urgent', 'alert', 'sec', 'etf', 'approve',
+      'bitcoin', 'btc', 'ethereum', 'eth', 'solana', 'regulation', 'ban',
+      'hack', 'exploit', 'crash', 'surge', 'rally', 'all-time high', 'ath',
+      'federal reserve', 'fed', 'interest rate', 'inflation', 'elon musk',
+      'blackrock', 'grayscale', 'coinbase', 'binance', 'ftx', 'bankruptcy',
+      'lawsuit', 'investigation', 'billion', 'million', 'whale', 'dump',
+      'pump', 'trump', 'election', 'government', 'treasury', 'bank'
+    ];
+
+    return importantKeywords.some(keyword => text.includes(keyword));
+  }
+
+  private getNewsEmoji(category: string): string {
+    const emojiMap: Record<string, string> = {
+      'Bitcoin': '₿',
+      'Ethereum': 'Ξ',
+      'DeFi': '🔗',
+      'Regulation': '⚖️',
+      'Markets': '📈',
+      'Technology': '🔧',
+      'Business': '💼',
+      'NFT & Metaverse': '🎨',
+      'General': '📰'
+    };
+    return emojiMap[category] || '📰';
+  }
+
+  // ============================================================================
+  // TRADING METRICS ALERTS
+  // ============================================================================
+
+  async checkTradingMetrics(): Promise<void> {
+    try {
+      // Get derivatives data for major assets
+      const [btcPositioning, ethPositioning] = await Promise.all([
+        derivativesAnalyticsService.getFuturesPositioning('BTC'),
+        derivativesAnalyticsService.getFuturesPositioning('ETH')
+      ]);
+
+      const now = Date.now();
+      const metrics: TradingMetricSnapshot[] = [];
+
+      if (btcPositioning) {
+        metrics.push({
+          symbol: 'BTC',
+          fundingRate: btcPositioning.fundingRateHistory[0]?.rate || 0,
+          openInterest: btcPositioning.totalLongOI + btcPositioning.totalShortOI,
+          liquidations24h: 0, // Will be filled from liquidation data
+          timestamp: now
+        });
+      }
+
+      if (ethPositioning) {
+        metrics.push({
+          symbol: 'ETH',
+          fundingRate: ethPositioning.fundingRateHistory[0]?.rate || 0,
+          openInterest: ethPositioning.totalLongOI + ethPositioning.totalShortOI,
+          liquidations24h: 0,
+          timestamp: now
+        });
+      }
+
+      // Store snapshots for trend analysis
+      for (const metric of metrics) {
+        if (!this.tradingMetricSnapshots.has(metric.symbol)) {
+          this.tradingMetricSnapshots.set(metric.symbol, []);
+        }
+        const snapshots = this.tradingMetricSnapshots.get(metric.symbol)!;
+        snapshots.push(metric);
+
+        // Keep only last 24 hours of snapshots
+        const oneDayAgo = now - 24 * 60 * 60 * 1000;
+        this.tradingMetricSnapshots.set(
+          metric.symbol,
+          snapshots.filter(s => s.timestamp > oneDayAgo)
+        );
+      }
+
+    } catch (error) {
+      console.error('❌ Failed to check trading metrics:', error);
+    }
+  }
+
+  async checkFundingRateAlerts(): Promise<void> {
+    try {
+      const [btcPositioning, ethPositioning] = await Promise.all([
+        derivativesAnalyticsService.getFuturesPositioning('BTC'),
+        derivativesAnalyticsService.getFuturesPositioning('ETH')
+      ]);
+
+      const now = Date.now();
+      const positions = [
+        { symbol: 'BTC', data: btcPositioning },
+        { symbol: 'ETH', data: ethPositioning }
+      ];
+
+      for (const { symbol, data } of positions) {
+        if (!data || data.fundingRateHistory.length === 0) continue;
+
+        const fundingRate = data.fundingRateHistory[0].rate;
+        const lastAlert = this.lastFundingRateAlerts.get(symbol) || 0;
+        
+        // Check cooldown (1 hour for funding rate alerts)
+        if (now - lastAlert < 60 * 60 * 1000) continue;
+
+        const absRate = Math.abs(fundingRate);
+        if (absRate >= this.FUNDING_RATE_EXTREME_THRESHOLD) {
+          const direction = fundingRate > 0 ? '🔥 LONGS PAYING' : '❄️ SHORTS PAYING';
+          const sentiment = fundingRate > 0 ? 'extremely bullish' : 'extremely bearish';
+          
+          await pushNotificationService.sendToAll({
+            title: `${direction} - ${symbol} Funding Rate Alert!`,
+            body: `Funding Rate: ${(fundingRate * 100).toFixed(3)}%\n\nMarket is ${sentiment}!\n\n⚠️ This is ~${Math.round(absRate * 3 * 365)}% annualized - potential reversal signal`,
+            url: '/discover',
+            tag: `funding-${symbol}`,
+            requireInteraction: true,
+            actions: [
+              { action: 'view_details', title: '📊 Details' },
+              { action: 'trade', title: '⚡ Trade' }
+            ]
+          }, 'funding_rate_alerts');
+
+          this.lastFundingRateAlerts.set(symbol, now);
+          console.log(`💰 Funding rate alert sent for ${symbol}: ${(fundingRate * 100).toFixed(3)}%`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to check funding rate alerts:', error);
+    }
+  }
+
+  async checkLiquidationAlerts(): Promise<void> {
+    try {
+      const [btcLiquidations, ethLiquidations] = await Promise.all([
+        derivativesAnalyticsService.getLiquidationData('BTC'),
+        derivativesAnalyticsService.getLiquidationData('ETH')
+      ]);
+
+      const now = Date.now();
+      const liquidationData = [
+        { symbol: 'BTC', data: btcLiquidations },
+        { symbol: 'ETH', data: ethLiquidations }
+      ];
+
+      for (const { symbol, data } of liquidationData) {
+        if (!data) continue;
+
+        const totalLiquidations = data.liquidations24h.totalNotional;
+        const lastAlert = this.lastLiquidationAlerts.get(symbol) || 0;
+        
+        // Check cooldown (30 minutes for liquidation alerts)
+        if (now - lastAlert < 30 * 60 * 1000) continue;
+
+        if (totalLiquidations >= this.LIQUIDATION_SPIKE_THRESHOLD) {
+          const dominantSide = data.liquidations24h.long > data.liquidations24h.short ? 'LONGS' : 'SHORTS';
+          const emoji = dominantSide === 'LONGS' ? '🔴' : '🟢';
+          
+          await pushNotificationService.sendToAll({
+            title: `💥 ${symbol} Liquidation Cascade!`,
+            body: `$${this.formatLargeNumber(totalLiquidations)} liquidated in 24h!\n\n${emoji} ${dominantSide} getting rekt\n📊 Longs: $${this.formatLargeNumber(data.liquidations24h.long)}\n📊 Shorts: $${this.formatLargeNumber(data.liquidations24h.short)}`,
+            url: '/discover',
+            tag: `liquidation-${symbol}`,
+            requireInteraction: true,
+            actions: [
+              { action: 'view_heatmap', title: '🔥 Heatmap' },
+              { action: 'trade', title: '⚡ Trade' }
+            ]
+          }, 'liquidation_alerts');
+
+          this.lastLiquidationAlerts.set(symbol, now);
+          console.log(`💥 Liquidation alert sent for ${symbol}: $${this.formatLargeNumber(totalLiquidations)}`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to check liquidation alerts:', error);
+    }
+  }
+
+  async checkWhaleAlerts(): Promise<void> {
+    try {
+      // Get smart money movements which include whale activity
+      const whaleActivity = await institutionalFlowService.getSmartMoneyMovements(['BTC', 'ETH', 'SOL'], this.WHALE_ALERT_THRESHOLD);
+      const now = Date.now();
+
+      if (!whaleActivity || whaleActivity.length === 0) return;
+
+      // Find significant whale movements in last 10 minutes
+      const tenMinutesAgo = now - 10 * 60 * 1000;
+      const recentWhaleMovements = whaleActivity.filter((w: any) => {
+        const txTime = new Date(w.timestamp).getTime();
+        return txTime > tenMinutesAgo && w.value >= this.WHALE_ALERT_THRESHOLD;
+      });
+
+      for (const whale of recentWhaleMovements.slice(0, 2)) {
+        const alertKey = whale.hash || `${whale.from}-${whale.timestamp}`;
+        const lastAlert = this.lastWhaleAlerts.get(alertKey);
+        
+        if (lastAlert) continue; // Already sent for this transaction
+
+        const direction = whale.type === 'accumulation' ? '🐋 WHALE BUYING' : 
+                         whale.type === 'distribution' ? '🐋 WHALE SELLING' : '🐋 WHALE ALERT';
+        
+        const sentiment = whale.type === 'accumulation' ? '🟢 Bullish' : 
+                         whale.type === 'distribution' ? '🔴 Bearish' : '🟡 Neutral';
+
+        await pushNotificationService.sendToAll({
+          title: `${direction} - $${this.formatLargeNumber(whale.value)}`,
+          body: `${whale.asset || 'Crypto'} moved!\n\n${sentiment} signal\n📍 From: ${this.truncateAddress(whale.from)}\n📍 To: ${this.truncateAddress(whale.to)}\n\n🎯 Impact: ${whale.impact?.toUpperCase() || 'SIGNIFICANT'}`,
+          url: '/discover',
+          tag: `whale-${alertKey}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'track', title: '👁️ Track' },
+            { action: 'trade', title: '⚡ Trade' }
+          ]
+        }, 'whale_alerts');
+
+        this.lastWhaleAlerts.set(alertKey, now);
+        console.log(`🐋 Whale alert sent: $${this.formatLargeNumber(whale.value)} ${whale.type}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check whale alerts:', error);
+    }
+  }
+
+  // ============================================================================
+  // HELPER METHODS
+  // ============================================================================
+
+  private async getTradingMetricsSummary(): Promise<{ avgFundingRate: number; totalLiquidations: number } | null> {
+    try {
+      const [btcPositioning, btcLiquidations] = await Promise.all([
+        derivativesAnalyticsService.getFuturesPositioning('BTC'),
+        derivativesAnalyticsService.getLiquidationData('BTC')
+      ]);
+
+      return {
+        avgFundingRate: btcPositioning?.fundingRateHistory[0]?.rate || 0,
+        totalLiquidations: btcLiquidations?.liquidations24h.totalNotional || 0
+      };
+    } catch (error) {
+      console.error('❌ Failed to get trading metrics summary:', error);
+      return null;
+    }
   }
 
   async sendManualAlert(title: string, body: string, url?: string): Promise<void> {
@@ -446,11 +809,31 @@ class MarketIntelligenceNotifier {
     return `${sign}${change.toFixed(1)}%`;
   }
 
-  getStatus(): { isRunning: boolean; trackedAssets: number; priceSnapshots: number } {
+  private formatLargeNumber(num: number): string {
+    if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)}B`;
+    if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+    if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+    return num.toFixed(0);
+  }
+
+  private truncateAddress(address: string): string {
+    if (!address || address.length < 10) return address || 'Unknown';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }
+
+  getStatus(): { 
+    isRunning: boolean; 
+    trackedAssets: number; 
+    priceSnapshots: number;
+    sentNewsCount: number;
+    tradingMetricSnapshots: number;
+  } {
     return {
       isRunning: this.isStarted,
       trackedAssets: this.TRACKED_CRYPTO.length + this.TRACKED_STOCKS.length,
-      priceSnapshots: Array.from(this.priceSnapshots.values()).reduce((sum, arr) => sum + arr.length, 0)
+      priceSnapshots: Array.from(this.priceSnapshots.values()).reduce((sum, arr) => sum + arr.length, 0),
+      sentNewsCount: this.sentNewsArticles.length,
+      tradingMetricSnapshots: Array.from(this.tradingMetricSnapshots.values()).reduce((sum, arr) => sum + arr.length, 0)
     };
   }
 }
