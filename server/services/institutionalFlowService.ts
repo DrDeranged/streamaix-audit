@@ -225,10 +225,10 @@ export class InstitutionalFlowService {
             type: this.determineTransactionType(whale),
             confidence,
             impact: this.determineImpact(whale.valueUsd),
-            fromType: this.getWalletType(whale.from),
-            toType: this.getWalletType(whale.to),
+            fromType: this.getWalletType(whale.from) || undefined,
+            toType: this.getWalletType(whale.to) || undefined,
             strategy: this.identifyStrategy(whale),
-            marketContext
+            marketContext: marketContext || undefined
           });
         }
       }
@@ -265,21 +265,22 @@ export class InstitutionalFlowService {
 
       // Analyze flows for institutional patterns
       for (const flow of exchangeFlows || []) {
-        const institutionalScore = this.calculateInstitutionalScore(flow);
+        const flowData = flow as any; // Type assertion for dynamic Dune data
+        const institutionalScore = this.calculateInstitutionalScore(flowData);
         
         if (institutionalScore > 50) { // Only include likely institutional flows
           fundFlows.push({
             id: `flow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            sourceExchange: flow.from_exchange || 'Unknown',
-            destinationExchange: flow.to_exchange || 'Unknown',
-            asset: flow.symbol,
-            amount: flow.amount,
-            value: flow.value_usd,
-            timestamp: flow.timestamp,
-            flowType: this.determineFlowType(flow),
+            sourceExchange: flowData.from_exchange || flowData.source || 'Unknown',
+            destinationExchange: flowData.to_exchange || flowData.destination || 'Unknown',
+            asset: flowData.symbol || flowData.token || 'ETH',
+            amount: flowData.amount || 0,
+            value: flowData.value_usd || flowData.value || 0,
+            timestamp: flowData.timestamp || new Date().toISOString(),
+            flowType: this.determineFlowType(flowData),
             institutionalScore,
-            significance: this.determineSignificance(flow.value_usd),
-            marketTiming: this.analyzeMarketTiming(flow.timestamp, flow.symbol)
+            significance: this.determineSignificance(flowData.value_usd || flowData.value || 0),
+            marketTiming: this.analyzeMarketTiming(flowData.timestamp || '', flowData.symbol || 'ETH')
           });
         }
       }
@@ -303,9 +304,12 @@ export class InstitutionalFlowService {
     if (cached) return cached;
 
     try {
+      // Convert timeframe for fund flows API (only supports 1h, 24h, 7d)
+      const fundFlowTimeframe: '1h' | '24h' | '7d' = timeframe === '1d' ? '24h' : timeframe === '30d' ? '7d' : timeframe;
+      
       const [smartMoney, fundFlows, whaleMovements] = await Promise.all([
         this.getSmartMoneyMovements(),
-        this.getInstitutionalFundFlows(timeframe === '1d' ? '24h' : timeframe),
+        this.getInstitutionalFundFlows(fundFlowTimeframe),
         onChainAnalyticsService.getRealTimeWhaleMovements(500)
       ]);
 

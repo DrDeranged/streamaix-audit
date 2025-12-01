@@ -499,33 +499,9 @@ export class MarketDataService {
         return stats;
       }
 
-      // Fallback data when no API keys available
-      const fallbackStats = {
-        updatedAt: new Date().toISOString(),
-        baseFiat: 'USD',
-        globalMarketCap: 2100000000000, // $2.1T
-        totalVolume24h: 127000000000, // $127B
-        btcDominance: 42.1,
-        ethDominance: 18.7,
-        activeProjects: 12847,
-        trending: ['BTC', 'ETH', 'BASE', 'SOL'],
-        defiTvl: '$47.2B',
-        totals: {
-          globalMarketCap: 2100000000000,
-          btcDominance: 42.1,
-          ethDominance: 18.7
-        },
-        assets: [
-          { symbol: 'BTC', price: 64500, change24h: 2.1, marketCap: 1270000000000, volume24h: 28000000000, dominance: 42.1 },
-          { symbol: 'ETH', price: 2450, change24h: -0.8, marketCap: 295000000000, volume24h: 15000000000, dominance: 18.7 },
-          { symbol: 'BASE', price: 1.2, change24h: 5.3, marketCap: 12000000000, volume24h: 850000000, dominance: 0.8 },
-          { symbol: 'SOL', price: 145, change24h: 3.2, marketCap: 67000000000, volume24h: 2800000000, dominance: 3.2 }
-        ]
-      };
-
-      this.cache.set(cacheKey, { data: fallbackStats, timestamp: Date.now(), customTimeout: 60000 });
-      console.log('⚠️ Using fallback crypto stats (no API keys)');
-      return fallbackStats;
+      // No mock data - throw error to indicate data unavailable
+      console.log('⚠️ No real crypto stats available - API keys required');
+      throw new Error('Crypto stats unavailable - no API keys configured');
 
     } catch (error: any) {
       console.error('❌ Failed to fetch crypto stats:', error);
@@ -563,15 +539,8 @@ export class MarketDataService {
 
     } catch (error: any) {
       console.error('❌ Failed to fetch global crypto data:', error.response?.data || error.message);
-      // Return fallback data
-      return {
-        totalMarketCap: 2100000000000,
-        totalVolume24h: 127000000000,
-        btcDominance: 42.1,
-        ethDominance: 18.7,
-        activeCryptocurrencies: 12847,
-        lastUpdated: new Date().toISOString()
-      };
+      // Throw error - no mock data
+      throw new Error('Failed to fetch real crypto global data');
     }
   }
 
@@ -1327,30 +1296,8 @@ export class MarketDataService {
       // Fetch crypto-related stock prices (using Finnhub)
       const stockPrices: StockQuote[] = [];
 
-      // Get recent news (placeholder - can be enhanced with real news API)
-      const recentNews = [
-        {
-          title: 'Bitcoin ETF inflows hit record high',
-          source: 'Bloomberg',
-          sentiment: 'positive',
-          relevance: 0.9,
-          timestamp: new Date()
-        },
-        {
-          title: 'Ethereum network upgrade scheduled',
-          source: 'CoinDesk',
-          sentiment: 'positive',
-          relevance: 0.8,
-          timestamp: new Date()
-        },
-        {
-          title: 'Market volatility expected ahead of Fed meeting',
-          source: 'Reuters',
-          sentiment: 'neutral',
-          relevance: 0.7,
-          timestamp: new Date()
-        }
-      ];
+      // No mock news - return empty array (real news requires newsService)
+      const recentNews: any[] = [];
 
       // Calculate market sentiment
       const marketSentiment = this.calculateSentiment(cryptoPrices, stockPrices, recentNews);
