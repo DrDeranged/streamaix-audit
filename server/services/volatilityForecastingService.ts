@@ -639,7 +639,7 @@ export class VolatilityForecastingService {
 
     } catch (error) {
       console.error('❌ Failed to calculate stress indicators:', error);
-      return this.getMockStressIndicators();
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -676,7 +676,7 @@ export class VolatilityForecastingService {
 
     } catch (error) {
       console.error('❌ Failed to analyze risk regime:', error);
-      return this.getMockRiskRegime();
+      throw new Error('Risk regime analysis unavailable - API failed');
     }
   }
 
@@ -714,7 +714,7 @@ export class VolatilityForecastingService {
 
     } catch (error) {
       console.error('❌ Failed to detect crisis indicators:', error);
-      return this.getMockCrisisIndicators();
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -824,7 +824,7 @@ export class VolatilityForecastingService {
 
     } catch (error) {
       console.error(`❌ Failed to calculate tail risk metrics for ${symbol}:`, error);
-      return this.getMockTailRiskMetrics(symbol);
+      return []; // Return empty array - no mock data
     }
   }
 
