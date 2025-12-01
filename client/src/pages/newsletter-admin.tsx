@@ -275,155 +275,180 @@ export default function NewsletterAdmin() {
   const activities = activityData?.activities || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <LayoutDashboard className="w-8 h-8 text-purple-400" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-slate-400">Platform analytics and newsletter management</p>
+        {/* Enhanced Header with Neural Network Effect */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-900/40 via-cyan-900/30 to-purple-900/40 border border-purple-500/30 p-6 md:p-8">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-purple-500/10" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-500/20 to-transparent blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-500/20 to-transparent blur-3xl" />
+          
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-600 to-purple-600 shadow-lg shadow-cyan-500/30">
+                <LayoutDashboard className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                  Admin Command Center
+                </h1>
+                <p className="text-slate-400 mt-1">Real-time platform analytics • AI systems monitoring • Newsletter control</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 border border-emerald-500/40">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-sm font-semibold text-emerald-300">LIVE</span>
+              </div>
+              <Button
+                onClick={() => setLocation('/')}
+                variant="outline"
+                className="border-purple-500/40 hover:border-purple-400/60 hover:bg-purple-500/10 text-purple-200 font-semibold"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
             </div>
           </div>
-          <Button
-            onClick={() => setLocation('/')}
-            variant="outline"
-            className="border-purple-500/40 hover:border-purple-400/60 hover:bg-purple-500/10 text-purple-200 font-semibold"
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
         </div>
 
-        {/* Platform Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+        {/* Platform Overview Stats - Enhanced Design */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-blue-900/50 to-blue-950/50 border border-blue-500/30 p-5 hover:border-blue-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30">
                   <Users className="w-6 h-6 text-blue-400" />
                 </div>
-                {statsLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                ) : (
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">{stats?.stats?.totalUsers || 0}</div>
-                    <div className="text-xs text-green-400">+{stats?.stats?.newUsers24h || 0} today</div>
+                {stats?.stats?.newUsers24h ? (
+                  <div className="px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40">
+                    <span className="text-xs font-semibold text-emerald-400">+{stats.stats.newUsers24h} today</span>
                   </div>
-                )}
+                ) : null}
               </div>
-              <h3 className="text-sm font-semibold text-slate-300">Total Users</h3>
-            </CardContent>
-          </Card>
+              {statsLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+              ) : (
+                <div className="text-3xl font-bold text-white mb-1">{(stats?.stats?.totalUsers || 0).toLocaleString()}</div>
+              )}
+              <h3 className="text-sm font-medium text-blue-300">Total Users</h3>
+            </div>
+          </div>
 
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/50 to-purple-950/50 border border-purple-500/30 p-5 hover:border-purple-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-purple-500/20 border border-purple-500/30">
                   <FileText className="w-6 h-6 text-purple-400" />
                 </div>
-                {statsLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                ) : (
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">{stats?.stats?.totalSummaries || 0}</div>
-                    <div className="text-xs text-green-400">+{stats?.stats?.summariesCreated24h || 0} today</div>
+                {stats?.stats?.summariesCreated24h ? (
+                  <div className="px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40">
+                    <span className="text-xs font-semibold text-emerald-400">+{stats.stats.summariesCreated24h} today</span>
                   </div>
-                )}
+                ) : null}
               </div>
-              <h3 className="text-sm font-semibold text-slate-300">AI Summaries</h3>
-            </CardContent>
-          </Card>
+              {statsLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+              ) : (
+                <div className="text-3xl font-bold text-white mb-1">{(stats?.stats?.totalSummaries || 0).toLocaleString()}</div>
+              )}
+              <h3 className="text-sm font-medium text-purple-300">AI Summaries</h3>
+            </div>
+          </div>
 
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-amber-900/50 to-amber-950/50 border border-amber-500/30 p-5 hover:border-amber-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30">
                   <Target className="w-6 h-6 text-amber-400" />
                 </div>
-                {statsLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                ) : (
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">{stats?.stats?.totalBounties || 0}</div>
-                    <div className="text-xs text-green-400">+{stats?.stats?.bountiesCreated24h || 0} today</div>
+                {stats?.stats?.bountiesCreated24h ? (
+                  <div className="px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40">
+                    <span className="text-xs font-semibold text-emerald-400">+{stats.stats.bountiesCreated24h} today</span>
                   </div>
-                )}
+                ) : null}
               </div>
-              <h3 className="text-sm font-semibold text-slate-300">Bounties</h3>
-            </CardContent>
-          </Card>
+              {statsLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
+              ) : (
+                <div className="text-3xl font-bold text-white mb-1">{(stats?.stats?.totalBounties || 0).toLocaleString()}</div>
+              )}
+              <h3 className="text-sm font-medium text-amber-300">Bounties</h3>
+            </div>
+          </div>
 
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-cyan-900/50 to-cyan-950/50 border border-cyan-500/30 p-5 hover:border-cyan-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30">
                   <TrendingUp className="w-6 h-6 text-cyan-400" />
                 </div>
-                {statsLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                ) : (
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">{stats?.stats?.totalMarkets || 0}</div>
-                    <div className="text-xs text-green-400">+{stats?.stats?.marketsCreated24h || 0} today</div>
+                {stats?.stats?.marketsCreated24h ? (
+                  <div className="px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40">
+                    <span className="text-xs font-semibold text-emerald-400">+{stats.stats.marketsCreated24h} today</span>
                   </div>
-                )}
+                ) : null}
               </div>
-              <h3 className="text-sm font-semibold text-slate-300">Prediction Markets</h3>
-            </CardContent>
-          </Card>
+              {statsLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
+              ) : (
+                <div className="text-3xl font-bold text-white mb-1">{(stats?.stats?.totalMarkets || 0).toLocaleString()}</div>
+              )}
+              <h3 className="text-sm font-medium text-cyan-300">Prediction Markets</h3>
+            </div>
+          </div>
         </div>
 
-        {/* Trading Stats */}
+        {/* Trading Stats - Enhanced Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <BarChart3 className="w-6 h-6 text-emerald-400" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">
-                    {statsLoading ? '...' : (stats?.stats?.totalTrades || 0).toLocaleString()}
-                  </div>
-                  <div className="text-sm text-slate-400">Total Trades</div>
-                </div>
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 border border-emerald-500/30 p-5 hover:border-emerald-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
+                <BarChart3 className="w-6 h-6 text-emerald-400" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {statsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (stats?.stats?.totalTrades || 0).toLocaleString()}
+                </div>
+                <div className="text-sm text-emerald-300">Total Trades</div>
+              </div>
+            </div>
+          </div>
 
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                  <Zap className="w-6 h-6 text-pink-400" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">
-                    {statsLoading ? '...' : ((stats?.stats?.totalVolume || 0) / 1e18).toFixed(2)} STREAM
-                  </div>
-                  <div className="text-sm text-slate-400">Trading Volume</div>
-                </div>
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-pink-900/40 to-pink-950/40 border border-pink-500/30 p-5 hover:border-pink-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-pink-500/20 border border-pink-500/30">
+                <Zap className="w-6 h-6 text-pink-400" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {statsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : `${((stats?.stats?.totalVolume || 0)).toLocaleString()} STREAM`}
+                </div>
+                <div className="text-sm text-pink-300">Trading Volume</div>
+              </div>
+            </div>
+          </div>
 
-          <Card className="neural-glass border-purple-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-                  <Activity className="w-6 h-6 text-indigo-400" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">
-                    {statsLoading ? '...' : stats?.stats?.activeUsers24h || 0}
-                  </div>
-                  <div className="text-sm text-slate-400">Active Users (24h)</div>
-                </div>
+          <div className="relative group overflow-hidden rounded-xl bg-gradient-to-br from-indigo-900/40 to-indigo-950/40 border border-indigo-500/30 p-5 hover:border-indigo-400/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-indigo-500/20 border border-indigo-500/30">
+                <Activity className="w-6 h-6 text-indigo-400" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {statsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : stats?.stats?.activeUsers24h || 0}
+                </div>
+                <div className="text-sm text-indigo-300">Active Users (24h)</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Recent Activity Feed */}
