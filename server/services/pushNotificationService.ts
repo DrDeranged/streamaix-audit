@@ -121,6 +121,12 @@ class PushNotificationService {
       marketMovers?: boolean;
       macroAlerts?: boolean;
       breakingNews?: boolean;
+      coinDeskNews?: boolean;
+      fundingRateAlerts?: boolean;
+      liquidationAlerts?: boolean;
+      whaleAlerts?: boolean;
+      volumeSpikes?: boolean;
+      weeklyPreview?: boolean;
     }
   ) {
     try {
@@ -312,6 +318,18 @@ class PushNotificationService {
         return subscription.macroAlerts ?? true;
       case 'breaking_news':
         return subscription.breakingNews ?? true;
+      case 'coindesk_news':
+        return subscription.coinDeskNews ?? true;
+      case 'funding_rate_alerts':
+        return subscription.fundingRateAlerts ?? true;
+      case 'liquidation_alerts':
+        return subscription.liquidationAlerts ?? true;
+      case 'whale_alerts':
+        return subscription.whaleAlerts ?? true;
+      case 'volume_spikes':
+        return subscription.volumeSpikes ?? true;
+      case 'weekly_preview':
+        return subscription.weeklyPreview ?? true;
       default:
         return true;
     }

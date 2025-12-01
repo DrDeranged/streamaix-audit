@@ -11291,6 +11291,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tradeConfirmations: s.tradeConfirmations,
         aiAgentActivity: s.aiAgentActivity,
         weeklyDigest: s.weeklyDigest,
+        morningBriefing: s.morningBriefing,
+        eveningRecap: s.eveningRecap,
+        marketMovers: s.marketMovers,
+        macroAlerts: s.macroAlerts,
+        breakingNews: s.breakingNews,
+        coinDeskNews: s.coinDeskNews,
+        fundingRateAlerts: s.fundingRateAlerts,
+        liquidationAlerts: s.liquidationAlerts,
+        whaleAlerts: s.whaleAlerts,
+        volumeSpikes: s.volumeSpikes,
+        weeklyPreview: s.weeklyPreview,
         lastUsed: s.lastUsed,
       }))
     });
@@ -11302,7 +11313,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
-    const { marketResolutions, priceAlerts, bountyUpdates, tradeConfirmations, aiAgentActivity, weeklyDigest } = req.body;
+    const { 
+      marketResolutions, priceAlerts, bountyUpdates, tradeConfirmations, 
+      aiAgentActivity, weeklyDigest, morningBriefing, eveningRecap,
+      marketMovers, macroAlerts, breakingNews, coinDeskNews,
+      fundingRateAlerts, liquidationAlerts, whaleAlerts, volumeSpikes, weeklyPreview
+    } = req.body;
 
     const result = await pushNotificationService.updatePreferences(req.user.id, {
       marketResolutions,
@@ -11311,6 +11327,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       tradeConfirmations,
       aiAgentActivity,
       weeklyDigest,
+      morningBriefing,
+      eveningRecap,
+      marketMovers,
+      macroAlerts,
+      breakingNews,
+      coinDeskNews,
+      fundingRateAlerts,
+      liquidationAlerts,
+      whaleAlerts,
+      volumeSpikes,
+      weeklyPreview,
     });
 
     res.json({ success: true, ...result });
