@@ -240,7 +240,7 @@ class PushNotificationService {
 
   async sendToAll(payload: PushPayload, notificationType?: string) {
     if (!this.initialized) {
-      console.warn('Push notifications not initialized');
+      console.warn('🔔 [sendToAll] Push notifications not initialized - VAPID keys missing');
       return { success: false, sent: 0 };
     }
 
@@ -250,13 +250,19 @@ class PushNotificationService {
         .from(pushSubscriptions)
         .where(eq(pushSubscriptions.isActive, true));
 
+      console.log(`🔔 [sendToAll] Broadcasting "${payload.title}" to ${allSubscriptions.length} subscriptions (type: ${notificationType || 'general'})`);
+      
       let sent = 0;
       let failed = 0;
+      let skipped = 0;
 
       for (const sub of allSubscriptions) {
         if (notificationType) {
           const shouldSend = this.checkNotificationPreference(sub, notificationType);
-          if (!shouldSend) continue;
+          if (!shouldSend) {
+            skipped++;
+            continue;
+          }
         }
 
         try {
@@ -280,16 +286,19 @@ class PushNotificationService {
           );
           sent++;
         } catch (error: any) {
+          console.error(`🔔 [sendToAll] ❌ Failed to send to endpoint:`, error.statusCode, error.message);
           if (error.statusCode === 410 || error.statusCode === 404) {
+            console.log(`🔔 [sendToAll] Removing stale subscription`);
             await this.removeSubscription(sub.endpoint);
           }
           failed++;
         }
       }
 
+      console.log(`🔔 [sendToAll] Result: sent=${sent}, failed=${failed}, skipped=${skipped}`);
       return { success: true, sent, failed };
     } catch (error: any) {
-      console.error('Failed to broadcast push notification:', error);
+      console.error('🔔 [sendToAll] Failed to broadcast push notification:', error);
       return { success: false, sent: 0, error: error.message };
     }
   }

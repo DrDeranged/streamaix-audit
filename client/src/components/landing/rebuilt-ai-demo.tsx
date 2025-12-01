@@ -132,6 +132,7 @@ export function AIProcessor() {
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   // Query for processing result with real-time updates
   const { data: result, isLoading: isResultLoading, error } = useQuery<ProcessingResult>({
