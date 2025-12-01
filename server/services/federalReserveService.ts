@@ -214,7 +214,7 @@ export class FederalReserveService {
 
     } catch (error) {
       console.error('❌ Failed to fetch Fed communications:', error);
-      return this.getMockCommunications(limit);
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -419,15 +419,13 @@ export class FederalReserveService {
     if (cached) return cached;
 
     try {
-      // In production, this would scrape the Fed calendar or use APIs
-      const mockEvents = this.getMockCalendarEvents();
-      
-      this.setCacheWithTimeout(cacheKey, mockEvents, this.longCacheTimeout);
-      return mockEvents.slice(0, limit);
+      // Real Fed calendar data requires official API or scraping
+      console.log('⚠️ Fed calendar events require official Fed calendar integration');
+      return []; // Return empty array - no mock data
 
     } catch (error) {
       console.error('❌ Failed to fetch Fed calendar events:', error);
-      return this.getMockCalendarEvents().slice(0, limit);
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -487,15 +485,42 @@ export class FederalReserveService {
     if (cached) return cached;
 
     try {
-      // In production, this would analyze historical data
-      const trend = this.getMockSentimentTrend(days);
+      // Analyze historical sentiment from actual communications
+      const recentComms = await this.getRecentCommunications(Math.min(days, 30));
+      const trend: FedSentimentTrend[] = [];
       
-      this.setCacheWithTimeout(cacheKey, trend, this.longCacheTimeout);
-      return trend;
+      // Group communications by date and calculate daily sentiment
+      const commsByDate = new Map<string, typeof recentComms>();
+      recentComms.forEach(comm => {
+        const date = comm.date.split('T')[0];
+        if (!commsByDate.has(date)) {
+          commsByDate.set(date, []);
+        }
+        commsByDate.get(date)!.push(comm);
+      });
+      
+      commsByDate.forEach((comms, date) => {
+        const avgScore = comms.reduce((sum, c) => sum + c.sentiment.score, 0) / comms.length;
+        const avgConfidence = comms.reduce((sum, c) => sum + c.sentiment.confidence, 0) / comms.length;
+        
+        trend.push({
+          date,
+          sentimentScore: avgScore,
+          confidence: avgConfidence,
+          numCommunications: comms.length,
+          dominantStance: avgScore > 0.2 ? 'hawkish' : avgScore < -0.2 ? 'dovish' : 'neutral',
+          keyTopics: [...new Set(comms.flatMap(c => c.keyTopics))]
+        });
+      });
+      
+      const sortedTrend = trend.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      this.setCacheWithTimeout(cacheKey, sortedTrend, this.longCacheTimeout);
+      return sortedTrend;
 
     } catch (error) {
       console.error('❌ Failed to get sentiment trend:', error);
-      return this.getMockSentimentTrend(days);
+      return []; // Return empty array - no mock data
     }
   }
 
@@ -549,7 +574,7 @@ export class FederalReserveService {
 
     } catch (error) {
       console.error('❌ Failed to generate Fed analytics summary:', error);
-      return this.getMockAnalyticsSummary(timeframe);
+      throw new Error('Fed analytics summary unavailable - data fetch failed');
     }
   }
 
