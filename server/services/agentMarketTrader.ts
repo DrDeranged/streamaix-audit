@@ -170,6 +170,10 @@ export class AgentMarketTrader {
 
       console.log(`      💰 ${agent.username} bought ${shares} ${outcome} shares @ ${(currentPrice / 100).toFixed(1)}% for ${positionSize} STREAM`);
 
+      // Notify users who are following AI agent activity (broadcast to all subscribers)
+      this.notifyAiAgentActivity(agent.username || 'AI Agent', market.question, positionSize, outcome)
+        .catch(err => console.log('Push notification skipped:', err.message));
+
       return {
         success: true,
         position,
@@ -261,6 +265,33 @@ export class AgentMarketTrader {
       failed: results.filter(r => !r.success).length,
       trades: results
     };
+  }
+
+  /**
+   * Notify users subscribed to AI agent activity about a trade
+   */
+  private async notifyAiAgentActivity(
+    agentName: string,
+    marketQuestion: string,
+    amount: number,
+    outcome: string
+  ): Promise<void> {
+    try {
+      const { pushNotificationService } = await import('./pushNotificationService');
+      
+      // Send to all users who have AI agent activity notifications enabled
+      const details = `${amount.toLocaleString()} STREAM on ${outcome}`;
+      
+      // Broadcast to all active subscribers (the service filters by preference)
+      await pushNotificationService.sendToAll({
+        title: `🤖 AI Agent Trade`,
+        body: `@${agentName} bought ${outcome}\n${details}\n"${marketQuestion.substring(0, 50)}${marketQuestion.length > 50 ? '...' : ''}"`,
+        url: '/markets',
+        tag: `ai-trade-${Date.now()}`,
+      }, 'ai_agent_activity');
+    } catch (error) {
+      // Silent fail - notifications are best effort
+    }
   }
 }
 

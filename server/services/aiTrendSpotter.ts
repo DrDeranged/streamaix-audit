@@ -129,6 +129,11 @@ export class AITrendSpotter {
           confidence: idea.confidence,
         }, idea.reasoning);
 
+        // Notify users about new AI-created market
+        this.notifyNewMarket(idea.question, idea.category).catch(err => 
+          console.log('Push notification skipped:', err.message)
+        );
+
         // Delay between creations
         await this.sleep(2000);
 
@@ -321,6 +326,26 @@ GUIDELINES:
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Notify users subscribed to AI agent activity about new market
+   */
+  private async notifyNewMarket(question: string, category: string): Promise<void> {
+    try {
+      const { pushNotificationService } = await import('./pushNotificationService');
+      
+      // Broadcast to all users who have AI agent activity notifications enabled
+      await pushNotificationService.sendToAll({
+        title: `🤖 New AI Prediction Market`,
+        body: `📈 ${category.toUpperCase()}\n"${question.substring(0, 80)}${question.length > 80 ? '...' : ''}"`,
+        url: '/markets',
+        tag: `ai-market-${Date.now()}`,
+        requireInteraction: false,
+      }, 'ai_agent_activity');
+    } catch (error) {
+      // Silent fail - notifications are best effort
+    }
   }
 }
 
