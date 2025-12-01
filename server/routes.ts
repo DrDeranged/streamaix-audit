@@ -6644,26 +6644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
-  // Get all data for admin dashboard
-  app.get('/api/admin/stats', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
-    // Get basic counts for admin dashboard
-    const [summaries, bounties, stacks] = await Promise.all([
-      storage.getSummaries(5),
-      storage.getBounties(5),
-      storage.getKnowledgeStacks(5)
-    ]);
-
-    res.json({
-      stats: {
-        summariesCount: summaries.length,
-        bountiesCount: bounties.length,
-        stacksCount: stacks.length
-      },
-      recentSummaries: summaries,
-      recentBounties: bounties,
-      recentStacks: stacks
-    });
-  }));
+  // NOTE: Comprehensive /api/admin/stats endpoint is defined below in ADMIN DASHBOARD ENDPOINTS section
 
   // Error handling middleware
   app.use((error: any, req: Request, res: Response, next: Function) => {

@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { aiAgents, predictionMarkets, aiTrades, aiPredictions, aiPositions } from '@shared/schema';
+import { aiAgents, predictionMarkets, aiTrades, aiPredictions, aiPositions, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, desc, sql, lt } from 'drizzle-orm';
 import OpenAI from 'openai';
 
@@ -135,9 +135,34 @@ export class AITradingBotService {
       await this.executeTrade(bot, market, analysis, tradeAmount);
 
       console.log(`  ✅ ${bot.name} executed ${analysis.prediction} trade on "${market.question.substring(0, 50)}..." for ${tradeAmount} STREAM`);
+      
+      // Log successful trade to database
+      await this.logTradeAction(bot.id, market.id, 'trade_executed', true, analysis.reasoning);
 
     } catch (error: any) {
       console.error(`  ❌ Error executing trade for ${bot.name}:`, error.message);
+      // Log failed trade to database
+      await this.logTradeAction(bot.id, null, 'trade_failed', false, undefined, error.message);
+    }
+  }
+  
+  /**
+   * Log trading action to database for admin dashboard
+   */
+  private async logTradeAction(botId: string, marketId: string | null, actionType: string, success: boolean, reasoning?: string, errorMessage?: string) {
+    try {
+      await db.insert(autonomousSystemLogs).values({
+        systemName: 'trading_bots',
+        actionType,
+        status: success ? 'success' : 'failed',
+        targetId: marketId || botId,
+        reasoning: reasoning || actionType,
+        errorMessage: errorMessage || null,
+        executionTimeMs: 0,
+        metadata: { botId, marketId },
+      });
+    } catch (dbError) {
+      console.error('Failed to log trade action:', dbError);
     }
   }
 

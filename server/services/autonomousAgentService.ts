@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { users } from '../../shared/schema';
+import { users, autonomousSystemLogs } from '../../shared/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import type { AgentPersonality, AgentMetadata, AgentAction } from '../types/agents';
 import { getAgentBountyEngine } from './agentBountyEngine';
@@ -496,14 +496,31 @@ export class AutonomousAgentService {
   }
   
   /**
-   * Log an action for analytics
+   * Log an action for analytics - stores in memory and database
    */
-  private logAction(action: AgentAction): void {
+  private async logAction(action: AgentAction): Promise<void> {
     this.actionLog.push(action);
     
     // Keep only last 1000 actions in memory
     if (this.actionLog.length > 1000) {
       this.actionLog = this.actionLog.slice(-1000);
+    }
+    
+    // Also log to database for admin dashboard
+    try {
+      await db.insert(autonomousSystemLogs).values({
+        systemName: 'social_agents',
+        actionType: action.type,
+        status: action.success ? 'success' : 'failed',
+        targetId: action.agentId,
+        reasoning: action.type,
+        errorMessage: action.error || null,
+        executionTimeMs: 0,
+        metadata: { agentId: action.agentId, timestamp: action.timestamp },
+      });
+    } catch (dbError) {
+      // Don't let logging failures break the main flow
+      console.error('Failed to log action to database:', dbError);
     }
   }
   
