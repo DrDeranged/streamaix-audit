@@ -132,7 +132,6 @@ export function AIProcessor() {
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const [showNotesModal, setShowNotesModal] = useState(false);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   // Query for processing result with real-time updates
   const { data: result, isLoading: isResultLoading, error } = useQuery<ProcessingResult>({
@@ -275,7 +274,6 @@ export function AIProcessor() {
           timestamp: new Date().toISOString(),
         };
         setLastError(detailedError);
-        setShowDiagnostics(true); // Auto-show diagnostics on error
         throw new Error(errorBody.error || errorBody.message || `${response.status}: ${response.statusText}`);
       }
 
@@ -420,16 +418,6 @@ export function AIProcessor() {
                     <div className="text-[10px] text-muted-foreground">
                       Failed at: {new Date(lastError.timestamp).toLocaleString()}
                     </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowDiagnostics(true)}
-                      className="w-full text-xs"
-                      data-testid="button-show-diagnostics-from-error"
-                    >
-                      Open Full Diagnostics Panel
-                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
