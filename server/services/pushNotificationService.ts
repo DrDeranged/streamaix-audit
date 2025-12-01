@@ -116,6 +116,11 @@ class PushNotificationService {
       tradeConfirmations?: boolean;
       aiAgentActivity?: boolean;
       weeklyDigest?: boolean;
+      morningBriefing?: boolean;
+      eveningRecap?: boolean;
+      marketMovers?: boolean;
+      macroAlerts?: boolean;
+      breakingNews?: boolean;
     }
   ) {
     try {
@@ -297,6 +302,16 @@ class PushNotificationService {
         return subscription.aiAgentActivity;
       case 'weekly_digest':
         return subscription.weeklyDigest;
+      case 'morning_briefing':
+        return subscription.morningBriefing ?? true;
+      case 'evening_recap':
+        return subscription.eveningRecap ?? true;
+      case 'market_movers':
+        return subscription.marketMovers ?? true;
+      case 'macro_alerts':
+        return subscription.macroAlerts ?? true;
+      case 'breaking_news':
+        return subscription.breakingNews ?? true;
       default:
         return true;
     }

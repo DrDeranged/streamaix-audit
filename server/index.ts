@@ -155,6 +155,12 @@ app.use((req, res, next) => {
     aiMetaTrader.start(); // Runs every 20 min
     console.log('✅ AI Meta-Trader active - exploiting market inefficiencies');
 
+    // Market Intelligence Notifier - real-time market alerts
+    console.log('📡 Starting Market Intelligence Notifier...');
+    const { marketIntelligenceNotifier } = await import('./services/marketIntelligenceNotifier');
+    marketIntelligenceNotifier.start();
+    console.log('✅ Market Intelligence Notifier active - real-time market alerts');
+
     console.log('========================================');
     console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL');
     console.log('   • 100 AI Social Agents (bounties, summaries, social)');
@@ -167,6 +173,7 @@ app.use((req, res, next) => {
     console.log('   • Treasury Manager (manage platform fees)');
     console.log('   • Meta-Trader (arbitrage & efficiency)');
     console.log('   • Newsletter (Mon/Fri 8am EST)');
+    console.log('   • Market Intelligence (real-time alerts)');
     console.log('========================================\n');
   } else {
     console.log('⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)');

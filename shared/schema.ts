@@ -828,6 +828,13 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   aiAgentActivity: boolean("ai_agent_activity").default(false),
   weeklyDigest: boolean("weekly_digest").default(true),
   
+  // Market Intelligence notifications
+  morningBriefing: boolean("morning_briefing").default(true),
+  eveningRecap: boolean("evening_recap").default(true),
+  marketMovers: boolean("market_movers").default(true),
+  macroAlerts: boolean("macro_alerts").default(true),
+  breakingNews: boolean("breaking_news").default(true),
+  
   // Metadata
   deviceInfo: text("device_info"), // Browser/device info
   isActive: boolean("is_active").default(true),

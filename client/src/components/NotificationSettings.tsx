@@ -28,6 +28,11 @@ interface NotificationPreferences {
   tradeConfirmations: boolean;
   aiAgentActivity: boolean;
   weeklyDigest: boolean;
+  morningBriefing: boolean;
+  eveningRecap: boolean;
+  marketMovers: boolean;
+  macroAlerts: boolean;
+  breakingNews: boolean;
 }
 
 interface DiagnosticStep {
@@ -68,6 +73,11 @@ export function NotificationSettings() {
     tradeConfirmations: true,
     aiAgentActivity: false,
     weeklyDigest: true,
+    morningBriefing: true,
+    eveningRecap: true,
+    marketMovers: true,
+    macroAlerts: true,
+    breakingNews: true,
   });
 
   const { data: subscriptionsData } = useQuery<{ success: boolean; subscriptions: any[] }>({
@@ -267,6 +277,11 @@ export function NotificationSettings() {
         tradeConfirmations: sub.tradeConfirmations ?? true,
         aiAgentActivity: sub.aiAgentActivity ?? false,
         weeklyDigest: sub.weeklyDigest ?? true,
+        morningBriefing: sub.morningBriefing ?? true,
+        eveningRecap: sub.eveningRecap ?? true,
+        marketMovers: sub.marketMovers ?? true,
+        macroAlerts: sub.macroAlerts ?? true,
+        breakingNews: sub.breakingNews ?? true,
       });
     }
   }, [subscriptionsData]);
@@ -563,20 +578,53 @@ export function NotificationSettings() {
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground">Notification Types</h4>
+                <h4 className="text-sm font-medium text-muted-foreground">Platform Alerts</h4>
                 
                 <div className="space-y-2">
                   {[
                     { key: 'marketResolutions' as const, label: 'Market Resolutions', desc: 'When prediction markets you participated in are resolved' },
-                    { key: 'priceAlerts' as const, label: 'Price Alerts', desc: 'When assets hit your target prices' },
                     { key: 'bountyUpdates' as const, label: 'Bounty Updates', desc: 'Assignments, completions, and reward notifications' },
                     { key: 'tradeConfirmations' as const, label: 'Trade Confirmations', desc: 'Confirmation of your market trades' },
                     { key: 'aiAgentActivity' as const, label: 'AI Agent Activity', desc: 'Updates from autonomous AI agents' },
-                    { key: 'weeklyDigest' as const, label: 'Weekly Digest', desc: 'Summary of platform activity and your earnings' },
+                    { key: 'weeklyDigest' as const, label: 'Weekly Digest', desc: 'Sunday summary of your activity and earnings' },
                   ].map(({ key, label, desc }) => (
                     <div 
                       key={key}
                       className="flex items-center justify-between py-2 px-3 rounded-lg bg-card/50 hover:bg-card/80 transition-colors"
+                    >
+                      <div>
+                        <div className="text-sm font-medium">{label}</div>
+                        <div className="text-xs text-muted-foreground">{desc}</div>
+                      </div>
+                      <Switch
+                        checked={preferences[key]}
+                        onCheckedChange={(checked) => handlePreferenceChange(key, checked)}
+                        disabled={updatePreferencesMutation.isPending}
+                        data-testid={`switch-notification-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-3 border-t border-cyan-500/10">
+                <h4 className="text-sm font-medium text-cyan-400 flex items-center gap-2">
+                  📡 Market Intelligence
+                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">Real-time</span>
+                </h4>
+                
+                <div className="space-y-2">
+                  {[
+                    { key: 'morningBriefing' as const, label: '🌅 Morning Briefing', desc: 'Daily 8am EST market overview, top movers, and key events' },
+                    { key: 'eveningRecap' as const, label: '🌆 Evening Recap', desc: 'Daily 6pm EST market summary and performance highlights' },
+                    { key: 'marketMovers' as const, label: '📊 Market Movers', desc: 'Top gainers/losers every 4 hours throughout the day' },
+                    { key: 'priceAlerts' as const, label: '🚀 Price Alerts', desc: 'Significant moves: BTC, ETH, and major alts moving 3%+ in an hour' },
+                    { key: 'macroAlerts' as const, label: '🏛️ Macro Alerts', desc: 'Fed news, FOMC decisions, and high-impact economic events' },
+                    { key: 'breakingNews' as const, label: '⚡ Breaking News', desc: 'Major market-moving news and announcements' },
+                  ].map(({ key, label, desc }) => (
+                    <div 
+                      key={key}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-cyan-500/5 hover:bg-cyan-500/10 transition-colors border border-cyan-500/10"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
