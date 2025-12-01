@@ -33,6 +33,11 @@ interface NotificationPreferences {
   marketMovers: boolean;
   macroAlerts: boolean;
   breakingNews: boolean;
+  coindeskNews: boolean;
+  tradingMetrics: boolean;
+  whaleAlerts: boolean;
+  liquidationAlerts: boolean;
+  fundingRateAlerts: boolean;
 }
 
 interface DiagnosticStep {
@@ -78,6 +83,11 @@ export function NotificationSettings() {
     marketMovers: true,
     macroAlerts: true,
     breakingNews: true,
+    coindeskNews: true,
+    tradingMetrics: true,
+    whaleAlerts: true,
+    liquidationAlerts: true,
+    fundingRateAlerts: true,
   });
 
   const { data: subscriptionsData } = useQuery<{ success: boolean; subscriptions: any[] }>({
@@ -282,6 +292,11 @@ export function NotificationSettings() {
         marketMovers: sub.marketMovers ?? true,
         macroAlerts: sub.macroAlerts ?? true,
         breakingNews: sub.breakingNews ?? true,
+        coindeskNews: sub.coindeskNews ?? true,
+        tradingMetrics: sub.tradingMetrics ?? true,
+        whaleAlerts: sub.whaleAlerts ?? true,
+        liquidationAlerts: sub.liquidationAlerts ?? true,
+        fundingRateAlerts: sub.fundingRateAlerts ?? true,
       });
     }
   }, [subscriptionsData]);
@@ -625,6 +640,67 @@ export function NotificationSettings() {
                     <div 
                       key={key}
                       className="flex items-center justify-between py-2 px-3 rounded-lg bg-cyan-500/5 hover:bg-cyan-500/10 transition-colors border border-cyan-500/10"
+                    >
+                      <div>
+                        <div className="text-sm font-medium">{label}</div>
+                        <div className="text-xs text-muted-foreground">{desc}</div>
+                      </div>
+                      <Switch
+                        checked={preferences[key]}
+                        onCheckedChange={(checked) => handlePreferenceChange(key, checked)}
+                        disabled={updatePreferencesMutation.isPending}
+                        data-testid={`switch-notification-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-3 border-t border-purple-500/10">
+                <h4 className="text-sm font-medium text-purple-400 flex items-center gap-2">
+                  📰 CoinDesk News
+                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">Every 15 min</span>
+                </h4>
+                
+                <div className="space-y-2">
+                  {[
+                    { key: 'coindeskNews' as const, label: '📰 CoinDesk Breaking Stories', desc: 'Major crypto news: ETF approvals, regulations, hacks, market-moving events' },
+                  ].map(({ key, label, desc }) => (
+                    <div 
+                      key={key}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 transition-colors border border-purple-500/10"
+                    >
+                      <div>
+                        <div className="text-sm font-medium">{label}</div>
+                        <div className="text-xs text-muted-foreground">{desc}</div>
+                      </div>
+                      <Switch
+                        checked={preferences[key]}
+                        onCheckedChange={(checked) => handlePreferenceChange(key, checked)}
+                        disabled={updatePreferencesMutation.isPending}
+                        data-testid={`switch-notification-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-3 border-t border-amber-500/10">
+                <h4 className="text-sm font-medium text-amber-400 flex items-center gap-2">
+                  📈 Trading Metrics & Derivatives
+                  <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full">Pro Signals</span>
+                </h4>
+                
+                <div className="space-y-2">
+                  {[
+                    { key: 'tradingMetrics' as const, label: '📈 Trading Metrics Summary', desc: 'Open interest, volume spikes, and positioning data every 10 min' },
+                    { key: 'fundingRateAlerts' as const, label: '💰 Funding Rate Alerts', desc: 'Extreme funding rates (>0.05%) signaling potential reversals' },
+                    { key: 'liquidationAlerts' as const, label: '💥 Liquidation Cascades', desc: 'Major liquidation events (>$50M) and dominant side getting rekt' },
+                    { key: 'whaleAlerts' as const, label: '🐋 Whale Alerts', desc: 'Large wallet movements (>$10M) and smart money accumulation/distribution' },
+                  ].map(({ key, label, desc }) => (
+                    <div 
+                      key={key}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-amber-500/5 hover:bg-amber-500/10 transition-colors border border-amber-500/10"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
