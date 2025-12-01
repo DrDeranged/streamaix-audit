@@ -262,6 +262,48 @@ IMPORTANT:
         sources: resolutionData.sources,
       },
     });
+
+    // Send push notifications to all users with positions in this market
+    await this.notifyMarketParticipants(market, resolutionData.outcome);
+  }
+
+  /**
+   * Notify all users who have positions in a resolved market
+   */
+  private async notifyMarketParticipants(market: any, outcome: string) {
+    try {
+      const { pushNotificationService } = await import('./pushNotificationService');
+      const { marketPositions } = await import('@shared/schema');
+
+      // Get all users with positions in this market
+      const positions = await db
+        .select()
+        .from(marketPositions)
+        .where(eq(marketPositions.marketId, market.id));
+
+      console.log(`🔔 Notifying ${positions.length} users about market resolution`);
+
+      for (const position of positions) {
+        if (!position.userId) continue;
+
+        // Calculate winnings if user bet correctly
+        const userWon = position.outcome.toUpperCase() === outcome.toUpperCase();
+        const winnings = userWon ? position.shares : 0;
+        const investment = position.totalInvested || 0;
+        const percentReturn = investment > 0 && userWon ? ((winnings - investment) / investment) * 100 : 0;
+
+        await pushNotificationService.notifyMarketResolution(
+          position.userId,
+          market.question,
+          outcome,
+          winnings,
+          percentReturn,
+          market.id
+        ).catch(err => console.log('Push notification skipped:', err.message));
+      }
+    } catch (error) {
+      console.error('Error sending market resolution notifications:', error);
+    }
   }
 
   /**
