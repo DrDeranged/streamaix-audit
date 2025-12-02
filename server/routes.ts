@@ -11757,6 +11757,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       role: 'host',
       isActive: true,
     });
+
+    // If stream is going live immediately, notify followers
+    if (!scheduledStart) {
+      try {
+        const { pushNotificationService } = await import('./services/pushNotificationService');
+        pushNotificationService.notifyFollowersStreamLive(
+          req.user.id,
+          req.user.username || 'Creator',
+          title,
+          streamType as 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
+          newStream.id,
+          req.user.avatar
+        ).catch(err => console.error('🔔 Error notifying followers of stream:', err));
+      } catch (error) {
+        console.error('🔔 Error importing push service:', error);
+      }
+    }
     
     res.json({ success: true, stream: newStream });
   }));
@@ -11788,6 +11805,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })
       .where(eq(liveStreams.id, req.params.id))
       .returning();
+
+    // Notify followers that the scheduled stream is now live
+    try {
+      const { pushNotificationService } = await import('./services/pushNotificationService');
+      pushNotificationService.notifyFollowersStreamLive(
+        req.user.id,
+        req.user.username || 'Creator',
+        stream.title,
+        stream.streamType as 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
+        stream.id,
+        req.user.avatar
+      ).catch(err => console.error('🔔 Error notifying followers of stream start:', err));
+    } catch (error) {
+      console.error('🔔 Error importing push service:', error);
+    }
     
     res.json({ success: true, stream: updatedStream });
   }));

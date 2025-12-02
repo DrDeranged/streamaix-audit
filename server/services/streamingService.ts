@@ -2,6 +2,7 @@ import { WebSocket } from 'ws';
 import { db } from '../db';
 import { liveStreams, streamMessages, users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { pushNotificationService } from './pushNotificationService';
 
 interface StreamMessage {
   type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message';
@@ -29,6 +30,7 @@ interface StreamSession {
   streamId: string;
   hostId: string;
   hostUsername: string;
+  streamTitle: string;
   viewers: Map<string, StreamViewer>;
   messages: Array<{
     id: string;
@@ -49,6 +51,7 @@ interface StreamSession {
   isLive: boolean;
   startedAt: number;
   peakViewers: number;
+  notifiedMilestones: Set<number>;
 }
 
 export class StreamingService {
@@ -91,12 +94,14 @@ export class StreamingService {
         streamId,
         hostId: streamRecord.hostId,
         hostUsername: hostUser?.username || 'unknown',
+        streamTitle: streamRecord.title || 'Untitled Stream',
         viewers: new Map(),
         messages: [],
         tips: [],
         isLive: streamRecord.status === 'live',
         startedAt: Date.now(),
         peakViewers: 0,
+        notifiedMilestones: new Set<number>(),
       };
       this.sessions.set(streamId, session);
     }
@@ -120,10 +125,25 @@ export class StreamingService {
     }
     this.viewerStreams.get(userId)!.add(streamId);
 
-    // Update peak viewers
+    // Update peak viewers and check milestones
     const currentViewerCount = session.viewers.size;
     if (currentViewerCount > session.peakViewers) {
       session.peakViewers = currentViewerCount;
+      
+      // Check viewer milestones
+      const viewerMilestones = [10, 25, 50, 100, 250, 500, 1000, 5000];
+      for (const milestone of viewerMilestones) {
+        if (currentViewerCount >= milestone && !session.notifiedMilestones.has(milestone)) {
+          session.notifiedMilestones.add(milestone);
+          pushNotificationService.notifyStreamMilestone(
+            session.hostId,
+            'viewers',
+            milestone,
+            session.streamTitle,
+            streamId
+          ).catch(err => console.error('Error sending viewer milestone notification:', err));
+        }
+      }
     }
 
     // Update database viewer count
@@ -242,6 +262,36 @@ export class StreamingService {
           username,
           data: tipData,
         });
+
+        // Send push notification to the host
+        try {
+          await pushNotificationService.notifyStreamTip(
+            session.hostId,
+            username,
+            message.data.amount,
+            session.streamTitle,
+            streamId,
+            message.data.message
+          );
+
+          // Check tip milestones
+          const totalTips = session.tips.reduce((sum, t) => sum + t.amount, 0);
+          const tipMilestones = [100, 500, 1000, 5000, 10000];
+          for (const milestone of tipMilestones) {
+            if (totalTips >= milestone && !session.notifiedMilestones.has(milestone * 1000)) {
+              session.notifiedMilestones.add(milestone * 1000); // Use different range for tip milestones
+              await pushNotificationService.notifyStreamMilestone(
+                session.hostId,
+                'tips',
+                milestone,
+                session.streamTitle,
+                streamId
+              );
+            }
+          }
+        } catch (error) {
+          console.error('Error sending tip notification:', error);
+        }
         break;
 
       case 'reaction':
