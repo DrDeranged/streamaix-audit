@@ -844,6 +844,12 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   liquidationAlerts: boolean("liquidation_alerts").default(true),
   fundingRateAlerts: boolean("funding_rate_alerts").default(true),
   
+  // Streaming notifications
+  streamLive: boolean("stream_live").default(true), // When someone you follow goes live
+  streamTips: boolean("stream_tips").default(true), // When you receive tips as a host
+  streamMilestones: boolean("stream_milestones").default(true), // Viewer milestones (100, 500, 1K)
+  streamReminders: boolean("stream_reminders").default(true), // Scheduled stream reminders
+  
   // Metadata
   deviceInfo: text("device_info"), // Browser/device info
   isActive: boolean("is_active").default(true),
