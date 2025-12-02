@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
   Video, 
+  VideoOff,
   TrendingUp, 
   Headphones, 
   Target,
@@ -16,7 +17,13 @@ import {
   CheckCircle,
   Loader2,
   Radio,
-  ChevronRight
+  ChevronRight,
+  Mic,
+  MicOff,
+  SwitchCamera,
+  Monitor,
+  AlertCircle,
+  Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -29,6 +36,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
+import { useMediaStream } from '@/hooks/useMediaStream';
 
 const streamTypes = [
   {
@@ -81,6 +89,7 @@ export default function GoLivePage() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -91,6 +100,35 @@ export default function GoLivePage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [requiresTicket, setRequiresTicket] = useState(false);
   const [ticketPrice, setTicketPrice] = useState('100');
+  const [cameraReady, setCameraReady] = useState(false);
+  
+  const {
+    stream,
+    videoEnabled,
+    audioEnabled,
+    isScreenSharing,
+    error: mediaError,
+    devices,
+    startStream,
+    stopStream,
+    toggleVideo,
+    toggleAudio,
+    switchCamera,
+  } = useMediaStream();
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stopStream();
+      }
+    };
+  }, []);
 
   const createStreamMutation = useMutation({
     mutationFn: async () => {
@@ -185,19 +223,19 @@ export default function GoLivePage() {
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-24">
         {/* Progress Steps - Mobile Optimized */}
         <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-8">
-          {[1, 2, 3].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <div key={s} className="flex items-center">
               <div className={cn(
-                "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-all",
+                "w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-all",
                 step >= s 
                   ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white" 
                   : "bg-slate-800 text-slate-500"
               )}>
-                {step > s ? <CheckCircle className="w-4 h-4" /> : s}
+                {step > s ? <CheckCircle className="w-3.5 h-3.5" /> : s}
               </div>
-              {s < 3 && (
+              {s < 4 && (
                 <div className={cn(
-                  "w-8 sm:w-12 h-1 mx-1 sm:mx-2 rounded-full transition-all",
+                  "w-6 sm:w-10 h-1 mx-0.5 sm:mx-1.5 rounded-full transition-all",
                   step > s ? "bg-gradient-to-r from-purple-500 to-fuchsia-500" : "bg-slate-800"
                 )} />
               )}
@@ -487,9 +525,228 @@ export default function GoLivePage() {
                 Back
               </Button>
               <Button
+                onClick={() => setStep(4)}
+                className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 h-12 sm:h-10 px-8"
+                data-testid="continue-step-3"
+              >
+                Continue
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 4: Camera & Mic Setup */}
+        {step === 4 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2 font-orbitron">Camera & Microphone</h2>
+            <p className="text-sm text-slate-400 mb-4 sm:mb-6">
+              {selectedType === 'audio_space' 
+                ? 'Test your microphone before going live'
+                : 'Check your camera and microphone before going live'
+              }
+            </p>
+
+            {/* Video Preview */}
+            <Card className="overflow-hidden bg-slate-900 border border-purple-500/20 mb-4">
+              <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900">
+                {stream && videoEnabled && selectedType !== 'audio_space' ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover scale-x-[-1]"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                    {selectedType === 'audio_space' ? (
+                      <>
+                        <motion.div
+                          animate={audioEnabled && stream ? { scale: [1, 1.2, 1] } : {}}
+                          transition={{ duration: 0.5, repeat: Infinity }}
+                          className={cn(
+                            "p-6 rounded-full",
+                            audioEnabled && stream ? "bg-cyan-500/20" : "bg-slate-700/50"
+                          )}
+                        >
+                          {audioEnabled && stream ? (
+                            <Mic className="w-12 h-12 text-cyan-400" />
+                          ) : (
+                            <MicOff className="w-12 h-12 text-slate-400" />
+                          )}
+                        </motion.div>
+                        <p className="text-sm text-slate-400">
+                          {stream ? (audioEnabled ? 'Microphone is on' : 'Microphone is muted') : 'Click below to enable microphone'}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="p-6 rounded-full bg-slate-700/50">
+                          <VideoOff className="w-12 h-12 text-slate-400" />
+                        </div>
+                        <p className="text-sm text-slate-400">
+                          {stream ? 'Camera is off' : 'Click below to enable camera'}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Camera Controls Overlay */}
+                {stream && selectedType !== 'audio_space' && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-3 bg-slate-900/80 backdrop-blur-sm rounded-full px-4 py-2">
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={toggleVideo}
+                      className={cn(
+                        "p-2 rounded-full transition-all",
+                        videoEnabled ? "bg-white/10 text-white" : "bg-red-500/20 text-red-400"
+                      )}
+                    >
+                      {videoEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+                    </motion.button>
+                    
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={toggleAudio}
+                      className={cn(
+                        "p-2 rounded-full transition-all",
+                        audioEnabled ? "bg-white/10 text-white" : "bg-red-500/20 text-red-400"
+                      )}
+                    >
+                      {audioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+                    </motion.button>
+
+                    {devices.videoDevices.length > 1 && (
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={switchCamera}
+                        className="p-2 rounded-full bg-white/10 text-white transition-all"
+                      >
+                        <SwitchCamera className="w-5 h-5" />
+                      </motion.button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Error Message */}
+            <AnimatePresence>
+              {mediaError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-3"
+                >
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-red-400 font-medium">Camera/Microphone Error</p>
+                    <p className="text-xs text-red-300/80 mt-1">{mediaError}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Enable Camera Button */}
+            {!stream && (
+              <Button
+                onClick={async () => {
+                  const constraints = selectedType === 'audio_space' 
+                    ? { video: false, audio: { echoCancellation: true, noiseSuppression: true } }
+                    : undefined;
+                  const success = await startStream(constraints);
+                  if (success) {
+                    setCameraReady(true);
+                  }
+                }}
+                className="w-full mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 h-14 text-base"
+                data-testid="button-enable-camera"
+              >
+                <Camera className="w-5 h-5 mr-2" />
+                {selectedType === 'audio_space' ? 'Enable Microphone' : 'Enable Camera & Microphone'}
+              </Button>
+            )}
+
+            {/* Audio-only controls for Audio Space */}
+            {selectedType === 'audio_space' && stream && (
+              <div className="flex justify-center gap-4 mb-4">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={toggleAudio}
+                  className={cn(
+                    "flex items-center gap-2 px-6 py-3 rounded-full transition-all",
+                    audioEnabled ? "bg-cyan-500/20 text-cyan-400" : "bg-red-500/20 text-red-400"
+                  )}
+                >
+                  {audioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+                  <span className="font-medium">{audioEnabled ? 'Mic On' : 'Mic Off'}</span>
+                </motion.button>
+              </div>
+            )}
+
+            {/* Device Info */}
+            {stream && (
+              <Card className="p-4 bg-slate-900/50 border border-purple-500/20 mb-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <div>
+                    <p className="text-sm text-white font-medium">
+                      {selectedType === 'audio_space' ? 'Audio ready' : 'Camera & audio ready'}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {devices.videoDevices.length > 0 && selectedType !== 'audio_space' && `${devices.videoDevices.length} camera(s) detected`}
+                      {devices.videoDevices.length > 0 && selectedType !== 'audio_space' && devices.audioDevices.length > 0 && ' • '}
+                      {devices.audioDevices.length > 0 && `${devices.audioDevices.length} microphone(s) detected`}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* Stream Summary */}
+            <Card className="p-4 bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-purple-900/30 border border-purple-500/30 mb-6">
+              <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                Ready to Go Live
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Title</span>
+                  <span className="text-white font-medium truncate max-w-[200px]">{title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Type</span>
+                  <span className="text-white font-medium capitalize">{selectedType?.replace('_', ' ')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Category</span>
+                  <span className="text-white font-medium capitalize">{category}</span>
+                </div>
+              </div>
+            </Card>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-between">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setStep(3);
+                }}
+                className="border-purple-500/30 text-purple-400 h-12 sm:h-10"
+                data-testid="back-step-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <Button
                 onClick={handleStartStream}
-                disabled={createStreamMutation.isPending}
-                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 h-14 sm:h-11 px-8 gap-2 text-base sm:text-sm font-semibold"
+                disabled={createStreamMutation.isPending || !stream}
+                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 h-14 sm:h-11 px-8 gap-2 text-base sm:text-sm font-semibold disabled:opacity-50"
                 data-testid="button-go-live"
               >
                 {createStreamMutation.isPending ? (
