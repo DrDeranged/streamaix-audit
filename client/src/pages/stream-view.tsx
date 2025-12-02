@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRoute, useLocation, Link } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,10 @@ import {
   UserPlus,
   Zap,
   BarChart3,
-  Plus
+  Plus,
+  Circle,
+  Play,
+  Pause
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -39,6 +42,8 @@ import { useStreamSocket } from '@/hooks/useStreamSocket';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
+import { StreamReactions, QuickReactButtons } from '@/components/streaming/StreamReactions';
+import { StreamPoll, CreatePollForm } from '@/components/streaming/StreamPoll';
 
 interface LiveStream {
   id: string;
@@ -236,6 +241,18 @@ export default function StreamViewPage() {
   const [showPredictionPanel, setShowPredictionPanel] = useState(false);
   const [predictionText, setPredictionText] = useState('');
   const [activeTipAlerts, setActiveTipAlerts] = useState<TipAlert[]>([]);
+  const [showPollCreator, setShowPollCreator] = useState(false);
+  const [activePoll, setActivePoll] = useState<{
+    id: string;
+    question: string;
+    options: { id: string; text: string; votes: number }[];
+    totalVotes: number;
+    isActive: boolean;
+    createdBy: string;
+  } | null>(null);
+  const [hasVotedOnPoll, setHasVotedOnPoll] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const streamId = params?.id || null;
@@ -281,6 +298,71 @@ export default function StreamViewPage() {
 
   const removeTipAlert = (id: string) => {
     setActiveTipAlerts(prev => prev.filter(a => a.id !== id));
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const handleCreatePoll = (question: string, options: string[]) => {
+    const newPoll = {
+      id: `poll-${Date.now()}`,
+      question,
+      options: options.map((text, i) => ({ id: `opt-${i}`, text, votes: 0 })),
+      totalVotes: 0,
+      isActive: true,
+      createdBy: user?.username || 'host',
+    };
+    setActivePoll(newPoll);
+    setShowPollCreator(false);
+    toast({
+      title: "Poll Created",
+      description: "Viewers can now vote on your poll!",
+    });
+  };
+
+  const handleVotePoll = (optionId: string) => {
+    if (!activePoll || hasVotedOnPoll) return;
+    
+    setActivePoll(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        options: prev.options.map(opt => 
+          opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
+        ),
+        totalVotes: prev.totalVotes + 1,
+      };
+    });
+    setHasVotedOnPoll(optionId);
+  };
+
+  const handleEndPoll = () => {
+    if (activePoll) {
+      setActivePoll(prev => prev ? { ...prev, isActive: false } : null);
+      toast({
+        title: "Poll Ended",
+        description: "Results are now final.",
+      });
+    }
+  };
+
+  const handleReaction = useCallback((emoji: string) => {
+    if (isConnected) {
+      sendMessage(`[reaction:${emoji}]`);
+    }
+  }, [isConnected, sendMessage]);
+
+  const formatRecordingTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSendMessage = () => {
@@ -601,6 +683,103 @@ export default function StreamViewPage() {
               </div>
             )}
           </Card>
+
+          {/* Viewer Engagement: Reactions & Polls */}
+          {isLive && (
+            <Card className="p-3 sm:p-4 bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-fuchsia-400" />
+                  Engage
+                </h3>
+                
+                {/* Host Controls */}
+                {isAuthenticated && stream.hostId === user?.id && (
+                  <div className="flex items-center gap-2">
+                    {isRecording ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsRecording(false)}
+                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8 text-xs"
+                        data-testid="button-stop-recording"
+                      >
+                        <Circle className="w-3 h-3 mr-1 fill-red-500 text-red-500 animate-pulse" />
+                        {formatRecordingTime(recordingDuration)}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setIsRecording(true); setRecordingDuration(0); }}
+                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8 text-xs"
+                        data-testid="button-start-recording"
+                      >
+                        <Circle className="w-3 h-3 mr-1" />
+                        Record
+                      </Button>
+                    )}
+                    
+                    {!activePoll && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowPollCreator(true)}
+                        className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 h-8 text-xs"
+                        data-testid="button-create-poll"
+                      >
+                        <BarChart3 className="w-3 h-3 mr-1" />
+                        Poll
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Quick Reactions */}
+              <div className="flex items-center justify-between">
+                <QuickReactButtons onReact={handleReaction} />
+                <StreamReactions streamId={streamId || ''} onReact={handleReaction} />
+              </div>
+              
+              {/* Active Poll */}
+              <AnimatePresence>
+                {activePoll && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4"
+                  >
+                    <StreamPoll
+                      poll={activePoll}
+                      hasVoted={hasVotedOnPoll || undefined}
+                      onVote={handleVotePoll}
+                      isHost={stream.hostId === user?.id}
+                      onEndPoll={handleEndPoll}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {/* Poll Creator */}
+              <AnimatePresence>
+                {showPollCreator && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4"
+                  >
+                    <CreatePollForm
+                      onCreate={handleCreatePoll}
+                      onCancel={() => setShowPollCreator(false)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          )}
 
           {/* Mobile: Quick Tip Buttons */}
           <div className="lg:hidden">
