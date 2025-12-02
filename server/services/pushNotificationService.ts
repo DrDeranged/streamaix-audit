@@ -127,6 +127,10 @@ class PushNotificationService {
       whaleAlerts?: boolean;
       volumeSpikes?: boolean;
       weeklyPreview?: boolean;
+      streamLive?: boolean;
+      streamTips?: boolean;
+      streamMilestones?: boolean;
+      streamReminders?: boolean;
     }
   ) {
     try {
@@ -339,6 +343,14 @@ class PushNotificationService {
         return subscription.volumeSpikes ?? true;
       case 'weekly_preview':
         return subscription.weeklyPreview ?? true;
+      case 'stream_live':
+        return subscription.streamLive ?? true;
+      case 'stream_tips':
+        return subscription.streamTips ?? true;
+      case 'stream_milestones':
+        return subscription.streamMilestones ?? true;
+      case 'stream_reminders':
+        return subscription.streamReminders ?? true;
       default:
         return true;
     }
@@ -633,6 +645,230 @@ class PushNotificationService {
     };
 
     return this.sendToUser(userId, payload, 'weekly_digest');
+  }
+
+  // ============================================
+  // STREAMING NOTIFICATIONS
+  // ============================================
+
+  async notifyStreamLive(
+    userId: string,
+    streamerName: string,
+    streamTitle: string,
+    streamType: 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
+    streamId: string,
+    streamerAvatar?: string
+  ) {
+    const streamTypeConfig = {
+      broadcast: { emoji: '📺', label: 'went live' },
+      trading_room: { emoji: '📈', label: 'opened a trading room' },
+      crypto_space: { emoji: '🎙️', label: 'started a crypto space' },
+      live_bounty: { emoji: '🎯', label: 'is streaming a live bounty' }
+    };
+
+    const config = streamTypeConfig[streamType] || streamTypeConfig.broadcast;
+
+    const payload: PushPayload = {
+      title: `${config.emoji} @${streamerName} ${config.label}!`,
+      body: this.truncate(streamTitle, 60),
+      url: `/streams/${streamId}`,
+      icon: streamerAvatar || '/icon-192.png',
+      tag: `stream-live-${streamId}`,
+      requireInteraction: true,
+      actions: [
+        { action: 'watch_now', title: '👁️ Watch Now' },
+        { action: 'remind_later', title: '⏰ Later' }
+      ],
+      timestamp: Date.now(),
+      data: { 
+        type: 'stream_live', 
+        streamId, 
+        streamerName, 
+        streamType,
+        streamTitle 
+      }
+    };
+
+    return this.sendToUser(userId, payload, 'stream_live');
+  }
+
+  async notifyStreamTip(
+    hostUserId: string,
+    tipperName: string,
+    tipAmount: number,
+    streamTitle: string,
+    streamId: string,
+    tipMessage?: string
+  ) {
+    const formatNumber = (n: number) => n >= 1000 ? `${(n/1000).toFixed(1)}K` : n.toFixed(0);
+    
+    const isLargeTip = tipAmount >= 100;
+    const emoji = tipAmount >= 500 ? '🚀' : tipAmount >= 100 ? '💎' : '💰';
+    
+    let body = `@${tipperName} sent ${formatNumber(tipAmount)} STREAM`;
+    if (tipMessage) {
+      body += `\n"${this.truncate(tipMessage, 40)}"`;
+    }
+
+    const payload: PushPayload = {
+      title: `${emoji} +${formatNumber(tipAmount)} STREAM Tip!`,
+      body,
+      url: `/streams/${streamId}`,
+      tag: `stream-tip-${streamId}-${Date.now()}`,
+      requireInteraction: isLargeTip,
+      actions: [
+        { action: 'thank_tipper', title: '💬 Thank' },
+        { action: 'view_stream', title: '📺 Stream' }
+      ],
+      timestamp: Date.now(),
+      data: { 
+        type: 'stream_tip', 
+        streamId, 
+        tipperName, 
+        tipAmount,
+        tipMessage 
+      }
+    };
+
+    return this.sendToUser(hostUserId, payload, 'stream_tips');
+  }
+
+  async notifyStreamMilestone(
+    hostUserId: string,
+    milestoneType: 'viewers' | 'tips' | 'duration' | 'followers',
+    milestoneValue: number,
+    streamTitle: string,
+    streamId: string
+  ) {
+    const formatNumber = (n: number) => n >= 1000 ? `${(n/1000).toFixed(1)}K` : n.toString();
+    
+    const configs = {
+      viewers: {
+        title: `🎉 ${formatNumber(milestoneValue)} viewers!`,
+        body: `Your stream "${this.truncate(streamTitle, 40)}" hit ${formatNumber(milestoneValue)} viewers!`,
+        emoji: '👥'
+      },
+      tips: {
+        title: `💎 ${formatNumber(milestoneValue)} STREAM in tips!`,
+        body: `Amazing! You've earned ${formatNumber(milestoneValue)} STREAM in tips`,
+        emoji: '💰'
+      },
+      duration: {
+        title: `⏱️ ${milestoneValue} hour${milestoneValue > 1 ? 's' : ''} streaming!`,
+        body: `You've been live for ${milestoneValue} hour${milestoneValue > 1 ? 's' : ''} - keep going!`,
+        emoji: '🔥'
+      },
+      followers: {
+        title: `🌟 +${formatNumber(milestoneValue)} new followers!`,
+        body: `You gained ${formatNumber(milestoneValue)} new followers during this stream!`,
+        emoji: '❤️'
+      }
+    };
+
+    const config = configs[milestoneType];
+
+    const payload: PushPayload = {
+      title: config.title,
+      body: config.body,
+      url: `/streams/${streamId}`,
+      tag: `stream-milestone-${milestoneType}-${milestoneValue}`,
+      requireInteraction: false,
+      actions: [
+        { action: 'celebrate', title: '🎉 Celebrate' },
+        { action: 'share', title: '📤 Share' }
+      ],
+      timestamp: Date.now(),
+      data: { 
+        type: 'stream_milestone', 
+        milestoneType, 
+        milestoneValue, 
+        streamId 
+      }
+    };
+
+    return this.sendToUser(hostUserId, payload, 'stream_milestones');
+  }
+
+  async notifyStreamReminder(
+    userId: string,
+    streamerName: string,
+    streamTitle: string,
+    scheduledTime: Date,
+    streamId: string,
+    minutesUntilStart: number
+  ) {
+    const timeLabel = minutesUntilStart <= 5 
+      ? 'Starting now!' 
+      : minutesUntilStart <= 15 
+        ? `In ${minutesUntilStart} minutes` 
+        : `In ${Math.round(minutesUntilStart / 60)} hour${minutesUntilStart >= 120 ? 's' : ''}`;
+
+    const payload: PushPayload = {
+      title: `🔔 @${streamerName} is about to go live`,
+      body: `${timeLabel}\n${this.truncate(streamTitle, 50)}`,
+      url: `/streams/${streamId}`,
+      tag: `stream-reminder-${streamId}`,
+      requireInteraction: true,
+      actions: [
+        { action: 'set_alarm', title: '⏰ Remind Me' },
+        { action: 'view_schedule', title: '📅 Schedule' }
+      ],
+      timestamp: Date.now(),
+      data: { 
+        type: 'stream_reminder', 
+        streamId, 
+        streamerName, 
+        scheduledTime: scheduledTime.toISOString(),
+        minutesUntilStart 
+      }
+    };
+
+    return this.sendToUser(userId, payload, 'stream_reminders');
+  }
+
+  async notifyFollowersStreamLive(
+    hostId: string,
+    hostUsername: string,
+    streamTitle: string,
+    streamType: 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
+    streamId: string,
+    hostAvatar?: string
+  ) {
+    try {
+      const { userFollows } = await import('@shared/schema');
+      
+      const followers = await db
+        .select({ followerId: userFollows.followerId })
+        .from(userFollows)
+        .where(eq(userFollows.followingId, hostId));
+
+      console.log(`🔔 [notifyFollowersStreamLive] Notifying ${followers.length} followers of @${hostUsername} going live`);
+
+      let sent = 0;
+      let failed = 0;
+
+      for (const follower of followers) {
+        try {
+          const result = await this.notifyStreamLive(
+            follower.followerId,
+            hostUsername,
+            streamTitle,
+            streamType,
+            streamId,
+            hostAvatar
+          );
+          if (result.sent > 0) sent++;
+        } catch (error) {
+          failed++;
+        }
+      }
+
+      console.log(`🔔 [notifyFollowersStreamLive] Result: ${sent} sent, ${failed} failed`);
+      return { success: true, followersNotified: sent, failed };
+    } catch (error: any) {
+      console.error('🔔 [notifyFollowersStreamLive] Error:', error);
+      return { success: false, error: error.message };
+    }
   }
 }
 
