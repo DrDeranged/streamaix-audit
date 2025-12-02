@@ -1,6 +1,7 @@
 import { Navigation } from "@/components/landing/navigation";
 import { AICapabilitiesBanner } from "@/components/landing/ai-capabilities-banner";
 import { HeroSection } from "@/components/landing/hero-section";
+import { LiveStreamingTerminal } from "@/components/landing/live-streaming-terminal";
 import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
 import LiveCryptoVideos from "@/components/landing/live-crypto-videos";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
@@ -20,6 +21,7 @@ export default function Landing() {
         <Navigation />
         <AICapabilitiesBanner />
         <HeroSection />
+        <LiveStreamingTerminal />
         <AIProcessor />
         <LiveCryptoVideos />
         <BountyFeed />

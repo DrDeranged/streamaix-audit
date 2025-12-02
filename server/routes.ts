@@ -72,7 +72,7 @@ import {
 import { Request, Response } from "express";
 import cors from "cors";
 import { db } from "./db";
-import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions, predictionLeagues, leagueParticipants, leagueTrades, marketTrades, pushSubscriptions } from "../shared/schema";
+import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions, predictionLeagues, leagueParticipants, leagueTrades, marketTrades, pushSubscriptions, liveStreams, streamParticipants, streamMessages, streamTips, streamPredictions } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
 // Helper function to handle validation errors
@@ -11573,6 +11573,559 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? 'Some notifications failed. Check if browser notifications are enabled and not blocked.'
         : undefined
     });
+  }));
+
+  // =============================================================================
+  // LIVE STREAMING API
+  // =============================================================================
+
+  // Get live streams (currently active)
+  app.get("/api/streams/live", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const streams = await db.select({
+        id: liveStreams.id,
+        title: liveStreams.title,
+        description: liveStreams.description,
+        streamType: liveStreams.streamType,
+        hostId: liveStreams.hostId,
+        status: liveStreams.status,
+        currentViewers: liveStreams.currentViewers,
+        peakViewers: liveStreams.peakViewers,
+        totalTipsReceived: liveStreams.totalTipsReceived,
+        category: liveStreams.category,
+        tags: liveStreams.tags,
+        linkedBountyId: liveStreams.linkedBountyId,
+        linkedMarketId: liveStreams.linkedMarketId,
+        actualStart: liveStreams.actualStart,
+        thumbnailUrl: liveStreams.thumbnailUrl,
+      })
+      .from(liveStreams)
+      .where(eq(liveStreams.status, 'live'))
+      .orderBy(desc(liveStreams.currentViewers))
+      .limit(20);
+      
+      // Enrich with host info
+      const enrichedStreams = await Promise.all(streams.map(async (stream) => {
+        const host = await storage.getUser(stream.hostId);
+        return {
+          ...stream,
+          hostUsername: host?.username,
+          hostAvatar: host?.avatar,
+        };
+      }));
+      
+      res.json({ success: true, streams: enrichedStreams });
+    } catch (error: any) {
+      res.json({ success: true, streams: [] });
+    }
+  }));
+
+  // Get scheduled streams
+  app.get("/api/streams/scheduled", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const streams = await db.select({
+        id: liveStreams.id,
+        title: liveStreams.title,
+        description: liveStreams.description,
+        streamType: liveStreams.streamType,
+        hostId: liveStreams.hostId,
+        status: liveStreams.status,
+        category: liveStreams.category,
+        tags: liveStreams.tags,
+        scheduledStart: liveStreams.scheduledStart,
+        thumbnailUrl: liveStreams.thumbnailUrl,
+      })
+      .from(liveStreams)
+      .where(eq(liveStreams.status, 'scheduled'))
+      .orderBy(asc(liveStreams.scheduledStart))
+      .limit(20);
+      
+      // Enrich with host info
+      const enrichedStreams = await Promise.all(streams.map(async (stream) => {
+        const host = await storage.getUser(stream.hostId);
+        return {
+          ...stream,
+          hostUsername: host?.username,
+          hostAvatar: host?.avatar,
+        };
+      }));
+      
+      res.json({ success: true, streams: enrichedStreams });
+    } catch (error: any) {
+      res.json({ success: true, streams: [] });
+    }
+  }));
+
+  // Get all streams (for browse page)
+  app.get("/api/streams", asyncHandler(async (req: Request, res: Response) => {
+    const { type, status, limit = 50 } = req.query;
+    
+    try {
+      let query = db.select().from(liveStreams);
+      
+      const streams = await query
+        .orderBy(desc(liveStreams.createdAt))
+        .limit(Number(limit));
+      
+      // Enrich with host info
+      const enrichedStreams = await Promise.all(streams.map(async (stream) => {
+        const host = await storage.getUser(stream.hostId);
+        return {
+          ...stream,
+          hostUsername: host?.username,
+          hostAvatar: host?.avatar,
+        };
+      }));
+      
+      res.json({ success: true, streams: enrichedStreams });
+    } catch (error: any) {
+      res.json({ success: true, streams: [] });
+    }
+  }));
+
+  // Get single stream details
+  app.get("/api/streams/:id", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const [stream] = await db.select()
+        .from(liveStreams)
+        .where(eq(liveStreams.id, req.params.id))
+        .limit(1);
+      
+      if (!stream) {
+        return res.status(404).json({ success: false, error: 'Stream not found' });
+      }
+      
+      const host = await storage.getUser(stream.hostId);
+      
+      // Get participant count
+      const [{ count }] = await db.select({ count: sql<number>`count(*)` })
+        .from(streamParticipants)
+        .where(and(
+          eq(streamParticipants.streamId, stream.id),
+          eq(streamParticipants.isActive, true)
+        ));
+      
+      res.json({ 
+        success: true, 
+        stream: {
+          ...stream,
+          hostUsername: host?.username,
+          hostAvatar: host?.avatar,
+          participantCount: Number(count),
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  // Create a new stream
+  app.post("/api/streams", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { title, description, streamType, category, tags, scheduledStart, linkedBountyId, linkedMarketId, isPrivate, ticketPrice } = req.body;
+    
+    if (!title || !streamType) {
+      return res.status(400).json({ success: false, error: 'Title and stream type are required' });
+    }
+    
+    const roomId = `stream_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    const [newStream] = await db.insert(liveStreams).values({
+      title,
+      description,
+      streamType,
+      hostId: req.user.id,
+      status: scheduledStart ? 'scheduled' : 'live',
+      category,
+      tags,
+      scheduledStart: scheduledStart ? new Date(scheduledStart) : null,
+      actualStart: scheduledStart ? null : new Date(),
+      linkedBountyId,
+      linkedMarketId,
+      isPrivate: isPrivate || false,
+      ticketPrice: ticketPrice || 0,
+      roomId,
+    }).returning();
+    
+    // Add host as participant
+    await db.insert(streamParticipants).values({
+      streamId: newStream.id,
+      userId: req.user.id,
+      role: 'host',
+      isActive: true,
+    });
+    
+    res.json({ success: true, stream: newStream });
+  }));
+
+  // Start a scheduled stream
+  app.post("/api/streams/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+    
+    if (stream.hostId !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Only the host can start the stream' });
+    }
+    
+    const [updatedStream] = await db.update(liveStreams)
+      .set({
+        status: 'live',
+        actualStart: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(liveStreams.id, req.params.id))
+      .returning();
+    
+    res.json({ success: true, stream: updatedStream });
+  }));
+
+  // End a stream
+  app.post("/api/streams/:id/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+    
+    if (stream.hostId !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Only the host can end the stream' });
+    }
+    
+    const actualEnd = new Date();
+    const durationSeconds = stream.actualStart 
+      ? Math.floor((actualEnd.getTime() - new Date(stream.actualStart).getTime()) / 1000)
+      : 0;
+    
+    const [updatedStream] = await db.update(liveStreams)
+      .set({
+        status: 'ended',
+        actualEnd,
+        durationSeconds,
+        updatedAt: new Date(),
+      })
+      .where(eq(liveStreams.id, req.params.id))
+      .returning();
+    
+    // Mark all participants as inactive
+    await db.update(streamParticipants)
+      .set({ isActive: false, leftAt: new Date() })
+      .where(eq(streamParticipants.streamId, req.params.id));
+    
+    res.json({ success: true, stream: updatedStream });
+  }));
+
+  // Join a stream
+  app.post("/api/streams/:id/join", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+    
+    if (stream.status !== 'live') {
+      return res.status(400).json({ success: false, error: 'Stream is not live' });
+    }
+    
+    // Check if already a participant
+    const [existing] = await db.select()
+      .from(streamParticipants)
+      .where(and(
+        eq(streamParticipants.streamId, req.params.id),
+        eq(streamParticipants.userId, req.user.id)
+      ))
+      .limit(1);
+    
+    if (existing) {
+      // Reactivate if exists
+      await db.update(streamParticipants)
+        .set({ isActive: true, leftAt: null })
+        .where(eq(streamParticipants.id, existing.id));
+    } else {
+      // Create new participant
+      await db.insert(streamParticipants).values({
+        streamId: req.params.id,
+        userId: req.user.id,
+        role: 'viewer',
+        isActive: true,
+      });
+    }
+    
+    // Update viewer count
+    await db.update(liveStreams)
+      .set({
+        currentViewers: sql`${liveStreams.currentViewers} + 1`,
+        totalViews: sql`${liveStreams.totalViews} + 1`,
+        peakViewers: sql`GREATEST(${liveStreams.peakViewers}, ${liveStreams.currentViewers} + 1)`,
+      })
+      .where(eq(liveStreams.id, req.params.id));
+    
+    res.json({ success: true, roomId: stream.roomId });
+  }));
+
+  // Leave a stream
+  app.post("/api/streams/:id/leave", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    await db.update(streamParticipants)
+      .set({ isActive: false, leftAt: new Date() })
+      .where(and(
+        eq(streamParticipants.streamId, req.params.id),
+        eq(streamParticipants.userId, req.user.id)
+      ));
+    
+    // Update viewer count
+    await db.update(liveStreams)
+      .set({
+        currentViewers: sql`GREATEST(${liveStreams.currentViewers} - 1, 0)`,
+      })
+      .where(eq(liveStreams.id, req.params.id));
+    
+    res.json({ success: true });
+  }));
+
+  // Send a tip to streamer
+  app.post("/api/streams/:id/tip", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { amount, message, isHighlighted } = req.body;
+    
+    if (!amount || amount < 1) {
+      return res.status(400).json({ success: false, error: 'Invalid tip amount' });
+    }
+    
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+    
+    // Check user balance
+    const user = await storage.getUser(req.user.id);
+    if (!user || (user.streamPoints || 0) < amount) {
+      return res.status(400).json({ success: false, error: 'Insufficient STREAM points' });
+    }
+    
+    // Deduct from tipper
+    await db.update(users)
+      .set({ streamPoints: sql`${users.streamPoints} - ${amount}` })
+      .where(eq(users.id, req.user.id));
+    
+    // Add to streamer
+    await db.update(users)
+      .set({ streamPoints: sql`${users.streamPoints} + ${amount}` })
+      .where(eq(users.id, stream.hostId));
+    
+    // Record the tip
+    const [tip] = await db.insert(streamTips).values({
+      streamId: req.params.id,
+      tipperId: req.user.id,
+      recipientId: stream.hostId,
+      amount,
+      message,
+      isHighlighted: isHighlighted || false,
+    }).returning();
+    
+    // Update stream tip total
+    await db.update(liveStreams)
+      .set({ totalTipsReceived: sql`${liveStreams.totalTipsReceived} + ${amount}` })
+      .where(eq(liveStreams.id, req.params.id));
+    
+    res.json({ success: true, tip });
+  }));
+
+  // Get stream messages/chat
+  app.get("/api/streams/:id/messages", asyncHandler(async (req: Request, res: Response) => {
+    const { limit = 50, before } = req.query;
+    
+    try {
+      let query = db.select({
+        id: streamMessages.id,
+        userId: streamMessages.userId,
+        content: streamMessages.content,
+        messageType: streamMessages.messageType,
+        metadata: streamMessages.metadata,
+        isPinned: streamMessages.isPinned,
+        reactions: streamMessages.reactions,
+        createdAt: streamMessages.createdAt,
+      })
+      .from(streamMessages)
+      .where(and(
+        eq(streamMessages.streamId, req.params.id),
+        eq(streamMessages.isDeleted, false)
+      ))
+      .orderBy(desc(streamMessages.createdAt))
+      .limit(Number(limit));
+      
+      const messages = await query;
+      
+      // Enrich with user info
+      const enrichedMessages = await Promise.all(messages.map(async (msg) => {
+        const user = await storage.getUser(msg.userId);
+        return {
+          ...msg,
+          username: user?.username,
+          userAvatar: user?.avatar,
+        };
+      }));
+      
+      res.json({ success: true, messages: enrichedMessages.reverse() });
+    } catch (error: any) {
+      res.json({ success: true, messages: [] });
+    }
+  }));
+
+  // Send a message to stream
+  app.post("/api/streams/:id/messages", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { content, messageType = 'chat', metadata } = req.body;
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ success: false, error: 'Message content is required' });
+    }
+    
+    const [message] = await db.insert(streamMessages).values({
+      streamId: req.params.id,
+      userId: req.user.id,
+      content: content.trim(),
+      messageType,
+      metadata,
+    }).returning();
+    
+    // Update stream message count
+    await db.update(liveStreams)
+      .set({ totalMessages: sql`${liveStreams.totalMessages} + 1` })
+      .where(eq(liveStreams.id, req.params.id));
+    
+    const user = await storage.getUser(req.user.id);
+    
+    res.json({ 
+      success: true, 
+      message: {
+        ...message,
+        username: user?.username,
+        userAvatar: user?.avatar,
+      }
+    });
+  }));
+
+  // Submit a prediction during stream
+  app.post("/api/streams/:id/predictions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { predictionText, confidence, timestamp } = req.body;
+    
+    if (!predictionText) {
+      return res.status(400).json({ success: false, error: 'Prediction text is required' });
+    }
+    
+    const [prediction] = await db.insert(streamPredictions).values({
+      streamId: req.params.id,
+      predictorId: req.user.id,
+      predictionText,
+      confidence: confidence || null,
+      timestamp: timestamp || null,
+    }).returning();
+    
+    res.json({ success: true, prediction });
+  }));
+
+  // Vote on a stream prediction (for market creation)
+  app.post("/api/streams/predictions/:id/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { vote } = req.body; // 'up' or 'down'
+    
+    if (vote === 'up') {
+      await db.update(streamPredictions)
+        .set({ upvotes: sql`${streamPredictions.upvotes} + 1` })
+        .where(eq(streamPredictions.id, req.params.id));
+    } else if (vote === 'down') {
+      await db.update(streamPredictions)
+        .set({ downvotes: sql`${streamPredictions.downvotes} + 1` })
+        .where(eq(streamPredictions.id, req.params.id));
+    }
+    
+    res.json({ success: true });
+  }));
+
+  // Get stream stats
+  app.get("/api/streams/stats/overview", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const [liveCount] = await db.select({ count: sql<number>`count(*)` })
+        .from(liveStreams)
+        .where(eq(liveStreams.status, 'live'));
+      
+      const [totalViewers] = await db.select({ sum: sql<number>`COALESCE(SUM(current_viewers), 0)` })
+        .from(liveStreams)
+        .where(eq(liveStreams.status, 'live'));
+      
+      const [totalStreams] = await db.select({ count: sql<number>`count(*)` })
+        .from(liveStreams);
+      
+      const [totalTips] = await db.select({ sum: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(streamTips);
+      
+      res.json({
+        success: true,
+        stats: {
+          liveStreams: Number(liveCount?.count || 0),
+          totalViewers: Number(totalViewers?.sum || 0),
+          totalStreamsAllTime: Number(totalStreams?.count || 0),
+          totalTipsAllTime: Number(totalTips?.sum || 0),
+        }
+      });
+    } catch (error: any) {
+      res.json({
+        success: true,
+        stats: {
+          liveStreams: 0,
+          totalViewers: 0,
+          totalStreamsAllTime: 0,
+          totalTipsAllTime: 0,
+        }
+      });
+    }
   }));
 
   // =============================================================================

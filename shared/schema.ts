@@ -5214,3 +5214,235 @@ export type GovernanceProposal = typeof governanceProposals.$inferSelect;
 
 export type InsertGovernanceVote = z.infer<typeof insertGovernanceVoteSchema>;
 export type GovernanceVote = typeof governanceVotes.$inferSelect;
+
+// ==================== LIVE STREAMING SYSTEM ====================
+
+export const liveStreams = pgTable("live_streams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Stream basics
+  title: text("title").notNull(),
+  description: text("description"),
+  thumbnailUrl: text("thumbnail_url"),
+  
+  // Stream type (maps to the 4 terminal modes)
+  streamType: text("stream_type").notNull().default("broadcast"), // broadcast, trading_room, audio_space, live_bounty
+  
+  // Host information
+  hostId: varchar("host_id").references(() => users.id).notNull(),
+  hostAvatarId: varchar("host_avatar_id").references(() => knowledgeAvatars.id), // If Knowledge Avatar is hosting
+  
+  // Stream state
+  status: text("status").notNull().default("scheduled"), // scheduled, live, ended, cancelled
+  isRecording: boolean("is_recording").default(false),
+  
+  // Audience settings
+  maxViewers: integer("max_viewers").default(1000),
+  isPrivate: boolean("is_private").default(false),
+  requiresTicket: boolean("requires_ticket").default(false),
+  ticketPrice: integer("ticket_price").default(0), // STREAM points
+  
+  // Platform integrations
+  linkedBountyId: varchar("linked_bounty_id").references(() => bounties.id), // For live_bounty type
+  linkedMarketId: varchar("linked_market_id").references(() => predictionMarkets.id), // For trading_room type
+  
+  // Categories and tags
+  category: text("category"), // crypto, trading, defi, nft, education, ama
+  tags: text("tags").array(),
+  
+  // WebRTC/Streaming details
+  roomId: text("room_id").unique(), // WebRTC room identifier
+  streamKey: text("stream_key"), // For RTMP streaming (future)
+  
+  // Stats (updated in real-time)
+  currentViewers: integer("current_viewers").default(0),
+  peakViewers: integer("peak_viewers").default(0),
+  totalViews: integer("total_views").default(0),
+  totalTipsReceived: integer("total_tips_received").default(0),
+  totalMessages: integer("total_messages").default(0),
+  
+  // Scheduling
+  scheduledStart: timestamp("scheduled_start"),
+  actualStart: timestamp("actual_start"),
+  actualEnd: timestamp("actual_end"),
+  durationSeconds: integer("duration_seconds"),
+  
+  // AI-generated content (after stream ends)
+  transcription: text("transcription"),
+  aiSummary: text("ai_summary"),
+  keyMoments: jsonb("key_moments"), // [{ timestamp, description, type }]
+  extractedPredictions: jsonb("extracted_predictions"), // AI-detected predictions for market creation
+  
+  // Generated summary (links to summaries table if auto-generated)
+  generatedSummaryId: varchar("generated_summary_id").references(() => summaries.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const streamParticipants = pgTable("stream_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Role in stream
+  role: text("role").notNull().default("viewer"), // host, co_host, speaker, viewer, moderator
+  
+  // Participation state
+  isActive: boolean("is_active").default(true),
+  isMuted: boolean("is_muted").default(false),
+  isVideoOn: boolean("is_video_on").default(false),
+  isScreenSharing: boolean("is_screen_sharing").default(false),
+  handRaised: boolean("hand_raised").default(false),
+  
+  // For audio spaces - speaking request queue
+  speakRequestedAt: timestamp("speak_requested_at"),
+  speakApprovedAt: timestamp("speak_approved_at"),
+  
+  // Engagement tracking
+  totalWatchTime: integer("total_watch_time").default(0), // seconds
+  messagesCount: integer("messages_count").default(0),
+  tipsGiven: integer("tips_given").default(0),
+  reactionsGiven: integer("reactions_given").default(0),
+  
+  joinedAt: timestamp("joined_at").defaultNow(),
+  leftAt: timestamp("left_at"),
+});
+
+export const streamTips = pgTable("stream_tips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  tipperId: varchar("tipper_id").references(() => users.id).notNull(),
+  recipientId: varchar("recipient_id").references(() => users.id).notNull(), // Usually the host
+  
+  amount: integer("amount").notNull(), // STREAM points
+  message: text("message"), // Optional tip message
+  
+  // Display settings
+  isHighlighted: boolean("is_highlighted").default(false), // Super chat style highlight
+  highlightColor: text("highlight_color"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const streamMessages = pgTable("stream_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Message content
+  content: text("content").notNull(),
+  messageType: text("message_type").notNull().default("chat"), // chat, prediction, question, poll, announcement, tip_message
+  
+  // For predictions/polls
+  metadata: jsonb("metadata"), // { prediction: "BTC > 100k", pollOptions: [...], etc }
+  
+  // Moderation
+  isDeleted: boolean("is_deleted").default(false),
+  deletedBy: varchar("deleted_by").references(() => users.id),
+  isPinned: boolean("is_pinned").default(false),
+  
+  // Reactions aggregation
+  reactions: jsonb("reactions").default({}), // { "🚀": 5, "💎": 3 }
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const streamRecordings = pgTable("stream_recordings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  
+  // Recording details
+  recordingUrl: text("recording_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  durationSeconds: integer("duration_seconds"),
+  fileSizeBytes: integer("file_size_bytes"),
+  
+  // Processing status
+  status: text("status").notNull().default("processing"), // processing, ready, failed, deleted
+  
+  // Decentralized storage
+  ipfsHash: text("ipfs_hash"),
+  arweaveId: text("arweave_id"),
+  
+  // Clips/highlights
+  isClip: boolean("is_clip").default(false),
+  clipStartTime: integer("clip_start_time"), // seconds from start
+  clipEndTime: integer("clip_end_time"),
+  parentRecordingId: varchar("parent_recording_id").references((): AnyPgColumn => streamRecordings.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream-to-Market pipeline: Create prediction markets from live stream predictions
+export const streamPredictions = pgTable("stream_predictions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  predictorId: varchar("predictor_id").references(() => users.id).notNull(),
+  
+  // The prediction made during stream
+  predictionText: text("prediction_text").notNull(),
+  confidence: integer("confidence"), // 0-100
+  timestamp: integer("timestamp"), // seconds into stream when made
+  
+  // Status of market creation
+  marketCreated: boolean("market_created").default(false),
+  marketId: varchar("market_id").references(() => predictionMarkets.id),
+  
+  // Community interest (used to decide whether to create market)
+  upvotes: integer("upvotes").default(0),
+  downvotes: integer("downvotes").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertLiveStreamSchema = createInsertSchema(liveStreams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStreamParticipantSchema = createInsertSchema(streamParticipants).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export const insertStreamTipSchema = createInsertSchema(streamTips).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamMessageSchema = createInsertSchema(streamMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamRecordingSchema = createInsertSchema(streamRecordings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamPredictionSchema = createInsertSchema(streamPredictions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types
+export type InsertLiveStream = z.infer<typeof insertLiveStreamSchema>;
+export type LiveStream = typeof liveStreams.$inferSelect;
+
+export type InsertStreamParticipant = z.infer<typeof insertStreamParticipantSchema>;
+export type StreamParticipant = typeof streamParticipants.$inferSelect;
+
+export type InsertStreamTip = z.infer<typeof insertStreamTipSchema>;
+export type StreamTip = typeof streamTips.$inferSelect;
+
+export type InsertStreamMessage = z.infer<typeof insertStreamMessageSchema>;
+export type StreamMessage = typeof streamMessages.$inferSelect;
+
+export type InsertStreamRecording = z.infer<typeof insertStreamRecordingSchema>;
+export type StreamRecording = typeof streamRecordings.$inferSelect;
+
+export type InsertStreamPrediction = z.infer<typeof insertStreamPredictionSchema>;
+export type StreamPrediction = typeof streamPredictions.$inferSelect;
