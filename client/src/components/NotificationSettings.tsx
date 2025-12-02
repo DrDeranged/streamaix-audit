@@ -38,6 +38,10 @@ interface NotificationPreferences {
   whaleAlerts: boolean;
   liquidationAlerts: boolean;
   fundingRateAlerts: boolean;
+  streamLive: boolean;
+  streamTips: boolean;
+  streamMilestones: boolean;
+  streamReminders: boolean;
 }
 
 interface DiagnosticStep {
@@ -88,6 +92,10 @@ export function NotificationSettings() {
     whaleAlerts: true,
     liquidationAlerts: true,
     fundingRateAlerts: true,
+    streamLive: true,
+    streamTips: true,
+    streamMilestones: true,
+    streamReminders: true,
   });
 
   const { data: subscriptionsData } = useQuery<{ success: boolean; subscriptions: any[] }>({
@@ -297,6 +305,10 @@ export function NotificationSettings() {
         whaleAlerts: sub.whaleAlerts ?? true,
         liquidationAlerts: sub.liquidationAlerts ?? true,
         fundingRateAlerts: sub.fundingRateAlerts ?? true,
+        streamLive: sub.streamLive ?? true,
+        streamTips: sub.streamTips ?? true,
+        streamMilestones: sub.streamMilestones ?? true,
+        streamReminders: sub.streamReminders ?? true,
       });
     }
   }, [subscriptionsData]);
@@ -701,6 +713,38 @@ export function NotificationSettings() {
                     <div 
                       key={key}
                       className="flex items-center justify-between py-2 px-3 rounded-lg bg-amber-500/5 hover:bg-amber-500/10 transition-colors border border-amber-500/10"
+                    >
+                      <div>
+                        <div className="text-sm font-medium">{label}</div>
+                        <div className="text-xs text-muted-foreground">{desc}</div>
+                      </div>
+                      <Switch
+                        checked={preferences[key]}
+                        onCheckedChange={(checked) => handlePreferenceChange(key, checked)}
+                        disabled={updatePreferencesMutation.isPending}
+                        data-testid={`switch-notification-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-3 border-t border-pink-500/10">
+                <h4 className="text-sm font-medium text-pink-400 flex items-center gap-2">
+                  🎬 Live Streaming
+                  <span className="text-xs bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full">Live</span>
+                </h4>
+                
+                <div className="space-y-2">
+                  {[
+                    { key: 'streamLive' as const, label: '📺 Creator Goes Live', desc: 'When creators you follow start a live broadcast' },
+                    { key: 'streamTips' as const, label: '💎 Tips Received', desc: 'When viewers tip STREAM tokens on your live streams' },
+                    { key: 'streamMilestones' as const, label: '🏆 Stream Milestones', desc: 'Celebrate when you hit viewer or tip milestones' },
+                    { key: 'streamReminders' as const, label: '⏰ Scheduled Reminders', desc: 'Reminders when scheduled streams are about to start' },
+                  ].map(({ key, label, desc }) => (
+                    <div 
+                      key={key}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-pink-500/5 hover:bg-pink-500/10 transition-colors border border-pink-500/10"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
