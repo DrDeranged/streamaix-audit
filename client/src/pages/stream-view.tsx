@@ -45,6 +45,7 @@ import { cn } from '@/lib/utils';
 import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
 import { StreamReactions, QuickReactButtons } from '@/components/streaming/StreamReactions';
 import { StreamPoll, CreatePollForm } from '@/components/streaming/StreamPoll';
+import { BroadcasterView } from '@/components/streaming/BroadcasterView';
 
 interface LiveStream {
   id: string;
@@ -456,6 +457,33 @@ export default function StreamViewPage() {
     predictionMutation.mutate(predictionText.trim());
   };
 
+  const endStreamMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/streams/${streamId}/end`, {
+        method: 'POST',
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Stream ended",
+        description: "Your stream has been ended successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/streams'] });
+      setLocation('/streams');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Couldn't end stream",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEndStream = () => {
+    endStreamMutation.mutate();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center safe-area-inset">
@@ -573,8 +601,16 @@ export default function StreamViewPage() {
               ))}
             </AnimatePresence>
             
-            {/* AI Avatar Stream or Regular Stream Display */}
-            {isLive && stream.isAiHost ? (
+            {/* Broadcaster View - Shows camera preview for the host */}
+            {isLive && isHost && !stream.isAiHost ? (
+              <BroadcasterView
+                streamId={stream.id}
+                streamType={stream.streamType}
+                viewerCount={displayViewerCount}
+                onEndStream={handleEndStream}
+                isEnding={endStreamMutation.isPending}
+              />
+            ) : isLive && stream.isAiHost ? (
               <AIAvatarStream
                 hostName={stream.hostUsername || 'AI Host'}
                 hostAvatar={stream.hostAvatar}
