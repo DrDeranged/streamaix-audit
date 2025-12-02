@@ -12295,6 +12295,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // GAMIFICATION SYSTEM - Daily Quests, Weekly Missions, XP, Season Pass
+  // =============================================================================
+
+  const { gamificationService } = await import('./services/gamificationService');
+
+  // Get full gamification dashboard
+  app.get("/api/gamification/dashboard", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const dashboard = await gamificationService.getGamificationDashboard(userId);
+    res.json({ success: true, dashboard });
+  }));
+
+  // Get user level info
+  app.get("/api/gamification/level", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const level = await gamificationService.getUserLevel(userId);
+    res.json({ success: true, level });
+  }));
+
+  // Get daily quests
+  app.get("/api/gamification/quests/daily", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const quests = await gamificationService.getDailyQuests(userId);
+    res.json({ success: true, quests });
+  }));
+
+  // Get weekly missions
+  app.get("/api/gamification/missions/weekly", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const missions = await gamificationService.getWeeklyMissions(userId);
+    res.json({ success: true, missions });
+  }));
+
+  // Get user streaks
+  app.get("/api/gamification/streaks", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const streaks = await gamificationService.getAllStreaks(userId);
+    res.json({ success: true, streaks });
+  }));
+
+  // Update streak (called when user performs activity)
+  app.post("/api/gamification/streaks/:type", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { type } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const streak = await gamificationService.updateStreak(userId, type);
+    res.json({ success: true, streak });
+  }));
+
+  // Get season pass progress
+  app.get("/api/gamification/season-pass", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const seasonPass = await gamificationService.getSeasonPassProgress(userId);
+    res.json({ success: true, seasonPass });
+  }));
+
+  // Get gamification notifications
+  app.get("/api/gamification/notifications", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const notifications = await gamificationService.getUnreadNotifications(userId);
+    res.json({ success: true, notifications });
+  }));
+
+  // Mark notification as read
+  app.post("/api/gamification/notifications/:id/read", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    await gamificationService.markNotificationRead(id);
+    res.json({ success: true });
+  }));
+
+  // Track action for quest progress (used internally and can be called manually)
+  app.post("/api/gamification/track-action", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { actionType, count = 1 } = req.body;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const result = await gamificationService.updateQuestProgress(userId, actionType, count);
+    res.json({ success: true, ...result });
+  }));
+
+  // =============================================================================
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   

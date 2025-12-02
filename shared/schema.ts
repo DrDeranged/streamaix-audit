@@ -5446,3 +5446,423 @@ export type StreamRecording = typeof streamRecordings.$inferSelect;
 
 export type InsertStreamPrediction = z.infer<typeof insertStreamPredictionSchema>;
 export type StreamPrediction = typeof streamPredictions.$inferSelect;
+
+// =============================================================================
+// ENHANCED GAMIFICATION SYSTEM - DAILY QUESTS, MISSIONS, XP, SEASON PASS
+// =============================================================================
+
+// Daily Quests - Rotating daily challenges
+export const dailyQuests = pgTable("daily_quests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  
+  // Quest type and requirements
+  questType: text("quest_type").notNull(), // trade, predict, social, content, streak
+  actionRequired: text("action_required").notNull(), // make_trade, create_prediction, comment, etc
+  targetCount: integer("target_count").notNull().default(1),
+  
+  // Rewards
+  xpReward: integer("xp_reward").notNull().default(100),
+  streamReward: integer("stream_reward").default(0),
+  bonusMultiplier: real("bonus_multiplier").default(1.0), // multiplier for streak bonuses
+  
+  // Quest settings
+  difficulty: text("difficulty").default("easy"), // easy, medium, hard, legendary
+  category: text("category").default("general"), // trading, prediction, social, exploration
+  
+  // Availability
+  isActive: boolean("is_active").default(true),
+  requiresLevel: integer("requires_level").default(1),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Daily Quest Progress
+export const userDailyQuests = pgTable("user_daily_quests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  questId: varchar("quest_id").references(() => dailyQuests.id).notNull(),
+  
+  // Progress
+  currentProgress: integer("current_progress").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  
+  // Rewards
+  xpEarned: integer("xp_earned").default(0),
+  streamEarned: integer("stream_earned").default(0),
+  rewardClaimed: boolean("reward_claimed").default(false),
+  
+  // Date tracking
+  questDate: timestamp("quest_date").notNull(), // The day this quest was assigned
+  expiresAt: timestamp("expires_at").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Weekly Missions - Bigger challenges with bigger rewards
+export const weeklyMissions = pgTable("weekly_missions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  
+  // Mission structure
+  missionType: text("mission_type").notNull(), // multi_step, cumulative, challenge
+  objectives: jsonb("objectives").notNull(), // [{ id, description, actionType, target, progress }]
+  
+  // Rewards
+  xpReward: integer("xp_reward").notNull().default(500),
+  streamReward: integer("stream_reward").default(0),
+  badgeReward: text("badge_reward"), // Badge ID if completing unlocks a badge
+  titleReward: text("title_reward"), // Special title like "Weekly Champion"
+  
+  // Settings
+  difficulty: text("difficulty").default("medium"),
+  category: text("category").default("general"),
+  isActive: boolean("is_active").default(true),
+  requiresLevel: integer("requires_level").default(1),
+  
+  // Week tracking
+  weekNumber: integer("week_number"), // Week of year
+  year: integer("year"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Weekly Mission Progress
+export const userWeeklyMissions = pgTable("user_weekly_missions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  missionId: varchar("mission_id").references(() => weeklyMissions.id).notNull(),
+  
+  // Progress
+  objectivesProgress: jsonb("objectives_progress"), // [{ objectiveId, current, target, completed }]
+  overallProgress: integer("overall_progress").default(0), // percentage 0-100
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  
+  // Rewards
+  xpEarned: integer("xp_earned").default(0),
+  streamEarned: integer("stream_earned").default(0),
+  rewardClaimed: boolean("reward_claimed").default(false),
+  
+  // Week tracking
+  weekStart: timestamp("week_start").notNull(),
+  weekEnd: timestamp("week_end").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User XP and Leveling System
+export const userLevels = pgTable("user_levels", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  
+  // Current level and XP
+  currentLevel: integer("current_level").default(1),
+  currentXp: integer("current_xp").default(0),
+  totalXpEarned: integer("total_xp_earned").default(0),
+  
+  // Level progress
+  xpToNextLevel: integer("xp_to_next_level").default(1000),
+  levelProgress: real("level_progress").default(0), // percentage 0-100
+  
+  // Prestige system (optional reset for rewards)
+  prestigeLevel: integer("prestige_level").default(0),
+  prestigeMultiplier: real("prestige_multiplier").default(1.0),
+  
+  // Stats
+  levelUpsThisWeek: integer("level_ups_this_week").default(0),
+  levelUpsThisMonth: integer("level_ups_this_month").default(0),
+  lastLevelUp: timestamp("last_level_up"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// XP Transactions - Track all XP gains/losses
+export const xpTransactions = pgTable("xp_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // XP details
+  xpAmount: integer("xp_amount").notNull(), // positive = gain, negative = loss
+  xpType: text("xp_type").notNull(), // quest, mission, trade, achievement, bonus, penalty
+  source: text("source").notNull(), // daily_quest, weekly_mission, trade_win, etc
+  sourceId: varchar("source_id"), // ID of the quest/mission/trade that gave XP
+  
+  // Context
+  description: text("description"),
+  multiplierApplied: real("multiplier_applied").default(1.0),
+  
+  // Level info at time of transaction
+  levelAtTime: integer("level_at_time"),
+  causedLevelUp: boolean("caused_level_up").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Season Pass System
+export const seasonPasses = pgTable("season_passes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(), // "Season 1: Genesis", "Season 2: DeFi Summer"
+  description: text("description"),
+  
+  // Season timing
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  
+  // Tier structure
+  maxTier: integer("max_tier").default(100),
+  xpPerTier: integer("xp_per_tier").default(1000),
+  
+  // Rewards by tier (stored as JSON for flexibility)
+  freeRewards: jsonb("free_rewards").notNull(), // [{ tier, reward: { type, amount, item } }]
+  premiumRewards: jsonb("premium_rewards").notNull(), // [{ tier, reward: { type, amount, item } }]
+  
+  // Premium pass cost
+  premiumCost: integer("premium_cost").default(5000), // STREAM tokens
+  
+  // Stats
+  totalParticipants: integer("total_participants").default(0),
+  premiumPurchases: integer("premium_purchases").default(0),
+  
+  // Status
+  status: text("status").default("upcoming"), // upcoming, active, ended
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Season Pass Progress
+export const userSeasonPasses = pgTable("user_season_passes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  seasonId: varchar("season_id").references(() => seasonPasses.id).notNull(),
+  
+  // Progress
+  currentTier: integer("current_tier").default(1),
+  currentXp: integer("current_xp").default(0),
+  totalSeasonXp: integer("total_season_xp").default(0),
+  
+  // Premium status
+  hasPremium: boolean("has_premium").default(false),
+  premiumPurchasedAt: timestamp("premium_purchased_at"),
+  
+  // Claimed rewards
+  freeRewardsClaimed: jsonb("free_rewards_claimed"), // [tier1, tier5, tier10, ...]
+  premiumRewardsClaimed: jsonb("premium_rewards_claimed"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User Streaks - Track various streak types
+export const userStreaks = pgTable("user_streaks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Streak type
+  streakType: text("streak_type").notNull(), // login, trading, prediction, content
+  
+  // Current streak
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  
+  // Tracking
+  lastActivityDate: timestamp("last_activity_date"),
+  streakStartDate: timestamp("streak_start_date"),
+  
+  // Milestones reached
+  milestonesReached: jsonb("milestones_reached"), // [3, 7, 14, 30, ...]
+  
+  // Grace period (allows 1-day miss without breaking streak)
+  graceUsedToday: boolean("grace_used_today").default(false),
+  totalGracesUsed: integer("total_graces_used").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Special Events / Tournaments
+export const gamificationEvents = pgTable("gamification_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  
+  // Event type
+  eventType: text("event_type").notNull(), // tournament, double_xp, special_quest, community_goal
+  
+  // Timing
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  
+  // Event configuration
+  config: jsonb("config"), // Event-specific settings
+  objectives: jsonb("objectives"), // For community goals: [{ description, target, current }]
+  
+  // Rewards
+  rewards: jsonb("rewards"), // [{ rank/tier, reward }]
+  xpMultiplier: real("xp_multiplier").default(1.0),
+  
+  // Participation
+  maxParticipants: integer("max_participants"),
+  currentParticipants: integer("current_participants").default(0),
+  
+  // Status
+  status: text("status").default("upcoming"), // upcoming, active, ended
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Event Participation
+export const userEventParticipation = pgTable("user_event_participation", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  eventId: varchar("event_id").references(() => gamificationEvents.id).notNull(),
+  
+  // Progress
+  score: integer("score").default(0),
+  progress: jsonb("progress"), // Event-specific progress tracking
+  
+  // Rankings
+  currentRank: integer("current_rank"),
+  finalRank: integer("final_rank"),
+  
+  // Rewards
+  rewardsEarned: jsonb("rewards_earned"),
+  rewardsClaimed: boolean("rewards_claimed").default(false),
+  
+  joinedAt: timestamp("joined_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Gamification Notifications
+export const gamificationNotifications = pgTable("gamification_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Notification content
+  notificationType: text("notification_type").notNull(), // level_up, quest_complete, achievement, reward
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  
+  // Related entity
+  relatedType: text("related_type"), // quest, mission, achievement, event
+  relatedId: varchar("related_id"),
+  
+  // Rewards to claim (if any)
+  pendingReward: jsonb("pending_reward"), // { xp, stream, badge, title }
+  
+  // Status
+  isRead: boolean("is_read").default(false),
+  isClaimed: boolean("is_claimed").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for gamification
+export const insertDailyQuestSchema = createInsertSchema(dailyQuests).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserDailyQuestSchema = createInsertSchema(userDailyQuests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWeeklyMissionSchema = createInsertSchema(weeklyMissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserWeeklyMissionSchema = createInsertSchema(userWeeklyMissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserLevelSchema = createInsertSchema(userLevels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertXpTransactionSchema = createInsertSchema(xpTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSeasonPassSchema = createInsertSchema(seasonPasses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserSeasonPassSchema = createInsertSchema(userSeasonPasses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertGamificationEventSchema = createInsertSchema(gamificationEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserEventParticipationSchema = createInsertSchema(userEventParticipation).omit({
+  id: true,
+  joinedAt: true,
+  updatedAt: true,
+});
+
+export const insertGamificationNotificationSchema = createInsertSchema(gamificationNotifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for gamification
+export type InsertDailyQuest = z.infer<typeof insertDailyQuestSchema>;
+export type DailyQuest = typeof dailyQuests.$inferSelect;
+
+export type InsertUserDailyQuest = z.infer<typeof insertUserDailyQuestSchema>;
+export type UserDailyQuest = typeof userDailyQuests.$inferSelect;
+
+export type InsertWeeklyMission = z.infer<typeof insertWeeklyMissionSchema>;
+export type WeeklyMission = typeof weeklyMissions.$inferSelect;
+
+export type InsertUserWeeklyMission = z.infer<typeof insertUserWeeklyMissionSchema>;
+export type UserWeeklyMission = typeof userWeeklyMissions.$inferSelect;
+
+export type InsertUserLevel = z.infer<typeof insertUserLevelSchema>;
+export type UserLevel = typeof userLevels.$inferSelect;
+
+export type InsertXpTransaction = z.infer<typeof insertXpTransactionSchema>;
+export type XpTransaction = typeof xpTransactions.$inferSelect;
+
+export type InsertSeasonPass = z.infer<typeof insertSeasonPassSchema>;
+export type SeasonPass = typeof seasonPasses.$inferSelect;
+
+export type InsertUserSeasonPass = z.infer<typeof insertUserSeasonPassSchema>;
+export type UserSeasonPass = typeof userSeasonPasses.$inferSelect;
+
+export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
+export type UserStreak = typeof userStreaks.$inferSelect;
+
+export type InsertGamificationEvent = z.infer<typeof insertGamificationEventSchema>;
+export type GamificationEvent = typeof gamificationEvents.$inferSelect;
+
+export type InsertUserEventParticipation = z.infer<typeof insertUserEventParticipationSchema>;
+export type UserEventParticipation = typeof userEventParticipation.$inferSelect;
+
+export type InsertGamificationNotification = z.infer<typeof insertGamificationNotificationSchema>;
+export type GamificationNotification = typeof gamificationNotifications.$inferSelect;
