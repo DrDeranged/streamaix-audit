@@ -38,6 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStreamSocket } from '@/hooks/useStreamSocket';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
+import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
 
 interface LiveStream {
   id: string;
@@ -56,6 +57,7 @@ interface LiveStream {
   scheduledStart?: string;
   actualStart?: string;
   roomId?: string;
+  isAiHost?: boolean;
 }
 
 interface MarketData {
@@ -481,23 +483,33 @@ export default function StreamViewPage() {
               ))}
             </AnimatePresence>
             
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
-              {isLive ? (
-                <div className="text-center px-4">
-                  <motion.div 
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="p-4 sm:p-6 rounded-full bg-gradient-to-br from-purple-500/30 to-fuchsia-500/30 border border-purple-400/30 mb-3 sm:mb-4 inline-block"
-                  >
-                    <Icon className="w-8 h-8 sm:w-12 sm:h-12 text-purple-400" />
-                  </motion.div>
-                  <p className="text-base sm:text-lg font-medium text-white mb-1 sm:mb-2 font-orbitron">Stream is Live</p>
-                  <p className="text-xs sm:text-sm text-slate-400 flex items-center justify-center gap-2">
-                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
-                    Audio/Video active
-                  </p>
-                </div>
-              ) : isScheduled ? (
+            {/* AI Avatar Stream or Regular Stream Display */}
+            {isLive && stream.isAiHost ? (
+              <AIAvatarStream
+                hostName={stream.hostUsername || 'AI Host'}
+                hostAvatar={stream.hostAvatar}
+                streamType={stream.streamType}
+                isLive={isLive}
+                currentMessage={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
+                {isLive ? (
+                  <div className="text-center px-4">
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="p-4 sm:p-6 rounded-full bg-gradient-to-br from-purple-500/30 to-fuchsia-500/30 border border-purple-400/30 mb-3 sm:mb-4 inline-block"
+                    >
+                      <Icon className="w-8 h-8 sm:w-12 sm:h-12 text-purple-400" />
+                    </motion.div>
+                    <p className="text-base sm:text-lg font-medium text-white mb-1 sm:mb-2 font-orbitron">Stream is Live</p>
+                    <p className="text-xs sm:text-sm text-slate-400 flex items-center justify-center gap-2">
+                      <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
+                      Audio/Video active
+                    </p>
+                  </div>
+                ) : isScheduled ? (
                 <div className="text-center px-4">
                   <Clock className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400 mb-3 sm:mb-4 mx-auto" />
                   <p className="text-base sm:text-lg font-medium text-white mb-1 sm:mb-2">Stream Scheduled</p>
@@ -513,7 +525,8 @@ export default function StreamViewPage() {
                   <p className="text-base sm:text-lg font-medium text-slate-400">Stream Ended</p>
                 </div>
               )}
-            </div>
+              </div>
+            )}
             
             {/* In-Stream Prediction Button */}
             {isLive && isAuthenticated && (
