@@ -280,6 +280,12 @@ export default function StreamsPage() {
                 />
                 {liveStreams.length} Live
               </Badge>
+              <Link href="/replays">
+                <Button variant="outline" size="sm" className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 h-9 gap-1.5">
+                  <Video className="w-4 h-4" />
+                  <span className="hidden sm:inline">Replays</span>
+                </Button>
+              </Link>
               <Link href="/go-live">
                 <Button size="sm" className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white h-9 gap-1.5">
                   <Zap className="w-4 h-4" />
