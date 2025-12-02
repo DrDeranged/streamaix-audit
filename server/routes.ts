@@ -12159,6 +12159,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     );
   });
 
+  // =============================================================================
+  // STREAMING WEBSOCKET SERVER
+  // =============================================================================
+  
+  const streamingWss = new WebSocketServer({ server: httpServer, path: '/ws/stream' });
+  const { initStreamingService } = await import('./services/streamingService');
+  const streamingService = initStreamingService();
+  
+  streamingWss.on('connection', (ws: WebSocket, req) => {
+    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    const streamId = url.searchParams.get('streamId');
+    const userId = url.searchParams.get('userId');
+    const username = url.searchParams.get('username');
+    const avatar = url.searchParams.get('avatar');
+    const isAiAgent = url.searchParams.get('isAiAgent') === 'true';
+    
+    if (!streamId || !userId || !username) {
+      ws.close(1008, 'Missing required parameters');
+      return;
+    }
+    
+    console.log(`📺 Stream connection for stream ${streamId} by ${isAiAgent ? 'AI Agent' : 'user'} ${username}`);
+    
+    streamingService.handleConnection(
+      ws,
+      streamId,
+      userId,
+      username,
+      avatar || undefined,
+      isAiAgent
+    );
+  });
+
   // Start enhanced real-time updates with multiple intervals
   const marketUpdateInterval = setInterval(broadcastMarketUpdates, 15000); // Every 15 seconds for comprehensive data
   const volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 45000); // Every 45 seconds for volatility alerts

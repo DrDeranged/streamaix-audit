@@ -1,0 +1,454 @@
+import { WebSocket } from 'ws';
+import { db } from '../db';
+import { liveStreams, streamMessages, users } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+
+interface StreamMessage {
+  type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message';
+  streamId: string;
+  userId: string;
+  username?: string;
+  avatar?: string;
+  isAiAgent?: boolean;
+  data?: any;
+  timestamp?: number;
+}
+
+interface StreamViewer {
+  odatetime: string;
+  odlUserId: string;
+  userId: string;
+  username: string;
+  avatar?: string;
+  isAiAgent: boolean;
+  ws: WebSocket;
+  joinedAt: number;
+}
+
+interface StreamSession {
+  streamId: string;
+  hostId: string;
+  hostUsername: string;
+  viewers: Map<string, StreamViewer>;
+  messages: Array<{
+    id: string;
+    userId: string;
+    username: string;
+    content: string;
+    isAiAgent: boolean;
+    timestamp: number;
+  }>;
+  tips: Array<{
+    id: string;
+    fromUserId: string;
+    fromUsername: string;
+    amount: number;
+    message?: string;
+    timestamp: number;
+  }>;
+  isLive: boolean;
+  startedAt: number;
+  peakViewers: number;
+}
+
+export class StreamingService {
+  private sessions = new Map<string, StreamSession>();
+  private viewerStreams = new Map<string, Set<string>>(); // userId -> Set of streamIds
+
+  constructor() {}
+
+  async handleConnection(
+    ws: WebSocket, 
+    streamId: string,
+    userId: string, 
+    username: string, 
+    avatar?: string,
+    isAiAgent: boolean = false
+  ) {
+    // Get or create session
+    let session = this.sessions.get(streamId);
+    
+    if (!session) {
+      // Check if stream exists in database
+      const [streamRecord] = await db.select()
+        .from(liveStreams)
+        .where(eq(liveStreams.id, streamId))
+        .limit(1);
+        
+      if (!streamRecord) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Stream not found' }));
+        ws.close();
+        return;
+      }
+      
+      // Get host username
+      const [hostUser] = await db.select({ username: users.username })
+        .from(users)
+        .where(eq(users.id, streamRecord.hostId))
+        .limit(1);
+
+      session = {
+        streamId,
+        hostId: streamRecord.hostId,
+        hostUsername: hostUser?.username || 'unknown',
+        viewers: new Map(),
+        messages: [],
+        tips: [],
+        isLive: streamRecord.status === 'live',
+        startedAt: Date.now(),
+        peakViewers: 0,
+      };
+      this.sessions.set(streamId, session);
+    }
+
+    // Add viewer to session
+    const viewerKey = `${userId}-${Date.now()}`;
+    session.viewers.set(viewerKey, {
+      odatetime: new Date().toISOString(),
+      odlUserId: viewerKey,
+      userId,
+      username,
+      avatar,
+      isAiAgent,
+      ws,
+      joinedAt: Date.now(),
+    });
+
+    // Track viewer's active streams
+    if (!this.viewerStreams.has(userId)) {
+      this.viewerStreams.set(userId, new Set());
+    }
+    this.viewerStreams.get(userId)!.add(streamId);
+
+    // Update peak viewers
+    const currentViewerCount = session.viewers.size;
+    if (currentViewerCount > session.peakViewers) {
+      session.peakViewers = currentViewerCount;
+    }
+
+    // Update database viewer count
+    await this.updateViewerCount(streamId);
+
+    // Broadcast viewer count update
+    this.broadcastToStream(streamId, {
+      type: 'viewer-count',
+      streamId,
+      userId: '',
+      data: { count: currentViewerCount },
+    });
+
+    // Send recent messages to new viewer
+    ws.send(JSON.stringify({
+      type: 'chat-history',
+      data: session.messages.slice(-50), // Last 50 messages
+    }));
+
+    // Notify others about join
+    this.broadcastToStream(streamId, {
+      type: 'join',
+      streamId,
+      userId,
+      username,
+      isAiAgent,
+      timestamp: Date.now(),
+    }, userId);
+
+    // Handle WebSocket messages
+    ws.on('message', async (data: Buffer) => {
+      try {
+        const message: StreamMessage = JSON.parse(data.toString());
+        await this.handleMessage(streamId, userId, username, isAiAgent, message);
+      } catch (error) {
+        console.error('Error handling stream message:', error);
+      }
+    });
+
+    // Handle disconnection
+    ws.on('close', () => {
+      this.handleDisconnection(streamId, viewerKey, userId, username, isAiAgent);
+    });
+
+    console.log(`[Streaming] ${isAiAgent ? 'AI Agent' : 'User'} ${username} joined stream ${streamId}. Viewers: ${currentViewerCount}`);
+  }
+
+  private async handleMessage(
+    streamId: string, 
+    userId: string, 
+    username: string,
+    isAiAgent: boolean,
+    message: StreamMessage
+  ) {
+    const session = this.sessions.get(streamId);
+    if (!session) return;
+
+    switch (message.type) {
+      case 'chat':
+        const chatMessage = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          userId,
+          username,
+          content: message.data.content,
+          isAiAgent,
+          timestamp: Date.now(),
+        };
+        
+        session.messages.push(chatMessage);
+        
+        // Keep only last 500 messages in memory
+        if (session.messages.length > 500) {
+          session.messages = session.messages.slice(-500);
+        }
+
+        // Save to database
+        try {
+          await db.insert(streamMessages).values({
+            streamId,
+            userId,
+            content: message.data.content,
+            messageType: 'chat',
+          });
+        } catch (error) {
+          console.error('Error saving stream message:', error);
+        }
+
+        // Broadcast to all viewers
+        this.broadcastToStream(streamId, {
+          type: 'chat',
+          streamId,
+          userId,
+          username,
+          isAiAgent,
+          data: chatMessage,
+        });
+        break;
+
+      case 'tip':
+        const tipData = {
+          id: `tip-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          fromUserId: userId,
+          fromUsername: username,
+          amount: message.data.amount,
+          message: message.data.message,
+          timestamp: Date.now(),
+        };
+
+        session.tips.push(tipData);
+
+        // Broadcast tip to all viewers (show in chat)
+        this.broadcastToStream(streamId, {
+          type: 'tip',
+          streamId,
+          userId,
+          username,
+          data: tipData,
+        });
+        break;
+
+      case 'reaction':
+        // Broadcast reaction (emoji, applause, etc)
+        this.broadcastToStream(streamId, {
+          type: 'reaction',
+          streamId,
+          userId,
+          username,
+          isAiAgent,
+          data: message.data,
+        });
+        break;
+    }
+  }
+
+  private async handleDisconnection(
+    streamId: string, 
+    viewerKey: string,
+    userId: string, 
+    username: string,
+    isAiAgent: boolean
+  ) {
+    const session = this.sessions.get(streamId);
+    if (!session) return;
+
+    session.viewers.delete(viewerKey);
+    this.viewerStreams.get(userId)?.delete(streamId);
+
+    // Update database viewer count
+    await this.updateViewerCount(streamId);
+
+    // Broadcast viewer count update
+    this.broadcastToStream(streamId, {
+      type: 'viewer-count',
+      streamId,
+      userId: '',
+      data: { count: session.viewers.size },
+    });
+
+    // Notify others about leave
+    this.broadcastToStream(streamId, {
+      type: 'leave',
+      streamId,
+      userId,
+      username,
+      isAiAgent,
+      timestamp: Date.now(),
+    });
+
+    // Clean up empty sessions after 5 minutes
+    if (session.viewers.size === 0) {
+      setTimeout(() => {
+        const currentSession = this.sessions.get(streamId);
+        if (currentSession && currentSession.viewers.size === 0) {
+          this.sessions.delete(streamId);
+          console.log(`[Streaming] Cleaned up empty stream session: ${streamId}`);
+        }
+      }, 5 * 60 * 1000);
+    }
+
+    console.log(`[Streaming] ${isAiAgent ? 'AI Agent' : 'User'} ${username} left stream ${streamId}. Viewers: ${session.viewers.size}`);
+  }
+
+  private broadcastToStream(streamId: string, message: StreamMessage, excludeUserId?: string) {
+    const session = this.sessions.get(streamId);
+    if (!session) return;
+
+    const messageStr = JSON.stringify(message);
+    
+    session.viewers.forEach((viewer) => {
+      if (excludeUserId && viewer.userId === excludeUserId) return;
+      
+      try {
+        if (viewer.ws.readyState === WebSocket.OPEN) {
+          viewer.ws.send(messageStr);
+        }
+      } catch (error) {
+        console.error('Error broadcasting to viewer:', error);
+      }
+    });
+  }
+
+  private async updateViewerCount(streamId: string) {
+    const session = this.sessions.get(streamId);
+    if (!session) return;
+
+    try {
+      await db.update(liveStreams)
+        .set({ currentViewers: session.viewers.size })
+        .where(eq(liveStreams.id, streamId));
+    } catch (error) {
+      console.error('Error updating viewer count:', error);
+    }
+  }
+
+  // AI Agent can send messages to a stream
+  async sendAiMessage(streamId: string, agentId: string, agentUsername: string, content: string) {
+    const session = this.sessions.get(streamId);
+    if (!session) {
+      console.log(`[Streaming] No active session for stream ${streamId}`);
+      return false;
+    }
+
+    const chatMessage = {
+      id: `ai-msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: agentId,
+      username: agentUsername,
+      content,
+      isAiAgent: true,
+      timestamp: Date.now(),
+    };
+
+    session.messages.push(chatMessage);
+
+    // Save to database
+    try {
+      await db.insert(streamMessages).values({
+        streamId,
+        userId: agentId,
+        content,
+        messageType: 'ai_comment',
+      });
+    } catch (error) {
+      console.error('Error saving AI stream message:', error);
+    }
+
+    // Broadcast to all viewers
+    this.broadcastToStream(streamId, {
+      type: 'ai-message',
+      streamId,
+      userId: agentId,
+      username: agentUsername,
+      isAiAgent: true,
+      data: chatMessage,
+    });
+
+    return true;
+  }
+
+  // End a stream
+  async endStream(streamId: string, hostId: string) {
+    const session = this.sessions.get(streamId);
+    if (!session) return false;
+
+    if (session.hostId !== hostId) {
+      return false;
+    }
+
+    session.isLive = false;
+
+    // Update database
+    await db.update(liveStreams)
+      .set({ 
+        status: 'ended',
+        actualEnd: new Date(),
+      })
+      .where(eq(liveStreams.id, streamId));
+
+    // Notify all viewers
+    this.broadcastToStream(streamId, {
+      type: 'stream-end',
+      streamId,
+      userId: hostId,
+      data: {
+        duration: Date.now() - session.startedAt,
+        peakViewers: session.peakViewers,
+        totalMessages: session.messages.length,
+        totalTips: session.tips.reduce((sum, t) => sum + t.amount, 0),
+      },
+    });
+
+    // Close all viewer connections
+    session.viewers.forEach((viewer) => {
+      try {
+        viewer.ws.close();
+      } catch (error) {
+        // Ignore close errors
+      }
+    });
+
+    this.sessions.delete(streamId);
+    return true;
+  }
+
+  // Get active streams count
+  getActiveStreamsCount(): number {
+    return this.sessions.size;
+  }
+
+  // Get viewer count for a stream
+  getViewerCount(streamId: string): number {
+    const session = this.sessions.get(streamId);
+    return session ? session.viewers.size : 0;
+  }
+}
+
+// Singleton instance
+let streamingServiceInstance: StreamingService | null = null;
+
+export function initStreamingService(): StreamingService {
+  if (!streamingServiceInstance) {
+    streamingServiceInstance = new StreamingService();
+  }
+  return streamingServiceInstance;
+}
+
+export function getStreamingService(): StreamingService | null {
+  return streamingServiceInstance;
+}

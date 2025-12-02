@@ -48,6 +48,7 @@ const MarketLeaderboard = React.lazy(() => import("@/pages/market-leaderboard"))
 const Leagues = React.lazy(() => import("@/pages/leagues"));
 const LeagueDetail = React.lazy(() => import("@/pages/league-detail"));
 const StreamView = React.lazy(() => import("@/pages/stream-view"));
+const GoLive = React.lazy(() => import("@/pages/go-live"));
 
 function Router() {
   return (
@@ -215,6 +216,12 @@ function Router() {
       <Route path="/stream/:id">
         <Suspense fallback={<DashboardSkeleton />}>
           <StreamView />
+        </Suspense>
+      </Route>
+      
+      <Route path="/go-live">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <GoLive />
         </Suspense>
       </Route>
       
