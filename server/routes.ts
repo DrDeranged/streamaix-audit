@@ -12089,6 +12089,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   }));
 
+  // =============================================================================
+  // ENHANCED STREAMING FEATURES (AI Commentary, Highlights, Co-hosting, etc.)
+  // =============================================================================
+
+  const { initEnhancedStreamingService } = await import('./services/enhancedStreamingService');
+  const enhancedStreamingService = initEnhancedStreamingService();
+
+  // Get live market data overlay for streams
+  app.get("/api/streams/:id/market-overlay", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const marketData = await enhancedStreamingService.getMarketData(['BTC', 'ETH', 'SOL']);
+      res.json({ success: true, marketData });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  // Start AI market commentary for a stream
+  app.post("/api/streams/:id/ai-commentary/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    
+    if (!stream || stream.hostId !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Only the host can enable AI commentary' });
+    }
+    
+    const { intervalMinutes = 5 } = req.body;
+    const success = await enhancedStreamingService.startAICommentary(req.params.id, intervalMinutes);
+    
+    res.json({ success, message: success ? 'AI commentary started' : 'Failed to start AI commentary' });
+  }));
+
+  // Stop AI market commentary
+  app.post("/api/streams/:id/ai-commentary/stop", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    enhancedStreamingService.stopAICommentary(req.params.id);
+    res.json({ success: true, message: 'AI commentary stopped' });
+  }));
+
+  // Get stream highlights
+  app.get("/api/streams/:id/highlights", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const highlights = await enhancedStreamingService.extractStreamHighlights(req.params.id);
+      res.json({ success: true, highlights });
+    } catch (error: any) {
+      res.json({ success: true, highlights: [] });
+    }
+  }));
+
+  // Generate stream summary (VOD)
+  app.post("/api/streams/:id/generate-summary", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const summary = await enhancedStreamingService.generateStreamSummary(req.params.id);
+    res.json({ success: !!summary, summary });
+  }));
+
+  // Get stream replays (VOD)
+  app.get("/api/streams/replays", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const replays = await enhancedStreamingService.getStreamReplays(limit);
+      res.json({ success: true, replays });
+    } catch (error: any) {
+      res.json({ success: true, replays: [] });
+    }
+  }));
+
+  // Add co-host to stream
+  app.post("/api/streams/:id/co-hosts", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { userId: coHostUserId } = req.body;
+    if (!coHostUserId) {
+      return res.status(400).json({ success: false, error: 'User ID required' });
+    }
+    
+    const success = await enhancedStreamingService.addCoHost(req.params.id, req.user.id, coHostUserId);
+    res.json({ success, message: success ? 'Co-host added' : 'Failed to add co-host' });
+  }));
+
+  // Remove co-host from stream
+  app.delete("/api/streams/:id/co-hosts/:userId", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const success = await enhancedStreamingService.removeCoHost(req.params.id, req.user.id, req.params.userId);
+    res.json({ success, message: success ? 'Co-host removed' : 'Failed to remove co-host' });
+  }));
+
+  // Get co-hosts for a stream
+  app.get("/api/streams/:id/co-hosts", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const coHosts = await enhancedStreamingService.getCoHosts(req.params.id);
+      res.json({ success: true, coHosts });
+    } catch (error: any) {
+      res.json({ success: true, coHosts: [] });
+    }
+  }));
+
+  // Toggle screen sharing
+  app.post("/api/streams/:id/screen-share", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { isSharing } = req.body;
+    const success = await enhancedStreamingService.toggleScreenShare(req.params.id, req.user.id, isSharing);
+    res.json({ success });
+  }));
+
+  // Create prediction from stream
+  app.post("/api/streams/:id/predictions/create", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { predictionText, confidence } = req.body;
+    if (!predictionText) {
+      return res.status(400).json({ success: false, error: 'Prediction text required' });
+    }
+    
+    const predictionId = await enhancedStreamingService.createPredictionFromStream(
+      req.params.id,
+      req.user.id,
+      predictionText,
+      confidence
+    );
+    
+    res.json({ success: !!predictionId, predictionId });
+  }));
+
+  // Convert stream prediction to market
+  app.post("/api/streams/predictions/:predictionId/convert-to-market", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { deadline } = req.body;
+    if (!deadline) {
+      return res.status(400).json({ success: false, error: 'Deadline required' });
+    }
+    
+    const marketId = await enhancedStreamingService.convertPredictionToMarket(
+      req.params.predictionId,
+      req.user.id,
+      new Date(deadline)
+    );
+    
+    res.json({ success: !!marketId, marketId });
+  }));
+
   // Get stream stats
   app.get("/api/streams/stats/overview", asyncHandler(async (req: Request, res: Response) => {
     try {

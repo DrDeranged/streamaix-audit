@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRoute, useLocation, Link } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
   Users, 
@@ -22,7 +22,12 @@ import {
   Bot,
   ChevronUp,
   ChevronDown,
-  X
+  X,
+  Monitor,
+  UserPlus,
+  Zap,
+  BarChart3,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -31,7 +36,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useStreamSocket } from '@/hooks/useStreamSocket';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 
 interface LiveStream {
@@ -53,12 +58,169 @@ interface LiveStream {
   roomId?: string;
 }
 
+interface MarketData {
+  symbol: string;
+  price: number;
+  change24h: number;
+}
+
+interface CoHost {
+  id: string;
+  userId: string;
+  username: string;
+  avatar?: string;
+  isVideoOn: boolean;
+  isMuted: boolean;
+  isScreenSharing: boolean;
+}
+
+interface TipAlert {
+  id: string;
+  username: string;
+  amount: number;
+  message?: string;
+  timestamp: number;
+}
+
 const streamTypeConfig: Record<string, { icon: any; label: string; color: string; bgColor: string }> = {
   broadcast: { icon: Video, label: 'Broadcast', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
   trading_room: { icon: TrendingUp, label: 'Trading Room', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
   audio_space: { icon: Headphones, label: 'Audio Space', color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
   live_bounty: { icon: Target, label: 'Live Bounty', color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
 };
+
+function TipAlertAnimation({ tip, onComplete }: { tip: TipAlert; onComplete: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 5000);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <motion.div
+      initial={{ scale: 0, y: 50, opacity: 0 }}
+      animate={{ scale: 1, y: 0, opacity: 1 }}
+      exit={{ scale: 0.8, y: -20, opacity: 0 }}
+      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+    >
+      <div className="relative">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 0.5, repeat: 2 }}
+          className="bg-gradient-to-br from-amber-500/90 via-orange-500/90 to-yellow-500/90 backdrop-blur-xl rounded-2xl p-6 border-2 border-amber-400/50 shadow-2xl shadow-amber-500/30"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <motion.div
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ duration: 0.5, repeat: 3 }}
+            >
+              <Coins className="w-8 h-8 text-yellow-200" />
+            </motion.div>
+            <div>
+              <p className="text-lg font-bold text-white">@{tip.username}</p>
+              <p className="text-sm text-yellow-100">sent a tip!</p>
+            </div>
+          </div>
+          <motion.p
+            initial={{ scale: 0.5 }}
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            className="text-3xl font-bold text-center text-white font-orbitron"
+          >
+            {tip.amount.toLocaleString()} STREAM
+          </motion.p>
+          {tip.message && (
+            <p className="text-sm text-yellow-100 mt-2 text-center italic">"{tip.message}"</p>
+          )}
+        </motion.div>
+        <motion.div
+          className="absolute -top-2 -right-2"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+          <Sparkles className="w-6 h-6 text-yellow-300" />
+        </motion.div>
+        <motion.div
+          className="absolute -bottom-2 -left-2"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+          <Zap className="w-6 h-6 text-amber-300" />
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+function MarketPriceOverlay({ streamId }: { streamId: string }) {
+  const { data } = useQuery<{ marketData: MarketData[] }>({
+    queryKey: ['/api/streams', streamId, 'market-overlay'],
+    enabled: !!streamId,
+    refetchInterval: 30000,
+  });
+
+  if (!data?.marketData?.length) return null;
+
+  return (
+    <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+      {data.marketData.map((coin) => (
+        <motion.div
+          key={coin.symbol}
+          initial={{ x: 50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="bg-slate-900/80 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-slate-700/50 flex items-center gap-2"
+        >
+          <span className="text-xs font-bold text-white">{coin.symbol}</span>
+          <span className="text-xs text-slate-300">${coin.price.toLocaleString()}</span>
+          <span className={cn(
+            "text-[10px] font-medium",
+            coin.change24h >= 0 ? "text-emerald-400" : "text-red-400"
+          )}>
+            {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
+          </span>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function CoHostsDisplay({ streamId }: { streamId: string }) {
+  const { data } = useQuery<{ coHosts: CoHost[] }>({
+    queryKey: ['/api/streams', streamId, 'co-hosts'],
+    enabled: !!streamId,
+    refetchInterval: 10000,
+  });
+
+  if (!data?.coHosts?.length) return null;
+
+  return (
+    <div className="absolute bottom-3 left-3 z-10 flex gap-2">
+      {data.coHosts.map((coHost) => (
+        <motion.div
+          key={coHost.id}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="relative"
+        >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center border-2 border-cyan-400/50 overflow-hidden">
+            {coHost.avatar ? (
+              <img src={coHost.avatar} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold text-white">{coHost.username?.[0]?.toUpperCase()}</span>
+            )}
+          </div>
+          {coHost.isScreenSharing && (
+            <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5">
+              <Monitor className="w-2.5 h-2.5 text-white" />
+            </div>
+          )}
+          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-slate-900/80 rounded px-1">
+            <span className="text-[8px] text-slate-300">{coHost.username}</span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
 
 export default function StreamViewPage() {
   const [, params] = useRoute('/stream/:id');
@@ -69,11 +231,13 @@ export default function StreamViewPage() {
   const [tipAmount, setTipAmount] = useState('');
   const [isChatExpanded, setIsChatExpanded] = useState(true);
   const [showTipPanel, setShowTipPanel] = useState(false);
+  const [showPredictionPanel, setShowPredictionPanel] = useState(false);
+  const [predictionText, setPredictionText] = useState('');
+  const [activeTipAlerts, setActiveTipAlerts] = useState<TipAlert[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const streamId = params?.id || null;
   
-  // WebSocket connection for real-time chat
   const { isConnected, viewerCount, messages, sendMessage } = useStreamSocket(streamId);
   
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
@@ -85,13 +249,37 @@ export default function StreamViewPage() {
   const stream = streamData?.stream;
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
+  const isHost = user?.id === stream?.hostId;
 
-  // Auto-scroll chat to bottom
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    const tipMessages = messages.filter(m => m.content.includes('💎 Tipped'));
+    if (tipMessages.length > 0) {
+      const latestTip = tipMessages[tipMessages.length - 1];
+      const match = latestTip.content.match(/💎 Tipped (\d+) STREAM(?:: (.+))?/);
+      if (match) {
+        const newAlert: TipAlert = {
+          id: latestTip.id,
+          username: latestTip.username,
+          amount: parseInt(match[1]),
+          message: match[2],
+          timestamp: latestTip.timestamp,
+        };
+        if (!activeTipAlerts.find(a => a.id === newAlert.id)) {
+          setActiveTipAlerts(prev => [...prev, newAlert]);
+        }
+      }
+    }
+  }, [messages]);
+
+  const removeTipAlert = (id: string) => {
+    setActiveTipAlerts(prev => prev.filter(a => a.id !== id));
+  };
 
   const handleSendMessage = () => {
     if (!message.trim() || !isAuthenticated) return;
@@ -146,6 +334,41 @@ export default function StreamViewPage() {
       return;
     }
     tipMutation.mutate(tipValue);
+  };
+
+  const predictionMutation = useMutation({
+    mutationFn: async (text: string) => {
+      return apiRequest(`/api/streams/${streamId}/predictions/create`, {
+        method: 'POST',
+        body: JSON.stringify({ predictionText: text, confidence: 70 }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Prediction created!",
+        description: "Your prediction has been shared with the stream",
+      });
+      setPredictionText('');
+      setShowPredictionPanel(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Couldn't create prediction",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreatePrediction = () => {
+    if (!predictionText.trim()) {
+      toast({
+        title: "Please enter a prediction",
+        variant: "destructive",
+      });
+      return;
+    }
+    predictionMutation.mutate(predictionText.trim());
   };
 
   if (isLoading) {
@@ -239,8 +462,25 @@ export default function StreamViewPage() {
       <div className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full">
         {/* Video/Stream Area */}
         <div className="flex-1 p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
-          {/* Video Area */}
+          {/* Video Area with Overlays */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 aspect-video">
+            {/* Live Market Price Overlay */}
+            {isLive && streamId && <MarketPriceOverlay streamId={streamId} />}
+            
+            {/* Co-hosts Display */}
+            {isLive && streamId && <CoHostsDisplay streamId={streamId} />}
+            
+            {/* Animated Tip Alerts */}
+            <AnimatePresence>
+              {activeTipAlerts.map((tip) => (
+                <TipAlertAnimation
+                  key={tip.id}
+                  tip={tip}
+                  onComplete={() => removeTipAlert(tip.id)}
+                />
+              ))}
+            </AnimatePresence>
+            
             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
               {isLive ? (
                 <div className="text-center px-4">
@@ -274,6 +514,24 @@ export default function StreamViewPage() {
                 </div>
               )}
             </div>
+            
+            {/* In-Stream Prediction Button */}
+            {isLive && isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute bottom-3 right-3 z-10"
+              >
+                <Button
+                  onClick={() => setShowPredictionPanel(true)}
+                  className="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 h-9 text-xs shadow-lg shadow-purple-500/20"
+                  data-testid="button-create-prediction"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                  Make Prediction
+                </Button>
+              </motion.div>
+            )}
           </Card>
 
           {/* Stream Info */}
@@ -589,6 +847,96 @@ export default function StreamViewPage() {
                 className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0 h-12 text-base font-semibold"
               >
                 {tipMutation.isPending ? 'Sending...' : `Tip ${tipAmount || '0'} STREAM`}
+              </Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* In-Stream Prediction Modal */}
+      {showPredictionPanel && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4"
+          onClick={() => setShowPredictionPanel(false)}
+        >
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-full max-w-md bg-gradient-to-br from-slate-900 via-fuchsia-900/30 to-slate-900 border border-fuchsia-500/30 rounded-2xl p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2 font-orbitron">
+                <BarChart3 className="w-5 h-5 text-fuchsia-400" />
+                Make a Prediction
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPredictionPanel(false)}
+                className="text-slate-400 h-8 w-8 p-0"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            <p className="text-sm text-slate-400 mb-4">
+              Share your crypto prediction with the stream. Popular predictions can become real prediction markets!
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white mb-2 block text-sm">Your Prediction</Label>
+                <Input
+                  placeholder="e.g., BTC will reach $150k by end of 2025"
+                  value={predictionText}
+                  onChange={(e) => setPredictionText(e.target.value)}
+                  className="bg-slate-900/50 border-fuchsia-500/30 text-white h-12 text-base"
+                  data-testid="input-prediction-text"
+                />
+              </div>
+              
+              <div className="flex gap-2 flex-wrap">
+                <Badge 
+                  className="bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30 cursor-pointer hover:bg-fuchsia-500/30"
+                  onClick={() => setPredictionText('BTC will reach $100k by Q1 2025')}
+                >
+                  BTC $100k
+                </Badge>
+                <Badge 
+                  className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 cursor-pointer hover:bg-cyan-500/30"
+                  onClick={() => setPredictionText('ETH will flip BTC market cap by 2026')}
+                >
+                  ETH Flippening
+                </Badge>
+                <Badge 
+                  className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 cursor-pointer hover:bg-emerald-500/30"
+                  onClick={() => setPredictionText('SOL will reach $500 by end of bull run')}
+                >
+                  SOL $500
+                </Badge>
+              </div>
+              
+              <Button 
+                onClick={handleCreatePrediction}
+                disabled={!predictionText.trim() || predictionMutation.isPending}
+                className="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 h-12 text-base font-semibold"
+                data-testid="button-submit-prediction"
+              >
+                {predictionMutation.isPending ? (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Share Prediction
+                  </>
+                )}
               </Button>
             </div>
           </motion.div>
