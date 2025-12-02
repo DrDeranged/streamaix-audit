@@ -61,8 +61,13 @@ import {
   Landmark,
   BarChart2,
   Gauge,
-  Coins
+  Coins,
+  Bell,
+  RefreshCw,
+  Percent
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface PredictionMarket {
   id: string;
@@ -104,11 +109,305 @@ interface Whale {
   topPositions: any[];
 }
 
+interface MarketSignal {
+  id: string;
+  type: 'bullish' | 'bearish' | 'neutral';
+  strength: number;
+  asset: string;
+  price: number;
+  change24h: number;
+  signal: string;
+  reasoning: string;
+  confidence: number;
+  timestamp: string;
+}
+
+interface WhaleMovement {
+  id: string;
+  type: 'accumulation' | 'distribution' | 'transfer';
+  asset: string;
+  amount: number;
+  amountUsd: number;
+  from: string;
+  to: string;
+  timestamp: string;
+  significance: 'low' | 'medium' | 'high';
+}
+
+interface SentimentData {
+  asset: string;
+  overall: number;
+  social: number;
+  news: number;
+  technical: number;
+  trend: 'rising' | 'falling' | 'stable';
+}
+
+function SignalCard({ signal }: { signal: MarketSignal }) {
+  const isPositive = signal.type === 'bullish';
+  const isNegative = signal.type === 'bearish';
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        "p-4 rounded-xl border backdrop-blur-sm",
+        isPositive && "bg-emerald-500/10 border-emerald-500/30",
+        isNegative && "bg-red-500/10 border-red-500/30",
+        !isPositive && !isNegative && "bg-slate-800/50 border-slate-700/30"
+      )}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className={cn(
+            "p-2 rounded-lg",
+            isPositive && "bg-emerald-500/20",
+            isNegative && "bg-red-500/20",
+            !isPositive && !isNegative && "bg-slate-700/50"
+          )}>
+            {isPositive ? (
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            ) : isNegative ? (
+              <TrendingDown className="w-4 h-4 text-red-400" />
+            ) : (
+              <Activity className="w-4 h-4 text-slate-400" />
+            )}
+          </div>
+          <div>
+            <p className="font-semibold text-white">{signal.asset}</p>
+            <p className="text-xs text-slate-400">${signal.price?.toLocaleString()}</p>
+          </div>
+        </div>
+        
+        <Badge className={cn(
+          "text-[10px]",
+          signal.confidence >= 80 && "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+          signal.confidence >= 60 && signal.confidence < 80 && "bg-amber-500/20 text-amber-400 border-amber-500/30",
+          signal.confidence < 60 && "bg-slate-700/50 text-slate-400 border-slate-600/30"
+        )}>
+          {signal.confidence}% confidence
+        </Badge>
+      </div>
+      
+      <p className="text-sm font-medium text-white mb-1">{signal.signal}</p>
+      <p className="text-xs text-slate-400 mb-3">{signal.reasoning}</p>
+      
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-24 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+            <div 
+              className={cn(
+                "h-full rounded-full transition-all",
+                isPositive && "bg-emerald-500",
+                isNegative && "bg-red-500",
+                !isPositive && !isNegative && "bg-slate-500"
+              )}
+              style={{ width: `${signal.strength}%` }}
+            />
+          </div>
+          <span className="text-[10px] text-slate-500">Strength: {signal.strength}%</span>
+        </div>
+        <span className="text-[10px] text-slate-500">
+          {new Date(signal.timestamp).toLocaleTimeString()}
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+
+function WhaleMovementCard({ movement }: { movement: WhaleMovement }) {
+  const typeColors = {
+    accumulation: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+    distribution: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' },
+    transfer: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+  };
+  
+  const colors = typeColors[movement.type];
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      className={cn(
+        "p-3 rounded-lg border backdrop-blur-sm",
+        colors.bg, colors.border
+      )}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Droplet className={cn("w-4 h-4", colors.text)} />
+          <span className="font-semibold text-white text-sm">{movement.asset}</span>
+          <Badge className={cn("text-[10px]", colors.bg, colors.text, colors.border)}>
+            {movement.type}
+          </Badge>
+        </div>
+        <Badge className={cn(
+          "text-[10px]",
+          movement.significance === 'high' && "bg-red-500/20 text-red-400 border-red-500/30",
+          movement.significance === 'medium' && "bg-amber-500/20 text-amber-400 border-amber-500/30",
+          movement.significance === 'low' && "bg-slate-700/50 text-slate-400 border-slate-600/30"
+        )}>
+          {movement.significance}
+        </Badge>
+      </div>
+      
+      <div className="flex items-center justify-between text-xs">
+        <div>
+          <p className="text-slate-400">Amount</p>
+          <p className="text-white font-medium">{movement.amount?.toLocaleString()} {movement.asset}</p>
+          <p className="text-slate-500">${movement.amountUsd?.toLocaleString()}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-slate-400">From → To</p>
+          <p className="text-slate-300 font-mono text-[10px]">
+            {movement.from?.slice(0, 6)}...{movement.from?.slice(-4)}
+          </p>
+          <p className="text-slate-300 font-mono text-[10px]">
+            {movement.to?.slice(0, 6)}...{movement.to?.slice(-4)}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function SentimentGauge({ data }: { data: SentimentData }) {
+  const getColor = (value: number) => {
+    if (value >= 70) return 'text-emerald-400';
+    if (value >= 50) return 'text-amber-400';
+    return 'text-red-400';
+  };
+  
+  const getBgColor = (value: number) => {
+    if (value >= 70) return 'bg-emerald-500';
+    if (value >= 50) return 'bg-amber-500';
+    return 'bg-red-500';
+  };
+  
+  return (
+    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="font-semibold text-white">{data.asset}</h4>
+        <div className="flex items-center gap-1">
+          {data.trend === 'rising' && <TrendingUp className="w-4 h-4 text-emerald-400" />}
+          {data.trend === 'falling' && <TrendingDown className="w-4 h-4 text-red-400" />}
+          {data.trend === 'stable' && <Activity className="w-4 h-4 text-slate-400" />}
+          <span className={cn(
+            "text-xs capitalize",
+            data.trend === 'rising' && 'text-emerald-400',
+            data.trend === 'falling' && 'text-red-400',
+            data.trend === 'stable' && 'text-slate-400'
+          )}>
+            {data.trend}
+          </span>
+        </div>
+      </div>
+      
+      <div className="relative h-3 bg-slate-800 rounded-full mb-4 overflow-hidden">
+        <div 
+          className={cn("h-full rounded-full transition-all", getBgColor(data.overall))}
+          style={{ width: `${data.overall}%` }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[10px] font-bold text-white">{data.overall}%</span>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div>
+          <p className="text-[10px] text-slate-500">Social</p>
+          <p className={cn("text-sm font-bold", getColor(data.social))}>{data.social}%</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-slate-500">News</p>
+          <p className={cn("text-sm font-bold", getColor(data.news))}>{data.news}%</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-slate-500">Technical</p>
+          <p className={cn("text-sm font-bold", getColor(data.technical))}>{data.technical}%</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CorrelationHeatmap() {
+  const assets = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP'];
+  const correlations = [
+    [1.00, 0.85, 0.72, 0.68, 0.45],
+    [0.85, 1.00, 0.78, 0.65, 0.42],
+    [0.72, 0.78, 1.00, 0.58, 0.35],
+    [0.68, 0.65, 0.58, 1.00, 0.52],
+    [0.45, 0.42, 0.35, 0.52, 1.00],
+  ];
+  
+  const getColor = (value: number) => {
+    if (value >= 0.8) return 'bg-emerald-500';
+    if (value >= 0.6) return 'bg-emerald-600/70';
+    if (value >= 0.4) return 'bg-amber-500/70';
+    if (value >= 0.2) return 'bg-orange-500/70';
+    return 'bg-red-500/70';
+  };
+  
+  return (
+    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+      <h3 className="font-semibold text-white mb-4">Asset Correlation Matrix</h3>
+      <div className="overflow-x-auto">
+        <div className="inline-block min-w-full">
+          <div className="flex gap-1 mb-1 pl-12">
+            {assets.map(asset => (
+              <div key={asset} className="w-10 text-center text-[10px] text-slate-400">{asset}</div>
+            ))}
+          </div>
+          {assets.map((asset, i) => (
+            <div key={asset} className="flex gap-1 items-center">
+              <div className="w-10 text-[10px] text-slate-400 text-right pr-2">{asset}</div>
+              {correlations[i].map((corr, j) => (
+                <motion.div
+                  key={j}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: (i * 5 + j) * 0.02 }}
+                  className={cn(
+                    "w-10 h-10 rounded flex items-center justify-center text-[10px] font-bold text-white",
+                    getColor(corr)
+                  )}
+                >
+                  {corr.toFixed(2)}
+                </motion.div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center justify-center gap-4 mt-4">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded bg-red-500/70" />
+          <span className="text-[10px] text-slate-500">Low</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded bg-amber-500/70" />
+          <span className="text-[10px] text-slate-500">Medium</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded bg-emerald-500" />
+          <span className="text-[10px] text-slate-500">High</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Discover() {
   const [pulseExpanded, setPulseExpanded] = useState(false);
   const [macroExpanded, setMacroExpanded] = useState(true);
   const [sectorExpanded, setSectorExpanded] = useState(false);
   const [newsExpanded, setNewsExpanded] = useState(false);
+  const [signalsExpanded, setSignalsExpanded] = useState(true);
+  const [whaleMovementsExpanded, setWhaleMovementsExpanded] = useState(false);
+  const [sentimentExpanded, setSentimentExpanded] = useState(false);
+  const [correlationExpanded, setCorrelationExpanded] = useState(false);
   const [contentExpanded, setContentExpanded] = useState(false);
   const [metricsExpanded, setMetricsExpanded] = useState(false);
   const [contentFilter, setContentFilter] = useState('all');
@@ -284,6 +583,22 @@ export default function Discover() {
     refetchInterval: 300000,
   });
 
+  // Market Intelligence Hub Data
+  const { data: marketSignalsData } = useQuery<{ signals: MarketSignal[] }>({
+    queryKey: ['/api/market-intelligence/signals'],
+    refetchInterval: 30000,
+  });
+
+  const { data: whaleMovementsData } = useQuery<{ movements: WhaleMovement[] }>({
+    queryKey: ['/api/market-intelligence/whales'],
+    refetchInterval: 60000,
+  });
+
+  const { data: marketSentimentData } = useQuery<{ sentiments: SentimentData[] }>({
+    queryKey: ['/api/market-intelligence/sentiment'],
+    refetchInterval: 60000,
+  });
+
   // Extract data
   const markets = (marketsData as any)?.markets || [];
   const leaderboard = (leaderboardData as any)?.leaderboard || [];
@@ -329,6 +644,11 @@ export default function Discover() {
   const smartMoney = (smartMoneyData as any)?.traders || [];
   const etfs = (etfData as any)?.etfs || [];
   const optionsInfo = (optionsData as any)?.options || [];
+
+  // Market Intelligence Hub data
+  const marketSignals: MarketSignal[] = marketSignalsData?.signals || [];
+  const whaleMovements: WhaleMovement[] = whaleMovementsData?.movements || [];
+  const marketSentiments: SentimentData[] = marketSentimentData?.sentiments || [];
 
   // Process markets data
   const activeMarkets = markets.filter((m: PredictionMarket) => m.status === 'active');
@@ -1778,6 +2098,152 @@ export default function Discover() {
             </div>
           </section>
         </div>
+
+        {/* AI Trading Signals Section */}
+        <section>
+          <div
+            onClick={() => setSignalsExpanded(!signalsExpanded)}
+            className="flex items-center gap-3 mb-4 cursor-pointer group p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all backdrop-blur-sm"
+            data-testid="toggle-signals"
+          >
+            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/20">
+              <Zap className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-orbitron font-bold text-white">AI Trading Signals</h2>
+              <p className="text-xs text-gray-400">Real-time AI-powered market signals</p>
+            </div>
+            <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs">
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Live
+            </Badge>
+            {signalsExpanded ? (
+              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+            ) : (
+              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+            )}
+          </div>
+
+          {signalsExpanded && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pl-2">
+              {marketSignals.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-400">
+                  <Zap className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Loading signals...</p>
+                </div>
+              ) : (
+                marketSignals.map((signal) => (
+                  <SignalCard key={signal.id} signal={signal} />
+                ))
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Whale Movements & On-Chain Analytics */}
+        <section>
+          <div
+            onClick={() => setWhaleMovementsExpanded(!whaleMovementsExpanded)}
+            className="flex items-center gap-3 mb-4 cursor-pointer group p-4 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 hover:border-cyan-500/40 transition-all backdrop-blur-sm"
+            data-testid="toggle-whale-movements"
+          >
+            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/20">
+              <Droplet className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-orbitron font-bold text-white">Whale Tracker</h2>
+              <p className="text-xs text-gray-400">On-chain movements & accumulation patterns</p>
+            </div>
+            <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs">
+              {whaleMovements.length} movements
+            </Badge>
+            {whaleMovementsExpanded ? (
+              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+            ) : (
+              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+            )}
+          </div>
+
+          {whaleMovementsExpanded && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-2">
+              {whaleMovements.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-400">
+                  <Droplet className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Loading whale movements...</p>
+                </div>
+              ) : (
+                whaleMovements.map((movement) => (
+                  <WhaleMovementCard key={movement.id} movement={movement} />
+                ))
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Market Sentiment Analysis */}
+        <section>
+          <div
+            onClick={() => setSentimentExpanded(!sentimentExpanded)}
+            className="flex items-center gap-3 mb-4 cursor-pointer group p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 hover:border-amber-500/40 transition-all backdrop-blur-sm"
+            data-testid="toggle-sentiment"
+          >
+            <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/20">
+              <Gauge className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-orbitron font-bold text-white">Sentiment Analysis</h2>
+              <p className="text-xs text-gray-400">Social, news & technical sentiment scores</p>
+            </div>
+            {sentimentExpanded ? (
+              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-amber-400 transition-colors" />
+            ) : (
+              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-amber-400 transition-colors" />
+            )}
+          </div>
+
+          {sentimentExpanded && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pl-2">
+              {marketSentiments.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-400">
+                  <Gauge className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Loading sentiment data...</p>
+                </div>
+              ) : (
+                marketSentiments.map((sentiment, idx) => (
+                  <SentimentGauge key={idx} data={sentiment} />
+                ))
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Correlation Heatmap */}
+        <section>
+          <div
+            onClick={() => setCorrelationExpanded(!correlationExpanded)}
+            className="flex items-center gap-3 mb-4 cursor-pointer group p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all backdrop-blur-sm"
+            data-testid="toggle-correlation"
+          >
+            <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20">
+              <Network className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-orbitron font-bold text-white">Correlation Heatmap</h2>
+              <p className="text-xs text-gray-400">Asset correlation matrix for portfolio diversification</p>
+            </div>
+            {correlationExpanded ? (
+              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition-colors" />
+            ) : (
+              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition-colors" />
+            )}
+          </div>
+
+          {correlationExpanded && (
+            <div className="pl-2">
+              <CorrelationHeatmap />
+            </div>
+          )}
+        </section>
 
         {/* Trending Markets Heat Map */}
         <section>
