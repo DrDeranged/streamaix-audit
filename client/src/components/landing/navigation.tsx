@@ -96,21 +96,17 @@ export function Navigation() {
       
       <div className="relative container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          {/* Logo with Animated Glow - Tap to scroll to top on mobile */}
-          <Link href="/">
-            <motion.div 
-              className="flex items-center space-x-3 cursor-pointer group"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => {
-                // On mobile, scroll to top when tapping the header
-                if (window.location.pathname === '/') {
-                  e.preventDefault();
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }}
-            >
+          {/* Logo with Animated Glow - Tap to scroll to top */}
+          <motion.div 
+            className="flex items-center space-x-3 cursor-pointer group"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => {
+              // Scroll to top on any page when tapping the header
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse" />
                 <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg">
@@ -120,8 +116,7 @@ export function Navigation() {
               <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-300">
                 StreamAiX
               </div>
-            </motion.div>
-          </Link>
+          </motion.div>
           
           <div className="flex items-center space-x-3 sm:space-x-6">
             {/* Desktop Navigation with Icons */}

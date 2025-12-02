@@ -10,7 +10,6 @@ import { DashboardSkeleton, TradingSkeleton } from "@/components/LazyWrapper";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { PWAInstallPrompt, PWAUpdatePrompt } from "@/components/pwa/PWAInstallPrompt";
-import { ScrollToTop } from "@/components/ScrollToTop";
 
 // Immediate load for critical pages
 import Landing from "@/pages/landing";
@@ -265,7 +264,6 @@ function App() {
             <OnboardingTour />
             <PWAInstallPrompt />
             <PWAUpdatePrompt />
-            <ScrollToTop />
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
