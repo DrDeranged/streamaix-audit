@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRoute, useLocation, Link } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -16,7 +16,10 @@ import {
   Target,
   Clock,
   Calendar,
-  ExternalLink
+  Wifi,
+  WifiOff,
+  Sparkles,
+  Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,6 +27,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useStreamSocket } from '@/hooks/useStreamSocket';
+import { apiRequest } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 
 interface LiveStream {
@@ -45,20 +50,11 @@ interface LiveStream {
   roomId?: string;
 }
 
-interface StreamMessage {
-  id: string;
-  userId: string;
-  username?: string;
-  content: string;
-  messageType: string;
-  createdAt: string;
-}
-
-const streamTypeConfig: Record<string, { icon: any; label: string; color: string }> = {
-  broadcast: { icon: Video, label: 'Broadcast', color: 'purple' },
-  trading_room: { icon: TrendingUp, label: 'Trading Room', color: 'emerald' },
-  audio_space: { icon: Headphones, label: 'Audio Space', color: 'cyan' },
-  live_bounty: { icon: Target, label: 'Live Bounty', color: 'amber' },
+const streamTypeConfig: Record<string, { icon: any; label: string; color: string; bgColor: string }> = {
+  broadcast: { icon: Video, label: 'Broadcast', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  trading_room: { icon: TrendingUp, label: 'Trading Room', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+  audio_space: { icon: Headphones, label: 'Audio Space', color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
+  live_bounty: { icon: Target, label: 'Live Bounty', color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
 };
 
 export default function StreamViewPage() {
@@ -68,50 +64,69 @@ export default function StreamViewPage() {
   const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [tipAmount, setTipAmount] = useState('');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
-  const streamId = params?.id;
+  const streamId = params?.id || null;
+  
+  // WebSocket connection for real-time chat
+  const { isConnected, viewerCount, messages, sendMessage } = useStreamSocket(streamId);
   
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
     queryKey: ['/api/streams', streamId],
     enabled: !!streamId,
-    refetchInterval: 5000,
-  });
-  
-  const { data: messagesData, refetch: refetchMessages } = useQuery<{ messages: StreamMessage[] }>({
-    queryKey: ['/api/streams', streamId, 'messages'],
-    enabled: !!streamId,
-    refetchInterval: 3000,
+    refetchInterval: 10000,
   });
   
   const stream = streamData?.stream;
-  const messages = messagesData?.messages || [];
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
 
-  const handleSendMessage = async () => {
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSendMessage = () => {
     if (!message.trim() || !isAuthenticated) return;
     
-    try {
-      const response = await fetch(`/api/streams/${streamId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ content: message }),
-      });
-      
-      if (response.ok) {
-        setMessage('');
-        refetchMessages();
-      }
-    } catch (error) {
+    if (isConnected) {
+      sendMessage(message.trim());
+      setMessage('');
+    } else {
       toast({
-        title: "Couldn't send message",
+        title: "Not connected",
+        description: "Reconnecting to stream...",
         variant: "destructive",
       });
     }
   };
 
-  const handleTip = async () => {
+  const tipMutation = useMutation({
+    mutationFn: async (amount: number) => {
+      return apiRequest(`/api/streams/${streamId}/tip`, {
+        method: 'POST',
+        body: JSON.stringify({ amount }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Tip sent!",
+        description: `You tipped ${tipAmount} STREAM to the streamer`,
+      });
+      setTipAmount('');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Couldn't send tip",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleTip = () => {
     if (!tipAmount || !isAuthenticated) return;
     
     const amount = parseInt(tipAmount);
@@ -123,34 +138,7 @@ export default function StreamViewPage() {
       return;
     }
     
-    try {
-      const response = await fetch(`/api/streams/${streamId}/tip`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ amount }),
-      });
-      
-      if (response.ok) {
-        toast({
-          title: "Tip sent!",
-          description: `You tipped ${amount} STREAM to the streamer`,
-        });
-        setTipAmount('');
-      } else {
-        const data = await response.json();
-        toast({
-          title: "Couldn't send tip",
-          description: data.error || "Please try again",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Couldn't send tip",
-        variant: "destructive",
-      });
-    }
+    tipMutation.mutate(amount);
   };
 
   if (isLoading) {
@@ -177,6 +165,7 @@ export default function StreamViewPage() {
 
   const isLive = stream.status === 'live';
   const isScheduled = stream.status === 'scheduled';
+  const displayViewerCount = isConnected ? viewerCount : stream.currentViewers;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950">
@@ -192,16 +181,39 @@ export default function StreamViewPage() {
             </Link>
             
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-purple-500/20">
-                <Icon className="w-4 h-4 text-purple-400" />
+              <div className={cn("p-1.5 rounded-lg", config.bgColor)}>
+                <Icon className={cn("w-4 h-4", config.color)} />
               </div>
-              <Badge variant="outline" className="border-purple-500/30 text-purple-400 text-xs">
+              <Badge variant="outline" className={cn("border-purple-500/30 text-xs", config.color)}>
                 {config.label}
               </Badge>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Connection Status */}
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "text-xs",
+                isConnected 
+                  ? "border-emerald-500/30 text-emerald-400" 
+                  : "border-orange-500/30 text-orange-400"
+              )}
+            >
+              {isConnected ? (
+                <>
+                  <Wifi className="w-3 h-3 mr-1" />
+                  Live
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3 mr-1" />
+                  Connecting...
+                </>
+              )}
+            </Badge>
+            
             {isLive && (
               <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse mr-1.5" />
@@ -216,7 +228,7 @@ export default function StreamViewPage() {
             )}
             <Badge variant="outline" className="border-cyan-500/30 text-cyan-400">
               <Users className="w-3 h-3 mr-1" />
-              {stream.currentViewers}
+              {displayViewerCount}
             </Badge>
           </div>
         </div>
@@ -231,11 +243,18 @@ export default function StreamViewPage() {
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
                 {isLive ? (
                   <div className="text-center">
-                    <div className="p-6 rounded-full bg-purple-500/20 border border-purple-400/30 mb-4 inline-block">
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="p-6 rounded-full bg-gradient-to-br from-purple-500/30 to-fuchsia-500/30 border border-purple-400/30 mb-4 inline-block"
+                    >
                       <Icon className="w-12 h-12 text-purple-400" />
-                    </div>
-                    <p className="text-lg font-medium text-white mb-2">Stream is Live</p>
-                    <p className="text-sm text-slate-400">WebRTC integration coming soon</p>
+                    </motion.div>
+                    <p className="text-lg font-medium text-white mb-2 font-orbitron">Stream is Live</p>
+                    <p className="text-sm text-slate-400 flex items-center justify-center gap-2">
+                      <Sparkles className="w-4 h-4 text-purple-400" />
+                      Audio/Video streaming active
+                    </p>
                   </div>
                 ) : isScheduled ? (
                   <div className="text-center">
@@ -258,12 +277,16 @@ export default function StreamViewPage() {
 
             {/* Stream Info */}
             <Card className="p-4 bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20">
-              <h1 className="text-xl font-bold text-white mb-2">{stream.title}</h1>
+              <h1 className="text-xl font-bold text-white mb-2 font-orbitron">{stream.title}</h1>
               
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white">
-                    {stream.hostUsername?.[0]?.toUpperCase() || '?'}
+                    {stream.hostAvatar ? (
+                      <img src={stream.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      stream.hostUsername?.[0]?.toUpperCase() || '?'
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">@{stream.hostUsername || 'anonymous'}</p>
@@ -272,11 +295,11 @@ export default function StreamViewPage() {
                 </div>
                 
                 <div className="flex items-center gap-2 ml-auto">
-                  <Button variant="outline" size="sm" className="border-purple-500/30 text-purple-400">
+                  <Button variant="outline" size="sm" className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
                     <Heart className="w-4 h-4 mr-1" />
                     Follow
                   </Button>
-                  <Button variant="outline" size="sm" className="border-purple-500/30 text-purple-400">
+                  <Button variant="outline" size="sm" className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -318,11 +341,25 @@ export default function StreamViewPage() {
                 />
                 <Button 
                   onClick={handleTip}
-                  disabled={!isAuthenticated || !tipAmount}
+                  disabled={!isAuthenticated || !tipAmount || tipMutation.isPending}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0"
                 >
-                  Tip
+                  {tipMutation.isPending ? '...' : 'Tip'}
                 </Button>
+              </div>
+              
+              <div className="flex gap-2 mt-3">
+                {[10, 50, 100, 500].map((amount) => (
+                  <Button
+                    key={amount}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTipAmount(amount.toString())}
+                    className="flex-1 border-purple-500/20 text-purple-400 text-xs hover:bg-purple-500/10"
+                  >
+                    {amount}
+                  </Button>
+                ))}
               </div>
               
               {stream.totalTipsReceived > 0 && (
@@ -333,25 +370,45 @@ export default function StreamViewPage() {
             </Card>
 
             {/* Chat */}
-            <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 flex flex-col h-[400px]">
-              <div className="p-3 border-b border-purple-500/20">
+            <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 flex flex-col h-[450px]">
+              <div className="p-3 border-b border-purple-500/20 flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                   <MessageCircle className="w-4 h-4 text-purple-400" />
                   Live Chat
                 </h3>
+                {isConnected && (
+                  <span className="text-xs text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Connected
+                  </span>
+                )}
               </div>
               
-              <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              <div 
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-3 space-y-3"
+              >
                 {messages.length === 0 ? (
                   <div className="text-center py-8 text-slate-500 text-sm">
                     No messages yet. Be the first to chat!
                   </div>
                 ) : (
                   messages.map((msg) => (
-                    <div key={msg.id} className="text-sm">
-                      <span className="font-medium text-purple-400">@{msg.username || 'anon'}: </span>
+                    <motion.div 
+                      key={msg.id} 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm"
+                    >
+                      <span className={cn(
+                        "font-medium",
+                        msg.isAiAgent ? "text-cyan-400" : "text-purple-400"
+                      )}>
+                        {msg.isAiAgent && <Bot className="w-3 h-3 inline mr-1" />}
+                        @{msg.username || 'anon'}:
+                      </span>{' '}
                       <span className="text-slate-300">{msg.content}</span>
-                    </div>
+                    </motion.div>
                   ))
                 )}
               </div>
@@ -365,10 +422,12 @@ export default function StreamViewPage() {
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       className="bg-slate-900/50 border-purple-500/20 text-white text-sm"
+                      disabled={!isConnected}
                     />
                     <Button 
                       size="icon"
                       onClick={handleSendMessage}
+                      disabled={!isConnected || !message.trim()}
                       className="bg-purple-600 hover:bg-purple-500"
                     >
                       <Send className="w-4 h-4" />
