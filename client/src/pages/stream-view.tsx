@@ -30,7 +30,8 @@ import {
   Plus,
   Circle,
   Play,
-  Pause
+  Pause,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -487,12 +488,19 @@ export default function StreamViewPage() {
       <div className="border-b border-purple-500/20 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white h-9 w-9 sm:w-auto p-0 sm:px-3">
-                <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline ml-2">Back</span>
-              </Button>
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white h-9 w-9 p-0 hover:bg-purple-500/20" data-testid="button-home">
+                  <Home className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Link href="/streams">
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white h-9 w-9 sm:w-auto p-0 sm:px-3 hover:bg-purple-500/20" data-testid="button-back-streams">
+                  <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline ml-2">Streams</span>
+                </Button>
+              </Link>
+            </div>
             
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className={cn("p-1 sm:p-1.5 rounded-lg", config.bgColor)}>

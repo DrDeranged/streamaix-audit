@@ -17,7 +17,9 @@ import {
   Zap,
   Bot,
   Calendar,
-  Play
+  Play,
+  Home,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -262,6 +264,11 @@ export default function StreamsPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
+              <Link href="/">
+                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-purple-500/20 h-10 w-10" data-testid="button-back-home">
+                  <Home className="w-5 h-5" />
+                </Button>
+              </Link>
               <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-500">
                 <Radio className="w-5 h-5 text-white" />
               </div>
