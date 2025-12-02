@@ -49,6 +49,7 @@ const LeagueDetail = React.lazy(() => import("@/pages/league-detail"));
 const StreamView = React.lazy(() => import("@/pages/stream-view"));
 const GoLive = React.lazy(() => import("@/pages/go-live"));
 const Gamification = React.lazy(() => import("@/pages/gamification"));
+const MarketIntelligence = React.lazy(() => import("@/pages/market-intelligence"));
 
 function Router() {
   return (
@@ -228,6 +229,12 @@ function Router() {
       <Route path="/gamification">
         <Suspense fallback={<DashboardSkeleton />}>
           <Gamification />
+        </Suspense>
+      </Route>
+      
+      <Route path="/intelligence">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <MarketIntelligence />
         </Suspense>
       </Route>
       
