@@ -1213,14 +1213,14 @@ export default function Dashboard() {
                     Quick Actions
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-3">
                   {/* Create Summary - Primary Action */}
                   <Link to="/create-summary">
                     <Button 
-                      className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white shadow-lg shadow-purple-500/20 transition-all duration-200 font-semibold touch-manipulation py-3"
+                      className="w-full h-12 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white shadow-lg shadow-purple-500/25 transition-all duration-200 font-semibold touch-manipulation text-sm"
                       data-testid="button-create-summary"
                     >
-                      <PlayCircle className="h-4 w-4 mr-2" />
+                      <PlayCircle className="h-5 w-5 mr-2 flex-shrink-0" />
                       Create Summary
                     </Button>
                   </Link>
@@ -1228,10 +1228,10 @@ export default function Dashboard() {
                   {/* Browse Markets */}
                   <Link to="/markets">
                     <Button 
-                      className="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      className="w-full h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 font-semibold touch-manipulation text-sm"
                       data-testid="button-browse-markets"
                     >
-                      <TrendingUp className="h-4 w-4 mr-2" />
+                      <TrendingUp className="h-5 w-5 mr-2 flex-shrink-0" />
                       Browse Markets
                     </Button>
                   </Link>
@@ -1239,10 +1239,10 @@ export default function Dashboard() {
                   {/* Find Bounties */}
                   <Link to="/bounties">
                     <Button 
-                      className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      className="w-full h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-amber-500/25 transition-all duration-200 font-semibold touch-manipulation text-sm"
                       data-testid="button-find-bounties"
                     >
-                      <Target className="h-4 w-4 mr-2" />
+                      <Target className="h-5 w-5 mr-2 flex-shrink-0" />
                       Find Bounties
                     </Button>
                   </Link>
@@ -1250,10 +1250,10 @@ export default function Dashboard() {
                   {/* Discover Analytics */}
                   <Link to="/discover">
                     <Button 
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 transition-all duration-200 font-semibold touch-manipulation text-sm"
                       data-testid="button-discover"
                     >
-                      <Compass className="h-4 w-4 mr-2" />
+                      <Compass className="h-5 w-5 mr-2 flex-shrink-0" />
                       Discover Analytics
                     </Button>
                   </Link>
@@ -1261,10 +1261,10 @@ export default function Dashboard() {
                   {/* Explore Avatars */}
                   <Link to="/landing#knowledge-avatars">
                     <Button 
-                      className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg shadow-pink-500/20 transition-all duration-200 font-semibold touch-manipulation py-2.5"
+                      className="w-full h-11 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg shadow-pink-500/25 transition-all duration-200 font-semibold touch-manipulation text-sm"
                       data-testid="button-explore-avatars"
                     >
-                      <Users className="h-4 w-4 mr-2" />
+                      <Users className="h-5 w-5 mr-2 flex-shrink-0" />
                       Explore Avatars
                     </Button>
                   </Link>
@@ -1277,10 +1277,10 @@ export default function Dashboard() {
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full bg-white/5 border-blue-500/30 hover:bg-blue-500/20 text-white transition-all duration-200 font-medium touch-manipulation py-2.5"
+                        className="w-full h-10 bg-white/5 border-blue-500/30 hover:bg-blue-500/20 text-white transition-all duration-200 font-medium touch-manipulation text-sm"
                         data-testid="button-add-note"
                       >
-                        <BookmarkPlus className="h-4 w-4 mr-2 text-blue-400" />
+                        <BookmarkPlus className="h-4 w-4 mr-2 text-blue-400 flex-shrink-0" />
                         Add Note
                       </Button>
                     </DialogTrigger>
@@ -1336,10 +1336,10 @@ export default function Dashboard() {
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full bg-white/5 border-green-500/30 hover:bg-green-500/20 text-white transition-all duration-200 font-medium touch-manipulation py-2.5"
+                        className="w-full h-10 bg-white/5 border-green-500/30 hover:bg-green-500/20 text-white transition-all duration-200 font-medium touch-manipulation text-sm"
                         data-testid="button-share-profile"
                       >
-                        <Share className="h-4 w-4 mr-2 text-green-400" />
+                        <Share className="h-4 w-4 mr-2 text-green-400 flex-shrink-0" />
                         Share Profile
                       </Button>
                     </DialogTrigger>

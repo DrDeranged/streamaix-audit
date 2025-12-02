@@ -52,7 +52,7 @@ class MarketIntelligenceNotifier {
   private readonly NEWS_ARTICLE_RETENTION = 24 * 60 * 60 * 1000; // 24 hours
   
   // Trading metric thresholds
-  private readonly FUNDING_RATE_EXTREME_THRESHOLD = 0.05; // 0.05% per 8h (annualized ~18%)
+  private readonly FUNDING_RATE_EXTREME_THRESHOLD = 0.10; // 0.10% per 8h (annualized ~36%) - Only alert on truly extreme rates
   private readonly FUNDING_RATE_HIGH_THRESHOLD = 0.03; // 0.03% per 8h
   private readonly LIQUIDATION_SPIKE_THRESHOLD = 50_000_000; // $50M in liquidations
   private readonly WHALE_ALERT_THRESHOLD = 10_000_000; // $10M whale movement
@@ -653,8 +653,8 @@ class MarketIntelligenceNotifier {
         const fundingRate = data.fundingRateHistory[0].rate;
         const lastAlert = this.lastFundingRateAlerts.get(symbol) || 0;
         
-        // Check cooldown (1 hour for funding rate alerts)
-        if (now - lastAlert < 60 * 60 * 1000) continue;
+        // Check cooldown (6 hours for funding rate alerts to reduce repetitive notifications)
+        if (now - lastAlert < 6 * 60 * 60 * 1000) continue;
 
         const absRate = Math.abs(fundingRate);
         if (absRate >= this.FUNDING_RATE_EXTREME_THRESHOLD) {
