@@ -78,7 +78,8 @@ import {
   StreamAchievementsPanel,
   ChatCommandsHelp,
   CreateClipButton,
-  PinnedMessagesBar
+  PinnedMessagesBar,
+  CoStreamPanel
 } from '@/components/streaming/EnhancedStreamingFeatures';
 
 interface LiveStream {
@@ -452,7 +453,7 @@ export default function StreamViewPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [streamDuration, setStreamDuration] = useState(0);
-  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe'>('chat');
+  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe' | 'costream'>('chat');
   const [isCopied, setIsCopied] = useState(false);
   const [isFloatingChat, setIsFloatingChat] = useState(false);
   const [showCommandsHelp, setShowCommandsHelp] = useState(false);
@@ -1144,7 +1145,7 @@ export default function StreamViewPage() {
             "flex flex-col transition-all duration-300 overflow-hidden",
             isChatExpanded ? "h-[400px] sm:h-[450px] lg:h-full lg:flex-1" : "h-0 lg:h-full lg:flex-1"
           )}>
-            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe')} className="flex flex-col h-full">
+            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">
                 <TabsList className="bg-transparent w-full justify-start rounded-none h-11 p-0">
                   <TabsTrigger 
@@ -1167,6 +1168,13 @@ export default function StreamViewPage() {
                   >
                     <Crown className="w-3.5 h-3.5 mr-1 text-fuchsia-400" />
                     Sub
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="costream" 
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-cyan-500 data-[state=active]:bg-transparent text-xs"
+                  >
+                    <Radio className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+                    Co-Stream
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1428,6 +1436,13 @@ export default function StreamViewPage() {
                     <StreamAchievementsPanel userId={user?.id} />
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="costream" className="flex-1 flex flex-col m-0 p-4 overflow-y-auto">
+                <CoStreamPanel 
+                  streamId={streamId || ''} 
+                  isHost={isHost}
+                />
               </TabsContent>
             </Tabs>
           </div>
