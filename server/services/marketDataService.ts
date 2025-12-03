@@ -163,37 +163,85 @@ export class MarketDataService {
     return null;
   }
 
+  // Stale cache for fallback when all APIs fail (retains last known good data)
+  private staleCache = new Map<string, { data: any; timestamp: number }>();
+  private staleCacheTimeout = 3600000; // 1 hour stale cache retention
+
+  private getFromStaleCache(key: string): any | null {
+    const cached = this.staleCache.get(key);
+    if (!cached) return null;
+    
+    // Allow stale data up to 1 hour old
+    if (Date.now() - cached.timestamp < this.staleCacheTimeout) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  private setStaleCache(key: string, data: any): void {
+    this.staleCache.set(key, { data, timestamp: Date.now() });
+  }
 
   /**
-   * Get live cryptocurrency data by symbols using 3-tier fallback: CoinGecko → CoinMarketCap → Dune
+   * Get live cryptocurrency data by symbols using 6-tier fallback chain:
+   * 1. CoinGecko (API key)
+   * 2. CoinMarketCap (API key)  
+   * 3. Binance Public API (FREE, no key required - most reliable)
+   * 4. CryptoCompare Public API (FREE, generous limits)
+   * 5. Dune Analytics (API key)
+   * 6. Stale Cache (last known good data, up to 1hr old)
    */
   async getCryptoQuotes(symbols: string[]): Promise<CryptoQuote[]> {
     const cacheKey = `crypto_${symbols.join(',').toUpperCase()}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
+    let quotes: CryptoQuote[] = [];
+    let dataSource = '';
+
     // Tier 1: Try CoinGecko first (better free tier)
-    if (this.coingeckoApiKey) {
+    if (this.coingeckoApiKey && quotes.length === 0) {
       try {
-        return await this.getCryptoQuotesFromCoinGecko(symbols);
+        quotes = await this.getCryptoQuotesFromCoinGecko(symbols);
+        dataSource = 'CoinGecko';
       } catch (error) {
-        console.warn('⚠️ CoinGecko failed, trying CoinMarketCap fallback');
+        console.warn('⚠️ [Tier 1] CoinGecko failed, trying next fallback');
       }
     }
 
     // Tier 2: Fallback to CoinMarketCap
-    if (this.cmcApiKey) {
+    if (this.cmcApiKey && quotes.length === 0) {
       try {
-        return await this.getCryptoQuotesFromCMC(symbols);
+        quotes = await this.getCryptoQuotesFromCMC(symbols);
+        dataSource = 'CoinMarketCap';
       } catch (error) {
-        console.warn('⚠️ CoinMarketCap failed, trying Dune Analytics fallback');
+        console.warn('⚠️ [Tier 2] CoinMarketCap failed, trying Binance fallback');
       }
     }
 
-    // Tier 3: Final fallback to Dune Analytics
-    if (duneService.isAvailable()) {
+    // Tier 3: Binance Public API (FREE, no API key required - extremely reliable)
+    if (quotes.length === 0) {
       try {
-        console.log('🔮 Using Dune Analytics as final fallback for crypto prices');
+        quotes = await this.getCryptoQuotesFromBinance(symbols);
+        dataSource = 'Binance';
+      } catch (error) {
+        console.warn('⚠️ [Tier 3] Binance failed, trying CryptoCompare fallback');
+      }
+    }
+
+    // Tier 4: CryptoCompare Public API (FREE, generous limits)
+    if (quotes.length === 0) {
+      try {
+        quotes = await this.getCryptoQuotesFromCryptoCompare(symbols);
+        dataSource = 'CryptoCompare';
+      } catch (error) {
+        console.warn('⚠️ [Tier 4] CryptoCompare failed, trying Dune Analytics fallback');
+      }
+    }
+
+    // Tier 5: Dune Analytics
+    if (duneService.isAvailable() && quotes.length === 0) {
+      try {
         const duneQuotes: CryptoQuote[] = [];
         
         for (const symbol of symbols) {
@@ -203,7 +251,7 @@ export class MarketDataService {
               symbol: symbol.toUpperCase(),
               name: symbol,
               price,
-              percentChange24h: 0, // Dune doesn't provide this easily
+              percentChange24h: 0,
               percentChange7d: 0,
               percentChange30d: 0,
               marketCap: 0,
@@ -215,18 +263,127 @@ export class MarketDataService {
         }
         
         if (duneQuotes.length > 0) {
-          this.setCacheWithTimeout(cacheKey, duneQuotes);
-          console.log(`🔮 Fetched ${duneQuotes.length} prices from Dune Analytics`);
-          return duneQuotes;
+          quotes = duneQuotes;
+          dataSource = 'Dune Analytics';
         }
       } catch (error) {
-        console.error('❌ Dune Analytics fallback failed:', error);
+        console.warn('⚠️ [Tier 5] Dune Analytics failed, checking stale cache');
       }
     }
 
-    // No APIs available
-    console.warn('⚠️ All crypto data APIs failed (CoinGecko, CoinMarketCap, Dune)');
+    // Tier 6: Stale Cache Fallback (last known good data)
+    if (quotes.length === 0) {
+      const staleData = this.getFromStaleCache(cacheKey);
+      if (staleData) {
+        console.log('📦 [Tier 6] Using stale cache data (all APIs failed)');
+        return staleData;
+      }
+    }
+
+    // Success - cache the results
+    if (quotes.length > 0) {
+      this.setCacheWithTimeout(cacheKey, quotes);
+      this.setStaleCache(cacheKey, quotes); // Also save to stale cache for emergency fallback
+      console.log(`✅ Fetched ${quotes.length} crypto prices from ${dataSource}`);
+      return quotes;
+    }
+
+    // Complete failure
+    console.error('❌ All 6 crypto data sources failed (CoinGecko, CoinMarketCap, Binance, CryptoCompare, Dune, StaleCache)');
     return [];
+  }
+
+  /**
+   * Get cryptocurrency data from Binance Public API (FREE, no API key required)
+   * This is extremely reliable as it's Binance's public trading data
+   */
+  private async getCryptoQuotesFromBinance(symbols: string[]): Promise<CryptoQuote[]> {
+    try {
+      // Binance uses USDT pairs, so we query ticker/24hr for each symbol
+      const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr', {
+        timeout: 10000
+      });
+
+      const quotes: CryptoQuote[] = [];
+      const binanceData = response.data;
+
+      for (const symbol of symbols) {
+        // Binance uses pairs like BTCUSDT, ETHUSDT
+        const pair = `${symbol.toUpperCase()}USDT`;
+        const ticker = binanceData.find((t: any) => t.symbol === pair);
+        
+        if (ticker) {
+          quotes.push({
+            symbol: symbol.toUpperCase(),
+            name: symbol.toUpperCase(),
+            price: parseFloat(ticker.lastPrice),
+            percentChange24h: parseFloat(ticker.priceChangePercent),
+            percentChange7d: 0, // Binance 24hr endpoint doesn't have 7d
+            percentChange30d: 0,
+            marketCap: 0, // Not available from this endpoint
+            volume24h: parseFloat(ticker.quoteVolume),
+            rank: 0,
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      }
+
+      if (quotes.length > 0) {
+        console.log(`📊 [Binance] Fetched ${quotes.length} prices (FREE, no API key)`);
+      }
+      
+      return quotes;
+    } catch (error: any) {
+      this.logErrorOnce('binance_error', '❌ [Binance] API error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Get cryptocurrency data from CryptoCompare Public API (FREE, generous limits)
+   */
+  private async getCryptoQuotesFromCryptoCompare(symbols: string[]): Promise<CryptoQuote[]> {
+    try {
+      const symbolsStr = symbols.join(',').toUpperCase();
+      const response = await axios.get('https://min-api.cryptocompare.com/data/pricemultifull', {
+        params: {
+          fsyms: symbolsStr,
+          tsyms: 'USD'
+        },
+        timeout: 10000
+      });
+
+      const quotes: CryptoQuote[] = [];
+      const data = response.data.RAW;
+
+      for (const symbol of symbols) {
+        const coinData = data?.[symbol.toUpperCase()]?.USD;
+        
+        if (coinData) {
+          quotes.push({
+            symbol: symbol.toUpperCase(),
+            name: symbol.toUpperCase(),
+            price: coinData.PRICE || 0,
+            percentChange24h: coinData.CHANGEPCT24HOUR || 0,
+            percentChange7d: 0, // Not directly available
+            percentChange30d: 0,
+            marketCap: coinData.MKTCAP || 0,
+            volume24h: coinData.TOTALVOLUME24HTO || 0,
+            rank: 0,
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      }
+
+      if (quotes.length > 0) {
+        console.log(`📊 [CryptoCompare] Fetched ${quotes.length} prices (FREE, public API)`);
+      }
+      
+      return quotes;
+    } catch (error: any) {
+      this.logErrorOnce('cryptocompare_error', '❌ [CryptoCompare] API error:', error.message);
+      throw error;
+    }
   }
 
   /**
