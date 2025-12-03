@@ -444,7 +444,7 @@ export default function StreamViewPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [streamDuration, setStreamDuration] = useState(0);
-  const [chatTab, setChatTab] = useState<'chat' | 'tips'>('chat');
+  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe'>('chat');
   const [isCopied, setIsCopied] = useState(false);
   const [isFloatingChat, setIsFloatingChat] = useState(false);
   
@@ -1124,22 +1124,29 @@ export default function StreamViewPage() {
             "flex flex-col transition-all duration-300 overflow-hidden",
             isChatExpanded ? "h-[400px] sm:h-[450px] lg:h-full lg:flex-1" : "h-0 lg:h-full lg:flex-1"
           )}>
-            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips')} className="flex flex-col h-full">
+            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">
                 <TabsList className="bg-transparent w-full justify-start rounded-none h-11 p-0">
                   <TabsTrigger 
                     value="chat" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent text-xs"
                   >
-                    <MessageCircle className="w-4 h-4 mr-1.5" />
+                    <MessageCircle className="w-3.5 h-3.5 mr-1" />
                     Chat
                   </TabsTrigger>
                   <TabsTrigger 
                     value="tips" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent text-xs"
                   >
-                    <Coins className="w-4 h-4 mr-1.5 text-amber-400" />
+                    <Coins className="w-3.5 h-3.5 mr-1 text-amber-400" />
                     Tips
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="subscribe" 
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-fuchsia-500 data-[state=active]:bg-transparent text-xs"
+                  >
+                    <Crown className="w-3.5 h-3.5 mr-1 text-fuchsia-400" />
+                    Sub
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1263,6 +1270,109 @@ export default function StreamViewPage() {
                       <p className="text-xs text-slate-500">STREAM received this stream</p>
                     </div>
                   )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="subscribe" className="flex-1 flex flex-col m-0 p-4 overflow-y-auto">
+                <div className="space-y-3">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-bold text-white mb-1">Subscribe to {stream.hostUsername || 'this streamer'}</h3>
+                    <p className="text-xs text-slate-400">Get exclusive perks and support your favorite creator</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:border-slate-600/60 transition-colors cursor-pointer group"
+                       onClick={() => toast({ title: 'Free Tier', description: 'You already have access to free content!' })}
+                       data-testid="subscription-tier-free"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                          <Users className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <span className="font-semibold text-white">Free</span>
+                      </div>
+                      <Badge variant="outline" className="border-slate-600 text-slate-400 text-[10px]">Current</Badge>
+                    </div>
+                    <ul className="text-xs text-slate-400 space-y-1.5">
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-emerald-400" /> Watch all public streams</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-emerald-400" /> Chat during live streams</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-emerald-400" /> Basic emotes</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 rounded-xl border-2 border-purple-500/50 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 hover:border-purple-400/70 transition-all cursor-pointer group"
+                       onClick={() => {
+                         if (!isAuthenticated) {
+                           toast({ title: 'Sign in required', description: 'Please sign in to subscribe.' });
+                           return;
+                         }
+                         toast({ title: 'Silver Subscription', description: 'Subscribe for 100 STREAM/month to unlock silver perks!' });
+                       }}
+                       data-testid="subscription-tier-silver"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center">
+                          <Crown className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="font-semibold text-white">Silver</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-bold text-purple-400">100</span>
+                        <span className="text-xs text-slate-400 ml-1">STREAM/mo</span>
+                      </div>
+                    </div>
+                    <ul className="text-xs text-slate-300 space-y-1.5 mb-3">
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> All Free tier perks</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> Subscriber badge in chat</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> Custom emotes (10+)</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> Ad-free viewing</li>
+                    </ul>
+                    <Button className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 h-9 text-sm">
+                      Subscribe - 100 STREAM
+                    </Button>
+                  </div>
+
+                  <div className="p-4 rounded-xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:border-amber-400/70 transition-all cursor-pointer group relative overflow-hidden"
+                       onClick={() => {
+                         if (!isAuthenticated) {
+                           toast({ title: 'Sign in required', description: 'Please sign in to subscribe.' });
+                           return;
+                         }
+                         toast({ title: 'Gold Subscription', description: 'Subscribe for 500 STREAM/month to unlock gold perks!' });
+                       }}
+                       data-testid="subscription-tier-gold"
+                  >
+                    <div className="absolute top-0 right-0 px-2 py-0.5 bg-amber-500 text-[10px] font-bold text-black">
+                      BEST VALUE
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center animate-pulse-slow">
+                          <Trophy className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="font-semibold text-white">Gold</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-bold text-amber-400">500</span>
+                        <span className="text-xs text-slate-400 ml-1">STREAM/mo</span>
+                      </div>
+                    </div>
+                    <ul className="text-xs text-slate-300 space-y-1.5 mb-3">
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> All Silver tier perks</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Priority chat messages</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Access subscriber-only streams</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Exclusive Discord role</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Monthly shoutout on stream</li>
+                    </ul>
+                    <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 h-9 text-sm text-black font-semibold">
+                      Subscribe - 500 STREAM
+                    </Button>
+                  </div>
+
+                  <p className="text-[10px] text-slate-500 text-center pt-2">
+                    Subscriptions renew monthly. Cancel anytime.
+                  </p>
                 </div>
               </TabsContent>
             </Tabs>
@@ -1393,10 +1503,15 @@ export default function StreamViewPage() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
         .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         .animate-fade-in { animation: fade-in 0.3s ease-out; }
         .animate-scale-in { animation: scale-in 0.3s ease-out; }
         .animate-spin-slow { animation: spin-slow 3s linear infinite; }
+        .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
       `}</style>
     </div>
   );
