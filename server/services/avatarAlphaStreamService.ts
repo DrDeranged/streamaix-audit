@@ -189,6 +189,24 @@ export class AvatarAlphaStreamService {
     const streamingService = getStreamingService();
     if (!streamingService) return;
 
+    // Send initial welcome and alpha message immediately
+    setTimeout(async () => {
+      try {
+        const welcomeMsg = `🎙️ Hey everyone! ${avatar.name} here. Let's get into it - I've got some insights to share on ${avatar.expertise || 'crypto markets'} today.`;
+        await streamingService.sendAiMessage(streamId, avatar.id, avatar.name, welcomeMsg);
+        
+        // Follow up with actual alpha after 5 seconds
+        setTimeout(async () => {
+          const alphaMessage = await this.generateAlphaContent(avatar, streamType);
+          if (alphaMessage) {
+            await streamingService.sendAiMessage(streamId, avatar.id, avatar.name, alphaMessage);
+          }
+        }, 5000);
+      } catch (error) {
+        console.error('[Avatar Alpha] Error sending initial messages:', error);
+      }
+    }, 2000);
+
     // Generate alpha messages every 30-60 seconds
     const alphaInterval = setInterval(async () => {
       try {

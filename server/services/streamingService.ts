@@ -390,12 +390,6 @@ export class StreamingService {
 
   // AI Agent can send messages to a stream
   async sendAiMessage(streamId: string, agentId: string, agentUsername: string, content: string) {
-    const session = this.sessions.get(streamId);
-    if (!session) {
-      console.log(`[Streaming] No active session for stream ${streamId}`);
-      return false;
-    }
-
     const chatMessage = {
       id: `ai-msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId: agentId,
@@ -405,9 +399,7 @@ export class StreamingService {
       timestamp: Date.now(),
     };
 
-    session.messages.push(chatMessage);
-
-    // Save to database
+    // Always save to database (even if no active WebSocket session)
     try {
       await db.insert(streamMessages).values({
         streamId,
@@ -415,19 +407,27 @@ export class StreamingService {
         content,
         messageType: 'ai_comment',
       });
+      console.log(`[Streaming] AI message saved: ${agentUsername} -> ${streamId.slice(0, 8)}...`);
     } catch (error) {
       console.error('Error saving AI stream message:', error);
+      return false;
     }
 
-    // Broadcast to all viewers
-    this.broadcastToStream(streamId, {
-      type: 'ai-message',
-      streamId,
-      userId: agentId,
-      username: agentUsername,
-      isAiAgent: true,
-      data: chatMessage,
-    });
+    // If there's an active session, add to memory and broadcast
+    const session = this.sessions.get(streamId);
+    if (session) {
+      session.messages.push(chatMessage);
+
+      // Broadcast to all viewers
+      this.broadcastToStream(streamId, {
+        type: 'ai-message',
+        streamId,
+        userId: agentId,
+        username: agentUsername,
+        isAiAgent: true,
+        data: chatMessage,
+      });
+    }
 
     return true;
   }
