@@ -219,6 +219,12 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
               AI Host
             </Badge>
           )}
+          {stream.tags?.includes('alpha') && (
+            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-2 py-1 animate-pulse shadow-lg shadow-amber-500/30">
+              <Sparkles className="w-3 h-3 mr-1" />
+              ALPHA
+            </Badge>
+          )}
         </div>
         
         <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -337,6 +343,15 @@ const StreamCard = memo(function StreamCard({ stream, size = 'normal' }: { strea
                 <Badge className="bg-cyan-500/90 text-white text-[10px] px-2 py-0.5 font-medium">
                   <Bot className="w-3 h-3 mr-1" />
                   AI
+                </Badge>
+              </div>
+            )}
+
+            {stream.tags?.includes('alpha') && (
+              <div className={cn("absolute top-3", stream.isAiHost ? "right-12" : "right-3")}>
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-2 py-0.5 font-medium animate-pulse">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  ALPHA
                 </Badge>
               </div>
             )}
