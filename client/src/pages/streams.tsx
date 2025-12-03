@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Radio,
   Video,
@@ -97,7 +96,7 @@ const streamTypeConfig: Record<string, { icon: any; label: string; color: string
 
 const categories = ['all', 'crypto', 'trading', 'defi', 'nft', 'education', 'ama', 'news', 'analysis'];
 
-function StreamCard({ stream }: { stream: LiveStream }) {
+const StreamCard = memo(function StreamCard({ stream }: { stream: LiveStream }) {
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
   const isLive = stream.status === 'live';
@@ -107,26 +106,9 @@ function StreamCard({ stream }: { stream: LiveStream }) {
     return count.toString();
   };
 
-  const getTimeAgo = (dateStr?: string) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 60) return `${diffMins}m`;
-    const diffHrs = Math.floor(diffMins / 60);
-    if (diffHrs < 24) return `${diffHrs}h`;
-    return `${Math.floor(diffHrs / 24)}d`;
-  };
-
   return (
     <Link href={`/stream/${stream.id}`}>
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="group cursor-pointer"
-      >
+      <div className="group cursor-pointer transform transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
         <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/10 to-slate-900/90 border border-purple-500/20 hover:border-purple-500/40 transition-all">
           <div className={cn(
             "relative aspect-video bg-gradient-to-br",
@@ -137,14 +119,10 @@ function StreamCard({ stream }: { stream: LiveStream }) {
             </div>
             
             {isLive && (
-              <motion.div
-                animate={{ opacity: [1, 0.7, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500/90 rounded-full px-2.5 py-1"
-              >
+              <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500/90 rounded-full px-2.5 py-1 animate-pulse">
                 <div className="w-1.5 h-1.5 rounded-full bg-white" />
                 <span className="text-[10px] font-bold text-white">LIVE</span>
-              </motion.div>
+              </div>
             )}
 
             {stream.isAiHost && (
@@ -168,7 +146,7 @@ function StreamCard({ stream }: { stream: LiveStream }) {
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 ring-2 ring-purple-500/30">
                 {stream.hostAvatar ? (
-                  <img src={stream.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
                 ) : (
                   <span className="text-sm font-bold text-white">
                     {stream.hostUsername?.[0]?.toUpperCase() || '?'}
@@ -202,12 +180,12 @@ function StreamCard({ stream }: { stream: LiveStream }) {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </div>
     </Link>
   );
-}
+});
 
-function ScheduledStreamCard({ stream }: { stream: LiveStream }) {
+const ScheduledStreamCard = memo(function ScheduledStreamCard({ stream }: { stream: LiveStream }) {
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
 
@@ -247,9 +225,9 @@ function ScheduledStreamCard({ stream }: { stream: LiveStream }) {
       </div>
     </Card>
   );
-}
+});
 
-function PastStreamCard({ stream }: { stream: PastStream }) {
+const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastStream }) {
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
 
@@ -280,11 +258,7 @@ function PastStreamCard({ stream }: { stream: PastStream }) {
 
   return (
     <Link href={`/replay/${stream.id}`}>
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="group cursor-pointer min-w-[280px] sm:min-w-[320px]"
-      >
+      <div className="group cursor-pointer min-w-[280px] sm:min-w-[320px] transform transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
         <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-800/50 to-slate-900/90 border border-slate-600/30 hover:border-purple-500/40 transition-all">
           <div className={cn(
             "relative aspect-video bg-gradient-to-br",
@@ -327,7 +301,7 @@ function PastStreamCard({ stream }: { stream: PastStream }) {
             <div className="flex items-start gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center flex-shrink-0">
                 {stream.hostAvatar ? (
-                  <img src={stream.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
                 ) : (
                   <span className="text-xs font-bold text-white">
                     {stream.hostUsername?.[0]?.toUpperCase() || '?'}
@@ -351,10 +325,10 @@ function PastStreamCard({ stream }: { stream: PastStream }) {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </div>
     </Link>
   );
-}
+});
 
 export default function StreamsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
