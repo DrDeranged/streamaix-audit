@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi, setAuthToken, removeAuthToken, type User, type UserStats } from '@/lib/auth';
-import { useToast } from './use-toast';
+import { useToast, dismissAll } from './use-toast';
 
 export function useAuth() {
   const { data, isLoading, error } = useQuery({
@@ -27,6 +27,7 @@ export function useLogin() {
     mutationFn: ({ username, password }: { username: string; password: string }) =>
       authApi.login(username, password),
     onSuccess: (data) => {
+      dismissAll();
       setAuthToken(data.token);
       queryClient.setQueryData(['auth', 'current-user'], data);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
@@ -61,6 +62,7 @@ export function useRegister() {
       bio?: string;
     }) => authApi.register(userData),
     onSuccess: (data) => {
+      dismissAll();
       setAuthToken(data.token);
       queryClient.setQueryData(['auth', 'current-user'], data);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
@@ -90,6 +92,7 @@ export function useWalletLogin() {
       message: string;
     }) => authApi.walletLogin(walletAddress, signature, message),
     onSuccess: (data) => {
+      dismissAll();
       setAuthToken(data.token);
       queryClient.setQueryData(['auth', 'current-user'], data);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
