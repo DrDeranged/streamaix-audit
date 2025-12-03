@@ -12746,6 +12746,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const aiStreamingService = initAIAgentStreamingService();
   aiStreamingService.scheduleAIStreams();
 
+  // Start Knowledge Avatar Alpha Streaming Service
+  const { initAvatarAlphaStreamService } = await import('./services/avatarAlphaStreamService');
+  const avatarAlphaService = initAvatarAlphaStreamService();
+  avatarAlphaService.scheduleAvatarStreams();
+  console.log('🎙️ Knowledge Avatar Alpha Streaming Service initialized');
+
   // Start enhanced real-time updates with multiple intervals
   const marketUpdateInterval = setInterval(broadcastMarketUpdates, 15000); // Every 15 seconds for comprehensive data
   const volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 45000); // Every 45 seconds for volatility alerts
