@@ -941,6 +941,10 @@ export default function StreamViewPage() {
             
             {isLive && isAuthenticated && !isHost && (
               <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+                <CreateClipButton 
+                  streamId={streamId || ''} 
+                  currentTime={streamDuration}
+                />
                 <Button
                   onClick={() => setShowPredictionPanel(true)}
                   className="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 h-9 text-xs shadow-lg"
