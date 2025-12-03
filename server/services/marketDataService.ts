@@ -186,10 +186,12 @@ export class MarketDataService {
    * Get live cryptocurrency data by symbols using 6-tier fallback chain:
    * 1. CoinGecko (API key)
    * 2. CoinMarketCap (API key)  
-   * 3. Binance Public API (FREE, no key required - most reliable)
-   * 4. CryptoCompare Public API (FREE, generous limits)
+   * 3. CryptoCompare Public API (FREE, generous limits - PRIORITY for reliability)
+   * 4. Kraken Public API (FREE, no API key required)
    * 5. Dune Analytics (API key)
    * 6. Stale Cache (last known good data, up to 1hr old)
+   * 
+   * Note: Binance is geo-blocked in many regions (HTTP 451), so CryptoCompare is preferred
    */
   async getCryptoQuotes(symbols: string[]): Promise<CryptoQuote[]> {
     const cacheKey = `crypto_${symbols.join(',').toUpperCase()}`;
@@ -215,27 +217,27 @@ export class MarketDataService {
         quotes = await this.getCryptoQuotesFromCMC(symbols);
         dataSource = 'CoinMarketCap';
       } catch (error) {
-        console.warn('⚠️ [Tier 2] CoinMarketCap failed, trying Binance fallback');
+        console.warn('⚠️ [Tier 2] CoinMarketCap failed, trying CryptoCompare fallback');
       }
     }
 
-    // Tier 3: Binance Public API (FREE, no API key required - extremely reliable)
-    if (quotes.length === 0) {
-      try {
-        quotes = await this.getCryptoQuotesFromBinance(symbols);
-        dataSource = 'Binance';
-      } catch (error) {
-        console.warn('⚠️ [Tier 3] Binance failed, trying CryptoCompare fallback');
-      }
-    }
-
-    // Tier 4: CryptoCompare Public API (FREE, generous limits)
+    // Tier 3: CryptoCompare Public API (FREE, generous limits - PRIORITY)
     if (quotes.length === 0) {
       try {
         quotes = await this.getCryptoQuotesFromCryptoCompare(symbols);
         dataSource = 'CryptoCompare';
       } catch (error) {
-        console.warn('⚠️ [Tier 4] CryptoCompare failed, trying Dune Analytics fallback');
+        console.warn('⚠️ [Tier 3] CryptoCompare failed, trying Kraken fallback');
+      }
+    }
+
+    // Tier 4: Kraken Public API (FREE, no API key required)
+    if (quotes.length === 0) {
+      try {
+        quotes = await this.getCryptoQuotesFromKraken(symbols);
+        dataSource = 'Kraken';
+      } catch (error) {
+        console.warn('⚠️ [Tier 4] Kraken failed, trying Dune Analytics fallback');
       }
     }
 
@@ -289,7 +291,7 @@ export class MarketDataService {
     }
 
     // Complete failure
-    console.error('❌ All 6 crypto data sources failed (CoinGecko, CoinMarketCap, Binance, CryptoCompare, Dune, StaleCache)');
+    console.error('❌ All 6 crypto data sources failed (CoinGecko, CoinMarketCap, CryptoCompare, Kraken, Dune, StaleCache)');
     return [];
   }
 
@@ -382,6 +384,87 @@ export class MarketDataService {
       return quotes;
     } catch (error: any) {
       this.logErrorOnce('cryptocompare_error', '❌ [CryptoCompare] API error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Get cryptocurrency data from Kraken Public API (FREE, no API key required)
+   * Kraken is globally accessible and provides reliable price data
+   */
+  private async getCryptoQuotesFromKraken(symbols: string[]): Promise<CryptoQuote[]> {
+    try {
+      // Kraken uses different ticker symbols
+      const krakenSymbolMap: { [key: string]: string } = {
+        'BTC': 'XXBTZUSD',
+        'ETH': 'XETHZUSD',
+        'XRP': 'XXRPZUSD',
+        'SOL': 'SOLUSD',
+        'ADA': 'ADAUSD',
+        'AVAX': 'AVAXUSD',
+        'DOT': 'DOTUSD',
+        'MATIC': 'MATICUSD',
+        'LINK': 'LINKUSD',
+        'LTC': 'XLTCZUSD',
+        'ATOM': 'ATOMUSD',
+        'UNI': 'UNIUSD',
+        'ALGO': 'ALGOUSD',
+        'DOGE': 'XDGUSD'
+      };
+
+      // Build pairs string for API request
+      const krakenPairs = symbols
+        .map(s => krakenSymbolMap[s.toUpperCase()])
+        .filter(Boolean)
+        .join(',');
+
+      if (!krakenPairs) {
+        return [];
+      }
+
+      const response = await axios.get('https://api.kraken.com/0/public/Ticker', {
+        params: { pair: krakenPairs },
+        timeout: 10000
+      });
+
+      if (response.data.error && response.data.error.length > 0) {
+        throw new Error(response.data.error[0]);
+      }
+
+      const quotes: CryptoQuote[] = [];
+      const result = response.data.result;
+
+      for (const symbol of symbols) {
+        const krakenSymbol = krakenSymbolMap[symbol.toUpperCase()];
+        const tickerData = result?.[krakenSymbol];
+        
+        if (tickerData) {
+          const currentPrice = parseFloat(tickerData.c[0]); // Current price
+          const openPrice = parseFloat(tickerData.o); // Open price (24h)
+          const percentChange24h = ((currentPrice - openPrice) / openPrice) * 100;
+
+          quotes.push({
+            symbol: symbol.toUpperCase(),
+            name: symbol.toUpperCase(),
+            price: currentPrice,
+            percentChange24h: percentChange24h,
+            percentChange7d: 0,
+            percentChange30d: 0,
+            marketCap: 0,
+            volume24h: parseFloat(tickerData.v[1]) * currentPrice, // Volume in USD
+            rank: 0,
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      }
+
+      if (quotes.length > 0) {
+        console.log(`📊 [Kraken] Fetched ${quotes.length} prices (FREE, public API)`);
+      }
+      
+      return quotes;
+    } catch (error: any) {
+      this.logErrorOnce('kraken_error', '❌ [Kraken] API error:', error.message);
       throw error;
     }
   }
