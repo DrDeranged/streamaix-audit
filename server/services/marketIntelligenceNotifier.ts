@@ -439,34 +439,36 @@ class MarketIntelligenceNotifier {
       
       // Calculate overall market performance
       const avgChange = cryptoData.reduce((sum, c) => sum + c.percentChange24h, 0) / cryptoData.length;
-      const marketStatus = avgChange > 2 ? '🟢 Great day!' : 
-                          avgChange > 0 ? '🟡 Slight gains' :
-                          avgChange > -2 ? '🟡 Minor dip' : '🔴 Rough day';
 
-      // Find day's biggest winner and loser
-      const topGainer = cryptoData.reduce((max, c) => 
-        (c.percentChange24h > (max?.percentChange24h || -Infinity)) ? c : max, cryptoData[0]);
-      const topLoser = cryptoData.reduce((min, c) => 
-        (c.percentChange24h < (min?.percentChange24h || Infinity)) ? c : min, cryptoData[0]);
+      // Generate AI-powered evening recap
+      const marketContextData = cryptoData.map(c => ({
+        symbol: c.symbol,
+        price: c.price,
+        change24h: c.percentChange24h,
+        change7d: c.percentChange7d,
+        volume24h: c.volume24h,
+        marketCap: c.marketCap
+      }));
 
-      // Clean, compact evening summary
-      let body = '';
-      
-      if (btc && eth) {
-        body += `₿ $${this.formatPrice(btc.price)} ${this.formatChangeCompact(btc.percentChange24h)}  ·  Ξ $${this.formatPrice(eth.price)} ${this.formatChangeCompact(eth.percentChange24h)}\n\n`;
-      }
-      
-      body += `🏆 ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}  ·  📉 ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
+      const insight = await alphaInsightsEngine.generateEveningRecap(
+        marketContextData,
+        tradingMetrics ? {
+          totalLiquidations: tradingMetrics.totalLiquidations,
+          dominantSide: tradingMetrics.dominantSide
+        } : undefined
+      );
 
-      // Add trading metrics summary if available
-      if (tradingMetrics && tradingMetrics.totalLiquidations > 1000000) {
-        body += `\n\n💥 $${this.formatLargeNumber(tradingMetrics.totalLiquidations)} liquidated today`;
-      }
+      // Market sentiment emoji
+      const sentimentEmoji = avgChange > 2 ? '🟢' : avgChange < -2 ? '🔴' : '🟡';
 
-      // Dynamic title based on market performance
-      const title = marketStatus === '🟢 Great day!' ? '🟢 Great Day · Evening Recap' :
-                    marketStatus === '🔴 Rough day' ? '🔴 Rough Day · Evening Recap' :
-                    '🌙 Evening Recap';
+      // AI-enhanced notification body
+      let body = `📊 ${insight.dayAnalysis}\n\n`;
+      body += `💡 ${insight.keyTakeaway}\n\n`;
+      body += `🌙 ${insight.overnightSetup}\n\n`;
+      body += `📈 ${insight.positionAdvice}`;
+
+      // Dynamic AI-powered title
+      const title = `${sentimentEmoji} ${insight.tomorrowOutlook.substring(0, 40)}`;
 
       await pushNotificationService.sendToAll({
         title,
@@ -480,7 +482,7 @@ class MarketIntelligenceNotifier {
         ]
       }, 'evening_recap');
 
-      console.log('✅ Evening recap sent');
+      console.log('✅ AI-enhanced evening recap sent');
     } catch (error) {
       console.error('❌ Failed to send evening recap:', error);
     }
