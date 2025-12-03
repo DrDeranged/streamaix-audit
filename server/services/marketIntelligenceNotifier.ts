@@ -4,6 +4,7 @@ import { marketDataService } from './marketDataService';
 import { newsService } from './newsService';
 import { derivativesAnalyticsService } from './derivativesAnalyticsService';
 import { institutionalFlowService } from './institutionalFlowService';
+import { alphaInsightsEngine } from './alphaInsightsEngine';
 import { db } from '../db';
 import { pushSubscriptions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -322,11 +323,20 @@ class MarketIntelligenceNotifier {
         if (Math.abs(hourlyChange) >= this.PRICE_ALERT_THRESHOLD) {
           const isUp = hourlyChange > 0;
           const emoji = isUp ? '🚀' : '💥';
-          const direction = isUp ? 'UP' : 'DOWN';
           
-          // Clean, impactful format
-          const title = `${emoji} ${crypto.symbol} ${direction} ${Math.abs(hourlyChange).toFixed(1)}%`;
-          const body = `$${this.formatPrice(oldestPrice)} → $${this.formatPrice(currentPrice)} in 1hr\n\n24h: ${this.formatChangeCompact(crypto.percentChange24h)}`;
+          // Generate AI-powered insight for this price move
+          const insight = await alphaInsightsEngine.generatePriceAlertInsight(
+            crypto.symbol,
+            oldestPrice,
+            currentPrice,
+            hourlyChange,
+            crypto.percentChange24h,
+            { volume24h: crypto.volume24h }
+          );
+          
+          // AI-enhanced notification with unique alpha
+          const title = `${emoji} ${insight.headline}`;
+          const body = `${insight.whyItMoved}\n\n💡 ${insight.whatItMeans}\n\n⚡ ${insight.actionAdvice}`;
           
           await pushNotificationService.sendToAll({
             title,
@@ -342,13 +352,13 @@ class MarketIntelligenceNotifier {
 
           this.lastPriceAlerts.set(key, now);
           alertsSent++;
-          console.log(`🚨 Price alert sent for ${key}: ${hourlyChange.toFixed(2)}% in 1h`);
+          console.log(`🚨 AI-enhanced price alert sent for ${key}: ${hourlyChange.toFixed(2)}% in 1h`);
         }
       }
 
       // Summary log
       if (alertsChecked > 0 || alertsSent > 0) {
-        console.log(`📊 [Price Alerts] Checked ${alertsChecked} assets, sent ${alertsSent} alerts (threshold: ${this.PRICE_ALERT_THRESHOLD}%)`);
+        console.log(`📊 [Price Alerts] Checked ${alertsChecked} assets, sent ${alertsSent} AI-enhanced alerts (threshold: ${this.PRICE_ALERT_THRESHOLD}%)`);
       }
     } catch (error) {
       console.error('❌ Failed to check price alerts:', error);
