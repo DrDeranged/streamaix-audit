@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
 import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle, Trophy, Award, PieChart, Bot, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,35 +51,26 @@ interface PredictionMarket {
   aiReasoning?: string;
 }
 
-const MarketCard = ({ market }: { market: PredictionMarket }) => {
-  // Normalize prices to percentage (prices stored as basis points: 5000 = 50%)
-  // Handle edge cases where prices might be stored incorrectly
+const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
   const normalizePrice = (price: number) => {
-    if (price > 10000) return 50; // Invalid, default to 50%
+    if (price > 10000) return 50;
     return price / 100;
   };
   const yesPercentage = normalizePrice(market.yesPrice).toFixed(1);
   const noPercentage = normalizePrice(market.noPrice).toFixed(1);
   const timeLeft = new Date(market.deadline).getTime() - Date.now();
   const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  
-  // AI prediction indicator
-  const hasAiPrediction = market.aiProbability !== undefined && market.aiProbability !== null;
-  const aiPrediction = hasAiPrediction ? (market.aiProbability! > 50 ? 'YES' : 'NO') : null;
-  const aiConfidence = market.aiProbability || 50;
 
   return (
     <Link href={`/markets/${market.id}`}>
-      <motion.div
-        whileHover={{ scale: 1.03, y: -6 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-      >
+      <div className="transform transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5">
         <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 h-full cursor-pointer">
           {market.imageUrl && (
             <div className="h-32 overflow-hidden relative">
               <img 
                 src={market.imageUrl} 
                 alt={market.question}
+                loading="lazy"
                 className="w-full h-full object-cover opacity-70"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
@@ -103,7 +93,6 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
               <span className="text-xs text-slate-400">{daysLeft}d left</span>
             </div>
 
-            {/* AI Consensus Card */}
             <AIConsensusCard marketId={market.id} compact />
 
             <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug">
@@ -136,10 +125,10 @@ const MarketCard = ({ market }: { market: PredictionMarket }) => {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </Link>
   );
-};
+});
 
 export default function Markets() {
   const [category, setCategory] = useState<string>("all");
@@ -201,68 +190,26 @@ export default function Markets() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
 
         {/* Hero Header - Compact */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4"
-        >
-          {/* Animated background effects */}
+        <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4 animate-fadeIn">
+          {/* Static background effects - removed animations for performance */}
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:30px_30px]" />
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 90, 0],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{
-              scale: [1.2, 1, 1.2],
-              rotate: [90, 0, 90],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
-          />
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
           
           <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex-1">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex items-center gap-2 mb-2"
-              >
+              <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-cyan-400" />
                 <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
                   Prediction Markets ✨
                 </h1>
-              </motion.div>
+              </div>
               
-              <motion.p
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-slate-300 text-sm mb-2 font-light"
-              >
+              <p className="text-slate-300 text-sm mb-2 font-light">
                 🚀 <span className="font-semibold text-cyan-300">Trade the future.</span> Predict outcomes. <span className="font-semibold text-purple-300">Earn STREAM.</span>
-              </motion.p>
+              </p>
               
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="flex flex-wrap items-center gap-2 text-xs"
-              >
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-200 border-purple-500/30 px-2 py-0.5">
                   <Sparkles className="w-3 h-3 mr-1" />
                   AI-Powered Predictions
@@ -274,15 +221,10 @@ export default function Markets() {
                 <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200 border-green-500/30 px-2 py-0.5">
                   Base Network
                 </Badge>
-              </motion.div>
+              </div>
             </div>
             
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
-            >
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Wallet Button */}
             {!isConnected ? (
               <Button
@@ -377,19 +319,14 @@ export default function Markets() {
               <Plus className="w-4 h-4 mr-2" />
               Create Market
             </Button>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Stats - Enhanced with Animated Counters */}
         {stats && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
-          >
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div className="transform transition-transform duration-200 hover:scale-[1.02]">
               <Card className="gradient-border-warm bg-gradient-to-br from-purple-900/30 to-purple-800/20 stat-glow overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-purple-300/90 mb-1">Active Markets</div>
@@ -398,16 +335,12 @@ export default function Markets() {
                     className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent"
                     duration={800}
                   />
-                  <motion.div
-                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  />
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl" />
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
             
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+            <div className="transform transition-transform duration-200 hover:scale-[1.02]">
               <Card className="gradient-border-warm bg-gradient-to-br from-cyan-900/30 to-cyan-800/20 stat-glow overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-cyan-300/90 mb-1">Total Volume</div>
@@ -419,16 +352,12 @@ export default function Markets() {
                     trendValue="+12%"
                     duration={1000}
                   />
-                  <motion.div
-                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                  />
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl" />
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
             
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+            <div className="transform transition-transform duration-200 hover:scale-[1.02]">
               <Card className="gradient-border-warm bg-gradient-to-br from-green-900/30 to-green-800/20 stat-glow overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-green-300/90 mb-1">Total Trades</div>
@@ -439,16 +368,12 @@ export default function Markets() {
                     showSparkle={true}
                     duration={900}
                   />
-                  <motion.div
-                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-                  />
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl" />
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
             
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+            <div className="transform transition-transform duration-200 hover:scale-[1.02]">
               <Card className="gradient-border-warm bg-gradient-to-br from-orange-900/30 to-orange-800/20 stat-glow overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-orange-300/90 mb-1">All Markets</div>
@@ -457,31 +382,18 @@ export default function Markets() {
                     className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent"
                     duration={850}
                   />
-                  <motion.div
-                    className="absolute -right-4 -bottom-4 w-20 h-20 bg-orange-500/10 rounded-full blur-xl"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
-                  />
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-orange-500/10 rounded-full blur-xl" />
                 </CardContent>
               </Card>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
 
         {/* Market Features Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-6"
-        >
+        <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/leagues">
-              <motion.div
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ duration: 0.2 }}
-                className="cursor-pointer"
-              >
+              <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
                 <Card className="bg-gradient-to-br from-fuchsia-900/20 via-fuchsia-800/10 to-transparent border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all duration-300 overflow-hidden group">
                   <CardContent className="p-4 relative">
                     <div className="flex items-center gap-3">
@@ -501,22 +413,14 @@ export default function Markets() {
                         <p className="text-xs text-slate-400">Compete for prizes</p>
                       </div>
                     </div>
-                    <motion.div
-                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-fuchsia-500/10 rounded-full blur-2xl"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 3, repeat: Infinity, delay: 0.25 }}
-                    />
+                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-fuchsia-500/10 rounded-full blur-2xl" />
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             </Link>
 
             <Link href="/markets/leaderboard">
-              <motion.div
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ duration: 0.2 }}
-                className="cursor-pointer"
-              >
+              <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
                 <Card className="bg-gradient-to-br from-amber-900/20 via-amber-800/10 to-transparent border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 overflow-hidden group">
                   <CardContent className="p-4 relative">
                     <div className="flex items-center gap-3">
@@ -528,22 +432,14 @@ export default function Markets() {
                         <p className="text-xs text-slate-400">Top traders & rankings</p>
                       </div>
                     </div>
-                    <motion.div
-                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    />
+                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl" />
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             </Link>
 
             <Link href="/markets/achievements">
-              <motion.div
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ duration: 0.2 }}
-                className="cursor-pointer"
-              >
+              <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
                 <Card className="bg-gradient-to-br from-purple-900/20 via-purple-800/10 to-transparent border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 overflow-hidden group">
                   <CardContent className="p-4 relative">
                     <div className="flex items-center gap-3">
@@ -555,22 +451,14 @@ export default function Markets() {
                         <p className="text-xs text-slate-400">Unlock badges & rewards</p>
                       </div>
                     </div>
-                    <motion.div
-                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                    />
+                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             </Link>
 
             <Link href="/markets/portfolio">
-              <motion.div
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ duration: 0.2 }}
-                className="cursor-pointer"
-              >
+              <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
                 <Card className="bg-gradient-to-br from-cyan-900/20 via-cyan-800/10 to-transparent border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300 overflow-hidden group">
                   <CardContent className="p-4 relative">
                     <div className="flex items-center gap-3">
@@ -582,17 +470,13 @@ export default function Markets() {
                         <p className="text-xs text-slate-400">Track your P&L & trades</p>
                       </div>
                     </div>
-                    <motion.div
-                      className="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-                    />
+                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl" />
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -654,23 +538,15 @@ export default function Markets() {
               </div>
             ) : filteredMarkets.length > 0 ? (
               <div className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-5"
-                >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fadeIn">
                   {displayedMarkets.map((market) => (
                     <MarketCard key={market.id} market={market} />
                   ))}
-                </motion.div>
+                </div>
                 
                 {/* View All / Show Less Button */}
                 {hasMoreMarkets && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-center pt-4"
-                  >
+                  <div className="flex justify-center pt-4">
                     <Button
                       variant="outline"
                       onClick={() => setShowAllMarkets(!showAllMarkets)}
@@ -683,7 +559,7 @@ export default function Markets() {
                         <>View All {filteredMarkets.length} Markets</>
                       )}
                     </Button>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             ) : (
@@ -710,21 +586,12 @@ export default function Markets() {
           {/* AI Activity Feed - Right Column */}
           <div className="lg:w-[35%]">
             <div className="lg:sticky lg:top-24 space-y-4">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              <div className="animate-fadeIn">
                 <MarketActivityFeed limit={15} className="max-w-full" />
-              </motion.div>
+              </div>
               
               {/* Engagement Section - Leagues, Achievements, Leaderboard */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-3"
-              >
+              <div className="space-y-3 animate-fadeIn">
                 {/* Quick Engagement Links */}
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4 h-4 text-purple-400" />
@@ -818,7 +685,7 @@ export default function Markets() {
                     </CardContent>
                   </Card>
                 </Link>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>

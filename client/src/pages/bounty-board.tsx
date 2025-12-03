@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -100,11 +99,7 @@ export default function BountyBoard() {
     <div className="min-h-screen bg-transparent dark:bg-transparent">
       <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
-        >
+        <div className="mb-12 animate-fadeIn">
           {/* Navigation Buttons */}
           <div className="flex gap-3 mb-6">
             <Button
@@ -185,15 +180,10 @@ export default function BountyBoard() {
               </WalletConnector>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 animate-fadeIn">
           <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-purple-500/10">
@@ -249,16 +239,11 @@ export default function BountyBoard() {
               </div>
             </div>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Trending Section */}
         {(trendingBounties.length > 0 || hotBounties.length > 0 || urgentBounties.length > 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-12"
-          >
+          <div className="mb-12 animate-fadeIn">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Trending */}
               {trendingBounties.length > 0 && (
@@ -344,16 +329,11 @@ export default function BountyBoard() {
                 </Card>
               )}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center gap-4 mb-6"
-        >
+        <div className="flex items-center gap-4 mb-6">
           <div className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-gray-400" />
             <span className="text-sm text-gray-400">Filters:</span>
@@ -390,7 +370,7 @@ export default function BountyBoard() {
           <Badge variant="outline" className="ml-auto border-purple-500/50 text-purple-400">
             {bounties.length} bounties
           </Badge>
-        </motion.div>
+        </div>
 
         {/* Bounties Grid */}
         {bountiesLoading ? (
@@ -421,23 +401,13 @@ export default function BountyBoard() {
             )}
           </Card>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {bounties.map((bounty, index) => (
-              <motion.div
-                key={bounty.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.05 }}
-              >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {bounties.map((bounty) => (
+              <div key={bounty.id} className="animate-fadeIn">
                 <BountyCard bounty={bounty} />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         )}
       </div>
     </div>
