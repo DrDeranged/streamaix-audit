@@ -454,7 +454,7 @@ class MarketIntelligenceNotifier {
         marketContextData,
         tradingMetrics ? {
           totalLiquidations: tradingMetrics.totalLiquidations,
-          dominantSide: tradingMetrics.dominantSide
+          dominantSide: tradingMetrics.avgFundingRate > 0 ? 'longs' : 'shorts'
         } : undefined
       );
 
@@ -683,9 +683,10 @@ class MarketIntelligenceNotifier {
 
   async checkFundingRateAlerts(): Promise<void> {
     try {
-      const [btcPositioning, ethPositioning] = await Promise.all([
+      const [btcPositioning, ethPositioning, cryptoData] = await Promise.all([
         derivativesAnalyticsService.getFuturesPositioning('BTC'),
-        derivativesAnalyticsService.getFuturesPositioning('ETH')
+        derivativesAnalyticsService.getFuturesPositioning('ETH'),
+        marketDataService.getCryptoQuotes(['BTC', 'ETH'])
       ]);
 
       const now = Date.now();
@@ -705,14 +706,23 @@ class MarketIntelligenceNotifier {
 
         const absRate = Math.abs(fundingRate);
         if (absRate >= this.FUNDING_RATE_EXTREME_THRESHOLD) {
+          const crypto = cryptoData.find(c => c.symbol === symbol);
+          const priceChange = crypto?.percentChange24h || 0;
+
+          // Generate AI-powered signal insight
+          const insight = await alphaInsightsEngine.generateTradingSignalInsight(
+            symbol,
+            'funding',
+            { fundingRate, priceChange },
+            { marketTrend: priceChange > 0 ? 'bullish' : 'bearish' }
+          );
+
           const isLongsPaying = fundingRate > 0;
           const emoji = isLongsPaying ? '🔥' : '❄️';
-          const direction = isLongsPaying ? 'Longs paying' : 'Shorts paying';
-          const annualized = Math.round(absRate * 3 * 365);
           
-          // Clean, impactful funding rate alert
-          const title = `${emoji} ${symbol} Funding ${(fundingRate * 100).toFixed(2)}%`;
-          const body = `${direction} · ${annualized}% APR\n\n⚠️ Extreme sentiment · Potential reversal`;
+          // AI-enhanced notification
+          const title = `${emoji} ${symbol} Extreme Funding (${insight.signalStrength})`;
+          const body = `💰 ${(fundingRate * 100).toFixed(2)}% (${isLongsPaying ? 'longs pay' : 'shorts pay'})\n\n🎯 ${insight.recommendation}\n\n⏱️ ${insight.timeframe} · ${insight.riskReward}`;
           
           await pushNotificationService.sendToAll({
             title,
@@ -727,7 +737,7 @@ class MarketIntelligenceNotifier {
           }, 'funding_rate_alerts');
 
           this.lastFundingRateAlerts.set(symbol, now);
-          console.log(`💰 Funding rate alert sent for ${symbol}: ${(fundingRate * 100).toFixed(3)}%`);
+          console.log(`💰 AI-enhanced funding rate alert sent for ${symbol}: ${(fundingRate * 100).toFixed(3)}%`);
         }
       }
     } catch (error) {
@@ -737,9 +747,10 @@ class MarketIntelligenceNotifier {
 
   async checkLiquidationAlerts(): Promise<void> {
     try {
-      const [btcLiquidations, ethLiquidations] = await Promise.all([
+      const [btcLiquidations, ethLiquidations, cryptoData] = await Promise.all([
         derivativesAnalyticsService.getLiquidationData('BTC'),
-        derivativesAnalyticsService.getLiquidationData('ETH')
+        derivativesAnalyticsService.getLiquidationData('ETH'),
+        marketDataService.getCryptoQuotes(['BTC', 'ETH'])
       ]);
 
       const now = Date.now();
@@ -758,13 +769,23 @@ class MarketIntelligenceNotifier {
         if (now - lastAlert < 30 * 60 * 1000) continue;
 
         if (totalLiquidations >= this.LIQUIDATION_SPIKE_THRESHOLD) {
+          const crypto = cryptoData.find(c => c.symbol === symbol);
+          const priceChange = crypto?.percentChange24h || 0;
+
+          // Generate AI-powered signal insight
+          const insight = await alphaInsightsEngine.generateTradingSignalInsight(
+            symbol,
+            'liquidation',
+            { liquidationVolume: totalLiquidations, priceChange },
+            { marketTrend: priceChange > 0 ? 'bullish' : 'bearish' }
+          );
+
           const isLongsRekt = data.liquidations24h.long > data.liquidations24h.short;
           const emoji = isLongsRekt ? '🔴' : '🟢';
-          const rektSide = isLongsRekt ? 'Longs rekt' : 'Shorts rekt';
           
-          // Clean, impactful liquidation alert
-          const title = `💥 ${symbol} $${this.formatLargeNumber(totalLiquidations)} Liquidated`;
-          const body = `${emoji} ${rektSide}\n\nLongs: $${this.formatLargeNumber(data.liquidations24h.long)} · Shorts: $${this.formatLargeNumber(data.liquidations24h.short)}`;
+          // AI-enhanced notification
+          const title = `💥 ${symbol} Cascade (${insight.signalStrength})`;
+          const body = `$${this.formatLargeNumber(totalLiquidations)} liquidated (${isLongsRekt ? 'longs rekt' : 'shorts rekt'})\n\n🎯 ${insight.recommendation}\n\n⏱️ ${insight.timeframe}`;
           
           await pushNotificationService.sendToAll({
             title,
@@ -779,7 +800,7 @@ class MarketIntelligenceNotifier {
           }, 'liquidation_alerts');
 
           this.lastLiquidationAlerts.set(symbol, now);
-          console.log(`💥 Liquidation alert sent for ${symbol}: $${this.formatLargeNumber(totalLiquidations)}`);
+          console.log(`💥 AI-enhanced liquidation alert sent for ${symbol}: $${this.formatLargeNumber(totalLiquidations)}`);
         }
       }
     } catch (error) {
@@ -790,7 +811,10 @@ class MarketIntelligenceNotifier {
   async checkWhaleAlerts(): Promise<void> {
     try {
       // Get smart money movements which include whale activity
-      const whaleActivity = await institutionalFlowService.getSmartMoneyMovements(['BTC', 'ETH', 'SOL'], this.WHALE_ALERT_THRESHOLD);
+      const [whaleActivity, cryptoData] = await Promise.all([
+        institutionalFlowService.getSmartMoneyMovements(['BTC', 'ETH', 'SOL'], this.WHALE_ALERT_THRESHOLD),
+        marketDataService.getCryptoQuotes(['BTC', 'ETH', 'SOL'])
+      ]);
       const now = Date.now();
 
       if (!whaleActivity || whaleActivity.length === 0) return;
@@ -808,13 +832,24 @@ class MarketIntelligenceNotifier {
         
         if (lastAlert) continue; // Already sent for this transaction
 
+        const crypto = cryptoData.find(c => c.symbol === (whale.asset || 'BTC'));
+        const priceChange = crypto?.percentChange24h || 0;
+
+        // Generate AI-powered signal insight
+        const insight = await alphaInsightsEngine.generateTradingSignalInsight(
+          whale.asset || 'BTC',
+          'whale',
+          { whaleSize: whale.value, priceChange },
+          { marketTrend: priceChange > 0 ? 'bullish' : 'bearish' }
+        );
+
         const isBuying = whale.type === 'accumulation';
         const emoji = isBuying ? '🟢' : whale.type === 'distribution' ? '🔴' : '🐋';
-        const action = isBuying ? 'Buying' : whale.type === 'distribution' ? 'Selling' : 'Moving';
+        const action = isBuying ? 'Accumulating' : whale.type === 'distribution' ? 'Distributing' : 'Moving';
         
-        // Clean, impactful whale alert
-        const title = `🐋 $${this.formatLargeNumber(whale.value)} ${whale.asset || 'Crypto'} ${action}`;
-        const body = `${emoji} ${isBuying ? 'Bullish' : whale.type === 'distribution' ? 'Bearish' : 'Neutral'} signal\n\n${this.truncateAddress(whale.from)} → ${this.truncateAddress(whale.to)}`;
+        // AI-enhanced whale notification
+        const title = `🐋 ${whale.asset || 'Crypto'} Whale ${action} (${insight.signalStrength})`;
+        const body = `$${this.formatLargeNumber(whale.value)} ${action.toLowerCase()}\n\n🎯 ${insight.recommendation}\n\n⏱️ ${insight.timeframe}`;
 
         await pushNotificationService.sendToAll({
           title,
@@ -829,7 +864,7 @@ class MarketIntelligenceNotifier {
         }, 'whale_alerts');
 
         this.lastWhaleAlerts.set(alertKey, now);
-        console.log(`🐋 Whale alert sent: $${this.formatLargeNumber(whale.value)} ${whale.type}`);
+        console.log(`🐋 AI-enhanced whale alert sent: $${this.formatLargeNumber(whale.value)} ${whale.type}`);
       }
     } catch (error) {
       console.error('❌ Failed to check whale alerts:', error);
