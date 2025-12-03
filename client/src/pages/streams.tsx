@@ -46,6 +46,24 @@ interface LiveStream {
   isAiHost?: boolean;
 }
 
+interface PastStream {
+  id: string;
+  title: string;
+  description?: string;
+  streamType: string;
+  hostId: string;
+  hostUsername?: string;
+  hostAvatar?: string;
+  status: string;
+  peakViewers?: number;
+  category?: string;
+  tags?: string[];
+  actualStart?: string;
+  actualEnd?: string;
+  durationSeconds?: number;
+  thumbnailUrl?: string;
+}
+
 const streamTypeConfig: Record<string, { icon: any; label: string; color: string; bgColor: string; gradient: string }> = {
   broadcast: { 
     icon: Video, 
@@ -231,6 +249,113 @@ function ScheduledStreamCard({ stream }: { stream: LiveStream }) {
   );
 }
 
+function PastStreamCard({ stream }: { stream: PastStream }) {
+  const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
+  const Icon = config.icon;
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return '0:00';
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatTimeAgo = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHrs = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHrs / 24);
+    
+    if (diffDays > 0) return `${diffDays}d ago`;
+    if (diffHrs > 0) return `${diffHrs}h ago`;
+    return `${diffMins}m ago`;
+  };
+
+  return (
+    <Link href={`/replay/${stream.id}`}>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="group cursor-pointer min-w-[280px] sm:min-w-[320px]"
+      >
+        <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-800/50 to-slate-900/90 border border-slate-600/30 hover:border-purple-500/40 transition-all">
+          <div className={cn(
+            "relative aspect-video bg-gradient-to-br",
+            config.gradient,
+            "opacity-60"
+          )}>
+            <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center">
+              <div className="p-3 rounded-full bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                <Play className="w-8 h-8 text-white fill-white" />
+              </div>
+            </div>
+            
+            <div className="absolute bottom-2 left-2">
+              <Badge className="bg-slate-900/80 text-slate-300 text-[10px] px-2 py-0.5">
+                <Clock className="w-3 h-3 mr-1" />
+                {formatDuration(stream.durationSeconds)}
+              </Badge>
+            </div>
+            
+            <div className="absolute bottom-2 right-2">
+              <Badge className="bg-slate-900/80 text-slate-400 text-[10px] px-2 py-0.5">
+                {formatTimeAgo(stream.actualEnd)}
+              </Badge>
+            </div>
+            
+            <div className="absolute top-2 left-2">
+              <Badge className={cn(
+                "text-[10px] px-2 py-0.5",
+                config.bgColor,
+                config.color,
+                "border-0"
+              )}>
+                <Icon className="w-3 h-3 mr-1" />
+                {config.label}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="p-3">
+            <div className="flex items-start gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center flex-shrink-0">
+                {stream.hostAvatar ? (
+                  <img src={stream.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-white">
+                    {stream.hostUsername?.[0]?.toUpperCase() || '?'}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-medium text-white line-clamp-1 group-hover:text-purple-300 transition-colors">
+                  {stream.title}
+                </h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-slate-400">{stream.hostUsername || 'Anonymous'}</span>
+                  {stream.peakViewers && (
+                    <span className="text-xs text-slate-500">
+                      <Users className="w-3 h-3 inline mr-0.5" />
+                      {stream.peakViewers} peak
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    </Link>
+  );
+}
+
 export default function StreamsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -245,8 +370,13 @@ export default function StreamsPage() {
     queryKey: ['/api/streams', { status: 'scheduled' }],
   });
 
+  const { data: pastStreamsData } = useQuery<{ streams: PastStream[] }>({
+    queryKey: ['/api/streams/ended', { limit: 6 }],
+  });
+
   const liveStreams = liveStreamsData?.streams || [];
   const scheduledStreams = scheduledStreamsData?.streams || [];
+  const pastStreams = pastStreamsData?.streams || [];
 
   const filteredStreams = liveStreams.filter(stream => {
     if (selectedCategory !== 'all' && stream.category !== selectedCategory) return false;
@@ -442,6 +572,34 @@ export default function StreamsPage() {
             </div>
           )}
         </section>
+
+        {pastStreams.length > 0 && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-slate-400" />
+                <h2 className="text-lg font-bold text-white font-orbitron">Past Streams</h2>
+                <Badge className="bg-slate-700/50 text-slate-400 border-slate-600/30 text-xs ml-2">
+                  {pastStreams.length}
+                </Badge>
+              </div>
+              <Link href="/replays">
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-purple-500/20 gap-1">
+                  View All
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+            <ScrollArea className="w-full">
+              <div className="flex gap-4 pb-4">
+                {pastStreams.slice(0, 3).map((stream) => (
+                  <PastStreamCard key={stream.id} stream={stream} />
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </section>
+        )}
 
         {scheduledStreams.length > 0 && (
           <section>
