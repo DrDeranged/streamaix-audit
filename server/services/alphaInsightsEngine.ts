@@ -342,7 +342,7 @@ Focus on actionable advice, avoid generic statements.`;
     }
   }
 
-  async generateAlphaSignal(
+  async generateAlphaSignalFromMultipleSignals(
     marketData: MarketContext[],
     signals: Array<{ type: string; strength: number; asset: string; details: string }>
   ): Promise<AlphaInsight | null> {
@@ -389,6 +389,67 @@ Be bold but responsible. This is high-conviction alpha.`;
     } catch (error) {
       console.error('❌ Failed to generate alpha signal:', error);
       return null;
+    }
+  }
+
+  async generateAlphaSignal(confluenceData: {
+    symbol: string;
+    direction: 'bullish' | 'bearish';
+    signals: string[];
+    priceChange: number;
+    fundingRate: number;
+    liquidations: number;
+    volumeSurge: number;
+  }): Promise<{ recommendation: string; timeframe: string; riskReward: string }> {
+    const cacheKey = `alpha_${confluenceData.symbol}_${confluenceData.direction}_${Math.floor(Date.now() / 300000)}`;
+    const cached = this.getCached<{ recommendation: string; timeframe: string; riskReward: string }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const prompt = `You are an elite crypto trading desk. Multiple signals have aligned for a high-conviction trade. Generate alpha:
+
+CONFLUENCE DETECTED:
+Asset: ${confluenceData.symbol}
+Direction: ${confluenceData.direction.toUpperCase()}
+Aligned Signals: ${confluenceData.signals.join(', ')}
+
+SIGNAL DETAILS:
+- Price Move: ${confluenceData.priceChange > 0 ? '+' : ''}${confluenceData.priceChange.toFixed(1)}% (24h)
+- Funding Rate: ${(confluenceData.fundingRate * 100).toFixed(3)}%
+- Liquidations: $${(confluenceData.liquidations / 1e6).toFixed(1)}M
+- Volume/MCap: ${(confluenceData.volumeSurge * 100).toFixed(1)}%
+
+Respond in this EXACT JSON format (no markdown):
+{
+  "recommendation": "Specific, actionable trade recommendation (entry, target, stop) in 25 words max",
+  "timeframe": "Expected timeframe for this setup to play out (e.g., '4-8 hours', '1-2 days')",
+  "riskReward": "R:R ratio and position sizing advice (e.g., '2:1 R:R, size 2% max')"
+}
+
+This is high-conviction alpha from multiple signals aligning. Be specific with levels.`;
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200,
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content || '';
+      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
+      const insight = JSON.parse(cleanContent);
+      
+      this.setCache(cacheKey, insight);
+      return insight;
+    } catch (error) {
+      console.error('❌ Failed to generate confluence alpha signal:', error);
+      return {
+        recommendation: confluenceData.direction === 'bullish' 
+          ? 'Consider scaling into longs on dips to support' 
+          : 'Consider scaling into shorts on rallies to resistance',
+        timeframe: '4-12 hours',
+        riskReward: '2:1 R:R, size 1-2% max'
+      };
     }
   }
 }

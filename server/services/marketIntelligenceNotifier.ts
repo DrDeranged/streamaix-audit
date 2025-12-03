@@ -45,6 +45,7 @@ class MarketIntelligenceNotifier {
   private lastFundingRateAlerts: Map<string, number> = new Map();
   private lastLiquidationAlerts: Map<string, number> = new Map();
   private lastWhaleAlerts: Map<string, number> = new Map();
+  private lastAlphaSignals: Map<string, number> = new Map();
   
   private readonly TRACKED_CRYPTO = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
   private readonly TRACKED_STOCKS = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'TSLA'];
@@ -124,6 +125,12 @@ class MarketIntelligenceNotifier {
       await this.checkFundingRateAlerts();
     }, { timezone: "America/New_York" });
 
+    // High-Conviction Alpha Signals - Every 20 minutes
+    cron.schedule('*/20 * * * *', async () => {
+      console.log('🎯 Checking alpha signal confluence...');
+      await this.checkAlphaSignals();
+    }, { timezone: "America/New_York" });
+
     this.isStarted = true;
     console.log('📡 Market Intelligence Notifier started');
     console.log('   ⏰ Morning Briefing: 8am EST (Mon-Fri)');
@@ -137,6 +144,7 @@ class MarketIntelligenceNotifier {
     console.log('   🐋 Whale Alerts: Every 5 min');
     console.log('   💥 Liquidation Alerts: Every 5 min');
     console.log('   💰 Funding Rate Alerts: Every 30 min');
+    console.log('   🎯 Alpha Signals: Every 20 min (confluence detection)');
   }
 
   stop(): void {
@@ -868,6 +876,146 @@ class MarketIntelligenceNotifier {
       }
     } catch (error) {
       console.error('❌ Failed to check whale alerts:', error);
+    }
+  }
+
+  // ============================================================================
+  // HIGH-CONVICTION ALPHA SIGNALS
+  // ============================================================================
+
+  async checkAlphaSignals(): Promise<void> {
+    try {
+      const symbols = ['BTC', 'ETH', 'SOL'];
+      const now = Date.now();
+
+      // Gather all signals for confluence detection
+      const [cryptoData, btcPositioning, ethPositioning, btcLiquidations, ethLiquidations] = await Promise.all([
+        marketDataService.getCryptoQuotes(symbols),
+        derivativesAnalyticsService.getFuturesPositioning('BTC'),
+        derivativesAnalyticsService.getFuturesPositioning('ETH'),
+        derivativesAnalyticsService.getLiquidationData('BTC'),
+        derivativesAnalyticsService.getLiquidationData('ETH')
+      ]);
+
+      const signalData = [
+        { 
+          symbol: 'BTC', 
+          crypto: cryptoData.find(c => c.symbol === 'BTC'),
+          positioning: btcPositioning,
+          liquidations: btcLiquidations
+        },
+        { 
+          symbol: 'ETH', 
+          crypto: cryptoData.find(c => c.symbol === 'ETH'),
+          positioning: ethPositioning,
+          liquidations: ethLiquidations
+        }
+      ];
+
+      for (const { symbol, crypto, positioning, liquidations } of signalData) {
+        if (!crypto) continue;
+
+        // Check cooldown (4 hours for alpha signals)
+        const lastAlert = this.lastAlphaSignals.get(symbol) || 0;
+        if (now - lastAlert < 4 * 60 * 60 * 1000) continue;
+
+        // Count confluence signals
+        const signals: { type: string; direction: 'bullish' | 'bearish'; strength: number }[] = [];
+
+        // 1. Price momentum signal
+        if (Math.abs(crypto.percentChange24h) >= 5) {
+          signals.push({
+            type: 'momentum',
+            direction: crypto.percentChange24h > 0 ? 'bullish' : 'bearish',
+            strength: Math.min(Math.abs(crypto.percentChange24h) / 10, 1)
+          });
+        }
+
+        // 2. Funding rate signal (contrarian)
+        if (positioning && positioning.fundingRateHistory[0]) {
+          const fundingRate = positioning.fundingRateHistory[0].rate;
+          if (Math.abs(fundingRate) >= 0.01) { // 1%+ funding
+            signals.push({
+              type: 'funding',
+              direction: fundingRate > 0 ? 'bearish' : 'bullish', // Contrarian
+              strength: Math.min(Math.abs(fundingRate) / 0.05, 1)
+            });
+          }
+        }
+
+        // 3. Liquidation cascade signal (follow the cascade)
+        if (liquidations) {
+          const totalLiqs = liquidations.liquidations24h.totalNotional;
+          if (totalLiqs >= 100_000_000) { // $100M+
+            const longsRekt = liquidations.liquidations24h.long > liquidations.liquidations24h.short;
+            signals.push({
+              type: 'liquidation',
+              direction: longsRekt ? 'bearish' : 'bullish',
+              strength: Math.min(totalLiqs / 500_000_000, 1)
+            });
+          }
+        }
+
+        // 4. Volume surge signal
+        if (crypto.volume24h && crypto.marketCap) {
+          const volumeToMcap = crypto.volume24h / crypto.marketCap;
+          if (volumeToMcap >= 0.1) { // Volume > 10% of market cap
+            signals.push({
+              type: 'volume',
+              direction: crypto.percentChange24h > 0 ? 'bullish' : 'bearish',
+              strength: Math.min(volumeToMcap / 0.2, 1)
+            });
+          }
+        }
+
+        // Need at least 3 signals aligned for high-conviction alert
+        if (signals.length < 3) continue;
+
+        // Calculate signal alignment
+        const bullishCount = signals.filter(s => s.direction === 'bullish').length;
+        const bearishCount = signals.filter(s => s.direction === 'bearish').length;
+        const dominantDirection = bullishCount >= bearishCount ? 'bullish' : 'bearish';
+        const alignedSignals = dominantDirection === 'bullish' ? bullishCount : bearishCount;
+
+        // Only fire if 75%+ signals aligned
+        if (alignedSignals / signals.length < 0.75) continue;
+
+        // Generate AI-powered alpha signal
+        const avgStrength = signals.reduce((sum, s) => sum + s.strength, 0) / signals.length;
+        const insight = await alphaInsightsEngine.generateAlphaSignal({
+          symbol,
+          direction: dominantDirection,
+          signals: signals.map(s => s.type),
+          priceChange: crypto.percentChange24h,
+          fundingRate: positioning?.fundingRateHistory[0]?.rate || 0,
+          liquidations: liquidations?.liquidations24h.totalNotional || 0,
+          volumeSurge: (crypto.volume24h || 0) / (crypto.marketCap || 1)
+        });
+
+        const signalStrength = avgStrength > 0.7 ? 'HIGH' : avgStrength > 0.4 ? 'MEDIUM' : 'MODERATE';
+        const emoji = dominantDirection === 'bullish' ? '🚀' : '📉';
+        const directionText = dominantDirection === 'bullish' ? 'BULLISH' : 'BEARISH';
+
+        const title = `${emoji} ALPHA: ${symbol} ${directionText} Confluence (${signalStrength})`;
+        const body = `📊 ${signals.length} aligned signals detected\n\n🎯 ${insight.recommendation}\n\n⏱️ ${insight.timeframe}\n💰 ${insight.riskReward}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/intelligence',
+          tag: `alpha-${symbol}-${Date.now()}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'view_analysis', title: '📊 Analysis' },
+            { action: 'trade_now', title: '⚡ Trade' }
+          ]
+        }, 'alpha_signals');
+
+        this.lastAlphaSignals.set(symbol, now);
+        console.log(`🎯 ALPHA SIGNAL sent for ${symbol}: ${directionText} with ${signals.length} signals`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check alpha signals:', error);
     }
   }
 
