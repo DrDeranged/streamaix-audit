@@ -72,6 +72,14 @@ import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
 import { StreamReactions, QuickReactButtons } from '@/components/streaming/StreamReactions';
 import { StreamPoll, CreatePollForm } from '@/components/streaming/StreamPoll';
 import { BroadcasterView } from '@/components/streaming/BroadcasterView';
+import { 
+  ViewerLeaderboard, 
+  WatchTimeRewards, 
+  StreamAchievementsPanel,
+  ChatCommandsHelp,
+  CreateClipButton,
+  PinnedMessagesBar
+} from '@/components/streaming/EnhancedStreamingFeatures';
 
 interface LiveStream {
   id: string;
@@ -447,6 +455,8 @@ export default function StreamViewPage() {
   const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe'>('chat');
   const [isCopied, setIsCopied] = useState(false);
   const [isFloatingChat, setIsFloatingChat] = useState(false);
+  const [showCommandsHelp, setShowCommandsHelp] = useState(false);
+  const [pinnedMessages, setPinnedMessages] = useState<{ id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[]>([]);
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const streamId = params?.id || null;
@@ -457,6 +467,12 @@ export default function StreamViewPage() {
     queryKey: ['/api/streams', streamId],
     enabled: !!streamId,
     refetchInterval: 10000,
+  });
+  
+  const { data: pinnedData } = useQuery<{ messages: { id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[] }>({
+    queryKey: ['/api/streams', streamId, 'messages', 'pinned'],
+    enabled: !!streamId,
+    refetchInterval: 15000,
   });
   
   const stream = streamData?.stream;
@@ -1152,6 +1168,15 @@ export default function StreamViewPage() {
               </div>
 
               <TabsContent value="chat" className="flex-1 flex flex-col m-0 overflow-hidden">
+                {pinnedData?.messages && pinnedData.messages.length > 0 && (
+                  <div className="p-2 border-b border-slate-700/40">
+                    <PinnedMessagesBar 
+                      messages={pinnedData.messages}
+                      onUnpin={undefined}
+                    />
+                  </div>
+                )}
+                
                 {superChats.length > 0 && (
                   <div className="p-3 border-b border-slate-700/40 max-h-[150px] overflow-y-auto">
                     {superChats.map((sc) => sc && (
@@ -1182,28 +1207,42 @@ export default function StreamViewPage() {
                   )}
                 </div>
                 
-                <div className="p-3 border-t border-slate-700/40 bg-slate-900/60">
+                <div className="p-3 border-t border-slate-700/40 bg-slate-900/60 relative">
+                  {showCommandsHelp && (
+                    <ChatCommandsHelp onClose={() => setShowCommandsHelp(false)} />
+                  )}
                   {isAuthenticated ? (
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Send a message..."
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="bg-slate-800/50 border-slate-700 text-white text-sm h-10"
-                        disabled={!isConnected}
-                        data-testid="input-chat-message"
-                      />
-                      <Button 
-                        size="icon"
-                        onClick={handleSendMessage}
-                        disabled={!isConnected || !message.trim()}
-                        className="bg-purple-600 hover:bg-purple-500 h-10 w-10 flex-shrink-0"
-                        data-testid="button-send-message"
-                      >
-                        <Send className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowCommandsHelp(!showCommandsHelp)}
+                          className="h-10 w-10 p-0 text-slate-400 hover:text-purple-400 flex-shrink-0"
+                          data-testid="button-commands-help"
+                        >
+                          <Zap className="w-4 h-4" />
+                        </Button>
+                        <Input
+                          placeholder="Send a message... (try !price BTC)"
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                          className="bg-slate-800/50 border-slate-700 text-white text-sm h-10"
+                          disabled={!isConnected}
+                          data-testid="input-chat-message"
+                        />
+                        <Button 
+                          size="icon"
+                          onClick={handleSendMessage}
+                          disabled={!isConnected || !message.trim()}
+                          className="bg-purple-600 hover:bg-purple-500 h-10 w-10 flex-shrink-0"
+                          data-testid="button-send-message"
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </>
                   ) : (
                     <Link href="/auth">
                       <Button className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 h-10">
@@ -1270,6 +1309,13 @@ export default function StreamViewPage() {
                       <p className="text-xs text-slate-500">STREAM received this stream</p>
                     </div>
                   )}
+                  
+                  <div className="pt-4 space-y-4">
+                    <ViewerLeaderboard streamId={streamId || ''} />
+                    {isAuthenticated && user && (
+                      <WatchTimeRewards streamId={streamId || ''} userId={user.id} />
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 
@@ -1373,6 +1419,10 @@ export default function StreamViewPage() {
                   <p className="text-[10px] text-slate-500 text-center pt-2">
                     Subscriptions renew monthly. Cancel anytime.
                   </p>
+                  
+                  <div className="pt-4">
+                    <StreamAchievementsPanel userId={user?.id} />
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>

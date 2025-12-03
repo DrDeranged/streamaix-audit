@@ -72,7 +72,14 @@ import {
 import { Request, Response } from "express";
 import cors from "cors";
 import { db } from "./db";
-import { predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions, predictionLeagues, leagueParticipants, leagueTrades, marketTrades, pushSubscriptions, liveStreams, streamParticipants, streamMessages, streamTips, streamPredictions } from "../shared/schema";
+import { 
+  predictionMarkets, aiAgents, aiPredictions, aiPositions, aiTrades, users, userInteractions, 
+  predictionLeagues, leagueParticipants, leagueTrades, marketTrades, pushSubscriptions, 
+  liveStreams, streamParticipants, streamMessages, streamTips, streamPredictions,
+  streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
+  streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
+  streamChatCommandLogs, streamViewerLeaderboard
+} from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
 // Helper function to handle validation errors
@@ -12367,6 +12374,482 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalTipsAllTime: 0,
         }
       });
+    }
+  }));
+
+  // =============================================================================
+  // ENHANCED STREAMING v2 - Polls, Leaderboard, Reminders, Clips, Achievements
+  // =============================================================================
+
+  // Get viewer leaderboard for a stream
+  app.get("/api/streams/:id/leaderboard", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const leaderboard = await db.select({
+        rank: streamViewerLeaderboard.rank,
+        userId: streamViewerLeaderboard.userId,
+        activityScore: streamViewerLeaderboard.activityScore,
+        messagesCount: streamViewerLeaderboard.messagesCount,
+        reactionsCount: streamViewerLeaderboard.reactionsCount,
+        tipsAmount: streamViewerLeaderboard.tipsAmount,
+      })
+      .from(streamViewerLeaderboard)
+      .where(eq(streamViewerLeaderboard.streamId, req.params.id))
+      .orderBy(desc(streamViewerLeaderboard.activityScore))
+      .limit(10);
+      
+      const enriched = await Promise.all(leaderboard.map(async (entry, idx) => {
+        const user = await storage.getUser(entry.userId);
+        return {
+          ...entry,
+          rank: idx + 1,
+          username: user?.username || 'Anonymous',
+          avatar: user?.avatar,
+        };
+      }));
+      
+      res.json({ success: true, leaderboard: enriched });
+    } catch (error: any) {
+      res.json({ success: true, leaderboard: [] });
+    }
+  }));
+
+  // Create a poll for a stream
+  app.post("/api/streams/:id/polls", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { question, options, duration = 60 } = req.body;
+    
+    if (!question || !options || options.length < 2) {
+      return res.status(400).json({ success: false, error: 'Question and at least 2 options required' });
+    }
+    
+    const pollOptions = options.map((text: string, idx: number) => ({
+      id: `opt_${idx}`,
+      text,
+      votes: 0,
+    }));
+    
+    const endsAt = new Date(Date.now() + duration * 1000);
+    
+    const [poll] = await db.insert(streamPolls).values({
+      streamId: req.params.id,
+      creatorId: req.user.id,
+      question,
+      options: pollOptions,
+      duration,
+      endsAt,
+    }).returning();
+    
+    res.json({ success: true, poll });
+  }));
+
+  // Vote on a poll
+  app.post("/api/streams/polls/:pollId/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { optionId } = req.body;
+    
+    const [poll] = await db.select().from(streamPolls).where(eq(streamPolls.id, req.params.pollId)).limit(1);
+    if (!poll || poll.status !== 'active') {
+      return res.status(400).json({ success: false, error: 'Poll not found or closed' });
+    }
+    
+    const [existingVote] = await db.select().from(streamPollVotes)
+      .where(and(
+        eq(streamPollVotes.pollId, req.params.pollId),
+        eq(streamPollVotes.voterId, req.user.id)
+      )).limit(1);
+    
+    if (existingVote && !poll.allowMultipleVotes) {
+      return res.status(400).json({ success: false, error: 'Already voted' });
+    }
+    
+    await db.insert(streamPollVotes).values({
+      pollId: req.params.pollId,
+      voterId: req.user.id,
+      optionId,
+    });
+    
+    const options = poll.options as any[];
+    const updatedOptions = options.map(opt => 
+      opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
+    );
+    
+    await db.update(streamPolls)
+      .set({ 
+        options: updatedOptions,
+        totalVotes: sql`${streamPolls.totalVotes} + 1`,
+      })
+      .where(eq(streamPolls.id, req.params.pollId));
+    
+    res.json({ success: true });
+  }));
+
+  // End a poll
+  app.post("/api/streams/polls/:pollId/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const [poll] = await db.select().from(streamPolls).where(eq(streamPolls.id, req.params.pollId)).limit(1);
+    if (!poll) {
+      return res.status(404).json({ success: false, error: 'Poll not found' });
+    }
+    
+    const options = poll.options as any[];
+    const winner = options.reduce((max, opt) => 
+      (opt.votes || 0) > (max.votes || 0) ? opt : max, options[0]
+    );
+    
+    await db.update(streamPolls)
+      .set({ 
+        status: 'closed',
+        endsAt: new Date(),
+        winningOptionId: winner.id,
+      })
+      .where(eq(streamPolls.id, req.params.pollId));
+    
+    res.json({ success: true });
+  }));
+
+  // Get active poll for a stream
+  app.get("/api/streams/:id/polls/active", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const [poll] = await db.select().from(streamPolls)
+        .where(and(
+          eq(streamPolls.streamId, req.params.id),
+          eq(streamPolls.status, 'active')
+        ))
+        .orderBy(desc(streamPolls.createdAt))
+        .limit(1);
+      
+      res.json({ success: true, poll: poll || null });
+    } catch (error) {
+      res.json({ success: true, poll: null });
+    }
+  }));
+
+  // Set stream reminder
+  app.post("/api/streams/:id/remind", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { notifyBefore = 15 } = req.body;
+    
+    const [existing] = await db.select().from(streamScheduleReminders)
+      .where(and(
+        eq(streamScheduleReminders.streamId, req.params.id),
+        eq(streamScheduleReminders.userId, req.user.id)
+      )).limit(1);
+    
+    if (existing) {
+      await db.delete(streamScheduleReminders).where(eq(streamScheduleReminders.id, existing.id));
+      return res.json({ success: true, hasReminder: false });
+    }
+    
+    await db.insert(streamScheduleReminders).values({
+      streamId: req.params.id,
+      userId: req.user.id,
+      notifyBefore,
+    });
+    
+    res.json({ success: true, hasReminder: true });
+  }));
+
+  // Get scheduled streams
+  app.get("/api/streams/scheduled", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId as string;
+      
+      const streams = await db.select()
+        .from(liveStreams)
+        .where(eq(liveStreams.status, 'scheduled'))
+        .orderBy(liveStreams.scheduledStart)
+        .limit(20);
+      
+      const enriched = await Promise.all(streams.map(async (stream) => {
+        const host = await storage.getUser(stream.hostId);
+        let hasReminder = false;
+        
+        if (userId) {
+          const [reminder] = await db.select().from(streamScheduleReminders)
+            .where(and(
+              eq(streamScheduleReminders.streamId, stream.id),
+              eq(streamScheduleReminders.userId, userId)
+            )).limit(1);
+          hasReminder = !!reminder;
+        }
+        
+        return {
+          id: stream.id,
+          title: stream.title,
+          hostUsername: host?.username || 'Anonymous',
+          hostAvatar: host?.avatar,
+          scheduledStart: stream.scheduledStart,
+          category: stream.category,
+          tags: stream.tags,
+          hasReminder,
+          isAvatarHost: !!stream.hostAvatarId,
+        };
+      }));
+      
+      res.json({ success: true, streams: enriched });
+    } catch (error) {
+      res.json({ success: true, streams: [] });
+    }
+  }));
+
+  // Create a clip
+  app.post("/api/streams/:id/clips", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { title, startTime, duration } = req.body;
+    
+    const [clip] = await db.insert(streamClips).values({
+      streamId: req.params.id,
+      creatorId: req.user.id,
+      title: title || `Clip from ${new Date().toLocaleTimeString()}`,
+      startTime: startTime || 0,
+      durationSeconds: duration || 30,
+    }).returning();
+    
+    res.json({ success: true, clip });
+  }));
+
+  // Get clips for a stream
+  app.get("/api/streams/:id/clips", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const clips = await db.select()
+        .from(streamClips)
+        .where(and(
+          eq(streamClips.streamId, req.params.id),
+          eq(streamClips.isDeleted, false)
+        ))
+        .orderBy(desc(streamClips.createdAt))
+        .limit(20);
+      
+      const enriched = await Promise.all(clips.map(async (clip) => {
+        const creator = await storage.getUser(clip.creatorId);
+        return {
+          ...clip,
+          creatorUsername: creator?.username || 'Anonymous',
+        };
+      }));
+      
+      res.json({ success: true, clips: enriched });
+    } catch (error) {
+      res.json({ success: true, clips: [] });
+    }
+  }));
+
+  // Get stream recordings (VOD)
+  app.get("/api/streams/:id/recordings", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const recordings = await db.select()
+        .from(streamRecordings)
+        .where(and(
+          eq(streamRecordings.streamId, req.params.id),
+          eq(streamRecordings.status, 'ready')
+        ))
+        .orderBy(desc(streamRecordings.createdAt))
+        .limit(10);
+      
+      res.json({ success: true, recordings });
+    } catch (error) {
+      res.json({ success: true, recordings: [] });
+    }
+  }));
+
+  // Get stream achievements
+  app.get("/api/stream-achievements", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId as string;
+      
+      const achievements = await db.select().from(streamAchievements)
+        .where(eq(streamAchievements.isActive, true));
+      
+      if (!userId) {
+        return res.json({ success: true, achievements: achievements.map(a => ({
+          ...a,
+          progress: 0,
+          isCompleted: false,
+        })) });
+      }
+      
+      const userAchievements = await db.select().from(userStreamAchievements)
+        .where(eq(userStreamAchievements.userId, userId));
+      
+      const merged = achievements.map(achievement => {
+        const userProgress = userAchievements.find(ua => ua.achievementId === achievement.id);
+        return {
+          ...achievement,
+          progress: userProgress?.currentProgress || 0,
+          target: achievement.targetValue,
+          isCompleted: userProgress?.isCompleted || false,
+        };
+      });
+      
+      res.json({ success: true, achievements: merged });
+    } catch (error) {
+      res.json({ success: true, achievements: [] });
+    }
+  }));
+
+  // Send a reaction
+  app.post("/api/streams/:id/reactions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { emoji, animationType = 'float' } = req.body;
+    
+    if (!emoji) {
+      return res.status(400).json({ success: false, error: 'Emoji required' });
+    }
+    
+    await db.insert(streamReactions).values({
+      streamId: req.params.id,
+      userId: req.user.id,
+      emoji,
+      animationType,
+      startX: Math.floor(Math.random() * 80) + 10,
+    });
+    
+    res.json({ success: true });
+  }));
+
+  // Pin/unpin a message
+  app.post("/api/streams/messages/:messageId/pin", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const [message] = await db.select().from(streamMessages)
+      .where(eq(streamMessages.id, req.params.messageId)).limit(1);
+    
+    if (!message) {
+      return res.status(404).json({ success: false, error: 'Message not found' });
+    }
+    
+    await db.update(streamMessages)
+      .set({ isPinned: !message.isPinned })
+      .where(eq(streamMessages.id, req.params.messageId));
+    
+    res.json({ success: true, isPinned: !message.isPinned });
+  }));
+
+  // Get pinned messages for a stream
+  app.get("/api/streams/:id/messages/pinned", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const messages = await db.select()
+        .from(streamMessages)
+        .where(and(
+          eq(streamMessages.streamId, req.params.id),
+          eq(streamMessages.isPinned, true),
+          eq(streamMessages.isDeleted, false)
+        ))
+        .orderBy(desc(streamMessages.createdAt))
+        .limit(5);
+      
+      const enriched = await Promise.all(messages.map(async (msg) => {
+        const user = await storage.getUser(msg.userId);
+        return {
+          id: msg.id,
+          username: user?.username || 'Anonymous',
+          content: msg.content,
+          pinnedAt: msg.createdAt,
+          isAlpha: msg.messageType === 'alpha' || (msg.content || '').includes('🎯'),
+        };
+      }));
+      
+      res.json({ success: true, messages: enriched });
+    } catch (error) {
+      res.json({ success: true, messages: [] });
+    }
+  }));
+
+  // Process chat command
+  app.post("/api/streams/:id/commands", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { command, input } = req.body;
+    
+    const [cmd] = await db.select().from(streamChatCommands)
+      .where(eq(streamChatCommands.command, command)).limit(1);
+    
+    if (!cmd || !cmd.isEnabled) {
+      return res.status(404).json({ success: false, error: 'Command not found' });
+    }
+    
+    let response = '';
+    
+    switch (cmd.commandType) {
+      case 'price_check':
+        const symbol = input?.toUpperCase() || 'BTC';
+        const marketData = await enhancedStreamingService.getMarketData([symbol]);
+        if (marketData.length > 0) {
+          const data = marketData[0];
+          response = `${symbol}: $${data.price.toLocaleString()} (${data.change24h >= 0 ? '+' : ''}${data.change24h.toFixed(2)}%)`;
+        } else {
+          response = `Could not fetch price for ${symbol}`;
+        }
+        break;
+      
+      case 'ai_query':
+        try {
+          const openai = new (await import('openai')).default();
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: cmd.promptTemplate || 'Provide a brief crypto market insight.' }],
+            max_tokens: 150,
+          });
+          response = completion.choices[0]?.message?.content || 'No insight available';
+        } catch (error) {
+          response = 'AI is currently unavailable';
+        }
+        break;
+      
+      case 'user_stats':
+        const user = await storage.getUser(req.user.id);
+        response = `Balance: ${(user?.streamPoints || 0).toLocaleString()} STREAM`;
+        break;
+      
+      case 'leaderboard':
+        response = 'Check the leaderboard panel to see top chatters!';
+        break;
+      
+      default:
+        response = 'Command processed';
+    }
+    
+    await db.insert(streamChatCommandLogs).values({
+      commandId: cmd.id,
+      streamId: req.params.id,
+      userId: req.user.id,
+      input,
+      response,
+    });
+    
+    res.json({ success: true, response });
+  }));
+
+  // Get chat commands
+  app.get("/api/stream-commands", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const commands = await db.select().from(streamChatCommands)
+        .where(eq(streamChatCommands.isEnabled, true));
+      res.json({ success: true, commands });
+    } catch (error) {
+      res.json({ success: true, commands: [] });
     }
   }));
 
