@@ -6025,3 +6025,331 @@ export type UserEventParticipation = typeof userEventParticipation.$inferSelect;
 
 export type InsertGamificationNotification = z.infer<typeof insertGamificationNotificationSchema>;
 export type GamificationNotification = typeof gamificationNotifications.$inferSelect;
+
+// =============================================================================
+// ENHANCED STREAMING FEATURES - POLLS, REACTIONS, COMMANDS, ACHIEVEMENTS
+// =============================================================================
+
+// Live Polls - Real-time voting during streams
+export const streamPolls = pgTable("stream_polls", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  creatorId: varchar("creator_id").references(() => users.id).notNull(),
+  
+  question: text("question").notNull(),
+  options: jsonb("options").notNull(), // [{ id, text, votes: 0 }]
+  
+  // Poll settings
+  allowMultipleVotes: boolean("allow_multiple_votes").default(false),
+  showResultsLive: boolean("show_results_live").default(true),
+  duration: integer("duration").default(60), // seconds, null = until manually closed
+  
+  // Status
+  status: text("status").notNull().default("active"), // active, closed, cancelled
+  
+  // Results
+  totalVotes: integer("total_votes").default(0),
+  winningOptionId: text("winning_option_id"),
+  
+  startsAt: timestamp("starts_at").defaultNow(),
+  endsAt: timestamp("ends_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Poll Votes
+export const streamPollVotes = pgTable("stream_poll_votes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pollId: varchar("poll_id").references(() => streamPolls.id).notNull(),
+  voterId: varchar("voter_id").references(() => users.id).notNull(),
+  optionId: text("option_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Floating Reactions - Animated reactions that float across screen
+export const streamReactions = pgTable("stream_reactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  emoji: text("emoji").notNull(), // 🚀, 💎, 🔥, 📈, 💰, etc
+  animationType: text("animation_type").default("float"), // float, burst, rain, pulse
+  
+  // Position for rendering
+  startX: integer("start_x"), // percentage 0-100
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Schedule Reminders
+export const streamScheduleReminders = pgTable("stream_schedule_reminders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Notification preferences
+  notifyBefore: integer("notify_before").default(15), // minutes before stream
+  notifyViaEmail: boolean("notify_via_email").default(false),
+  notifyViaPush: boolean("notify_via_push").default(true),
+  
+  notificationSent: boolean("notification_sent").default(false),
+  sentAt: timestamp("sent_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Chat Commands Definition
+export const streamChatCommands = pgTable("stream_chat_commands", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  command: text("command").notNull().unique(), // !price, !alpha, !market, !portfolio
+  description: text("description").notNull(),
+  
+  // Command type determines how it's handled
+  commandType: text("command_type").notNull(), // price_check, ai_query, market_info, user_stats
+  
+  // For AI commands, the prompt template
+  promptTemplate: text("prompt_template"),
+  
+  // Rate limiting
+  cooldownSeconds: integer("cooldown_seconds").default(5),
+  
+  isEnabled: boolean("is_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Chat Command Usage Logs
+export const streamChatCommandLogs = pgTable("stream_chat_command_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  commandId: varchar("command_id").references(() => streamChatCommands.id).notNull(),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  input: text("input"), // e.g., "BTC" for !price BTC
+  response: text("response"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Achievements - Viewer achievements for engagement
+export const streamAchievements = pgTable("stream_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(), // emoji or icon name
+  
+  // Achievement criteria
+  achievementType: text("achievement_type").notNull(), // watch_time, tips_given, messages_sent, streams_watched, early_bird, alpha_hunter
+  targetValue: integer("target_value").notNull(), // e.g., 100 hours watched
+  
+  // Rewards
+  xpReward: integer("xp_reward").default(0),
+  streamReward: integer("stream_reward").default(0),
+  badgeId: text("badge_id"), // Special badge unlock
+  
+  // Rarity
+  rarity: text("rarity").default("common"), // common, uncommon, rare, epic, legendary
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Stream Achievements
+export const userStreamAchievements = pgTable("user_stream_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  achievementId: varchar("achievement_id").references(() => streamAchievements.id).notNull(),
+  
+  // Progress tracking
+  currentProgress: integer("current_progress").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  
+  // Rewards claimed
+  rewardsClaimed: boolean("rewards_claimed").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Viewer Watch Rewards - Earn STREAM for watching
+export const viewerWatchRewards = pgTable("viewer_watch_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  
+  // Watch time tracking
+  watchTimeMinutes: integer("watch_time_minutes").default(0),
+  lastHeartbeat: timestamp("last_heartbeat"),
+  
+  // Rewards earned this session
+  streamPointsEarned: integer("stream_points_earned").default(0),
+  xpEarned: integer("xp_earned").default(0),
+  
+  // Bonus multipliers
+  consecutiveMinutesBonus: real("consecutive_minutes_bonus").default(1.0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Multi-Stream Sessions - Track users watching multiple streams
+export const multiStreamSessions = pgTable("multi_stream_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Streams being watched (max 4)
+  streamIds: text("stream_ids").array().notNull(),
+  layout: text("layout").default("2x2"), // 1x1, 1x2, 2x1, 2x2, 1x3, 1x4
+  
+  // Active stream for audio
+  primaryStreamId: varchar("primary_stream_id").references(() => liveStreams.id),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Co-Stream Sessions - Multiple avatars streaming together
+export const coStreamSessions = pgTable("co_stream_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  title: text("title").notNull(),
+  description: text("description"),
+  
+  // Primary host
+  primaryStreamId: varchar("primary_stream_id").references(() => liveStreams.id).notNull(),
+  primaryHostId: varchar("primary_host_id").references(() => users.id).notNull(),
+  
+  // Co-hosts (avatar IDs)
+  coHostAvatarIds: text("co_host_avatar_ids").array(),
+  
+  // Session settings
+  layout: text("layout").default("split"), // split, picture_in_picture, carousel
+  
+  status: text("status").notNull().default("active"), // active, ended
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+});
+
+// Viewer Leaderboard - Track chat activity for rankings
+export const streamViewerLeaderboard = pgTable("stream_viewer_leaderboard", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Activity metrics
+  messagesCount: integer("messages_count").default(0),
+  reactionsCount: integer("reactions_count").default(0),
+  tipsAmount: integer("tips_amount").default(0),
+  pollsVoted: integer("polls_voted").default(0),
+  watchTimeMinutes: integer("watch_time_minutes").default(0),
+  
+  // Calculated score
+  activityScore: integer("activity_score").default(0),
+  rank: integer("rank"),
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for enhanced streaming features
+export const insertStreamPollSchema = createInsertSchema(streamPolls).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamPollVoteSchema = createInsertSchema(streamPollVotes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamReactionSchema = createInsertSchema(streamReactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamScheduleReminderSchema = createInsertSchema(streamScheduleReminders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamChatCommandSchema = createInsertSchema(streamChatCommands).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamChatCommandLogSchema = createInsertSchema(streamChatCommandLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamAchievementSchema = createInsertSchema(streamAchievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserStreamAchievementSchema = createInsertSchema(userStreamAchievements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertViewerWatchRewardSchema = createInsertSchema(viewerWatchRewards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMultiStreamSessionSchema = createInsertSchema(multiStreamSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCoStreamSessionSchema = createInsertSchema(coStreamSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamViewerLeaderboardSchema = createInsertSchema(streamViewerLeaderboard).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// Types for enhanced streaming
+export type InsertStreamPoll = z.infer<typeof insertStreamPollSchema>;
+export type StreamPoll = typeof streamPolls.$inferSelect;
+
+export type InsertStreamPollVote = z.infer<typeof insertStreamPollVoteSchema>;
+export type StreamPollVote = typeof streamPollVotes.$inferSelect;
+
+export type InsertStreamReaction = z.infer<typeof insertStreamReactionSchema>;
+export type StreamReaction = typeof streamReactions.$inferSelect;
+
+export type InsertStreamScheduleReminder = z.infer<typeof insertStreamScheduleReminderSchema>;
+export type StreamScheduleReminder = typeof streamScheduleReminders.$inferSelect;
+
+export type InsertStreamChatCommand = z.infer<typeof insertStreamChatCommandSchema>;
+export type StreamChatCommand = typeof streamChatCommands.$inferSelect;
+
+export type InsertStreamChatCommandLog = z.infer<typeof insertStreamChatCommandLogSchema>;
+export type StreamChatCommandLog = typeof streamChatCommandLogs.$inferSelect;
+
+export type InsertStreamAchievement = z.infer<typeof insertStreamAchievementSchema>;
+export type StreamAchievement = typeof streamAchievements.$inferSelect;
+
+export type InsertUserStreamAchievement = z.infer<typeof insertUserStreamAchievementSchema>;
+export type UserStreamAchievement = typeof userStreamAchievements.$inferSelect;
+
+export type InsertViewerWatchReward = z.infer<typeof insertViewerWatchRewardSchema>;
+export type ViewerWatchReward = typeof viewerWatchRewards.$inferSelect;
+
+export type InsertMultiStreamSession = z.infer<typeof insertMultiStreamSessionSchema>;
+export type MultiStreamSession = typeof multiStreamSessions.$inferSelect;
+
+export type InsertCoStreamSession = z.infer<typeof insertCoStreamSessionSchema>;
+export type CoStreamSession = typeof coStreamSessions.$inferSelect;
+
+export type InsertStreamViewerLeaderboard = z.infer<typeof insertStreamViewerLeaderboardSchema>;
+export type StreamViewerLeaderboard = typeof streamViewerLeaderboard.$inferSelect;
