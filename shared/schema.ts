@@ -5434,6 +5434,144 @@ export const insertStreamPredictionSchema = createInsertSchema(streamPredictions
   createdAt: true,
 });
 
+// Streamer Subscriptions - Support creators with monthly subscriptions
+export const streamerSubscriptions = pgTable("streamer_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamerId: varchar("streamer_id").references(() => users.id).notNull(),
+  subscriberId: varchar("subscriber_id").references(() => users.id).notNull(),
+  
+  tier: text("tier").notNull().default("supporter"), // supporter, vip, whale
+  monthlyPrice: integer("monthly_price").notNull(), // STREAM points per month
+  
+  status: text("status").notNull().default("active"), // active, cancelled, expired, paused
+  
+  benefits: jsonb("benefits").default({}), // { subscriberBadge: true, emotes: [], noAds: true }
+  
+  startedAt: timestamp("started_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  renewsAt: timestamp("renews_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  
+  totalPaid: integer("total_paid").default(0),
+  monthsSubscribed: integer("months_subscribed").default(0),
+  
+  autoRenew: boolean("auto_renew").default(true),
+  giftedBy: varchar("gifted_by").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Streamer Subscription Tiers - Define what each tier offers
+export const streamerSubscriptionTiers = pgTable("streamer_subscription_tiers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamerId: varchar("streamer_id").references(() => users.id).notNull(),
+  
+  tierName: text("tier_name").notNull(), // supporter, vip, whale
+  monthlyPrice: integer("monthly_price").notNull(),
+  
+  benefits: jsonb("benefits").default({}),
+  emotes: text("emotes").array(), // Custom emotes unlocked at this tier
+  badgeUrl: text("badge_url"),
+  
+  subscriberOnlyChat: boolean("subscriber_only_chat").default(false),
+  noAds: boolean("no_ads").default(false),
+  prioritySupport: boolean("priority_support").default(false),
+  exclusiveContent: boolean("exclusive_content").default(false),
+  
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Super Chats - Premium highlighted messages
+export const superChats = pgTable("super_chats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  senderId: varchar("sender_id").references(() => users.id).notNull(),
+  
+  amount: integer("amount").notNull(), // STREAM points
+  message: text("message"),
+  
+  tier: text("tier").notNull().default("basic"), // basic, super, mega
+  highlightColor: text("highlight_color"),
+  durationSeconds: integer("duration_seconds").default(5), // How long to display
+  
+  enableTTS: boolean("enable_tts").default(false), // Text-to-speech
+  isRead: boolean("is_read").default(false), // Has the streamer acknowledged
+  isPinned: boolean("is_pinned").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Raids - Send viewers to other streams
+export const streamRaids = pgTable("stream_raids", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fromStreamId: varchar("from_stream_id").references(() => liveStreams.id).notNull(),
+  toStreamId: varchar("to_stream_id").references(() => liveStreams.id).notNull(),
+  
+  raiderId: varchar("raider_id").references(() => users.id).notNull(), // Who initiated the raid
+  
+  viewersTransferred: integer("viewers_transferred").default(0),
+  
+  status: text("status").notNull().default("pending"), // pending, accepted, declined, completed
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Stream Clips - User-created highlights
+export const streamClips = pgTable("stream_clips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  creatorId: varchar("creator_id").references(() => users.id).notNull(),
+  
+  title: text("title").notNull(),
+  description: text("description"),
+  
+  startTime: integer("start_time").notNull(), // seconds from stream start
+  endTime: integer("end_time").notNull(),
+  durationSeconds: integer("duration_seconds"),
+  
+  clipUrl: text("clip_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  
+  views: integer("views").default(0),
+  likes: integer("likes").default(0),
+  shares: integer("shares").default(0),
+  
+  isFeatured: boolean("is_featured").default(false),
+  isDeleted: boolean("is_deleted").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for new tables
+export const insertStreamerSubscriptionSchema = createInsertSchema(streamerSubscriptions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamerSubscriptionTierSchema = createInsertSchema(streamerSubscriptionTiers).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSuperChatSchema = createInsertSchema(superChats).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamRaidSchema = createInsertSchema(streamRaids).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamClipSchema = createInsertSchema(streamClips).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertLiveStream = z.infer<typeof insertLiveStreamSchema>;
 export type LiveStream = typeof liveStreams.$inferSelect;
@@ -5452,6 +5590,21 @@ export type StreamRecording = typeof streamRecordings.$inferSelect;
 
 export type InsertStreamPrediction = z.infer<typeof insertStreamPredictionSchema>;
 export type StreamPrediction = typeof streamPredictions.$inferSelect;
+
+export type InsertStreamerSubscription = z.infer<typeof insertStreamerSubscriptionSchema>;
+export type StreamerSubscription = typeof streamerSubscriptions.$inferSelect;
+
+export type InsertStreamerSubscriptionTier = z.infer<typeof insertStreamerSubscriptionTierSchema>;
+export type StreamerSubscriptionTier = typeof streamerSubscriptionTiers.$inferSelect;
+
+export type InsertSuperChat = z.infer<typeof insertSuperChatSchema>;
+export type SuperChat = typeof superChats.$inferSelect;
+
+export type InsertStreamRaid = z.infer<typeof insertStreamRaidSchema>;
+export type StreamRaid = typeof streamRaids.$inferSelect;
+
+export type InsertStreamClip = z.infer<typeof insertStreamClipSchema>;
+export type StreamClip = typeof streamClips.$inferSelect;
 
 // =============================================================================
 // ENHANCED GAMIFICATION SYSTEM - DAILY QUESTS, MISSIONS, XP, SEASON PASS
