@@ -11656,6 +11656,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get past/ended streams
+  app.get("/api/streams/ended", asyncHandler(async (req: Request, res: Response) => {
+    const { limit = 10 } = req.query;
+    
+    try {
+      const streams = await db.select({
+        id: liveStreams.id,
+        title: liveStreams.title,
+        description: liveStreams.description,
+        streamType: liveStreams.streamType,
+        hostId: liveStreams.hostId,
+        status: liveStreams.status,
+        currentViewers: liveStreams.currentViewers,
+        peakViewers: liveStreams.peakViewers,
+        totalTipsReceived: liveStreams.totalTipsReceived,
+        category: liveStreams.category,
+        tags: liveStreams.tags,
+        actualStart: liveStreams.actualStart,
+        actualEnd: liveStreams.actualEnd,
+        durationSeconds: liveStreams.durationSeconds,
+        thumbnailUrl: liveStreams.thumbnailUrl,
+        createdAt: liveStreams.createdAt,
+      })
+      .from(liveStreams)
+      .where(eq(liveStreams.status, 'ended'))
+      .orderBy(desc(liveStreams.actualEnd))
+      .limit(Number(limit));
+      
+      // Enrich with host info
+      const enrichedStreams = await Promise.all(streams.map(async (stream) => {
+        const host = await storage.getUser(stream.hostId);
+        return {
+          ...stream,
+          hostUsername: host?.username,
+          hostAvatar: host?.avatar,
+        };
+      }));
+      
+      res.json({ success: true, streams: enrichedStreams });
+    } catch (error: any) {
+      res.json({ success: true, streams: [] });
+    }
+  }));
+
   // Get all streams (for browse page)
   app.get("/api/streams", asyncHandler(async (req: Request, res: Response) => {
     const { type, status, limit = 50 } = req.query;
