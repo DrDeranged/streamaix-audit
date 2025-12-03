@@ -31,7 +31,9 @@ import {
   Shield,
   Mic,
   Pause,
-  Volume2
+  Volume2,
+  Grid2X2,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -40,6 +42,11 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { 
+  StreamCategoryFilter, 
+  MultiStreamView, 
+  StreamScheduleCard 
+} from '@/components/streaming/EnhancedStreamingFeatures';
 
 interface LiveStream {
   id: string;
@@ -274,15 +281,38 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
   );
 });
 
-const StreamCard = memo(function StreamCard({ stream, size = 'normal' }: { stream: LiveStream; size?: 'normal' | 'compact' }) {
+const StreamCard = memo(function StreamCard({ 
+  stream, 
+  size = 'normal',
+  selectionMode = false,
+  isSelected = false,
+  onSelect
+}: { 
+  stream: LiveStream; 
+  size?: 'normal' | 'compact';
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onSelect?: (streamId: string) => void;
+}) {
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
   const isLive = stream.status === 'live';
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (selectionMode && onSelect) {
+      e.preventDefault();
+      e.stopPropagation();
+      onSelect(stream.id);
+    }
+  };
+
   if (size === 'compact') {
     return (
       <Link href={`/stream/${stream.id}`}>
-        <div className="group flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/50 hover:border-purple-500/40 hover:bg-slate-800/60 transition-all cursor-pointer">
+        <div 
+          className="group flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/50 hover:border-purple-500/40 hover:bg-slate-800/60 transition-all cursor-pointer"
+          onClick={handleClick}
+        >
           <div className={cn(
             "relative w-16 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br",
             config.gradient
@@ -312,14 +342,30 @@ const StreamCard = memo(function StreamCard({ stream, size = 'normal' }: { strea
     );
   }
 
-  return (
-    <Link href={`/stream/${stream.id}`}>
-      <div className="group cursor-pointer transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" data-testid={`stream-card-${stream.id}`}>
-        <Card className="overflow-hidden bg-slate-900/80 border border-slate-700/50 hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/10">
-          <div className={cn(
-            "relative aspect-video bg-gradient-to-br",
-            config.gradient
-          )}>
+  const cardContent = (
+    <div 
+      className={cn(
+        "group cursor-pointer transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
+        selectionMode && isSelected && "ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950 rounded-xl"
+      )} 
+      data-testid={`stream-card-${stream.id}`}
+      onClick={handleClick}
+    >
+      {selectionMode && (
+        <div className={cn(
+          "absolute top-2 left-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+          isSelected 
+            ? "bg-purple-500 border-purple-500" 
+            : "bg-slate-900/80 border-slate-500 hover:border-purple-400"
+        )}>
+          {isSelected && <span className="text-white text-xs font-bold">✓</span>}
+        </div>
+      )}
+      <Card className="overflow-hidden bg-slate-900/80 border border-slate-700/50 hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/10">
+        <div className={cn(
+          "relative aspect-video bg-gradient-to-br",
+          config.gradient
+        )}>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjEiIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIvPjwvZz48L3N2Zz4=')] opacity-30" />
             <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center">
               <div className="p-3 rounded-full bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
@@ -421,6 +467,15 @@ const StreamCard = memo(function StreamCard({ stream, size = 'normal' }: { strea
           </div>
         </Card>
       </div>
+  );
+
+  if (selectionMode) {
+    return cardContent;
+  }
+
+  return (
+    <Link href={`/stream/${stream.id}`}>
+      {cardContent}
     </Link>
   );
 });
@@ -667,6 +722,25 @@ export default function StreamsPage() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('discover');
+  const [multiStreamMode, setMultiStreamMode] = useState(false);
+  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
+  const [multiStreamLayout, setMultiStreamLayout] = useState<'1x1' | '1x2' | '2x1' | '2x2'>('2x2');
+  const [primaryStreamId, setPrimaryStreamId] = useState<string | undefined>();
+
+  const handleToggleStreamSelection = (streamId: string) => {
+    if (selectedStreams.includes(streamId)) {
+      setSelectedStreams(selectedStreams.filter(id => id !== streamId));
+    } else if (selectedStreams.length < 4) {
+      setSelectedStreams([...selectedStreams, streamId]);
+    }
+  };
+
+  const handleRemoveFromMultiStream = (streamId: string) => {
+    setSelectedStreams(selectedStreams.filter(id => id !== streamId));
+    if (primaryStreamId === streamId && selectedStreams.length > 1) {
+      setPrimaryStreamId(selectedStreams.find(id => id !== streamId));
+    }
+  };
 
   const { data: liveStreamsData, isLoading } = useQuery<{ success: boolean; streams: LiveStream[] }>({
     queryKey: ['/api/streams/live'],
@@ -836,7 +910,77 @@ export default function StreamsPage() {
               data-testid="input-search-streams"
             />
           </div>
+          <Button
+            variant={multiStreamMode ? "default" : "outline"}
+            onClick={() => {
+              setMultiStreamMode(!multiStreamMode);
+              if (!multiStreamMode) setSelectedStreams([]);
+            }}
+            className={cn(
+              "h-11 gap-2 whitespace-nowrap",
+              multiStreamMode 
+                ? "bg-purple-600 hover:bg-purple-500 text-white"
+                : "border-slate-600 text-slate-300 hover:bg-slate-800"
+            )}
+            data-testid="button-multistream-toggle"
+          >
+            <Grid2X2 className="w-4 h-4" />
+            Multi-Stream
+            {multiStreamMode && selectedStreams.length > 0 && (
+              <Badge className="bg-white/20 text-white text-xs ml-1">
+                {selectedStreams.length}/4
+              </Badge>
+            )}
+          </Button>
         </div>
+
+        {multiStreamMode && selectedStreams.length > 0 && (
+          <Card className="p-4 bg-slate-900/60 border border-purple-500/40">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Grid2X2 className="w-5 h-5 text-purple-400" />
+                <span className="font-semibold text-white">Multi-Stream View</span>
+                <Badge className="bg-purple-500/20 text-purple-400 border-0">
+                  {selectedStreams.length} streams selected
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <select 
+                  value={multiStreamLayout}
+                  onChange={(e) => setMultiStreamLayout(e.target.value as any)}
+                  className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-white"
+                >
+                  <option value="1x1">1x1</option>
+                  <option value="1x2">1x2</option>
+                  <option value="2x1">2x1</option>
+                  <option value="2x2">2x2</option>
+                </select>
+                <Link href={`/multi-stream?streams=${selectedStreams.join(',')}&layout=${multiStreamLayout}`}>
+                  <Button size="sm" className="bg-purple-600 hover:bg-purple-500">
+                    Watch Now
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="h-[300px]">
+              <MultiStreamView
+                streams={selectedStreams.map(id => {
+                  const stream = liveStreams.find(s => s.id === id);
+                  return {
+                    id,
+                    title: stream?.title || 'Stream',
+                    hostUsername: stream?.hostUsername || 'Unknown',
+                    thumbnailUrl: stream?.hostAvatar
+                  };
+                })}
+                layout={multiStreamLayout}
+                primaryStreamId={primaryStreamId}
+                onChangePrimary={setPrimaryStreamId}
+                onRemoveStream={handleRemoveFromMultiStream}
+              />
+            </div>
+          </Card>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1 w-full sm:w-auto grid grid-cols-3 sm:flex">
@@ -888,7 +1032,13 @@ export default function StreamsPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {aiHostedStreams.map((stream) => (
-                    <StreamCard key={stream.id} stream={stream} />
+                    <StreamCard 
+                      key={stream.id} 
+                      stream={stream} 
+                      selectionMode={multiStreamMode}
+                      isSelected={selectedStreams.includes(stream.id)}
+                      onSelect={handleToggleStreamSelection}
+                    />
                   ))}
                 </div>
               </section>
@@ -938,7 +1088,13 @@ export default function StreamsPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {(userHostedStreams.length > 0 ? userHostedStreams : filteredStreams).map((stream) => (
-                    <StreamCard key={stream.id} stream={stream} />
+                    <StreamCard 
+                      key={stream.id} 
+                      stream={stream} 
+                      selectionMode={multiStreamMode}
+                      isSelected={selectedStreams.includes(stream.id)}
+                      onSelect={handleToggleStreamSelection}
+                    />
                   ))}
                 </div>
               )}
@@ -1023,7 +1179,13 @@ export default function StreamsPage() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                     {filteredStreams.map((stream) => (
-                      <StreamCard key={stream.id} stream={stream} />
+                      <StreamCard 
+                        key={stream.id} 
+                        stream={stream} 
+                        selectionMode={multiStreamMode}
+                        isSelected={selectedStreams.includes(stream.id)}
+                        onSelect={handleToggleStreamSelection}
+                      />
                     ))}
                   </div>
                 )}
@@ -1036,8 +1198,15 @@ export default function StreamsPage() {
                     Hot Right Now
                   </h3>
                   <div className="space-y-2">
-                    {filteredStreams.slice(0, 5).map((stream, idx) => (
-                      <StreamCard key={stream.id} stream={stream} size="compact" />
+                    {filteredStreams.slice(0, 5).map((stream) => (
+                      <StreamCard 
+                        key={stream.id} 
+                        stream={stream} 
+                        size="compact"
+                        selectionMode={multiStreamMode}
+                        isSelected={selectedStreams.includes(stream.id)}
+                        onSelect={handleToggleStreamSelection}
+                      />
                     ))}
                   </div>
                 </Card>
