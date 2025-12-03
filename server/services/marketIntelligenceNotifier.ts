@@ -275,6 +275,17 @@ class MarketIntelligenceNotifier {
       const cryptoData = await marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO);
       const now = Date.now();
 
+      // Log data source status for debugging
+      if (cryptoData.length === 0) {
+        console.warn('⚠️ [Price Alerts] No crypto data available - all APIs failed');
+        return;
+      }
+      
+      console.log(`📊 [Price Alerts] Received ${cryptoData.length}/${this.TRACKED_CRYPTO.length} prices, tracking ${this.priceSnapshots.size} assets`);
+
+      let alertsChecked = 0;
+      let alertsSent = 0;
+
       for (const crypto of cryptoData) {
         const key = crypto.symbol;
         const snapshot: PriceSnapshot = {
@@ -296,6 +307,8 @@ class MarketIntelligenceNotifier {
         this.priceSnapshots.set(key, filteredSnapshots);
 
         if (filteredSnapshots.length < 2) continue;
+
+        alertsChecked++;
 
         // Check for significant move in last hour
         const oldestPrice = filteredSnapshots[0].price;
@@ -328,8 +341,14 @@ class MarketIntelligenceNotifier {
           }, 'price_alert');
 
           this.lastPriceAlerts.set(key, now);
+          alertsSent++;
           console.log(`🚨 Price alert sent for ${key}: ${hourlyChange.toFixed(2)}% in 1h`);
         }
+      }
+
+      // Summary log
+      if (alertsChecked > 0 || alertsSent > 0) {
+        console.log(`📊 [Price Alerts] Checked ${alertsChecked} assets, sent ${alertsSent} alerts (threshold: ${this.PRICE_ALERT_THRESHOLD}%)`);
       }
     } catch (error) {
       console.error('❌ Failed to check price alerts:', error);
