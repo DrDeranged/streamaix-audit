@@ -190,7 +190,7 @@ export default function Markets() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
 
         {/* Hero Header - Compact */}
-        <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4 animate-fadeIn">
+        <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4 animate-fade-in">
           {/* Static background effects - removed animations for performance */}
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:30px_30px]" />
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
@@ -538,7 +538,7 @@ export default function Markets() {
               </div>
             ) : filteredMarkets.length > 0 ? (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fadeIn">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in">
                   {displayedMarkets.map((market) => (
                     <MarketCard key={market.id} market={market} />
                   ))}
@@ -586,12 +586,12 @@ export default function Markets() {
           {/* AI Activity Feed - Right Column */}
           <div className="lg:w-[35%]">
             <div className="lg:sticky lg:top-24 space-y-4">
-              <div className="animate-fadeIn">
+              <div className="animate-fade-in">
                 <MarketActivityFeed limit={15} className="max-w-full" />
               </div>
               
               {/* Engagement Section - Leagues, Achievements, Leaderboard */}
-              <div className="space-y-3 animate-fadeIn">
+              <div className="space-y-3 animate-fade-in">
                 {/* Quick Engagement Links */}
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4 h-4 text-purple-400" />

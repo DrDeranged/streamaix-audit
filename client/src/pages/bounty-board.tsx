@@ -99,7 +99,7 @@ export default function BountyBoard() {
     <div className="min-h-screen bg-transparent dark:bg-transparent">
       <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Header */}
-        <div className="mb-12 animate-fadeIn">
+        <div className="mb-12 animate-fade-in">
           {/* Navigation Buttons */}
           <div className="flex gap-3 mb-6">
             <Button
@@ -183,7 +183,7 @@ export default function BountyBoard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 animate-fadeIn">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 animate-fade-in">
           <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300 p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-purple-500/10">
@@ -243,7 +243,7 @@ export default function BountyBoard() {
 
         {/* Trending Section */}
         {(trendingBounties.length > 0 || hotBounties.length > 0 || urgentBounties.length > 0) && (
-          <div className="mb-12 animate-fadeIn">
+          <div className="mb-12 animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Trending */}
               {trendingBounties.length > 0 && (
@@ -403,7 +403,7 @@ export default function BountyBoard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {bounties.map((bounty) => (
-              <div key={bounty.id} className="animate-fadeIn">
+              <div key={bounty.id} className="animate-fade-in">
                 <BountyCard bounty={bounty} />
               </div>
             ))}
