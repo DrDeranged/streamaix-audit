@@ -153,47 +153,63 @@ class MarketIntelligenceNotifier {
         newsService.getCryptoNews(3)
       ]);
 
-      // Find biggest movers
-      const topGainer = cryptoData.reduce((max, c) => 
-        (c.percentChange24h > (max?.percentChange24h || -Infinity)) ? c : max, cryptoData[0]);
-      const topLoser = cryptoData.reduce((min, c) => 
-        (c.percentChange24h < (min?.percentChange24h || Infinity)) ? c : min, cryptoData[0]);
-      
       const btc = cryptoData.find(c => c.symbol === 'BTC');
       const eth = cryptoData.find(c => c.symbol === 'ETH');
 
-      // Market sentiment based on BTC movement
-      const sentiment = btc && btc.percentChange24h > 2 ? '🟢 Bullish' : 
-                       btc && btc.percentChange24h < -2 ? '🔴 Bearish' : '🟡 Neutral';
+      // Get trading metrics for AI analysis
+      let tradingMetrics;
+      try {
+        const [btcPositioning, ethPositioning] = await Promise.all([
+          derivativesAnalyticsService.getFuturesPositioning('BTC'),
+          derivativesAnalyticsService.getFuturesPositioning('ETH')
+        ]);
+        tradingMetrics = {
+          btcFunding: btcPositioning?.fundingRateHistory?.[0]?.rate,
+          ethFunding: ethPositioning?.fundingRateHistory?.[0]?.rate,
+          totalOI: (btcPositioning?.totalLongOI || 0) + (btcPositioning?.totalShortOI || 0)
+        };
+      } catch (e) {
+        console.log('⚠️ Could not fetch trading metrics for morning briefing');
+      }
 
       // Today's key events
       const todayEvents = economicEvents.filter(e => {
         const eventDate = new Date(e.scheduledDate);
         const today = new Date();
         return eventDate.toDateString() === today.toDateString();
-      }).slice(0, 2);
+      }).slice(0, 3);
 
-      // Build clean, scannable body
-      let body = '';
+      // Generate AI-powered morning briefing
+      const marketContextData = cryptoData.map(c => ({
+        symbol: c.symbol,
+        price: c.price,
+        change24h: c.percentChange24h,
+        change7d: c.percentChange7d,
+        volume24h: c.volume24h,
+        marketCap: c.marketCap
+      }));
+
+      const insight = await alphaInsightsEngine.generateMorningBriefing(
+        marketContextData,
+        todayEvents,
+        tradingMetrics
+      );
+
+      // Market sentiment emoji
+      const avgChange = cryptoData.reduce((sum, c) => sum + c.percentChange24h, 0) / cryptoData.length;
+      const sentimentEmoji = avgChange > 2 ? '🟢' : avgChange < -2 ? '🔴' : '🟡';
+
+      // AI-enhanced notification body
+      let body = `📊 ${insight.marketRegime}\n\n`;
+      body += `🎯 ${insight.topOpportunity}\n\n`;
+      body += `⚠️ ${insight.riskWarning}`;
       
-      if (btc && eth) {
-        body += `₿ $${this.formatPrice(btc.price)} ${this.formatChangeCompact(btc.percentChange24h)}  ·  Ξ $${this.formatPrice(eth.price)} ${this.formatChangeCompact(eth.percentChange24h)}\n\n`;
-      }
-      
-      body += `🏆 ${topGainer?.symbol} ${this.formatChange(topGainer?.percentChange24h || 0)}  ·  📉 ${topLoser?.symbol} ${this.formatChange(topLoser?.percentChange24h || 0)}`;
-      
-      if (todayEvents.length > 0) {
-        body += `\n\n📅 ${todayEvents[0].title}`;
+      if (insight.watchList.length > 0) {
+        body += `\n\n👀 Watch: ${insight.watchList.join(', ')}`;
       }
 
-      if (topNews.length > 0) {
-        body += `\n\n📰 ${topNews[0].title.substring(0, 55)}...`;
-      }
-
-      // Dynamic title based on market sentiment
-      const title = sentiment === '🟢 Bullish' ? '🟢 Markets Up · Morning Brief' :
-                    sentiment === '🔴 Bearish' ? '🔴 Markets Down · Morning Brief' :
-                    '☀️ Morning Brief';
+      // Dynamic AI-powered title
+      const title = `${sentimentEmoji} ${insight.dayTraderFocus.substring(0, 40)}`;
 
       await pushNotificationService.sendToAll({
         title,
@@ -207,7 +223,7 @@ class MarketIntelligenceNotifier {
         ]
       }, 'morning_briefing');
 
-      console.log('✅ Morning briefing sent');
+      console.log('✅ AI-enhanced morning briefing sent');
     } catch (error) {
       console.error('❌ Failed to send morning briefing:', error);
     }
