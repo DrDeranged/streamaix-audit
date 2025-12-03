@@ -216,7 +216,7 @@ export default function BountyBoard() {
               <div>
                 <p className="text-sm text-gray-400">Total Rewards</p>
                 <p className="text-2xl font-bold text-white" data-testid="stat-total-rewards">
-                  {stats?.totalRewards ? `${formatTokenAmount(stats.totalRewards.toString())} $STREAM` : '0 $STREAM'}
+                  {stats?.totalRewards ? `${stats.totalRewards.toLocaleString()} $STREAM` : '0 $STREAM'}
                 </p>
               </div>
             </div>

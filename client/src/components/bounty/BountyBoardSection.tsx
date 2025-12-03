@@ -111,7 +111,7 @@ export default function BountyBoardSection() {
             <div>
               <p className="text-xs text-gray-400">Rewards</p>
               <p className="text-lg font-bold text-white">
-                {stats?.totalRewards ? formatTokenAmount(stats.totalRewards.toString()).slice(0, 6) : '0'}
+                {stats?.totalRewards ? stats.totalRewards.toLocaleString() : '0'} STREAM
               </p>
             </div>
           </div>
