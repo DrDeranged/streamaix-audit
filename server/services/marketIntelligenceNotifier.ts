@@ -7,6 +7,7 @@ import { institutionalFlowService } from './institutionalFlowService';
 import { alphaInsightsEngine } from './alphaInsightsEngine';
 import { alphaIntelligenceService } from './alphaIntelligenceService';
 import { stockMarketService } from './stockMarketService';
+import { notificationDataValidator } from './notificationDataValidator';
 import { db } from '../db';
 import { pushSubscriptions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -249,6 +250,53 @@ class MarketIntelligenceNotifier {
   stop(): void {
     this.isStarted = false;
     console.log('⏹️ Market Intelligence Notifier stopped');
+  }
+
+  /**
+   * Validated notification sender - all notifications pass through CoinGecko cross-referencing
+   * before being sent to ensure real-time data accuracy
+   */
+  private async sendValidatedNotification(
+    notificationType: string,
+    payload: { title: string; body: string; url?: string; tag?: string; requireInteraction?: boolean; actions?: Array<{ action: string; title: string }> },
+    category: string,
+    requiredAssets: string[] = ['BTC', 'ETH']
+  ): Promise<boolean> {
+    try {
+      // Validate notification data against live CoinGecko prices
+      const validation = await notificationDataValidator.validateNotification({
+        type: notificationType,
+        title: payload.title,
+        body: payload.body,
+        requiredAssets,
+        data: { category, originalPayload: payload }
+      });
+
+      if (!validation.isValid) {
+        console.log(`⚠️ [Validator] ${notificationType} notification BLOCKED: ${validation.errors.join(', ')}`);
+        return false;
+      }
+
+      if (validation.warnings.length > 0) {
+        console.log(`⚠️ [Validator] ${notificationType} warnings: ${validation.warnings.join(', ')}`);
+      }
+
+      // Append market context to body if not already included
+      const marketContext = await notificationDataValidator.getRealTimeMarketContext();
+      const contextLine = `\n\n📊 BTC: $${marketContext.btcPrice.toLocaleString()} (${marketContext.btcChange24h >= 0 ? '+' : ''}${marketContext.btcChange24h.toFixed(1)}%)`;
+      
+      const enhancedPayload = {
+        ...payload,
+        body: payload.body.includes('BTC:') ? payload.body : payload.body + contextLine
+      };
+
+      await pushNotificationService.sendToAll(enhancedPayload, category);
+      console.log(`✅ [Validator] ${notificationType} notification sent (freshness: ${validation.dataFreshness})`);
+      return true;
+    } catch (error) {
+      console.error(`❌ [Validator] Failed to validate/send ${notificationType}:`, error);
+      return false;
+    }
   }
 
   async sendMorningBriefing(): Promise<void> {
@@ -1176,24 +1224,49 @@ class MarketIntelligenceNotifier {
         const lastAlert = this.lastCTAlphaSignals.get(signal.id) || 0;
         if (now - lastAlert < 60 * 60 * 1000) continue; // 1hr cooldown per signal
 
-        const sentimentEmoji = signal.sentiment === 'bullish' ? '🟢' : signal.sentiment === 'bearish' ? '🔴' : '🟡';
-        const title = `🐦 CT Alpha: ${signal.influencer}`;
-        const body = `${sentimentEmoji} ${signal.signal}\n\n${signal.token ? `Token: ${signal.token}\n` : ''}Confidence: ${signal.confidence}%\nEngagement: ${signal.engagement.toLocaleString()}`;
+        // Validate signal against live market data
+        const validation = await notificationDataValidator.validateCTAlphaSignal({
+          influencer: signal.influencer,
+          token: signal.token,
+          signal: signal.signal,
+          sentiment: signal.sentiment,
+          confidence: signal.confidence
+        });
 
-        await pushNotificationService.sendToAll({
-          title,
-          body,
-          url: '/discover',
-          tag: `ct-alpha-${signal.id}`,
-          requireInteraction: true,
-          actions: [
-            { action: 'view', title: '👀 View' },
-            { action: 'trade', title: '⚡ Trade' }
-          ]
-        }, 'ct_alpha');
+        // Log any market alignment warnings but don't block
+        if (!validation.marketAlignment) {
+          console.log(`⚠️ CT Signal alignment warning: ${validation.errors.join(', ')}`);
+        }
+
+        const sentimentEmoji = signal.sentiment === 'bullish' ? '🟢' : signal.sentiment === 'bearish' ? '🔴' : '🟡';
+        const alignmentNote = validation.marketAlignment ? '' : ' ⚠️';
+        const title = `🐦 CT Alpha: ${signal.influencer}${alignmentNote}`;
+        
+        // Include validated price if available
+        const priceInfo = validation.tokenPrice 
+          ? `\n💰 ${signal.token}: $${validation.tokenPrice.toLocaleString()}`
+          : '';
+        const body = `${sentimentEmoji} ${signal.signal}\n\n${signal.token ? `Token: ${signal.token}` : ''}${priceInfo}\nConfidence: ${signal.confidence}%\nEngagement: ${signal.engagement.toLocaleString()}`;
+
+        await this.sendValidatedNotification(
+          'ct_alpha_signal',
+          {
+            title,
+            body,
+            url: '/discover',
+            tag: `ct-alpha-${signal.id}`,
+            requireInteraction: true,
+            actions: [
+              { action: 'view', title: '👀 View' },
+              { action: 'trade', title: '⚡ Trade' }
+            ]
+          },
+          'ct_alpha',
+          signal.token ? [signal.token] : ['BTC', 'ETH']
+        );
 
         this.lastCTAlphaSignals.set(signal.id, now);
-        console.log(`🐦 CT Alpha alert: ${signal.influencer} - ${signal.sentiment}`);
+        console.log(`🐦 CT Alpha alert: ${signal.influencer} - ${signal.sentiment} (validated: ${validation.isValid})`);
       }
     } catch (error) {
       console.error('❌ Failed to check CT alpha signals:', error);
@@ -1348,25 +1421,49 @@ class MarketIntelligenceNotifier {
         const lastAlert = this.lastVCWalletAlerts.get(activity.id) || 0;
         if (now - lastAlert < 30 * 60 * 1000) continue; // 30min cooldown
 
+        // Validate VC wallet activity against live prices
+        const validation = await notificationDataValidator.validateVCWalletAlert({
+          fund: activity.fund,
+          action: activity.action,
+          token: activity.token,
+          amount: activity.amount,
+          valueUsd: activity.valueUsd
+        });
+
+        // Log price validation errors but don't block
+        if (!validation.isValid) {
+          console.log(`⚠️ VC Wallet validation warning: ${validation.errors.join(', ')}`);
+        }
+
         const actionEmoji = activity.action === 'buy' ? '🟢' : activity.action === 'sell' ? '🔴' : '↔️';
         const actionText = activity.action.toUpperCase();
         const title = `💼 ${activity.fund} ${actionText} Alert`;
-        const body = `${actionEmoji} ${activity.token}: $${this.formatLargeNumber(activity.valueUsd)}\n${activity.amount.toLocaleString()} tokens\n\nTx: ${activity.txHash}`;
+        
+        // Include current price if validated
+        const priceInfo = validation.currentPrice 
+          ? `\n📊 Current ${activity.token}: $${validation.currentPrice.toLocaleString()} (${validation.priceChange24h! >= 0 ? '+' : ''}${validation.priceChange24h?.toFixed(1)}%)`
+          : '';
+        const body = `${actionEmoji} ${activity.token}: $${this.formatLargeNumber(activity.valueUsd)}\n${activity.amount.toLocaleString()} tokens${priceInfo}\n\nTx: ${activity.txHash}`;
 
-        await pushNotificationService.sendToAll({
-          title,
-          body,
-          url: '/discover',
-          tag: `vc-${activity.id}`,
-          requireInteraction: true,
-          actions: [
-            { action: 'view_tx', title: '🔗 View' },
-            { action: 'trade', title: '⚡ Trade' }
-          ]
-        }, 'vc_wallet');
+        await this.sendValidatedNotification(
+          'vc_wallet_activity',
+          {
+            title,
+            body,
+            url: '/discover',
+            tag: `vc-${activity.id}`,
+            requireInteraction: true,
+            actions: [
+              { action: 'view_tx', title: '🔗 View' },
+              { action: 'trade', title: '⚡ Trade' }
+            ]
+          },
+          'vc_wallet',
+          [activity.token]
+        );
 
         this.lastVCWalletAlerts.set(activity.id, now);
-        console.log(`💼 VC alert: ${activity.fund} ${activity.action} ${activity.token}`);
+        console.log(`💼 VC alert: ${activity.fund} ${activity.action} ${activity.token} (validated: ${validation.isValid})`);
       }
     } catch (error) {
       console.error('❌ Failed to check VC wallet activity:', error);
@@ -1420,24 +1517,51 @@ class MarketIntelligenceNotifier {
       if (ideas.length === 0) return;
 
       const topIdea = ideas[0];
-      const directionEmoji = topIdea.direction === 'long' ? '🟢' : '🔴';
-      const title = `💡 AI Trade Idea: ${topIdea.asset} ${topIdea.direction.toUpperCase()}`;
-      const body = `${directionEmoji} Entry: $${topIdea.entry.toLocaleString()}\n🎯 Target: $${topIdea.target.toLocaleString()}\n🛡️ Stop: $${topIdea.stopLoss.toLocaleString()}\n\nR:R ${topIdea.riskReward.toFixed(1)}:1 · Confidence: ${topIdea.confidence}%\n\n${topIdea.reasoning}`;
+      
+      // Validate trade idea against live market prices
+      const validation = await notificationDataValidator.validateAndEnrichTradeIdea({
+        asset: topIdea.asset,
+        entry: topIdea.entry,
+        target: topIdea.target,
+        stopLoss: topIdea.stopLoss,
+        direction: topIdea.direction,
+        reasoning: topIdea.reasoning
+      });
 
-      await pushNotificationService.sendToAll({
-        title,
-        body,
-        url: '/discover',
-        tag: `trade-idea-${topIdea.id}`,
-        requireInteraction: true,
-        actions: [
-          { action: 'trade', title: '⚡ Trade' },
-          { action: 'view_all', title: '📊 More' }
-        ]
-      }, 'ai_trade_idea');
+      // If entry is more than 5% off live price, block the notification
+      if (!validation.isValid) {
+        console.log(`⚠️ AI Trade Idea blocked: ${validation.errors.join(', ')}`);
+        return;
+      }
+
+      const directionEmoji = topIdea.direction === 'long' ? '🟢' : '🔴';
+      
+      // Include live price comparison
+      const livePriceInfo = validation.livePrice 
+        ? `\n📊 Live: $${validation.livePrice.toLocaleString()} (${validation.priceDeviation! >= 0 ? '+' : ''}${validation.priceDeviation?.toFixed(1)}% from entry)`
+        : '';
+      const title = `💡 AI Trade Idea: ${topIdea.asset} ${topIdea.direction.toUpperCase()}`;
+      const body = `${directionEmoji} Entry: $${topIdea.entry.toLocaleString()}${livePriceInfo}\n🎯 Target: $${topIdea.target.toLocaleString()}\n🛡️ Stop: $${topIdea.stopLoss.toLocaleString()}\n\nR:R ${topIdea.riskReward.toFixed(1)}:1 · Confidence: ${topIdea.confidence}%\n\n${topIdea.reasoning}`;
+
+      await this.sendValidatedNotification(
+        'ai_trade_idea',
+        {
+          title,
+          body,
+          url: '/discover',
+          tag: `trade-idea-${topIdea.id}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'trade', title: '⚡ Trade' },
+            { action: 'view_all', title: '📊 More' }
+          ]
+        },
+        'ai_trade_idea',
+        [topIdea.asset]
+      );
 
       this.lastAITradeIdeas = now;
-      console.log(`💡 AI trade idea pushed: ${topIdea.asset} ${topIdea.direction}`);
+      console.log(`💡 AI trade idea pushed: ${topIdea.asset} ${topIdea.direction} (validated with live price $${validation.livePrice})`);
     } catch (error) {
       console.error('❌ Failed to push AI trade ideas:', error);
     }
@@ -1502,17 +1626,23 @@ class MarketIntelligenceNotifier {
         const title = `${severityEmoji} Market Anomaly: ${anomaly.type}`;
         const body = `Asset: ${anomaly.asset}\n\n${anomaly.description}\n\n💡 ${anomaly.recommendation}`;
 
-        await pushNotificationService.sendToAll({
-          title,
-          body,
-          url: '/discover',
-          tag: `anomaly-${anomaly.id}`,
-          requireInteraction: anomaly.severity === 'critical',
-          actions: [
-            { action: 'view', title: '📊 Analyze' },
-            { action: 'trade', title: '⚡ Act' }
-          ]
-        }, 'anomaly');
+        // Use validated notification for anomalies to include live market context
+        await this.sendValidatedNotification(
+          'market_anomaly',
+          {
+            title,
+            body,
+            url: '/discover',
+            tag: `anomaly-${anomaly.id}`,
+            requireInteraction: anomaly.severity === 'critical',
+            actions: [
+              { action: 'view', title: '📊 Analyze' },
+              { action: 'trade', title: '⚡ Act' }
+            ]
+          },
+          'anomaly',
+          [anomaly.asset]
+        );
 
         this.lastAnomalyAlerts.set(anomaly.id, now);
         console.log(`${severityEmoji} Anomaly alert: ${anomaly.type} on ${anomaly.asset}`);
