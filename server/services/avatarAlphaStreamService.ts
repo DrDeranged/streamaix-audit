@@ -2,6 +2,7 @@ import { db } from '../db';
 import { liveStreams, knowledgeAvatars, streamMessages } from '@shared/schema';
 import { eq, sql, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
+import { notificationDataValidator } from './notificationDataValidator';
 import OpenAI from 'openai';
 
 const openai = new OpenAI();
@@ -45,20 +46,37 @@ const AVATAR_ALPHA_TOPICS: Record<string, string[]> = {
   'justinsuntron': ['TRON ecosystem', 'Stablecoin dominance', 'Asian crypto markets', 'Exchange dynamics', 'High-yield DeFi'],
 };
 
-// Real-time market data simulation (would connect to live APIs)
+// Real-time market data from CoinGecko Pro API via notificationDataValidator
 async function getCurrentMarketContext(): Promise<string> {
-  const now = new Date();
-  const hour = now.getHours();
-  
-  // Market context based on time
-  const marketPhase = hour >= 9 && hour < 16 ? 'US trading hours' : 
-                      hour >= 2 && hour < 9 ? 'Asian session' : 'overnight/European';
-  
-  const btcTrend = Math.random() > 0.5 ? 'bullish momentum' : 'consolidating';
-  const ethTrend = Math.random() > 0.5 ? 'showing strength' : 'following BTC';
-  const defiTvl = Math.random() > 0.5 ? 'increasing' : 'stable';
-  
-  return `Market context: ${marketPhase}. BTC ${btcTrend}. ETH ${ethTrend}. DeFi TVL ${defiTvl}.`;
+  try {
+    const context = await notificationDataValidator.getRealTimeMarketContext();
+    
+    const btcPriceFormatted = context.btcPrice.toLocaleString('en-US', { 
+      style: 'currency', 
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+    const ethPriceFormatted = context.ethPrice.toLocaleString('en-US', { 
+      style: 'currency', 
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+    
+    const btcChangeStr = `${context.btcChange24h >= 0 ? '+' : ''}${context.btcChange24h.toFixed(1)}%`;
+    const ethChangeStr = `${context.ethChange24h >= 0 ? '+' : ''}${context.ethChange24h.toFixed(1)}%`;
+    
+    return `Market context: ${context.marketPhase}. BTC at ${btcPriceFormatted} (${btcChangeStr} 24h) - ${context.btcTrend}. ETH at ${ethPriceFormatted} (${ethChangeStr} 24h) - ${context.ethTrend}. Overall sentiment: ${context.marketSentiment}.`;
+  } catch (error) {
+    console.error('[Avatar Alpha] Failed to get real-time market context:', error);
+    // Fallback to basic context if API fails
+    const now = new Date();
+    const hour = now.getHours();
+    const marketPhase = hour >= 9 && hour < 16 ? 'US trading hours' : 
+                        hour >= 2 && hour < 9 ? 'Asian session' : 'overnight/European';
+    return `Market context: ${marketPhase}. Check live prices for current market conditions.`;
+  }
 }
 
 export class AvatarAlphaStreamService {
