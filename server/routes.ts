@@ -78,7 +78,7 @@ import {
   liveStreams, streamParticipants, streamMessages, streamTips, streamPredictions,
   streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
-  streamChatCommandLogs, streamViewerLeaderboard
+  streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
@@ -12075,7 +12075,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true, streams: enrichedStreams });
     } catch (error: any) {
-      res.json({ success: true, streams: [] });
+      console.error('[Streams/Live] Error fetching live streams:', error);
+      res.json({ success: true, streams: [], error: error.message });
     }
   }));
 
