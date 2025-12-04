@@ -2476,6 +2476,20 @@ export default function Discover() {
             ALPHA INTELLIGENCE HUB - 12 Features
             ===================================================================== */}
         
+        {/* Alpha Intelligence Header with Live Data Indicator */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-violet-400" />
+            <h2 className="text-lg font-bold text-white">Alpha Intelligence Hub</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-gray-400 bg-black/40 px-2 py-1 rounded-full border border-white/10">
+              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+              Live from CoinGecko Pro
+            </span>
+          </div>
+        </div>
+        
         {/* Row 1: Narrative Momentum & CT Alpha Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Narrative Momentum Tracker */}
@@ -2777,9 +2791,17 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <Briefcase className="w-4 h-4 text-amber-400" />
               <h3 className="text-sm font-bold text-white">VC Wallet Tracker</h3>
-              <Badge className="ml-auto bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
-                On-Chain
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {vcWalletsTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(vcWalletsTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
+                  On-Chain
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
               {vcWallets.length === 0 ? (
@@ -2832,9 +2854,17 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <ArrowRightLeft className="w-4 h-4 text-blue-400" />
               <h3 className="text-sm font-bold text-white">Exchange Flows</h3>
-              <Badge className="ml-auto bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
-                24h Net
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {exchangeFlowsTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(exchangeFlowsTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
+                  24h Net
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2">
               {exchangeFlows.length === 0 ? (
@@ -3046,9 +3076,17 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <Shield className="w-4 h-4 text-rose-400" />
               <h3 className="text-sm font-bold text-white">Anomaly Detector</h3>
-              <Badge className="ml-auto bg-rose-500/10 text-rose-400 border-rose-500/30 text-xs">
-                {anomalies.filter((a: any) => a.severity === 'critical').length} Critical
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {anomaliesTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(anomaliesTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-rose-500/10 text-rose-400 border-rose-500/30 text-xs">
+                  {anomalies.filter((a: any) => a.severity === 'critical').length} Critical
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
               {anomalies.length === 0 ? (
