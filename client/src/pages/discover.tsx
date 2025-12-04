@@ -795,18 +795,25 @@ export default function Discover() {
   const stockLosers = (stockMoversData as any)?.losers || [];
   const stockTrending = (stockMoversData as any)?.trending || [];
 
-  // Alpha Intelligence data
+  // Alpha Intelligence data with timestamps for freshness indicators
   const narratives = (narrativesData as any)?.narratives || [];
+  const narrativesTimestamp = (narrativesData as any)?.timestamp;
   const ctAlpha = (ctAlphaData as any)?.signals || [];
+  const ctAlphaTimestamp = (ctAlphaData as any)?.timestamp;
   const tokenUnlocks = (tokenUnlocksData as any)?.unlocks || [];
+  const tokenUnlocksTimestamp = (tokenUnlocksData as any)?.timestamp;
   const airdrops = (airdropsData as any)?.airdrops || [];
   const governance = (governanceData as any)?.proposals || [];
   const vcWallets = (vcWalletsData as any)?.activities || [];
+  const vcWalletsTimestamp = (vcWalletsData as any)?.timestamp;
   const exchangeFlows = (exchangeFlowsData as any)?.flows || [];
+  const exchangeFlowsTimestamp = (exchangeFlowsData as any)?.timestamp;
   const dexCexVolume = (dexCexVolumeData as any)?.volumes || [];
   const aiTradeIdeas = (aiTradeIdeasData as any)?.ideas || [];
+  const aiTradeIdeasTimestamp = (aiTradeIdeasData as any)?.timestamp;
   const eventImpacts = (eventImpactsData as any)?.events || [];
   const anomalies = (anomaliesData as any)?.anomalies || [];
+  const anomaliesTimestamp = (anomaliesData as any)?.timestamp;
   const conferences = (conferencesData as any)?.conferences || [];
 
   // Process markets data
@@ -2476,9 +2483,17 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <Hash className="w-4 h-4 text-purple-400" />
               <h3 className="text-sm font-bold text-white">Narrative Momentum</h3>
-              <Badge className="ml-auto bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs">
-                {narratives.length} Active
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {narrativesTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(narrativesTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs">
+                  {narratives.length} Active
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
               {narratives.length === 0 ? (
@@ -2529,10 +2544,18 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <Twitter className="w-4 h-4 text-cyan-400" />
               <h3 className="text-sm font-bold text-white">CT Alpha Feed</h3>
-              <Badge className="ml-auto bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-xs">
-                <Radio className="w-2 h-2 mr-1 animate-pulse" />
-                Live
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {ctAlphaTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(ctAlphaTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-xs">
+                  <Radio className="w-2 h-2 mr-1 animate-pulse" />
+                  Live
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
               {ctAlpha.length === 0 ? (
@@ -2579,9 +2602,17 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <Unlock className="w-4 h-4 text-red-400" />
               <h3 className="text-sm font-bold text-white">Token Unlocks</h3>
-              <Badge className="ml-auto bg-red-500/10 text-red-400 border-red-500/30 text-xs">
-                Next 30 Days
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {tokenUnlocksTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(tokenUnlocksTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-red-500/10 text-red-400 border-red-500/30 text-xs">
+                  Next 30 Days
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
               {tokenUnlocks.length === 0 ? (
@@ -2891,10 +2922,18 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-3">
               <Lightbulb className="w-4 h-4 text-violet-400" />
               <h3 className="text-sm font-bold text-white">AI Trade Ideas</h3>
-              <Badge className="ml-auto bg-violet-500/10 text-violet-400 border-violet-500/30 text-xs">
-                <Brain className="w-2.5 h-2.5 mr-1" />
-                GPT-4
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                {aiTradeIdeasTimestamp && (
+                  <span className="text-[9px] text-gray-500 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {timeAgo(aiTradeIdeasTimestamp)}
+                  </span>
+                )}
+                <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/30 text-xs">
+                  <Brain className="w-2.5 h-2.5 mr-1" />
+                  GPT-4
+                </Badge>
+              </div>
             </div>
             <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
               {aiTradeIdeas.length === 0 ? (
