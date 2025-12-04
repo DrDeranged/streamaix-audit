@@ -1003,31 +1003,8 @@ export default function Discover() {
           )}
         </div>
 
-        {/* =================================================================== */}
-        {/* COINGECKO PRO MARKET OVERVIEW */}
-        {/* =================================================================== */}
-        
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-emerald-500/30 rounded-lg blur-lg" />
-                <div className="relative p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-cyan-500/30">
-                  <BarChart2 className="w-5 h-5 text-cyan-400" />
-                </div>
-              </div>
-              <div>
-                <h2 className="text-lg font-orbitron font-bold text-white">Global Market Overview</h2>
-                <p className="text-xs text-gray-400">Powered by CoinGecko Pro</p>
-              </div>
-            </div>
-            <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-1 text-xs">
-              <RefreshCw className="w-3 h-3 mr-1 animate-spin" style={{ animationDuration: '3s' }} />
-              Live
-            </Badge>
-          </div>
-
-          {/* Global Stats Cards */}
+        {/* Global Stats Cards */}
+        <section className="space-y-3">
           {cgGlobal && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Total Market Cap */}
@@ -1191,43 +1168,9 @@ export default function Discover() {
           </div>
         </section>
 
-        {/* =================================================================== */}
-        {/* ALPHA DASHBOARD - Derivatives, On-Chain, Volatility */}
-        {/* =================================================================== */}
-        
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/30 to-purple-500/30 rounded-lg blur-lg" />
-                <div className="relative p-2 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/30">
-                  <Cpu className="w-5 h-5 text-violet-400" />
-                </div>
-              </div>
-              <div>
-                <h2 className="text-lg font-orbitron font-bold text-white">Alpha Dashboard</h2>
-                <p className="text-xs text-gray-400">Advanced Market Intelligence</p>
-              </div>
-            </div>
-            {apiUsage && (
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <p className="text-xs text-gray-400">API Budget</p>
-                  <p className="text-sm font-medium text-white">
-                    {((apiUsage.coingecko_pro?.count || 0) / 1000).toFixed(1)}k / 100k
-                  </p>
-                </div>
-                <div className="w-16 h-2 bg-gray-700/50 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
-                    style={{ width: `${Math.min((apiUsage.coingecko_pro?.count || 0) / 1000, 100)}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Alpha Features Grid */}
+        <section className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {/* Derivatives Deep Dive */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 to-blue-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1498,21 +1441,8 @@ export default function Discover() {
           )}
         </section>
 
-        {/* =================================================================== */}
-        {/* CRYPTO INTELLIGENCE DASHBOARD */}
-        {/* =================================================================== */}
-        
-        <section className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/20">
-              <Flame className="w-5 h-5 text-orange-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-orbitron font-bold text-white">Crypto Intelligence</h2>
-            </div>
-          </div>
-
-          {/* Row 1: Fear & Greed, Market Dominance, Gas Tracker, Funding Rates - Compact */}
+        {/* Crypto Indicators Grid */}
+        <section className="space-y-3">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             
             {/* Fear & Greed Index */}
@@ -1847,26 +1777,19 @@ export default function Discover() {
           </div>
         </section>
 
-        {/* =================================================================== */}
-        {/* MACRO INTELLIGENCE DASHBOARD - Moved higher for better visibility */}
-        {/* =================================================================== */}
-        
+        {/* Macro Data Section */}
         <section>
           <div
             onClick={() => toggleSection('macro')}
-            className="flex items-center gap-2 mb-3 cursor-pointer group p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all backdrop-blur-sm"
+            className="flex items-center gap-2 mb-2 cursor-pointer group py-2 px-3 rounded-lg bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all"
             data-testid="toggle-macro-dashboard"
           >
-            <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/30">
-              <Globe className="w-5 h-5 text-blue-400" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-orbitron font-bold text-white">Macro Intelligence</h2>
-            </div>
+            <Globe className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium text-white flex-1">Macro Data</span>
             {macroExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+              <ChevronDown className="w-4 h-4 text-gray-400" />
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+              <ChevronUp className="w-4 h-4 text-gray-400" />
             )}
           </div>
 
@@ -2044,21 +1967,9 @@ export default function Discover() {
           )}
         </section>
 
-        {/* =================================================================== */}
-        {/* ADVANCED MARKET INTELLIGENCE */}
-        {/* =================================================================== */}
-        
-        <section className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/20">
-              <Cpu className="w-5 h-5 text-purple-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-orbitron font-bold text-white">Advanced Intelligence</h2>
-            </div>
-          </div>
-
-          {/* Row 1: ETF Dashboard */}
+        {/* ETF & Advanced Data */}
+        <section className="space-y-3">
+          {/* ETF Dashboard */}
           <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
             <div className="flex items-center gap-2 mb-4">
               <Building className="w-5 h-5 text-blue-400" />
