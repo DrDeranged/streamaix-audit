@@ -1,5 +1,4 @@
 import { Navigation } from "@/components/landing/navigation";
-import { AICapabilitiesBanner } from "@/components/landing/ai-capabilities-banner";
 import { HeroSection } from "@/components/landing/hero-section";
 import { LiveStreamingTerminal } from "@/components/landing/live-streaming-terminal";
 import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
@@ -19,7 +18,6 @@ export default function Landing() {
       <NeuralNetworkBackground />
       <div className="relative z-10">
         <Navigation />
-        <AICapabilitiesBanner />
         <HeroSection />
         <LiveStreamingTerminal />
         <AIProcessor />
