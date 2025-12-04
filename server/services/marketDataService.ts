@@ -72,11 +72,13 @@ export class MarketDataService {
   private static instance: MarketDataService;
   private cmcApiKey: string;
   private coingeckoApiKey: string;
+  private coingeckoProApiKey: string;
   private alphaVantageApiKey: string;
   private finnhubApiKey: string;
   private fredApiKey: string;
   private cmcBaseUrl = 'https://pro-api.coinmarketcap.com/v1';
   private coingeckoBaseUrl = 'https://api.coingecko.com/api/v3';
+  private coingeckoProBaseUrl = 'https://pro-api.coingecko.com/api/v3';
   private alphaVantageBaseUrl = 'https://www.alphavantage.co/query';
   private finnhubBaseUrl = 'https://finnhub.io/api/v1';
   private fredBaseUrl = 'https://api.stlouisfed.org/fred';
@@ -84,6 +86,9 @@ export class MarketDataService {
   private cache = new Map<string, { data: any; timestamp: number; customTimeout?: number }>();
   private cacheTimeout = 30000; // 30 second cache for real-time data
   private economicCacheTimeout = 300000; // 5 minute cache for economic data
+  
+  // API usage tracking for CoinGecko Pro (100k calls/month limit)
+  private apiCallCounts = new Map<string, { count: number; resetDate: Date }>();
   
   // Error suppression to prevent rate limit spam
   private errorLog = new Map<string, number>(); // Track last error log time
@@ -106,21 +111,96 @@ export class MarketDataService {
   constructor() {
     this.cmcApiKey = process.env.COINMARKETCAP_API_KEY || '';
     this.coingeckoApiKey = process.env.COINGECKO_API_KEY || '';
+    this.coingeckoProApiKey = process.env.COINGECKO_PRO_API_KEY || '';
     this.alphaVantageApiKey = process.env.ALPHA_VANTAGE_API_KEY || '';
     this.finnhubApiKey = process.env.FINNHUB_API_KEY || '';
     this.fredApiKey = process.env.FRED_API_KEY || '';
     
     console.log('🔑 Market Data Service initialized:');
+    console.log(`  - CoinGecko Pro: ${this.coingeckoProApiKey ? '✅ Available (100k calls/mo)' : '❌ Missing'}`);
+    console.log(`  - CoinGecko Demo: ${this.coingeckoApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - CoinMarketCap: ${this.cmcApiKey ? '✅ Available' : '❌ Missing'}`);
-    console.log(`  - CoinGecko: ${this.coingeckoApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Alpha Vantage: ${this.alphaVantageApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Finnhub: ${this.finnhubApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - FRED (Economic Data): ${this.fredApiKey ? '✅ Available' : '❌ Missing'}`);
     console.log(`  - Dune Analytics: ${duneService.isAvailable() ? '✅ Available' : '❌ Missing'}`);
     
-    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.alphaVantageApiKey && !this.finnhubApiKey && !duneService.isAvailable()) {
+    // Initialize API call counter for current month
+    this.initApiCallCounter();
+    
+    if (!this.cmcApiKey && !this.coingeckoApiKey && !this.coingeckoProApiKey && !this.alphaVantageApiKey && !this.finnhubApiKey && !duneService.isAvailable()) {
       console.warn('⚠️ No market data API keys found - using fallback data');
     }
+  }
+  
+  /**
+   * Initialize or reset the API call counter for the current month
+   */
+  private initApiCallCounter(): void {
+    const now = new Date();
+    const resetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1); // First of next month
+    
+    const existing = this.apiCallCounts.get('coingecko_pro');
+    if (!existing || existing.resetDate < now) {
+      this.apiCallCounts.set('coingecko_pro', { count: 0, resetDate });
+      console.log(`📊 CoinGecko Pro API counter initialized - resets on ${resetDate.toDateString()}`);
+    }
+  }
+  
+  /**
+   * Track an API call and return current usage stats
+   */
+  trackApiCall(provider: string = 'coingecko_pro'): { count: number; limit: number; remaining: number } {
+    const stats = this.apiCallCounts.get(provider);
+    const limit = 100000; // 100k calls/month for CoinGecko Pro Basic
+    
+    if (stats) {
+      const now = new Date();
+      if (stats.resetDate < now) {
+        // Reset for new month
+        const resetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        this.apiCallCounts.set(provider, { count: 1, resetDate });
+        return { count: 1, limit, remaining: limit - 1 };
+      }
+      stats.count++;
+      return { count: stats.count, limit, remaining: limit - stats.count };
+    }
+    
+    return { count: 0, limit, remaining: limit };
+  }
+  
+  /**
+   * Get current API usage statistics
+   */
+  getApiUsageStats(): { provider: string; count: number; limit: number; remaining: number; percentUsed: number; resetDate: Date }[] {
+    const stats: any[] = [];
+    
+    this.apiCallCounts.forEach((value, provider) => {
+      const limit = provider === 'coingecko_pro' ? 100000 : 10000;
+      stats.push({
+        provider,
+        count: value.count,
+        limit,
+        remaining: limit - value.count,
+        percentUsed: (value.count / limit) * 100,
+        resetDate: value.resetDate
+      });
+    });
+    
+    return stats;
+  }
+  
+  /**
+   * Check if CoinGecko Pro API is available and under limit
+   */
+  isCoingeckoProAvailable(): boolean {
+    if (!this.coingeckoProApiKey) return false;
+    
+    const stats = this.apiCallCounts.get('coingecko_pro');
+    if (!stats) return true;
+    
+    // Leave 5% buffer (5000 calls) for safety
+    return stats.count < 95000;
   }
 
   static getInstance(): MarketDataService {
@@ -183,15 +263,14 @@ export class MarketDataService {
   }
 
   /**
-   * Get live cryptocurrency data by symbols using 6-tier fallback chain:
-   * 1. CoinGecko (API key)
-   * 2. CoinMarketCap (API key)  
-   * 3. CryptoCompare Public API (FREE, generous limits - PRIORITY for reliability)
-   * 4. Kraken Public API (FREE, no API key required)
-   * 5. Dune Analytics (API key)
-   * 6. Stale Cache (last known good data, up to 1hr old)
-   * 
-   * Note: Binance is geo-blocked in many regions (HTTP 451), so CryptoCompare is preferred
+   * Get live cryptocurrency data by symbols using 7-tier fallback chain:
+   * 1. CoinGecko Pro (100k calls/mo, 250/min rate limit) - PRIMARY
+   * 2. CoinGecko Demo (API key)
+   * 3. CoinMarketCap (API key)  
+   * 4. CryptoCompare Public API (FREE, generous limits)
+   * 5. Kraken Public API (FREE, no API key required)
+   * 6. Dune Analytics (API key)
+   * 7. Stale Cache (last known good data, up to 1hr old)
    */
   async getCryptoQuotes(symbols: string[]): Promise<CryptoQuote[]> {
     const cacheKey = `crypto_${symbols.join(',').toUpperCase()}`;
@@ -201,47 +280,57 @@ export class MarketDataService {
     let quotes: CryptoQuote[] = [];
     let dataSource = '';
 
-    // Tier 1: Try CoinGecko first (better free tier)
-    if (this.coingeckoApiKey && quotes.length === 0) {
+    // Tier 1: CoinGecko Pro (PRIMARY - 100k calls/mo, 250/min rate limit)
+    if (this.isCoingeckoProAvailable() && quotes.length === 0) {
       try {
-        quotes = await this.getCryptoQuotesFromCoinGecko(symbols);
-        dataSource = 'CoinGecko';
-      } catch (error) {
-        console.warn('⚠️ [Tier 1] CoinGecko failed, trying next fallback');
+        quotes = await this.getCryptoQuotesFromCoinGeckoPro(symbols);
+        dataSource = 'CoinGecko Pro';
+      } catch (error: any) {
+        console.warn('⚠️ [Tier 1] CoinGecko Pro failed:', error.message);
       }
     }
 
-    // Tier 2: Fallback to CoinMarketCap
+    // Tier 2: CoinGecko Demo (fallback)
+    if (this.coingeckoApiKey && quotes.length === 0) {
+      try {
+        quotes = await this.getCryptoQuotesFromCoinGecko(symbols);
+        dataSource = 'CoinGecko Demo';
+      } catch (error) {
+        console.warn('⚠️ [Tier 2] CoinGecko Demo failed, trying next fallback');
+      }
+    }
+
+    // Tier 3: Fallback to CoinMarketCap
     if (this.cmcApiKey && quotes.length === 0) {
       try {
         quotes = await this.getCryptoQuotesFromCMC(symbols);
         dataSource = 'CoinMarketCap';
       } catch (error) {
-        console.warn('⚠️ [Tier 2] CoinMarketCap failed, trying CryptoCompare fallback');
+        console.warn('⚠️ [Tier 3] CoinMarketCap failed, trying CryptoCompare fallback');
       }
     }
 
-    // Tier 3: CryptoCompare Public API (FREE, generous limits - PRIORITY)
+    // Tier 4: CryptoCompare Public API (FREE, generous limits)
     if (quotes.length === 0) {
       try {
         quotes = await this.getCryptoQuotesFromCryptoCompare(symbols);
         dataSource = 'CryptoCompare';
       } catch (error) {
-        console.warn('⚠️ [Tier 3] CryptoCompare failed, trying Kraken fallback');
+        console.warn('⚠️ [Tier 4] CryptoCompare failed, trying Kraken fallback');
       }
     }
 
-    // Tier 4: Kraken Public API (FREE, no API key required)
+    // Tier 5: Kraken Public API (FREE, no API key required)
     if (quotes.length === 0) {
       try {
         quotes = await this.getCryptoQuotesFromKraken(symbols);
         dataSource = 'Kraken';
       } catch (error) {
-        console.warn('⚠️ [Tier 4] Kraken failed, trying Dune Analytics fallback');
+        console.warn('⚠️ [Tier 5] Kraken failed, trying Dune Analytics fallback');
       }
     }
 
-    // Tier 5: Dune Analytics
+    // Tier 6: Dune Analytics
     if (duneService.isAvailable() && quotes.length === 0) {
       try {
         const duneQuotes: CryptoQuote[] = [];
@@ -269,15 +358,15 @@ export class MarketDataService {
           dataSource = 'Dune Analytics';
         }
       } catch (error) {
-        console.warn('⚠️ [Tier 5] Dune Analytics failed, checking stale cache');
+        console.warn('⚠️ [Tier 6] Dune Analytics failed, checking stale cache');
       }
     }
 
-    // Tier 6: Stale Cache Fallback (last known good data)
+    // Tier 7: Stale Cache Fallback (last known good data)
     if (quotes.length === 0) {
       const staleData = this.getFromStaleCache(cacheKey);
       if (staleData) {
-        console.log('📦 [Tier 6] Using stale cache data (all APIs failed)');
+        console.log('📦 [Tier 7] Using stale cache data (all APIs failed)');
         return staleData;
       }
     }
@@ -291,8 +380,82 @@ export class MarketDataService {
     }
 
     // Complete failure
-    console.error('❌ All 6 crypto data sources failed (CoinGecko, CoinMarketCap, CryptoCompare, Kraken, Dune, StaleCache)');
+    console.error('❌ All 7 crypto data sources failed');
     return [];
+  }
+  
+  /**
+   * Get cryptocurrency data from CoinGecko Pro API (100k calls/mo, 250/min rate limit)
+   * This is the PRIMARY data source with best data quality and rate limits
+   */
+  private async getCryptoQuotesFromCoinGeckoPro(symbols: string[]): Promise<CryptoQuote[]> {
+    // Convert symbols to CoinGecko IDs (complete mapping for top cryptos)
+    const coinIds = symbols.map(symbol => {
+      const mapping: { [key: string]: string } = {
+        'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin', 'XRP': 'ripple',
+        'SOL': 'solana', 'ADA': 'cardano', 'AVAX': 'avalanche-2', 'DOT': 'polkadot',
+        'MATIC': 'matic-network', 'LINK': 'chainlink', 'LTC': 'litecoin', 'BCH': 'bitcoin-cash',
+        'UNI': 'uniswap', 'ATOM': 'cosmos', 'ALGO': 'algorand', 'XLM': 'stellar',
+        'VET': 'vechain', 'ICP': 'internet-computer', 'FIL': 'filecoin', 'HBAR': 'hedera-hashgraph',
+        'ETC': 'ethereum-classic', 'XMR': 'monero', 'EOS': 'eos', 'DOGE': 'dogecoin',
+        'SHIB': 'shiba-inu', 'TRX': 'tron', 'NEAR': 'near', 'APT': 'aptos',
+        'ARB': 'arbitrum', 'OP': 'optimism', 'SUI': 'sui', 'TON': 'the-open-network',
+        'PEPE': 'pepe', 'AAVE': 'aave', 'MKR': 'maker', 'CRV': 'curve-dao-token',
+        'LDO': 'lido-dao', 'RNDR': 'render-token', 'INJ': 'injective-protocol'
+      };
+      return mapping[symbol.toUpperCase()] || symbol.toLowerCase();
+    });
+
+    try {
+      // Track this API call
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/simple/price`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: {
+          ids: coinIds.join(','),
+          vs_currencies: 'usd',
+          include_market_cap: true,
+          include_24hr_vol: true,
+          include_24hr_change: true,
+          include_7d_change: true,
+          include_30d_change: true,
+          precision: 8
+        },
+        timeout: 10000
+      });
+
+      const quotes: CryptoQuote[] = [];
+      
+      symbols.forEach((symbol, index) => {
+        const coinId = coinIds[index];
+        const data = response.data[coinId];
+        
+        if (data) {
+          quotes.push({
+            symbol: symbol.toUpperCase(),
+            name: symbol,
+            price: data.usd || 0,
+            percentChange24h: data.usd_24h_change || 0,
+            percentChange7d: data.usd_7d_change || 0,
+            percentChange30d: data.usd_30d_change || 0,
+            marketCap: data.usd_market_cap || 0,
+            volume24h: data.usd_24h_vol || 0,
+            rank: 0, // Will be filled by separate call if needed
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      });
+
+      if (quotes.length > 0) {
+        console.log(`📊 [CoinGecko Pro] Fetched ${quotes.length} prices (100k calls/mo)`);
+      }
+      
+      return quotes;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_error', '❌ [CoinGecko Pro] API error:', error.message);
+      throw error;
+    }
   }
 
   /**
@@ -1605,6 +1768,505 @@ export class MarketDataService {
     }
 
     return { overall, confidence };
+  }
+
+  // =============================================================================
+  // COINGECKO PRO EXCLUSIVE ENDPOINTS (100k calls/mo, 250/min rate limit)
+  // =============================================================================
+
+  /**
+   * Get trending coins from CoinGecko Pro (search trending + most visited)
+   */
+  async getTrendingCoins(): Promise<{
+    trending: Array<{ id: string; name: string; symbol: string; marketCapRank: number; thumb: string; score: number }>;
+    mostVisited: Array<{ id: string; name: string; symbol: string; price: number; change24h: number }>;
+  }> {
+    const cacheKey = 'coingecko_pro_trending';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return { trending: [], mostVisited: [] };
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/search/trending`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        timeout: 10000
+      });
+
+      const trending = (response.data.coins || []).map((item: any) => ({
+        id: item.item.id,
+        name: item.item.name,
+        symbol: item.item.symbol.toUpperCase(),
+        marketCapRank: item.item.market_cap_rank || 0,
+        thumb: item.item.thumb || '',
+        score: item.item.score || 0
+      }));
+
+      const result = { trending, mostVisited: [] };
+      this.setCacheWithTimeout(cacheKey, result, 300000); // 5 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched ${trending.length} trending coins`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_trending', '❌ [CoinGecko Pro] Trending error:', error.message);
+      return { trending: [], mostVisited: [] };
+    }
+  }
+
+  /**
+   * Get global market statistics from CoinGecko Pro
+   */
+  async getGlobalMarketData(): Promise<{
+    totalMarketCap: number;
+    totalVolume24h: number;
+    btcDominance: number;
+    ethDominance: number;
+    marketCapChange24h: number;
+    activeCryptocurrencies: number;
+    upcomingIcos: number;
+    endedIcos: number;
+  } | null> {
+    const cacheKey = 'coingecko_pro_global';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return null;
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/global`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        timeout: 10000
+      });
+
+      const data = response.data.data;
+      const result = {
+        totalMarketCap: data.total_market_cap?.usd || 0,
+        totalVolume24h: data.total_volume?.usd || 0,
+        btcDominance: data.market_cap_percentage?.btc || 0,
+        ethDominance: data.market_cap_percentage?.eth || 0,
+        marketCapChange24h: data.market_cap_change_percentage_24h_usd || 0,
+        activeCryptocurrencies: data.active_cryptocurrencies || 0,
+        upcomingIcos: data.upcoming_icos || 0,
+        endedIcos: data.ended_icos || 0
+      };
+
+      this.setCacheWithTimeout(cacheKey, result, 60000); // 1 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched global market data`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_global', '❌ [CoinGecko Pro] Global data error:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Get top gainers and losers from CoinGecko Pro
+   */
+  async getTopMovers(limit: number = 10): Promise<{
+    gainers: Array<{ id: string; name: string; symbol: string; price: number; change24h: number; volume24h: number; marketCap: number }>;
+    losers: Array<{ id: string; name: string; symbol: string; price: number; change24h: number; volume24h: number; marketCap: number }>;
+  }> {
+    const cacheKey = `coingecko_pro_movers_${limit}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return { gainers: [], losers: [] };
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      // Get top 250 coins by market cap to find gainers/losers
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/coins/markets`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: {
+          vs_currency: 'usd',
+          order: 'market_cap_desc',
+          per_page: 250,
+          page: 1,
+          sparkline: false,
+          price_change_percentage: '24h'
+        },
+        timeout: 15000
+      });
+
+      const coins = response.data.map((coin: any) => ({
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol.toUpperCase(),
+        price: coin.current_price || 0,
+        change24h: coin.price_change_percentage_24h || 0,
+        volume24h: coin.total_volume || 0,
+        marketCap: coin.market_cap || 0
+      }));
+
+      // Sort to get gainers (highest positive change) and losers (most negative change)
+      const sortedByChange = [...coins].sort((a, b) => b.change24h - a.change24h);
+      const gainers = sortedByChange.slice(0, limit);
+      const losers = sortedByChange.slice(-limit).reverse();
+
+      const result = { gainers, losers };
+      this.setCacheWithTimeout(cacheKey, result, 120000); // 2 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched top ${limit} gainers and losers`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_movers', '❌ [CoinGecko Pro] Top movers error:', error.message);
+      return { gainers: [], losers: [] };
+    }
+  }
+
+  /**
+   * Get detailed coin data with historical chart from CoinGecko Pro
+   */
+  async getCoinDetails(coinId: string): Promise<{
+    id: string;
+    name: string;
+    symbol: string;
+    description: string;
+    image: string;
+    currentPrice: number;
+    marketCap: number;
+    marketCapRank: number;
+    fullyDilutedValuation: number;
+    totalVolume: number;
+    high24h: number;
+    low24h: number;
+    priceChange24h: number;
+    priceChangePercentage24h: number;
+    priceChangePercentage7d: number;
+    priceChangePercentage30d: number;
+    circulatingSupply: number;
+    totalSupply: number;
+    maxSupply: number | null;
+    ath: number;
+    athChangePercentage: number;
+    athDate: string;
+    atl: number;
+    atlChangePercentage: number;
+    atlDate: string;
+    sparkline7d: number[];
+    categories: string[];
+  } | null> {
+    const cacheKey = `coingecko_pro_coin_${coinId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return null;
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/coins/${coinId}`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: {
+          localization: false,
+          tickers: false,
+          market_data: true,
+          community_data: false,
+          developer_data: false,
+          sparkline: true
+        },
+        timeout: 15000
+      });
+
+      const coin = response.data;
+      const marketData = coin.market_data;
+
+      const result = {
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol.toUpperCase(),
+        description: coin.description?.en?.substring(0, 500) || '',
+        image: coin.image?.large || '',
+        currentPrice: marketData?.current_price?.usd || 0,
+        marketCap: marketData?.market_cap?.usd || 0,
+        marketCapRank: coin.market_cap_rank || 0,
+        fullyDilutedValuation: marketData?.fully_diluted_valuation?.usd || 0,
+        totalVolume: marketData?.total_volume?.usd || 0,
+        high24h: marketData?.high_24h?.usd || 0,
+        low24h: marketData?.low_24h?.usd || 0,
+        priceChange24h: marketData?.price_change_24h || 0,
+        priceChangePercentage24h: marketData?.price_change_percentage_24h || 0,
+        priceChangePercentage7d: marketData?.price_change_percentage_7d || 0,
+        priceChangePercentage30d: marketData?.price_change_percentage_30d || 0,
+        circulatingSupply: marketData?.circulating_supply || 0,
+        totalSupply: marketData?.total_supply || 0,
+        maxSupply: marketData?.max_supply || null,
+        ath: marketData?.ath?.usd || 0,
+        athChangePercentage: marketData?.ath_change_percentage?.usd || 0,
+        athDate: marketData?.ath_date?.usd || '',
+        atl: marketData?.atl?.usd || 0,
+        atlChangePercentage: marketData?.atl_change_percentage?.usd || 0,
+        atlDate: marketData?.atl_date?.usd || '',
+        sparkline7d: marketData?.sparkline_7d?.price || [],
+        categories: coin.categories || []
+      };
+
+      this.setCacheWithTimeout(cacheKey, result, 60000); // 1 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched details for ${coinId}`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce(`coingecko_pro_coin_${coinId}`, `❌ [CoinGecko Pro] Coin details error:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Get OHLC candlestick data for charting from CoinGecko Pro
+   */
+  async getOHLCData(coinId: string, days: number = 7): Promise<Array<{
+    timestamp: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+  }>> {
+    const cacheKey = `coingecko_pro_ohlc_${coinId}_${days}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return [];
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/coins/${coinId}/ohlc`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: {
+          vs_currency: 'usd',
+          days: days
+        },
+        timeout: 15000
+      });
+
+      const result = (response.data || []).map((candle: number[]) => ({
+        timestamp: candle[0],
+        open: candle[1],
+        high: candle[2],
+        low: candle[3],
+        close: candle[4]
+      }));
+
+      this.setCacheWithTimeout(cacheKey, result, 300000); // 5 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched ${result.length} OHLC candles for ${coinId}`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce(`coingecko_pro_ohlc_${coinId}`, `❌ [CoinGecko Pro] OHLC error:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Search for coins, exchanges, categories, and NFTs on CoinGecko Pro
+   */
+  async searchCoins(query: string): Promise<{
+    coins: Array<{ id: string; name: string; symbol: string; marketCapRank: number; thumb: string }>;
+    exchanges: Array<{ id: string; name: string; marketType: string; thumb: string }>;
+    categories: Array<{ id: number; name: string }>;
+  }> {
+    const cacheKey = `coingecko_pro_search_${query.toLowerCase()}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return { coins: [], exchanges: [], categories: [] };
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/search`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: { query },
+        timeout: 10000
+      });
+
+      const result = {
+        coins: (response.data.coins || []).slice(0, 20).map((coin: any) => ({
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol.toUpperCase(),
+          marketCapRank: coin.market_cap_rank || 0,
+          thumb: coin.thumb || ''
+        })),
+        exchanges: (response.data.exchanges || []).slice(0, 10).map((ex: any) => ({
+          id: ex.id,
+          name: ex.name,
+          marketType: ex.market_type || '',
+          thumb: ex.thumb || ''
+        })),
+        categories: (response.data.categories || []).slice(0, 10).map((cat: any) => ({
+          id: cat.id,
+          name: cat.name
+        }))
+      };
+
+      this.setCacheWithTimeout(cacheKey, result, 600000); // 10 minute cache
+      console.log(`📊 [CoinGecko Pro] Search found ${result.coins.length} coins for "${query}"`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_search', '❌ [CoinGecko Pro] Search error:', error.message);
+      return { coins: [], exchanges: [], categories: [] };
+    }
+  }
+
+  /**
+   * Get DeFi market overview from CoinGecko Pro
+   */
+  async getDefiMarketData(): Promise<{
+    defiMarketCap: number;
+    ethMarketCap: number;
+    defiToEthRatio: number;
+    tradingVolume24h: number;
+    defiDominance: number;
+    topDefiCoins: Array<{ id: string; name: string; symbol: string; price: number; change24h: number; tvl: number }>;
+  } | null> {
+    const cacheKey = 'coingecko_pro_defi';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return null;
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/global/decentralized_finance_defi`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        timeout: 10000
+      });
+
+      const data = response.data.data;
+      
+      const result = {
+        defiMarketCap: parseFloat(data.defi_market_cap) || 0,
+        ethMarketCap: parseFloat(data.eth_market_cap) || 0,
+        defiToEthRatio: parseFloat(data.defi_to_eth_ratio) || 0,
+        tradingVolume24h: parseFloat(data.trading_volume_24h) || 0,
+        defiDominance: parseFloat(data.defi_dominance) || 0,
+        topDefiCoins: []
+      };
+
+      this.setCacheWithTimeout(cacheKey, result, 300000); // 5 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched DeFi market data`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_defi', '❌ [CoinGecko Pro] DeFi data error:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Get NFT market data from CoinGecko Pro
+   */
+  async getNftMarketData(): Promise<{
+    nfts: Array<{ id: string; name: string; symbol: string; thumb: string; floorPriceInNativeCurrency: number; floorPrice24hChange: number; marketCap: number; volume24h: number }>;
+  }> {
+    const cacheKey = 'coingecko_pro_nft';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return { nfts: [] };
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/nfts/list`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: {
+          order: 'market_cap_usd_desc',
+          per_page: 20
+        },
+        timeout: 10000
+      });
+
+      const result = {
+        nfts: (response.data || []).map((nft: any) => ({
+          id: nft.id,
+          name: nft.name,
+          symbol: nft.symbol || '',
+          thumb: nft.thumb || '',
+          floorPriceInNativeCurrency: nft.floor_price_in_native_currency || 0,
+          floorPrice24hChange: nft.floor_price_24h_percentage_change || 0,
+          marketCap: nft.market_cap?.usd || 0,
+          volume24h: nft.volume_24h?.usd || 0
+        }))
+      };
+
+      this.setCacheWithTimeout(cacheKey, result, 300000); // 5 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched ${result.nfts.length} NFT collections`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_nft', '❌ [CoinGecko Pro] NFT data error:', error.message);
+      return { nfts: [] };
+    }
+  }
+
+  /**
+   * Get exchange data from CoinGecko Pro
+   */
+  async getExchangeData(limit: number = 20): Promise<Array<{
+    id: string;
+    name: string;
+    yearEstablished: number | null;
+    country: string;
+    trustScore: number;
+    trustScoreRank: number;
+    tradeVolume24hBtc: number;
+    tradeVolume24hBtcNormalized: number;
+    image: string;
+  }>> {
+    const cacheKey = `coingecko_pro_exchanges_${limit}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    if (!this.isCoingeckoProAvailable()) {
+      return [];
+    }
+
+    try {
+      this.trackApiCall('coingecko_pro');
+      
+      const response = await axios.get(`${this.coingeckoProBaseUrl}/exchanges`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProApiKey },
+        params: { per_page: limit },
+        timeout: 10000
+      });
+
+      const result = (response.data || []).map((ex: any) => ({
+        id: ex.id,
+        name: ex.name,
+        yearEstablished: ex.year_established,
+        country: ex.country || '',
+        trustScore: ex.trust_score || 0,
+        trustScoreRank: ex.trust_score_rank || 0,
+        tradeVolume24hBtc: ex.trade_volume_24h_btc || 0,
+        tradeVolume24hBtcNormalized: ex.trade_volume_24h_btc_normalized || 0,
+        image: ex.image || ''
+      }));
+
+      this.setCacheWithTimeout(cacheKey, result, 300000); // 5 minute cache
+      console.log(`📊 [CoinGecko Pro] Fetched ${result.length} exchanges`);
+      return result;
+    } catch (error: any) {
+      this.logErrorOnce('coingecko_pro_exchanges', '❌ [CoinGecko Pro] Exchanges error:', error.message);
+      return [];
+    }
   }
 
 }
