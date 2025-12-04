@@ -7090,6 +7090,189 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // =============================================================================
+  // COINGECKO PRO API ENDPOINTS (Premium market data)
+  // =============================================================================
+
+  // Get trending coins from CoinGecko Pro
+  app.get('/api/market/coingecko/trending', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const trending = await marketData.getTrendingCoins();
+      res.json({
+        ...trending,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch trending coins:', error);
+      res.status(500).json({ error: 'Failed to fetch trending coins' });
+    }
+  }));
+
+  // Get global market statistics from CoinGecko Pro
+  app.get('/api/market/coingecko/global', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const globalData = await marketData.getGlobalMarketData();
+      res.json({
+        data: globalData,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch global market data:', error);
+      res.status(500).json({ error: 'Failed to fetch global market data' });
+    }
+  }));
+
+  // Get top gainers and losers from CoinGecko Pro
+  app.get('/api/market/coingecko/movers', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const movers = await marketData.getTopMovers(limit);
+      res.json({
+        ...movers,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch top movers:', error);
+      res.status(500).json({ error: 'Failed to fetch top movers' });
+    }
+  }));
+
+  // Get detailed coin data from CoinGecko Pro
+  app.get('/api/market/coingecko/coin/:coinId', asyncHandler(async (req: Request, res: Response) => {
+    const { coinId } = req.params;
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const coinDetails = await marketData.getCoinDetails(coinId);
+      if (!coinDetails) {
+        return res.status(404).json({ error: 'Coin not found' });
+      }
+      res.json({
+        data: coinDetails,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch coin details:', error);
+      res.status(500).json({ error: 'Failed to fetch coin details' });
+    }
+  }));
+
+  // Get OHLC candlestick data for charting
+  app.get('/api/market/coingecko/ohlc/:coinId', asyncHandler(async (req: Request, res: Response) => {
+    const { coinId } = req.params;
+    const days = parseInt(req.query.days as string) || 7;
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const ohlcData = await marketData.getOHLCData(coinId, days);
+      res.json({
+        data: ohlcData,
+        coinId,
+        days,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch OHLC data:', error);
+      res.status(500).json({ error: 'Failed to fetch OHLC data' });
+    }
+  }));
+
+  // Search coins on CoinGecko Pro
+  app.get('/api/market/coingecko/search', asyncHandler(async (req: Request, res: Response) => {
+    const query = req.query.q as string;
+    if (!query) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const results = await marketData.searchCoins(query);
+      res.json({
+        ...results,
+        query,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to search coins:', error);
+      res.status(500).json({ error: 'Failed to search coins' });
+    }
+  }));
+
+  // Get DeFi market data from CoinGecko Pro
+  app.get('/api/market/coingecko/defi', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const defiData = await marketData.getDefiMarketData();
+      res.json({
+        data: defiData,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch DeFi data:', error);
+      res.status(500).json({ error: 'Failed to fetch DeFi data' });
+    }
+  }));
+
+  // Get NFT market data from CoinGecko Pro
+  app.get('/api/market/coingecko/nft', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const nftData = await marketData.getNftMarketData();
+      res.json({
+        ...nftData,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch NFT data:', error);
+      res.status(500).json({ error: 'Failed to fetch NFT data' });
+    }
+  }));
+
+  // Get exchange data from CoinGecko Pro
+  app.get('/api/market/coingecko/exchanges', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const exchanges = await marketData.getExchangeData(limit);
+      res.json({
+        data: exchanges,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch exchanges:', error);
+      res.status(500).json({ error: 'Failed to fetch exchanges' });
+    }
+  }));
+
+  // Get API usage statistics
+  app.get('/api/market/coingecko/usage', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    const stats = marketData.getApiUsageStats();
+    res.json({
+      stats,
+      timestamp: new Date().toISOString()
+    });
+  }));
+
   // Get trending stories for discover page - now using real crypto content
   app.get('/api/discover/trending', asyncHandler(async (req: Request, res: Response) => {
     const timeFilter = req.query.timeFilter as string || '24h';

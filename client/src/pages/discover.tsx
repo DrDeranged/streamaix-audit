@@ -599,6 +599,22 @@ export default function Discover() {
     refetchInterval: 60000,
   });
 
+  // CoinGecko Pro Data (Premium market data)
+  const { data: cgTrendingData } = useQuery({
+    queryKey: ['/api/market/coingecko/trending'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const { data: cgGlobalData } = useQuery({
+    queryKey: ['/api/market/coingecko/global'],
+    refetchInterval: 60000, // 1 minute
+  });
+
+  const { data: cgMoversData } = useQuery({
+    queryKey: ['/api/market/coingecko/movers'],
+    refetchInterval: 120000, // 2 minutes
+  });
+
   // Extract data
   const markets = (marketsData as any)?.markets || [];
   const leaderboard = (leaderboardData as any)?.leaderboard || [];
@@ -649,6 +665,12 @@ export default function Discover() {
   const marketSignals: MarketSignal[] = marketSignalsData?.signals || [];
   const whaleMovements: WhaleMovement[] = whaleMovementsData?.movements || [];
   const marketSentiments: SentimentData[] = marketSentimentData?.sentiments || [];
+
+  // CoinGecko Pro data
+  const cgTrending = (cgTrendingData as any)?.trending || [];
+  const cgGlobal = (cgGlobalData as any)?.data || null;
+  const cgGainers = (cgMoversData as any)?.gainers || [];
+  const cgLosers = (cgMoversData as any)?.losers || [];
 
   // Process markets data
   const activeMarkets = markets.filter((m: PredictionMarket) => m.status === 'active');
@@ -941,6 +963,194 @@ export default function Discover() {
             ))
           )}
         </div>
+
+        {/* =================================================================== */}
+        {/* COINGECKO PRO MARKET OVERVIEW */}
+        {/* =================================================================== */}
+        
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-emerald-500/30 rounded-lg blur-lg" />
+                <div className="relative p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-cyan-500/30">
+                  <BarChart2 className="w-5 h-5 text-cyan-400" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-lg font-orbitron font-bold text-white">Global Market Overview</h2>
+                <p className="text-xs text-gray-400">Powered by CoinGecko Pro</p>
+              </div>
+            </div>
+            <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-1 text-xs">
+              <RefreshCw className="w-3 h-3 mr-1 animate-spin" style={{ animationDuration: '3s' }} />
+              Live
+            </Badge>
+          </div>
+
+          {/* Global Stats Cards */}
+          {cgGlobal && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Total Market Cap */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-cyan-500/30 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-400">Total Market Cap</span>
+                    <Globe className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-white">${(cgGlobal.totalMarketCap / 1e12).toFixed(2)}T</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    {cgGlobal.marketCapChange24h >= 0 ? (
+                      <TrendingUp className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 text-red-400" />
+                    )}
+                    <span className={`text-xs ${cgGlobal.marketCapChange24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {cgGlobal.marketCapChange24h >= 0 ? '+' : ''}{cgGlobal.marketCapChange24h.toFixed(2)}% (24h)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 24h Volume */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-fuchsia-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-400">24h Volume</span>
+                    <Activity className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-white">${(cgGlobal.totalVolume24h / 1e9).toFixed(1)}B</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Zap className="w-3 h-3 text-purple-400" />
+                    <span className="text-xs text-gray-400">{cgGlobal.activeCryptocurrencies.toLocaleString()} coins</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* BTC Dominance */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-amber-500/30 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-400">BTC Dominance</span>
+                    <Crown className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-white">{cgGlobal.btcDominance.toFixed(1)}%</p>
+                  <div className="w-full bg-gray-700/50 rounded-full h-1.5 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 h-1.5 rounded-full transition-all"
+                      style={{ width: `${cgGlobal.btcDominance}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ETH Dominance */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-blue-500/30 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-400">ETH Dominance</span>
+                    <Coins className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-white">{cgGlobal.ethDominance.toFixed(1)}%</p>
+                  <div className="w-full bg-gray-700/50 rounded-full h-1.5 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all"
+                      style={{ width: `${Math.min(cgGlobal.ethDominance * 3, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Trending + Gainers/Losers Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Trending Coins */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600/10 to-pink-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-fuchsia-500/30 transition-all h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-fuchsia-400" />
+                    <span className="text-sm font-medium text-white">Trending Now</span>
+                  </div>
+                  <Badge className="bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/30 text-xs px-2">Hot</Badge>
+                </div>
+                <div className="space-y-2">
+                  {cgTrending.slice(0, 6).map((coin: any, idx: number) => (
+                    <div key={coin.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                      <img src={coin.thumb} alt={coin.symbol} className="w-6 h-6 rounded-full" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{coin.name}</p>
+                        <p className="text-xs text-gray-500">{coin.symbol}</p>
+                      </div>
+                      {coin.marketCapRank > 0 && (
+                        <Badge className="bg-white/5 text-gray-400 text-xs px-1.5">#{coin.marketCapRank}</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Gainers */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-green-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-emerald-500/30 transition-all h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                    <span className="text-sm font-medium text-white">Top Gainers</span>
+                  </div>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2">24h</Badge>
+                </div>
+                <div className="space-y-2">
+                  {cgGainers.slice(0, 6).map((coin: any, idx: number) => (
+                    <div key={coin.id} className="flex items-center gap-3 p-2 rounded-lg bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors">
+                      <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{coin.symbol}</p>
+                        <p className="text-xs text-gray-500">${coin.price < 0.01 ? coin.price.toFixed(6) : coin.price.toFixed(2)}</p>
+                      </div>
+                      <span className="text-sm font-bold text-emerald-400">+{coin.change24h.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Losers */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-rose-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-red-500/30 transition-all h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4 text-red-400" />
+                    <span className="text-sm font-medium text-white">Top Losers</span>
+                  </div>
+                  <Badge className="bg-red-500/10 text-red-400 border border-red-500/30 text-xs px-2">24h</Badge>
+                </div>
+                <div className="space-y-2">
+                  {cgLosers.slice(0, 6).map((coin: any, idx: number) => (
+                    <div key={coin.id} className="flex items-center gap-3 p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 transition-colors">
+                      <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{coin.symbol}</p>
+                        <p className="text-xs text-gray-500">${coin.price < 0.01 ? coin.price.toFixed(6) : coin.price.toFixed(2)}</p>
+                      </div>
+                      <span className="text-sm font-bold text-red-400">{coin.change24h.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* =================================================================== */}
         {/* CRYPTO INTELLIGENCE DASHBOARD */}
