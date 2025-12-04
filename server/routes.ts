@@ -7358,6 +7358,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // ============================================================
+  // ALPHA INTELLIGENCE ENDPOINTS
+  // ============================================================
+
+  const { alphaIntelligenceService } = await import('./services/alphaIntelligenceService');
+
+  // Narrative Momentum Tracker
+  app.get('/api/alpha/narratives', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getNarrativeMomentum();
+      res.json({ success: true, narratives: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch narratives:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch narrative momentum' });
+    }
+  }));
+
+  // CT Alpha Feed
+  app.get('/api/alpha/ct-feed', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getCTAlphaFeed();
+      res.json({ success: true, signals: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch CT alpha:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch CT alpha feed' });
+    }
+  }));
+
+  // Token Unlocks
+  app.get('/api/alpha/token-unlocks', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getTokenUnlocks();
+      res.json({ success: true, unlocks: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch token unlocks:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch token unlocks' });
+    }
+  }));
+
+  // Airdrop Radar
+  app.get('/api/alpha/airdrops', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getAirdropRadar();
+      res.json({ success: true, airdrops: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch airdrops:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch airdrop radar' });
+    }
+  }));
+
+  // Governance Pulse
+  app.get('/api/alpha/governance', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getGovernancePulse();
+      res.json({ success: true, proposals: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch governance:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch governance pulse' });
+    }
+  }));
+
+  // VC Wallet Activity
+  app.get('/api/alpha/vc-wallets', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getVCWalletActivity();
+      res.json({ success: true, activities: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch VC wallets:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch VC wallet activity' });
+    }
+  }));
+
+  // Exchange Flows
+  app.get('/api/alpha/exchange-flows', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getExchangeFlows();
+      res.json({ success: true, flows: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch exchange flows:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch exchange flows' });
+    }
+  }));
+
+  // DEX vs CEX Volume
+  app.get('/api/alpha/dex-cex-volume', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getDexCexVolume();
+      res.json({ success: true, volumes: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch DEX/CEX volume:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch DEX/CEX volume' });
+    }
+  }));
+
+  // AI Trade Ideas
+  app.get('/api/alpha/trade-ideas', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getAITradeIdeas();
+      res.json({ success: true, ideas: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch AI trade ideas:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch AI trade ideas' });
+    }
+  }));
+
+  // Event Impact Predictions
+  app.get('/api/alpha/event-impacts', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getEventImpactPredictions();
+      res.json({ success: true, events: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch event impacts:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch event impacts' });
+    }
+  }));
+
+  // Anomaly Detector
+  app.get('/api/alpha/anomalies', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getAnomalies();
+      res.json({ success: true, anomalies: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch anomalies:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch market anomalies' });
+    }
+  }));
+
+  // Crypto Conferences Calendar
+  app.get('/api/alpha/conferences', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await alphaIntelligenceService.getCryptoConferences();
+      res.json({ success: true, conferences: data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch conferences:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch crypto conferences' });
+    }
+  }));
+
   // Get trending stories for discover page - now using real crypto content
   app.get('/api/discover/trending', asyncHandler(async (req: Request, res: Response) => {
     const timeFilter = req.query.timeFilter as string || '24h';

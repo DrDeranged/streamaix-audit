@@ -64,7 +64,19 @@ import {
   Coins,
   Bell,
   RefreshCw,
-  Percent
+  Percent,
+  MessageSquare,
+  Unlock,
+  Gift,
+  Vote,
+  Briefcase,
+  ArrowRightLeft,
+  Lightbulb,
+  AlertTriangle,
+  Shield,
+  MapPin,
+  Twitter,
+  Hash
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -646,6 +658,67 @@ export default function Discover() {
     refetchInterval: 60000, // 1 minute
   });
 
+  // Alpha Intelligence Data
+  const { data: narrativesData } = useQuery({
+    queryKey: ['/api/alpha/narratives'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  const { data: ctAlphaData } = useQuery({
+    queryKey: ['/api/alpha/ct-feed'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const { data: tokenUnlocksData } = useQuery({
+    queryKey: ['/api/alpha/token-unlocks'],
+    refetchInterval: 1800000, // 30 minutes
+  });
+
+  const { data: airdropsData } = useQuery({
+    queryKey: ['/api/alpha/airdrops'],
+    refetchInterval: 3600000, // 1 hour
+  });
+
+  const { data: governanceData } = useQuery({
+    queryKey: ['/api/alpha/governance'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  const { data: vcWalletsData } = useQuery({
+    queryKey: ['/api/alpha/vc-wallets'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const { data: exchangeFlowsData } = useQuery({
+    queryKey: ['/api/alpha/exchange-flows'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const { data: dexCexVolumeData } = useQuery({
+    queryKey: ['/api/alpha/dex-cex-volume'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  const { data: aiTradeIdeasData } = useQuery({
+    queryKey: ['/api/alpha/trade-ideas'],
+    refetchInterval: 1800000, // 30 minutes
+  });
+
+  const { data: eventImpactsData } = useQuery({
+    queryKey: ['/api/alpha/event-impacts'],
+    refetchInterval: 1800000, // 30 minutes
+  });
+
+  const { data: anomaliesData } = useQuery({
+    queryKey: ['/api/alpha/anomalies'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const { data: conferencesData } = useQuery({
+    queryKey: ['/api/alpha/conferences'],
+    refetchInterval: 86400000, // 24 hours
+  });
+
   // Extract data
   const markets = (marketsData as any)?.markets || [];
   const leaderboard = (leaderboardData as any)?.leaderboard || [];
@@ -710,6 +783,20 @@ export default function Discover() {
   const categories = (categoryData as any)?.data || null;
   const aiPredictions = (aiPredictionsData as any)?.data || null;
   const apiUsage = (apiUsageData as any)?.stats || null;
+
+  // Alpha Intelligence data
+  const narratives = (narrativesData as any)?.narratives || [];
+  const ctAlpha = (ctAlphaData as any)?.signals || [];
+  const tokenUnlocks = (tokenUnlocksData as any)?.unlocks || [];
+  const airdrops = (airdropsData as any)?.airdrops || [];
+  const governance = (governanceData as any)?.proposals || [];
+  const vcWallets = (vcWalletsData as any)?.activities || [];
+  const exchangeFlows = (exchangeFlowsData as any)?.flows || [];
+  const dexCexVolume = (dexCexVolumeData as any)?.volumes || [];
+  const aiTradeIdeas = (aiTradeIdeasData as any)?.ideas || [];
+  const eventImpacts = (eventImpactsData as any)?.events || [];
+  const anomalies = (anomaliesData as any)?.anomalies || [];
+  const conferences = (conferencesData as any)?.conferences || [];
 
   // Process markets data
   const activeMarkets = markets.filter((m: PredictionMarket) => m.status === 'active');
@@ -2364,6 +2451,634 @@ export default function Discover() {
             </div>
           </div>
         </section>
+
+        {/* =====================================================================
+            ALPHA INTELLIGENCE HUB - 12 Features
+            ===================================================================== */}
+        
+        {/* Row 1: Narrative Momentum & CT Alpha Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Narrative Momentum Tracker */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-purple-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Hash className="w-4 h-4 text-purple-400" />
+              <h3 className="text-sm font-bold text-white">Narrative Momentum</h3>
+              <Badge className="ml-auto bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs">
+                {narratives.length} Active
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+              {narratives.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading narratives...</p>
+              ) : (
+                narratives.map((n: any, idx: number) => (
+                  <div key={idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white">{n.narrative}</span>
+                        <Badge className={`text-[10px] px-1.5 ${
+                          n.trend === 'rising' ? 'bg-emerald-500/20 text-emerald-400' :
+                          n.trend === 'falling' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {n.trend === 'rising' ? '↑' : n.trend === 'falling' ? '↓' : '→'} {n.weeklyChange > 0 ? '+' : ''}{n.weeklyChange?.toFixed(1)}%
+                        </Badge>
+                      </div>
+                      <span className="text-xs font-bold text-purple-400">{n.momentum}%</span>
+                    </div>
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-1.5">
+                      <div 
+                        className={`h-full rounded-full ${
+                          n.momentum >= 70 ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500' :
+                          n.momentum >= 50 ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
+                          'bg-gradient-to-r from-gray-500 to-gray-600'
+                        }`}
+                        style={{ width: `${n.momentum}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-gray-500">
+                      <span>Social Buzz: {n.socialBuzz}%</span>
+                      <span>Correlation: {(n.priceCorrelation * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="flex gap-1 mt-1.5 flex-wrap">
+                      {n.topTokens?.slice(0, 4).map((token: string, i: number) => (
+                        <Badge key={i} className="text-[9px] px-1 py-0 bg-white/5 text-gray-400">{token}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* CT Alpha Feed */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-cyan-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Twitter className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-sm font-bold text-white">CT Alpha Feed</h3>
+              <Badge className="ml-auto bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-xs">
+                <Radio className="w-2 h-2 mr-1 animate-pulse" />
+                Live
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+              {ctAlpha.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading CT signals...</p>
+              ) : (
+                ctAlpha.map((signal: any, idx: number) => (
+                  <div key={signal.id || idx} className={`p-2.5 rounded-lg border transition-colors ${
+                    signal.sentiment === 'bullish' ? 'bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40' :
+                    signal.sentiment === 'bearish' ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40' :
+                    'bg-white/5 border-white/10 hover:border-white/20'
+                  }`}>
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-white">{signal.influencer}</span>
+                        <span className="text-[10px] text-gray-500">{signal.handle}</span>
+                      </div>
+                      <Badge className={`text-[10px] ${
+                        signal.sentiment === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' :
+                        signal.sentiment === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {signal.confidence}%
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-300 mb-1.5 line-clamp-2">{signal.signal}</p>
+                    <div className="flex items-center justify-between text-[10px] text-gray-500">
+                      <div className="flex items-center gap-2">
+                        {signal.token && <Badge className="bg-white/10 text-white px-1.5">{signal.token}</Badge>}
+                        <span className="text-gray-600">{signal.category}</span>
+                      </div>
+                      <span>{signal.engagement?.toLocaleString()} engagements</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Token Unlocks & Airdrop Radar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Token Unlock Calendar */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-red-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Unlock className="w-4 h-4 text-red-400" />
+              <h3 className="text-sm font-bold text-white">Token Unlocks</h3>
+              <Badge className="ml-auto bg-red-500/10 text-red-400 border-red-500/30 text-xs">
+                Next 30 Days
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+              {tokenUnlocks.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading unlocks...</p>
+              ) : (
+                tokenUnlocks.map((unlock: any, idx: number) => (
+                  <div key={unlock.id || idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white">{unlock.symbol}</span>
+                        <Badge className={`text-[10px] px-1.5 ${
+                          unlock.priceImpact === 'high' ? 'bg-red-500/20 text-red-400' :
+                          unlock.priceImpact === 'medium' ? 'bg-amber-500/20 text-amber-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {unlock.priceImpact} impact
+                        </Badge>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {new Date(unlock.unlockDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-[10px]">
+                      <div>
+                        <span className="text-gray-500 block">Amount</span>
+                        <span className="text-white">{(unlock.amount / 1e6)?.toFixed(1)}M</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">Value</span>
+                        <span className="text-white">${(unlock.valueUsd / 1e6)?.toFixed(0)}M</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">% Supply</span>
+                        <span className={unlock.percentOfSupply > 2 ? 'text-red-400' : 'text-white'}>
+                          {unlock.percentOfSupply?.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 text-[10px]">
+                      <span className="text-gray-600">{unlock.vestingType}</span>
+                      <span className={unlock.predictedMove < 0 ? 'text-red-400' : 'text-emerald-400'}>
+                        Est: {unlock.predictedMove > 0 ? '+' : ''}{unlock.predictedMove?.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Airdrop Radar */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-fuchsia-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Gift className="w-4 h-4 text-fuchsia-400" />
+              <h3 className="text-sm font-bold text-white">Airdrop Radar</h3>
+              <Badge className="ml-auto bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30 text-xs">
+                {airdrops.length} Opportunities
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+              {airdrops.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading airdrops...</p>
+              ) : (
+                airdrops.map((airdrop: any, idx: number) => (
+                  <div key={airdrop.id || idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white">{airdrop.project}</span>
+                        <Badge className={`text-[10px] px-1.5 ${
+                          airdrop.status === 'confirmed' ? 'bg-emerald-500/20 text-emerald-400' :
+                          airdrop.status === 'ongoing' ? 'bg-cyan-500/20 text-cyan-400' :
+                          'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {airdrop.status}
+                        </Badge>
+                      </div>
+                      <span className="text-xs font-medium text-fuchsia-400">{airdrop.estimatedValue}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] mb-1.5">
+                      <Badge className="bg-white/10 text-gray-300">{airdrop.chain}</Badge>
+                      <Badge className={`${
+                        airdrop.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-400' :
+                        airdrop.difficulty === 'medium' ? 'bg-amber-500/10 text-amber-400' :
+                        'bg-red-500/10 text-red-400'
+                      }`}>
+                        {airdrop.difficulty}
+                      </Badge>
+                    </div>
+                    <p className="text-[10px] text-gray-400 line-clamp-2">{airdrop.description}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: Governance Pulse & VC Wallet Tracker */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Governance Pulse */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-indigo-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Vote className="w-4 h-4 text-indigo-400" />
+              <h3 className="text-sm font-bold text-white">Governance Pulse</h3>
+              <Badge className="ml-auto bg-indigo-500/10 text-indigo-400 border-indigo-500/30 text-xs">
+                Active Proposals
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+              {governance.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading proposals...</p>
+              ) : (
+                governance.map((proposal: any, idx: number) => (
+                  <div key={proposal.id || idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <Badge className="text-[10px] px-1.5 bg-indigo-500/20 text-indigo-400">{proposal.protocol}</Badge>
+                        <Badge className={`text-[10px] px-1.5 ${
+                          proposal.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
+                          proposal.status === 'passed' ? 'bg-cyan-500/20 text-cyan-400' :
+                          proposal.status === 'failed' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {proposal.status}
+                        </Badge>
+                      </div>
+                      <Badge className={`text-[10px] ${
+                        proposal.priceImpact === 'high' ? 'bg-amber-500/20 text-amber-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {proposal.priceImpact} impact
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-white mb-2 line-clamp-1">{proposal.title}</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-emerald-400">For: {((proposal.votesFor / (proposal.votesFor + proposal.votesAgainst)) * 100 || 0).toFixed(0)}%</span>
+                        <span className="text-red-400">Against: {((proposal.votesAgainst / (proposal.votesFor + proposal.votesAgainst)) * 100 || 0).toFixed(0)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden flex">
+                        <div 
+                          className="h-full bg-emerald-500"
+                          style={{ width: `${((proposal.votesFor / (proposal.votesFor + proposal.votesAgainst)) * 100) || 50}%` }}
+                        />
+                        <div 
+                          className="h-full bg-red-500"
+                          style={{ width: `${((proposal.votesAgainst / (proposal.votesFor + proposal.votesAgainst)) * 100) || 50}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-gray-500">
+                        <span>Quorum: {((proposal.votesFor + proposal.votesAgainst) / proposal.quorum * 100).toFixed(0)}%</span>
+                        <span>Ends: {new Date(proposal.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* VC Wallet Tracker */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-amber-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Briefcase className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-white">VC Wallet Tracker</h3>
+              <Badge className="ml-auto bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
+                On-Chain
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+              {vcWallets.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading VC activity...</p>
+              ) : (
+                vcWallets.map((activity: any, idx: number) => (
+                  <div key={activity.id || idx} className={`p-2.5 rounded-lg border transition-colors ${
+                    activity.action === 'buy' ? 'bg-emerald-500/5 border-emerald-500/20' :
+                    activity.action === 'sell' ? 'bg-red-500/5 border-red-500/20' :
+                    'bg-white/5 border-white/10'
+                  }`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white">{activity.fund}</span>
+                        <Badge className={`text-[10px] px-1.5 ${
+                          activity.action === 'buy' ? 'bg-emerald-500/20 text-emerald-400' :
+                          activity.action === 'sell' ? 'bg-red-500/20 text-red-400' :
+                          'bg-cyan-500/20 text-cyan-400'
+                        }`}>
+                          {activity.action.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <Badge className={`text-[10px] ${
+                        activity.significance === 'major' ? 'bg-amber-500/20 text-amber-400' :
+                        activity.significance === 'notable' ? 'bg-gray-500/20 text-gray-300' :
+                        'bg-gray-500/20 text-gray-500'
+                      }`}>
+                        {activity.significance}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-white font-medium">{activity.token}</span>
+                      <span className="text-gray-400">${(activity.valueUsd / 1e6)?.toFixed(2)}M</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1 text-[10px] text-gray-500">
+                      <span className="font-mono truncate max-w-[120px]">{activity.txHash?.slice(0, 10)}...</span>
+                      <span>{new Date(activity.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 4: Exchange Flows & DEX/CEX Volume */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Exchange Flows */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-blue-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <ArrowRightLeft className="w-4 h-4 text-blue-400" />
+              <h3 className="text-sm font-bold text-white">Exchange Flows</h3>
+              <Badge className="ml-auto bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
+                24h Net
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {exchangeFlows.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading flows...</p>
+              ) : (
+                exchangeFlows.slice(0, 5).map((flow: any, idx: number) => (
+                  <div key={idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-medium text-white">{flow.exchange}</span>
+                      <Badge className={`text-[10px] ${
+                        flow.trend === 'accumulation' ? 'bg-emerald-500/20 text-emerald-400' :
+                        flow.trend === 'distribution' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {flow.trend}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-[10px]">
+                      <div>
+                        <span className="text-emerald-400 block">Inflow</span>
+                        <span className="text-white">${(flow.inflow24h / 1e6)?.toFixed(0)}M</span>
+                      </div>
+                      <div>
+                        <span className="text-red-400 block">Outflow</span>
+                        <span className="text-white">${(flow.outflow24h / 1e6)?.toFixed(0)}M</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">Net</span>
+                        <span className={flow.netFlow >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                          {flow.netFlow >= 0 ? '+' : ''}${(flow.netFlow / 1e6)?.toFixed(0)}M
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mt-2 flex">
+                      <div className="h-full bg-emerald-500" style={{ width: `${(flow.inflow24h / (flow.inflow24h + flow.outflow24h)) * 100}%` }} />
+                      <div className="h-full bg-red-500" style={{ width: `${(flow.outflow24h / (flow.inflow24h + flow.outflow24h)) * 100}%` }} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* DEX vs CEX Volume */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-teal-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="w-4 h-4 text-teal-400" />
+              <h3 className="text-sm font-bold text-white">DEX vs CEX Volume</h3>
+              <Badge className="ml-auto bg-teal-500/10 text-teal-400 border-teal-500/30 text-xs">
+                24h
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {dexCexVolume.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading volume data...</p>
+              ) : (
+                dexCexVolume.slice(0, 5).map((vol: any, idx: number) => (
+                  <div key={idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-medium text-white">{vol.token}</span>
+                      <Badge className={`text-[10px] ${vol.dexDominant ? 'bg-teal-500/20 text-teal-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                        {vol.dexDominant ? 'DEX Leading' : 'CEX Leading'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] mb-1.5">
+                      <span className="text-teal-400">DEX: {vol.dexPercent?.toFixed(0)}%</span>
+                      <span className="text-blue-400">CEX: {vol.cexPercent?.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden flex">
+                      <div className="h-full bg-teal-500" style={{ width: `${vol.dexPercent}%` }} />
+                      <div className="h-full bg-blue-500" style={{ width: `${vol.cexPercent}%` }} />
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-1.5 truncate">{vol.interpretation}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 5: AI Trade Ideas & Event Impact Predictor */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* AI Trade Ideas */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-violet-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="w-4 h-4 text-violet-400" />
+              <h3 className="text-sm font-bold text-white">AI Trade Ideas</h3>
+              <Badge className="ml-auto bg-violet-500/10 text-violet-400 border-violet-500/30 text-xs">
+                <Brain className="w-2.5 h-2.5 mr-1" />
+                GPT-4
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+              {aiTradeIdeas.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading trade ideas...</p>
+              ) : (
+                aiTradeIdeas.map((idea: any, idx: number) => (
+                  <div key={idea.id || idx} className={`p-3 rounded-lg border transition-colors ${
+                    idea.direction === 'long' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-white">{idea.asset}</span>
+                        <Badge className={`text-[10px] ${idea.direction === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {idea.direction.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-violet-500 rounded-full" style={{ width: `${idea.confidence}%` }} />
+                        </div>
+                        <span className="text-[10px] text-violet-400">{idea.confidence}%</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-[10px] mb-2">
+                      <div>
+                        <span className="text-gray-500 block">Entry</span>
+                        <span className="text-white">${idea.entry?.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">Target</span>
+                        <span className="text-emerald-400">${idea.target?.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">Stop</span>
+                        <span className="text-red-400">${idea.stopLoss?.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 block">R:R</span>
+                        <span className="text-violet-400">{idea.riskReward?.toFixed(1)}:1</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-gray-400 line-clamp-2">{idea.reasoning}</p>
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                      {idea.signals?.slice(0, 3).map((signal: string, i: number) => (
+                        <Badge key={i} className="text-[9px] px-1 py-0 bg-violet-500/10 text-violet-300">{signal}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Event Impact Predictor */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-orange-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-4 h-4 text-orange-400" />
+              <h3 className="text-sm font-bold text-white">Event Impact Predictor</h3>
+              <Badge className="ml-auto bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs">
+                AI Analysis
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+              {eventImpacts.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading events...</p>
+              ) : (
+                eventImpacts.map((event: any, idx: number) => (
+                  <div key={event.id || idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs text-gray-400">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <Badge className="text-[10px] bg-orange-500/10 text-orange-400">{event.category}</Badge>
+                    </div>
+                    <p className="text-sm text-white mb-2">{event.event}</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between text-[10px] mb-1">
+                          <span className="text-gray-500">Predicted Impact</span>
+                          <span className={event.predictedImpact >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                            {event.predictedImpact >= 0 ? '+' : ''}{event.predictedImpact?.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${event.predictedImpact >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
+                            style={{ width: `${Math.min(Math.abs(event.predictedImpact) * 10, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-[10px] text-gray-500 block">Confidence</span>
+                        <span className="text-xs font-medium text-orange-400">{event.confidence}%</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 flex-wrap">
+                      {event.affectedAssets?.slice(0, 4).map((asset: string, i: number) => (
+                        <Badge key={i} className="text-[9px] px-1 py-0 bg-white/5 text-gray-400">{asset}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 6: Anomaly Detector & Crypto Conferences */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Anomaly Detector */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-rose-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="w-4 h-4 text-rose-400" />
+              <h3 className="text-sm font-bold text-white">Anomaly Detector</h3>
+              <Badge className="ml-auto bg-rose-500/10 text-rose-400 border-rose-500/30 text-xs">
+                {anomalies.filter((a: any) => a.severity === 'critical').length} Critical
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+              {anomalies.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">No anomalies detected</p>
+              ) : (
+                anomalies.map((anomaly: any, idx: number) => (
+                  <div key={anomaly.id || idx} className={`p-2.5 rounded-lg border transition-colors ${
+                    anomaly.severity === 'critical' ? 'bg-red-500/10 border-red-500/30' :
+                    anomaly.severity === 'warning' ? 'bg-amber-500/10 border-amber-500/30' :
+                    'bg-white/5 border-white/10'
+                  }`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white">{anomaly.asset}</span>
+                        <Badge className={`text-[10px] ${
+                          anomaly.severity === 'critical' ? 'bg-red-500/20 text-red-400' :
+                          anomaly.severity === 'warning' ? 'bg-amber-500/20 text-amber-400' :
+                          'bg-blue-500/20 text-blue-400'
+                        }`}>
+                          {anomaly.severity}
+                        </Badge>
+                      </div>
+                      <span className="text-[10px] text-gray-500">{anomaly.type}</span>
+                    </div>
+                    <p className="text-xs text-gray-300 mb-1.5">{anomaly.description}</p>
+                    <div className="p-1.5 rounded bg-white/5 text-[10px]">
+                      <span className="text-gray-500">💡 </span>
+                      <span className="text-gray-400">{anomaly.recommendation}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Crypto Conferences */}
+          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:border-sky-500/30 transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-4 h-4 text-sky-400" />
+              <h3 className="text-sm font-bold text-white">Crypto Conferences</h3>
+              <Badge className="ml-auto bg-sky-500/10 text-sky-400 border-sky-500/30 text-xs">
+                Upcoming
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+              {conferences.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">Loading conferences...</p>
+              ) : (
+                conferences.map((conf: any, idx: number) => (
+                  <div key={conf.id || idx} className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-medium text-white">{conf.name}</span>
+                      <Badge className={`text-[10px] ${
+                        conf.tier === 'major' ? 'bg-amber-500/20 text-amber-400' :
+                        conf.tier === 'notable' ? 'bg-sky-500/20 text-sky-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {conf.tier}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-gray-400 mb-1.5">
+                      <span>{conf.location}</span>
+                      <span>•</span>
+                      <span>{new Date(conf.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(conf.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] mb-1.5">
+                      <span className="text-gray-500">Expected:</span>
+                      <span className="text-white">{conf.expectedAttendees}</span>
+                    </div>
+                    {conf.relevantTokens?.length > 0 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {conf.relevantTokens.slice(0, 5).map((token: string, i: number) => (
+                          <Badge key={i} className="text-[9px] px-1 py-0 bg-sky-500/10 text-sky-300">{token}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Three Column Layout: Activity Feed, Whale Tracker, Resolution History */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
