@@ -345,23 +345,23 @@ const StreamCard = memo(function StreamCard({
   const cardContent = (
     <div 
       className={cn(
-        "group cursor-pointer transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
-        selectionMode && isSelected && "ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950 rounded-xl"
+        "group cursor-pointer streaming-card-3d rounded-2xl overflow-hidden",
+        selectionMode && isSelected && "ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950"
       )} 
       data-testid={`stream-card-${stream.id}`}
       onClick={handleClick}
     >
       {selectionMode && (
         <div className={cn(
-          "absolute top-2 left-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+          "absolute top-2 left-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all backdrop-blur-sm",
           isSelected 
-            ? "bg-purple-500 border-purple-500" 
+            ? "bg-purple-500 border-purple-500 shadow-lg shadow-purple-500/50" 
             : "bg-slate-900/80 border-slate-500 hover:border-purple-400"
         )}>
           {isSelected && <span className="text-white text-xs font-bold">✓</span>}
         </div>
       )}
-      <Card className="overflow-hidden bg-slate-900/80 border border-slate-700/50 hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/10">
+      <Card className="overflow-hidden bg-transparent border-0 shadow-none">
         <div className={cn(
           "relative aspect-video bg-gradient-to-br",
           config.gradient
@@ -699,17 +699,31 @@ const QuickStatCard = memo(function QuickStatCard({
   trend?: string; 
   color: string;
 }) {
+  const getGlowColor = () => {
+    if (color.includes('red')) return 'shadow-red-500/20 border-red-500/20';
+    if (color.includes('purple')) return 'shadow-purple-500/20 border-purple-500/20';
+    if (color.includes('amber')) return 'shadow-amber-500/20 border-amber-500/20';
+    return 'shadow-slate-500/10 border-slate-600/20';
+  };
+
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/40">
-      <div className={cn("p-2.5 rounded-lg", color)}>
-        <Icon className="w-4 h-4 text-white" />
+    <div className={cn(
+      "streaming-glass-panel flex items-center gap-3 p-4 rounded-2xl transition-all hover:scale-[1.02]",
+      getGlowColor()
+    )}>
+      <div className={cn(
+        "p-3 rounded-xl relative overflow-hidden",
+        color
+      )}>
+        <div className="absolute inset-0 bg-white/10" />
+        <Icon className="w-5 h-5 text-white relative z-10" />
       </div>
       <div>
-        <p className="text-lg font-bold text-white">{value}</p>
+        <p className="text-xl font-bold streaming-counter">{value}</p>
         <p className="text-xs text-slate-400">{label}</p>
       </div>
       {trend && (
-        <div className="ml-auto text-xs text-emerald-400 font-medium">
+        <div className="ml-auto text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded-full">
           {trend}
         </div>
       )}
@@ -804,52 +818,65 @@ export default function StreamsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
-      <div className="border-b border-purple-500/20 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/10 to-slate-950 safe-area-inset relative overflow-hidden">
+      {/* Ambient background orbs */}
+      <div className="streaming-orbs">
+        <div className="streaming-orb streaming-orb-1" />
+        <div className="streaming-orb streaming-orb-2" />
+        <div className="streaming-orb streaming-orb-3" />
+      </div>
+      
+      {/* Hexagon pattern overlay */}
+      <div className="absolute inset-0 streaming-hex-pattern opacity-30 pointer-events-none" />
+
+      {/* Modern glassmorphism header */}
+      <div className="streaming-glass-panel border-b border-purple-500/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Link href="/">
-                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-purple-500/20 h-10 w-10" data-testid="button-back-home">
+                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-purple-500/20 h-10 w-10 streaming-edge-glow rounded-xl" data-testid="button-back-home">
                   <Home className="w-5 h-5" />
                 </Button>
               </Link>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 shadow-lg shadow-red-500/20">
-                <Radio className="w-5 h-5 text-white" />
+              {/* Animated logo container with morphing border */}
+              <div className="relative p-3 rounded-2xl streaming-morph-border overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-pink-500/20 backdrop-blur-xl" />
+                <Radio className="w-5 h-5 text-red-400 relative z-10" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white font-orbitron tracking-tight">StreamAiX Live</h1>
-                <p className="text-xs text-slate-400 hidden sm:block">Real-time crypto content & trading rooms</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white font-orbitron tracking-tight streaming-glow-text">StreamAiX Live</h1>
+                <p className="text-xs text-slate-400 hidden sm:block">Real-time broadcasts & trading rooms</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Stats badges with glass effect */}
               <div className="hidden sm:flex items-center gap-2 mr-2">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/50">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <div className="streaming-viewer-glow flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2 streaming-live-pulse rounded-full">
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                   </span>
-                  <span className="text-xs font-semibold text-white">{liveStreams.length}</span>
+                  <span className="text-xs font-bold streaming-counter">{liveStreams.length}</span>
                   <span className="text-xs text-slate-400">live</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/50">
-                  <Eye className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="text-xs font-semibold text-white">{formatViewers(totalViewers)}</span>
+                <div className="streaming-cyber-badge flex items-center gap-1.5 px-3 py-1.5 rounded-full">
+                  <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-xs font-bold text-cyan-300">{formatViewers(totalViewers)}</span>
                   <span className="text-xs text-slate-400">watching</span>
                 </div>
               </div>
-              <Badge className="sm:hidden bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+              <Badge className="sm:hidden streaming-viewer-glow text-red-400 text-xs font-semibold">
                 {liveStreams.length} Live
               </Badge>
               <Link href="/replays">
-                <Button variant="outline" size="sm" className="border-slate-600 text-slate-300 hover:bg-slate-800 h-9 gap-1.5">
+                <Button variant="outline" size="sm" className="streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white h-9 gap-1.5 rounded-xl">
                   <Play className="w-4 h-4" />
                   <span className="hidden sm:inline">Replays</span>
                 </Button>
               </Link>
               <Link href="/go-live">
-                <Button size="sm" className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white h-9 gap-1.5 shadow-lg shadow-red-500/20">
+                <Button size="sm" className="streaming-neon-btn text-white h-9 gap-1.5 rounded-xl font-semibold">
                   <Zap className="w-4 h-4" />
                   <span>Go Live</span>
                 </Button>
@@ -901,12 +928,12 @@ export default function StreamsPage() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-purple-400" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search streams, hosts, topics..."
-              className="pl-10 bg-slate-900/60 border-slate-700/50 text-white h-11 focus:border-purple-500/50"
+              className="pl-11 streaming-glass-panel text-white h-12 focus:border-purple-500/50 rounded-2xl placeholder:text-slate-500"
               data-testid="input-search-streams"
             />
           </div>
@@ -917,17 +944,17 @@ export default function StreamsPage() {
               if (!multiStreamMode) setSelectedStreams([]);
             }}
             className={cn(
-              "h-11 gap-2 whitespace-nowrap",
+              "h-12 gap-2 whitespace-nowrap rounded-2xl font-semibold",
               multiStreamMode 
-                ? "bg-purple-600 hover:bg-purple-500 text-white"
-                : "border-slate-600 text-slate-300 hover:bg-slate-800"
+                ? "streaming-neon-btn text-white"
+                : "streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white"
             )}
             data-testid="button-multistream-toggle"
           >
             <Grid2X2 className="w-4 h-4" />
             Multi-Stream
             {multiStreamMode && selectedStreams.length > 0 && (
-              <Badge className="bg-white/20 text-white text-xs ml-1">
+              <Badge className="bg-white/20 text-white text-xs ml-1 font-bold">
                 {selectedStreams.length}/4
               </Badge>
             )}
@@ -935,33 +962,34 @@ export default function StreamsPage() {
         </div>
 
         {multiStreamMode && selectedStreams.length > 0 && (
-          <Card className="p-4 bg-slate-900/60 border border-purple-500/40">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Grid2X2 className="w-5 h-5 text-purple-400" />
-                <span className="font-semibold text-white">Multi-Stream View</span>
-                <Badge className="bg-purple-500/20 text-purple-400 border-0">
-                  {selectedStreams.length} streams selected
-                </Badge>
+          <div className="streaming-holo-border rounded-2xl overflow-hidden">
+            <div className="streaming-glass-panel p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Grid2X2 className="w-5 h-5 text-purple-400" />
+                  <span className="font-semibold text-white streaming-glow-text">Multi-Stream View</span>
+                  <Badge className="streaming-cyber-badge text-cyan-400 border-0 font-semibold">
+                    {selectedStreams.length} streams selected
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select 
+                    value={multiStreamLayout}
+                    onChange={(e) => setMultiStreamLayout(e.target.value as any)}
+                    className="streaming-glass-panel rounded-xl px-3 py-2 text-sm text-white border-purple-500/20"
+                  >
+                    <option value="1x1">1x1</option>
+                    <option value="1x2">1x2</option>
+                    <option value="2x1">2x1</option>
+                    <option value="2x2">2x2</option>
+                  </select>
+                  <Link href={`/multi-stream?streams=${selectedStreams.join(',')}&layout=${multiStreamLayout}`}>
+                    <Button size="sm" className="streaming-neon-btn text-white rounded-xl font-semibold">
+                      Watch Now
+                    </Button>
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <select 
-                  value={multiStreamLayout}
-                  onChange={(e) => setMultiStreamLayout(e.target.value as any)}
-                  className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-white"
-                >
-                  <option value="1x1">1x1</option>
-                  <option value="1x2">1x2</option>
-                  <option value="2x1">2x1</option>
-                  <option value="2x2">2x2</option>
-                </select>
-                <Link href={`/multi-stream?streams=${selectedStreams.join(',')}&layout=${multiStreamLayout}`}>
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-500">
-                    Watch Now
-                  </Button>
-                </Link>
-              </div>
-            </div>
             <div className="h-[300px]">
               <MultiStreamView
                 streams={selectedStreams.map(id => {
@@ -979,20 +1007,21 @@ export default function StreamsPage() {
                 onRemoveStream={handleRemoveFromMultiStream}
               />
             </div>
-          </Card>
+          </div>
+        </div>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1 w-full sm:w-auto grid grid-cols-3 sm:flex">
-            <TabsTrigger value="discover" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 gap-1.5">
+          <TabsList className="streaming-glass-panel p-1.5 w-full sm:w-auto grid grid-cols-3 sm:flex gap-1 rounded-2xl">
+            <TabsTrigger value="discover" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/20 data-[state=active]:text-purple-200 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/10 gap-1.5 rounded-xl transition-all">
               <Sparkles className="w-4 h-4" />
               <span className="hidden sm:inline">Discover</span>
             </TabsTrigger>
-            <TabsTrigger value="browse" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 gap-1.5">
+            <TabsTrigger value="browse" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/20 data-[state=active]:text-purple-200 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/10 gap-1.5 rounded-xl transition-all">
               <Filter className="w-4 h-4" />
               <span className="hidden sm:inline">Browse</span>
             </TabsTrigger>
-            <TabsTrigger value="upcoming" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 gap-1.5">
+            <TabsTrigger value="upcoming" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/20 data-[state=active]:text-purple-200 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/10 gap-1.5 rounded-xl transition-all">
               <Calendar className="w-4 h-4" />
               <span className="hidden sm:inline">Upcoming</span>
             </TabsTrigger>
@@ -1002,20 +1031,19 @@ export default function StreamsPage() {
             <ScrollArea className="w-full">
               <div className="flex gap-2 pb-2">
                 {categories.map((cat) => (
-                  <Badge
+                  <button
                     key={cat}
-                    variant="outline"
                     className={cn(
-                      "cursor-pointer transition-all capitalize whitespace-nowrap py-2 px-4 text-sm",
-                      selectedCategory === cat
-                        ? "bg-purple-500/20 border-purple-500 text-purple-300"
-                        : "border-slate-700 text-slate-400 hover:border-purple-500/40 hover:text-slate-300"
+                      "streaming-pill-glass cursor-pointer transition-all capitalize whitespace-nowrap py-2.5 px-5 text-sm rounded-full font-medium",
+                      selectedCategory === cat && "active"
                     )}
                     onClick={() => setSelectedCategory(cat)}
                     data-testid={`category-filter-${cat}`}
                   >
-                    {cat}
-                  </Badge>
+                    <span className={selectedCategory === cat ? "text-purple-200" : "text-slate-400"}>
+                      {cat}
+                    </span>
+                  </button>
                 ))}
               </div>
               <ScrollBar orientation="horizontal" />
@@ -1070,21 +1098,42 @@ export default function StreamsPage() {
                   ))}
                 </div>
               ) : filteredStreams.length === 0 ? (
-                <Card className="p-12 text-center bg-slate-900/60 border border-slate-700/40">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-800/60 flex items-center justify-center">
-                    <Radio className="w-10 h-10 text-slate-600" />
+                <div className="relative streaming-holo-border rounded-3xl overflow-hidden">
+                  <div className="streaming-glass-panel streaming-neural-grid streaming-scan-line p-12 text-center rounded-3xl">
+                    {/* Floating particles */}
+                    <div className="streaming-particles">
+                      <div className="streaming-particle" />
+                      <div className="streaming-particle" />
+                      <div className="streaming-particle" />
+                      <div className="streaming-particle" />
+                      <div className="streaming-particle" />
+                      <div className="streaming-particle" />
+                    </div>
+                    
+                    {/* Animated icon container */}
+                    <div className="relative w-24 h-24 mx-auto mb-6">
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 streaming-empty-pulse" />
+                      <div className="absolute inset-2 rounded-full streaming-glass-panel flex items-center justify-center">
+                        <Video className="w-10 h-10 text-purple-400" />
+                      </div>
+                      {/* Orbiting dot */}
+                      <div className="absolute inset-0 animate-spin" style={{ animationDuration: '8s' }}>
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50" />
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-white mb-3 streaming-glow-text">No broadcasts live right now</h3>
+                    <p className="text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
+                      Be the first to go live and share your alpha with the community. Start streaming to build your audience!
+                    </p>
+                    <Link href="/go-live">
+                      <Button className="streaming-neon-btn text-white px-8 py-3 rounded-xl font-semibold text-base gap-2">
+                        <Sparkles className="w-5 h-5" />
+                        Be the First
+                      </Button>
+                    </Link>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">No Live Streams</h3>
-                  <p className="text-slate-400 mb-6 max-w-md mx-auto">
-                    There are no streams matching your filters right now. Be the first to go live and start building your audience!
-                  </p>
-                  <Link href="/go-live">
-                    <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 shadow-lg shadow-red-500/20">
-                      <Radio className="w-4 h-4 mr-2" />
-                      Start Streaming
-                    </Button>
-                  </Link>
-                </Card>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {(userHostedStreams.length > 0 ? userHostedStreams : filteredStreams).map((stream) => (
@@ -1171,11 +1220,13 @@ export default function StreamsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <div className="lg:col-span-3">
                 {filteredStreams.length === 0 ? (
-                  <Card className="p-8 text-center bg-slate-900/60 border border-slate-700/40">
-                    <Radio className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">No Streams Found</h3>
+                  <div className="streaming-glass-panel streaming-neural-grid p-8 text-center rounded-2xl">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full streaming-glass-panel flex items-center justify-center">
+                      <Radio className="w-8 h-8 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2 streaming-glow-text">No Streams Found</h3>
                     <p className="text-slate-400">Try adjusting your filters</p>
-                  </Card>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                     {filteredStreams.map((stream) => (
@@ -1192,10 +1243,10 @@ export default function StreamsPage() {
               </div>
 
               <div className="space-y-4">
-                <Card className="p-4 bg-slate-900/60 border border-slate-700/40">
+                <div className="streaming-glass-panel p-4 rounded-2xl streaming-edge-glow">
                   <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                     <Flame className="w-4 h-4 text-orange-400" />
-                    Hot Right Now
+                    <span className="streaming-glow-text">Hot Right Now</span>
                   </h3>
                   <div className="space-y-2">
                     {filteredStreams.slice(0, 5).map((stream) => (
@@ -1209,7 +1260,7 @@ export default function StreamsPage() {
                       />
                     ))}
                   </div>
-                </Card>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -1222,21 +1273,26 @@ export default function StreamsPage() {
                 ))}
               </div>
             ) : (
-              <Card className="p-12 text-center bg-slate-900/60 border border-slate-700/40">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-800/60 flex items-center justify-center">
-                  <Calendar className="w-10 h-10 text-slate-600" />
+              <div className="relative streaming-holo-border rounded-3xl overflow-hidden">
+                <div className="streaming-glass-panel streaming-neural-grid p-12 text-center rounded-3xl">
+                  <div className="relative w-24 h-24 mx-auto mb-6">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 streaming-empty-pulse" />
+                    <div className="absolute inset-2 rounded-full streaming-glass-panel flex items-center justify-center">
+                      <Calendar className="w-10 h-10 text-amber-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3 streaming-glow-text">No Upcoming Streams</h3>
+                  <p className="text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
+                    No streams are scheduled yet. Schedule your stream to let your audience know when to tune in!
+                  </p>
+                  <Link href="/go-live">
+                    <Button className="streaming-neon-btn text-white px-8 py-3 rounded-xl font-semibold">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Schedule a Stream
+                    </Button>
+                  </Link>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">No Upcoming Streams</h3>
-                <p className="text-slate-400 mb-6 max-w-md mx-auto">
-                  No streams are scheduled yet. Schedule your stream to let your audience know when to tune in!
-                </p>
-                <Link href="/go-live">
-                  <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Schedule a Stream
-                  </Button>
-                </Link>
-              </Card>
+              </div>
             )}
           </TabsContent>
         </Tabs>
