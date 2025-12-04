@@ -425,304 +425,364 @@ export default function Discover() {
   const [contentFilter, setContentFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Prediction Markets Data
+  // Prediction Markets Data - with staleTime to cache and reduce refetches
   const { data: marketsData } = useQuery<{ markets: PredictionMarket[] }>({
     queryKey: ['/api/prediction-markets'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: leaderboardData } = useQuery({
     queryKey: ['/api/prediction-leagues/leaderboard'],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: aiTradesData } = useQuery({
     queryKey: ['/api/prediction-markets/ai-stats'],
+    staleTime: 5 * 60 * 1000,
   });
 
   // New endpoints for enhanced features
   const { data: recentTradesData } = useQuery({
     queryKey: ['/api/prediction-markets/recent-trades'],
-    refetchInterval: 60000, // 1 minute
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 60000,
   });
 
   const { data: whalesData } = useQuery({
     queryKey: ['/api/prediction-markets/whales'],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: resolvedMarketsData } = useQuery({
     queryKey: ['/api/prediction-markets/resolved'],
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Macro Economic Data
+  // Macro Economic Data - stale for 5 min, refetch less often
   const { data: indexFuturesData } = useQuery({
     queryKey: ['/api/macro/index-futures'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
   const { data: treasuryYieldsData } = useQuery({
     queryKey: ['/api/macro/treasury-yields'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: volatilityIndicesData } = useQuery({
     queryKey: ['/api/macro/volatility-indices'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
   const { data: preciousMetalsData } = useQuery({
     queryKey: ['/api/macro/precious-metals'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
   const { data: globalLiquidityData } = useQuery({
     queryKey: ['/api/macro/global-liquidity'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: macroCalendarData } = useQuery({
     queryKey: ['/api/macro/calendar'],
-    refetchInterval: 300000, // 5 minutes - calendar events don't change frequently
+    staleTime: 30 * 60 * 1000, // 30 min - calendar rarely changes
+    refetchInterval: 1800000,
   });
 
   const { data: fedWatchData } = useQuery({
     queryKey: ['/api/macro/fed-watch'],
-    refetchInterval: 300000, // 5 minutes - Fed probabilities update periodically
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
-  // Market Data Queries
+  // Market Data Queries - with caching
   const { data: cryptoData, isLoading: cryptoLoading, isError: cryptoError } = useQuery({
     queryKey: ['/api/analytics/live/crypto'],
+    staleTime: 2 * 60 * 1000,
   });
 
   const { data: sectorsData } = useQuery({
     queryKey: ['/api/market/sectors'],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: marketOverview } = useQuery({
     queryKey: ['/api/market/overview'],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: marketNews } = useQuery({
     queryKey: ['/api/market/news'],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: trendingContent } = useQuery({
     queryKey: ['/api/discover/trending', contentFilter],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: marketRegime } = useQuery({
     queryKey: ['/api/correlation/market-regime'],
+    staleTime: 10 * 60 * 1000,
   });
 
   const { data: activityData } = useQuery({
     queryKey: ['/api/activity'],
-    refetchInterval: 30000, // 30 seconds
+    staleTime: 30 * 1000,
+    refetchInterval: 60000,
   });
 
-  // Crypto Intelligence Data
+  // Crypto Intelligence Data - with caching
   const { data: fearGreedData } = useQuery({
     queryKey: ['/api/crypto/fear-greed'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: dominanceData } = useQuery({
     queryKey: ['/api/crypto/dominance'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: cryptoMoversData } = useQuery({
     queryKey: ['/api/crypto/movers'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
   const { data: trendingTokensData } = useQuery({
     queryKey: ['/api/crypto/trending'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: defiTvlData } = useQuery({
     queryKey: ['/api/crypto/defi-tvl'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: gasTrackerData } = useQuery({
     queryKey: ['/api/crypto/gas'],
-    refetchInterval: 60000, // 1 minute
+    staleTime: 60 * 1000,
+    refetchInterval: 120000,
   });
 
   const { data: fundingRatesData } = useQuery({
     queryKey: ['/api/crypto/funding-rates'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: whaleAlertsData } = useQuery({
     queryKey: ['/api/crypto/whale-alerts'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: 180000,
   });
 
-  // Advanced Market Intelligence Data
+  // Advanced Market Intelligence Data - with caching
   const { data: exchangeReservesData } = useQuery({
     queryKey: ['/api/intel/exchange-reserves'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: stablecoinFlowsData } = useQuery({
     queryKey: ['/api/intel/stablecoin-flows'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: altcoinSeasonData } = useQuery({
     queryKey: ['/api/intel/altcoin-season'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: btcLiquidationsData } = useQuery({
     queryKey: ['/api/intel/liquidations/BTC'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
   const { data: smartMoneyData } = useQuery({
     queryKey: ['/api/intel/smart-money'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: etfData } = useQuery({
     queryKey: ['/api/intel/etfs'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
   const { data: optionsData } = useQuery({
     queryKey: ['/api/intel/options'],
-    refetchInterval: 300000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
-  // Market Intelligence Hub Data
+  // Market Intelligence Hub Data - with caching
   const { data: marketSignalsData } = useQuery<{ signals: MarketSignal[] }>({
     queryKey: ['/api/market-intelligence/signals'],
-    refetchInterval: 30000,
+    staleTime: 30 * 1000,
+    refetchInterval: 60000,
   });
 
   const { data: whaleMovementsData } = useQuery<{ movements: WhaleMovement[] }>({
     queryKey: ['/api/market-intelligence/whales'],
-    refetchInterval: 60000,
+    staleTime: 60 * 1000,
+    refetchInterval: 120000,
   });
 
   const { data: marketSentimentData } = useQuery<{ sentiments: SentimentData[] }>({
     queryKey: ['/api/market-intelligence/sentiment'],
-    refetchInterval: 60000,
+    staleTime: 60 * 1000,
+    refetchInterval: 120000,
   });
 
-  // CoinGecko Pro Data (Premium market data)
+  // CoinGecko Pro Data (Premium market data) - with caching
   const { data: cgTrendingData } = useQuery({
     queryKey: ['/api/market/coingecko/trending'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: cgGlobalData } = useQuery({
     queryKey: ['/api/market/coingecko/global'],
-    refetchInterval: 60000, // 1 minute
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: 120000,
   });
 
   const { data: cgMoversData } = useQuery({
     queryKey: ['/api/market/coingecko/movers'],
-    refetchInterval: 120000, // 2 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
-  // Alpha Features Data
+  // Alpha Features Data - with caching
   const { data: derivativesData } = useQuery({
     queryKey: ['/api/market/derivatives'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: onchainData } = useQuery({
     queryKey: ['/api/market/onchain'],
-    refetchInterval: 600000, // 10 minutes
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 900000,
   });
 
   const { data: volatilityData } = useQuery({
     queryKey: ['/api/market/volatility'],
-    refetchInterval: 600000, // 10 minutes
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 900000,
   });
 
   const { data: categoryData } = useQuery({
     queryKey: ['/api/market/categories'],
-    refetchInterval: 600000, // 10 minutes
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 900000,
   });
 
   const { data: aiPredictionsData } = useQuery({
     queryKey: ['/api/market/ai-predictions'],
-    refetchInterval: 900000, // 15 minutes
+    staleTime: 30 * 60 * 1000,
+    refetchInterval: 1800000,
   });
 
   const { data: apiUsageData } = useQuery({
     queryKey: ['/api/market/coingecko/usage'],
-    refetchInterval: 60000, // 1 minute
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 300000,
   });
 
-  // Tech/AI Stock Data
+  // Tech/AI Stock Data - with caching
   const { data: stockMoversData } = useQuery({
     queryKey: ['/api/stocks/tech-ai-movers'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
-  // Alpha Intelligence Data
+  // Alpha Intelligence Data - with caching for faster loads
   const { data: narrativesData } = useQuery({
     queryKey: ['/api/alpha/narratives'],
-    refetchInterval: 600000, // 10 minutes
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 900000,
   });
 
   const { data: ctAlphaData } = useQuery({
     queryKey: ['/api/alpha/ct-feed'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: tokenUnlocksData } = useQuery({
     queryKey: ['/api/alpha/token-unlocks'],
-    refetchInterval: 1800000, // 30 minutes
+    staleTime: 60 * 60 * 1000, // 1 hour - unlocks don't change often
+    refetchInterval: 3600000,
   });
 
   const { data: airdropsData } = useQuery({
     queryKey: ['/api/alpha/airdrops'],
-    refetchInterval: 3600000, // 1 hour
+    staleTime: 2 * 60 * 60 * 1000, // 2 hours
+    refetchInterval: 7200000,
   });
 
   const { data: governanceData } = useQuery({
     queryKey: ['/api/alpha/governance'],
-    refetchInterval: 600000, // 10 minutes
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 900000,
   });
 
   const { data: vcWalletsData } = useQuery({
     queryKey: ['/api/alpha/vc-wallets'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: exchangeFlowsData } = useQuery({
     queryKey: ['/api/alpha/exchange-flows'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: dexCexVolumeData } = useQuery({
     queryKey: ['/api/alpha/dex-cex-volume'],
-    refetchInterval: 600000, // 10 minutes
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 900000,
   });
 
   const { data: aiTradeIdeasData } = useQuery({
     queryKey: ['/api/alpha/trade-ideas'],
-    refetchInterval: 1800000, // 30 minutes
+    staleTime: 60 * 60 * 1000, // 1 hour - AI ideas don't change frequently
+    refetchInterval: 3600000,
   });
 
   const { data: eventImpactsData } = useQuery({
     queryKey: ['/api/alpha/event-impacts'],
-    refetchInterval: 1800000, // 30 minutes
+    staleTime: 60 * 60 * 1000,
+    refetchInterval: 3600000,
   });
 
   const { data: anomaliesData } = useQuery({
     queryKey: ['/api/alpha/anomalies'],
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 600000,
   });
 
   const { data: conferencesData } = useQuery({
     queryKey: ['/api/alpha/conferences'],
-    refetchInterval: 86400000, // 24 hours
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchInterval: 86400000,
   });
 
   // Extract data
