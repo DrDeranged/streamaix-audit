@@ -1248,9 +1248,11 @@ export default function Discover() {
             </div>
           )}
 
-          {/* Tech/AI Stock Movers Grid */}
+          {/* Tech/AI Stock Movers Grid - only show if we have data */}
+          {(stockTrending.length > 0 || stockGainers.length > 0 || stockLosers.length > 0) && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Trending Tech/AI Stocks */}
+            {stockTrending.length > 0 && (
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 to-purple-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-violet-500/30 transition-all h-full">
@@ -1280,8 +1282,10 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Stock Gainers */}
+            {stockGainers.length > 0 && (
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-green-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-emerald-500/30 transition-all h-full">
@@ -1306,8 +1310,10 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Stock Losers */}
+            {stockLosers.length > 0 && (
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-rose-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-red-500/30 transition-all h-full">
@@ -1332,7 +1338,9 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+            )}
           </div>
+          )}
         </section>
 
         {/* Alpha Features Grid */}
