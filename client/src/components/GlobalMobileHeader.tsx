@@ -1,0 +1,123 @@
+import { useState, useEffect, useCallback } from "react";
+import { useLocation, Link } from "wouter";
+import { Home, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+
+export function GlobalMobileHeader() {
+  const [location] = useLocation();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  // Don't show on landing page - it has its own navigation
+  const isLandingPage = location === "/";
+  
+  // Track scroll position to show/hide scroll-to-top indicator
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Smooth scroll to top with visual feedback
+  const scrollToTop = useCallback(() => {
+    setIsScrolling(true);
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+    
+    // Reset animation state after scroll completes
+    setTimeout(() => setIsScrolling(false), 500);
+  }, []);
+
+  // Navigate home
+  const goHome = useCallback(() => {
+    window.location.href = "/";
+  }, []);
+
+  if (isLandingPage) {
+    return null;
+  }
+
+  return (
+    <>
+      {/* Scroll-to-top tap zone - tapping anywhere in this area scrolls to top */}
+      <div 
+        className="fixed top-0 left-0 right-0 h-2 z-[100] cursor-pointer bg-gradient-to-b from-black/20 to-transparent"
+        onClick={scrollToTop}
+        role="button"
+        aria-label="Scroll to top"
+        data-testid="scroll-to-top-zone"
+      />
+      
+      {/* Main navigation header */}
+      <motion.header 
+        className="fixed top-0 left-0 right-0 z-[99] bg-gradient-to-r from-slate-900/95 via-purple-900/90 to-slate-900/95 backdrop-blur-xl border-b border-purple-500/20 shadow-lg shadow-purple-500/10"
+        initial={{ y: -60 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <div className="flex items-center justify-between h-14 px-3">
+          {/* Left: Back to Home button */}
+          <Link href="/">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-300 hover:text-white hover:bg-white/10 gap-1.5 px-2"
+              data-testid="button-back-home"
+            >
+              <Home className="w-4 h-4" />
+              <span className="text-sm font-medium">Home</span>
+            </Button>
+          </Link>
+
+          {/* Center: StreamAiX Logo - tappable to go home */}
+          <button
+            onClick={goHome}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all duration-200 active:scale-95"
+            aria-label="Go to StreamAiX home"
+            data-testid="button-logo-home"
+          >
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <span className="text-white font-bold text-sm">S</span>
+            </div>
+            <span className="text-lg font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+              StreamAiX
+            </span>
+          </button>
+
+          {/* Right: Scroll to top button (visible when scrolled) */}
+          <AnimatePresence>
+            {showScrollTop ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={scrollToTop}
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 px-2 ${isScrolling ? 'animate-pulse' : ''}`}
+                  data-testid="button-scroll-top"
+                >
+                  <ChevronUp className={`w-5 h-5 ${isScrolling ? 'text-cyan-400' : ''}`} />
+                </Button>
+              </motion.div>
+            ) : (
+              <div className="w-9" /> // Placeholder to maintain layout
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.header>
+
+      {/* Spacer to prevent content from hiding under fixed header */}
+      <div className="h-14" />
+    </>
+  );
+}
