@@ -12010,6 +12010,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get live streams (currently active)
   app.get("/api/streams/live", asyncHandler(async (req: Request, res: Response) => {
+    // Prevent caching to ensure fresh stream data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
     try {
       const streams = await db.select({
         id: liveStreams.id,
