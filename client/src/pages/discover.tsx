@@ -2476,20 +2476,6 @@ export default function Discover() {
             ALPHA INTELLIGENCE HUB - 12 Features
             ===================================================================== */}
         
-        {/* Alpha Intelligence Header with Live Data Indicator */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Brain className="w-5 h-5 text-violet-400" />
-            <h2 className="text-lg font-bold text-white">Alpha Intelligence Hub</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-gray-400 bg-black/40 px-2 py-1 rounded-full border border-white/10">
-              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-              Live from CoinGecko Pro
-            </span>
-          </div>
-        </div>
-        
         {/* Row 1: Narrative Momentum & CT Alpha Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Narrative Momentum Tracker */}
