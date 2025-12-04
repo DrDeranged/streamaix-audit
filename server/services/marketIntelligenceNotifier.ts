@@ -5,6 +5,8 @@ import { newsService } from './newsService';
 import { derivativesAnalyticsService } from './derivativesAnalyticsService';
 import { institutionalFlowService } from './institutionalFlowService';
 import { alphaInsightsEngine } from './alphaInsightsEngine';
+import { alphaIntelligenceService } from './alphaIntelligenceService';
+import { stockMarketService } from './stockMarketService';
 import { db } from '../db';
 import { pushSubscriptions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -47,6 +49,21 @@ class MarketIntelligenceNotifier {
   private lastWhaleAlerts: Map<string, number> = new Map();
   private lastAlphaSignals: Map<string, number> = new Map();
   
+  // Alpha Intelligence tracking
+  private lastNarrativeMomentum: Map<string, number> = new Map();
+  private lastCTAlphaSignals: Map<string, number> = new Map();
+  private lastTokenUnlockAlerts: Map<string, number> = new Map();
+  private lastAirdropAlerts: Map<string, number> = new Map();
+  private lastGovernanceAlerts: Map<string, number> = new Map();
+  private lastVCWalletAlerts: Map<string, number> = new Map();
+  private lastExchangeFlowAlerts: Map<string, number> = new Map();
+  private lastAITradeIdeas: number = 0;
+  private lastEventImpactAlerts: Map<string, number> = new Map();
+  private lastAnomalyAlerts: Map<string, number> = new Map();
+  private lastConferenceAlerts: Map<string, number> = new Map();
+  private lastStockAlerts: Map<string, number> = new Map();
+  private previousNarrativeMomentum: Map<string, number> = new Map();
+  
   private readonly TRACKED_CRYPTO = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
   private readonly TRACKED_STOCKS = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'TSLA'];
   private readonly PRICE_ALERT_THRESHOLD = 3; // 3% in 1 hour
@@ -58,6 +75,12 @@ class MarketIntelligenceNotifier {
   private readonly FUNDING_RATE_HIGH_THRESHOLD = 0.03; // 0.03% per 8h
   private readonly LIQUIDATION_SPIKE_THRESHOLD = 50_000_000; // $50M in liquidations
   private readonly WHALE_ALERT_THRESHOLD = 10_000_000; // $10M whale movement
+  
+  // Alpha Intelligence thresholds
+  private readonly NARRATIVE_SPIKE_THRESHOLD = 10; // 10% momentum increase
+  private readonly CT_CONFIDENCE_THRESHOLD = 75; // Only high-confidence signals
+  private readonly VC_WALLET_MIN_VALUE = 5_000_000; // $5M+ moves
+  private readonly STOCK_MOVE_THRESHOLD = 4; // 4%+ move in tech stocks
 
   start(): void {
     if (this.isStarted) {
@@ -131,6 +154,70 @@ class MarketIntelligenceNotifier {
       await this.checkAlphaSignals();
     }, { timezone: "America/New_York" });
 
+    // ============================================================
+    // ALPHA INTELLIGENCE NOTIFICATIONS (NEW)
+    // ============================================================
+
+    // Narrative Momentum Alerts - Every 30 minutes
+    cron.schedule('*/30 * * * *', async () => {
+      await this.checkNarrativeMomentum();
+    }, { timezone: "America/New_York" });
+
+    // CT Alpha Feed - Every 15 minutes (high-confidence only)
+    cron.schedule('*/15 * * * *', async () => {
+      await this.checkCTAlphaSignals();
+    }, { timezone: "America/New_York" });
+
+    // Token Unlock Warnings - Every 4 hours
+    cron.schedule('0 */4 * * *', async () => {
+      await this.checkTokenUnlocks();
+    }, { timezone: "America/New_York" });
+
+    // Airdrop Radar - Daily at 9am EST
+    cron.schedule('0 9 * * *', async () => {
+      await this.checkAirdropOpportunities();
+    }, { timezone: "America/New_York" });
+
+    // Governance Critical Alerts - Every hour
+    cron.schedule('0 * * * *', async () => {
+      await this.checkGovernanceAlerts();
+    }, { timezone: "America/New_York" });
+
+    // VC Wallet Activity - Every 10 minutes
+    cron.schedule('*/10 * * * *', async () => {
+      await this.checkVCWalletActivity();
+    }, { timezone: "America/New_York" });
+
+    // Exchange Flow Anomalies - Every 15 minutes
+    cron.schedule('*/15 * * * *', async () => {
+      await this.checkExchangeFlowAnomalies();
+    }, { timezone: "America/New_York" });
+
+    // AI Trade Ideas - Every 4 hours
+    cron.schedule('0 */4 * * *', async () => {
+      await this.pushAITradeIdeas();
+    }, { timezone: "America/New_York" });
+
+    // Event Impact Pre-Alerts - Every 6 hours
+    cron.schedule('0 */6 * * *', async () => {
+      await this.checkEventImpacts();
+    }, { timezone: "America/New_York" });
+
+    // Anomaly Detection - Every 10 minutes
+    cron.schedule('*/10 * * * *', async () => {
+      await this.checkMarketAnomalies();
+    }, { timezone: "America/New_York" });
+
+    // Conference Calendar - Weekly Sunday 5pm EST
+    cron.schedule('0 17 * * 0', async () => {
+      await this.sendConferenceReminders();
+    }, { timezone: "America/New_York" });
+
+    // Tech/AI Stock Alerts - Every 30 minutes (market hours)
+    cron.schedule('*/30 9-16 * * 1-5', async () => {
+      await this.checkTechStockAlerts();
+    }, { timezone: "America/New_York" });
+
     this.isStarted = true;
     console.log('📡 Market Intelligence Notifier started');
     console.log('   ⏰ Morning Briefing: 8am EST (Mon-Fri)');
@@ -145,6 +232,18 @@ class MarketIntelligenceNotifier {
     console.log('   💥 Liquidation Alerts: Every 5 min');
     console.log('   💰 Funding Rate Alerts: Every 30 min');
     console.log('   🎯 Alpha Signals: Every 20 min (confluence detection)');
+    console.log('   📈 Narrative Momentum: Every 30 min');
+    console.log('   🐦 CT Alpha Feed: Every 15 min');
+    console.log('   🔓 Token Unlocks: Every 4 hours');
+    console.log('   🎁 Airdrop Radar: Daily 9am EST');
+    console.log('   🗳️ Governance: Every hour');
+    console.log('   💼 VC Wallet Tracker: Every 10 min');
+    console.log('   🏦 Exchange Flows: Every 15 min');
+    console.log('   💡 AI Trade Ideas: Every 4 hours');
+    console.log('   📅 Event Impacts: Every 6 hours');
+    console.log('   🚨 Anomaly Detector: Every 10 min');
+    console.log('   🎤 Conferences: Weekly Sunday 5pm EST');
+    console.log('   📊 Tech/AI Stocks: Every 30 min (market hours)');
   }
 
   stop(): void {
@@ -1016,6 +1115,488 @@ class MarketIntelligenceNotifier {
       }
     } catch (error) {
       console.error('❌ Failed to check alpha signals:', error);
+    }
+  }
+
+  // ============================================================================
+  // ALPHA INTELLIGENCE NOTIFICATION METHODS
+  // ============================================================================
+
+  async checkNarrativeMomentum(): Promise<void> {
+    try {
+      const narratives = await alphaIntelligenceService.getNarrativeMomentum();
+      const now = Date.now();
+
+      for (const narrative of narratives) {
+        const previousMomentum = this.previousNarrativeMomentum.get(narrative.narrative) || narrative.momentum;
+        const momentumChange = narrative.momentum - previousMomentum;
+        
+        // Update previous momentum
+        this.previousNarrativeMomentum.set(narrative.narrative, narrative.momentum);
+
+        // Check for significant momentum spike (rising trend + high change)
+        if (narrative.trend === 'rising' && momentumChange >= this.NARRATIVE_SPIKE_THRESHOLD) {
+          const lastAlert = this.lastNarrativeMomentum.get(narrative.narrative) || 0;
+          if (now - lastAlert < 2 * 60 * 60 * 1000) continue; // 2hr cooldown
+
+          const emoji = narrative.momentum > 80 ? '🔥' : '📈';
+          const title = `${emoji} ${narrative.narrative} Narrative Surging`;
+          const body = `Momentum: ${narrative.momentum}% (+${momentumChange.toFixed(0)}%)\nSocial Buzz: ${narrative.socialBuzz}%\n\nTop tokens: ${narrative.topTokens.slice(0, 3).join(', ')}\n\n${narrative.description}`;
+
+          await pushNotificationService.sendToAll({
+            title,
+            body,
+            url: '/discover',
+            tag: `narrative-${narrative.narrative}`,
+            requireInteraction: true,
+            actions: [
+              { action: 'view', title: '📊 View' },
+              { action: 'trade', title: '⚡ Trade' }
+            ]
+          }, 'narrative_momentum');
+
+          this.lastNarrativeMomentum.set(narrative.narrative, now);
+          console.log(`📈 Narrative alert: ${narrative.narrative} +${momentumChange.toFixed(0)}%`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to check narrative momentum:', error);
+    }
+  }
+
+  async checkCTAlphaSignals(): Promise<void> {
+    try {
+      const signals = await alphaIntelligenceService.getCTAlphaFeed();
+      const now = Date.now();
+
+      // Only push high-confidence signals
+      const highConfidenceSignals = signals.filter(s => s.confidence >= this.CT_CONFIDENCE_THRESHOLD);
+
+      for (const signal of highConfidenceSignals.slice(0, 2)) {
+        const lastAlert = this.lastCTAlphaSignals.get(signal.id) || 0;
+        if (now - lastAlert < 60 * 60 * 1000) continue; // 1hr cooldown per signal
+
+        const sentimentEmoji = signal.sentiment === 'bullish' ? '🟢' : signal.sentiment === 'bearish' ? '🔴' : '🟡';
+        const title = `🐦 CT Alpha: ${signal.influencer}`;
+        const body = `${sentimentEmoji} ${signal.signal}\n\n${signal.token ? `Token: ${signal.token}\n` : ''}Confidence: ${signal.confidence}%\nEngagement: ${signal.engagement.toLocaleString()}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `ct-alpha-${signal.id}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'view', title: '👀 View' },
+            { action: 'trade', title: '⚡ Trade' }
+          ]
+        }, 'ct_alpha');
+
+        this.lastCTAlphaSignals.set(signal.id, now);
+        console.log(`🐦 CT Alpha alert: ${signal.influencer} - ${signal.sentiment}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check CT alpha signals:', error);
+    }
+  }
+
+  async checkTokenUnlocks(): Promise<void> {
+    try {
+      const unlocks = await alphaIntelligenceService.getTokenUnlocks();
+      const now = Date.now();
+
+      for (const unlock of unlocks) {
+        const unlockTime = new Date(unlock.unlockDate).getTime();
+        const hoursUntil = (unlockTime - now) / (60 * 60 * 1000);
+
+        // Alert 24h and 1h before
+        const shouldAlert24h = hoursUntil <= 24 && hoursUntil > 23;
+        const shouldAlert1h = hoursUntil <= 1 && hoursUntil > 0;
+
+        if (!shouldAlert24h && !shouldAlert1h) continue;
+
+        const lastAlert = this.lastTokenUnlockAlerts.get(unlock.id) || 0;
+        const cooldown = shouldAlert1h ? 30 * 60 * 1000 : 12 * 60 * 60 * 1000;
+        if (now - lastAlert < cooldown) continue;
+
+        const impactEmoji = unlock.priceImpact === 'high' ? '🔴' : unlock.priceImpact === 'medium' ? '🟡' : '🟢';
+        const timeLabel = shouldAlert1h ? '⚠️ 1 HOUR' : '📅 24 HOURS';
+        const title = `🔓 ${unlock.symbol} Unlock ${timeLabel}`;
+        const body = `Amount: ${(unlock.amount / 1_000_000).toFixed(1)}M tokens\nValue: $${(unlock.valueUsd / 1_000_000).toFixed(1)}M (${unlock.percentOfSupply.toFixed(1)}% of supply)\n\n${impactEmoji} Impact: ${unlock.priceImpact.toUpperCase()}\n📉 Predicted move: ${unlock.predictedMove}%`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `unlock-${unlock.id}-${shouldAlert1h ? '1h' : '24h'}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'prepare', title: '🎯 Prepare' },
+            { action: 'dismiss', title: '✓ OK' }
+          ]
+        }, 'token_unlock');
+
+        this.lastTokenUnlockAlerts.set(unlock.id, now);
+        console.log(`🔓 Token unlock alert: ${unlock.symbol} in ${hoursUntil.toFixed(0)}h`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check token unlocks:', error);
+    }
+  }
+
+  async checkAirdropOpportunities(): Promise<void> {
+    try {
+      const airdrops = await alphaIntelligenceService.getAirdropRadar();
+      const now = Date.now();
+
+      // Only alert on confirmed or high-value speculated airdrops
+      const notableAirdrops = airdrops.filter(a => 
+        a.status === 'confirmed' || (a.status === 'speculated' && a.difficulty !== 'hard')
+      );
+
+      if (notableAirdrops.length === 0) return;
+
+      // Check daily cooldown
+      const lastDailyAlert = this.lastAirdropAlerts.get('daily') || 0;
+      if (now - lastDailyAlert < 23 * 60 * 60 * 1000) return;
+
+      const confirmedCount = notableAirdrops.filter(a => a.status === 'confirmed').length;
+      const title = `🎁 Airdrop Radar: ${notableAirdrops.length} Opportunities`;
+      
+      let body = '';
+      for (const airdrop of notableAirdrops.slice(0, 3)) {
+        const statusEmoji = airdrop.status === 'confirmed' ? '✅' : airdrop.status === 'ongoing' ? '🔄' : '🔮';
+        body += `${statusEmoji} ${airdrop.project} (${airdrop.chain})\n   Est: ${airdrop.estimatedValue} · ${airdrop.difficulty}\n\n`;
+      }
+
+      await pushNotificationService.sendToAll({
+        title,
+        body: body.trim(),
+        url: '/discover',
+        tag: `airdrops-${new Date().toDateString()}`,
+        requireInteraction: false,
+        actions: [
+          { action: 'view_all', title: '🎁 View All' },
+          { action: 'dismiss', title: '✓ OK' }
+        ]
+      }, 'airdrop_radar');
+
+      this.lastAirdropAlerts.set('daily', now);
+      console.log(`🎁 Airdrop radar: ${notableAirdrops.length} opportunities pushed`);
+    } catch (error) {
+      console.error('❌ Failed to check airdrop opportunities:', error);
+    }
+  }
+
+  async checkGovernanceAlerts(): Promise<void> {
+    try {
+      const proposals = await alphaIntelligenceService.getGovernancePulse();
+      const now = Date.now();
+
+      // Focus on active proposals with high price impact nearing deadline
+      const criticalProposals = proposals.filter(p => {
+        if (p.status !== 'active' || p.priceImpact !== 'high') return false;
+        const deadline = new Date(p.deadline).getTime();
+        const hoursLeft = (deadline - now) / (60 * 60 * 1000);
+        return hoursLeft > 0 && hoursLeft <= 24; // Within 24 hours
+      });
+
+      for (const proposal of criticalProposals) {
+        const lastAlert = this.lastGovernanceAlerts.get(proposal.id) || 0;
+        if (now - lastAlert < 6 * 60 * 60 * 1000) continue; // 6hr cooldown
+
+        const deadline = new Date(proposal.deadline);
+        const hoursLeft = Math.round((deadline.getTime() - now) / (60 * 60 * 1000));
+        const quorumReached = (proposal.votesFor + proposal.votesAgainst) >= proposal.quorum;
+        const passing = proposal.votesFor > proposal.votesAgainst;
+
+        const statusEmoji = passing ? '🟢' : '🔴';
+        const title = `🗳️ Critical Vote: ${proposal.protocol}`;
+        const body = `${proposal.title}\n\n${statusEmoji} ${passing ? 'Passing' : 'Failing'} · ${quorumReached ? '✅ Quorum reached' : '⚠️ Needs quorum'}\n⏰ ${hoursLeft}h remaining\n\n${proposal.summary}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `governance-${proposal.id}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'vote', title: '🗳️ Vote' },
+            { action: 'view', title: '👀 View' }
+          ]
+        }, 'governance');
+
+        this.lastGovernanceAlerts.set(proposal.id, now);
+        console.log(`🗳️ Governance alert: ${proposal.protocol} - ${hoursLeft}h left`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check governance alerts:', error);
+    }
+  }
+
+  async checkVCWalletActivity(): Promise<void> {
+    try {
+      const activities = await alphaIntelligenceService.getVCWalletActivity();
+      const now = Date.now();
+
+      // Focus on major moves
+      const majorMoves = activities.filter(a => 
+        a.significance === 'major' && a.valueUsd >= this.VC_WALLET_MIN_VALUE
+      );
+
+      for (const activity of majorMoves.slice(0, 2)) {
+        const lastAlert = this.lastVCWalletAlerts.get(activity.id) || 0;
+        if (now - lastAlert < 30 * 60 * 1000) continue; // 30min cooldown
+
+        const actionEmoji = activity.action === 'buy' ? '🟢' : activity.action === 'sell' ? '🔴' : '↔️';
+        const actionText = activity.action.toUpperCase();
+        const title = `💼 ${activity.fund} ${actionText} Alert`;
+        const body = `${actionEmoji} ${activity.token}: $${this.formatLargeNumber(activity.valueUsd)}\n${activity.amount.toLocaleString()} tokens\n\nTx: ${activity.txHash}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `vc-${activity.id}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'view_tx', title: '🔗 View' },
+            { action: 'trade', title: '⚡ Trade' }
+          ]
+        }, 'vc_wallet');
+
+        this.lastVCWalletAlerts.set(activity.id, now);
+        console.log(`💼 VC alert: ${activity.fund} ${activity.action} ${activity.token}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check VC wallet activity:', error);
+    }
+  }
+
+  async checkExchangeFlowAnomalies(): Promise<void> {
+    try {
+      const flows = await alphaIntelligenceService.getExchangeFlows();
+      const now = Date.now();
+
+      for (const flow of flows) {
+        // Alert on significant net flows (accumulation or distribution)
+        const netFlowAbs = Math.abs(flow.netFlow);
+        if (netFlowAbs < 3000) continue; // Minimum 3000 BTC equivalent
+
+        const lastAlert = this.lastExchangeFlowAlerts.get(flow.exchange) || 0;
+        if (now - lastAlert < 2 * 60 * 60 * 1000) continue; // 2hr cooldown
+
+        const trendEmoji = flow.trend === 'accumulation' ? '🟢' : flow.trend === 'distribution' ? '🔴' : '🟡';
+        const flowDirection = flow.netFlow < 0 ? 'OUT' : 'IN';
+        const title = `🏦 ${flow.exchange}: ${Math.abs(flow.netFlow).toLocaleString()} BTC ${flowDirection}`;
+        const body = `${trendEmoji} Trend: ${flow.trend.toUpperCase()}\n\nInflow 24h: ${flow.inflow24h.toLocaleString()} BTC\nOutflow 24h: ${flow.outflow24h.toLocaleString()} BTC\n7d Change: ${flow.change7d > 0 ? '+' : ''}${flow.change7d.toFixed(1)}%`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `exchange-${flow.exchange}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'view', title: '📊 View' },
+            { action: 'trade', title: '⚡ Trade' }
+          ]
+        }, 'exchange_flow');
+
+        this.lastExchangeFlowAlerts.set(flow.exchange, now);
+        console.log(`🏦 Exchange flow alert: ${flow.exchange} ${flow.trend}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check exchange flow anomalies:', error);
+    }
+  }
+
+  async pushAITradeIdeas(): Promise<void> {
+    try {
+      const now = Date.now();
+      if (now - this.lastAITradeIdeas < 3 * 60 * 60 * 1000) return; // 3hr cooldown
+
+      const ideas = await alphaIntelligenceService.getAITradeIdeas();
+      if (ideas.length === 0) return;
+
+      const topIdea = ideas[0];
+      const directionEmoji = topIdea.direction === 'long' ? '🟢' : '🔴';
+      const title = `💡 AI Trade Idea: ${topIdea.asset} ${topIdea.direction.toUpperCase()}`;
+      const body = `${directionEmoji} Entry: $${topIdea.entry.toLocaleString()}\n🎯 Target: $${topIdea.target.toLocaleString()}\n🛡️ Stop: $${topIdea.stopLoss.toLocaleString()}\n\nR:R ${topIdea.riskReward.toFixed(1)}:1 · Confidence: ${topIdea.confidence}%\n\n${topIdea.reasoning}`;
+
+      await pushNotificationService.sendToAll({
+        title,
+        body,
+        url: '/discover',
+        tag: `trade-idea-${topIdea.id}`,
+        requireInteraction: true,
+        actions: [
+          { action: 'trade', title: '⚡ Trade' },
+          { action: 'view_all', title: '📊 More' }
+        ]
+      }, 'ai_trade_idea');
+
+      this.lastAITradeIdeas = now;
+      console.log(`💡 AI trade idea pushed: ${topIdea.asset} ${topIdea.direction}`);
+    } catch (error) {
+      console.error('❌ Failed to push AI trade ideas:', error);
+    }
+  }
+
+  async checkEventImpacts(): Promise<void> {
+    try {
+      const events = await alphaIntelligenceService.getEventImpactPredictions();
+      const now = Date.now();
+
+      for (const event of events) {
+        const eventTime = new Date(event.date).getTime();
+        const hoursUntil = (eventTime - now) / (60 * 60 * 1000);
+
+        // Alert 24-48h before high-impact events
+        if (hoursUntil < 24 || hoursUntil > 48) continue;
+        if (Math.abs(event.predictedImpact) < 5) continue; // Only 5%+ predicted moves
+
+        const lastAlert = this.lastEventImpactAlerts.get(event.id) || 0;
+        if (now - lastAlert < 12 * 60 * 60 * 1000) continue; // 12hr cooldown
+
+        const impactEmoji = event.predictedImpact > 0 ? '📈' : '📉';
+        const title = `📅 Event Alert: ${event.event}`;
+        const body = `⏰ ${Math.round(hoursUntil)}h away\n\n${impactEmoji} Predicted impact: ${event.predictedImpact > 0 ? '+' : ''}${event.predictedImpact}%\nConfidence: ${event.confidence}%\n\nAffected: ${event.affectedAssets.join(', ')}\n\n${event.analysis}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `event-${event.id}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'prepare', title: '🎯 Prepare' },
+            { action: 'view', title: '📊 Details' }
+          ]
+        }, 'event_impact');
+
+        this.lastEventImpactAlerts.set(event.id, now);
+        console.log(`📅 Event impact alert: ${event.event} in ${Math.round(hoursUntil)}h`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check event impacts:', error);
+    }
+  }
+
+  async checkMarketAnomalies(): Promise<void> {
+    try {
+      const anomalies = await alphaIntelligenceService.getAnomalies();
+      const now = Date.now();
+
+      // Only alert on critical and warning severity
+      const significantAnomalies = anomalies.filter(a => 
+        a.severity === 'critical' || a.severity === 'warning'
+      );
+
+      for (const anomaly of significantAnomalies.slice(0, 2)) {
+        const lastAlert = this.lastAnomalyAlerts.get(anomaly.id) || 0;
+        const cooldown = anomaly.severity === 'critical' ? 15 * 60 * 1000 : 60 * 60 * 1000;
+        if (now - lastAlert < cooldown) continue;
+
+        const severityEmoji = anomaly.severity === 'critical' ? '🚨' : '⚠️';
+        const title = `${severityEmoji} Market Anomaly: ${anomaly.type}`;
+        const body = `Asset: ${anomaly.asset}\n\n${anomaly.description}\n\n💡 ${anomaly.recommendation}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `anomaly-${anomaly.id}`,
+          requireInteraction: anomaly.severity === 'critical',
+          actions: [
+            { action: 'view', title: '📊 Analyze' },
+            { action: 'trade', title: '⚡ Act' }
+          ]
+        }, 'anomaly');
+
+        this.lastAnomalyAlerts.set(anomaly.id, now);
+        console.log(`${severityEmoji} Anomaly alert: ${anomaly.type} on ${anomaly.asset}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check market anomalies:', error);
+    }
+  }
+
+  async sendConferenceReminders(): Promise<void> {
+    try {
+      const conferences = await alphaIntelligenceService.getCryptoConferences();
+      const now = Date.now();
+
+      // Get conferences in the next 2 weeks
+      const upcomingConferences = conferences.filter(c => {
+        const startDate = new Date(c.startDate).getTime();
+        const daysUntil = (startDate - now) / (24 * 60 * 60 * 1000);
+        return daysUntil > 0 && daysUntil <= 14;
+      });
+
+      if (upcomingConferences.length === 0) return;
+
+      const title = `🎤 Crypto Conferences This Week`;
+      let body = '';
+      for (const conf of upcomingConferences.slice(0, 3)) {
+        const startDate = new Date(conf.startDate);
+        const tierEmoji = conf.tier === 'major' ? '⭐' : '📍';
+        body += `${tierEmoji} ${conf.name}\n   ${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${conf.location}\n   ${conf.relevantTokens.slice(0, 3).join(', ')}\n\n`;
+      }
+
+      await pushNotificationService.sendToAll({
+        title,
+        body: body.trim(),
+        url: '/discover',
+        tag: `conferences-weekly`,
+        requireInteraction: false,
+        actions: [
+          { action: 'view_all', title: '📅 Calendar' },
+          { action: 'dismiss', title: '✓ OK' }
+        ]
+      }, 'conference');
+
+      console.log(`🎤 Conference reminders: ${upcomingConferences.length} upcoming`);
+    } catch (error) {
+      console.error('❌ Failed to send conference reminders:', error);
+    }
+  }
+
+  async checkTechStockAlerts(): Promise<void> {
+    try {
+      const { gainers, losers } = await stockMarketService.getTechAiMovers();
+      const now = Date.now();
+
+      // Alert on big movers (threshold-based)
+      const bigMovers = [...gainers, ...losers].filter(s => 
+        Math.abs(s.changePercent) >= this.STOCK_MOVE_THRESHOLD
+      );
+
+      for (const stock of bigMovers.slice(0, 2)) {
+        const lastAlert = this.lastStockAlerts.get(stock.symbol) || 0;
+        if (now - lastAlert < 2 * 60 * 60 * 1000) continue; // 2hr cooldown
+
+        const directionEmoji = stock.changePercent > 0 ? '🟢' : '🔴';
+        const title = `📊 ${stock.symbol} ${stock.changePercent > 0 ? 'Surging' : 'Dropping'}`;
+        const body = `${stock.name}\n\n${directionEmoji} ${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(1)}%\n💵 $${stock.price.toFixed(2)}\n\nSector: ${stock.sector}`;
+
+        await pushNotificationService.sendToAll({
+          title,
+          body,
+          url: '/discover',
+          tag: `stock-${stock.symbol}`,
+          requireInteraction: false,
+          actions: [
+            { action: 'view', title: '📊 View' },
+            { action: 'trade', title: '⚡ Trade' }
+          ]
+        }, 'tech_stock');
+
+        this.lastStockAlerts.set(stock.symbol, now);
+        console.log(`📊 Tech stock alert: ${stock.symbol} ${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(1)}%`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check tech stock alerts:', error);
     }
   }
 
