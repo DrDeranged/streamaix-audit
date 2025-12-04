@@ -12017,6 +12017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: liveStreams.description,
         streamType: liveStreams.streamType,
         hostId: liveStreams.hostId,
+        hostAvatarId: liveStreams.hostAvatarId,
         status: liveStreams.status,
         currentViewers: liveStreams.currentViewers,
         peakViewers: liveStreams.peakViewers,
@@ -12033,13 +12034,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .orderBy(desc(liveStreams.currentViewers))
       .limit(20);
       
-      // Enrich with host info
+      // Enrich with host info - prioritize Knowledge Avatar if available
       const enrichedStreams = await Promise.all(streams.map(async (stream) => {
+        // First check if this is a Knowledge Avatar stream
+        if (stream.hostAvatarId) {
+          const [avatar] = await db.select({
+            name: knowledgeAvatars.name,
+            handle: knowledgeAvatars.handle,
+            imageUrl: knowledgeAvatars.imageUrl,
+            expertise: knowledgeAvatars.expertise,
+            verificationStatus: knowledgeAvatars.verificationStatus,
+          })
+          .from(knowledgeAvatars)
+          .where(eq(knowledgeAvatars.id, stream.hostAvatarId))
+          .limit(1);
+          
+          if (avatar) {
+            return {
+              ...stream,
+              hostUsername: avatar.name,
+              hostHandle: avatar.handle,
+              hostAvatar: avatar.imageUrl,
+              hostExpertise: avatar.expertise,
+              isKnowledgeAvatar: true,
+              isVerified: avatar.verificationStatus === 'verified',
+            };
+          }
+        }
+        
+        // Fall back to regular user
         const host = await storage.getUser(stream.hostId);
         return {
           ...stream,
-          hostUsername: host?.username,
+          hostUsername: host?.username || 'Anonymous',
           hostAvatar: host?.avatar,
+          isKnowledgeAvatar: false,
+          isVerified: false,
         };
       }));
       
@@ -12058,6 +12088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: liveStreams.description,
         streamType: liveStreams.streamType,
         hostId: liveStreams.hostId,
+        hostAvatarId: liveStreams.hostAvatarId,
         status: liveStreams.status,
         category: liveStreams.category,
         tags: liveStreams.tags,
@@ -12069,13 +12100,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .orderBy(asc(liveStreams.scheduledStart))
       .limit(20);
       
-      // Enrich with host info
+      // Enrich with host info - prioritize Knowledge Avatar if available
       const enrichedStreams = await Promise.all(streams.map(async (stream) => {
+        if (stream.hostAvatarId) {
+          const [avatar] = await db.select({
+            name: knowledgeAvatars.name,
+            handle: knowledgeAvatars.handle,
+            imageUrl: knowledgeAvatars.imageUrl,
+            expertise: knowledgeAvatars.expertise,
+            verificationStatus: knowledgeAvatars.verificationStatus,
+          })
+          .from(knowledgeAvatars)
+          .where(eq(knowledgeAvatars.id, stream.hostAvatarId))
+          .limit(1);
+          
+          if (avatar) {
+            return {
+              ...stream,
+              hostUsername: avatar.name,
+              hostHandle: avatar.handle,
+              hostAvatar: avatar.imageUrl,
+              hostExpertise: avatar.expertise,
+              isKnowledgeAvatar: true,
+              isVerified: avatar.verificationStatus === 'verified',
+            };
+          }
+        }
+        
         const host = await storage.getUser(stream.hostId);
         return {
           ...stream,
-          hostUsername: host?.username,
+          hostUsername: host?.username || 'Anonymous',
           hostAvatar: host?.avatar,
+          isKnowledgeAvatar: false,
+          isVerified: false,
         };
       }));
       
@@ -12084,6 +12142,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, streams: [] });
     }
   }));
+
+  // Helper function to enrich stream with Knowledge Avatar or user info
+  async function enrichStreamWithHostInfo(stream: any) {
+    if (stream.hostAvatarId) {
+      const [avatar] = await db.select({
+        name: knowledgeAvatars.name,
+        handle: knowledgeAvatars.handle,
+        imageUrl: knowledgeAvatars.imageUrl,
+        expertise: knowledgeAvatars.expertise,
+        verificationStatus: knowledgeAvatars.verificationStatus,
+      })
+      .from(knowledgeAvatars)
+      .where(eq(knowledgeAvatars.id, stream.hostAvatarId))
+      .limit(1);
+      
+      if (avatar) {
+        return {
+          ...stream,
+          hostUsername: avatar.name,
+          hostHandle: avatar.handle,
+          hostAvatar: avatar.imageUrl,
+          hostExpertise: avatar.expertise,
+          isKnowledgeAvatar: true,
+          isVerified: avatar.verificationStatus === 'verified',
+        };
+      }
+    }
+    
+    const host = await storage.getUser(stream.hostId);
+    return {
+      ...stream,
+      hostUsername: host?.username || 'Anonymous',
+      hostAvatar: host?.avatar,
+      isKnowledgeAvatar: false,
+      isVerified: false,
+    };
+  }
 
   // Get past/ended streams
   app.get("/api/streams/ended", asyncHandler(async (req: Request, res: Response) => {
@@ -12096,6 +12191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: liveStreams.description,
         streamType: liveStreams.streamType,
         hostId: liveStreams.hostId,
+        hostAvatarId: liveStreams.hostAvatarId,
         status: liveStreams.status,
         currentViewers: liveStreams.currentViewers,
         peakViewers: liveStreams.peakViewers,
@@ -12113,15 +12209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .orderBy(desc(liveStreams.actualEnd))
       .limit(Number(limit));
       
-      // Enrich with host info
-      const enrichedStreams = await Promise.all(streams.map(async (stream) => {
-        const host = await storage.getUser(stream.hostId);
-        return {
-          ...stream,
-          hostUsername: host?.username,
-          hostAvatar: host?.avatar,
-        };
-      }));
+      const enrichedStreams = await Promise.all(streams.map(enrichStreamWithHostInfo));
       
       res.json({ success: true, streams: enrichedStreams });
     } catch (error: any) {
@@ -12134,21 +12222,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { type, status, limit = 50 } = req.query;
     
     try {
-      let query = db.select().from(liveStreams);
-      
-      const streams = await query
+      const streams = await db.select()
+        .from(liveStreams)
         .orderBy(desc(liveStreams.createdAt))
         .limit(Number(limit));
       
-      // Enrich with host info
-      const enrichedStreams = await Promise.all(streams.map(async (stream) => {
-        const host = await storage.getUser(stream.hostId);
-        return {
-          ...stream,
-          hostUsername: host?.username,
-          hostAvatar: host?.avatar,
-        };
-      }));
+      const enrichedStreams = await Promise.all(streams.map(enrichStreamWithHostInfo));
       
       res.json({ success: true, streams: enrichedStreams });
     } catch (error: any) {
@@ -12168,8 +12247,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ success: false, error: 'Stream not found' });
       }
       
-      const host = await storage.getUser(stream.hostId);
-      
       // Get participant count
       const [{ count }] = await db.select({ count: sql<number>`count(*)` })
         .from(streamParticipants)
@@ -12178,12 +12255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eq(streamParticipants.isActive, true)
         ));
       
+      // Enrich with Knowledge Avatar or user info
+      const enrichedStream = await enrichStreamWithHostInfo(stream);
+      
       res.json({ 
         success: true, 
         stream: {
-          ...stream,
-          hostUsername: host?.username,
-          hostAvatar: host?.avatar,
+          ...enrichedStream,
           participantCount: Number(count),
         }
       });

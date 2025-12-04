@@ -55,7 +55,11 @@ interface LiveStream {
   streamType: string;
   hostId: string;
   hostUsername?: string;
+  hostHandle?: string;
   hostAvatar?: string;
+  hostExpertise?: string;
+  isKnowledgeAvatar?: boolean;
+  isVerified?: boolean;
   status: string;
   currentViewers: number;
   totalViews?: number;
@@ -77,7 +81,11 @@ interface PastStream {
   streamType: string;
   hostId: string;
   hostUsername?: string;
+  hostHandle?: string;
   hostAvatar?: string;
+  hostExpertise?: string;
+  isKnowledgeAvatar?: boolean;
+  isVerified?: boolean;
   status: string;
   peakViewers?: number;
   category?: string;
@@ -261,8 +269,16 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
               <h3 className="text-lg sm:text-xl font-bold text-white line-clamp-2 group-hover:text-purple-200 transition-colors leading-tight">
                 {stream.title}
               </h3>
-              <div className="flex items-center gap-3 mt-2">
-                <span className="text-sm text-slate-300 font-medium">{stream.hostUsername || 'Anonymous'}</span>
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-slate-300 font-medium">{stream.hostUsername || 'Anonymous'}</span>
+                  {stream.isKnowledgeAvatar && (
+                    <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                  )}
+                  {stream.hostHandle && (
+                    <span className="text-xs text-slate-500">@{stream.hostHandle}</span>
+                  )}
+                </div>
                 {stream.category && (
                   <Badge variant="outline" className="text-xs text-slate-400 border-slate-600 capitalize">
                     {stream.category}
@@ -273,6 +289,9 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
                   {formatLiveTime(stream.actualStart)}
                 </span>
               </div>
+              {stream.hostExpertise && (
+                <p className="text-xs text-slate-400 mt-1.5 line-clamp-1">{stream.hostExpertise}</p>
+              )}
             </div>
           </div>
         </div>
@@ -384,7 +403,16 @@ const StreamCard = memo(function StreamCard({
               </div>
             )}
 
-            {stream.isAiHost && (
+            {stream.isKnowledgeAvatar && (
+              <div className="absolute top-3 right-3">
+                <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white text-[10px] px-2 py-0.5 font-medium shadow-lg shadow-cyan-500/30">
+                  <Shield className="w-3 h-3 mr-1" />
+                  KA
+                </Badge>
+              </div>
+            )}
+
+            {stream.isAiHost && !stream.isKnowledgeAvatar && (
               <div className="absolute top-3 right-3">
                 <Badge className="bg-cyan-500/90 text-white text-[10px] px-2 py-0.5 font-medium">
                   <Bot className="w-3 h-3 mr-1" />
@@ -394,7 +422,7 @@ const StreamCard = memo(function StreamCard({
             )}
 
             {stream.tags?.includes('alpha') && (
-              <div className={cn("absolute top-3", stream.isAiHost ? "right-12" : "right-3")}>
+              <div className={cn("absolute top-3", (stream.isKnowledgeAvatar || stream.isAiHost) ? "right-12" : "right-3")}>
                 <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-2 py-0.5 font-medium animate-pulse">
                   <Sparkles className="w-3 h-3 mr-1" />
                   ALPHA
@@ -443,9 +471,20 @@ const StreamCard = memo(function StreamCard({
                 <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-purple-300 transition-colors leading-snug">
                   {stream.title}
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  {stream.hostUsername || 'Anonymous'}
-                </p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-xs text-slate-300 font-medium">
+                    {stream.hostUsername || 'Anonymous'}
+                  </span>
+                  {stream.isKnowledgeAvatar && (
+                    <Shield className="w-3 h-3 text-cyan-400" />
+                  )}
+                  {stream.hostHandle && (
+                    <span className="text-xs text-slate-500">@{stream.hostHandle}</span>
+                  )}
+                </div>
+                {stream.hostExpertise && (
+                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{stream.hostExpertise}</p>
+                )}
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   <Badge variant="outline" className={cn(
                     "text-[10px] capitalize font-medium",
