@@ -615,6 +615,37 @@ export default function Discover() {
     refetchInterval: 120000, // 2 minutes
   });
 
+  // Alpha Features Data
+  const { data: derivativesData } = useQuery({
+    queryKey: ['/api/market/derivatives'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const { data: onchainData } = useQuery({
+    queryKey: ['/api/market/onchain'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  const { data: volatilityData } = useQuery({
+    queryKey: ['/api/market/volatility'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  const { data: categoryData } = useQuery({
+    queryKey: ['/api/market/categories'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  const { data: aiPredictionsData } = useQuery({
+    queryKey: ['/api/market/ai-predictions'],
+    refetchInterval: 900000, // 15 minutes
+  });
+
+  const { data: apiUsageData } = useQuery({
+    queryKey: ['/api/market/coingecko/usage'],
+    refetchInterval: 60000, // 1 minute
+  });
+
   // Extract data
   const markets = (marketsData as any)?.markets || [];
   const leaderboard = (leaderboardData as any)?.leaderboard || [];
@@ -671,6 +702,14 @@ export default function Discover() {
   const cgGlobal = (cgGlobalData as any)?.data || null;
   const cgGainers = (cgMoversData as any)?.gainers || [];
   const cgLosers = (cgMoversData as any)?.losers || [];
+
+  // Alpha features data
+  const derivatives = (derivativesData as any)?.data || null;
+  const onchain = (onchainData as any)?.data || null;
+  const volatility = (volatilityData as any)?.data || null;
+  const categories = (categoryData as any)?.data || null;
+  const aiPredictions = (aiPredictionsData as any)?.data || null;
+  const apiUsage = (apiUsageData as any)?.stats || null;
 
   // Process markets data
   const activeMarkets = markets.filter((m: PredictionMarket) => m.status === 'active');
@@ -1150,6 +1189,313 @@ export default function Discover() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* =================================================================== */}
+        {/* ALPHA DASHBOARD - Derivatives, On-Chain, Volatility */}
+        {/* =================================================================== */}
+        
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/30 to-purple-500/30 rounded-lg blur-lg" />
+                <div className="relative p-2 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/30">
+                  <Cpu className="w-5 h-5 text-violet-400" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-lg font-orbitron font-bold text-white">Alpha Dashboard</h2>
+                <p className="text-xs text-gray-400">Advanced Market Intelligence</p>
+              </div>
+            </div>
+            {apiUsage && (
+              <div className="flex items-center gap-2">
+                <div className="text-right">
+                  <p className="text-xs text-gray-400">API Budget</p>
+                  <p className="text-sm font-medium text-white">
+                    {((apiUsage.coingecko_pro?.count || 0) / 1000).toFixed(1)}k / 100k
+                  </p>
+                </div>
+                <div className="w-16 h-2 bg-gray-700/50 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
+                    style={{ width: `${Math.min((apiUsage.coingecko_pro?.count || 0) / 1000, 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Derivatives Deep Dive */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 to-blue-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-indigo-500/30 transition-all h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Scale className="w-4 h-4 text-indigo-400" />
+                    <span className="text-sm font-medium text-white">Derivatives</span>
+                  </div>
+                  <Badge className={`text-xs px-2 ${
+                    derivatives?.fundingRateSummary?.sentiment === 'bullish' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                    derivatives?.fundingRateSummary?.sentiment === 'bearish' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                    'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                  }`}>
+                    {derivatives?.fundingRateSummary?.sentiment || 'Loading...'}
+                  </Badge>
+                </div>
+                {derivatives && (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">Total Open Interest</span>
+                      <span className="text-sm font-bold text-white">${(derivatives.totalOpenInterest / 1e9).toFixed(2)}B</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">Avg Funding Rate</span>
+                      <span className={`text-sm font-bold ${derivatives.fundingRateSummary.avgFunding >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {derivatives.fundingRateSummary.avgFunding >= 0 ? '+' : ''}{derivatives.fundingRateSummary.avgFunding.toFixed(4)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">Perpetual Premium</span>
+                      <span className={`text-sm font-bold ${derivatives.perpetualPremium >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {derivatives.perpetualPremium >= 0 ? '+' : ''}{derivatives.perpetualPremium.toFixed(3)}%
+                      </span>
+                    </div>
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-xs text-gray-500">Top Exchanges</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {derivatives.derivativesTickers?.slice(0, 4).map((t: any, i: number) => (
+                          <Badge key={i} className="bg-white/5 text-gray-300 text-xs px-1.5">{t.exchange}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* On-Chain Metrics */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-600/10 to-orange-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-amber-500/30 transition-all h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Network className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-medium text-white">On-Chain</span>
+                  </div>
+                  {onchain?.networkHealth && (
+                    <Badge className={`text-xs px-2 ${
+                      onchain.networkHealth.score >= 80 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                      onchain.networkHealth.score >= 60 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                      'bg-red-500/10 text-red-400 border-red-500/30'
+                    }`}>
+                      Health: {onchain.networkHealth.score}%
+                    </Badge>
+                  )}
+                </div>
+                {onchain && (
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Bitcoin</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">NVT</span>
+                          <span className="text-white font-medium">{onchain.btc.nvtRatio.toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">MVRV</span>
+                          <span className={`font-medium ${onchain.btc.mvrv > 2 ? 'text-red-400' : onchain.btc.mvrv < 1 ? 'text-emerald-400' : 'text-white'}`}>
+                            {onchain.btc.mvrv.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Hash Rate</span>
+                          <span className="text-white font-medium">{onchain.btc.hashRate}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Active Addr</span>
+                          <span className="text-white font-medium">{(onchain.btc.activeAddresses / 1000).toFixed(0)}k</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-xs text-gray-500 mb-1">Ethereum</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">NVT</span>
+                          <span className="text-white font-medium">{onchain.eth.nvtRatio.toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Staking</span>
+                          <span className="text-cyan-400 font-medium">{onchain.eth.stakingRatio.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Volatility Index */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-rose-600/10 to-pink-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-rose-500/30 transition-all h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Waves className="w-4 h-4 text-rose-400" />
+                    <span className="text-sm font-medium text-white">Volatility</span>
+                  </div>
+                  {volatility && (
+                    <Badge className={`text-xs px-2 ${
+                      volatility.volTrend === 'increasing' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                      'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                    }`}>
+                      {volatility.volTrend === 'increasing' ? 'Rising' : 'Falling'}
+                    </Badge>
+                  )}
+                </div>
+                {volatility && (
+                  <div className="space-y-3">
+                    <div className="text-center py-2">
+                      <p className="text-xs text-gray-400 mb-1">Crypto Vol Index</p>
+                      <p className="text-3xl font-bold text-white">{volatility.marketVolIndex.toFixed(1)}%</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-2 rounded-lg bg-amber-500/10">
+                        <p className="text-gray-400 mb-0.5">BTC 30d</p>
+                        <p className="text-amber-400 font-bold">{volatility.btcVolatility.realized30d.toFixed(1)}%</p>
+                      </div>
+                      <div className="p-2 rounded-lg bg-blue-500/10">
+                        <p className="text-gray-400 mb-0.5">ETH 30d</p>
+                        <p className="text-blue-400 font-bold">{volatility.ethVolatility.realized30d.toFixed(1)}%</p>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-xs text-gray-500 mb-1">High Vol Assets</p>
+                      <div className="flex gap-1">
+                        {volatility.highVolAssets.map((a: any, i: number) => (
+                          <Badge key={i} className="bg-red-500/10 text-red-400 text-xs px-1.5">
+                            {a.symbol} {a.volatility.toFixed(0)}%
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* AI Price Predictions */}
+          {aiPredictions && aiPredictions.predictions?.length > 0 && (
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-fuchsia-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-medium text-white">AI Price Predictions</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`text-xs px-2 ${
+                      aiPredictions.marketOutlook === 'Bullish' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                      aiPredictions.marketOutlook === 'Bearish' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                      'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    }`}>
+                      {aiPredictions.marketOutlook}
+                    </Badge>
+                    <Badge className={`text-xs px-2 ${
+                      aiPredictions.riskLevel === 'Low' ? 'bg-emerald-500/10 text-emerald-400' :
+                      aiPredictions.riskLevel === 'High' ? 'bg-red-500/10 text-red-400' :
+                      'bg-amber-500/10 text-amber-400'
+                    }`}>
+                      Risk: {aiPredictions.riskLevel}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {aiPredictions.predictions.map((p: any) => (
+                    <div key={p.symbol} className="p-3 rounded-lg bg-white/5 border border-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-bold text-white">{p.symbol}</span>
+                        <Badge className={`text-xs px-1.5 ${
+                          p.trend === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' :
+                          p.trend === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {p.trend}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-1">Current: ${p.currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-500">24h Range</span>
+                          <span className="text-white">${p.prediction24h.low.toFixed(0)} - ${p.prediction24h.high.toFixed(0)}</span>
+                        </div>
+                        <div className="w-full h-1 bg-gray-700/50 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-500"
+                            style={{ width: `${p.prediction24h.confidence}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 text-right">{p.prediction24h.confidence}% confidence</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Category/Sector Performance */}
+          {categories && categories.categories?.length > 0 && (
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-600/10 to-cyan-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-teal-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-teal-400" />
+                    <span className="text-sm font-medium text-white">Sector Performance</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`text-xs px-2 ${
+                      categories.sectorRotation === 'risk-on' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                      categories.sectorRotation === 'risk-off' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                      'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                    }`}>
+                      {categories.sectorRotation === 'risk-on' ? 'Risk On' : categories.sectorRotation === 'risk-off' ? 'Risk Off' : 'Neutral'}
+                    </Badge>
+                    {categories.hotSector && (
+                      <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2">
+                        Hot: {categories.hotSector}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                  {categories.categories.slice(0, 10).map((cat: any, i: number) => (
+                    <div key={i} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                      <p className="text-xs font-medium text-white truncate mb-1">{cat.name}</p>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-sm font-bold ${cat.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {cat.change24h >= 0 ? '+' : ''}{cat.change24h.toFixed(1)}%
+                        </span>
+                        <span className="text-xs text-gray-500">${(cat.marketCap / 1e9).toFixed(1)}B</span>
+                      </div>
+                      <div className="w-full h-0.5 bg-gray-700/50 rounded-full mt-1">
+                        <div 
+                          className={`h-full rounded-full ${cat.change24h >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min(Math.abs(cat.change24h) * 5, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* =================================================================== */}

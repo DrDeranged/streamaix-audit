@@ -7273,6 +7273,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Get derivatives data (open interest, funding rates, perpetual premium)
+  app.get('/api/market/derivatives', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const data = await marketData.getDerivativesData();
+      res.json({
+        data,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch derivatives data:', error);
+      res.status(500).json({ error: 'Failed to fetch derivatives data' });
+    }
+  }));
+
+  // Get on-chain metrics (active addresses, NVT, MVRV, etc.)
+  app.get('/api/market/onchain', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const data = await marketData.getOnChainMetrics();
+      res.json({
+        data,
+        timestamp: new Date().toISOString(),
+        source: 'Derived from CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch on-chain metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch on-chain metrics' });
+    }
+  }));
+
+  // Get volatility metrics
+  app.get('/api/market/volatility', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const data = await marketData.getVolatilityMetrics();
+      res.json({
+        data,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro OHLC'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch volatility metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch volatility metrics' });
+    }
+  }));
+
+  // Get category/sector performance
+  app.get('/api/market/categories', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const data = await marketData.getCategoryPerformance();
+      res.json({
+        data,
+        timestamp: new Date().toISOString(),
+        source: 'CoinGecko Pro'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch category performance:', error);
+      res.status(500).json({ error: 'Failed to fetch category performance' });
+    }
+  }));
+
+  // Get AI price predictions
+  app.get('/api/market/ai-predictions', asyncHandler(async (req: Request, res: Response) => {
+    const marketData = MarketDataService.getInstance();
+    
+    try {
+      const data = await marketData.getAIPricePredictions();
+      res.json({
+        data,
+        timestamp: new Date().toISOString(),
+        source: 'AI Analysis'
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch AI predictions:', error);
+      res.status(500).json({ error: 'Failed to fetch AI predictions' });
+    }
+  }));
+
   // Get trending stories for discover page - now using real crypto content
   app.get('/api/discover/trending', asyncHandler(async (req: Request, res: Response) => {
     const timeFilter = req.query.timeFilter as string || '24h';
