@@ -658,6 +658,12 @@ export default function Discover() {
     refetchInterval: 60000, // 1 minute
   });
 
+  // Tech/AI Stock Data
+  const { data: stockMoversData } = useQuery({
+    queryKey: ['/api/stocks/tech-ai-movers'],
+    refetchInterval: 300000, // 5 minutes
+  });
+
   // Alpha Intelligence Data
   const { data: narrativesData } = useQuery({
     queryKey: ['/api/alpha/narratives'],
@@ -783,6 +789,11 @@ export default function Discover() {
   const categories = (categoryData as any)?.data || null;
   const aiPredictions = (aiPredictionsData as any)?.data || null;
   const apiUsage = (apiUsageData as any)?.stats || null;
+
+  // Tech/AI Stock data
+  const stockGainers = (stockMoversData as any)?.gainers || [];
+  const stockLosers = (stockMoversData as any)?.losers || [];
+  const stockTrending = (stockMoversData as any)?.trending || [];
 
   // Alpha Intelligence data
   const narratives = (narrativesData as any)?.narratives || [];
@@ -1170,83 +1181,85 @@ export default function Discover() {
             </div>
           )}
 
-          {/* Trending + Gainers/Losers Grid */}
+          {/* Tech/AI Stock Movers Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Trending Coins */}
+            {/* Trending Tech/AI Stocks */}
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600/10 to-pink-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-fuchsia-500/30 transition-all h-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 to-purple-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-violet-500/30 transition-all h-full">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-fuchsia-400" />
-                    <span className="text-sm font-medium text-white">Trending Now</span>
+                    <Flame className="w-4 h-4 text-violet-400" />
+                    <span className="text-sm font-medium text-white">Trending Tech/AI</span>
                   </div>
-                  <Badge className="bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/30 text-xs px-2">Hot</Badge>
+                  <Badge className="bg-violet-500/10 text-violet-400 border border-violet-500/30 text-xs px-2">Stocks</Badge>
                 </div>
                 <div className="space-y-2">
-                  {cgTrending.slice(0, 6).map((coin: any, idx: number) => (
-                    <div key={coin.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                  {stockTrending.slice(0, 6).map((stock: any, idx: number) => (
+                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                       <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
-                      <img src={coin.thumb} alt={coin.symbol} className="w-6 h-6 rounded-full" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{coin.name}</p>
-                        <p className="text-xs text-gray-500">{coin.symbol}</p>
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-violet-400">{stock.symbol.slice(0, 2)}</span>
                       </div>
-                      {coin.marketCapRank > 0 && (
-                        <Badge className="bg-white/5 text-gray-400 text-xs px-1.5">#{coin.marketCapRank}</Badge>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{stock.name}</p>
+                        <p className="text-xs text-gray-500">{stock.sector}</p>
+                      </div>
+                      <Badge className={`text-xs px-1.5 ${stock.changePercent >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                        {stock.reason}
+                      </Badge>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Top Gainers */}
+            {/* Stock Gainers */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-green-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-emerald-500/30 transition-all h-full">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    <span className="text-sm font-medium text-white">Top Gainers</span>
+                    <span className="text-sm font-medium text-white">Stock Gainers</span>
                   </div>
-                  <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2">24h</Badge>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2">Tech/AI</Badge>
                 </div>
                 <div className="space-y-2">
-                  {cgGainers.slice(0, 6).map((coin: any, idx: number) => (
-                    <div key={coin.id} className="flex items-center gap-3 p-2 rounded-lg bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors">
+                  {stockGainers.slice(0, 6).map((stock: any, idx: number) => (
+                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-lg bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors">
                       <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{coin.symbol}</p>
-                        <p className="text-xs text-gray-500">${coin.price < 0.01 ? coin.price.toFixed(6) : coin.price.toFixed(2)}</p>
+                        <p className="text-sm font-medium text-white truncate">{stock.symbol}</p>
+                        <p className="text-xs text-gray-500">${stock.price.toFixed(2)}</p>
                       </div>
-                      <span className="text-sm font-bold text-emerald-400">+{coin.change24h.toFixed(1)}%</span>
+                      <span className="text-sm font-bold text-emerald-400">+{stock.changePercent.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Top Losers */}
+            {/* Stock Losers */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-rose-600/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-red-500/30 transition-all h-full">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <TrendingDown className="w-4 h-4 text-red-400" />
-                    <span className="text-sm font-medium text-white">Top Losers</span>
+                    <span className="text-sm font-medium text-white">Stock Losers</span>
                   </div>
-                  <Badge className="bg-red-500/10 text-red-400 border border-red-500/30 text-xs px-2">24h</Badge>
+                  <Badge className="bg-red-500/10 text-red-400 border border-red-500/30 text-xs px-2">Tech/AI</Badge>
                 </div>
                 <div className="space-y-2">
-                  {cgLosers.slice(0, 6).map((coin: any, idx: number) => (
-                    <div key={coin.id} className="flex items-center gap-3 p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 transition-colors">
+                  {stockLosers.slice(0, 6).map((stock: any, idx: number) => (
+                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 transition-colors">
                       <span className="text-xs text-gray-500 w-4">#{idx + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{coin.symbol}</p>
-                        <p className="text-xs text-gray-500">${coin.price < 0.01 ? coin.price.toFixed(6) : coin.price.toFixed(2)}</p>
+                        <p className="text-sm font-medium text-white truncate">{stock.symbol}</p>
+                        <p className="text-xs text-gray-500">${stock.price.toFixed(2)}</p>
                       </div>
-                      <span className="text-sm font-bold text-red-400">{coin.change24h.toFixed(1)}%</span>
+                      <span className="text-sm font-bold text-red-400">{stock.changePercent.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>

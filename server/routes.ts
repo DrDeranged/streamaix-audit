@@ -7359,6 +7359,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // ============================================================
+  // TECH/AI STOCK MARKET ENDPOINTS
+  // ============================================================
+
+  const { stockMarketService } = await import('./services/stockMarketService');
+
+  app.get('/api/stocks/tech-ai-movers', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await stockMarketService.getTechAiMovers();
+      res.json({ success: true, ...data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch tech/AI stock movers:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch stock movers' });
+    }
+  }));
+
+  // ============================================================
   // ALPHA INTELLIGENCE ENDPOINTS
   // ============================================================
 
