@@ -38,9 +38,9 @@ export class AIMarketResolver {
       try {
         await this.resolveExpiredMarkets();
 
-        // Run every 90 minutes (COST OPTIMIZATION: 3x fewer API calls)
-        const delayMs = 90 * 60 * 1000;
-        console.log(`⏱️  Market resolver sleeping for 90 minutes...`);
+        // Run every 12 hours (MAJOR COST OPTIMIZATION: 8x reduction)
+        const delayMs = 12 * 60 * 60 * 1000;
+        console.log(`⏱️  Market resolver sleeping for 12 hours...`);
         await this.sleep(delayMs);
 
       } catch (error) {

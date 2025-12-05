@@ -34,9 +34,9 @@ export class AILiquidityProvider {
       try {
         await this.provideLiquidity();
 
-        // Run every 2 hours (COST OPTIMIZATION: 2.5x fewer API calls)
-        const delayMs = 120 * 60 * 1000;
-        console.log(`⏱️  Liquidity provider sleeping for 2 hours...`);
+        // Run every 12 hours (MAJOR COST OPTIMIZATION: 6x reduction)
+        const delayMs = 12 * 60 * 60 * 1000;
+        console.log(`⏱️  Liquidity provider sleeping for 12 hours...`);
         await this.sleep(delayMs);
 
       } catch (error) {

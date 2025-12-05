@@ -31,11 +31,11 @@ export class AITradingBotService {
       try {
         await this.runTradingCycle();
 
-        // Random delay between 15-30 minutes (reduced from 3-8 to save costs)
-        const delayMinutes = 15 + Math.random() * 15;
+        // Random delay between 5-7 hours (MAJOR COST OPTIMIZATION: ~80% reduction)
+        const delayMinutes = 300 + Math.random() * 120;
         const delayMs = delayMinutes * 60 * 1000;
 
-        console.log(`⏱️  Trading cycle ${this.cycleCount} complete. Next cycle in ${Math.round(delayMinutes)} minutes.`);
+        console.log(`⏱️  Trading cycle ${this.cycleCount} complete. Next cycle in ${Math.round(delayMinutes / 60)} hours.`);
         await this.sleep(delayMs);
 
       } catch (error) {

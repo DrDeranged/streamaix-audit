@@ -39,11 +39,11 @@ export class AutonomousAgentService {
       try {
         await this.runCycle();
         
-        // Random delay between 20-40 minutes (reduced from 5-15 to save costs)
-        const delayMinutes = 20 + Math.random() * 20;
+        // Random delay between 5-7 hours (MAJOR COST OPTIMIZATION: ~80% reduction)
+        const delayMinutes = 300 + Math.random() * 120;
         const delayMs = delayMinutes * 60 * 1000;
         
-        console.log(`⏱️  Cycle ${this.cycleCount} complete. Next cycle in ${Math.round(delayMinutes)} minutes.`);
+        console.log(`⏱️  Cycle ${this.cycleCount} complete. Next cycle in ${Math.round(delayMinutes / 60)} hours.`);
         await this.sleep(delayMs);
         
       } catch (error) {

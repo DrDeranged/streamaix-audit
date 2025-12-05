@@ -37,9 +37,9 @@ export class AITreasuryManager {
       try {
         await this.manageTreasury();
 
-        // Run every 24 hours
-        const delayMs = 24 * 60 * 60 * 1000;
-        console.log(`⏱️  Treasury manager sleeping for 24 hours...`);
+        // Run every 72 hours (MAJOR COST OPTIMIZATION: 3x reduction)
+        const delayMs = 72 * 60 * 60 * 1000;
+        console.log(`⏱️  Treasury manager sleeping for 72 hours...`);
         await this.sleep(delayMs);
 
       } catch (error) {

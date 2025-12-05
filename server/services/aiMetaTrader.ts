@@ -40,9 +40,9 @@ export class AIMetaTrader {
       try {
         await this.findAndExecuteArbitrage();
 
-        // Run every 60 minutes (COST OPTIMIZATION: 3x fewer API calls)
-        const delayMs = 60 * 60 * 1000;
-        console.log(`⏱️  Meta-trader sleeping for 60 minutes...`);
+        // Run every 6 hours (MAJOR COST OPTIMIZATION: 6x reduction)
+        const delayMs = 6 * 60 * 60 * 1000;
+        console.log(`⏱️  Meta-trader sleeping for 6 hours...`);
         await this.sleep(delayMs);
 
       } catch (error) {

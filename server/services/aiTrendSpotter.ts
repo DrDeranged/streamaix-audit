@@ -44,9 +44,9 @@ export class AITrendSpotter {
       try {
         await this.spotTrendsAndCreateMarkets();
 
-        // Run every 12 hours (COST OPTIMIZATION: 50% fewer API calls)
-        const delayMs = 12 * 60 * 60 * 1000;
-        console.log(`⏱️  Trend spotter sleeping for 12 hours...`);
+        // Run every 48 hours (MAJOR COST OPTIMIZATION: 75% reduction)
+        const delayMs = 48 * 60 * 60 * 1000;
+        console.log(`⏱️  Trend spotter sleeping for 48 hours...`);
         await this.sleep(delayMs);
 
       } catch (error) {
