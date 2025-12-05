@@ -350,6 +350,14 @@ export const userFollows = pgTable("user_follows", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Category Follows - Users can follow bounty categories for personalized feed
+export const categoryFollows = pgTable("category_follows", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  category: text("category").notNull(), // DeFi, NFT, Layer2, Gaming, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const summaryComments = pgTable("summary_comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   summaryId: varchar("summary_id").references(() => summaries.id).notNull(),
@@ -1216,6 +1224,11 @@ export const insertUserFollowSchema = createInsertSchema(userFollows).pick({
   followingId: true,
 });
 
+export const insertCategoryFollowSchema = createInsertSchema(categoryFollows).pick({
+  userId: true,
+  category: true,
+});
+
 export const insertSummaryCommentSchema = createInsertSchema(summaryComments).pick({
   summaryId: true,
   userId: true,
@@ -1487,6 +1500,9 @@ export type ReferralSignup = typeof referralSignups.$inferSelect;
 
 export type InsertUserFollow = z.infer<typeof insertUserFollowSchema>;
 export type UserFollow = typeof userFollows.$inferSelect;
+
+export type InsertCategoryFollow = z.infer<typeof insertCategoryFollowSchema>;
+export type CategoryFollow = typeof categoryFollows.$inferSelect;
 
 export type InsertSummaryComment = z.infer<typeof insertSummaryCommentSchema>;
 export type SummaryComment = typeof summaryComments.$inferSelect;
