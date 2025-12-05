@@ -9435,13 +9435,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     // Execute the trade
+    // For buy: tokensOut is shares received, amount is STREAM spent
+    // For sell: amount is shares sold, amountOut is STREAM received
+    const sharesTraded = isBuy ? quote.tokensOut : amount;
+    const streamAmount = isBuy ? amount : quote.amountOut;
+    
     const tradeResult = await predictionMarketService.executeTrade({
       userId,
       marketId,
       outcome: isYes ? 'YES' : 'NO',
       tradeType: isBuy ? 'buy' : 'sell',
-      amount,
-      shares: quote.tokensOut,
+      amount: streamAmount,
+      shares: sharesTraded,
       price: isYes ? market.yesPrice : market.noPrice,
       fee: quote.fee
     });
@@ -9487,7 +9492,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       trade: tradeResult,
       position: updatedPosition,
       quote: {
-        sharesReceived: quote.tokensOut,
+        sharesReceived: isBuy ? quote.tokensOut : amount,
+        streamReceived: isBuy ? 0 : quote.amountOut,
         priceImpact: quote.priceImpact,
         fee: quote.fee
       },
