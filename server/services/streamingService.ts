@@ -5,7 +5,8 @@ import { eq } from 'drizzle-orm';
 import { pushNotificationService } from './pushNotificationService';
 
 interface StreamMessage {
-  type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message';
+  type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 
+        'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice-candidate' | 'request-offer' | 'broadcaster-ready' | 'broadcaster-left';
   streamId: string;
   userId: string;
   username?: string;
@@ -13,6 +14,7 @@ interface StreamMessage {
   isAiAgent?: boolean;
   data?: any;
   timestamp?: number;
+  targetUserId?: string;
 }
 
 interface StreamViewer {
@@ -32,6 +34,8 @@ interface StreamSession {
   hostUsername: string;
   streamTitle: string;
   viewers: Map<string, StreamViewer>;
+  broadcasterWs: WebSocket | null;
+  broadcasterUserId: string | null;
   messages: Array<{
     id: string;
     userId: string;
@@ -96,6 +100,8 @@ export class StreamingService {
         hostUsername: hostUser?.username || 'unknown',
         streamTitle: streamRecord.title || 'Untitled Stream',
         viewers: new Map(),
+        broadcasterWs: null,
+        broadcasterUserId: null,
         messages: [],
         tips: [],
         isLive: streamRecord.status === 'live',
@@ -305,7 +311,125 @@ export class StreamingService {
           data: message.data,
         });
         break;
+
+      // WebRTC Signaling for live video streaming
+      case 'broadcaster-ready':
+        // Host is ready to broadcast - store their WebSocket for signaling
+        session.broadcasterWs = this.getViewerWs(session, userId);
+        session.broadcasterUserId = userId;
+        console.log(`[WebRTC] Broadcaster ${username} is ready for stream ${streamId}`);
+        
+        // Notify all existing viewers that broadcaster is ready
+        this.broadcastToStream(streamId, {
+          type: 'broadcaster-ready',
+          streamId,
+          userId,
+          username,
+          timestamp: Date.now(),
+        }, userId);
+        break;
+
+      case 'request-offer':
+        // Viewer is requesting an offer from broadcaster
+        if (session.broadcasterWs && session.broadcasterWs.readyState === WebSocket.OPEN) {
+          session.broadcasterWs.send(JSON.stringify({
+            type: 'request-offer',
+            streamId,
+            userId,
+            username,
+            data: { viewerId: userId, viewerKey: message.data?.viewerKey },
+          }));
+          console.log(`[WebRTC] Viewer ${username} requesting offer from broadcaster`);
+        } else {
+          // Broadcaster not ready yet, notify viewer
+          const viewerWs = this.getViewerWs(session, userId);
+          if (viewerWs) {
+            viewerWs.send(JSON.stringify({
+              type: 'broadcaster-not-ready',
+              streamId,
+            }));
+          }
+        }
+        break;
+
+      case 'webrtc-offer':
+        // Broadcaster sending offer to specific viewer
+        if (message.targetUserId) {
+          const targetWs = this.getViewerWs(session, message.targetUserId);
+          if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+            targetWs.send(JSON.stringify({
+              type: 'webrtc-offer',
+              streamId,
+              userId,
+              data: message.data,
+            }));
+            console.log(`[WebRTC] Offer sent from ${username} to viewer ${message.targetUserId}`);
+          }
+        }
+        break;
+
+      case 'webrtc-answer':
+        // Viewer sending answer back to broadcaster
+        if (session.broadcasterWs && session.broadcasterWs.readyState === WebSocket.OPEN) {
+          session.broadcasterWs.send(JSON.stringify({
+            type: 'webrtc-answer',
+            streamId,
+            userId,
+            data: message.data,
+          }));
+          console.log(`[WebRTC] Answer sent from viewer ${username} to broadcaster`);
+        }
+        break;
+
+      case 'webrtc-ice-candidate':
+        // ICE candidate exchange (can be from broadcaster or viewer)
+        if (message.targetUserId) {
+          // Specific target
+          const targetWs = this.getViewerWs(session, message.targetUserId);
+          if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+            targetWs.send(JSON.stringify({
+              type: 'webrtc-ice-candidate',
+              streamId,
+              userId,
+              data: message.data,
+            }));
+          }
+        } else if (userId === session.broadcasterUserId) {
+          // From broadcaster to viewer specified in data
+          const viewerId = message.data?.viewerId;
+          if (viewerId) {
+            const viewerWs = this.getViewerWs(session, viewerId);
+            if (viewerWs && viewerWs.readyState === WebSocket.OPEN) {
+              viewerWs.send(JSON.stringify({
+                type: 'webrtc-ice-candidate',
+                streamId,
+                userId,
+                data: message.data,
+              }));
+            }
+          }
+        } else {
+          // From viewer to broadcaster
+          if (session.broadcasterWs && session.broadcasterWs.readyState === WebSocket.OPEN) {
+            session.broadcasterWs.send(JSON.stringify({
+              type: 'webrtc-ice-candidate',
+              streamId,
+              userId,
+              data: message.data,
+            }));
+          }
+        }
+        break;
     }
+  }
+
+  private getViewerWs(session: StreamSession, userId: string): WebSocket | null {
+    for (const [, viewer] of session.viewers) {
+      if (viewer.userId === userId && viewer.ws.readyState === WebSocket.OPEN) {
+        return viewer.ws;
+      }
+    }
+    return null;
   }
 
   private async handleDisconnection(
