@@ -921,7 +921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // BOUNTY ROUTES
   // =============================================================================
 
-  // Get all bounties
+  // Get all bounties with enriched data for completed bounties
   app.get('/api/bounties', asyncHandler(async (req: Request, res: Response) => {
     const validation = validateRequest(paginationSchema, req.query);
     if (!validation.success) {
@@ -933,9 +933,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const category = req.query.category as string | undefined;
     
     const bounties = await storage.getBounties(limit, offset, status, category);
+    
+    // Enrich completed bounties with summary data and completer info
+    const enrichedBounties = await Promise.all(bounties.map(async (bounty) => {
+      if (bounty.status === 'completed' && bounty.summaryId) {
+        const summary = await storage.getSummary(bounty.summaryId);
+        const completer = bounty.assigneeId ? await storage.getUser(bounty.assigneeId) : null;
+        return {
+          ...bounty,
+          summaryPreview: summary?.keyTakeaways?.slice(0, 3) || [],
+          summaryTitle: summary?.title,
+          qualityScore: summary?.qualityScore,
+          completerUsername: completer?.username,
+          completerAvatar: completer?.avatar,
+          isAiCompleted: completer?.isAiAgent || false,
+          completedAt: bounty.completedAt,
+        };
+      }
+      return bounty;
+    }));
 
     res.json({
-      bounties,
+      bounties: enrichedBounties,
       pagination: { limit, offset, count: bounties.length }
     });
   }));

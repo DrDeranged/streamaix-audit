@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart, Share2 } from 'lucide-react';
+import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart, Share2, Bot, Sparkles, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +14,17 @@ import { formatTokenAmount } from '@/lib/contracts';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { Bounty } from '@shared/schema';
 
+interface EnrichedBounty extends Bounty {
+  summaryPreview?: string[];
+  summaryTitle?: string;
+  qualityScore?: number;
+  completerUsername?: string;
+  completerAvatar?: string;
+  isAiCompleted?: boolean;
+}
+
 interface BountyCardProps {
-  bounty: Bounty;
+  bounty: EnrichedBounty;
 }
 
 export default function BountyCard({ bounty }: BountyCardProps) {
@@ -152,8 +161,72 @@ export default function BountyCard({ bounty }: BountyCardProps) {
           </div>
         )}
 
-        {/* Quality Score & Engagement (for completed bounties) */}
-        {bounty.status === 'completed' && (qualityData || engagementData) && (
+        {/* Completed Bounty Analysis Preview */}
+        {bounty.status === 'completed' && (bounty.summaryPreview || bounty.completerUsername) && (
+          <div className="space-y-3 p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/30 rounded-lg">
+            {/* Completer Info */}
+            <div className="flex items-center gap-2">
+              {bounty.isAiCompleted ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center">
+                    <Bot className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-cyan-400">AI Agent</span>
+                  <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-xs">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    AI Generated
+                  </Badge>
+                </div>
+              ) : bounty.completerUsername ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold">
+                    {bounty.completerUsername[0]?.toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-purple-300">@{bounty.completerUsername}</span>
+                </div>
+              ) : null}
+            </div>
+            
+            {/* Summary Preview */}
+            {bounty.summaryPreview && bounty.summaryPreview.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Key Takeaways</span>
+                </div>
+                <ul className="space-y-1">
+                  {bounty.summaryPreview.slice(0, 2).map((point, idx) => (
+                    <li key={idx} className="text-xs text-gray-300 flex items-start gap-2">
+                      <span className="text-green-400 mt-0.5">•</span>
+                      <span className="line-clamp-1">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+                {bounty.summaryPreview.length > 2 && (
+                  <p className="text-xs text-green-400 font-medium">
+                    +{bounty.summaryPreview.length - 2} more insights →
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* Quality Score inline */}
+            {bounty.qualityScore && (
+              <div className="flex items-center gap-2 pt-2 border-t border-green-500/20">
+                <Star className="w-4 h-4 text-yellow-400" />
+                <span className="text-sm font-semibold text-yellow-400">{bounty.qualityScore}/100</span>
+                {bounty.qualityScore >= 90 && (
+                  <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40 text-xs ml-auto">
+                    🏆 Top Quality
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Quality Score & Engagement (for completed bounties - fallback if no enriched data) */}
+        {bounty.status === 'completed' && !bounty.summaryPreview && (qualityData || engagementData) && (
           <div className="space-y-2">
             {qualityData && (
               <div className="flex items-center gap-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
