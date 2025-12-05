@@ -604,20 +604,53 @@ export class PredictionMarketService {
   }
 
   /**
-   * Get a single user position for a specific market
+   * Get a single user position for a specific market (aggregates YES and NO positions)
    */
-  async getUserPosition(userId: string, marketId: string): Promise<MarketPosition | null> {
+  async getUserPosition(userId: string, marketId: string): Promise<{
+    yesShares: number;
+    noShares: number;
+    totalCost: number;
+    averageYesPrice: number;
+    averageNoPrice: number;
+  } | null> {
     try {
-      const [position] = await db
+      const positions = await db
         .select()
         .from(marketPositions)
         .where(and(
           eq(marketPositions.userId, userId),
           eq(marketPositions.marketId, marketId)
-        ))
-        .limit(1);
+        ));
       
-      return position || null;
+      if (positions.length === 0) {
+        return null;
+      }
+      
+      // Aggregate YES and NO positions
+      let yesShares = 0;
+      let noShares = 0;
+      let totalCost = 0;
+      let yesInvested = 0;
+      let noInvested = 0;
+      
+      for (const pos of positions) {
+        if (pos.outcome === 'YES') {
+          yesShares += pos.shares;
+          yesInvested += pos.totalInvested;
+        } else {
+          noShares += pos.shares;
+          noInvested += pos.totalInvested;
+        }
+        totalCost += pos.totalInvested;
+      }
+      
+      return {
+        yesShares,
+        noShares,
+        totalCost,
+        averageYesPrice: yesShares > 0 ? Math.round(yesInvested / yesShares * 100) : 0,
+        averageNoPrice: noShares > 0 ? Math.round(noInvested / noShares * 100) : 0
+      };
     } catch (error: any) {
       console.error('❌ Error fetching user position:', error);
       throw error;

@@ -41,10 +41,9 @@ type PortfolioData = {
 };
 
 export default function MarketPortfolio() {
-  const userId = "1"; // TODO: Get from auth context
-
+  // Use the authenticated user's positions endpoint instead of hardcoded ID
   const { data: portfolio, isLoading } = useQuery<{ portfolio: PortfolioData }>({
-    queryKey: ['/api/markets/portfolio', userId],
+    queryKey: ['/api/markets/portfolio/me'],
     refetchInterval: 30000
   });
 

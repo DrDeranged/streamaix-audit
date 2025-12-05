@@ -10554,7 +10554,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
-  // Get user portfolio with positions and P&L
+  // Get authenticated user's portfolio with positions and P&L
+  app.get("/api/markets/portfolio/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+
+    const positions = await db
+      .select({
+        position: marketPositions,
+        market: predictionMarkets
+      })
+      .from(marketPositions)
+      .leftJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
+      .where(eq(marketPositions.userId, userId))
+      .orderBy(desc(marketPositions.updatedAt));
+
+    const stats = await db
+      .select()
+      .from(userTradingStats)
+      .where(eq(userTradingStats.userId, userId))
+      .limit(1);
+
+    const recentTrades = await db
+      .select({
+        trade: marketTrades,
+        market: predictionMarkets
+      })
+      .from(marketTrades)
+      .leftJoin(predictionMarkets, eq(marketTrades.marketId, predictionMarkets.id))
+      .where(eq(marketTrades.userId, userId))
+      .orderBy(desc(marketTrades.createdAt))
+      .limit(20);
+
+    // Calculate portfolio summary
+    let totalProfit = 0;
+    let totalVolume = 0;
+    let totalTrades = 0;
+    let winningTrades = 0;
+    
+    if (stats[0]) {
+      totalProfit = stats[0].netProfit || 0;
+      totalVolume = stats[0].totalVolume || 0;
+      totalTrades = stats[0].totalTrades || 0;
+      winningTrades = stats[0].winningTrades || 0;
+    }
+    
+    const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+    const roi = totalVolume > 0 ? (totalProfit / totalVolume) * 100 : 0;
+
+    // Transform positions to match frontend expected format
+    const formattedPositions = positions.map(({ position, market }) => {
+      const currentPrice = position.outcome === 'YES' 
+        ? (market?.yesPrice || 0) 
+        : (market?.noPrice || 0);
+      const value = position.shares * currentPrice / 100;
+      const unrealizedPnL = value - position.totalInvested;
+      const percentChange = position.totalInvested > 0 
+        ? ((value - position.totalInvested) / position.totalInvested) * 100 
+        : 0;
+
+      return {
+        marketId: position.marketId,
+        marketTitle: market?.question || 'Unknown Market',
+        outcome: position.outcome,
+        shares: position.shares,
+        avgPrice: position.averagePrice / 100,
+        currentPrice: currentPrice / 100,
+        unrealizedPnL,
+        percentChange
+      };
+    });
+
+    // Transform trades to match frontend expected format
+    const formattedTrades = recentTrades.map(({ trade, market }) => ({
+      id: trade.id,
+      marketTitle: market?.question || 'Unknown Market',
+      outcome: trade.outcome,
+      shares: trade.shares,
+      price: trade.price / 100,
+      type: trade.tradeType as 'buy' | 'sell',
+      timestamp: trade.createdAt?.toISOString() || new Date().toISOString(),
+      pnl: trade.tradeType === 'sell' ? (trade.shares * trade.price / 100 - trade.streamAmount) : undefined
+    }));
+
+    res.json({
+      success: true,
+      portfolio: {
+        totalProfit,
+        totalVolume,
+        winRate,
+        roi,
+        totalTrades,
+        winningTrades,
+        currentStreak: stats[0]?.currentWinStreak || 0,
+        positions: formattedPositions,
+        recentTrades: formattedTrades
+      }
+    });
+  }));
+
+  // Get user portfolio with positions and P&L (by userId - legacy endpoint)
   app.get("/api/markets/portfolio/:userId", asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
 
