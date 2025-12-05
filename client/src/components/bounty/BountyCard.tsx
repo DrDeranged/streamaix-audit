@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart, Share2, Bot, Sparkles, FileText } from 'lucide-react';
+import { Clock, Trophy, DollarSign, User, Tag, CheckCircle, AlertCircle, Star, Eye, Heart, Share2, Bot, Sparkles, FileText, Brain, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,9 @@ interface EnrichedBounty extends Bounty {
   completerUsername?: string;
   completerAvatar?: string;
   isAiCompleted?: boolean;
+  isAiProcessing?: boolean;
+  processingAgentUsername?: string;
+  processingAgentAvatar?: string;
 }
 
 interface BountyCardProps {
@@ -101,6 +104,44 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             {bounty.status.replace('_', ' ')}
           </Badge>
         </div>
+
+        {/* AI Processing Indicator for in-progress bounties */}
+        {bounty.status === 'in_progress' && bounty.isAiProcessing && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40"
+          >
+            <div className="relative">
+              <img
+                src={bounty.processingAgentAvatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${bounty.processingAgentUsername}`}
+                alt="AI Agent"
+                className="w-8 h-8 rounded-full ring-2 ring-amber-500/50"
+              />
+              <motion.div
+                className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                <Brain className="w-2.5 h-2.5 text-white" />
+              </motion.div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-300">
+                AI Agent Processing
+              </p>
+              <p className="text-xs text-amber-400/70">
+                @{bounty.processingAgentUsername} is analyzing content...
+              </p>
+            </div>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              <Zap className="w-5 h-5 text-amber-400" />
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Description */}
         <p className="text-sm text-gray-300 line-clamp-3" data-testid={`bounty-description-${bounty.id}`}>

@@ -78,7 +78,7 @@ import {
   liveStreams, streamParticipants, streamMessages, streamTips, streamPredictions,
   streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
-  streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars
+  streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
@@ -934,8 +934,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const bounties = await storage.getBounties(limit, offset, status, category);
     
-    // Enrich completed bounties with summary data and completer info
+    // Enrich bounties with status-specific data
     const enrichedBounties = await Promise.all(bounties.map(async (bounty) => {
+      // Completed bounties - show summary data and completer info
       if (bounty.status === 'completed' && bounty.summaryId) {
         const summary = await storage.getSummary(bounty.summaryId);
         const completer = bounty.assigneeId ? await storage.getUser(bounty.assigneeId) : null;
@@ -961,6 +962,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           completedAt: bounty.completedAt,
         };
       }
+      
+      // In-progress bounties - show AI processing info if assignee is AI agent
+      if (bounty.status === 'in_progress' && bounty.assigneeId) {
+        const assignee = await storage.getUser(bounty.assigneeId);
+        if (assignee?.isAiAgent) {
+          return {
+            ...bounty,
+            isAiProcessing: true,
+            processingAgentUsername: assignee.username,
+            processingAgentAvatar: assignee.avatar,
+          };
+        }
+      }
+      
       return bounty;
     }));
 
