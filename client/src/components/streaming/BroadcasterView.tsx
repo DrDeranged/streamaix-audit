@@ -16,11 +16,18 @@ import {
   Sparkles,
   AlertTriangle,
   Loader2,
-  Radio
+  Radio,
+  Wifi,
+  WifiOff,
+  Signal,
+  SignalHigh,
+  SignalLow,
+  SignalMedium
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMediaStream } from '@/hooks/useMediaStream';
+import { useBroadcastStream } from '@/hooks/useBroadcastStream';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
@@ -63,14 +70,38 @@ export function BroadcasterView({
     switchCamera,
   } = useMediaStream();
 
+  const {
+    isConnected: isWebRTCConnected,
+    isBroadcasting,
+    viewerCount: webrtcViewerCount,
+    connectionQuality,
+    error: webrtcError,
+    startBroadcast,
+    stopBroadcast,
+  } = useBroadcastStream(streamId);
+
   useEffect(() => {
     const isAudioOnly = streamType === 'audio_space';
-    startStream(isAudioOnly ? { video: false, audio: { echoCancellation: true, noiseSuppression: true } } : undefined);
+    const initStream = async () => {
+      const success = await startStream(isAudioOnly ? { video: false, audio: { echoCancellation: true, noiseSuppression: true } } : undefined);
+      if (success) {
+        console.log('[BroadcasterView] Media stream started, ready for WebRTC');
+      }
+    };
+    initStream();
     
     return () => {
       stopStream();
+      stopBroadcast();
     };
   }, []);
+
+  useEffect(() => {
+    if (stream && !isBroadcasting) {
+      console.log('[BroadcasterView] Starting WebRTC broadcast with stream');
+      startBroadcast(stream);
+    }
+  }, [stream, isBroadcasting, startBroadcast]);
 
   useEffect(() => {
     if (videoRef.current && stream && !isScreenSharing) {
@@ -223,6 +254,20 @@ export function BroadcasterView({
             className="w-2 h-2 rounded-full bg-white mr-1.5"
           />
           LIVE
+        </Badge>
+        
+        <Badge className={cn(
+          "backdrop-blur-sm text-xs px-2.5 py-1",
+          connectionQuality === 'excellent' ? "bg-emerald-500/80 text-white" :
+          connectionQuality === 'good' ? "bg-cyan-500/80 text-white" :
+          connectionQuality === 'poor' ? "bg-amber-500/80 text-white" :
+          "bg-slate-700/80 text-slate-300"
+        )}>
+          {connectionQuality === 'excellent' ? <Wifi className="w-3 h-3 mr-1.5" /> :
+           connectionQuality === 'good' ? <Wifi className="w-3 h-3 mr-1.5" /> :
+           connectionQuality === 'poor' ? <WifiOff className="w-3 h-3 mr-1.5" /> :
+           <WifiOff className="w-3 h-3 mr-1.5" />}
+          {connectionQuality === 'disconnected' ? 'Connecting...' : connectionQuality.charAt(0).toUpperCase() + connectionQuality.slice(1)}
         </Badge>
         
         <Badge className="bg-slate-900/80 backdrop-blur-sm text-white text-xs px-2.5 py-1">
