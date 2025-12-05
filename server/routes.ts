@@ -939,9 +939,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (bounty.status === 'completed' && bounty.summaryId) {
         const summary = await storage.getSummary(bounty.summaryId);
         const completer = bounty.assigneeId ? await storage.getUser(bounty.assigneeId) : null;
+        
+        // Extract preview from summary text - split into sentences and take first 3
+        let summaryPreview: string[] = [];
+        if (summary?.summary) {
+          const sentences = summary.summary.split(/[.!?]+/).filter((s: string) => s.trim().length > 20);
+          summaryPreview = sentences.slice(0, 3).map((s: string) => s.trim());
+        } else if (summary?.executiveSummary) {
+          const sentences = summary.executiveSummary.split(/[.!?]+/).filter((s: string) => s.trim().length > 20);
+          summaryPreview = sentences.slice(0, 3).map((s: string) => s.trim());
+        }
+        
         return {
           ...bounty,
-          summaryPreview: summary?.keyTakeaways?.slice(0, 3) || [],
+          summaryPreview,
           summaryTitle: summary?.title,
           qualityScore: summary?.qualityScore,
           completerUsername: completer?.username,
