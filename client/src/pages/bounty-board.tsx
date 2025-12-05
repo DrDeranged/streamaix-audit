@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,14 +13,15 @@ import {
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { formatTokenAmount } from '@/lib/contracts';
 import type { Bounty } from '@shared/schema';
 
-// Import components we'll create next
 import BountyCard from '@/components/bounty/BountyCard';
 import CreateBountyModal from '@/components/bounty/CreateBountyModal';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
+import AIAgentsAtWork from '@/components/AIAgentsAtWork';
 
 export default function BountyBoard() {
   const { isConnected } = useWeb3();
@@ -239,6 +240,11 @@ export default function BountyBoard() {
               </div>
             </div>
           </Card>
+        </div>
+
+        {/* AI Agents at Work Section */}
+        <div className="mb-12 animate-fade-in">
+          <AIAgentsAtWork />
         </div>
 
         {/* Trending Section */}

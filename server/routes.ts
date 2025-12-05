@@ -9907,6 +9907,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // AI AGENT BOUNTY ACTIVITY - Real-time dashboard for AI solving bounties
+  // =============================================================================
+  
+  // Get AI agents' bounty-solving activity and stats
+  app.get("/api/ai-agents/bounty-activity", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    
+    // Get recent bounty completions by AI agents
+    const recentCompletions = await db
+      .select({
+        bountyId: bounties.id,
+        bountyTitle: bounties.title,
+        bountyCategory: bounties.category,
+        bountyReward: bounties.reward,
+        completedAt: bounties.completedAt,
+        agentId: users.id,
+        agentUsername: users.username,
+        agentAvatar: users.avatar,
+        summaryId: bounties.summaryId,
+        summaryTitle: summaries.title,
+      })
+      .from(bounties)
+      .innerJoin(users, and(eq(bounties.assigneeId, users.id), eq(users.isAiAgent, true)))
+      .leftJoin(summaries, eq(bounties.summaryId, summaries.id))
+      .where(eq(bounties.status, 'completed'))
+      .orderBy(desc(bounties.completedAt))
+      .limit(limit);
+    
+    // Get bounties currently being worked on by AI agents
+    const inProgressBounties = await db
+      .select({
+        bountyId: bounties.id,
+        bountyTitle: bounties.title,
+        bountyCategory: bounties.category,
+        claimedAt: bounties.claimedAt,
+        agentId: users.id,
+        agentUsername: users.username,
+        agentAvatar: users.avatar,
+      })
+      .from(bounties)
+      .innerJoin(users, and(eq(bounties.assigneeId, users.id), eq(users.isAiAgent, true)))
+      .where(eq(bounties.status, 'in_progress'))
+      .orderBy(desc(bounties.claimedAt))
+      .limit(10);
+    
+    // Get top AI agents by bounties solved
+    const topAgents = await db
+      .select({
+        agentId: users.id,
+        username: users.username,
+        avatar: users.avatar,
+        streamPoints: users.streamPoints,
+        bountiesCompleted: sql<number>`count(${bounties.id})`.as('bountiesCompleted'),
+      })
+      .from(users)
+      .leftJoin(bounties, and(eq(bounties.assigneeId, users.id), eq(bounties.status, 'completed')))
+      .where(eq(users.isAiAgent, true))
+      .groupBy(users.id, users.username, users.avatar, users.streamPoints)
+      .orderBy(sql`count(${bounties.id}) DESC`)
+      .limit(10);
+    
+    // Get overall stats
+    const [statsResult] = await db
+      .select({
+        totalAgents: sql<number>`count(distinct ${users.id})`.as('totalAgents'),
+        totalBountiesCompleted: sql<number>`count(${bounties.id})`.as('totalBountiesCompleted'),
+        totalRewardsEarned: sql<number>`coalesce(sum(${bounties.reward}), 0)`.as('totalRewardsEarned'),
+      })
+      .from(users)
+      .leftJoin(bounties, and(eq(bounties.assigneeId, users.id), eq(bounties.status, 'completed')))
+      .where(eq(users.isAiAgent, true));
+    
+    // Get today's completions count
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const [todayStats] = await db
+      .select({
+        todayCount: sql<number>`count(${bounties.id})`.as('todayCount'),
+      })
+      .from(bounties)
+      .innerJoin(users, and(eq(bounties.assigneeId, users.id), eq(users.isAiAgent, true)))
+      .where(and(
+        eq(bounties.status, 'completed'),
+        sql`${bounties.completedAt} >= ${today.toISOString()}`
+      ));
+    
+    res.json({
+      success: true,
+      recentCompletions,
+      inProgressBounties,
+      topAgents,
+      stats: {
+        totalAgents: statsResult?.totalAgents || 0,
+        totalBountiesCompleted: statsResult?.totalBountiesCompleted || 0,
+        totalRewardsEarned: statsResult?.totalRewardsEarned || 0,
+        todayCompletions: todayStats?.todayCount || 0,
+      }
+    });
+  }));
+  
+  // Get AI agent bounty leaderboard with extended stats
+  app.get("/api/ai-agents/bounty-leaderboard", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
+    
+    const leaderboard = await db
+      .select({
+        agentId: users.id,
+        username: users.username,
+        avatar: users.avatar,
+        streamPoints: users.streamPoints,
+        agentPersonality: users.agentPersonality,
+        bountiesCompleted: sql<number>`count(${bounties.id})`.as('bountiesCompleted'),
+        totalEarned: sql<number>`coalesce(sum(${bounties.reward}), 0)`.as('totalEarned'),
+        lastActive: sql<string>`max(${bounties.completedAt})`.as('lastActive'),
+      })
+      .from(users)
+      .leftJoin(bounties, and(eq(bounties.assigneeId, users.id), eq(bounties.status, 'completed')))
+      .where(eq(users.isAiAgent, true))
+      .groupBy(users.id, users.username, users.avatar, users.streamPoints, users.agentPersonality)
+      .orderBy(sql`count(${bounties.id}) DESC`)
+      .limit(limit);
+    
+    res.json({
+      success: true,
+      leaderboard: leaderboard.map((agent, index) => ({
+        ...agent,
+        rank: index + 1,
+        expertise: (agent.agentPersonality as any)?.expertise || [],
+        tradingStyle: (agent.agentPersonality as any)?.tradingStyle || 'balanced',
+        activityLevel: (agent.agentPersonality as any)?.activityLevel || 'regular',
+      }))
+    });
+  }));
+
+  // =============================================================================
   // PREDICTION MARKET ENHANCEMENTS - LEADERBOARDS, ACHIEVEMENTS, PORTFOLIO
   // =============================================================================
 
