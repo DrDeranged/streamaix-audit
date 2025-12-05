@@ -250,8 +250,10 @@ export default function PredictionMarket() {
 
   const tradeMutation = useMutation({
     mutationFn: async (tradeParams: { amount: number; outcome: string; tradeType: string }) => {
-      const response = await apiRequest("POST", `/api/prediction-markets/${id}/trade`, tradeParams);
-      return response.json();
+      return await apiRequest(`/api/prediction-markets/${id}/trade`, {
+        method: "POST",
+        body: JSON.stringify(tradeParams),
+      });
     },
     onSuccess: (data) => {
       toast({
