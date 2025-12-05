@@ -60,6 +60,11 @@ import {
   type InsertReferralCode,
   type ReferralSignup,
   type InsertReferralSignup,
+  // User/Category Follow Types
+  type UserFollow,
+  type InsertUserFollow,
+  type CategoryFollow,
+  type InsertCategoryFollow,
   users,
   summaries,
   bounties,
@@ -92,6 +97,9 @@ import {
   // Referral System Tables
   referralCodes,
   referralSignups,
+  // User/Category Follow Tables
+  userFollows,
+  categoryFollows,
   // Collaboration Tables
   bountyCollaborators,
   collaborationSessions,
@@ -244,6 +252,24 @@ export interface IStorage {
   getUserFollowedAvatars(userId: string): Promise<(AvatarFollow & { avatar: KnowledgeAvatar })[]>;
   getAvatarFollowers(avatarId: string): Promise<(AvatarFollow & { user: User })[]>;
   isFollowingAvatar(userId: string, avatarId: string): Promise<boolean>;
+
+  // User Following operations (follow bounty creators)
+  followUser(followerId: string, followingId: string): Promise<UserFollow>;
+  unfollowUser(followerId: string, followingId: string): Promise<boolean>;
+  isFollowingUser(followerId: string, followingId: string): Promise<boolean>;
+  getFollowedUsers(userId: string): Promise<User[]>;
+  getFollowers(userId: string): Promise<User[]>;
+  getUserFollowStats(userId: string): Promise<{ followersCount: number; followingCount: number }>;
+
+  // Category Following operations (follow bounty categories)
+  followCategory(userId: string, category: string): Promise<CategoryFollow>;
+  unfollowCategory(userId: string, category: string): Promise<boolean>;
+  isFollowingCategory(userId: string, category: string): Promise<boolean>;
+  getFollowedCategories(userId: string): Promise<string[]>;
+  getCategoryFollowersCount(category: string): Promise<number>;
+
+  // Personalized Feed operations
+  getPersonalizedBounties(userId: string, limit?: number, offset?: number): Promise<Bounty[]>;
 
   // Avatar Content & Interactions
   createAvatarContentInteraction(interaction: InsertAvatarContentInteraction): Promise<AvatarContentInteraction>;
@@ -1471,6 +1497,199 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
     return !!follow;
+  }
+
+  // User Following implementations (follow bounty creators)
+  async followUser(followerId: string, followingId: string): Promise<UserFollow> {
+    const existing = await db
+      .select()
+      .from(userFollows)
+      .where(and(
+        eq(userFollows.followerId, followerId),
+        eq(userFollows.followingId, followingId)
+      ))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    const [follow] = await db
+      .insert(userFollows)
+      .values({
+        followerId,
+        followingId,
+      })
+      .returning();
+    return follow;
+  }
+
+  async unfollowUser(followerId: string, followingId: string): Promise<boolean> {
+    const result = await db
+      .delete(userFollows)
+      .where(and(
+        eq(userFollows.followerId, followerId),
+        eq(userFollows.followingId, followingId)
+      ));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async isFollowingUser(followerId: string, followingId: string): Promise<boolean> {
+    const [follow] = await db
+      .select()
+      .from(userFollows)
+      .where(and(
+        eq(userFollows.followerId, followerId),
+        eq(userFollows.followingId, followingId)
+      ))
+      .limit(1);
+    return !!follow;
+  }
+
+  async getFollowedUsers(userId: string): Promise<User[]> {
+    const follows = await db
+      .select({
+        user: users
+      })
+      .from(userFollows)
+      .innerJoin(users, eq(userFollows.followingId, users.id))
+      .where(eq(userFollows.followerId, userId))
+      .orderBy(desc(userFollows.createdAt));
+    
+    return follows.map(f => f.user);
+  }
+
+  async getFollowers(userId: string): Promise<User[]> {
+    const follows = await db
+      .select({
+        user: users
+      })
+      .from(userFollows)
+      .innerJoin(users, eq(userFollows.followerId, users.id))
+      .where(eq(userFollows.followingId, userId))
+      .orderBy(desc(userFollows.createdAt));
+    
+    return follows.map(f => f.user);
+  }
+
+  async getUserFollowStats(userId: string): Promise<{ followersCount: number; followingCount: number }> {
+    const [followersResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, userId));
+    
+    const [followingResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, userId));
+    
+    return {
+      followersCount: Number(followersResult?.count || 0),
+      followingCount: Number(followingResult?.count || 0)
+    };
+  }
+
+  // Category Following implementations (follow bounty categories)
+  async followCategory(userId: string, category: string): Promise<CategoryFollow> {
+    const existing = await db
+      .select()
+      .from(categoryFollows)
+      .where(and(
+        eq(categoryFollows.userId, userId),
+        eq(categoryFollows.category, category)
+      ))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    const [follow] = await db
+      .insert(categoryFollows)
+      .values({
+        userId,
+        category,
+      })
+      .returning();
+    return follow;
+  }
+
+  async unfollowCategory(userId: string, category: string): Promise<boolean> {
+    const result = await db
+      .delete(categoryFollows)
+      .where(and(
+        eq(categoryFollows.userId, userId),
+        eq(categoryFollows.category, category)
+      ));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async isFollowingCategory(userId: string, category: string): Promise<boolean> {
+    const [follow] = await db
+      .select()
+      .from(categoryFollows)
+      .where(and(
+        eq(categoryFollows.userId, userId),
+        eq(categoryFollows.category, category)
+      ))
+      .limit(1);
+    return !!follow;
+  }
+
+  async getFollowedCategories(userId: string): Promise<string[]> {
+    const follows = await db
+      .select({ category: categoryFollows.category })
+      .from(categoryFollows)
+      .where(eq(categoryFollows.userId, userId))
+      .orderBy(desc(categoryFollows.createdAt));
+    
+    return follows.map(f => f.category);
+  }
+
+  async getCategoryFollowersCount(category: string): Promise<number> {
+    const [result] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(categoryFollows)
+      .where(eq(categoryFollows.category, category));
+    
+    return Number(result?.count || 0);
+  }
+
+  // Personalized Feed implementations
+  async getPersonalizedBounties(userId: string, limit = 50, offset = 0): Promise<Bounty[]> {
+    // Get followed users and categories
+    const followedUsers = await this.getFollowedUsers(userId);
+    const followedCategories = await this.getFollowedCategories(userId);
+    
+    const followedUserIds = followedUsers.map(u => u.id);
+    
+    if (followedUserIds.length === 0 && followedCategories.length === 0) {
+      // Return recent bounties if not following anyone
+      return await db
+        .select()
+        .from(bounties)
+        .orderBy(desc(bounties.createdAt))
+        .limit(limit)
+        .offset(offset);
+    }
+
+    // Build dynamic query for bounties from followed creators OR followed categories
+    let query = db.select().from(bounties);
+    
+    if (followedUserIds.length > 0 && followedCategories.length > 0) {
+      query = query.where(
+        sql`${bounties.creatorId} = ANY(${followedUserIds}) OR ${bounties.category} = ANY(${followedCategories})`
+      );
+    } else if (followedUserIds.length > 0) {
+      query = query.where(inArray(bounties.creatorId, followedUserIds));
+    } else {
+      query = query.where(inArray(bounties.category, followedCategories));
+    }
+
+    return await query
+      .orderBy(desc(bounties.createdAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   // Avatar Content & Interactions implementations
