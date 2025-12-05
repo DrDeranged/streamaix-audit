@@ -9353,6 +9353,203 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   }));
+
+  // Execute a trade (buy/sell shares) for authenticated users
+  app.post("/api/prediction-markets/:marketId/trade", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { amount, outcome, tradeType } = req.body;
+    const marketId = req.params.marketId;
+    const userId = req.user!.id;
+
+    // Validate inputs
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Invalid trade amount" });
+    }
+    if (!outcome || !['yes', 'no'].includes(outcome.toLowerCase())) {
+      return res.status(400).json({ error: "Invalid outcome - must be 'yes' or 'no'" });
+    }
+    if (!tradeType || !['buy', 'sell'].includes(tradeType.toLowerCase())) {
+      return res.status(400).json({ error: "Invalid trade type - must be 'buy' or 'sell'" });
+    }
+
+    const market = await predictionMarketService.getMarket(marketId);
+    if (!market) {
+      return res.status(404).json({ error: "Market not found" });
+    }
+
+    if (market.status !== 'active') {
+      return res.status(400).json({ error: "Market is not active for trading" });
+    }
+
+    // Check if market has expired
+    if (new Date(market.deadline) < new Date()) {
+      return res.status(400).json({ error: "Market has expired" });
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isYes = outcome.toLowerCase() === 'yes';
+    const isBuy = tradeType.toLowerCase() === 'buy';
+
+    // Calculate the trade using AMM
+    let quote;
+    if (isBuy) {
+      // Check user has enough STREAM points
+      if ((user.streamPoints || 0) < amount) {
+        return res.status(400).json({ 
+          error: "Insufficient STREAM points", 
+          required: amount,
+          available: user.streamPoints || 0
+        });
+      }
+
+      quote = ammService.calculateBuyTokens(
+        amount,
+        isYes,
+        market.yesLiquidity,
+        market.noLiquidity
+      );
+    } else {
+      // For selling, check user has enough shares
+      const existingPosition = await predictionMarketService.getUserPosition(userId, marketId);
+      const sharesHeld = isYes 
+        ? (existingPosition?.yesShares || 0) 
+        : (existingPosition?.noShares || 0);
+      
+      if (sharesHeld < amount) {
+        return res.status(400).json({ 
+          error: `Insufficient ${isYes ? 'YES' : 'NO'} shares`,
+          required: amount,
+          available: sharesHeld
+        });
+      }
+
+      quote = ammService.calculateSellTokens(
+        amount,
+        isYes,
+        market.yesLiquidity,
+        market.noLiquidity
+      );
+    }
+
+    // Execute the trade
+    const tradeResult = await predictionMarketService.executeTrade({
+      userId,
+      marketId,
+      outcome: isYes ? 'YES' : 'NO',
+      tradeType: isBuy ? 'buy' : 'sell',
+      amount,
+      shares: quote.tokensOut,
+      price: isYes ? market.yesPrice : market.noPrice,
+      fee: quote.fee
+    });
+
+    // Update user's STREAM points
+    if (isBuy) {
+      await storage.updateUser(userId, {
+        streamPoints: (user.streamPoints || 0) - amount
+      });
+    } else {
+      await storage.updateUser(userId, {
+        streamPoints: (user.streamPoints || 0) + quote.amountOut
+      });
+    }
+
+    // Update market liquidity and prices
+    const newYesLiquidity = isBuy 
+      ? (isYes ? market.yesLiquidity + amount : market.yesLiquidity)
+      : (isYes ? market.yesLiquidity - quote.amountOut : market.yesLiquidity);
+    const newNoLiquidity = isBuy 
+      ? (isYes ? market.noLiquidity : market.noLiquidity + amount)
+      : (isYes ? market.noLiquidity : market.noLiquidity - quote.amountOut);
+
+    // Calculate new prices based on liquidity
+    const totalLiquidity = newYesLiquidity + newNoLiquidity;
+    const newYesPrice = Math.round((newNoLiquidity / totalLiquidity) * 10000);
+    const newNoPrice = Math.round((newYesLiquidity / totalLiquidity) * 10000);
+
+    await predictionMarketService.updateMarket(marketId, {
+      yesLiquidity: newYesLiquidity,
+      noLiquidity: newNoLiquidity,
+      yesPrice: newYesPrice,
+      noPrice: newNoPrice,
+      totalVolume: (market.totalVolume || 0) + amount,
+      totalTrades: (market.totalTrades || 0) + 1
+    });
+
+    // Get updated position
+    const updatedPosition = await predictionMarketService.getUserPosition(userId, marketId);
+
+    res.json({
+      success: true,
+      trade: tradeResult,
+      position: updatedPosition,
+      quote: {
+        sharesReceived: quote.tokensOut,
+        priceImpact: quote.priceImpact,
+        fee: quote.fee
+      },
+      newPrices: {
+        yes: newYesPrice / 100,
+        no: newNoPrice / 100
+      },
+      remainingBalance: isBuy 
+        ? (user.streamPoints || 0) - amount 
+        : (user.streamPoints || 0) + quote.amountOut
+    });
+  }));
+
+  // Get user's position on a specific market
+  app.get("/api/prediction-markets/:marketId/position", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const position = await predictionMarketService.getUserPosition(req.user!.id, req.params.marketId);
+    const market = await predictionMarketService.getMarket(req.params.marketId);
+    
+    if (!position) {
+      return res.json({
+        success: true,
+        position: null,
+        hasPosition: false
+      });
+    }
+
+    // Calculate P&L
+    const yesValue = (position.yesShares || 0) * (market?.yesPrice || 0) / 100;
+    const noValue = (position.noShares || 0) * (market?.noPrice || 0) / 100;
+    const totalValue = yesValue + noValue;
+    const totalCost = (position.totalCost || 0);
+    const unrealizedPnL = totalValue - totalCost;
+
+    res.json({
+      success: true,
+      position: {
+        ...position,
+        currentYesValue: yesValue,
+        currentNoValue: noValue,
+        totalValue,
+        unrealizedPnL,
+        percentChange: totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0
+      },
+      hasPosition: true,
+      market: market ? {
+        yesPrice: market.yesPrice,
+        noPrice: market.noPrice,
+        status: market.status
+      } : null
+    });
+  }));
+
+  // Get trades for a specific market by the current user
+  app.get("/api/prediction-markets/:marketId/trades/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const trades = await predictionMarketService.getUserTradesForMarket(req.user!.id, req.params.marketId);
+    
+    res.json({
+      success: true,
+      trades,
+      count: trades.length
+    });
+  }));
   
   // Get user positions
   app.get("/api/prediction-markets/positions/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {

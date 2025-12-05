@@ -602,6 +602,111 @@ export class PredictionMarketService {
       throw error;
     }
   }
+
+  /**
+   * Get a single user position for a specific market
+   */
+  async getUserPosition(userId: string, marketId: string): Promise<MarketPosition | null> {
+    try {
+      const [position] = await db
+        .select()
+        .from(marketPositions)
+        .where(and(
+          eq(marketPositions.userId, userId),
+          eq(marketPositions.marketId, marketId)
+        ))
+        .limit(1);
+      
+      return position || null;
+    } catch (error: any) {
+      console.error('❌ Error fetching user position:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user trades for a specific market
+   */
+  async getUserTradesForMarket(userId: string, marketId: string): Promise<MarketTrade[]> {
+    try {
+      const trades = await db
+        .select()
+        .from(marketTrades)
+        .where(and(
+          eq(marketTrades.userId, userId),
+          eq(marketTrades.marketId, marketId)
+        ))
+        .orderBy(desc(marketTrades.createdAt));
+      
+      return trades;
+    } catch (error: any) {
+      console.error('❌ Error fetching user trades for market:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute a trade and record it
+   */
+  async executeTrade(params: {
+    userId: string;
+    marketId: string;
+    outcome: 'YES' | 'NO';
+    tradeType: 'buy' | 'sell';
+    amount: number;
+    shares: number;
+    price: number;
+    fee: number;
+  }): Promise<MarketTrade> {
+    try {
+      const trade = await this.recordTrade({
+        marketId: params.marketId,
+        userId: params.userId,
+        userWallet: '', // Will be updated with wallet if connected
+        outcome: params.outcome,
+        tradeType: params.tradeType,
+        shares: params.shares,
+        price: params.price,
+        streamAmount: params.amount,
+        fee: params.fee,
+      });
+      
+      console.log(`✅ Trade executed: ${params.tradeType} ${params.shares.toFixed(2)} ${params.outcome} shares for ${params.amount} STREAM`);
+      
+      return trade;
+    } catch (error: any) {
+      console.error('❌ Error executing trade:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update market data
+   */
+  async updateMarket(marketId: string, updates: Partial<{
+    yesLiquidity: number;
+    noLiquidity: number;
+    yesPrice: number;
+    noPrice: number;
+    totalVolume: number;
+    totalTrades: number;
+    status: string;
+  }>): Promise<void> {
+    try {
+      await db
+        .update(predictionMarkets)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(predictionMarkets.id, marketId));
+      
+      console.log(`✅ Market ${marketId} updated`);
+    } catch (error: any) {
+      console.error('❌ Error updating market:', error);
+      throw error;
+    }
+  }
 }
 
 export const predictionMarketService = new PredictionMarketService();
