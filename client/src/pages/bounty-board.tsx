@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot, Rss, Users } from 'lucide-react';
 import { Link } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -25,6 +26,7 @@ import AIAgentsAtWork from '@/components/AIAgentsAtWork';
 
 export default function BountyBoard() {
   const { isConnected } = useWeb3();
+  const { isAuthenticated } = useAuth();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -122,7 +124,18 @@ export default function BountyBoard() {
             >
               <Link href="/dashboard">
                 <LayoutDashboard className="w-4 h-4 mr-2" />
-                Back to Dashboard
+                Dashboard
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300"
+              data-testid="button-following-feed"
+            >
+              <Link href="/following">
+                <Rss className="w-4 h-4 mr-2" />
+                Your Feed
               </Link>
             </Button>
           </div>
