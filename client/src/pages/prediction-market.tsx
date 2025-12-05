@@ -186,6 +186,93 @@ interface Market {
     id: string;
     title: string;
   };
+  yesVolume?: number;
+  noVolume?: number;
+  volume24h?: number;
+  volumeChange24h?: number;
+}
+
+function VolumeFlowIndicator({ yesVolume, noVolume, totalVolume }: { yesVolume: number; noVolume: number; totalVolume: number }) {
+  const yesPercent = totalVolume > 0 ? (yesVolume / totalVolume) * 100 : 50;
+  const noPercent = totalVolume > 0 ? (noVolume / totalVolume) * 100 : 50;
+  const flowDirection = yesVolume > noVolume ? 'yes' : noVolume > yesVolume ? 'no' : 'neutral';
+  
+  return (
+    <div className="relative p-4 rounded-xl neural-glass overflow-hidden">
+      <div className="absolute inset-0 opacity-20">
+        <div 
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-transparent transition-all duration-1000"
+          style={{ width: `${yesPercent}%` }}
+        />
+        <div 
+          className="absolute inset-y-0 right-0 bg-gradient-to-l from-rose-500 to-transparent transition-all duration-1000"
+          style={{ width: `${noPercent}%` }}
+        />
+      </div>
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <Activity className="w-3 h-3" />
+            Volume Flow
+          </span>
+          <Badge 
+            variant="outline" 
+            className={`text-xs ${
+              flowDirection === 'yes' 
+                ? 'border-emerald-500/50 text-emerald-300' 
+                : flowDirection === 'no' 
+                  ? 'border-rose-500/50 text-rose-300' 
+                  : 'border-slate-500/50 text-slate-300'
+            }`}
+          >
+            {flowDirection === 'yes' ? '↑ YES Leading' : flowDirection === 'no' ? '↓ NO Leading' : '⟷ Balanced'}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                YES
+              </span>
+              <span className="text-emerald-300 font-bold">{yesPercent.toFixed(1)}%</span>
+            </div>
+            <div className="text-xs text-slate-400">{Math.floor(yesVolume).toLocaleString()} STREAM</div>
+          </div>
+          
+          <div className="w-px h-10 bg-slate-600" />
+          
+          <div className="flex-1 text-right">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-rose-300 font-bold">{noPercent.toFixed(1)}%</span>
+              <span className="text-rose-400 font-semibold text-sm flex items-center gap-1">
+                NO
+                <TrendingDown className="w-3 h-3" />
+              </span>
+            </div>
+            <div className="text-xs text-slate-400">{Math.floor(noVolume).toLocaleString()} STREAM</div>
+          </div>
+        </div>
+        
+        <div className="mt-3 h-2 bg-slate-800 rounded-full overflow-hidden flex">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+            initial={{ width: 0 }}
+            animate={{ width: `${yesPercent}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+          <motion.div 
+            className="h-full bg-gradient-to-l from-rose-500 to-rose-400"
+            initial={{ width: 0 }}
+            animate={{ width: `${noPercent}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface UserPosition {
@@ -209,6 +296,103 @@ interface UserTrade {
   streamAmount: number;
   fee: number;
   createdAt: string;
+}
+
+interface VolumeStats {
+  yesVolume: number;
+  noVolume: number;
+  totalVolume: number;
+  volume24h: number;
+  volumeChange24h: number;
+  recentTrades: Array<{
+    id: string;
+    outcome: string;
+    tradeType: string;
+    streamAmount: number;
+    createdAt: string;
+    userId?: string;
+    username?: string;
+  }>;
+}
+
+function LiveTradeFeed({ marketId }: { marketId: string }) {
+  const { data, isLoading } = useQuery<{ success: boolean; stats: VolumeStats }>({
+    queryKey: ["/api/prediction-markets", marketId, "volume-stats"],
+    refetchInterval: 5000,
+  });
+
+  const stats = data?.stats;
+  const trades = stats?.recentTrades || [];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-12 bg-purple-900/20 rounded animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (trades.length === 0) {
+    return (
+      <div className="text-center py-6 text-slate-400">
+        <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+        <p className="text-sm">No trades yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2 max-h-48 overflow-y-auto">
+      {trades.slice(0, 10).map((trade, index) => (
+        <motion.div
+          key={trade.id}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: index * 0.05 }}
+          className={`flex items-center justify-between p-2 rounded-lg ${
+            trade.outcome === 'YES' 
+              ? 'bg-emerald-500/10 border border-emerald-500/20' 
+              : 'bg-rose-500/10 border border-rose-500/20'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${
+              trade.outcome === 'YES' ? 'bg-emerald-400' : 'bg-rose-400'
+            } animate-pulse`} />
+            <Badge 
+              variant="outline" 
+              className={`text-xs ${
+                trade.tradeType === 'buy' 
+                  ? 'border-cyan-500/30 text-cyan-300' 
+                  : 'border-orange-500/30 text-orange-300'
+              }`}
+            >
+              {trade.tradeType.toUpperCase()}
+            </Badge>
+            <Badge 
+              className={`text-xs ${
+                trade.outcome === 'YES' 
+                  ? 'bg-emerald-500/20 text-emerald-300' 
+                  : 'bg-rose-500/20 text-rose-300'
+              }`}
+            >
+              {trade.outcome}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-white">
+              {Math.floor(trade.streamAmount).toLocaleString()} <span className="text-purple-400 text-xs">STREAM</span>
+            </span>
+            <span className="text-xs text-slate-500">
+              {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
+            </span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
 }
 
 export default function PredictionMarket() {
@@ -248,6 +432,13 @@ export default function PredictionMarket() {
     queryKey: ["/api/user"],
   });
 
+  const { data: volumeStatsData } = useQuery<{ success: boolean; stats: VolumeStats }>({
+    queryKey: ["/api/prediction-markets", id, "volume-stats"],
+    refetchInterval: 5000,
+  });
+
+  const volumeStats = volumeStatsData?.stats;
+
   const tradeMutation = useMutation({
     mutationFn: async (tradeParams: { amount: number; outcome: string; tradeType: string }) => {
       return await apiRequest(`/api/prediction-markets/${id}/trade`, {
@@ -264,6 +455,7 @@ export default function PredictionMarket() {
       queryClient.invalidateQueries({ queryKey: ["/api/prediction-markets", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/prediction-markets", id, "position"] });
       queryClient.invalidateQueries({ queryKey: ["/api/prediction-markets", id, "trades", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prediction-markets", id, "volume-stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: any) => {
@@ -515,6 +707,60 @@ export default function PredictionMarket() {
               </TabsList>
               
               <TabsContent value="overview" className="mt-6 space-y-6">
+                {/* Real-time Volume Flow */}
+                {volumeStats && (
+                  <VolumeFlowIndicator 
+                    yesVolume={volumeStats.yesVolume} 
+                    noVolume={volumeStats.noVolume}
+                    totalVolume={volumeStats.totalVolume}
+                  />
+                )}
+
+                {/* 24h Volume Stats Card */}
+                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-white flex items-center gap-2 text-lg">
+                      <Activity className="w-5 h-5 text-cyan-400" />
+                      Live Trade Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
+                        <div className="text-xs text-slate-400 mb-1">24h Volume</div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl font-bold text-white">
+                            {volumeStats ? Math.floor(volumeStats.volume24h).toLocaleString() : '0'}
+                          </span>
+                          <span className="text-xs text-purple-400">STREAM</span>
+                          {volumeStats && volumeStats.volumeChange24h !== 0 && (
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${
+                                volumeStats.volumeChange24h > 0 
+                                  ? 'border-emerald-500/30 text-emerald-300' 
+                                  : 'border-rose-500/30 text-rose-300'
+                              }`}
+                            >
+                              {volumeStats.volumeChange24h > 0 ? '+' : ''}{volumeStats.volumeChange24h.toFixed(1)}%
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
+                        <div className="text-xs text-slate-400 mb-1">Recent Trades</div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl font-bold text-white">
+                            {volumeStats?.recentTrades?.length || 0}
+                          </span>
+                          <span className="text-xs text-slate-500">in feed</span>
+                        </div>
+                      </div>
+                    </div>
+                    <LiveTradeFeed marketId={market.id} />
+                  </CardContent>
+                </Card>
+
                 <PriceChart marketId={market.id} hours={24} />
                 
                 <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">

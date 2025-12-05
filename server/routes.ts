@@ -9556,6 +9556,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       count: trades.length
     });
   }));
+
+  // Get volume stats for a specific market (real-time tracking)
+  app.get("/api/prediction-markets/:marketId/volume-stats", asyncHandler(async (req: Request, res: Response) => {
+    const marketId = req.params.marketId;
+    const market = await predictionMarketService.getMarket(marketId);
+    
+    if (!market) {
+      return res.status(404).json({ error: "Market not found" });
+    }
+
+    // Get all trades for this market to calculate volume breakdown
+    const allTrades = await predictionMarketService.getMarketTrades(marketId);
+    
+    // Calculate YES vs NO volume
+    let yesVolume = 0;
+    let noVolume = 0;
+    let volume24h = 0;
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    let volumePrevious24h = 0;
+    
+    for (const trade of allTrades) {
+      const amount = trade.streamAmount || 0;
+      const tradeDate = new Date(trade.createdAt);
+      
+      if (trade.outcome === 'YES') {
+        yesVolume += amount;
+      } else {
+        noVolume += amount;
+      }
+      
+      // Calculate 24h volume
+      if (tradeDate >= twentyFourHoursAgo) {
+        volume24h += amount;
+      } else if (tradeDate >= fortyEightHoursAgo) {
+        volumePrevious24h += amount;
+      }
+    }
+
+    // Calculate volume change percentage
+    const volumeChange24h = volumePrevious24h > 0 
+      ? ((volume24h - volumePrevious24h) / volumePrevious24h) * 100 
+      : volume24h > 0 ? 100 : 0;
+
+    // Get recent trades (last 10)
+    const recentTrades = allTrades
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10)
+      .map(t => ({
+        id: t.id,
+        outcome: t.outcome,
+        tradeType: t.tradeType,
+        streamAmount: t.streamAmount,
+        createdAt: t.createdAt,
+      }));
+
+    res.json({
+      success: true,
+      stats: {
+        yesVolume,
+        noVolume,
+        totalVolume: market.totalVolume || 0,
+        volume24h,
+        volumeChange24h,
+        recentTrades
+      }
+    });
+  }));
   
   // Get user positions
   app.get("/api/prediction-markets/positions/me", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {

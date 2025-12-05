@@ -400,6 +400,24 @@ export class PredictionMarketService {
   }
 
   /**
+   * Get all trades for a specific market (for volume analysis)
+   */
+  async getMarketTrades(marketId: string): Promise<MarketTrade[]> {
+    try {
+      const trades = await db
+        .select()
+        .from(marketTrades)
+        .where(eq(marketTrades.marketId, marketId))
+        .orderBy(desc(marketTrades.createdAt));
+      
+      return trades;
+    } catch (error: any) {
+      console.error('❌ Error fetching market trades:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Record a trade in database
    */
   async recordTrade(trade: InsertMarketTrade): Promise<MarketTrade> {
