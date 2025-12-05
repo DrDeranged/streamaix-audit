@@ -424,7 +424,8 @@ export class StreamingService {
   }
 
   private getViewerWs(session: StreamSession, userId: string): WebSocket | null {
-    for (const [, viewer] of session.viewers) {
+    const viewersArray = Array.from(session.viewers.values());
+    for (const viewer of viewersArray) {
       if (viewer.userId === userId && viewer.ws.readyState === WebSocket.OPEN) {
         return viewer.ws;
       }
