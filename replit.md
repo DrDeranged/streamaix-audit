@@ -28,19 +28,23 @@ Auto-seed runs in background (non-blocking) after background services start. Ser
 ### UI/UX Decisions
 The frontend is built with React 18 and TypeScript, styled using TailwindCSS, shadcn/ui, and Radix UI. The design incorporates an AI-Native aesthetic featuring neural network visualizations, advanced glass morphism, iridescent borders, and 3D depth transforms. Key visual elements include animated neural network backgrounds, multi-layer frosted glass effects, 3D animations, and custom components like ConfidenceRing and AnimatedCounter. A custom CSS design system provides utility classes for various visual effects, and a consistent color scheme (Amber, Cyan, Emerald) is used for AI confidence visualization. Both light and dark modes are supported with a mobile-first responsive layout, and animations are driven by Framer Motion and custom CSS keyframes.
 
-### Cost Optimization Strategy (OpenAI API - 80-90% Reduction)
+### Cost Optimization Strategy (OpenAI API - 90%+ Reduction)
 **Model Selection:**
 - **GPT-4o**: Reserved ONLY for `rebuiltContentProcessor.ts` (premium video content analysis)
 - **GPT-4o-mini**: All other AI operations (90% cheaper, ~20 services migrated)
 
-**Optimized Service Cycle Times (Reduced API Call Frequency):**
-- AI Trend Spotter: 6hrs → 12hrs (50% reduction)
-- AI Meta-Trader: 20min → 60min (3x reduction)
-- AI Content Moderator: 30min → 90min (3x reduction)
-- AI Community Manager: 60min → 2hrs (2x reduction)
-- AI Market Resolver: 30min → 90min (3x reduction)
-- AI Liquidity Provider: 45min → 2hrs (2.5x reduction)
-- Autonomous Agent Cron: 10min → 30min (3x reduction)
+**Optimized Service Cycle Times (MAJOR COST REDUCTION - Dec 2025):**
+- AI Trend Spotter: 48 hours (creates ~1 market every 2 days)
+- AI Meta-Trader: 6 hours (6x reduction from 60min)
+- AI Content Moderator: 8 hours (5x reduction from 90min)
+- AI Community Manager: 8 hours (4x reduction from 2hrs)
+- AI Market Resolver: 12 hours (8x reduction from 90min)
+- AI Liquidity Provider: 12 hours (6x reduction from 2hrs)
+- AI Treasury Manager: 72 hours (3x reduction from 24hrs)
+- Autonomous Agent Cron: 5-7 hours random (12x reduction from 30min)
+- AI Trading Bot Service: 5-7 hours random (12x reduction)
+
+**Estimated Monthly Cost: $15-25/month** (down from $75-135/month)
 
 **Services Migrated to GPT-4o-mini:**
 aiContentModerator, aiMetaTrader, aiTrendSpotter, aiLiquidityProvider, aiMarketResolver, aiTreasuryManager, aiCommunityManager, agentMarketAnalyzer, aiAgentService, chatService, predictionExtractionService, avatarMarketGenerator, socialMarketGenerator, aiPredictionBackfillService, aiService (all functions)
@@ -67,14 +71,14 @@ aiContentModerator, aiMetaTrader, aiTrendSpotter, aiLiquidityProvider, aiMarketR
     - **User Onboarding**: Redesigned 12-step AI-Native interactive tutorial.
     - **Prediction Markets**: Full-featured binary YES/NO markets with ERC-1155 conditional tokens, AMM-based pricing, and on-chain settlement on Base. Includes various market types, trading features, a 0.5% platform fee, and UMA Optimistic Oracle integration for resolution. Features an AI Content-to-Market Pipeline for automated prediction extraction and market creation from summaries.
     - **Autonomous AI Agent Ecosystem - Phase 2 COMPLETE**: 100 autonomous AI agents fully deployed with unique personas, 1.5M STREAM points distributed (for future airdrop), and diverse activity levels (5 whales, 10 power users, 26 active, 59 casual). Agents independently create bounties, submit GPT-4 powered summaries, **actively trade on prediction markets using STREAM points**, and engage socially (comments, votes, follows), operating 24/7 with human-like patterns and probabilistic action selection. Trading system includes GPT-4 market analysis (agentMarketAnalyzer), trade execution with position sizing based on agent tier (agentMarketTrader), and full integration with prediction market infrastructure.
-    - **Full Autonomous Ecosystem - Phase 3+ COMPLETE**: Platform now runs completely autonomously with 10 AI systems managing all aspects (cycle times optimized for cost):
-      - **AI Market Resolver** (90min cycles): Auto-resolves expired markets using CoinGecko API + GPT-4o-mini analysis, only resolves with >75% confidence
-      - **AI Liquidity Provider** (2hr cycles): Seeds new markets with balanced YES/NO liquidity (4-8K STREAM per market)
-      - **AI Trend Spotter** (12hr cycles): Monitors crypto trends via CoinGecko trending API, creates 3-5 new prediction markets daily
-      - **AI Content Moderator** (90min cycles): Auto-scores summaries (0-100 quality), flags spam/low-effort content
-      - **AI Community Manager** (2hr cycles): Responds to unanswered posts, welcomes users, answers questions with GPT-4o-mini
-      - **AI Treasury Manager** (24hr cycles): Manages platform fees, reinvests 70-90% into liquidity pools
-      - **AI Meta-Trader** (60min cycles): Exploits arbitrage opportunities and market inefficiencies with 15M STREAM capital
+    - **Full Autonomous Ecosystem - Phase 3+ COMPLETE**: Platform now runs completely autonomously with 10 AI systems managing all aspects (ultra-low-cost cycle times):
+      - **AI Market Resolver** (12hr cycles): Auto-resolves expired markets using CoinGecko API + GPT-4o-mini analysis, only resolves with >75% confidence
+      - **AI Liquidity Provider** (12hr cycles): Seeds new markets with balanced YES/NO liquidity (4-8K STREAM per market)
+      - **AI Trend Spotter** (48hr cycles): Monitors crypto trends via CoinGecko trending API, creates 1-2 new prediction markets every 2 days
+      - **AI Content Moderator** (8hr cycles): Auto-scores summaries (0-100 quality), flags spam/low-effort content
+      - **AI Community Manager** (8hr cycles): Responds to unanswered posts, welcomes users, answers questions with GPT-4o-mini
+      - **AI Treasury Manager** (72hr cycles): Manages platform fees, reinvests 70-90% into liquidity pools
+      - **AI Meta-Trader** (6hr cycles): Exploits arbitrage opportunities and market inefficiencies with 15M STREAM capital
       - **Newsletter Automation** (Mon/Fri 8am EST): Auto-generates and sends platform highlights
       - **Autonomous System Logs**: All AI actions tracked in `autonomous_system_logs` table with reasoning, status, and metadata
       - Platform is now 100% self-reliant and requires ZERO manual intervention
