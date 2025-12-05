@@ -6,7 +6,8 @@ import { pushNotificationService } from './pushNotificationService';
 
 interface StreamMessage {
   type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 
-        'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice-candidate' | 'request-offer' | 'broadcaster-ready' | 'broadcaster-left';
+        'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice-candidate' | 'request-offer' | 'broadcaster-ready' | 'broadcaster-left' |
+        'avatar-audio' | 'avatar-speaking';
   streamId: string;
   userId: string;
   username?: string;
@@ -15,6 +16,16 @@ interface StreamMessage {
   data?: any;
   timestamp?: number;
   targetUserId?: string;
+}
+
+export interface AvatarAudioMessage {
+  type: 'avatar-audio';
+  avatarName: string;
+  text: string;
+  audioBase64: string;
+  segmentType: string;
+  duration: number;
+  timestamp: string;
 }
 
 interface StreamViewer {
@@ -511,6 +522,54 @@ export class StreamingService {
     } catch (error) {
       console.error('Error updating viewer count:', error);
     }
+  }
+
+  // Broadcast avatar audio to stream viewers
+  broadcastAvatarAudio(streamId: string, audioMessage: AvatarAudioMessage) {
+    const session = this.sessions.get(streamId);
+    if (!session) {
+      console.log(`[Streaming] No active session for stream ${streamId} to broadcast avatar audio`);
+      return false;
+    }
+
+    const message = {
+      type: 'avatar-audio' as const,
+      streamId,
+      userId: '',
+      data: audioMessage,
+      timestamp: Date.now(),
+    };
+
+    const messageStr = JSON.stringify(message);
+    let sentCount = 0;
+
+    session.viewers.forEach((viewer) => {
+      try {
+        if (viewer.ws.readyState === WebSocket.OPEN) {
+          viewer.ws.send(messageStr);
+          sentCount++;
+        }
+      } catch (error) {
+        console.error('Error broadcasting avatar audio to viewer:', error);
+      }
+    });
+
+    console.log(`[Streaming] 🎤 Avatar audio broadcast to ${sentCount} viewers in stream ${streamId.slice(0, 8)}...`);
+    return true;
+  }
+
+  // Broadcast avatar speaking status
+  broadcastAvatarSpeaking(streamId: string, isSpeaking: boolean, avatarName: string) {
+    const session = this.sessions.get(streamId);
+    if (!session) return;
+
+    this.broadcastToStream(streamId, {
+      type: 'avatar-speaking',
+      streamId,
+      userId: '',
+      data: { isSpeaking, avatarName },
+      timestamp: Date.now(),
+    });
   }
 
   // AI Agent can send messages to a stream
