@@ -464,7 +464,7 @@ export default function StreamViewPage() {
   const viewerVideoRef = useRef<HTMLVideoElement>(null);
   const streamId = params?.id || null;
   
-  const { isConnected, viewerCount, messages, sendMessage } = useStreamSocket(streamId);
+  const { isConnected, viewerCount, messages, sendMessage, onAvatarAudio } = useStreamSocket(streamId);
   
   const {
     isReceivingVideo,
@@ -910,6 +910,8 @@ export default function StreamViewPage() {
                 streamType={stream.streamType}
                 isLive={isLive}
                 currentMessage={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
+                viewerCount={displayViewerCount}
+                onAudioMessage={onAvatarAudio}
               />
             ) : isLive && isReceivingVideo && remoteStream ? (
               <div className="absolute inset-0">
@@ -1504,8 +1506,8 @@ export default function StreamViewPage() {
 
               <TabsContent value="costream" className="flex-1 flex flex-col m-0 p-4 overflow-y-auto">
                 <CoStreamPanel 
-                  streamId={streamId || ''} 
-                  isHost={isHost}
+                  sessionId={streamId || ''} 
+                  avatars={[]}
                 />
               </TabsContent>
             </Tabs>

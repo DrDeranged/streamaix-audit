@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Sparkles, Activity, Mic, Radio, Brain, Zap, TrendingUp, Volume2, MessageCircle, Lightbulb, Target, BarChart3, Shield, Flame, Heart } from 'lucide-react';
+import { Bot, Sparkles, Activity, Mic, Radio, Brain, Zap, TrendingUp, Volume2, VolumeX, MessageCircle, Lightbulb, Target, BarChart3, Shield, Flame, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface AIAvatarStreamProps {
   hostName: string;
@@ -10,6 +11,23 @@ interface AIAvatarStreamProps {
   isLive: boolean;
   currentMessage?: string;
   viewerCount?: number;
+  onAudioMessage?: (callback: (audio: AvatarAudioData) => void) => () => void;
+}
+
+interface AvatarAudioData {
+  avatarName: string;
+  text: string;
+  audioBase64: string;
+  segmentType: string;
+  duration: number;
+  timestamp: string;
+}
+
+interface AudioQueueItem {
+  id: string;
+  text: string;
+  audioBase64: string;
+  segmentType: string;
 }
 
 interface AIPersona {
@@ -55,6 +73,38 @@ const getPersonaFromName = (name: string): AIPersona => {
       icon: Flame,
       gradient: 'from-pink-500 to-rose-500',
     },
+    'Marc Andreessen': {
+      name: 'Marc Andreessen',
+      style: 'analytical',
+      expertise: ['Venture Capital', 'Tech Trends', 'Web3 Vision'],
+      mood: 'Strategic',
+      icon: Brain,
+      gradient: 'from-blue-500 to-indigo-500',
+    },
+    'Vitalik Buterin': {
+      name: 'Vitalik Buterin',
+      style: 'educational',
+      expertise: ['Ethereum', 'Protocol Design', 'Crypto Philosophy'],
+      mood: 'Thoughtful',
+      icon: Sparkles,
+      gradient: 'from-violet-500 to-purple-500',
+    },
+    'Elon Musk': {
+      name: 'Elon Musk',
+      style: 'enthusiastic',
+      expertise: ['Innovation', 'Meme Coins', 'Tech Future'],
+      mood: 'Unpredictable',
+      icon: Zap,
+      gradient: 'from-amber-500 to-yellow-500',
+    },
+    'Balaji Srinivasan': {
+      name: 'Balaji Srinivasan',
+      style: 'analytical',
+      expertise: ['Network States', 'Crypto Economics', 'Tech Predictions'],
+      mood: 'Visionary',
+      icon: Target,
+      gradient: 'from-cyan-500 to-teal-500',
+    },
   };
   
   return personas[name] || {
@@ -87,6 +137,11 @@ const avatarStyles: Record<string, { gradient: string; icon: any; pulseColor: st
     gradient: 'from-amber-500 via-orange-500 to-red-500',
     icon: Zap,
     pulseColor: 'rgb(245, 158, 11)',
+  },
+  avatar_alpha: {
+    gradient: 'from-purple-600 via-pink-500 to-orange-400',
+    icon: Brain,
+    pulseColor: 'rgb(168, 85, 247)',
   },
 };
 
@@ -340,22 +395,234 @@ function EngagementMetrics({ viewerCount }: { viewerCount?: number }) {
   );
 }
 
+function AudioController({ 
+  isMuted, 
+  onToggleMute,
+  isPlaying,
+  currentText 
+}: { 
+  isMuted: boolean;
+  onToggleMute: () => void;
+  isPlaying: boolean;
+  currentText?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="absolute bottom-4 left-4 z-20 flex items-center gap-3"
+    >
+      <Button
+        onClick={onToggleMute}
+        variant="outline"
+        size="sm"
+        className={cn(
+          "rounded-full border-2 transition-all",
+          isMuted 
+            ? "border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20" 
+            : "border-purple-500/50 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
+        )}
+        data-testid="button-toggle-audio"
+      >
+        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        <span className="ml-2 text-xs">{isMuted ? 'Unmute' : 'Muted'}</span>
+      </Button>
+      
+      {isPlaying && !isMuted && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-2 bg-purple-500/20 rounded-full px-3 py-1.5 border border-purple-500/30"
+        >
+          <motion.div
+            className="w-2 h-2 rounded-full bg-green-400"
+            animate={{ scale: [1, 1.3, 1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+          />
+          <span className="text-xs text-purple-300">Playing Audio</span>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+function SpeechBubble({ text, segmentType }: { text: string; segmentType?: string }) {
+  const getSegmentLabel = () => {
+    switch (segmentType) {
+      case 'opening': return '🎤 Opening';
+      case 'market_analysis': return '📊 Market Analysis';
+      case 'market_reaction': return '📈 Market Update';
+      case 'viewer_qa': return '💬 Q&A';
+      default: return '💡 Insight';
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      className="absolute bottom-20 left-1/2 transform -translate-x-1/2 max-w-md px-6 py-4 bg-gradient-to-br from-slate-800/95 via-purple-900/30 to-slate-800/95 backdrop-blur-xl rounded-2xl border border-purple-500/40 shadow-2xl shadow-purple-500/20"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xs text-purple-400 font-medium">{getSegmentLabel()}</span>
+      </div>
+      <p className="text-sm text-white leading-relaxed">{text}</p>
+    </motion.div>
+  );
+}
+
 export function AIAvatarStream({ 
   hostName, 
   hostAvatar, 
   streamType, 
   isLive,
   currentMessage,
-  viewerCount
+  viewerCount,
+  onAudioMessage
 }: AIAvatarStreamProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [currentThought, setCurrentThought] = useState('');
   const [thoughtPosition, setThoughtPosition] = useState<'left' | 'right'>('left');
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [currentSpeechText, setCurrentSpeechText] = useState<string | null>(null);
+  const [currentSegmentType, setCurrentSegmentType] = useState<string>('');
+  
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioQueueRef = useRef<AudioQueueItem[]>([]);
+  const isProcessingRef = useRef(false);
+  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
   
   const style = avatarStyles[streamType] || avatarStyles.broadcast;
   const TypeIcon = style.icon;
   const persona = useMemo(() => getPersonaFromName(hostName), [hostName]);
+
+  const initAudioContext = useCallback(() => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+    return audioContextRef.current;
+  }, []);
+
+  const playNextInQueue = useCallback(async () => {
+    if (isProcessingRef.current || audioQueueRef.current.length === 0 || isMuted) {
+      return;
+    }
+
+    isProcessingRef.current = true;
+    const item = audioQueueRef.current.shift();
+    
+    if (!item) {
+      isProcessingRef.current = false;
+      return;
+    }
+
+    try {
+      const audioContext = initAudioContext();
+      
+      const binaryString = atob(item.audioBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const audioBuffer = await audioContext.decodeAudioData(bytes.buffer);
+      
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      
+      currentSourceRef.current = source;
+      setIsPlayingAudio(true);
+      setIsSpeaking(true);
+      setCurrentSpeechText(item.text);
+      setCurrentSegmentType(item.segmentType);
+      
+      source.onended = () => {
+        currentSourceRef.current = null;
+        setIsPlayingAudio(false);
+        setIsSpeaking(false);
+        isProcessingRef.current = false;
+        
+        setTimeout(() => {
+          setCurrentSpeechText(null);
+        }, 2000);
+        
+        playNextInQueue();
+      };
+      
+      source.start(0);
+      console.log(`[Audio] 🔊 Playing: "${item.text.substring(0, 50)}..."`);
+      
+    } catch (error) {
+      console.error('[Audio] Failed to play audio:', error);
+      isProcessingRef.current = false;
+      setIsPlayingAudio(false);
+      setIsSpeaking(false);
+      playNextInQueue();
+    }
+  }, [isMuted, initAudioContext]);
+
+  const handleAudioMessage = useCallback((audio: AvatarAudioData) => {
+    console.log(`[Audio] 📥 Received: "${audio.text.substring(0, 50)}..." (${audio.segmentType})`);
+    
+    const queueItem: AudioQueueItem = {
+      id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      text: audio.text,
+      audioBase64: audio.audioBase64,
+      segmentType: audio.segmentType,
+    };
+    
+    audioQueueRef.current.push(queueItem);
+    
+    if (!isProcessingRef.current && !isMuted) {
+      playNextInQueue();
+    }
+  }, [isMuted, playNextInQueue]);
+
+  useEffect(() => {
+    if (onAudioMessage) {
+      const unsubscribe = onAudioMessage(handleAudioMessage);
+      return unsubscribe;
+    }
+  }, [onAudioMessage, handleAudioMessage]);
+
+  useEffect(() => {
+    if (!isMuted && audioQueueRef.current.length > 0 && !isProcessingRef.current) {
+      playNextInQueue();
+    }
+  }, [isMuted, playNextInQueue]);
+
+  const toggleMute = useCallback(() => {
+    if (isMuted) {
+      initAudioContext();
+    } else {
+      if (currentSourceRef.current) {
+        currentSourceRef.current.stop();
+        currentSourceRef.current = null;
+      }
+      setIsPlayingAudio(false);
+      setIsSpeaking(false);
+      isProcessingRef.current = false;
+    }
+    setIsMuted(!isMuted);
+  }, [isMuted, initAudioContext]);
+
+  useEffect(() => {
+    return () => {
+      if (currentSourceRef.current) {
+        currentSourceRef.current.stop();
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (currentMessage) {
@@ -367,7 +634,7 @@ export function AIAvatarStream({
   }, [currentMessage]);
 
   useEffect(() => {
-    if (isLive && !currentMessage) {
+    if (isLive && !currentMessage && !isPlayingAudio) {
       const interval = setInterval(() => {
         const rand = Math.random();
         if (rand > 0.7) {
@@ -382,7 +649,7 @@ export function AIAvatarStream({
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [isLive, currentMessage]);
+  }, [isLive, currentMessage, isPlayingAudio]);
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 flex items-center justify-center overflow-hidden">
@@ -391,6 +658,13 @@ export function AIAvatarStream({
       
       <PersonaInfoPanel persona={persona} isLive={isLive} />
       <EngagementMetrics viewerCount={viewerCount} />
+      
+      <AudioController
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
+        isPlaying={isPlayingAudio}
+        currentText={currentSpeechText || undefined}
+      />
       
       <AnimatePresence>
         {isThinking && !isSpeaking && (
@@ -526,7 +800,10 @@ export function AIAvatarStream({
         </div>
 
         <AnimatePresence>
-          {currentMessage && (
+          {currentSpeechText && (
+            <SpeechBubble text={currentSpeechText} segmentType={currentSegmentType} />
+          )}
+          {!currentSpeechText && currentMessage && (
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

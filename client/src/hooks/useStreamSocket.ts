@@ -11,7 +11,7 @@ interface StreamMessage {
 }
 
 interface StreamEvent {
-  type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 'chat-history' | 'error';
+  type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 'chat-history' | 'error' | 'avatar-audio' | 'avatar-speaking';
   streamId?: string;
   userId?: string;
   username?: string;
@@ -21,6 +21,18 @@ interface StreamEvent {
   message?: string;
 }
 
+export interface AvatarAudioData {
+  type: 'avatar-audio';
+  avatarName: string;
+  text: string;
+  audioBase64: string;
+  segmentType: string;
+  duration: number;
+  timestamp: string;
+}
+
+type AvatarAudioCallback = (audio: AvatarAudioData) => void;
+
 interface UseStreamSocketReturn {
   isConnected: boolean;
   viewerCount: number;
@@ -28,6 +40,8 @@ interface UseStreamSocketReturn {
   sendMessage: (content: string) => void;
   sendReaction: (reaction: string) => void;
   disconnect: () => void;
+  onAvatarAudio: (callback: AvatarAudioCallback) => () => void;
+  isSpeaking: boolean;
 }
 
 export function useStreamSocket(streamId: string | null): UseStreamSocketReturn {
@@ -35,8 +49,10 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
   const [isConnected, setIsConnected] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
   const [messages, setMessages] = useState<StreamMessage[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const audioCallbacksRef = useRef<Set<AvatarAudioCallback>>(new Set());
 
   const connect = useCallback(() => {
     if (!streamId || !isAuthenticated || !user) return;
@@ -148,6 +164,25 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
       case 'error':
         console.error('[StreamSocket] Error:', event.message);
         break;
+        
+      case 'avatar-audio':
+        if (event.data) {
+          console.log('[StreamSocket] 🎤 Avatar audio received:', event.data.avatarName);
+          audioCallbacksRef.current.forEach(callback => {
+            try {
+              callback(event.data as AvatarAudioData);
+            } catch (err) {
+              console.error('[StreamSocket] Error in audio callback:', err);
+            }
+          });
+        }
+        break;
+        
+      case 'avatar-speaking':
+        if (event.data) {
+          setIsSpeaking(event.data.isSpeaking);
+        }
+        break;
     }
   };
 
@@ -194,6 +229,13 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     setIsConnected(false);
   }, []);
 
+  const onAvatarAudio = useCallback((callback: AvatarAudioCallback) => {
+    audioCallbacksRef.current.add(callback);
+    return () => {
+      audioCallbacksRef.current.delete(callback);
+    };
+  }, []);
+
   useEffect(() => {
     if (streamId && isAuthenticated) {
       connect();
@@ -211,5 +253,7 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     sendMessage,
     sendReaction,
     disconnect,
+    onAvatarAudio,
+    isSpeaking,
   };
 }
