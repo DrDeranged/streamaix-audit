@@ -52,6 +52,7 @@ const GoLive = React.lazy(() => import("@/pages/go-live"));
 const Streams = React.lazy(() => import("@/pages/streams"));
 const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const Gamification = React.lazy(() => import("@/pages/gamification"));
+const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 
 function Router() {
   return (
@@ -105,6 +106,12 @@ function Router() {
       <Route path="/bounties">
         <Suspense fallback={<DashboardSkeleton />}>
           <BountyBoard />
+        </Suspense>
+      </Route>
+      
+      <Route path="/following">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <FollowingFeed />
         </Suspense>
       </Route>
       
