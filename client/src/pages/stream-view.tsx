@@ -66,6 +66,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useStreamSocket } from '@/hooks/useStreamSocket';
+import { useViewerStream } from '@/hooks/useViewerStream';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
@@ -460,9 +461,17 @@ export default function StreamViewPage() {
   const [pinnedMessages, setPinnedMessages] = useState<{ id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[]>([]);
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const viewerVideoRef = useRef<HTMLVideoElement>(null);
   const streamId = params?.id || null;
   
   const { isConnected, viewerCount, messages, sendMessage } = useStreamSocket(streamId);
+  
+  const {
+    isReceivingVideo,
+    remoteStream,
+    connectionState: videoConnectionState,
+    error: videoError,
+  } = useViewerStream(streamId);
   
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
     queryKey: ['/api/streams', streamId],
@@ -486,6 +495,13 @@ export default function StreamViewPage() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (viewerVideoRef.current && remoteStream) {
+      viewerVideoRef.current.srcObject = remoteStream;
+      console.log('[StreamView] Attached remote stream to video element');
+    }
+  }, [remoteStream]);
 
   useEffect(() => {
     const tipMessages = messages.filter(m => m.content.includes('💎 Tipped'));
@@ -895,6 +911,32 @@ export default function StreamViewPage() {
                 isLive={isLive}
                 currentMessage={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
               />
+            ) : isLive && isReceivingVideo && remoteStream ? (
+              <div className="absolute inset-0">
+                <video
+                  ref={viewerVideoRef}
+                  autoPlay
+                  playsInline
+                  muted={isMuted}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 z-10">
+                  <Badge className={cn(
+                    "backdrop-blur-sm text-xs px-2.5 py-1",
+                    videoConnectionState === 'connected' ? "bg-emerald-500/80 text-white" :
+                    videoConnectionState === 'connecting' ? "bg-cyan-500/80 text-white" :
+                    videoConnectionState === 'reconnecting' ? "bg-amber-500/80 text-white" :
+                    "bg-red-500/80 text-white"
+                  )}>
+                    {videoConnectionState === 'connected' ? <Wifi className="w-3 h-3 mr-1.5" /> :
+                     videoConnectionState === 'connecting' ? <Radio className="w-3 h-3 mr-1.5 animate-pulse" /> :
+                     <WifiOff className="w-3 h-3 mr-1.5" />}
+                    {videoConnectionState === 'connected' ? 'Live' :
+                     videoConnectionState === 'connecting' ? 'Connecting...' :
+                     videoConnectionState === 'reconnecting' ? 'Reconnecting...' : 'Disconnected'}
+                  </Badge>
+                </div>
+              </div>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
                 {isLive ? (
@@ -904,12 +946,34 @@ export default function StreamViewPage() {
                       config.gradient,
                       "border-white/20"
                     )}>
-                      <Icon className="w-12 h-12 text-white" />
+                      {videoConnectionState === 'connecting' ? (
+                        <Radio className="w-12 h-12 text-white animate-pulse" />
+                      ) : (
+                        <Icon className="w-12 h-12 text-white" />
+                      )}
                     </div>
-                    <p className="text-lg font-bold text-white mb-2 font-orbitron">Stream is Live</p>
+                    <p className="text-lg font-bold text-white mb-2 font-orbitron">
+                      {videoConnectionState === 'connecting' ? 'Connecting to Stream...' : 
+                       videoConnectionState === 'reconnecting' ? 'Reconnecting...' :
+                       videoError ? 'Connection Failed' : 'Stream is Live'}
+                    </p>
                     <p className="text-sm text-slate-400 flex items-center justify-center gap-2">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      Audio/Video active
+                      {videoConnectionState === 'connecting' ? (
+                        <>
+                          <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
+                          Establishing video connection...
+                        </>
+                      ) : videoError ? (
+                        <>
+                          <WifiOff className="w-4 h-4 text-red-400" />
+                          {videoError}
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 text-purple-400" />
+                          Waiting for broadcaster...
+                        </>
+                      )}
                     </p>
                   </div>
                 ) : isScheduled ? (
