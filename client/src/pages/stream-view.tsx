@@ -466,18 +466,21 @@ export default function StreamViewPage() {
   
   const { isConnected, viewerCount, messages, sendMessage, onAvatarAudio } = useStreamSocket(streamId);
   
-  const {
-    isReceivingVideo,
-    remoteStream,
-    connectionState: videoConnectionState,
-    error: videoError,
-  } = useViewerStream(streamId);
-  
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
     queryKey: ['/api/streams', streamId],
     enabled: !!streamId,
     refetchInterval: 10000,
   });
+  
+  const stream = streamData?.stream;
+  const isAvatarStream = stream?.isKnowledgeAvatar === true;
+  
+  const {
+    isReceivingVideo,
+    remoteStream,
+    connectionState: videoConnectionState,
+    error: videoError,
+  } = useViewerStream(streamId, !isAvatarStream && !!stream);
   
   const { data: pinnedData } = useQuery<{ messages: { id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[] }>({
     queryKey: ['/api/streams', streamId, 'messages', 'pinned'],
@@ -497,7 +500,6 @@ export default function StreamViewPage() {
     }
   }, [streamId, isAuthenticated]);
   
-  const stream = streamData?.stream;
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
   const isHost = user?.id === stream?.hostId;

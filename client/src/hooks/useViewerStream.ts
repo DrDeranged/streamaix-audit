@@ -44,7 +44,7 @@ export interface UseViewerStreamReturn extends ViewerStreamState {
   disconnect: () => void;
 }
 
-export function useViewerStream(streamId: string | null): UseViewerStreamReturn {
+export function useViewerStream(streamId: string | null, enabled: boolean = true): UseViewerStreamReturn {
   const { user, isAuthenticated } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [isReceivingVideo, setIsReceivingVideo] = useState(false);
@@ -355,14 +355,14 @@ export function useViewerStream(streamId: string | null): UseViewerStreamReturn 
   }, []);
 
   useEffect(() => {
-    if (streamId && isAuthenticated) {
+    if (streamId && isAuthenticated && enabled) {
       connect();
     }
     
     return () => {
       disconnect();
     };
-  }, [streamId, isAuthenticated]);
+  }, [streamId, isAuthenticated, enabled]);
 
   return {
     isConnected,
