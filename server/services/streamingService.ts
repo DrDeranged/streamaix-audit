@@ -3,6 +3,7 @@ import { db } from '../db';
 import { liveStreams, streamMessages, users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { pushNotificationService } from './pushNotificationService';
+import { getAutonomousAvatarStreamService } from './autonomousAvatarStreamService';
 
 interface StreamMessage {
   type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 
@@ -173,6 +174,21 @@ export class StreamingService {
       userId: '',
       data: { count: currentViewerCount },
     });
+
+    // Check if this is a Knowledge Avatar stream and activate voice on-demand
+    const [streamRecord] = await db.select({ hostAvatarId: liveStreams.hostAvatarId })
+      .from(liveStreams)
+      .where(eq(liveStreams.id, streamId))
+      .limit(1);
+    
+    if (streamRecord?.hostAvatarId) {
+      const avatarService = getAutonomousAvatarStreamService();
+      if (avatarService && !avatarService.isVoiceActiveForStream(streamId)) {
+        avatarService.activateVoiceForStream(streamId).catch(err => 
+          console.error(`[Streaming] Failed to activate voice for stream ${streamId}:`, err)
+        );
+      }
+    }
 
     // Send recent messages to new viewer
     ws.send(JSON.stringify({

@@ -291,6 +291,76 @@ Just output the topic, nothing else.`
 
     return stream.podcastEngine.addViewerQuestion(streamId, viewerId, viewerName, question);
   }
+
+  async activateVoiceForStream(streamId: string): Promise<boolean> {
+    if (this.activeVoiceStreams.has(streamId)) {
+      return true;
+    }
+
+    if (this.activeVoiceStreams.size >= MAX_CONCURRENT_VOICE_STREAMS) {
+      console.log(`[Avatar Voice] Cannot activate more streams (limit: ${MAX_CONCURRENT_VOICE_STREAMS})`);
+      return false;
+    }
+
+    try {
+      const [streamRecord] = await db.select()
+        .from(liveStreams)
+        .where(eq(liveStreams.id, streamId))
+        .limit(1);
+
+      if (!streamRecord?.hostAvatarId) {
+        return false;
+      }
+
+      const [avatar] = await db.select()
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, streamRecord.hostAvatarId))
+        .limit(1);
+
+      if (!avatar) {
+        return false;
+      }
+
+      console.log(`[Avatar Voice] 🎙️ Activating voice for ${avatar.name}'s stream (viewer joined)`);
+
+      const topic = streamRecord.description || 'Current market dynamics and trading strategies';
+      const durationMinutes = 60;
+      const scheduledEndTime = new Date(Date.now() + durationMinutes * 60 * 1000);
+
+      const streamingService = getStreamingService();
+      if (streamingService) {
+        await streamingService.createAvatarStreamSession(streamId);
+      }
+
+      const podcastEngine = new AvatarPodcastEngine();
+      await podcastEngine.startPodcastSession(streamId, avatar.id, topic);
+
+      const activeStream: ActiveVoiceStream = {
+        streamId,
+        avatarId: avatar.id,
+        avatarName: avatar.name,
+        podcastEngine,
+        startTime: new Date(),
+        scheduledEndTime,
+        isActive: true,
+      };
+
+      this.activeVoiceStreams.set(streamId, activeStream);
+
+      console.log(`[Avatar Voice] ✅ ${avatar.name}'s stream now has voice enabled!`);
+
+      this.scheduleStreamEnd(streamId, durationMinutes);
+
+      return true;
+    } catch (error) {
+      console.error(`[Avatar Voice] Error activating voice for stream ${streamId}:`, error);
+      return false;
+    }
+  }
+
+  isVoiceActiveForStream(streamId: string): boolean {
+    return this.activeVoiceStreams.has(streamId);
+  }
 }
 
 let serviceInstance: AutonomousAvatarStreamService | null = null;
