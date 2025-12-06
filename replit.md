@@ -82,6 +82,14 @@ aiContentModerator, aiMetaTrader, aiTrendSpotter, aiLiquidityProvider, aiMarketR
       - **Newsletter Automation** (Mon/Fri 8am EST): Auto-generates and sends platform highlights
       - **Autonomous System Logs**: All AI actions tracked in `autonomous_system_logs` table with reasoning, status, and metadata
       - Platform is now 100% self-reliant and requires ZERO manual intervention
+    - **Autonomous Avatar Voice Streaming - Phase 4 (Dec 2025)**: Knowledge Avatars now host 24/7 autonomous live streams with actual AI-generated voice commentary:
+      - **35 Knowledge Avatars**: Crypto influencers (Vitalik, CZ, Elon, Balaji, etc.) with unique OpenAI TTS voices (onyx, echo, shimmer) and personalized speaking speeds
+      - **AvatarVoiceService** (`server/services/avatarVoiceService.ts`): Generates speech via OpenAI TTS-1, handles voice assignment per avatar
+      - **AvatarPodcastEngine** (`server/services/avatarPodcastEngine.ts`): Continuous podcast-style commentary with 45s intervals, market reaction segments, viewer Q&A responses
+      - **AutonomousAvatarStreamService** (`server/services/autonomousAvatarStreamService.ts`): Manages 2 concurrent voice streams, 45-90 minute durations, automatic rotation every 4 hours
+      - **Audio Pipeline**: GPT-4o-mini generates insights → OpenAI TTS converts to speech → Base64 audio → WebSocket broadcast → Browser AudioContext playback
+      - **Frontend Integration**: `AIAvatarStream.tsx` with AudioContext playback, speaking indicators, speech bubbles, neural network visualizations
+      - **Cost Controls**: 30% random segment skip rate, 150 TTS calls max per stream, extended segment intervals (45s vs 25s)
 
 ## External Dependencies
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless.
