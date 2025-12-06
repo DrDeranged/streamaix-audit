@@ -246,6 +246,32 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     };
   }, [streamId, isAuthenticated, connect, disconnect]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && streamId && isAuthenticated) {
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          console.log('[StreamSocket] Reconnecting after visibility change');
+          connect();
+        }
+      }
+    };
+
+    const handleOnline = () => {
+      if (streamId && isAuthenticated) {
+        console.log('[StreamSocket] Network online - reconnecting');
+        connect();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [streamId, isAuthenticated, connect]);
+
   return {
     isConnected,
     viewerCount,

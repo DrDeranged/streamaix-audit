@@ -395,6 +395,46 @@ function EngagementMetrics({ viewerCount }: { viewerCount?: number }) {
   );
 }
 
+function MobileAudioOverlay({ onEnable }: { onEnable: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
+      onClick={onEnable}
+      onTouchEnd={onEnable}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="flex flex-col items-center gap-4 p-8"
+      >
+        <motion.div
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-purple-500/30"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Volume2 className="w-10 h-10 text-white" />
+        </motion.div>
+        <div className="text-center">
+          <p className="text-lg font-semibold text-white mb-1">Tap to Enable Audio</p>
+          <p className="text-sm text-slate-400">Listen to live AI commentary</p>
+        </div>
+        <motion.div
+          className="flex items-center gap-1 mt-2"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <div className="w-2 h-2 rounded-full bg-purple-400" />
+          <div className="w-2 h-2 rounded-full bg-cyan-400" />
+          <div className="w-2 h-2 rounded-full bg-purple-400" />
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function AudioController({ 
   isMuted, 
   onToggleMute,
@@ -410,36 +450,39 @@ function AudioController({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="absolute bottom-4 left-4 z-20 flex items-center gap-3"
+      className="absolute bottom-4 left-4 right-4 md:right-auto z-20 flex items-center justify-between md:justify-start gap-3"
     >
       <Button
         onClick={onToggleMute}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          onToggleMute();
+        }}
         variant="outline"
-        size="sm"
         className={cn(
-          "rounded-full border-2 transition-all",
+          "rounded-full border-2 transition-all min-h-[48px] min-w-[48px] px-4 py-3 md:py-2 md:min-h-0",
           isMuted 
-            ? "border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20" 
-            : "border-purple-500/50 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
+            ? "border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 active:bg-red-500/30" 
+            : "border-purple-500/50 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 active:bg-purple-500/30"
         )}
         data-testid="button-toggle-audio"
       >
-        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-        <span className="ml-2 text-xs">{isMuted ? 'Unmute' : 'Muted'}</span>
+        {isMuted ? <VolumeX className="w-5 h-5 md:w-4 md:h-4" /> : <Volume2 className="w-5 h-5 md:w-4 md:h-4" />}
+        <span className="ml-2 text-sm md:text-xs font-medium">{isMuted ? 'Tap to Listen' : 'Listening'}</span>
       </Button>
       
       {isPlaying && !isMuted && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center gap-2 bg-purple-500/20 rounded-full px-3 py-1.5 border border-purple-500/30"
+          className="flex items-center gap-2 bg-purple-500/20 rounded-full px-3 py-2 border border-purple-500/30"
         >
           <motion.div
-            className="w-2 h-2 rounded-full bg-green-400"
+            className="w-2.5 h-2.5 rounded-full bg-green-400"
             animate={{ scale: [1, 1.3, 1] }}
             transition={{ duration: 0.5, repeat: Infinity }}
           />
-          <span className="text-xs text-purple-300">Playing Audio</span>
+          <span className="text-sm md:text-xs text-purple-300 whitespace-nowrap">Playing</span>
         </motion.div>
       )}
     </motion.div>
@@ -457,17 +500,46 @@ function SpeechBubble({ text, segmentType }: { text: string; segmentType?: strin
     }
   };
 
+  const truncatedText = text.length > 200 ? text.substring(0, 200) + '...' : text;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-      className="absolute bottom-20 left-1/2 transform -translate-x-1/2 max-w-md px-6 py-4 bg-gradient-to-br from-slate-800/95 via-purple-900/30 to-slate-800/95 backdrop-blur-xl rounded-2xl border border-purple-500/40 shadow-2xl shadow-purple-500/20"
+      className="absolute bottom-24 md:bottom-20 left-2 right-2 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 max-w-md mx-auto px-4 md:px-6 py-3 md:py-4 bg-gradient-to-br from-slate-800/95 via-purple-900/30 to-slate-800/95 backdrop-blur-xl rounded-xl md:rounded-2xl border border-purple-500/40 shadow-2xl shadow-purple-500/20"
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-1.5 md:mb-2">
         <span className="text-xs text-purple-400 font-medium">{getSegmentLabel()}</span>
       </div>
-      <p className="text-sm text-white leading-relaxed">{text}</p>
+      <p className="text-xs md:text-sm text-white leading-relaxed">{truncatedText}</p>
+    </motion.div>
+  );
+}
+
+function MobileHostBadge({ hostName, isLive, viewerCount }: { hostName: string; isLive: boolean; viewerCount?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 md:hidden"
+    >
+      <div className="bg-slate-900/90 backdrop-blur-xl rounded-full border border-purple-500/30 px-4 py-2 flex items-center gap-3">
+        {isLive && (
+          <div className="flex items-center gap-1.5">
+            <motion.div
+              className="w-2 h-2 rounded-full bg-red-500"
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+            <span className="text-xs font-medium text-red-400">LIVE</span>
+          </div>
+        )}
+        <span className="text-sm font-medium text-white">{hostName}</span>
+        {viewerCount !== undefined && (
+          <span className="text-xs text-slate-400">{viewerCount} watching</span>
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -489,6 +561,8 @@ export function AIAvatarStream({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentSpeechText, setCurrentSpeechText] = useState<string | null>(null);
   const [currentSegmentType, setCurrentSegmentType] = useState<string>('');
+  const [showMobileOverlay, setShowMobileOverlay] = useState(true);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioQueueRef = useRef<AudioQueueItem[]>([]);
@@ -598,7 +672,15 @@ export function AIAvatarStream({
     }
   }, [isMuted, playNextInQueue]);
 
+  const handleEnableAudio = useCallback(() => {
+    setShowMobileOverlay(false);
+    setHasUserInteracted(true);
+    initAudioContext();
+    setIsMuted(false);
+  }, [initAudioContext]);
+
   const toggleMute = useCallback(() => {
+    setHasUserInteracted(true);
     if (isMuted) {
       initAudioContext();
     } else {
@@ -652,12 +734,24 @@ export function AIAvatarStream({
   }, [isLive, currentMessage, isPlayingAudio]);
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 flex items-center justify-center overflow-hidden touch-manipulation">
       <FloatingParticles />
       <NeuralNetwork />
       
-      <PersonaInfoPanel persona={persona} isLive={isLive} />
-      <EngagementMetrics viewerCount={viewerCount} />
+      <AnimatePresence>
+        {showMobileOverlay && isLive && !hasUserInteracted && (
+          <MobileAudioOverlay onEnable={handleEnableAudio} />
+        )}
+      </AnimatePresence>
+      
+      <MobileHostBadge hostName={hostName} isLive={isLive} viewerCount={viewerCount} />
+      
+      <div className="hidden md:block">
+        <PersonaInfoPanel persona={persona} isLive={isLive} />
+      </div>
+      <div className="hidden sm:block">
+        <EngagementMetrics viewerCount={viewerCount} />
+      </div>
       
       <AudioController
         isMuted={isMuted}
