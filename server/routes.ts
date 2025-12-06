@@ -14472,6 +14472,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const streamingService = initStreamingService();
   
   streamingWss.on('connection', (ws: WebSocket, req) => {
+    console.log(`🔌 [WS] Stream WebSocket connection attempt received`);
+    console.log(`🔌 [WS] Request URL: ${req.url}`);
+    console.log(`🔌 [WS] Headers:`, JSON.stringify(req.headers, null, 2));
+    
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const streamId = url.searchParams.get('streamId');
     const userId = url.searchParams.get('userId');
@@ -14479,7 +14483,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const avatar = url.searchParams.get('avatar');
     const isAiAgent = url.searchParams.get('isAiAgent') === 'true';
     
+    console.log(`🔌 [WS] Parsed params - streamId: ${streamId}, userId: ${userId}, username: ${username}, isAiAgent: ${isAiAgent}`);
+    
     if (!streamId || !userId || !username) {
+      console.log(`❌ [WS] Rejecting connection - Missing params: streamId=${!!streamId}, userId=${!!userId}, username=${!!username}`);
       ws.close(1008, 'Missing required parameters');
       return;
     }
