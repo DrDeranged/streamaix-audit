@@ -38,9 +38,11 @@ interface ViewerQuestion {
   answered: boolean;
 }
 
-const SEGMENT_INTERVAL_MS = 25000;
-const MARKET_CHECK_INTERVAL_MS = 60000;
+const SEGMENT_INTERVAL_MS = 45000;
+const MARKET_CHECK_INTERVAL_MS = 120000;
 const MAX_CONTEXT_LENGTH = 5;
+const MAX_TTS_CALLS_PER_STREAM = 150;
+const SKIP_AUDIO_CHANCE = 0.3;
 
 export class AvatarPodcastEngine {
   private activeSessions = new Map<string, PodcastSession>();
@@ -246,6 +248,17 @@ export class AvatarPodcastEngine {
 
   private async generateCommentarySegment(session: PodcastSession): Promise<void> {
     try {
+      if (session.segmentCount >= MAX_TTS_CALLS_PER_STREAM) {
+        console.log(`[Podcast] ⚠️ TTS limit reached for ${session.avatarName} (${session.segmentCount} segments)`);
+        session.isActive = false;
+        return;
+      }
+
+      if (Math.random() < SKIP_AUDIO_CHANCE) {
+        console.log(`[Podcast] ⏭️ Skipping segment for ${session.avatarName} (cost optimization)`);
+        return;
+      }
+
       const segmentTypes = ['analysis', 'alpha', 'commentary'];
       const weights = [0.3, 0.4, 0.3];
       const random = Math.random();

@@ -18,9 +18,9 @@ interface ActiveVoiceStream {
   isActive: boolean;
 }
 
-const STREAM_DURATION_MIN = 60;
-const STREAM_DURATION_MAX = 180;
-const STREAM_ROTATION_INTERVAL = 3 * 60 * 60 * 1000;
+const STREAM_DURATION_MIN = 45;
+const STREAM_DURATION_MAX = 90;
+const STREAM_ROTATION_INTERVAL = 4 * 60 * 60 * 1000;
 const MAX_CONCURRENT_VOICE_STREAMS = 2;
 
 export class AutonomousAvatarStreamService {
