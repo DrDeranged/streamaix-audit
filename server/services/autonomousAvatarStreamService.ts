@@ -21,7 +21,7 @@ interface ActiveVoiceStream {
 const STREAM_DURATION_MIN = 45;
 const STREAM_DURATION_MAX = 90;
 const STREAM_ROTATION_INTERVAL = 4 * 60 * 60 * 1000;
-const MAX_CONCURRENT_VOICE_STREAMS = 2;
+const MAX_CONCURRENT_VOICE_STREAMS = 1; // Reduced to 1 for testing - saves API costs
 
 export class AutonomousAvatarStreamService {
   private activeVoiceStreams = new Map<string, ActiveVoiceStream>();
