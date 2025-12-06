@@ -485,6 +485,18 @@ export default function StreamViewPage() {
     refetchInterval: 15000,
   });
   
+  useEffect(() => {
+    if (streamId && isAuthenticated) {
+      apiRequest(`/api/streams/${streamId}/join`, { method: 'POST' })
+        .then(() => {
+          console.log('[StreamView] Joined stream successfully');
+        })
+        .catch((error) => {
+          console.log('[StreamView] Join API call failed (non-blocking):', error.message);
+        });
+    }
+  }, [streamId, isAuthenticated]);
+  
   const stream = streamData?.stream;
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;

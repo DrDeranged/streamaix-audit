@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { 
   Video, 
@@ -25,7 +25,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
 
 type StreamType = 'broadcast' | 'trading_room' | 'audio_space' | 'live_bounty';
 
@@ -90,31 +89,7 @@ function StreamCard({ stream }: { stream: LiveStream }) {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
-  const joinMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest(`/api/streams/${stream.id}/join`, { method: 'POST' });
-      return response;
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Joined stream!",
-        description: `You're now watching "${stream.title}"`,
-      });
-      setLocation(`/stream/${stream.id}`);
-    },
-    onError: () => {
-      if (!isAuthenticated) {
-        setLocation('/auth');
-      } else {
-        toast({
-          title: "Couldn't join stream",
-          description: "Please try again",
-          variant: "destructive",
-        });
-      }
-    }
-  });
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleJoin = () => {
     if (!isAuthenticated) {
@@ -125,7 +100,8 @@ function StreamCard({ stream }: { stream: LiveStream }) {
       setLocation('/auth');
       return;
     }
-    joinMutation.mutate();
+    setIsNavigating(true);
+    setLocation(`/stream/${stream.id}`);
   };
   
   return (
@@ -184,14 +160,14 @@ function StreamCard({ stream }: { stream: LiveStream }) {
                 e.stopPropagation();
                 handleJoin();
               }}
-              disabled={joinMutation.isPending}
+              disabled={isNavigating}
               className={cn(
                 "h-8 px-4 text-xs font-semibold rounded-xl bg-gradient-to-r border-0 shadow-lg transition-all",
                 config.color,
                 "hover:shadow-xl hover:brightness-110"
               )}
             >
-              {joinMutation.isPending ? (
+              {isNavigating ? (
                 <span className="animate-pulse">...</span>
               ) : (
                 <>
