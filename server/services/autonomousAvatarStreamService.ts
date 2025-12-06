@@ -297,9 +297,28 @@ Just output the topic, nothing else.`
       return true;
     }
 
+    // Check if we're at the limit and need to stop an empty stream
     if (this.activeVoiceStreams.size >= MAX_CONCURRENT_VOICE_STREAMS) {
-      console.log(`[Avatar Voice] Cannot activate more streams (limit: ${MAX_CONCURRENT_VOICE_STREAMS})`);
-      return false;
+      const streamingService = getStreamingService();
+      let stoppedEmpty = false;
+      
+      // Look for active voice streams with 0 viewers
+      const activeStreams = Array.from(this.activeVoiceStreams.entries());
+      for (let i = 0; i < activeStreams.length; i++) {
+        const [activeStreamId, activeStream] = activeStreams[i];
+        const viewerCount = streamingService?.getViewerCount(activeStreamId) || 0;
+        if (viewerCount === 0) {
+          console.log(`[Avatar Voice] 🔄 Stopping empty stream ${activeStreamId.slice(0, 8)}... (${activeStream.avatarName}) to activate viewer's stream`);
+          await this.endVoiceStream(activeStreamId, 'No viewers - viewer priority');
+          stoppedEmpty = true;
+          break;
+        }
+      }
+      
+      if (!stoppedEmpty) {
+        console.log(`[Avatar Voice] Cannot activate - all active streams have viewers`);
+        return false;
+      }
     }
 
     try {
