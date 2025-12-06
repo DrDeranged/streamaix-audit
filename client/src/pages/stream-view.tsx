@@ -100,7 +100,7 @@ interface LiveStream {
   scheduledStart?: string;
   actualStart?: string;
   roomId?: string;
-  isAiHost?: boolean;
+  isKnowledgeAvatar?: boolean;
   isSubscriberOnly?: boolean;
   ticketPrice?: number;
 }
@@ -907,7 +907,7 @@ export default function StreamViewPage() {
               />
             ))}
             
-            {isLive && isHost && !stream.isAiHost ? (
+            {isLive && isHost && !stream.isKnowledgeAvatar ? (
               <BroadcasterView
                 streamId={stream.id}
                 streamType={stream.streamType}
@@ -915,7 +915,7 @@ export default function StreamViewPage() {
                 onEndStream={() => endStreamMutation.mutate()}
                 isEnding={endStreamMutation.isPending}
               />
-            ) : isLive && stream.isAiHost ? (
+            ) : isLive && stream.isKnowledgeAvatar ? (
               <AIAvatarStream
                 hostName={stream.hostUsername || 'AI Host'}
                 hostAvatar={stream.hostAvatar}
