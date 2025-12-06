@@ -181,9 +181,15 @@ export class StreamingService {
       .where(eq(liveStreams.id, streamId))
       .limit(1);
     
+    console.log(`[Streaming] 🔍 Checking stream ${streamId.slice(0, 8)}... hostAvatarId: ${streamRecord?.hostAvatarId || 'none'}`);
+    
     if (streamRecord?.hostAvatarId) {
       const avatarService = getAutonomousAvatarStreamService();
-      if (avatarService && !avatarService.isVoiceActiveForStream(streamId)) {
+      const isVoiceActive = avatarService?.isVoiceActiveForStream(streamId);
+      console.log(`[Streaming] 🎤 Knowledge Avatar stream detected. Voice active: ${isVoiceActive}`);
+      
+      if (avatarService && !isVoiceActive) {
+        console.log(`[Streaming] 🎙️ Triggering on-demand voice activation for stream ${streamId.slice(0, 8)}...`);
         avatarService.activateVoiceForStream(streamId).catch(err => 
           console.error(`[Streaming] Failed to activate voice for stream ${streamId}:`, err)
         );
