@@ -10986,13 +10986,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES
   // =============================================================================
   
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  // Use noServer: true to handle upgrades manually (before Vite intercepts them)
+  const wss = new WebSocketServer({ noServer: true });
   
   // Store connected clients
   const clients = new Set<WebSocket>();
   
   wss.on('connection', (ws: WebSocket) => {
-    console.log('📡 WebSocket client connected');
+    console.log('📡 WebSocket client connected to /ws');
     clients.add(ws);
     
     // Send initial stock data
@@ -14436,7 +14437,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // COLLABORATION WEBSOCKET SERVER
   // =============================================================================
   
-  const collaborationWss = new WebSocketServer({ server: httpServer, path: '/ws/collaborate' });
+  // Use noServer: true to handle upgrades manually (before Vite intercepts them)
+  const collaborationWss = new WebSocketServer({ noServer: true });
   const { CollaborationService } = await import('./services/collaborationService');
   const collaborationService = new CollaborationService(storage as DatabaseStorage);
   
@@ -14467,7 +14469,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // STREAMING WEBSOCKET SERVER
   // =============================================================================
   
-  const streamingWss = new WebSocketServer({ server: httpServer, path: '/ws/stream' });
+  // Use noServer: true to handle upgrades manually (before Vite intercepts them)
+  const streamingWss = new WebSocketServer({ noServer: true });
   const { initStreamingService } = await import('./services/streamingService');
   const streamingService = initStreamingService();
   
@@ -14501,6 +14504,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       avatar || undefined,
       isAiAgent
     );
+  });
+
+  // =============================================================================
+  // EXPLICIT WEBSOCKET UPGRADE HANDLING
+  // This ensures WebSocket upgrades are handled BEFORE Vite's HMR can intercept them
+  // =============================================================================
+  
+  httpServer.on('upgrade', (request, socket, head) => {
+    const pathname = new URL(request.url || '', `http://${request.headers.host}`).pathname;
+    
+    console.log(`🔌 [WS Upgrade] Received upgrade request for path: ${pathname}`);
+    
+    if (pathname === '/ws') {
+      console.log(`🔌 [WS Upgrade] Routing to main WebSocket server (/ws)`);
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/collaborate') {
+      console.log(`🔌 [WS Upgrade] Routing to collaboration WebSocket server (/ws/collaborate)`);
+      collaborationWss.handleUpgrade(request, socket, head, (ws) => {
+        collaborationWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/stream') {
+      console.log(`🔌 [WS Upgrade] Routing to streaming WebSocket server (/ws/stream)`);
+      streamingWss.handleUpgrade(request, socket, head, (ws) => {
+        streamingWss.emit('connection', ws, request);
+      });
+    } else {
+      // Let other upgrade requests pass through (e.g., Vite HMR)
+      console.log(`🔌 [WS Upgrade] Unknown path ${pathname}, not handling (may be Vite HMR)`);
+    }
   });
 
   // Start AI Agent Streaming Service
