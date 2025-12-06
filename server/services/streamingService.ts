@@ -671,6 +671,59 @@ export class StreamingService {
     const session = this.sessions.get(streamId);
     return session ? session.viewers.size : 0;
   }
+
+  // Pre-create a session for avatar streams (before viewers connect)
+  async createAvatarStreamSession(streamId: string): Promise<boolean> {
+    if (this.sessions.has(streamId)) {
+      console.log(`[Streaming] Session already exists for stream ${streamId.slice(0, 8)}...`);
+      return true;
+    }
+
+    try {
+      const [streamRecord] = await db.select()
+        .from(liveStreams)
+        .where(eq(liveStreams.id, streamId))
+        .limit(1);
+
+      if (!streamRecord) {
+        console.log(`[Streaming] Cannot create session - stream ${streamId.slice(0, 8)}... not found`);
+        return false;
+      }
+
+      const [hostUser] = await db.select({ username: users.username })
+        .from(users)
+        .where(eq(users.id, streamRecord.hostId))
+        .limit(1);
+
+      const session: StreamSession = {
+        streamId,
+        hostId: streamRecord.hostId,
+        hostUsername: hostUser?.username || 'Avatar Host',
+        streamTitle: streamRecord.title || 'Avatar Stream',
+        viewers: new Map(),
+        broadcasterWs: null,
+        broadcasterUserId: null,
+        messages: [],
+        tips: [],
+        isLive: true,
+        startedAt: Date.now(),
+        peakViewers: 0,
+        notifiedMilestones: new Set<number>(),
+      };
+
+      this.sessions.set(streamId, session);
+      console.log(`[Streaming] ✅ Pre-created session for avatar stream ${streamId.slice(0, 8)}...`);
+      return true;
+    } catch (error) {
+      console.error(`[Streaming] Error creating avatar stream session:`, error);
+      return false;
+    }
+  }
+
+  // Check if session exists
+  hasSession(streamId: string): boolean {
+    return this.sessions.has(streamId);
+  }
 }
 
 // Singleton instance

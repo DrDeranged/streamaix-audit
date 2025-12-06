@@ -120,6 +120,12 @@ export class AutonomousAvatarStreamService {
       const durationMinutes = Math.floor(Math.random() * (STREAM_DURATION_MAX - STREAM_DURATION_MIN)) + STREAM_DURATION_MIN;
       const scheduledEndTime = new Date(Date.now() + durationMinutes * 60 * 1000);
 
+      // Pre-create WebSocket session so audio can be broadcast immediately
+      const streamingService = getStreamingService();
+      if (streamingService) {
+        await streamingService.createAvatarStreamSession(stream.id);
+      }
+
       const podcastEngine = new AvatarPodcastEngine();
       await podcastEngine.startPodcastSession(stream.id, avatar.id, topic);
 
