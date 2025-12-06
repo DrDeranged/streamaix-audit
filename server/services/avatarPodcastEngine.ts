@@ -382,12 +382,12 @@ export class AvatarPodcastEngine {
         },
       });
 
-      const { getStreamingService, AvatarAudioMessage } = await import('./streamingService');
+      const { getStreamingService } = await import('./streamingService');
       const streamingService = getStreamingService();
       
       if (streamingService) {
-        const audioMessage: AvatarAudioMessage = {
-          type: 'avatar-audio',
+        const audioMessage: import('./streamingService').AvatarAudioMessage = {
+          type: 'avatar-audio' as const,
           avatarName: session.avatarName,
           text: segment.text,
           audioBase64: segment.audioBase64,

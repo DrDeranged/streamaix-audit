@@ -14501,11 +14501,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const aiStreamingService = initAIAgentStreamingService();
   aiStreamingService.scheduleAIStreams();
 
-  // Start Knowledge Avatar Alpha Streaming Service
+  // Start Knowledge Avatar Alpha Streaming Service (text-based chat)
   const { initAvatarAlphaStreamService } = await import('./services/avatarAlphaStreamService');
   const avatarAlphaService = initAvatarAlphaStreamService();
   avatarAlphaService.scheduleAvatarStreams();
   console.log('🎙️ Knowledge Avatar Alpha Streaming Service initialized');
+
+  // Start Autonomous Avatar Voice Streaming Service (with TTS audio)
+  const { initAutonomousAvatarStreamService } = await import('./services/autonomousAvatarStreamService');
+  const autonomousVoiceService = initAutonomousAvatarStreamService();
+  autonomousVoiceService.start();
+  console.log('🎤 Autonomous Avatar Voice Streaming Service initialized');
 
   // Start enhanced real-time updates with multiple intervals
   const marketUpdateInterval = setInterval(broadcastMarketUpdates, 15000); // Every 15 seconds for comprehensive data
