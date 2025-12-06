@@ -55,17 +55,19 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
   const audioCallbacksRef = useRef<Set<AvatarAudioCallback>>(new Set());
 
   const connect = useCallback(() => {
-    if (!streamId || !isAuthenticated || !user) return;
+    if (!streamId) return;
 
-    // Build WebSocket URL
+    // Build WebSocket URL - allow guest viewing even without authentication
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
+    const guestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const params = new URLSearchParams({
       streamId,
-      userId: user.id || 'guest',
-      username: user.username || 'Anonymous',
-      avatar: user.avatar || '',
+      userId: user?.id || guestId,
+      username: user?.username || 'Guest Viewer',
+      avatar: user?.avatar || '',
       isAiAgent: 'false',
+      isGuest: (!isAuthenticated).toString(),
     });
     
     const wsUrl = `${protocol}//${host}/ws/stream?${params.toString()}`;
@@ -93,7 +95,7 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
         setIsConnected(false);
         
         // Attempt reconnection after 3 seconds
-        if (streamId && isAuthenticated) {
+        if (streamId) {
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, 3000);
@@ -237,18 +239,19 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
   }, []);
 
   useEffect(() => {
-    if (streamId && isAuthenticated) {
+    // Connect for any viewer (guest or authenticated) when streamId is available
+    if (streamId) {
       connect();
     }
     
     return () => {
       disconnect();
     };
-  }, [streamId, isAuthenticated, connect, disconnect]);
+  }, [streamId, connect, disconnect]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && streamId && isAuthenticated) {
+      if (document.visibilityState === 'visible' && streamId) {
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
           console.log('[StreamSocket] Reconnecting after visibility change');
           connect();
@@ -257,7 +260,7 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     };
 
     const handleOnline = () => {
-      if (streamId && isAuthenticated) {
+      if (streamId) {
         console.log('[StreamSocket] Network online - reconnecting');
         connect();
       }
@@ -270,7 +273,7 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
     };
-  }, [streamId, isAuthenticated, connect]);
+  }, [streamId, connect]);
 
   return {
     isConnected,
