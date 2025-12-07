@@ -82,6 +82,10 @@ export async function generateChatResponse(
   messages: ChatMessage[],
   userContext?: { summariesCount?: number; bountiesCount?: number; walletBalance?: number }
 ): Promise<string> {
+  if (process.env.PAUSE_OPENAI_API === 'true') {
+    return 'The AI assistant is currently paused. Please try again later.';
+  }
+
   try {
     const systemMessage: ChatMessage = {
       role: 'system',

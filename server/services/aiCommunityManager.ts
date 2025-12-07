@@ -21,6 +21,11 @@ export class AICommunityManager {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('👥 [Community Manager] ⏸️ OpenAI API paused - community manager disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI Community Manager service...');
 

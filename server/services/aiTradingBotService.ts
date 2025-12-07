@@ -24,6 +24,11 @@ export class AITradingBotService {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('💹 [Trading Bots] ⏸️ OpenAI API paused - trading bots disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI trading bot service...');
 
@@ -58,6 +63,11 @@ export class AITradingBotService {
    * Run a single trading cycle
    */
   private async runTradingCycle() {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('💹 [Trading Bots] ⏸️ OpenAI API paused - skipping trading cycle');
+      return;
+    }
+
     this.cycleCount++;
     console.log(`\n📈 === Trading Cycle ${this.cycleCount} Starting ===`);
 

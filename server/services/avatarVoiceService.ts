@@ -77,6 +77,11 @@ export class AvatarVoiceService {
     avatarName: string,
     options?: { useCache?: boolean }
   ): Promise<Buffer> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log(`[TTS] ⏸️ OpenAI API paused - skipping TTS generation for ${avatarName}`);
+      throw new Error('OpenAI API usage is paused');
+    }
+
     const cacheKey = `${avatarName}:${text.substring(0, 100)}`;
     
     if (options?.useCache && this.audioCache.has(cacheKey)) {

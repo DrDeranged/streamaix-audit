@@ -24,6 +24,11 @@ export class AILiquidityProvider {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('💧 [Liquidity Provider] ⏸️ OpenAI API paused - liquidity provider disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI Liquidity Provider service...');
 

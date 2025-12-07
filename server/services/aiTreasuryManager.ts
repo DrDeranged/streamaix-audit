@@ -28,6 +28,11 @@ export class AITreasuryManager {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('💰 [Treasury Manager] ⏸️ OpenAI API paused - treasury manager disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI Treasury Manager service...');
 

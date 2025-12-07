@@ -34,6 +34,11 @@ export class AITrendSpotter {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('🔍 [Trend Spotter] ⏸️ OpenAI API paused - trend spotter disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI Trend Spotter service...');
 

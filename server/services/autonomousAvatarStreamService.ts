@@ -36,6 +36,11 @@ export class AutonomousAvatarStreamService {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('🎙️ [Avatar Voice] ⏸️ OpenAI API is paused - voice streaming disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🎙️ Autonomous Avatar Voice Streaming Service started');
     console.log(`   Max concurrent voice streams: ${MAX_CONCURRENT_VOICE_STREAMS}`);
@@ -92,6 +97,11 @@ export class AutonomousAvatarStreamService {
   }
 
   private async startVoiceStream(avatar: any): Promise<string | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log(`[Avatar Voice] ⏸️ OpenAI API paused - skipping voice stream for ${avatar.name}`);
+      return null;
+    }
+
     try {
       console.log(`[Avatar Voice] 🎙️ Starting voice stream for ${avatar.name}`);
 

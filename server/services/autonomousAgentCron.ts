@@ -31,6 +31,11 @@ export class AutonomousAgentCron {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('🤖 [Agent Cron] ⏸️ OpenAI API paused - autonomous agent cron disabled');
+      return;
+    }
+
     console.log(`🤖 Starting autonomous agent cron service (every ${intervalMinutes} minutes)`);
 
     // Schedule: runs every X minutes

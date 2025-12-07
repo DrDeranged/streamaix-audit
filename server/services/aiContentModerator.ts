@@ -37,6 +37,11 @@ export class AIContentModerator {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('🛡️ [Content Moderator] ⏸️ OpenAI API paused - content moderator disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI Content Moderator service...');
 

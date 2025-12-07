@@ -31,6 +31,11 @@ export class AIMetaTrader {
       return;
     }
 
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('🎯 [Meta-Trader] ⏸️ OpenAI API paused - meta-trader disabled');
+      return;
+    }
+
     this.isRunning = true;
     console.log('🚀 Starting AI Meta-Trader service...');
 
