@@ -639,10 +639,9 @@ export function AIAvatarStream({
       };
       
       source.start(0);
-      console.log(`[Audio] 🔊 Playing: "${item.text.substring(0, 50)}..."`);
       
     } catch (error) {
-      console.error('[Audio] Failed to play audio:', error);
+      if (import.meta.env.DEV) console.error('[Audio] Failed to play audio:', error);
       isProcessingRef.current = false;
       setIsPlayingAudio(false);
       setIsSpeaking(false);
@@ -651,7 +650,6 @@ export function AIAvatarStream({
   }, [isMuted, initAudioContext]);
 
   const handleAudioMessage = useCallback((audio: AvatarAudioData) => {
-    console.log(`[Audio] 📥 Received: "${audio.text.substring(0, 50)}..." (${audio.segmentType})`);
     
     const queueItem: AudioQueueItem = {
       id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,

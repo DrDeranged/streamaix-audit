@@ -68,7 +68,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
     pcRef.current = pc;
 
     pc.ontrack = (event) => {
-      console.log('[Viewer] Received remote track:', event.track.kind);
       if (event.streams[0]) {
         setRemoteStream(event.streams[0]);
         setIsReceivingVideo(true);
@@ -88,8 +87,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
     };
 
     pc.onconnectionstatechange = () => {
-      console.log('[Viewer] Connection state:', pc.connectionState);
-      
       switch (pc.connectionState) {
         case 'connected':
           setConnectionState('connected');
@@ -109,7 +106,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
     };
 
     pc.oniceconnectionstatechange = () => {
-      console.log('[Viewer] ICE connection state:', pc.iceConnectionState);
       if (pc.iceConnectionState === 'failed') {
         pc.restartIce();
       }
@@ -120,7 +116,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
 
   const requestOffer = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      console.log('[Viewer] Requesting offer from broadcaster');
       wsRef.current.send(JSON.stringify({
         type: 'request-offer',
         streamId,
@@ -166,7 +161,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
         break;
 
       case 'broadcaster-ready':
-        console.log('[Viewer] Broadcaster is ready, requesting offer...');
         if (offerRequestTimeoutRef.current) {
           clearTimeout(offerRequestTimeoutRef.current);
         }
@@ -174,7 +168,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
         break;
 
       case 'broadcaster-not-ready':
-        console.log('[Viewer] Broadcaster not ready, will retry...');
         if (offerRequestTimeoutRef.current) {
           clearTimeout(offerRequestTimeoutRef.current);
         }
@@ -183,7 +176,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
 
       case 'webrtc-offer':
         if (event.data?.sdp) {
-          console.log('[Viewer] Received offer, creating answer...');
           setConnectionState('connecting');
           
           const pc = createPeerConnection();
@@ -200,7 +192,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
                 userId: user?.id,
                 data: { sdp: answer },
               }));
-              console.log('[Viewer] Sent answer to broadcaster');
             }
           } catch (err) {
             console.error('[Viewer] Error handling offer:', err);
@@ -221,7 +212,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
         break;
 
       case 'stream-end':
-        console.log('[Viewer] Stream ended');
         setIsReceivingVideo(false);
         setRemoteStream(null);
         setConnectionState('disconnected');
@@ -233,11 +223,9 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
         break;
 
       case 'join':
-        console.log(`[Viewer] ${event.username} joined the stream`);
         break;
 
       case 'leave':
-        console.log(`[Viewer] ${event.username} left the stream`);
         break;
     }
   }, [createPeerConnection, requestOffer, streamId, user?.id]);
@@ -264,7 +252,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[Viewer] WebSocket connected');
         setIsConnected(true);
         setError(null);
         
@@ -281,7 +268,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
       };
 
       ws.onclose = () => {
-        console.log('[Viewer] WebSocket disconnected');
         setIsConnected(false);
         
         if (streamId && isAuthenticated) {

@@ -77,7 +77,7 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[StreamSocket] Connected to stream:', streamId);
+        if (import.meta.env.DEV) console.log('[StreamSocket] Connected to stream:', streamId);
         setIsConnected(true);
       };
 
@@ -91,7 +91,7 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
       };
 
       ws.onclose = () => {
-        console.log('[StreamSocket] Disconnected from stream');
+        if (import.meta.env.DEV) console.log('[StreamSocket] Disconnected from stream');
         setIsConnected(false);
         
         // Attempt reconnection after 3 seconds
@@ -132,11 +132,9 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
         break;
         
       case 'join':
-        console.log(`[StreamSocket] ${event.username} joined the stream`);
         break;
         
       case 'leave':
-        console.log(`[StreamSocket] ${event.username} left the stream`);
         break;
         
       case 'tip':
@@ -154,12 +152,9 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
         break;
         
       case 'reaction':
-        // Handle reactions (emoji animations, etc)
-        console.log(`[StreamSocket] Reaction from ${event.username}:`, event.data);
         break;
         
       case 'stream-end':
-        console.log('[StreamSocket] Stream ended:', event.data);
         setIsConnected(false);
         break;
         
@@ -169,7 +164,6 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
         
       case 'avatar-audio':
         if (event.data) {
-          console.log('[StreamSocket] 🎤 Avatar audio received:', event.data.avatarName);
           audioCallbacksRef.current.forEach(callback => {
             try {
               callback(event.data as AvatarAudioData);
@@ -253,7 +247,6 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && streamId) {
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-          console.log('[StreamSocket] Reconnecting after visibility change');
           connect();
         }
       }
@@ -261,7 +254,6 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
 
     const handleOnline = () => {
       if (streamId) {
-        console.log('[StreamSocket] Network online - reconnecting');
         connect();
       }
     };
