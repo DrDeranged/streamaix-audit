@@ -46,6 +46,17 @@ The frontend is built with React 18 and TypeScript, styled using TailwindCSS, sh
 
 **Estimated Monthly Cost: $15-25/month** (down from $75-135/month)
 
+### API Pause Feature (Emergency Cost Control)
+Set `PAUSE_OPENAI_API=true` in environment variables to immediately halt all OpenAI API consumption while keeping the platform operational. This pauses:
+- Avatar Voice Streaming (TTS generation)
+- Autonomous AI Agents (GPT summaries, comments)
+- AI Trading Bots (market analysis)
+- AI Market Resolver, Liquidity Provider, Trend Spotter
+- AI Content Moderator, Community Manager, Treasury Manager
+- AI Meta-Trader, AI Chatbot
+
+**To Re-enable**: Set `PAUSE_OPENAI_API=false` or delete the environment variable, then restart the application.
+
 **Services Migrated to GPT-4o-mini:**
 aiContentModerator, aiMetaTrader, aiTrendSpotter, aiLiquidityProvider, aiMarketResolver, aiTreasuryManager, aiCommunityManager, agentMarketAnalyzer, aiAgentService, chatService, predictionExtractionService, avatarMarketGenerator, socialMarketGenerator, aiPredictionBackfillService, aiService (all functions)
 
