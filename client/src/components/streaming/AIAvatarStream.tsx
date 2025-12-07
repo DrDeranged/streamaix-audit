@@ -220,19 +220,21 @@ function NeuralNetwork() {
 
 function EnhancedSpeakingIndicator({ isActive }: { isActive: boolean }) {
   return (
-    <div className="flex items-center justify-center gap-0.5">
+    <div className="flex items-center justify-center gap-1">
       {[...Array(7)].map((_, i) => (
         <motion.div
           key={i}
-          className="w-1 bg-gradient-to-t from-cyan-400 via-purple-400 to-fuchsia-400 rounded-full"
+          className="w-1.5 bg-gradient-to-t from-cyan-400 via-purple-400 to-fuchsia-400 rounded-full shadow-sm shadow-purple-400/50"
           animate={isActive ? {
-            height: [6, 16 + Math.sin(i * 0.5) * 12, 6],
-            opacity: [0.6, 1, 0.6],
-          } : { height: 6, opacity: 0.4 }}
+            height: [8, 24 + Math.sin(i * 0.5) * 16, 8],
+            opacity: [0.7, 1, 0.7],
+            boxShadow: ['0 0 4px rgba(168,85,247,0.3)', '0 0 12px rgba(168,85,247,0.6)', '0 0 4px rgba(168,85,247,0.3)'],
+          } : { height: 8, opacity: 0.4, boxShadow: '0 0 0px rgba(168,85,247,0)' }}
           transition={{
-            duration: 0.3 + Math.random() * 0.2,
+            duration: isActive ? 0.25 + (i * 0.03) : 0.4,
             repeat: isActive ? Infinity : 0,
-            delay: i * 0.05,
+            delay: i * 0.04,
+            ease: "easeInOut",
           }}
         />
       ))}
@@ -507,12 +509,18 @@ function SpeechBubble({ text, segmentType }: { text: string; segmentType?: strin
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-      className="absolute bottom-24 md:bottom-20 left-2 right-2 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 max-w-md mx-auto px-4 md:px-6 py-3 md:py-4 bg-gradient-to-br from-slate-800/95 via-purple-900/30 to-slate-800/95 backdrop-blur-xl rounded-xl md:rounded-2xl border border-purple-500/40 shadow-2xl shadow-purple-500/20"
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="absolute bottom-24 md:bottom-20 left-3 right-3 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 max-w-lg mx-auto"
     >
-      <div className="flex items-center gap-2 mb-1.5 md:mb-2">
-        <span className="text-xs text-purple-400 font-medium">{getSegmentLabel()}</span>
+      <div className="relative px-5 md:px-6 py-4 md:py-5 bg-gradient-to-br from-slate-900/98 via-purple-900/40 to-slate-900/98 backdrop-blur-2xl rounded-2xl md:rounded-3xl border-2 border-purple-500/50 shadow-2xl shadow-purple-500/30">
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <div className="px-3 py-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-full shadow-lg">
+            <span className="text-[10px] md:text-xs text-white font-semibold tracking-wide">{getSegmentLabel()}</span>
+          </div>
+        </div>
+        <p className="text-sm md:text-base text-white leading-relaxed mt-1 font-medium">{truncatedText}</p>
+        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900/98 border-b-2 border-r-2 border-purple-500/50 rotate-45" />
       </div>
-      <p className="text-xs md:text-sm text-white leading-relaxed">{truncatedText}</p>
     </motion.div>
   );
 }
@@ -851,13 +859,20 @@ export function AIAvatarStream({
           className="mt-6 text-center"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <motion.div 
+            className="flex items-center justify-center gap-2 mb-3 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 border border-cyan-400/40 backdrop-blur-sm shadow-lg shadow-cyan-500/20"
+            animate={{ 
+              boxShadow: ['0 4px 20px 0 rgba(6,182,212,0.15)', '0 4px 30px 0 rgba(6,182,212,0.3)', '0 4px 20px 0 rgba(6,182,212,0.15)'],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
             <Bot className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-medium text-cyan-400 uppercase tracking-wider">AI Host</span>
-            <Sparkles className="w-3 h-3 text-purple-400" />
-          </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-2">{hostName}</h3>
+            <span className="text-xs font-bold text-cyan-300 uppercase tracking-widest">AI Host</span>
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          </motion.div>
+          <h3 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-2 drop-shadow-lg">{hostName}</h3>
           
           <div className="flex items-center justify-center gap-2">
             <motion.div
@@ -876,18 +891,24 @@ export function AIAvatarStream({
           </div>
         </motion.div>
 
-        <div className="mt-6 h-10">
+        <div className="mt-6 h-12">
           <AnimatePresence mode="wait">
             {isSpeaking && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-500/20"
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="flex items-center gap-4 bg-gradient-to-r from-purple-900/60 via-slate-800/70 to-purple-900/60 backdrop-blur-xl rounded-full px-5 py-2.5 border-2 border-purple-400/40 shadow-lg shadow-purple-500/25"
               >
-                <Volume2 className="w-4 h-4 text-purple-400" />
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 0.6, repeat: Infinity }}
+                >
+                  <Volume2 className="w-5 h-5 text-purple-300" />
+                </motion.div>
                 <EnhancedSpeakingIndicator isActive={isSpeaking} />
-                <span className="text-xs text-purple-300 font-medium">Speaking</span>
+                <span className="text-sm text-purple-200 font-semibold tracking-wide">Speaking</span>
               </motion.div>
             )}
           </AnimatePresence>
