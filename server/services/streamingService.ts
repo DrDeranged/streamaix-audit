@@ -176,24 +176,28 @@ export class StreamingService {
     });
 
     // Check if this is a Knowledge Avatar stream and activate voice on-demand
+    // CRITICAL: Only activate TTS when a REAL (non-AI) viewer joins to save API costs
     const [streamRecord] = await db.select({ hostAvatarId: liveStreams.hostAvatarId })
       .from(liveStreams)
       .where(eq(liveStreams.id, streamId))
       .limit(1);
     
-    console.log(`[Streaming] 🔍 Checking stream ${streamId.slice(0, 8)}... hostAvatarId: ${streamRecord?.hostAvatarId || 'none'}`);
+    console.log(`[Streaming] 🔍 Checking stream ${streamId.slice(0, 8)}... hostAvatarId: ${streamRecord?.hostAvatarId || 'none'}, isAiAgent: ${isAiAgent}`);
     
-    if (streamRecord?.hostAvatarId) {
+    if (streamRecord?.hostAvatarId && !isAiAgent) {
+      // Only trigger voice activation for real human viewers (not AI agents)
       const avatarService = getAutonomousAvatarStreamService();
       const isVoiceActive = avatarService?.isVoiceActiveForStream(streamId);
-      console.log(`[Streaming] 🎤 Knowledge Avatar stream detected. Voice active: ${isVoiceActive}`);
+      console.log(`[Streaming] 🎤 Knowledge Avatar stream detected. Voice active: ${isVoiceActive}, Real viewer joined!`);
       
       if (avatarService && !isVoiceActive) {
-        console.log(`[Streaming] 🎙️ Triggering on-demand voice activation for stream ${streamId.slice(0, 8)}...`);
+        console.log(`[Streaming] 🎙️ ON-DEMAND: Real viewer joined - triggering voice activation for stream ${streamId.slice(0, 8)}...`);
         avatarService.activateVoiceForStream(streamId).catch(err => 
           console.error(`[Streaming] Failed to activate voice for stream ${streamId}:`, err)
         );
       }
+    } else if (streamRecord?.hostAvatarId && isAiAgent) {
+      console.log(`[Streaming] ⏸️ AI agent joined stream ${streamId.slice(0, 8)}... - NOT activating TTS (on-demand mode)`);
     }
 
     // Send recent messages to new viewer
