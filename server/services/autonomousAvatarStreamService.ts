@@ -23,6 +23,12 @@ const STREAM_DURATION_MAX = 90;
 const STREAM_ROTATION_INTERVAL = 4 * 60 * 60 * 1000;
 const MAX_CONCURRENT_VOICE_STREAMS = 1; // Reduced to 1 for testing - saves API costs
 
+// Avatars allowed to use TTS even when PAUSE_OPENAI_API is true (for testing)
+// Uses avatar handles (lowercase, no spaces)
+const TTS_ENABLED_AVATARS = new Set([
+  'haydenzadams',  // Hayden Adams - Uniswap founder
+]);
+
 export class AutonomousAvatarStreamService {
   private activeVoiceStreams = new Map<string, ActiveVoiceStream>();
   private isRunning = false;
@@ -302,31 +308,45 @@ Just output the topic, nothing else.`
     return stream.podcastEngine.addViewerQuestion(streamId, viewerId, viewerName, question);
   }
 
+  // Check if an avatar is allowed to use TTS (for on-demand testing)
+  isAvatarTtsEnabled(avatarHandle: string): boolean {
+    const normalizedHandle = avatarHandle.toLowerCase().replace(/\s+/g, '');
+    return TTS_ENABLED_AVATARS.has(normalizedHandle);
+  }
+
   async activateVoiceForStream(streamId: string): Promise<boolean> {
     if (this.activeVoiceStreams.has(streamId)) {
       return true;
     }
 
+    const streamingService = getStreamingService();
+
+    // ON-DEMAND TTS: Only activate if there are REAL (human) viewers
+    const realViewerCount = streamingService?.getRealViewerCount(streamId) || 0;
+    if (realViewerCount === 0) {
+      console.log(`[Avatar Voice] ⏸️ No real viewers in stream ${streamId.slice(0, 8)}... - TTS not activated (on-demand mode)`);
+      return false;
+    }
+
     // Check if we're at the limit and need to stop an empty stream
     if (this.activeVoiceStreams.size >= MAX_CONCURRENT_VOICE_STREAMS) {
-      const streamingService = getStreamingService();
       let stoppedEmpty = false;
       
-      // Look for active voice streams with 0 viewers
+      // Look for active voice streams with 0 real viewers
       const activeStreams = Array.from(this.activeVoiceStreams.entries());
       for (let i = 0; i < activeStreams.length; i++) {
         const [activeStreamId, activeStream] = activeStreams[i];
-        const viewerCount = streamingService?.getViewerCount(activeStreamId) || 0;
+        const viewerCount = streamingService?.getRealViewerCount(activeStreamId) || 0;
         if (viewerCount === 0) {
           console.log(`[Avatar Voice] 🔄 Stopping empty stream ${activeStreamId.slice(0, 8)}... (${activeStream.avatarName}) to activate viewer's stream`);
-          await this.endVoiceStream(activeStreamId, 'No viewers - viewer priority');
+          await this.endVoiceStream(activeStreamId, 'No real viewers - viewer priority');
           stoppedEmpty = true;
           break;
         }
       }
       
       if (!stoppedEmpty) {
-        console.log(`[Avatar Voice] Cannot activate - all active streams have viewers`);
+        console.log(`[Avatar Voice] Cannot activate - all active streams have real viewers`);
         return false;
       }
     }
@@ -350,7 +370,14 @@ Just output the topic, nothing else.`
         return false;
       }
 
-      console.log(`[Avatar Voice] 🎙️ Activating voice for ${avatar.name}'s stream (viewer joined)`);
+      // Check if this avatar is allowed to use TTS (even when API is paused)
+      const avatarHandle = avatar.handle || avatar.name.toLowerCase().replace(/\s+/g, '');
+      if (!this.isAvatarTtsEnabled(avatarHandle)) {
+        console.log(`[Avatar Voice] ⏸️ Avatar ${avatar.name} (${avatarHandle}) is not TTS-enabled - voice not activated`);
+        return false;
+      }
+
+      console.log(`[Avatar Voice] 🎙️ Activating ON-DEMAND voice for ${avatar.name}'s stream (${realViewerCount} real viewer(s) present)`);
 
       const topic = streamRecord.description || 'Current market dynamics and trading strategies';
       const durationMinutes = 60;

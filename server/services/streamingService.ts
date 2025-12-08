@@ -694,6 +694,25 @@ export class StreamingService {
     return session ? session.viewers.size : 0;
   }
 
+  // Get REAL viewer count (excludes AI agents/bots)
+  getRealViewerCount(streamId: string): number {
+    const session = this.sessions.get(streamId);
+    if (!session) return 0;
+    
+    let realCount = 0;
+    session.viewers.forEach((viewer) => {
+      if (!viewer.isAiAgent) {
+        realCount++;
+      }
+    });
+    return realCount;
+  }
+
+  // Check if stream has any real (human) viewers
+  hasRealViewers(streamId: string): boolean {
+    return this.getRealViewerCount(streamId) > 0;
+  }
+
   // Pre-create a session for avatar streams (before viewers connect)
   async createAvatarStreamSession(streamId: string): Promise<boolean> {
     if (this.sessions.has(streamId)) {

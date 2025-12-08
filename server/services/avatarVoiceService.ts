@@ -54,7 +54,22 @@ const AVATAR_VOICE_MAPPINGS: Record<string, AvatarVoiceMapping> = {
 
 const DEFAULT_VOICE_MAPPING: AvatarVoiceMapping = { voice: 'alloy', speed: 1.0, style: 'professional' };
 
+// Avatars allowed to use TTS even when PAUSE_OPENAI_API is true (for on-demand testing)
+const TTS_ENABLED_AVATARS = new Set([
+  'haydenzadams',
+  'hayden adams',
+  'Hayden Adams',
+]);
+
 export class AvatarVoiceService {
+  // Check if an avatar is allowed to bypass the API pause
+  static isAvatarTtsEnabled(avatarName: string): boolean {
+    const normalized = avatarName.toLowerCase().replace(/\s+/g, '');
+    return TTS_ENABLED_AVATARS.has(avatarName) || 
+           TTS_ENABLED_AVATARS.has(normalized) ||
+           normalized === 'haydenzadams' ||
+           avatarName.toLowerCase().includes('hayden');
+  }
   private static audioCache = new Map<string, Buffer>();
   private static cacheMaxSize = 100;
 
@@ -77,9 +92,13 @@ export class AvatarVoiceService {
     avatarName: string,
     options?: { useCache?: boolean }
   ): Promise<Buffer> {
+    // Check if API is paused AND avatar is not in the allowed list
     if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log(`[TTS] ⏸️ OpenAI API paused - skipping TTS generation for ${avatarName}`);
-      throw new Error('OpenAI API usage is paused');
+      if (!this.isAvatarTtsEnabled(avatarName)) {
+        console.log(`[TTS] ⏸️ OpenAI API paused - skipping TTS generation for ${avatarName}`);
+        throw new Error('OpenAI API usage is paused');
+      }
+      console.log(`[TTS] 🎙️ ON-DEMAND: ${avatarName} is TTS-enabled, generating audio despite API pause`);
     }
 
     const cacheKey = `${avatarName}:${text.substring(0, 100)}`;

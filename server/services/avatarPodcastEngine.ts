@@ -55,11 +55,6 @@ export class AvatarPodcastEngine {
     avatarId: string,
     topic: string
   ): Promise<boolean> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log('[Podcast] ⏸️ OpenAI API paused - podcast session disabled');
-      return false;
-    }
-    
     try {
       const [avatar] = await db.select()
         .from(knowledgeAvatars)
@@ -69,6 +64,15 @@ export class AvatarPodcastEngine {
       if (!avatar) {
         console.error('[Podcast] Avatar not found:', avatarId);
         return false;
+      }
+
+      // Check if API is paused AND avatar is not TTS-enabled
+      if (process.env.PAUSE_OPENAI_API === 'true') {
+        if (!AvatarVoiceService.isAvatarTtsEnabled(avatar.name)) {
+          console.log(`[Podcast] ⏸️ OpenAI API paused - podcast session disabled for ${avatar.name}`);
+          return false;
+        }
+        console.log(`[Podcast] 🎙️ ON-DEMAND: ${avatar.name} is TTS-enabled, starting podcast despite API pause`);
       }
 
       const marketContext = await this.fetchMarketContext();
