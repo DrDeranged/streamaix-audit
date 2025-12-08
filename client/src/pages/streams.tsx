@@ -1,5 +1,5 @@
 import { useState, memo, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import {
   Radio,
@@ -33,7 +33,9 @@ import {
   Pause,
   Volume2,
   Grid2X2,
-  X
+  X,
+  FlaskConical,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -42,6 +44,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { 
   StreamCategoryFilter, 
   MultiStreamView, 
@@ -779,6 +783,32 @@ export default function StreamsPage() {
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [multiStreamLayout, setMultiStreamLayout] = useState<'1x1' | '1x2' | '2x1' | '2x2'>('2x2');
   const [primaryStreamId, setPrimaryStreamId] = useState<string | undefined>();
+  const { toast } = useToast();
+
+  const startTestStreamMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/streams/start-test-stream', {
+        avatarName: 'Vitalik Buterin',
+        durationMinutes: 5,
+        maxSegments: 4
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Test Stream Started!",
+        description: `Vitalik Buterin is now live for 5 minutes. Stream ID: ${data.streamId?.slice(0, 8)}...`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/streams/live'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to start test stream",
+        description: error.message || "Please try again",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleToggleStreamSelection = (streamId: string) => {
     if (selectedStreams.includes(streamId)) {
@@ -908,6 +938,21 @@ export default function StreamsPage() {
               <Badge className="sm:hidden streaming-viewer-glow text-red-400 text-xs font-semibold">
                 {liveStreams.length} Live
               </Badge>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="streaming-pill-glass border-amber-500/30 text-amber-300 hover:text-amber-100 hover:bg-amber-500/20 h-9 gap-1.5 rounded-xl"
+                onClick={() => startTestStreamMutation.mutate()}
+                disabled={startTestStreamMutation.isPending}
+                data-testid="button-start-test-stream"
+              >
+                {startTestStreamMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FlaskConical className="w-4 h-4" />
+                )}
+                <span className="hidden sm:inline">Test Stream</span>
+              </Button>
               <Link href="/replays">
                 <Button variant="outline" size="sm" className="streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white h-9 gap-1.5 rounded-xl">
                   <Play className="w-4 h-4" />
