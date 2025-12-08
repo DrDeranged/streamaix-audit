@@ -787,7 +787,7 @@ export default function StreamsPage() {
 
   const startTestStreamMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest('/api/streams/start-test-stream', {
+      const data = await apiRequest('/api/streams/start-test-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -796,7 +796,7 @@ export default function StreamsPage() {
           maxSegments: 4
         })
       });
-      return res.json();
+      return data;
     },
     onSuccess: (data) => {
       toast({
