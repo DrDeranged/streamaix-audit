@@ -13570,6 +13570,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success });
   }));
 
+  // Test TTS with minimal cost (short phrases only)
+  app.post("/api/streams/test-tts", asyncHandler(async (req: Request, res: Response) => {
+    const { AvatarVoiceService } = await import('./services/avatarVoiceService');
+    const { avatarName = 'Vitalik Buterin', maxSegments = 3 } = req.body;
+    
+    console.log('[API] 🧪 Running TTS test mode...');
+    const result = await AvatarVoiceService.runTestMode(avatarName, Math.min(maxSegments, 5));
+    
+    res.json({ 
+      success: result.success, 
+      segments: result.segments,
+      totalCost: result.totalCost,
+      message: result.success 
+        ? `Test complete! Generated ${result.segments.length} audio segments.`
+        : 'Test failed - check server logs'
+    });
+  }));
+
+  // Test single TTS phrase with audio response
+  app.post("/api/streams/test-tts-audio", asyncHandler(async (req: Request, res: Response) => {
+    const { AvatarVoiceService } = await import('./services/avatarVoiceService');
+    const { avatarName = 'Vitalik Buterin', streamId = 'test' } = req.body;
+    
+    console.log('[API] 🎤 Running single TTS audio test...');
+    const result = await AvatarVoiceService.testStreamBroadcast(streamId, avatarName);
+    
+    res.json({ 
+      success: result.success, 
+      text: result.text,
+      audioBase64: result.audioBase64,
+      audioSize: result.audioBase64.length,
+      message: result.success 
+        ? 'Audio generated successfully! Base64 audio included in response.'
+        : 'Audio generation failed - check server logs'
+    });
+  }));
+
   // Create prediction from stream
   app.post("/api/streams/:id/predictions/create", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
