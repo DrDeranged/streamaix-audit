@@ -31,6 +31,11 @@ export class AgentContentCreator {
     keyInsights: any[];
     quality: number;
   } | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log(`      ⏸️ OpenAI API paused - skipping summary generation`);
+      return null;
+    }
+    
     try {
       console.log(`      🎨 Generating summary...`);
       
@@ -78,6 +83,11 @@ export class AgentContentCreator {
    * Generate a comment for social engagement
    */
   async generateComment(params: CommentCreationParams): Promise<string | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log(`      ⏸️ OpenAI API paused - skipping comment generation`);
+      return null;
+    }
+    
     try {
       console.log(`      💬 Generating comment...`);
       

@@ -82,6 +82,16 @@ class AlphaInsightsEngine {
     change24h: number,
     additionalContext?: { fundingRate?: number; volume24h?: number }
   ): Promise<PriceAlertInsight> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return {
+        headline: `${symbol} moved ${hourlyChange > 0 ? 'up' : 'down'} ${Math.abs(hourlyChange).toFixed(1)}%`,
+        whyItMoved: 'AI analysis paused',
+        whatItMeans: 'AI analysis paused',
+        actionAdvice: 'AI analysis paused',
+        riskLevel: 'medium'
+      };
+    }
+    
     const cacheKey = `price_alert_${symbol}_${Math.floor(Date.now() / 60000)}`;
     const cached = this.getCached<PriceAlertInsight>(cacheKey);
     if (cached) return cached;
@@ -139,6 +149,18 @@ Be specific, avoid generic statements. Reference actual levels and patterns.`;
     economicEvents: any[],
     tradingMetrics?: { btcFunding?: number; ethFunding?: number; totalOI?: number }
   ): Promise<MorningBriefingInsight> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      const avgChange = cryptoData.reduce((sum, c) => sum + c.change24h, 0) / cryptoData.length;
+      return {
+        marketRegime: avgChange > 0 ? 'Risk-on environment' : 'Risk-off conditions',
+        topOpportunity: 'AI analysis paused',
+        riskWarning: 'AI analysis paused',
+        watchList: ['BTC', 'ETH', 'SOL'],
+        dayTraderFocus: 'AI analysis paused',
+        swingTraderFocus: 'AI analysis paused'
+      };
+    }
+    
     const cacheKey = `morning_briefing_${new Date().toDateString()}`;
     const cached = this.getCached<MorningBriefingInsight>(cacheKey);
     if (cached) return cached;
@@ -210,6 +232,17 @@ Be specific with levels and setups. No generic advice.`;
     cryptoData: MarketContext[],
     tradingMetrics?: { totalLiquidations?: number; dominantSide?: string }
   ): Promise<EveningRecapInsight> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      const avgChange = cryptoData.reduce((sum, c) => sum + c.change24h, 0) / cryptoData.length;
+      return {
+        dayAnalysis: avgChange > 0 ? 'Bulls maintained control' : 'Bears dominated',
+        keyTakeaway: 'AI analysis paused',
+        overnightSetup: 'AI analysis paused',
+        tomorrowOutlook: 'AI analysis paused',
+        positionAdvice: 'AI analysis paused'
+      };
+    }
+    
     const cacheKey = `evening_recap_${new Date().toDateString()}`;
     const cached = this.getCached<EveningRecapInsight>(cacheKey);
     if (cached) return cached;

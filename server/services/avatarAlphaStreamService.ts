@@ -84,6 +84,11 @@ export class AvatarAlphaStreamService {
   private isRunning = false;
 
   async startAvatarStream(config: AvatarStreamConfig): Promise<string | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('[Avatar Alpha] ⏸️ OpenAI API paused - avatar stream disabled');
+      return null;
+    }
+    
     try {
       // Get avatar details
       const [avatar] = await db.select()

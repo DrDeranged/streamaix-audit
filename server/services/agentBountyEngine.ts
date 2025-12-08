@@ -101,6 +101,11 @@ export class AgentBountyEngine {
    * Use GPT-4 to generate a realistic bounty
    */
   private async generateBountyWithAI(params: BountyCreationParams): Promise<GeneratedBounty | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log(`      ⏸️ OpenAI API paused - skipping bounty generation`);
+      return null;
+    }
+    
     try {
       const expertiseString = params.personality.expertise.join(', ');
       

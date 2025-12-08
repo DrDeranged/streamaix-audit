@@ -101,6 +101,14 @@ export async function extractPredictionsFromSummary(
   summaryTitle: string,
   summaryUrl: string
 ): Promise<PredictionExtractionResult> {
+  if (process.env.PAUSE_OPENAI_API === 'true') {
+    return {
+      predictions: generateFallbackMarkets(summaryTitle, summaryUrl, 3),
+      summaryInsights: 'AI analysis paused - using fallback markets',
+      totalFound: 3
+    };
+  }
+  
   try {
     const prompt = `You are an expert prediction market analyst. **CRITICAL REQUIREMENT: You MUST generate AT LEAST 3 prediction markets for EVERY piece of content, no exceptions.**
 

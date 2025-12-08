@@ -33,6 +33,11 @@ export class SocialMarketGenerator {
    * Analyze a news article and generate a prediction market
    */
   async generateMarketFromNews(article: NewsArticle): Promise<GeneratedMarket | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('⏸️ OpenAI API paused - skipping news market generation');
+      return null;
+    }
+    
     try {
       const prompt = `You are an expert at creating prediction markets from news articles. Analyze this article and create a binary YES/NO prediction market question.
 

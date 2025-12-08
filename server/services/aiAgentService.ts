@@ -111,6 +111,15 @@ export class AIAgentService {
     reasoning: string;
     analysisData: any;
   }> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return {
+        prediction: "YES",
+        confidence: 0,
+        reasoning: "OpenAI API paused",
+        analysisData: { paused: true }
+      };
+    }
+    
     const agent = await db.select().from(aiAgents).where(eq(aiAgents.id, agentId)).limit(1);
     
     if (!agent[0]) {

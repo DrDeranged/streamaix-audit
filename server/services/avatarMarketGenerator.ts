@@ -22,6 +22,11 @@ export class AvatarMarketGenerator {
    * Generate prediction markets based on avatar's activities and investments
    */
   async generateMarketsForAvatar(avatarId: string): Promise<GeneratedMarket[]> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('⏸️ OpenAI API paused - skipping avatar market generation');
+      return [];
+    }
+    
     try {
       // Get avatar details
       const avatar = await db

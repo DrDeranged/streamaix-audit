@@ -55,6 +55,11 @@ export class AvatarPodcastEngine {
     avatarId: string,
     topic: string
   ): Promise<boolean> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('[Podcast] ⏸️ OpenAI API paused - podcast session disabled');
+      return false;
+    }
+    
     try {
       const [avatar] = await db.select()
         .from(knowledgeAvatars)

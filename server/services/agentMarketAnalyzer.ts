@@ -105,6 +105,17 @@ export class AgentMarketAnalyzer {
     agent: User,
     market: PredictionMarket
   ): Promise<MarketAnalysis> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return {
+        shouldTrade: false,
+        outcome: "YES",
+        confidence: 0,
+        reasoning: "OpenAI API paused",
+        positionSize: 0,
+        riskLevel: "low"
+      };
+    }
+    
     const profile = this.getAgentProfile(agent);
     const streamBalance = agent.streamPoints || 0;
 

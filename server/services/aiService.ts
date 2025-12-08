@@ -27,6 +27,10 @@ export class AIService {
     duration: number;
     language: string;
   }> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      throw new Error('OpenAI API is paused - transcription unavailable');
+    }
+    
     try {
       console.log('🎬 Extracting audio from URL:', videoUrl);
       
