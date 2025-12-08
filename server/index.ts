@@ -5,9 +5,8 @@ import { autoSeedDatabase } from "./auto-seed";
 
 const app = express();
 
-// CRITICAL: Server version middleware - adds headers visible in browser DevTools
 const SERVER_BUILD_TIME = new Date().toISOString();
-const SERVER_VERSION = `v${Date.now()}`; // Unique build identifier
+const SERVER_VERSION = `v${Date.now()}`;
 app.use((req, res, next) => {
   res.setHeader('X-Server-Version', SERVER_VERSION);
   res.setHeader('X-Server-Build-Time', SERVER_BUILD_TIME);
@@ -49,7 +48,6 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Validate critical environment variables on startup
   console.log('\n🔐 ========== ENVIRONMENT VALIDATION ==========');
   
   const openaiKey = process.env.OPENAI_API_KEY;
@@ -73,143 +71,19 @@ app.use((req, res, next) => {
   
   const server = await registerRoutes(app);
 
-  // Start background services FIRST (before auto-seed to prevent blocking)
-  // This ensures services are running even if seeding takes time or fails
-  
-  // Start newsletter scheduler for automated sends
-  const resendKey = process.env.RESEND_API_KEY;
-  if (resendKey) {
-    console.log('📧 Starting newsletter scheduler...');
-    const { newsletterScheduler } = await import('./services/newsletterScheduler');
-    newsletterScheduler.start();
-    console.log('✅ Newsletter scheduler active - Sends Monday & Friday 8am EST');
-  } else {
-    console.log('⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)');
-  }
-
-  // Start autonomous AI agent service (100 agents)
-  if (openaiKey) {
-    console.log('🤖 Starting autonomous AI agent service...');
-    const { getAutonomousAgentService } = await import('./services/autonomousAgentService');
-    const agentService = getAutonomousAgentService();
-    agentService.start(); // Runs continuously with 20-40 min intervals
-    console.log('✅ Autonomous AI agent service active - 100 agents engaging with platform');
-  } else {
-    console.log('⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)');
-  }
-
-  // Start AI trading bot service (50 trading bots)
-  if (openaiKey) {
-    console.log('💹 Starting AI trading bot service...');
-    const { getTradingBotService } = await import('./services/aiTradingBotService');
-    const tradingService = getTradingBotService();
-    tradingService.start(); // Runs continuously with 15-30 min intervals
-    console.log('✅ AI trading bot service active - 50 bots analyzing and trading on markets');
-  } else {
-    console.log('⚠️  AI trading bots disabled (requires OPENAI_API_KEY)');
-  }
-
-  // Start autonomous ecosystem services (Phase 3+)
-  if (openaiKey) {
-    console.log('\n🌐 ========== AUTONOMOUS ECOSYSTEM STARTUP ==========');
-    
-    // AI Market Resolver - auto-resolve expired markets
-    console.log('🎯 Starting AI Market Resolver...');
-    const { aiMarketResolver } = await import('./services/aiMarketResolver');
-    aiMarketResolver.start(); // Runs every 30 min
-    console.log('✅ AI Market Resolver active - auto-resolving expired markets');
-
-    // AI Liquidity Provider - seed new markets with balanced liquidity
-    console.log('💧 Starting AI Liquidity Provider...');
-    const { aiLiquidityProvider } = await import('./services/aiLiquidityProvider');
-    aiLiquidityProvider.start(); // Runs every 45 min
-    console.log('✅ AI Liquidity Provider active - seeding markets with liquidity');
-
-    // AI Trend Spotter - create new markets from trending topics
-    console.log('🔍 Starting AI Trend Spotter...');
-    const { aiTrendSpotter } = await import('./services/aiTrendSpotter');
-    aiTrendSpotter.start(); // Runs every 6 hours
-    console.log('✅ AI Trend Spotter active - creating markets from crypto trends');
-
-    // AI Content Moderator - auto-score and flag content
-    console.log('🛡️ Starting AI Content Moderator...');
-    const { aiContentModerator } = await import('./services/aiContentModerator');
-    aiContentModerator.start(); // Runs every 30 min
-    console.log('✅ AI Content Moderator active - auto-scoring submissions');
-
-    // AI Community Manager - engage with users and answer questions
-    console.log('👥 Starting AI Community Manager...');
-    const { aiCommunityManager } = await import('./services/aiCommunityManager');
-    aiCommunityManager.start(); // Runs every 60 min
-    console.log('✅ AI Community Manager active - engaging with community');
-
-    // AI Treasury Manager - manage fees and reinvest
-    console.log('💰 Starting AI Treasury Manager...');
-    const { aiTreasuryManager } = await import('./services/aiTreasuryManager');
-    aiTreasuryManager.start(); // Runs every 24 hours
-    console.log('✅ AI Treasury Manager active - managing platform treasury');
-
-    // AI Meta-Trader - exploit arbitrage opportunities
-    console.log('🎯 Starting AI Meta-Trader...');
-    const { aiMetaTrader } = await import('./services/aiMetaTrader');
-    aiMetaTrader.start(); // Runs every 20 min
-    console.log('✅ AI Meta-Trader active - exploiting market inefficiencies');
-
-    // Market Intelligence Notifier - real-time market alerts
-    console.log('📡 Starting Market Intelligence Notifier...');
-    const { marketIntelligenceNotifier } = await import('./services/marketIntelligenceNotifier');
-    marketIntelligenceNotifier.start();
-    console.log('✅ Market Intelligence Notifier active - real-time market alerts');
-
-    console.log('========================================');
-    console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL');
-    console.log('   • 100 AI Social Agents (bounties, summaries, social)');
-    console.log('   • 50 AI Trading Bots (prediction markets)');
-    console.log('   • Market Resolver (auto-resolve expired markets)');
-    console.log('   • Liquidity Provider (seed new markets)');
-    console.log('   • Trend Spotter (create markets from trends)');
-    console.log('   • Content Moderator (auto-score quality)');
-    console.log('   • Community Manager (answer questions)');
-    console.log('   • Treasury Manager (manage platform fees)');
-    console.log('   • Meta-Trader (arbitrage & efficiency)');
-    console.log('   • Newsletter (Mon/Fri 8am EST)');
-    console.log('   • Market Intelligence (real-time alerts)');
-    console.log('========================================\n');
-  } else {
-    console.log('⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)');
-  }
-
-  // Auto-seed database in background (non-blocking)
-  // Runs asynchronously so it doesn't delay server startup
-  console.log('🌱 Starting background database seeding...');
-  autoSeedDatabase().then(() => {
-    console.log('✅ Auto-seed completed successfully');
-  }).catch(error => {
-    console.error('⚠️  Auto-seed encountered an error (non-critical):', error.message);
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // Error handler must come LAST, after all routes and static serving
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
     res.status(status).json({ message });
     throw err;
   });
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
@@ -217,5 +91,110 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+  });
+
+  setImmediate(async () => {
+    try {
+      const resendKey = process.env.RESEND_API_KEY;
+      if (resendKey) {
+        console.log('📧 Starting newsletter scheduler...');
+        const { newsletterScheduler } = await import('./services/newsletterScheduler');
+        newsletterScheduler.start();
+        console.log('✅ Newsletter scheduler active - Sends Monday & Friday 8am EST');
+      } else {
+        console.log('⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)');
+      }
+
+      if (openaiKey) {
+        console.log('🤖 Starting autonomous AI agent service...');
+        const { getAutonomousAgentService } = await import('./services/autonomousAgentService');
+        const agentService = getAutonomousAgentService();
+        agentService.start();
+        console.log('✅ Autonomous AI agent service active - 100 agents engaging with platform');
+      } else {
+        console.log('⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)');
+      }
+
+      if (openaiKey) {
+        console.log('💹 Starting AI trading bot service...');
+        const { getTradingBotService } = await import('./services/aiTradingBotService');
+        const tradingService = getTradingBotService();
+        tradingService.start();
+        console.log('✅ AI trading bot service active - 50 bots analyzing and trading on markets');
+      } else {
+        console.log('⚠️  AI trading bots disabled (requires OPENAI_API_KEY)');
+      }
+
+      if (openaiKey) {
+        console.log('\n🌐 ========== AUTONOMOUS ECOSYSTEM STARTUP ==========');
+        
+        console.log('🎯 Starting AI Market Resolver...');
+        const { aiMarketResolver } = await import('./services/aiMarketResolver');
+        aiMarketResolver.start();
+        console.log('✅ AI Market Resolver active - auto-resolving expired markets');
+
+        console.log('💧 Starting AI Liquidity Provider...');
+        const { aiLiquidityProvider } = await import('./services/aiLiquidityProvider');
+        aiLiquidityProvider.start();
+        console.log('✅ AI Liquidity Provider active - seeding markets with liquidity');
+
+        console.log('🔍 Starting AI Trend Spotter...');
+        const { aiTrendSpotter } = await import('./services/aiTrendSpotter');
+        aiTrendSpotter.start();
+        console.log('✅ AI Trend Spotter active - creating markets from crypto trends');
+
+        console.log('🛡️ Starting AI Content Moderator...');
+        const { aiContentModerator } = await import('./services/aiContentModerator');
+        aiContentModerator.start();
+        console.log('✅ AI Content Moderator active - auto-scoring submissions');
+
+        console.log('👥 Starting AI Community Manager...');
+        const { aiCommunityManager } = await import('./services/aiCommunityManager');
+        aiCommunityManager.start();
+        console.log('✅ AI Community Manager active - engaging with community');
+
+        console.log('💰 Starting AI Treasury Manager...');
+        const { aiTreasuryManager } = await import('./services/aiTreasuryManager');
+        aiTreasuryManager.start();
+        console.log('✅ AI Treasury Manager active - managing platform treasury');
+
+        console.log('🎯 Starting AI Meta-Trader...');
+        const { aiMetaTrader } = await import('./services/aiMetaTrader');
+        aiMetaTrader.start();
+        console.log('✅ AI Meta-Trader active - exploiting market inefficiencies');
+
+        console.log('📡 Starting Market Intelligence Notifier...');
+        const { marketIntelligenceNotifier } = await import('./services/marketIntelligenceNotifier');
+        marketIntelligenceNotifier.start();
+        console.log('✅ Market Intelligence Notifier active - real-time market alerts');
+
+        console.log('========================================');
+        console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL');
+        console.log('   • 100 AI Social Agents (bounties, summaries, social)');
+        console.log('   • 50 AI Trading Bots (prediction markets)');
+        console.log('   • Market Resolver (auto-resolve expired markets)');
+        console.log('   • Liquidity Provider (seed new markets)');
+        console.log('   • Trend Spotter (create markets from trends)');
+        console.log('   • Content Moderator (auto-score quality)');
+        console.log('   • Community Manager (answer questions)');
+        console.log('   • Treasury Manager (manage platform fees)');
+        console.log('   • Meta-Trader (arbitrage & efficiency)');
+        console.log('   • Newsletter (Mon/Fri 8am EST)');
+        console.log('   • Market Intelligence (real-time alerts)');
+        console.log('========================================\n');
+      } else {
+        console.log('⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)');
+      }
+
+      console.log('🌱 Starting background database seeding...');
+      autoSeedDatabase().then(() => {
+        console.log('✅ Auto-seed completed successfully');
+      }).catch(error => {
+        console.error('⚠️  Auto-seed encountered an error (non-critical):', error.message);
+      });
+
+    } catch (error) {
+      console.error('⚠️  Error starting background services:', error);
+    }
   });
 })();
