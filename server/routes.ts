@@ -13616,14 +13616,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log(`[TEST STREAM] 🎙️ Starting controlled test stream with ${avatarName} for ${durationMinutes} minutes`);
 
     try {
-      // Find the avatar
-      const [avatar] = await db.select()
+      // Find the avatar or create it if missing (for production deployments without seeded data)
+      let [avatar] = await db.select()
         .from(knowledgeAvatars)
         .where(eq(knowledgeAvatars.name, avatarName))
         .limit(1);
 
       if (!avatar) {
-        return res.status(404).json({ success: false, error: `Avatar "${avatarName}" not found` });
+        console.log(`[TEST STREAM] Avatar "${avatarName}" not found, creating it now...`);
+        
+        // Default avatar configs for common test avatars
+        const avatarConfigs: Record<string, { expertise: string; voice: string; speakingRate: number; personality: string; twitterHandle: string }> = {
+          'Vitalik Buterin': {
+            expertise: 'Ethereum, Smart Contracts, Decentralization, Blockchain Scalability',
+            voice: 'echo',
+            speakingRate: 1.0,
+            personality: 'Technical visionary focused on decentralization and blockchain innovation',
+            twitterHandle: 'VitalikButerin'
+          },
+          'Elon Musk': {
+            expertise: 'Tesla, SpaceX, AI, Cryptocurrency, Dogecoin',
+            voice: 'onyx',
+            speakingRate: 1.1,
+            personality: 'Bold entrepreneur with unconventional views on technology and markets',
+            twitterHandle: 'elonmusk'
+          },
+          'CZ Binance': {
+            expertise: 'Cryptocurrency Exchange, BNB, DeFi, Web3 Adoption',
+            voice: 'alloy',
+            speakingRate: 1.0,
+            personality: 'Pragmatic exchange operator focused on crypto adoption',
+            twitterHandle: 'caborange'
+          }
+        };
+
+        const config = avatarConfigs[avatarName] || avatarConfigs['Vitalik Buterin'];
+        
+        const [newAvatar] = await db.insert(knowledgeAvatars).values({
+          name: avatarName,
+          expertise: config.expertise,
+          personality: config.personality,
+          ttsVoice: config.voice,
+          speakingSpeed: config.speakingRate,
+          twitterHandle: config.twitterHandle,
+          isActive: true,
+          totalStreams: 0,
+          totalViewers: 0,
+          avgRating: 4.5,
+        }).returning();
+        
+        avatar = newAvatar;
+        console.log(`[TEST STREAM] ✅ Created avatar: ${avatar.name} (${avatar.id})`);
       }
 
       // Create a live stream
