@@ -13607,6 +13607,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Start a controlled live test stream for mobile testing (5 minutes, 3-4 segments)
+  app.post("/api/streams/start-test-stream", asyncHandler(async (req: Request, res: Response) => {
+    const { AvatarVoiceService } = await import('./services/avatarVoiceService');
+    const { getStreamingService } = await import('./services/streamingService');
+    const { avatarName = 'Vitalik Buterin', durationMinutes = 5, maxSegments = 4 } = req.body;
+
+    console.log(`[TEST STREAM] 🎙️ Starting controlled test stream with ${avatarName} for ${durationMinutes} minutes`);
+
+    try {
+      // Find the avatar
+      const [avatar] = await db.select()
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.name, avatarName))
+        .limit(1);
+
+      if (!avatar) {
+        return res.status(404).json({ success: false, error: `Avatar "${avatarName}" not found` });
+      }
+
+      // Create a live stream
+      const [stream] = await db.insert(liveStreams).values({
+        title: `🧪 Test Stream: ${avatarName} Live`,
+        description: `Controlled test stream with ${avatarName}. Testing voice streaming functionality.`,
+        streamType: 'broadcast',
+        hostId: avatar.id,
+        hostAvatarId: avatar.id,
+        status: 'live',
+        category: 'crypto',
+        tags: ['test', 'voice', 'live', avatarName.toLowerCase().replace(/\s+/g, '-')],
+        actualStart: new Date(),
+        currentViewers: Math.floor(Math.random() * 50) + 10,
+        thumbnailUrl: avatar.imageUrl,
+      }).returning();
+
+      console.log(`[TEST STREAM] ✅ Stream created: ${stream.id}`);
+
+      // Initialize WebSocket session
+      const streamingService = getStreamingService();
+      if (streamingService) {
+        await streamingService.createAvatarStreamSession(stream.id);
+      }
+
+      // Generate and broadcast test segments in background
+      const testPhrases = AvatarVoiceService.TEST_PHRASES;
+      let segmentCount = 0;
+      const segmentInterval = (durationMinutes * 60 * 1000) / maxSegments;
+
+      const broadcastSegment = async () => {
+        if (segmentCount >= maxSegments) {
+          // End the stream
+          await db.update(liveStreams)
+            .set({ status: 'ended', actualEnd: new Date() })
+            .where(eq(liveStreams.id, stream.id));
+          console.log(`[TEST STREAM] 🏁 Test stream ended after ${segmentCount} segments`);
+          return;
+        }
+
+        try {
+          const phrase = testPhrases[segmentCount % testPhrases.length];
+          console.log(`[TEST STREAM] 🎤 Generating segment ${segmentCount + 1}/${maxSegments}: "${phrase}"`);
+
+          const result = await AvatarVoiceService.testStreamBroadcast(stream.id, avatarName);
+          
+          if (result.success && streamingService) {
+            // Broadcast audio to connected clients
+            streamingService.broadcastToStream(stream.id, {
+              type: 'avatar_audio',
+              avatarName,
+              text: result.text,
+              audioBase64: result.audioBase64,
+              timestamp: new Date().toISOString(),
+              segmentNumber: segmentCount + 1,
+            });
+            console.log(`[TEST STREAM] 📡 Broadcast segment ${segmentCount + 1}`);
+          }
+
+          segmentCount++;
+          setTimeout(broadcastSegment, segmentInterval);
+        } catch (error) {
+          console.error(`[TEST STREAM] ❌ Error broadcasting segment:`, error);
+        }
+      };
+
+      // Start broadcasting after a short delay
+      setTimeout(broadcastSegment, 3000);
+
+      // Schedule stream end
+      setTimeout(async () => {
+        await db.update(liveStreams)
+          .set({ status: 'ended', actualEnd: new Date() })
+          .where(eq(liveStreams.id, stream.id));
+        console.log(`[TEST STREAM] ⏰ Test stream auto-ended after ${durationMinutes} minutes`);
+      }, durationMinutes * 60 * 1000);
+
+      res.json({
+        success: true,
+        streamId: stream.id,
+        avatarName,
+        durationMinutes,
+        maxSegments,
+        message: `Test stream started! Stream ID: ${stream.id}. Will run for ${durationMinutes} minutes with ${maxSegments} audio segments.`,
+        estimatedCost: `~$${(maxSegments * 0.001).toFixed(3)}`,
+      });
+    } catch (error: any) {
+      console.error('[TEST STREAM] ❌ Failed to start test stream:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  // Stop a test stream early
+  app.post("/api/streams/stop-test-stream/:id", asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    await db.update(liveStreams)
+      .set({ status: 'ended', actualEnd: new Date() })
+      .where(eq(liveStreams.id, id));
+    
+    console.log(`[TEST STREAM] 🛑 Test stream ${id} manually stopped`);
+    res.json({ success: true, message: 'Test stream stopped' });
+  }));
+
   // Create prediction from stream
   app.post("/api/streams/:id/predictions/create", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
