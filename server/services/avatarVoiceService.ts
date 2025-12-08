@@ -305,6 +305,108 @@ export class AvatarVoiceService {
     this.audioCache.clear();
     console.log('[TTS] Cache cleared');
   }
+
+  // Test mode with short phrases for low-cost testing
+  static readonly TEST_PHRASES = [
+    "Bitcoin looks bullish today, traders.",
+    "Ethereum breaking key resistance levels.",
+    "Markets showing strong momentum here.",
+    "Watch this support zone closely.",
+    "Big moves coming, stay alert.",
+  ];
+
+  static async runTestMode(avatarName: string = 'Vitalik Buterin', maxSegments: number = 3): Promise<{
+    success: boolean;
+    segments: Array<{ text: string; audioBytes: number; durationMs: number }>;
+    totalCost: string;
+  }> {
+    console.log(`[TTS TEST] 🧪 Starting test mode for ${avatarName} with ${maxSegments} segments`);
+    const results: Array<{ text: string; audioBytes: number; durationMs: number }> = [];
+    let totalCharacters = 0;
+
+    const voiceConfig = this.getVoiceForAvatar(avatarName);
+
+    for (let i = 0; i < Math.min(maxSegments, this.TEST_PHRASES.length); i++) {
+      const phrase = this.TEST_PHRASES[i];
+      totalCharacters += phrase.length;
+      
+      try {
+        console.log(`[TTS TEST] 🎤 Segment ${i + 1}/${maxSegments}: "${phrase}"`);
+        const startTime = Date.now();
+
+        const response = await openai.audio.speech.create({
+          model: 'tts-1',
+          voice: voiceConfig.voice,
+          input: phrase,
+          speed: voiceConfig.speed,
+          response_format: 'mp3',
+        });
+
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = Buffer.from(arrayBuffer);
+        const durationMs = Date.now() - startTime;
+
+        results.push({
+          text: phrase,
+          audioBytes: audioBuffer.length,
+          durationMs,
+        });
+
+        console.log(`[TTS TEST] ✅ Generated ${audioBuffer.length} bytes in ${durationMs}ms`);
+        
+        // Small delay between segments
+        if (i < maxSegments - 1) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      } catch (error) {
+        console.error(`[TTS TEST] ❌ Error on segment ${i + 1}:`, error);
+        return { success: false, segments: results, totalCost: 'Error occurred' };
+      }
+    }
+
+    // TTS-1 costs $0.015 per 1000 characters
+    const estimatedCost = (totalCharacters / 1000) * 0.015;
+
+    console.log(`[TTS TEST] 🎉 Test complete! ${results.length} segments, ${totalCharacters} chars, ~$${estimatedCost.toFixed(4)}`);
+
+    return {
+      success: true,
+      segments: results,
+      totalCost: `$${estimatedCost.toFixed(4)} (${totalCharacters} characters)`,
+    };
+  }
+
+  // Generate test audio and broadcast to a stream (for full pipeline test)
+  static async testStreamBroadcast(streamId: string, avatarName: string = 'Vitalik Buterin'): Promise<{
+    success: boolean;
+    audioBase64: string;
+    text: string;
+  }> {
+    const phrase = this.TEST_PHRASES[Math.floor(Math.random() * this.TEST_PHRASES.length)];
+    console.log(`[TTS TEST] 📡 Testing broadcast to stream ${streamId.slice(0, 8)}...`);
+
+    try {
+      const voiceConfig = this.getVoiceForAvatar(avatarName);
+      
+      const response = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: voiceConfig.voice,
+        input: phrase,
+        speed: voiceConfig.speed,
+        response_format: 'mp3',
+      });
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBase64 = Buffer.from(arrayBuffer).toString('base64');
+
+      console.log(`[TTS TEST] ✅ Audio ready for broadcast (${arrayBuffer.byteLength} bytes)`);
+
+      return { success: true, audioBase64, text: phrase };
+    } catch (error) {
+      console.error(`[TTS TEST] ❌ Broadcast test failed:`, error);
+      return { success: false, audioBase64: '', text: phrase };
+    }
+  }
 }
 
 export const avatarVoiceService = new AvatarVoiceService();
