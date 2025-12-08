@@ -13651,18 +13651,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         const config = avatarConfigs[avatarName] || avatarConfigs['Vitalik Buterin'];
+        const handle = avatarName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
         
         const [newAvatar] = await db.insert(knowledgeAvatars).values({
           name: avatarName,
+          handle: handle,
           expertise: config.expertise,
-          personality: config.personality,
-          ttsVoice: config.voice,
-          speakingSpeed: config.speakingRate,
+          bio: config.personality,
           twitterHandle: config.twitterHandle,
           isActive: true,
-          totalStreams: 0,
-          totalViewers: 0,
-          avgRating: 4.5,
+          followerCount: 0,
+          followingCount: 0,
         }).returning();
         
         avatar = newAvatar;
