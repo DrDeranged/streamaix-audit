@@ -57,6 +57,10 @@ export class RealContentProcessor {
   }
 
   async startProcessing(url: string, userId: string): Promise<string> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      throw new Error('Content processing is temporarily paused for maintenance. Please try again later.');
+    }
+    
     console.log(`🚀 Starting REAL processing for URL: ${url}`);
     
     // Create summary record

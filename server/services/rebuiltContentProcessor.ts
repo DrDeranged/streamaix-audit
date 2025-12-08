@@ -70,6 +70,10 @@ export class RebuiltContentProcessor {
   async processContent(url: string, userId?: string, options?: {
     useTranscription?: boolean;
   }): Promise<{ summaryId: string }> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      throw new Error('Content processing is temporarily paused for maintenance. Please try again later.');
+    }
+    
     console.log(`🔄 Starting REBUILT processing for URL: ${url}`, options);
     console.log(`👤 User ID: ${userId || 'anonymous'}`);
     console.log(`🔑 OpenAI instance: ${this.openai ? 'CONFIGURED ✓' : 'NOT CONFIGURED ✗'}`);

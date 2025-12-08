@@ -54,6 +54,11 @@ export class AIAgentStreamingService {
   private isRunning = false;
 
   async startAIAgentStream(config: AIAgentStreamConfig): Promise<string | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      console.log('[AI Streaming] ⏸️ OpenAI API paused - AI agent stream disabled');
+      return null;
+    }
+    
     try {
       // Create the stream in database
       const [stream] = await db.insert(liveStreams).values({

@@ -35,6 +35,10 @@ export class EnhancedStreamingService {
   private aiCommentaryInterval: Map<string, NodeJS.Timeout> = new Map();
 
   async generateAIMarketCommentary(streamId: string): Promise<string | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return null;
+    }
+    
     try {
       const [stream] = await db.select()
         .from(liveStreams)

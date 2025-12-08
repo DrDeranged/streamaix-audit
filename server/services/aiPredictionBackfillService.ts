@@ -15,6 +15,13 @@ export class AIPredictionBackfillService {
     aiProbability: number;
     aiReasoning: string;
   }> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return {
+        aiProbability: 50,
+        aiReasoning: 'AI prediction paused - using default value'
+      };
+    }
+    
     try {
       const prompt = `You are an expert prediction analyst. Analyze this prediction market question and provide your prediction.
 

@@ -52,6 +52,10 @@ export class CleanContentProcessor {
   }
 
   async processContent(url: string, userId?: string): Promise<{ summaryId: string }> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      throw new Error('Content processing is temporarily paused for maintenance. Please try again later.');
+    }
+    
     console.log(`🚀 Starting CLEAN processing for URL: ${url}`);
     
     if (!this.openai) {
