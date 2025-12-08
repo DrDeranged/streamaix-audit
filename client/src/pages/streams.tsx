@@ -787,10 +787,14 @@ export default function StreamsPage() {
 
   const startTestStreamMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest('POST', '/api/streams/start-test-stream', {
-        avatarName: 'Vitalik Buterin',
-        durationMinutes: 5,
-        maxSegments: 4
+      const res = await apiRequest('/api/streams/start-test-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          avatarName: 'Vitalik Buterin',
+          durationMinutes: 5,
+          maxSegments: 4
+        })
       });
       return res.json();
     },
