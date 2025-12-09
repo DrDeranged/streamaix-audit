@@ -46,6 +46,35 @@ The frontend is built with React 18 and TypeScript, styled using TailwindCSS, sh
 
 **Estimated Monthly Cost: $15-25/month** (down from $75-135/month)
 
+### CoinGecko API Optimization (Dec 2025)
+**Problem**: Hit 80% API usage in first week of month (100k calls/month limit)
+
+**Solution - Aggressive Cache & Schedule Optimization:**
+- **Cache TTLs increased 6-60x across all services:**
+  - marketDataService: 30s → 30min cache
+  - cryptoIntelligenceService: 5min → 30min cache, stale cache 1hr → 2hr
+  - newsService: 5min → 60min cache
+  - comprehensiveMarketService: 5min → 60min cache
+  - macroDataService: 2min → 30min cache
+  - advancedMarketIntelService: 1min → 30min cache
+
+- **Cron schedule reductions (marketIntelligenceNotifier):**
+  - Price alerts: 15min → 2hr
+  - CoinDesk news: 15min → 2hr
+  - Trading metrics: 10min → 3hr
+  - Whale alerts: 5min → 2hr
+  - Liquidation alerts: 5min → 2hr
+  - Funding rates: 30min → 4hr
+  - Alpha signals: 20min → 4hr
+  - Narrative momentum: 30min → 6hr
+  - CT alpha: 15min → 4hr
+  - Governance: 1hr → 6hr
+  - VC wallet: 10min → 4hr
+  - Exchange flows: 15min → 4hr
+  - Anomaly detection: 10min → 4hr
+
+**Estimated API reduction: ~85% fewer calls** (should stay well under 100k/month limit)
+
 ### API Pause Feature (Emergency Cost Control)
 Set `PAUSE_OPENAI_API=true` in environment variables to immediately halt all OpenAI API consumption while keeping the platform operational. This pauses:
 - Avatar Voice Streaming (TTS generation)

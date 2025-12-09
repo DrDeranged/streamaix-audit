@@ -101,8 +101,8 @@ class MarketIntelligenceNotifier {
       await this.sendMarketMovers();
     }, { timezone: "America/New_York" });
 
-    // Price Monitor - Every 15 minutes for significant moves
-    cron.schedule('*/15 * * * *', async () => {
+    // Price Monitor - Every 2 hours for significant moves (reduced from 15 min to save API calls)
+    cron.schedule('0 */2 * * *', async () => {
       await this.checkPriceAlerts();
     }, { timezone: "America/New_York" });
 
@@ -124,33 +124,33 @@ class MarketIntelligenceNotifier {
       await this.sendWeeklyPreview();
     }, { timezone: "America/New_York" });
 
-    // CoinDesk Breaking News - Every 15 minutes
-    cron.schedule('*/15 * * * *', async () => {
+    // CoinDesk Breaking News - Every 2 hours (reduced from 15 min to save API calls)
+    cron.schedule('0 */2 * * *', async () => {
       await this.checkCoinDeskNews();
     }, { timezone: "America/New_York" });
 
-    // Trading Metrics Monitor - Every 10 minutes
-    cron.schedule('*/10 * * * *', async () => {
+    // Trading Metrics Monitor - Every 3 hours (reduced from 10 min to save API calls)
+    cron.schedule('0 */3 * * *', async () => {
       await this.checkTradingMetrics();
     }, { timezone: "America/New_York" });
 
-    // Whale Alert Monitor - Every 5 minutes
-    cron.schedule('*/5 * * * *', async () => {
+    // Whale Alert Monitor - Every 2 hours (reduced from 5 min to save API calls)
+    cron.schedule('0 */2 * * *', async () => {
       await this.checkWhaleAlerts();
     }, { timezone: "America/New_York" });
 
-    // Liquidation Alert Monitor - Every 5 minutes
-    cron.schedule('*/5 * * * *', async () => {
+    // Liquidation Alert Monitor - Every 2 hours (reduced from 5 min to save API calls)
+    cron.schedule('0 */2 * * *', async () => {
       await this.checkLiquidationAlerts();
     }, { timezone: "America/New_York" });
 
-    // Funding Rate Monitor - Every 30 minutes
-    cron.schedule('*/30 * * * *', async () => {
+    // Funding Rate Monitor - Every 4 hours (reduced from 30 min to save API calls)
+    cron.schedule('0 */4 * * *', async () => {
       await this.checkFundingRateAlerts();
     }, { timezone: "America/New_York" });
 
-    // High-Conviction Alpha Signals - Every 20 minutes
-    cron.schedule('*/20 * * * *', async () => {
+    // High-Conviction Alpha Signals - Every 4 hours (reduced from 20 min to save API calls)
+    cron.schedule('0 */4 * * *', async () => {
       console.log('🎯 Checking alpha signal confluence...');
       await this.checkAlphaSignals();
     }, { timezone: "America/New_York" });
@@ -159,13 +159,13 @@ class MarketIntelligenceNotifier {
     // ALPHA INTELLIGENCE NOTIFICATIONS (NEW)
     // ============================================================
 
-    // Narrative Momentum Alerts - Every 30 minutes
-    cron.schedule('*/30 * * * *', async () => {
+    // Narrative Momentum Alerts - Every 6 hours (reduced from 30 min to save API calls)
+    cron.schedule('0 */6 * * *', async () => {
       await this.checkNarrativeMomentum();
     }, { timezone: "America/New_York" });
 
-    // CT Alpha Feed - Every 15 minutes (high-confidence only)
-    cron.schedule('*/15 * * * *', async () => {
+    // CT Alpha Feed - Every 4 hours (reduced from 15 min to save API calls)
+    cron.schedule('0 */4 * * *', async () => {
       await this.checkCTAlphaSignals();
     }, { timezone: "America/New_York" });
 
@@ -179,18 +179,18 @@ class MarketIntelligenceNotifier {
       await this.checkAirdropOpportunities();
     }, { timezone: "America/New_York" });
 
-    // Governance Critical Alerts - Every hour
-    cron.schedule('0 * * * *', async () => {
+    // Governance Critical Alerts - Every 6 hours (reduced from hourly to save API calls)
+    cron.schedule('0 */6 * * *', async () => {
       await this.checkGovernanceAlerts();
     }, { timezone: "America/New_York" });
 
-    // VC Wallet Activity - Every 10 minutes
-    cron.schedule('*/10 * * * *', async () => {
+    // VC Wallet Activity - Every 4 hours (reduced from 10 min to save API calls)
+    cron.schedule('0 */4 * * *', async () => {
       await this.checkVCWalletActivity();
     }, { timezone: "America/New_York" });
 
-    // Exchange Flow Anomalies - Every 15 minutes
-    cron.schedule('*/15 * * * *', async () => {
+    // Exchange Flow Anomalies - Every 4 hours (reduced from 15 min to save API calls)
+    cron.schedule('0 */4 * * *', async () => {
       await this.checkExchangeFlowAnomalies();
     }, { timezone: "America/New_York" });
 
@@ -204,8 +204,8 @@ class MarketIntelligenceNotifier {
       await this.checkEventImpacts();
     }, { timezone: "America/New_York" });
 
-    // Anomaly Detection - Every 10 minutes
-    cron.schedule('*/10 * * * *', async () => {
+    // Anomaly Detection - Every 4 hours (reduced from 10 min to save API calls)
+    cron.schedule('0 */4 * * *', async () => {
       await this.checkMarketAnomalies();
     }, { timezone: "America/New_York" });
 

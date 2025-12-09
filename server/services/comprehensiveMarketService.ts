@@ -74,7 +74,7 @@ export class ComprehensiveMarketService {
   private static instance: ComprehensiveMarketService;
   private marketDataService: MarketDataService;
   private cache = new Map<string, { data: any; timestamp: number }>();
-  private readonly cacheTimeout = 5 * 60 * 1000; // 5 minutes
+  private readonly cacheTimeout = 60 * 60 * 1000; // 60 minutes (increased from 5 min to save API calls)
   
   // API Keys
   private readonly fredApiKey = process.env.FRED_API_KEY;

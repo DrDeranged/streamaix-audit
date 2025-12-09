@@ -18,7 +18,7 @@ export class NewsService {
   private static instance: NewsService;
   private parser: Parser;
   private cache: Map<string, { data: NewsArticle[]; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_TTL = 60 * 60 * 1000; // 60 minutes (increased from 5 min to save API calls)
 
   private constructor() {
     this.parser = new Parser({

@@ -92,8 +92,8 @@ interface OptionsData {
   putVolume: number;
 }
 
-const CACHE_DURATION = 60000;
-const LONG_CACHE_DURATION = 300000;
+const CACHE_DURATION = 1800000; // 30 minutes (increased from 1 min to save API calls)
+const LONG_CACHE_DURATION = 3600000; // 1 hour (increased from 5 min)
 
 class AdvancedMarketIntelService {
   private cache: Map<string, { data: any; timestamp: number }> = new Map();

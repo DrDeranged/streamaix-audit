@@ -84,8 +84,8 @@ export class MarketDataService {
   private fredBaseUrl = 'https://api.stlouisfed.org/fred';
   private coindeskNewsUrl = 'https://www.coindesk.com/arc/outboundfeeds/rss';
   private cache = new Map<string, { data: any; timestamp: number; customTimeout?: number }>();
-  private cacheTimeout = 30000; // 30 second cache for real-time data
-  private economicCacheTimeout = 300000; // 5 minute cache for economic data
+  private cacheTimeout = 1800000; // 30 minute cache for real-time data (increased from 30s to save API calls)
+  private economicCacheTimeout = 3600000; // 1 hour cache for economic data (increased from 5 min)
   
   // API usage tracking for CoinGecko Pro (100k calls/month limit)
   private apiCallCounts = new Map<string, { count: number; resetDate: Date }>();
@@ -245,7 +245,7 @@ export class MarketDataService {
 
   // Stale cache for fallback when all APIs fail (retains last known good data)
   private staleCache = new Map<string, { data: any; timestamp: number }>();
-  private staleCacheTimeout = 3600000; // 1 hour stale cache retention
+  private staleCacheTimeout = 14400000; // 4 hour stale cache retention (increased from 1 hour)
 
   private getFromStaleCache(key: string): any | null {
     const cached = this.staleCache.get(key);

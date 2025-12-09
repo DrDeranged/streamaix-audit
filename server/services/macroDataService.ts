@@ -37,8 +37,8 @@ class MacroDataService {
   private static instance: MacroDataService;
   private finnhubApiKey: string;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private cacheTimeout = 120000; // 2 minute cache for real-time data (reduced API calls)
-  private longCacheTimeout = 600000; // 10 minutes for less volatile data
+  private cacheTimeout = 1800000; // 30 minute cache for real-time data (increased from 2 min to save API calls)
+  private longCacheTimeout = 3600000; // 1 hour for less volatile data (increased from 10 min)
 
   constructor() {
     this.finnhubApiKey = process.env.FINNHUB_API_KEY || '';
