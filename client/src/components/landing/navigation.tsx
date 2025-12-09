@@ -520,20 +520,11 @@ export function Navigation() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="flex items-center space-x-3">
-                  <Link href="/auth">
-                    <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth">
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="relative bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-lg shadow-purple-500/30">
-                        <span className="relative z-10">Get Started</span>
-                      </Button>
-                    </motion.div>
-                  </Link>
-                </div>
+                <Link href="/auth">
+                  <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10">
+                    Sign In
+                  </Button>
+                </Link>
               )}
             </div>
             
