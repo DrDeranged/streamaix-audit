@@ -46,7 +46,11 @@ import {
   Award,
   Play,
   Video,
-  Bell
+  Bell,
+  Radio,
+  Calendar,
+  Mic,
+  History
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NotificationSettings } from "@/components/NotificationSettings";
@@ -165,6 +169,66 @@ export function Navigation() {
                       <div>
                         <span className="font-medium block">Platform Stats</span>
                         <span className="text-xs text-gray-500 dark:text-slate-400">Engagement metrics</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Streams Dropdown - NEW Priority Feature */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-red-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative flex items-center gap-1.5">
+                      <div className="relative">
+                        <Radio className="w-4 h-4 text-red-500 dark:text-red-400 group-hover:text-red-400 dark:group-hover:text-red-300 transition-colors drop-shadow-sm" />
+                        <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      </div>
+                      <span className="font-medium text-sm">Streams</span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-red-500/30 shadow-2xl dark:shadow-red-500/20" align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/streams/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Radio className="w-4 h-4 text-red-400" />
+                      <div>
+                        <span className="font-medium block">Live Streams</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Watch now</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/streams" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-pink-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Bot className="w-4 h-4 text-pink-400" />
+                      <div>
+                        <span className="font-medium block">Avatar Streams</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">AI-powered hosts</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/go-live" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-orange-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Mic className="w-4 h-4 text-orange-400" />
+                      <div>
+                        <span className="font-medium block">Go Live</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Start streaming</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                      <History className="w-4 h-4 text-amber-400" />
+                      <div>
+                        <span className="font-medium block">Replays</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Past streams</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -613,8 +677,41 @@ export function Navigation() {
               className="md:hidden mt-4 py-4 border-t border-purple-500/30 bg-slate-900/90 backdrop-blur-xl rounded-lg mx-2 shadow-xl shadow-purple-500/10"
             >
               <div className="flex flex-col space-y-1 px-4 max-h-[70vh] overflow-y-auto">
+                {/* Streams Section - NEW Priority */}
+                <div className="text-xs font-semibold text-red-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  Streams
+                </div>
+                <Link href="/streams/discover" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-red-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Radio className="w-4 h-4 text-red-400" />
+                    Live Streams
+                  </button>
+                </Link>
+                <Link href="/streams" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-pink-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Bot className="w-4 h-4 text-pink-400" />
+                    Avatar Streams
+                  </button>
+                </Link>
+                <Link href="/go-live" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-orange-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Mic className="w-4 h-4 text-orange-400" />
+                    Go Live
+                  </button>
+                </Link>
+
                 {/* Discover Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">Discover</div>
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Discover</div>
                 <Link href="/discover" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
