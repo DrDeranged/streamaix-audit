@@ -247,6 +247,7 @@ export default function StreamDiscoveryPage() {
   const [activeTab, setActiveTab] = useState('live');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [hostFilter, setHostFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { data: liveStreams = [], isLoading: loadingLive } = useQuery<StreamData[]>({
@@ -304,7 +305,10 @@ export default function StreamDiscoveryPage() {
         stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         stream.hostUsername.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesType = typeFilter === 'all' || stream.streamType === typeFilter;
-      return matchesSearch && matchesType;
+      const matchesHost = hostFilter === 'all' || 
+        (hostFilter === 'ai' && stream.isKnowledgeAvatar) ||
+        (hostFilter === 'creators' && !stream.isKnowledgeAvatar);
+      return matchesSearch && matchesType && matchesHost;
     });
   };
 
@@ -357,6 +361,54 @@ export default function StreamDiscoveryPage() {
           >
             <Plus className="w-4 h-4 mr-2" />
             Start Streaming
+          </Button>
+        </div>
+
+        {/* Host Type Filter Tabs */}
+        <div className="flex items-center gap-2 mb-6">
+          <Button
+            variant={hostFilter === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setHostFilter('all')}
+            className={cn(
+              "rounded-full transition-all",
+              hostFilter === 'all' 
+                ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+            )}
+            data-testid="filter-host-all"
+          >
+            All
+          </Button>
+          <Button
+            variant={hostFilter === 'ai' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setHostFilter('ai')}
+            className={cn(
+              "rounded-full transition-all",
+              hostFilter === 'ai' 
+                ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white" 
+                : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+            )}
+            data-testid="filter-host-ai"
+          >
+            <Brain className="w-3.5 h-3.5 mr-1.5" />
+            AI Avatars
+          </Button>
+          <Button
+            variant={hostFilter === 'creators' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setHostFilter('creators')}
+            className={cn(
+              "rounded-full transition-all",
+              hostFilter === 'creators' 
+                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white" 
+                : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+            )}
+            data-testid="filter-host-creators"
+          >
+            <User className="w-3.5 h-3.5 mr-1.5" />
+            Creators
           </Button>
         </div>
 
