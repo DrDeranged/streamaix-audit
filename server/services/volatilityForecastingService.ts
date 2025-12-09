@@ -486,8 +486,12 @@ export class VolatilityForecastingService {
     // Initialize GARCH models
     this.initializeModels();
     
-    // Start real-time monitoring
-    this.startRealTimeMonitoring();
+    // Start real-time monitoring (skip in QUIET_MODE to save API calls)
+    if (process.env.QUIET_MODE !== 'true') {
+      this.startRealTimeMonitoring();
+    } else {
+      console.log('🔇 [Volatility Forecasting] QUIET MODE - background monitoring disabled');
+    }
   }
 
   static getInstance(): VolatilityForecastingService {

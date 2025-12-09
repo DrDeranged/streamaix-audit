@@ -75,6 +75,25 @@ The frontend is built with React 18 and TypeScript, styled using TailwindCSS, sh
 
 **Estimated API reduction: ~85% fewer calls** (should stay well under 100k/month limit)
 
+### Quiet Mode (On-Demand Only - MAXIMUM API SAVINGS)
+Set `QUIET_MODE=true` in environment variables to disable ALL background polling. Data will only be fetched when users actively request it on-demand.
+
+**Services disabled in Quiet Mode:**
+- Market Intelligence Notifier (all 13+ cron jobs)
+- Cross-Market Signal Service (real-time monitoring)
+- Pattern Recognition Service (background monitoring)
+- Volatility Forecasting Service (real-time monitoring)
+- Market Event Modeling Service (background monitoring)
+
+**What still works:**
+- All on-demand API requests when users visit pages
+- All cached data (with extended TTLs)
+- Push notifications (if data is requested)
+
+**Estimated API reduction: ~95%+ fewer calls** (maximum possible savings)
+
+**To Re-enable background polling**: Set `QUIET_MODE=false` or delete the environment variable, then restart.
+
 ### API Pause Feature (Emergency Cost Control)
 Set `PAUSE_OPENAI_API=true` in environment variables to immediately halt all OpenAI API consumption while keeping the platform operational. This pauses:
 - Avatar Voice Streaming (TTS generation)

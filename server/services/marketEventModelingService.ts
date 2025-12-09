@@ -66,9 +66,11 @@ export class MarketEventModelingService {
     console.log(`  - Confidence Threshold: ${this.config.confidenceThreshold}%`);
     console.log(`  - Active Models: ${this.initializeMLModels()}`);
     
-    // Start background monitoring if enabled
-    if (this.config.enableRealTimeMonitoring) {
+    // Start background monitoring if enabled (skip in QUIET_MODE to save API calls)
+    if (this.config.enableRealTimeMonitoring && process.env.QUIET_MODE !== 'true') {
       this.startRealTimeMonitoring();
+    } else if (process.env.QUIET_MODE === 'true') {
+      console.log('🔇 [Market Event Modeling] QUIET MODE - background monitoring disabled');
     }
   }
 

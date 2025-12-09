@@ -254,9 +254,11 @@ export class PatternRecognitionService {
     // Initialize ML models
     this.initializeMLModels();
     
-    // Start background monitoring
-    if (this.config.enableAlertGeneration) {
+    // Start background monitoring (skip in QUIET_MODE to save API calls)
+    if (this.config.enableAlertGeneration && process.env.QUIET_MODE !== 'true') {
       this.startBackgroundMonitoring();
+    } else if (process.env.QUIET_MODE === 'true') {
+      console.log('🔇 [Pattern Recognition] QUIET MODE - background monitoring disabled');
     }
   }
 

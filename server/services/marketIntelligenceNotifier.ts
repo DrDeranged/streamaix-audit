@@ -89,6 +89,16 @@ class MarketIntelligenceNotifier {
       return;
     }
 
+    // QUIET MODE: Skip all background polling to save API calls
+    // Data will only be fetched on-demand when users actively request it
+    if (process.env.QUIET_MODE === 'true') {
+      console.log('🔇 [Market Intelligence] QUIET MODE enabled - all background polling disabled');
+      console.log('   → Data will only be fetched when users actively request it');
+      console.log('   → This dramatically reduces CoinGecko API usage');
+      this.isStarted = true; // Mark as started but don't schedule any crons
+      return;
+    }
+
     // Morning Briefing - 8am EST weekdays
     cron.schedule('0 8 * * 1-5', async () => {
       console.log('🌅 Morning Briefing starting...');

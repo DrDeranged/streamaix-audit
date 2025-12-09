@@ -87,9 +87,11 @@ export class CrossMarketSignalService {
     console.log(`  - Signal Refresh: ${this.config.signalRefreshInterval}s`);
     console.log(`  - Weighting: Event(${this.config.weightingScheme.eventModelingWeight}) Pattern(${this.config.weightingScheme.patternRecognitionWeight}) Vol(${this.config.weightingScheme.volatilityForecastWeight}) Corr(${this.config.weightingScheme.correlationAnalysisWeight})`);
     
-    // Start real-time monitoring if enabled
-    if (this.config.enableRealTimeSignals) {
+    // Start real-time monitoring if enabled (skip in QUIET_MODE to save API calls)
+    if (this.config.enableRealTimeSignals && process.env.QUIET_MODE !== 'true') {
       this.startRealTimeMonitoring();
+    } else if (process.env.QUIET_MODE === 'true') {
+      console.log('🔇 [Cross-Market Signal] QUIET MODE - background monitoring disabled');
     }
   }
 
