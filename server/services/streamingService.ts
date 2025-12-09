@@ -8,7 +8,7 @@ import { getAutonomousAvatarStreamService } from './autonomousAvatarStreamServic
 interface StreamMessage {
   type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 
         'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice-candidate' | 'request-offer' | 'broadcaster-ready' | 'broadcaster-left' |
-        'avatar-audio' | 'avatar-speaking';
+        'avatar-audio' | 'avatar-speaking' | 'question-submitted' | 'question-answered' | 'debate-update' | 'debate-vote';
   streamId: string;
   userId: string;
   username?: string;
@@ -518,7 +518,7 @@ export class StreamingService {
     console.log(`[Streaming] ${isAiAgent ? 'AI Agent' : 'User'} ${username} left stream ${streamId}. Viewers: ${session.viewers.size}`);
   }
 
-  private broadcastToStream(streamId: string, message: StreamMessage, excludeUserId?: string) {
+  broadcastToStream(streamId: string, message: StreamMessage, excludeUserId?: string) {
     const session = this.sessions.get(streamId);
     if (!session) return;
 

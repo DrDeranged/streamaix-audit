@@ -5623,6 +5623,255 @@ export type InsertStreamClip = z.infer<typeof insertStreamClipSchema>;
 export type StreamClip = typeof streamClips.$inferSelect;
 
 // =============================================================================
+// ENHANCED STREAMING SYSTEM - Q&A, DEBATES, VOTING, ON-DEMAND TTS
+// =============================================================================
+
+// Stream Q&A Queue - Questions from viewers awaiting answers
+export const streamQuestions = pgTable("stream_questions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  askerId: varchar("asker_id").references(() => users.id).notNull(),
+  
+  question: text("question").notNull(),
+  status: text("status").notNull().default("pending"), // pending, answered, skipped, pinned
+  
+  upvotes: integer("upvotes").default(0),
+  isAnonymous: boolean("is_anonymous").default(false),
+  tipAmount: integer("tip_amount").default(0), // Tip to boost question priority
+  
+  answeredAt: timestamp("answered_at"),
+  answerText: text("answer_text"), // Text response stored
+  answerAudioId: varchar("answer_audio_id"), // Reference to audio segment
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Debates - User vs User or User vs Avatar debates
+export const streamDebates = pgTable("stream_debates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  
+  topic: text("topic").notNull(),
+  description: text("description"),
+  
+  // Participants (can be user or avatar)
+  participant1Id: varchar("participant1_id").references(() => users.id),
+  participant1AvatarId: varchar("participant1_avatar_id").references(() => knowledgeAvatars.id),
+  participant1Position: text("participant1_position").notNull(), // Their stance/side
+  
+  participant2Id: varchar("participant2_id").references(() => users.id),
+  participant2AvatarId: varchar("participant2_avatar_id").references(() => knowledgeAvatars.id),
+  participant2Position: text("participant2_position").notNull(),
+  
+  // Debate state
+  status: text("status").notNull().default("pending"), // pending, invited, active, voting, completed
+  currentTurn: integer("current_turn").default(1), // Which participant's turn (1 or 2)
+  turnTimeLimit: integer("turn_time_limit").default(120), // Seconds per turn
+  maxRounds: integer("max_rounds").default(3),
+  currentRound: integer("current_round").default(1),
+  
+  // Voting
+  participant1Votes: integer("participant1_votes").default(0),
+  participant2Votes: integer("participant2_votes").default(0),
+  winnerId: varchar("winner_id").references(() => users.id),
+  winnerAvatarId: varchar("winner_avatar_id").references(() => knowledgeAvatars.id),
+  
+  // Rewards
+  stakeAmount: integer("stake_amount").default(0), // STREAM points at stake
+  winnerReward: integer("winner_reward").default(0),
+  
+  startedAt: timestamp("started_at"),
+  endedAt: timestamp("ended_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Debate Votes - Track individual votes
+export const debateVotes = pgTable("debate_votes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  debateId: varchar("debate_id").references(() => streamDebates.id).notNull(),
+  voterId: varchar("voter_id").references(() => users.id).notNull(),
+  
+  votedFor: integer("voted_for").notNull(), // 1 or 2 (participant number)
+  voteWeight: integer("vote_weight").default(1), // Can be weighted by stake
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Invitations - For co-streaming and debates
+export const streamInvitations = pgTable("stream_invitations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  debateId: varchar("debate_id").references(() => streamDebates.id),
+  
+  inviterId: varchar("inviter_id").references(() => users.id).notNull(),
+  inviteeId: varchar("invitee_id").references(() => users.id),
+  inviteeAvatarId: varchar("invitee_avatar_id").references(() => knowledgeAvatars.id),
+  
+  invitationType: text("invitation_type").notNull(), // debate, co_host, speaker
+  message: text("message"),
+  
+  status: text("status").notNull().default("pending"), // pending, accepted, declined, expired
+  expiresAt: timestamp("expires_at"),
+  respondedAt: timestamp("responded_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Scheduled Streams - For stream discovery and alerts
+export const scheduledStreams = pgTable("scheduled_streams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id),
+  
+  hostId: varchar("host_id").references(() => users.id),
+  hostAvatarId: varchar("host_avatar_id").references(() => knowledgeAvatars.id),
+  
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"),
+  tags: text("tags").array(),
+  
+  scheduledAt: timestamp("scheduled_at").notNull(),
+  estimatedDuration: integer("estimated_duration").default(60), // Minutes
+  
+  // For recurring streams
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: text("recurring_pattern"), // daily, weekly, custom
+  recurringDays: text("recurring_days").array(), // ['monday', 'wednesday', 'friday']
+  
+  // Notifications
+  remindersSent: boolean("reminders_sent").default(false),
+  subscribersNotified: boolean("subscribers_notified").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Alerts/Subscriptions - Users subscribing to stream notifications
+export const streamAlerts = pgTable("stream_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // What they're subscribing to (user or avatar)
+  streamerId: varchar("streamer_id").references(() => users.id),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id),
+  
+  // Alert preferences
+  alertOnLive: boolean("alert_on_live").default(true),
+  alertOnScheduled: boolean("alert_on_scheduled").default(true),
+  alertOnDebate: boolean("alert_on_debate").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Stream Settings - Voice preferences for user streams
+export const userStreamSettings = pgTable("user_stream_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  
+  // Voice options for user streams
+  voiceMode: text("voice_mode").notNull().default("text"), // tts, mic, text
+  ttsVoice: text("tts_voice").default("alloy"), // OpenAI voice selection
+  ttsSpeed: real("tts_speed").default(1.0),
+  
+  // Default stream settings
+  defaultCategory: text("default_category"),
+  defaultTags: text("default_tags").array(),
+  defaultStreamType: text("default_stream_type").default("broadcast"),
+  
+  // Permissions
+  allowDebateInvites: boolean("allow_debate_invites").default(true),
+  allowCoHostInvites: boolean("allow_co_host_invites").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Cached Audio Phrases - Pre-generated common audio segments
+export const cachedAudioPhrases = pgTable("cached_audio_phrases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  phrase: text("phrase").notNull(),
+  phraseType: text("phrase_type").notNull(), // intro, outro, transition, greeting, thanks
+  
+  voice: text("voice").notNull(), // OpenAI voice name
+  speed: real("speed").default(1.0),
+  
+  audioBase64: text("audio_base64").notNull(),
+  durationMs: integer("duration_ms").notNull(),
+  
+  usageCount: integer("usage_count").default(0),
+  lastUsedAt: timestamp("last_used_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for enhanced streaming
+export const insertStreamQuestionSchema = createInsertSchema(streamQuestions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamDebateSchema = createInsertSchema(streamDebates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDebateVoteSchema = createInsertSchema(debateVotes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamInvitationSchema = createInsertSchema(streamInvitations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertScheduledStreamSchema = createInsertSchema(scheduledStreams).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStreamAlertSchema = createInsertSchema(streamAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserStreamSettingsSchema = createInsertSchema(userStreamSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCachedAudioPhraseSchema = createInsertSchema(cachedAudioPhrases).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for enhanced streaming
+export type InsertStreamQuestion = z.infer<typeof insertStreamQuestionSchema>;
+export type StreamQuestion = typeof streamQuestions.$inferSelect;
+
+export type InsertStreamDebate = z.infer<typeof insertStreamDebateSchema>;
+export type StreamDebate = typeof streamDebates.$inferSelect;
+
+export type InsertDebateVote = z.infer<typeof insertDebateVoteSchema>;
+export type DebateVote = typeof debateVotes.$inferSelect;
+
+export type InsertStreamInvitation = z.infer<typeof insertStreamInvitationSchema>;
+export type StreamInvitation = typeof streamInvitations.$inferSelect;
+
+export type InsertScheduledStream = z.infer<typeof insertScheduledStreamSchema>;
+export type ScheduledStream = typeof scheduledStreams.$inferSelect;
+
+export type InsertStreamAlert = z.infer<typeof insertStreamAlertSchema>;
+export type StreamAlert = typeof streamAlerts.$inferSelect;
+
+export type InsertUserStreamSettings = z.infer<typeof insertUserStreamSettingsSchema>;
+export type UserStreamSettings = typeof userStreamSettings.$inferSelect;
+
+export type InsertCachedAudioPhrase = z.infer<typeof insertCachedAudioPhraseSchema>;
+export type CachedAudioPhrase = typeof cachedAudioPhrases.$inferSelect;
+
+// =============================================================================
 // ENHANCED GAMIFICATION SYSTEM - DAILY QUESTS, MISSIONS, XP, SEASON PASS
 // =============================================================================
 

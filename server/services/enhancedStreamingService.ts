@@ -1,8 +1,14 @@
 import OpenAI from 'openai';
 import { db } from '../db';
-import { liveStreams, streamMessages, streamParticipants, streamTips, streamPredictions, streamRecordings, users, pushSubscriptions, predictionMarkets } from '@shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { 
+  liveStreams, streamMessages, streamParticipants, streamTips, streamPredictions, 
+  streamRecordings, users, pushSubscriptions, predictionMarkets,
+  streamQuestions, streamDebates, debateVotes, streamInvitations,
+  scheduledStreams, streamAlerts, userStreamSettings, cachedAudioPhrases, knowledgeAvatars
+} from '@shared/schema';
+import { eq, and, desc, gt, sql, ne, isNull } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
+import { AvatarVoiceService } from './avatarVoiceService';
 import webpush from 'web-push';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -30,9 +36,26 @@ interface StreamHighlight {
   type: 'key_moment' | 'prediction' | 'tip_surge' | 'viewer_spike';
 }
 
+interface RealViewerInfo {
+  userId: string;
+  username: string;
+  isAiAgent: boolean;
+  joinedAt: Date;
+}
+
+interface DebateParticipant {
+  type: 'user' | 'avatar';
+  id: string;
+  name: string;
+  position: string;
+}
+
 export class EnhancedStreamingService {
   private marketDataCache: Map<string, { data: MarketData; timestamp: number }> = new Map();
   private aiCommentaryInterval: Map<string, NodeJS.Timeout> = new Map();
+  private realViewerCache = new Map<string, Map<string, RealViewerInfo>>();
+  private ttsActivatedStreams = new Set<string>();
+  private priceAlertThreshold = 2.0;
 
   async generateAIMarketCommentary(streamId: string): Promise<string | null> {
     if (process.env.PAUSE_OPENAI_API === 'true') {
@@ -644,6 +667,744 @@ Focus on: market insights, price predictions, important announcements, and viewe
       console.error('[EnhancedStreaming] Error converting to market:', error);
       return null;
     }
+  }
+
+  // ==================== ON-DEMAND TTS SYSTEM ====================
+  
+  getRealViewerCount(streamId: string): number {
+    const viewers = this.realViewerCache.get(streamId);
+    if (!viewers) return 0;
+    
+    let realCount = 0;
+    viewers.forEach(viewer => {
+      if (!viewer.isAiAgent) realCount++;
+    });
+    return realCount;
+  }
+
+  registerViewer(streamId: string, userId: string, username: string, isAiAgent: boolean): void {
+    if (!this.realViewerCache.has(streamId)) {
+      this.realViewerCache.set(streamId, new Map());
+    }
+    
+    this.realViewerCache.get(streamId)!.set(userId, {
+      userId,
+      username,
+      isAiAgent,
+      joinedAt: new Date()
+    });
+
+    if (!isAiAgent && !this.ttsActivatedStreams.has(streamId)) {
+      this.activateTtsForStream(streamId);
+    }
+  }
+
+  removeViewer(streamId: string, userId: string): void {
+    const viewers = this.realViewerCache.get(streamId);
+    if (viewers) {
+      viewers.delete(userId);
+      
+      const realCount = this.getRealViewerCount(streamId);
+      if (realCount === 0 && this.ttsActivatedStreams.has(streamId)) {
+        this.deactivateTtsForStream(streamId);
+      }
+    }
+  }
+
+  private activateTtsForStream(streamId: string): void {
+    console.log(`[Enhanced Streaming] 🎙️ TTS ACTIVATED for stream ${streamId} - real user joined`);
+    this.ttsActivatedStreams.add(streamId);
+  }
+
+  private deactivateTtsForStream(streamId: string): void {
+    console.log(`[Enhanced Streaming] 🔇 TTS DEACTIVATED for stream ${streamId} - no real users`);
+    this.ttsActivatedStreams.delete(streamId);
+  }
+
+  isTtsActiveForStream(streamId: string): boolean {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return false;
+    }
+    return this.ttsActivatedStreams.has(streamId);
+  }
+
+  // ==================== Q&A QUEUE SYSTEM ====================
+
+  async submitQuestion(
+    streamId: string, 
+    askerId: string, 
+    question: string, 
+    isAnonymous: boolean = false,
+    tipAmount: number = 0
+  ): Promise<{ id: string; position: number }> {
+    const [newQuestion] = await db.insert(streamQuestions).values({
+      streamId,
+      askerId,
+      question,
+      isAnonymous,
+      tipAmount,
+      status: 'pending'
+    }).returning();
+
+    const queuePosition = await db.select({ count: sql<number>`count(*)` })
+      .from(streamQuestions)
+      .where(and(
+        eq(streamQuestions.streamId, streamId),
+        eq(streamQuestions.status, 'pending')
+      ));
+
+    const streamingService = getStreamingService();
+    if (streamingService) {
+      streamingService.broadcastToStream(streamId, {
+        type: 'question-submitted',
+        streamId,
+        userId: askerId,
+        data: {
+          questionId: newQuestion.id,
+          position: queuePosition[0]?.count || 1,
+          isAnonymous
+        }
+      });
+    }
+
+    return { 
+      id: newQuestion.id, 
+      position: Number(queuePosition[0]?.count) || 1 
+    };
+  }
+
+  async getQuestionQueue(streamId: string): Promise<any[]> {
+    const questions = await db.select({
+      id: streamQuestions.id,
+      question: streamQuestions.question,
+      status: streamQuestions.status,
+      upvotes: streamQuestions.upvotes,
+      tipAmount: streamQuestions.tipAmount,
+      isAnonymous: streamQuestions.isAnonymous,
+      askerId: streamQuestions.askerId,
+      askerName: users.username,
+      askerAvatar: users.avatar,
+      createdAt: streamQuestions.createdAt
+    })
+    .from(streamQuestions)
+    .leftJoin(users, eq(streamQuestions.askerId, users.id))
+    .where(and(
+      eq(streamQuestions.streamId, streamId),
+      eq(streamQuestions.status, 'pending')
+    ))
+    .orderBy(
+      desc(streamQuestions.tipAmount),
+      desc(streamQuestions.upvotes),
+      streamQuestions.createdAt
+    )
+    .limit(20);
+
+    return questions.map(q => ({
+      ...q,
+      askerName: q.isAnonymous ? 'Anonymous' : q.askerName,
+      askerAvatar: q.isAnonymous ? null : q.askerAvatar
+    }));
+  }
+
+  async upvoteQuestion(questionId: string): Promise<number> {
+    await db.update(streamQuestions)
+      .set({ upvotes: sql`upvotes + 1` })
+      .where(eq(streamQuestions.id, questionId));
+
+    const [updated] = await db.select({ upvotes: streamQuestions.upvotes })
+      .from(streamQuestions)
+      .where(eq(streamQuestions.id, questionId));
+
+    return updated?.upvotes || 0;
+  }
+
+  async answerQuestion(
+    questionId: string, 
+    answerText: string
+  ): Promise<{ success: boolean }> {
+    const [question] = await db.select()
+      .from(streamQuestions)
+      .where(eq(streamQuestions.id, questionId));
+
+    if (!question) {
+      return { success: false };
+    }
+
+    await db.update(streamQuestions)
+      .set({
+        status: 'answered',
+        answeredAt: new Date(),
+        answerText
+      })
+      .where(eq(streamQuestions.id, questionId));
+
+    const streamingService = getStreamingService();
+    if (streamingService) {
+      streamingService.broadcastToStream(question.streamId, {
+        type: 'question-answered',
+        streamId: question.streamId,
+        userId: question.askerId,
+        data: {
+          questionId,
+          answerText,
+          askerId: question.askerId
+        }
+      });
+    }
+
+    return { success: true };
+  }
+
+  // ==================== DEBATE SYSTEM ====================
+
+  async createDebate(
+    streamId: string,
+    topic: string,
+    description: string,
+    participant1: DebateParticipant,
+    participant2: DebateParticipant,
+    stakeAmount: number = 0
+  ): Promise<{ id: string; success: boolean }> {
+    const [debate] = await db.insert(streamDebates).values({
+      streamId,
+      topic,
+      description,
+      participant1Id: participant1.type === 'user' ? participant1.id : null,
+      participant1AvatarId: participant1.type === 'avatar' ? participant1.id : null,
+      participant1Position: participant1.position,
+      participant2Id: participant2.type === 'user' ? participant2.id : null,
+      participant2AvatarId: participant2.type === 'avatar' ? participant2.id : null,
+      participant2Position: participant2.position,
+      stakeAmount,
+      status: 'pending'
+    }).returning();
+
+    if (participant2.type === 'user') {
+      await db.insert(streamInvitations).values({
+        streamId,
+        debateId: debate.id,
+        inviterId: participant1.type === 'user' ? participant1.id : '',
+        inviteeId: participant2.id,
+        invitationType: 'debate',
+        message: `You've been invited to debate: ${topic}`,
+        status: 'pending',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      });
+
+      await db.update(streamDebates)
+        .set({ status: 'invited' })
+        .where(eq(streamDebates.id, debate.id));
+    } else {
+      await db.update(streamDebates)
+        .set({ status: 'active', startedAt: new Date() })
+        .where(eq(streamDebates.id, debate.id));
+    }
+
+    return { id: debate.id, success: true };
+  }
+
+  async getActiveDebate(streamId: string): Promise<any | null> {
+    const [debate] = await db.select()
+      .from(streamDebates)
+      .where(and(
+        eq(streamDebates.streamId, streamId),
+        eq(streamDebates.status, 'active')
+      ))
+      .limit(1);
+
+    if (!debate) return null;
+
+    let participant1Name = 'Unknown';
+    let participant2Name = 'Unknown';
+
+    if (debate.participant1Id) {
+      const [user] = await db.select({ username: users.username })
+        .from(users)
+        .where(eq(users.id, debate.participant1Id));
+      participant1Name = user?.username || 'Unknown';
+    } else if (debate.participant1AvatarId) {
+      const [avatar] = await db.select({ name: knowledgeAvatars.name })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, debate.participant1AvatarId));
+      participant1Name = avatar?.name || 'Unknown Avatar';
+    }
+
+    if (debate.participant2Id) {
+      const [user] = await db.select({ username: users.username })
+        .from(users)
+        .where(eq(users.id, debate.participant2Id));
+      participant2Name = user?.username || 'Unknown';
+    } else if (debate.participant2AvatarId) {
+      const [avatar] = await db.select({ name: knowledgeAvatars.name })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, debate.participant2AvatarId));
+      participant2Name = avatar?.name || 'Unknown Avatar';
+    }
+
+    return {
+      ...debate,
+      participant1Name,
+      participant2Name,
+      participant1Type: debate.participant1Id ? 'user' : 'avatar',
+      participant2Type: debate.participant2Id ? 'user' : 'avatar'
+    };
+  }
+
+  async voteInDebate(debateId: string, voterId: string, votedFor: 1 | 2): Promise<{ success: boolean; totals: { p1: number; p2: number } }> {
+    const existing = await db.select()
+      .from(debateVotes)
+      .where(and(
+        eq(debateVotes.debateId, debateId),
+        eq(debateVotes.voterId, voterId)
+      ))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return { success: false, totals: { p1: 0, p2: 0 } };
+    }
+
+    await db.insert(debateVotes).values({
+      debateId,
+      voterId,
+      votedFor,
+      voteWeight: 1
+    });
+
+    if (votedFor === 1) {
+      await db.update(streamDebates)
+        .set({ participant1Votes: sql`participant1_votes + 1` })
+        .where(eq(streamDebates.id, debateId));
+    } else {
+      await db.update(streamDebates)
+        .set({ participant2Votes: sql`participant2_votes + 1` })
+        .where(eq(streamDebates.id, debateId));
+    }
+
+    const [debate] = await db.select({
+      p1: streamDebates.participant1Votes,
+      p2: streamDebates.participant2Votes
+    })
+    .from(streamDebates)
+    .where(eq(streamDebates.id, debateId));
+
+    return { 
+      success: true, 
+      totals: { p1: debate?.p1 || 0, p2: debate?.p2 || 0 } 
+    };
+  }
+
+  async endDebate(debateId: string): Promise<{ winnerId?: string; winnerAvatarId?: string; winnerName: string }> {
+    const [debate] = await db.select()
+      .from(streamDebates)
+      .where(eq(streamDebates.id, debateId));
+
+    if (!debate) {
+      return { winnerName: 'Unknown' };
+    }
+
+    const p1Votes = debate.participant1Votes || 0;
+    const p2Votes = debate.participant2Votes || 0;
+
+    let winnerId = undefined;
+    let winnerAvatarId = undefined;
+    let winnerName = 'Tie';
+
+    if (p1Votes > p2Votes) {
+      winnerId = debate.participant1Id || undefined;
+      winnerAvatarId = debate.participant1AvatarId || undefined;
+    } else if (p2Votes > p1Votes) {
+      winnerId = debate.participant2Id || undefined;
+      winnerAvatarId = debate.participant2AvatarId || undefined;
+    }
+
+    if (winnerId) {
+      const [user] = await db.select({ username: users.username })
+        .from(users)
+        .where(eq(users.id, winnerId));
+      winnerName = user?.username || 'Unknown';
+    } else if (winnerAvatarId) {
+      const [avatar] = await db.select({ name: knowledgeAvatars.name })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, winnerAvatarId));
+      winnerName = avatar?.name || 'Unknown Avatar';
+    }
+
+    await db.update(streamDebates)
+      .set({
+        status: 'completed',
+        endedAt: new Date(),
+        winnerId,
+        winnerAvatarId,
+        winnerReward: debate.stakeAmount ? debate.stakeAmount * 2 : 0
+      })
+      .where(eq(streamDebates.id, debateId));
+
+    return { winnerId, winnerAvatarId, winnerName };
+  }
+
+  // ==================== AUDIO CACHING SYSTEM ====================
+
+  async getCachedPhrase(phrase: string, voice: string): Promise<string | null> {
+    const [cached] = await db.select()
+      .from(cachedAudioPhrases)
+      .where(and(
+        eq(cachedAudioPhrases.phrase, phrase),
+        eq(cachedAudioPhrases.voice, voice)
+      ))
+      .limit(1);
+
+    if (cached) {
+      await db.update(cachedAudioPhrases)
+        .set({ 
+          usageCount: sql`usage_count + 1`,
+          lastUsedAt: new Date()
+        })
+        .where(eq(cachedAudioPhrases.id, cached.id));
+
+      return cached.audioBase64;
+    }
+
+    return null;
+  }
+
+  async cachePhrase(
+    phrase: string, 
+    phraseType: string, 
+    voice: string, 
+    audioBase64: string, 
+    durationMs: number
+  ): Promise<void> {
+    await db.insert(cachedAudioPhrases).values({
+      phrase,
+      phraseType,
+      voice,
+      audioBase64,
+      durationMs
+    }).onConflictDoNothing();
+  }
+
+  async generateWithCache(text: string, voice: string, avatarName: string): Promise<{ audioBase64: string; fromCache: boolean }> {
+    const cached = await this.getCachedPhrase(text, voice);
+    if (cached) {
+      console.log(`[Audio Cache] HIT: "${text.substring(0, 30)}..." (${voice})`);
+      return { audioBase64: cached, fromCache: true };
+    }
+
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      throw new Error('OpenAI API is paused');
+    }
+
+    const audioBuffer = await AvatarVoiceService.textToSpeech(text, avatarName);
+    const audioBase64 = audioBuffer.toString('base64');
+
+    const commonPhraseTypes = ['intro', 'outro', 'transition', 'greeting', 'thanks'];
+    const isCommonPhrase = text.length < 100 && commonPhraseTypes.some(type => 
+      text.toLowerCase().includes(type === 'intro' ? 'welcome' : type)
+    );
+
+    if (isCommonPhrase) {
+      await this.cachePhrase(text, 'common', voice, audioBase64, text.length * 50);
+    }
+
+    return { audioBase64, fromCache: false };
+  }
+
+  // ==================== STREAM SCHEDULING ====================
+
+  async scheduleStream(
+    hostId: string | null,
+    hostAvatarId: string | null,
+    title: string,
+    description: string,
+    scheduledAt: Date,
+    category?: string,
+    tags?: string[],
+    estimatedDuration: number = 60
+  ): Promise<{ id: string; success: boolean }> {
+    const [scheduled] = await db.insert(scheduledStreams).values({
+      hostId,
+      hostAvatarId,
+      title,
+      description,
+      scheduledAt,
+      category,
+      tags,
+      estimatedDuration
+    }).returning();
+
+    return { id: scheduled.id, success: true };
+  }
+
+  async getUpcomingStreams(limit: number = 20): Promise<any[]> {
+    const now = new Date();
+    
+    const streams = await db.select({
+      id: scheduledStreams.id,
+      title: scheduledStreams.title,
+      description: scheduledStreams.description,
+      category: scheduledStreams.category,
+      scheduledAt: scheduledStreams.scheduledAt,
+      estimatedDuration: scheduledStreams.estimatedDuration,
+      hostId: scheduledStreams.hostId,
+      hostAvatarId: scheduledStreams.hostAvatarId,
+      hostName: users.username,
+      hostAvatar: users.avatar
+    })
+    .from(scheduledStreams)
+    .leftJoin(users, eq(scheduledStreams.hostId, users.id))
+    .where(gt(scheduledStreams.scheduledAt, now))
+    .orderBy(scheduledStreams.scheduledAt)
+    .limit(limit);
+
+    const result = await Promise.all(streams.map(async (stream) => {
+      if (stream.hostAvatarId && !stream.hostId) {
+        const [avatar] = await db.select({ 
+          name: knowledgeAvatars.name, 
+          imageUrl: knowledgeAvatars.imageUrl 
+        })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, stream.hostAvatarId));
+        
+        return {
+          ...stream,
+          hostName: avatar?.name || 'AI Avatar',
+          hostAvatar: avatar?.imageUrl,
+          isAvatarHost: true
+        };
+      }
+      return { ...stream, isAvatarHost: false };
+    }));
+
+    return result;
+  }
+
+  // ==================== STREAM ALERTS ====================
+
+  async subscribeToAlerts(
+    userId: string, 
+    streamerId?: string, 
+    avatarId?: string
+  ): Promise<{ success: boolean }> {
+    await db.insert(streamAlerts).values({
+      userId,
+      streamerId,
+      avatarId
+    }).onConflictDoNothing();
+
+    return { success: true };
+  }
+
+  async getSubscribedStreamers(userId: string): Promise<any[]> {
+    const alerts = await db.select({
+      streamerId: streamAlerts.streamerId,
+      avatarId: streamAlerts.avatarId,
+      alertOnLive: streamAlerts.alertOnLive,
+      alertOnScheduled: streamAlerts.alertOnScheduled
+    })
+    .from(streamAlerts)
+    .where(eq(streamAlerts.userId, userId));
+
+    return alerts;
+  }
+
+  // ==================== USER STREAM SETTINGS ====================
+
+  async getUserStreamSettings(userId: string): Promise<any> {
+    const [settings] = await db.select()
+      .from(userStreamSettings)
+      .where(eq(userStreamSettings.userId, userId));
+
+    if (!settings) {
+      const [newSettings] = await db.insert(userStreamSettings).values({
+        userId,
+        voiceMode: 'text',
+        ttsVoice: 'alloy',
+        ttsSpeed: 1.0,
+        defaultStreamType: 'broadcast'
+      }).returning();
+      return newSettings;
+    }
+
+    return settings;
+  }
+
+  async updateUserStreamSettings(
+    userId: string, 
+    settings: Partial<{
+      voiceMode: string;
+      ttsVoice: string;
+      ttsSpeed: number;
+      defaultCategory: string;
+      defaultTags: string[];
+      defaultStreamType: string;
+      allowDebateInvites: boolean;
+      allowCoHostInvites: boolean;
+    }>
+  ): Promise<{ success: boolean }> {
+    await db.update(userStreamSettings)
+      .set({ ...settings, updatedAt: new Date() })
+      .where(eq(userStreamSettings.userId, userId));
+
+    return { success: true };
+  }
+
+  // ==================== MARKET REACTION TRIGGERS ====================
+
+  async checkMarketMovement(symbol: string, currentPrice: number): Promise<boolean> {
+    const cached = this.marketDataCache.get(symbol);
+    
+    if (!cached) {
+      this.marketDataCache.set(symbol, { data: { symbol, price: currentPrice, change24h: 0, volume24h: 0 }, timestamp: Date.now() });
+      return false;
+    }
+
+    const priceChange = ((currentPrice - cached.data.price) / cached.data.price) * 100;
+    const timeSinceUpdate = Date.now() - cached.timestamp;
+
+    if (timeSinceUpdate > 60000) {
+      this.marketDataCache.set(symbol, { data: { symbol, price: currentPrice, change24h: priceChange, volume24h: 0 }, timestamp: Date.now() });
+    }
+
+    if (Math.abs(priceChange) >= this.priceAlertThreshold) {
+      console.log(`[Market Reaction] ${symbol} moved ${priceChange.toFixed(2)}% - triggering commentary`);
+      this.marketDataCache.set(symbol, { data: { symbol, price: currentPrice, change24h: priceChange, volume24h: 0 }, timestamp: Date.now() });
+      return true;
+    }
+
+    return false;
+  }
+
+  async generateMarketReactionComment(
+    symbol: string, 
+    priceChange: number, 
+    currentPrice: number,
+    avatarName: string
+  ): Promise<string> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      const direction = priceChange > 0 ? 'up' : 'down';
+      return `${symbol} just moved ${Math.abs(priceChange).toFixed(1)}% ${direction} to $${currentPrice.toLocaleString()}!`;
+    }
+
+    const direction = priceChange > 0 ? 'surged' : 'dropped';
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{
+        role: 'system',
+        content: `You are ${avatarName}, a crypto expert. Give a brief, insightful 1-2 sentence reaction to this price movement. Be specific and actionable.`
+      }, {
+        role: 'user',
+        content: `${symbol} just ${direction} ${Math.abs(priceChange).toFixed(1)}% to $${currentPrice.toLocaleString()}. Give your quick take.`
+      }],
+      max_tokens: 100
+    });
+
+    return response.choices[0]?.message?.content || `${symbol} ${direction} ${Math.abs(priceChange).toFixed(1)}%!`;
+  }
+
+  // ==================== USER GO-LIVE SYSTEM ====================
+
+  async createUserStream(
+    hostId: string,
+    title: string,
+    description: string,
+    streamType: string = 'broadcast',
+    category?: string,
+    tags?: string[]
+  ): Promise<{ streamId: string; success: boolean }> {
+    const [stream] = await db.insert(liveStreams).values({
+      hostId,
+      title,
+      description,
+      streamType,
+      category,
+      tags,
+      status: 'live',
+      actualStart: new Date()
+    }).returning();
+
+    return { streamId: stream.id, success: true };
+  }
+
+  async endUserStream(streamId: string, hostId: string): Promise<{ success: boolean }> {
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(and(
+        eq(liveStreams.id, streamId),
+        eq(liveStreams.hostId, hostId)
+      ))
+      .limit(1);
+
+    if (!stream) {
+      return { success: false };
+    }
+
+    const actualStart = stream.actualStart || new Date();
+    const durationSeconds = Math.floor((Date.now() - new Date(actualStart).getTime()) / 1000);
+
+    await db.update(liveStreams)
+      .set({
+        status: 'ended',
+        actualEnd: new Date(),
+        durationSeconds
+      })
+      .where(eq(liveStreams.id, streamId));
+
+    return { success: true };
+  }
+
+  // ==================== PENDING INVITATIONS ====================
+
+  async getPendingInvitations(userId: string): Promise<any[]> {
+    const invitations = await db.select({
+      id: streamInvitations.id,
+      streamId: streamInvitations.streamId,
+      debateId: streamInvitations.debateId,
+      invitationType: streamInvitations.invitationType,
+      message: streamInvitations.message,
+      expiresAt: streamInvitations.expiresAt,
+      createdAt: streamInvitations.createdAt,
+      inviterName: users.username,
+      inviterAvatar: users.avatar
+    })
+    .from(streamInvitations)
+    .leftJoin(users, eq(streamInvitations.inviterId, users.id))
+    .where(and(
+      eq(streamInvitations.inviteeId, userId),
+      eq(streamInvitations.status, 'pending')
+    ))
+    .orderBy(desc(streamInvitations.createdAt));
+
+    return invitations;
+  }
+
+  async respondToInvitation(invitationId: string, userId: string, accept: boolean): Promise<{ success: boolean }> {
+    const [invitation] = await db.select()
+      .from(streamInvitations)
+      .where(and(
+        eq(streamInvitations.id, invitationId),
+        eq(streamInvitations.inviteeId, userId)
+      ))
+      .limit(1);
+
+    if (!invitation) {
+      return { success: false };
+    }
+
+    await db.update(streamInvitations)
+      .set({
+        status: accept ? 'accepted' : 'declined',
+        respondedAt: new Date()
+      })
+      .where(eq(streamInvitations.id, invitationId));
+
+    if (accept && invitation.debateId) {
+      await db.update(streamDebates)
+        .set({ status: 'active', startedAt: new Date() })
+        .where(eq(streamDebates.id, invitation.debateId));
+    }
+
+    return { success: true };
   }
 }
 
