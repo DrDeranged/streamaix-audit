@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot, Rss, Users } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot, Rss, Users, Heart, MessageCircle, Gift, Star, Award, Zap } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -20,29 +20,54 @@ import { formatTokenAmount } from '@/lib/contracts';
 import type { Bounty } from '@shared/schema';
 
 import BountyCard from '@/components/bounty/BountyCard';
+import CompletedBountyCard from '@/components/bounty/CompletedBountyCard';
 import CreateBountyModal from '@/components/bounty/CreateBountyModal';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
 import AIAgentsAtWork from '@/components/AIAgentsAtWork';
 
 export default function BountyBoard() {
-  const { isConnected } = useWeb3();
-  const { isAuthenticated } = useAuth();
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { wallet, isConnected } = useWeb3();
+  const { user, isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>('active');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
 
-  // Fetch bounties
-  const { data: bountiesData, isLoading: bountiesLoading } = useQuery<{ bounties: Bounty[] }>({
-    queryKey: ['/api/bounties', statusFilter, categoryFilter],
+  // Fetch active bounties (open, claimed, in_progress)
+  const { data: activeBountiesData, isLoading: activeLoading } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties', 'active', categoryFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (statusFilter !== 'all') params.append('status', statusFilter);
+      params.append('status', 'open,claimed,in_progress');
       if (categoryFilter !== 'all') params.append('category', categoryFilter);
       const response = await fetch(`/api/bounties?${params}`);
       if (!response.ok) throw new Error('Failed to fetch bounties');
       return response.json();
     },
+  });
+
+  // Fetch completed bounties
+  const { data: completedBountiesData, isLoading: completedLoading } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties', 'completed', categoryFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('status', 'completed');
+      if (categoryFilter !== 'all') params.append('category', categoryFilter);
+      const response = await fetch(`/api/bounties?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch bounties');
+      return response.json();
+    },
+  });
+
+  // Fetch my bounties (created by or assigned to current user)
+  const { data: myBountiesData, isLoading: myBountiesLoading } = useQuery<{ bounties: Bounty[] }>({
+    queryKey: ['/api/bounties', 'my', wallet?.address, user?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/bounties?creatorWallet=${wallet?.address || ''}&userId=${user?.id || ''}`);
+      if (!response.ok) throw new Error('Failed to fetch bounties');
+      return response.json();
+    },
+    enabled: !!(wallet?.address || user?.id),
   });
 
   // Fetch stats
@@ -92,11 +117,16 @@ export default function BountyBoard() {
     },
   });
 
-  const bounties = bountiesData?.bounties || [];
+  const activeBounties = activeBountiesData?.bounties || [];
+  const completedBounties = completedBountiesData?.bounties || [];
+  const myBounties = myBountiesData?.bounties || [];
   const stats = statsData?.stats;
   const trendingBounties = trendingData?.bounties || [];
   const hotBounties = hotData?.bounties || [];
   const urgentBounties = urgentData?.bounties || [];
+  
+  const bountiesLoading = activeTab === 'active' ? activeLoading : activeTab === 'completed' ? completedLoading : myBountiesLoading;
+  const currentBounties = activeTab === 'active' ? activeBounties : activeTab === 'completed' ? completedBounties : myBounties;
 
   return (
     <div className="min-h-screen bg-transparent dark:bg-transparent">
@@ -351,83 +381,180 @@ export default function BountyBoard() {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-gray-400">Filters:</span>
-          </div>
-
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] bg-slate-900/50 border-purple-500/30" data-testid="select-status-filter">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="claimed">Claimed</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="expired">Expired</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px] bg-slate-900/50 border-purple-500/30" data-testid="select-category-filter">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="crypto">Crypto</SelectItem>
-              <SelectItem value="tech">Technology</SelectItem>
-              <SelectItem value="business">Business</SelectItem>
-              <SelectItem value="education">Education</SelectItem>
-              <SelectItem value="entertainment">Entertainment</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Badge variant="outline" className="ml-auto border-purple-500/50 text-purple-400">
-            {bounties.length} bounties
-          </Badge>
-        </div>
-
-        {/* Bounties Grid */}
-        {bountiesLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card
-                key={i}
-                className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/20 backdrop-blur-sm h-64 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : bounties.length === 0 ? (
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-12 text-center">
-            <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Bounties Found</h3>
-            <p className="text-gray-400 mb-6">
-              Be the first to create a bounty and start earning!
-            </p>
-            {isConnected && (
-              <Button
-                onClick={() => setCreateModalOpen(true)}
-                className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                data-testid="button-create-first-bounty"
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <TabsList className="bg-slate-900/50 border border-purple-500/30 h-auto p-1">
+              <TabsTrigger 
+                value="active" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white"
+                data-testid="tab-active-bounties"
               >
-                <Plus className="w-5 h-5 mr-2" />
-                Create First Bounty
-              </Button>
-            )}
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bounties.map((bounty) => (
-              <div key={bounty.id} className="animate-fade-in">
-                <BountyCard bounty={bounty} />
-              </div>
-            ))}
+                <Zap className="w-4 h-4 mr-2" />
+                Active
+                <Badge className="ml-2 bg-purple-500/30 text-purple-300 text-xs">
+                  {activeBounties.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="completed" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
+                data-testid="tab-completed-bounties"
+              >
+                <Award className="w-4 h-4 mr-2" />
+                Completed
+                <Badge className="ml-2 bg-green-500/30 text-green-300 text-xs">
+                  {completedBounties.length}
+                </Badge>
+              </TabsTrigger>
+              {(wallet?.address || user?.id) && (
+                <TabsTrigger 
+                  value="my" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+                  data-testid="tab-my-bounties"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  My Bounties
+                  <Badge className="ml-2 bg-cyan-500/30 text-cyan-300 text-xs">
+                    {myBounties.length}
+                  </Badge>
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            {/* Category Filter */}
+            <div className="flex items-center gap-3">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[180px] bg-slate-900/50 border-purple-500/30" data-testid="select-category-filter">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="crypto">Crypto</SelectItem>
+                  <SelectItem value="tech">Technology</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="education">Education</SelectItem>
+                  <SelectItem value="entertainment">Entertainment</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        )}
+
+          {/* Active Bounties Tab */}
+          <TabsContent value="active" className="mt-0">
+            {activeLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card
+                    key={i}
+                    className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/20 backdrop-blur-sm h-64 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : activeBounties.length === 0 ? (
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-12 text-center">
+                <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">No Active Bounties</h3>
+                <p className="text-gray-400 mb-6">
+                  Be the first to create a bounty and start earning!
+                </p>
+                {isConnected && (
+                  <Button
+                    onClick={() => setCreateModalOpen(true)}
+                    className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    data-testid="button-create-first-bounty"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create First Bounty
+                  </Button>
+                )}
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activeBounties.map((bounty) => (
+                  <div key={bounty.id} className="animate-fade-in">
+                    <BountyCard bounty={bounty} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Completed Bounties Tab */}
+          <TabsContent value="completed" className="mt-0">
+            {completedLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card
+                    key={i}
+                    className="bg-gradient-to-br from-green-900/20 to-emerald-800/10 border-green-500/20 backdrop-blur-sm h-64 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : completedBounties.length === 0 ? (
+              <Card className="bg-gradient-to-br from-green-900/20 to-emerald-800/10 border-green-500/30 backdrop-blur-sm p-12 text-center">
+                <Award className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">No Completed Bounties Yet</h3>
+                <p className="text-gray-400 mb-6">
+                  Completed bounties will appear here with likes, comments, and tips.
+                </p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {completedBounties.map((bounty) => (
+                  <div key={bounty.id} className="animate-fade-in">
+                    <CompletedBountyCard bounty={bounty} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* My Bounties Tab */}
+          <TabsContent value="my" className="mt-0">
+            {myBountiesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <Card
+                    key={i}
+                    className="bg-gradient-to-br from-cyan-900/20 to-blue-800/10 border-cyan-500/20 backdrop-blur-sm h-64 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : myBounties.length === 0 ? (
+              <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-800/10 border-cyan-500/30 backdrop-blur-sm p-12 text-center">
+                <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">No Bounties Yet</h3>
+                <p className="text-gray-400 mb-6">
+                  Create your first bounty or claim one to get started!
+                </p>
+                {isConnected && (
+                  <Button
+                    onClick={() => setCreateModalOpen(true)}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    data-testid="button-create-my-bounty"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create Bounty
+                  </Button>
+                )}
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myBounties.map((bounty) => (
+                  <div key={bounty.id} className="animate-fade-in">
+                    {bounty.status === 'completed' ? (
+                      <CompletedBountyCard bounty={bounty} />
+                    ) : (
+                      <BountyCard bounty={bounty} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
