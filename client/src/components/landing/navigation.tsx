@@ -200,17 +200,8 @@ export function Navigation() {
                     <Link href="/streams/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1">
                       <Radio className="w-4 h-4 text-red-400" />
                       <div>
-                        <span className="font-medium block">Live Streams</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Watch now</span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/streams" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-pink-500/20 transition-all duration-200 rounded-md mx-1">
-                      <Bot className="w-4 h-4 text-pink-400" />
-                      <div>
-                        <span className="font-medium block">Avatar Streams</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">AI-powered hosts</span>
+                        <span className="font-medium block">Browse All</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">AI & creators live</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -224,7 +215,7 @@ export function Navigation() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/streams/discover?tab=ended" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
                       <History className="w-4 h-4 text-amber-400" />
                       <div>
                         <span className="font-medium block">Replays</span>
@@ -668,7 +659,7 @@ export function Navigation() {
               className="md:hidden mt-4 py-4 border-t border-purple-500/30 bg-slate-900/90 backdrop-blur-xl rounded-lg mx-2 shadow-xl shadow-purple-500/10"
             >
               <div className="flex flex-col space-y-1 px-4 max-h-[70vh] overflow-y-auto">
-                {/* Streams Section - NEW Priority */}
+                {/* Streams Section - Unified */}
                 <div className="text-xs font-semibold text-red-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                   Streams
@@ -679,16 +670,7 @@ export function Navigation() {
                     className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-red-500/20 transition-all duration-200 font-medium text-sm"
                   >
                     <Radio className="w-4 h-4 text-red-400" />
-                    Live Streams
-                  </button>
-                </Link>
-                <Link href="/streams" className="block">
-                  <button 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-pink-500/20 transition-all duration-200 font-medium text-sm"
-                  >
-                    <Bot className="w-4 h-4 text-pink-400" />
-                    Avatar Streams
+                    Browse All
                   </button>
                 </Link>
                 <Link href="/go-live" className="block">
@@ -698,6 +680,15 @@ export function Navigation() {
                   >
                     <Mic className="w-4 h-4 text-orange-400" />
                     Go Live
+                  </button>
+                </Link>
+                <Link href="/streams/discover?tab=ended" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <History className="w-4 h-4 text-amber-400" />
+                    Replays
                   </button>
                 </Link>
 
