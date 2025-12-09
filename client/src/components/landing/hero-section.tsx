@@ -63,10 +63,10 @@ export function HeroSection() {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/50 hover:border-red-400/70 hover:bg-red-500/10 text-red-300 hover:text-red-200 transition-all duration-300 rounded-xl backdrop-blur-sm group relative overflow-hidden"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-red-500/50 hover:bg-red-500/5 text-slate-300 hover:text-red-400 transition-all duration-300 rounded-xl backdrop-blur-sm group relative"
                   data-testid="button-live-streams"
                 >
-                  <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                   <Radio className="w-4 h-4 mr-2 text-red-400 group-hover:text-red-300" />
                   Live Streams
                 </Button>

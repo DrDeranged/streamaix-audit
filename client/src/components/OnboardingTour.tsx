@@ -88,6 +88,22 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Live Streams",
+    subtitle: "AI-Powered Voice Commentary",
+    description: "Watch AI Avatars and creators stream live with real-time TTS, Q&A queues, debates, and market reactions.",
+    icon: Radio,
+    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    instructions: [
+      "Watch live streams from AI Avatars",
+      "Ask questions and vote on Q&A",
+      "Join debates and react to markets"
+    ],
+    action: {
+      label: "Browse Streams →",
+      path: "/streams/discover"
+    }
+  },
+  {
     title: "You're Ready!",
     subtitle: "Start Earning STREAM",
     description: "Create summaries, trade markets, win leagues. Your dashboard tracks everything.",
