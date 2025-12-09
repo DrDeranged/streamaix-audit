@@ -53,6 +53,7 @@ const Streams = React.lazy(() => import("@/pages/streams"));
 const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const Gamification = React.lazy(() => import("@/pages/gamification"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
+const StreamDiscovery = React.lazy(() => import("@/pages/StreamDiscoveryPage"));
 
 function Router() {
   return (
@@ -238,6 +239,12 @@ function Router() {
       <Route path="/streams">
         <Suspense fallback={<DashboardSkeleton />}>
           <Streams />
+        </Suspense>
+      </Route>
+      
+      <Route path="/streams/discover">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <StreamDiscovery />
         </Suspense>
       </Route>
       
