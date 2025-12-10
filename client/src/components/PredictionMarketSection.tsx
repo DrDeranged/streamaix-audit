@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Sparkline } from "@/components/ui/sparkline";
+import { SectionHeader } from "@/components/ui/section-header";
 
 interface PredictionMarket {
   id: string;
@@ -233,22 +234,13 @@ export function PredictionMarketSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-cyan-100 dark:from-purple-500/20 dark:to-cyan-500/20 border border-purple-300 dark:border-purple-500/30 rounded-full mb-6">
-            <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">Prediction Markets</span>
-          </div>
-
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-            Trade the Future with{" "}
-            <span className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              AI-Powered Prediction Markets
-            </span>
-          </h2>
-          
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            Spend your earned STREAM points on binary YES/NO markets. Predict crypto trends, DeFi events, 
-            bounty outcomes, and real-world events. Build your reputation as a top predictor.
-          </p>
+          <SectionHeader
+            title="Prediction Markets"
+            subtitle="Trade the future with AI-powered predictions"
+            highlightWord="Markets"
+            badge="Prediction Markets"
+            badgeIcon={<Sparkles className="w-3 h-3" />}
+          />
 
           {/* Platform Stats */}
           {stats && (
