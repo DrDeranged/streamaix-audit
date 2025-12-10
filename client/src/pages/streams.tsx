@@ -333,32 +333,34 @@ const StreamCard = memo(function StreamCard({
     return (
       <Link href={`/stream/${stream.id}`}>
         <div 
-          className="group flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/50 hover:border-purple-500/40 hover:bg-slate-800/60 transition-all cursor-pointer"
+          className="group relative flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 backdrop-blur-xl border border-cyan-500/20 hover:border-cyan-400/50 transition-all cursor-pointer overflow-hidden"
           onClick={handleClick}
         >
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className={cn(
-            "relative w-16 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br",
+            "relative w-16 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br overflow-hidden",
             config.gradient
           )}>
-            <Icon className="w-5 h-5 text-white/70" />
+            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px]" />
+            <Icon className="w-5 h-5 text-white/80 relative z-10" />
             {isLive && (
-              <div className="absolute -top-1 -left-1">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              <div className="absolute -top-1 -left-1 z-20">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-gradient-to-r from-cyan-400 to-purple-500 shadow-lg shadow-cyan-400/50"></span>
                 </span>
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-white line-clamp-1 group-hover:text-purple-300 transition-colors">
+          <div className="flex-1 min-w-0 relative z-10">
+            <h4 className="text-sm font-medium text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
               {stream.title}
             </h4>
             <p className="text-xs text-slate-400">{stream.hostUsername}</p>
           </div>
-          <div className="flex items-center gap-1 text-slate-400">
-            <Users className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">{formatViewers(stream.currentViewers)}</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-800/60 backdrop-blur-sm rounded border border-cyan-500/20 relative z-10">
+            <Users className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-xs font-mono font-medium text-cyan-300">{formatViewers(stream.currentViewers)}</span>
           </div>
         </div>
       </Link>
@@ -368,148 +370,181 @@ const StreamCard = memo(function StreamCard({
   const cardContent = (
     <div 
       className={cn(
-        "group cursor-pointer streaming-card-3d rounded-2xl overflow-hidden",
-        selectionMode && isSelected && "ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950"
+        "group cursor-pointer relative rounded-2xl overflow-hidden",
+        "bg-slate-900/40 backdrop-blur-xl",
+        "border border-slate-700/50",
+        "hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]",
+        "transition-all duration-500",
+        selectionMode && isSelected && "ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-950"
       )} 
       data-testid={`stream-card-${stream.id}`}
       onClick={handleClick}
     >
+      {/* Corner brackets for HUD effect */}
+      <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-cyan-500/40 rounded-tl-lg z-20" />
+      <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-cyan-500/40 rounded-tr-lg z-20" />
+      <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-purple-500/40 rounded-bl-lg z-20" />
+      <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-purple-500/40 rounded-br-lg z-20" />
+
+      {/* Animated gradient border on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-purple-500/0 group-hover:from-cyan-500/10 group-hover:via-transparent group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none z-10" />
+      
       {selectionMode && (
         <div className={cn(
-          "absolute top-2 left-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all backdrop-blur-sm",
+          "absolute top-4 left-4 z-30 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all backdrop-blur-sm",
           isSelected 
-            ? "bg-purple-500 border-purple-500 shadow-lg shadow-purple-500/50" 
-            : "bg-slate-900/80 border-slate-500 hover:border-purple-400"
+            ? "bg-cyan-500 border-cyan-400 shadow-lg shadow-cyan-500/50" 
+            : "bg-slate-900/80 border-slate-500 hover:border-cyan-400"
         )}>
           {isSelected && <span className="text-white text-xs font-bold">✓</span>}
         </div>
       )}
+      
       <Card className="overflow-hidden bg-transparent border-0 shadow-none">
         <div className={cn(
-          "relative aspect-video bg-gradient-to-br",
+          "relative aspect-video bg-gradient-to-br overflow-hidden",
           config.gradient
         )}>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjEiIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIvPjwvZz48L3N2Zz4=')] opacity-30" />
-            <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center">
-              <div className="p-3 rounded-full bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                <Play className="w-8 h-8 text-white fill-white" />
-              </div>
+          {/* Scanline overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.05)_50%)] bg-[length:100%_4px] pointer-events-none z-10" />
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
+            backgroundSize: '20px 20px'
+          }} />
+          
+          <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
+            <div className="p-4 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
+              <Play className="w-8 h-8 text-cyan-300 fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
             </div>
-            <Icon className="absolute bottom-4 right-4 w-8 h-8 text-white/30" />
-            
-            {isLive && (
-              <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500/90 rounded-full px-2.5 py-1 shadow-lg shadow-red-500/20">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+          </div>
+          
+          <Icon className="absolute bottom-4 right-4 w-10 h-10 text-white/20 drop-shadow-lg" />
+          
+          {/* Enhanced LIVE indicator with neon glow */}
+          {isLive && (
+            <div className="absolute top-3 left-3 z-20">
+              <div className="relative flex items-center gap-2 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
                 </span>
-                <span className="text-[10px] font-bold text-white uppercase">Live</span>
+                <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">Live</span>
               </div>
-            )}
-
-            {stream.isKnowledgeAvatar && (
-              <div className="absolute top-3 right-3">
-                <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white text-[10px] px-2 py-0.5 font-medium shadow-lg shadow-cyan-500/30">
-                  <Shield className="w-3 h-3 mr-1" />
-                  KA
-                </Badge>
-              </div>
-            )}
-
-            {stream.isAiHost && !stream.isKnowledgeAvatar && (
-              <div className="absolute top-3 right-3">
-                <Badge className="bg-cyan-500/90 text-white text-[10px] px-2 py-0.5 font-medium">
-                  <Bot className="w-3 h-3 mr-1" />
-                  AI
-                </Badge>
-              </div>
-            )}
-
-            {stream.tags?.includes('alpha') && (
-              <div className={cn("absolute top-3", (stream.isKnowledgeAvatar || stream.isAiHost) ? "right-12" : "right-3")}>
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-2 py-0.5 font-medium animate-pulse">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  ALPHA
-                </Badge>
-              </div>
-            )}
-
-            {stream.isSubscriberOnly && (
-              <div className="absolute top-3 right-3">
-                <Badge className="bg-amber-500/90 text-white text-[10px] px-2 py-0.5 font-medium">
-                  <Crown className="w-3 h-3 mr-1" />
-                  Subs Only
-                </Badge>
-              </div>
-            )}
-
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-sm rounded-full px-2.5 py-1">
-              <Eye className="w-3 h-3 text-slate-300" />
-              <span className="text-xs font-medium text-white">{formatViewers(stream.currentViewers)}</span>
             </div>
+          )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60" />
+          {stream.isKnowledgeAvatar && (
+            <div className="absolute top-3 right-3 z-20">
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-cyan-300 text-[10px] px-2.5 py-1 font-bold border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                <Shield className="w-3 h-3 mr-1.5 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+                KA
+              </Badge>
+            </div>
+          )}
+
+          {stream.isAiHost && !stream.isKnowledgeAvatar && (
+            <div className="absolute top-3 right-3 z-20">
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-purple-300 text-[10px] px-2.5 py-1 font-bold border border-purple-500/50 shadow-[0_0_15px_rgba(147,51,234,0.3)]">
+                <Bot className="w-3 h-3 mr-1.5" />
+                AI
+              </Badge>
+            </div>
+          )}
+
+          {stream.tags?.includes('alpha') && (
+            <div className={cn("absolute top-3 z-20", (stream.isKnowledgeAvatar || stream.isAiHost) ? "right-16" : "right-3")}>
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-amber-300 text-[10px] px-2.5 py-1 font-bold border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] animate-pulse">
+                <Sparkles className="w-3 h-3 mr-1.5 drop-shadow-[0_0_4px_rgba(245,158,11,0.8)]" />
+                ALPHA
+              </Badge>
+            </div>
+          )}
+
+          {stream.isSubscriberOnly && (
+            <div className="absolute top-3 right-3 z-20">
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-amber-300 text-[10px] px-2.5 py-1 font-bold border border-amber-500/50">
+                <Crown className="w-3 h-3 mr-1.5" />
+                Subs
+              </Badge>
+            </div>
+          )}
+
+          {/* HUD-style viewer count */}
+          <div className="absolute bottom-3 left-3 z-20">
+            <div className="flex items-center gap-2 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-cyan-500/30">
+              <Users className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+              <span className="text-sm font-mono font-bold text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+                {formatViewers(stream.currentViewers)}
+              </span>
+            </div>
           </div>
 
-          <div className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="relative">
-                <div className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ring-2 bg-gradient-to-br",
-                  config.gradient,
-                  "ring-purple-500/30"
-                )}>
-                  {stream.hostAvatar ? (
-                    <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-bold text-white">
-                      {stream.hostUsername?.[0]?.toUpperCase() || '?'}
-                    </span>
-                  )}
-                </div>
-                {isLive && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-purple-300 transition-colors leading-snug">
-                  {stream.title}
-                </h3>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-xs text-slate-300 font-medium">
-                    {stream.hostUsername || 'Anonymous'}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent opacity-80" />
+        </div>
+
+        <div className="p-4 relative">
+          <div className="flex items-start gap-3">
+            {/* Avatar with animated ring */}
+            <div className="relative group/avatar">
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500 animate-[spin_4s_linear_infinite]" />
+              <div className={cn(
+                "relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 bg-gradient-to-br overflow-hidden",
+                config.gradient,
+                "ring-cyan-500/30"
+              )}>
+                {stream.hostAvatar ? (
+                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span className="text-sm font-bold text-white">
+                    {stream.hostUsername?.[0]?.toUpperCase() || '?'}
                   </span>
-                  {stream.isKnowledgeAvatar && (
-                    <Shield className="w-3 h-3 text-cyan-400" />
-                  )}
-                  {stream.hostHandle && (
-                    <span className="text-xs text-slate-500">@{stream.hostHandle}</span>
-                  )}
-                </div>
-                {stream.hostExpertise && (
-                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{stream.hostExpertise}</p>
                 )}
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <Badge variant="outline" className={cn(
-                    "text-[10px] capitalize font-medium",
-                    config.color,
-                    config.bgColor,
-                    "border-0"
-                  )}>
-                    <Icon className="w-3 h-3 mr-1" />
-                    {config.label}
+              </div>
+              {isLive && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-slate-900 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-cyan-300 transition-colors leading-snug">
+                {stream.title}
+              </h3>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <span className="text-xs text-slate-300 font-medium">
+                  {stream.hostUsername || 'Anonymous'}
+                </span>
+                {stream.isKnowledgeAvatar && (
+                  <Shield className="w-3 h-3 text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.6)]" />
+                )}
+                {stream.hostHandle && (
+                  <span className="text-xs text-slate-500">@{stream.hostHandle}</span>
+                )}
+              </div>
+              {stream.hostExpertise && (
+                <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{stream.hostExpertise}</p>
+              )}
+              <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                <Badge variant="outline" className={cn(
+                  "text-[10px] capitalize font-medium px-2 py-0.5",
+                  "bg-slate-800/60 backdrop-blur-sm border-slate-600/50",
+                  config.color
+                )}>
+                  <Icon className="w-3 h-3 mr-1" />
+                  {config.label}
+                </Badge>
+                {stream.category && (
+                  <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700/50 bg-slate-800/40 capitalize">
+                    {stream.category}
                   </Badge>
-                  {stream.category && (
-                    <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700 capitalize">
-                      {stream.category}
-                    </Badge>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
+    </div>
   );
 
   if (selectionMode) {

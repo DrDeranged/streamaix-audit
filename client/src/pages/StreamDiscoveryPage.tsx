@@ -4,13 +4,14 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { 
   Radio, Calendar, History, Play, Users, Bot, User, 
   Sparkles, Bell, BellOff, Plus, Search, Filter, 
-  TrendingUp, Mic, Zap, Brain, Crown, Clock, CheckCircle2
+  TrendingUp, Mic, Zap, Brain, Crown, Clock, CheckCircle2, Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CreateStreamModal, StreamFormData } from '@/components/streaming/CreateStreamModal';
 import { useToast } from '@/hooks/use-toast';
@@ -86,89 +87,114 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -4, scale: 1.01 }}
       onClick={onClick}
-      className="bg-slate-900/90 backdrop-blur-xl rounded-xl border border-slate-700/50 overflow-hidden cursor-pointer group hover:border-purple-500/50 transition-all duration-200"
+      className={cn(
+        "relative rounded-2xl overflow-hidden cursor-pointer group",
+        "bg-slate-900/40 backdrop-blur-xl",
+        "border border-slate-700/50",
+        "hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]",
+        "transition-all duration-500"
+      )}
       data-testid={`card-stream-${stream.id}`}
     >
-      {/* Thumbnail Area - Fixed height with clean badge layout */}
+      {/* Corner brackets for HUD effect */}
+      <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-cyan-500/40 rounded-tl-lg z-20" />
+      <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-cyan-500/40 rounded-tr-lg z-20" />
+      <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-purple-500/40 rounded-bl-lg z-20" />
+      <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-purple-500/40 rounded-br-lg z-20" />
+
+      {/* Animated gradient on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-purple-500/0 group-hover:from-cyan-500/10 group-hover:via-transparent group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none z-10" />
+      
+      {/* Thumbnail Area */}
       <div className={cn("h-36 bg-gradient-to-br relative overflow-hidden", gradient)}>
+        {/* Scanline overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.05)_50%)] bg-[length:100%_4px] pointer-events-none z-10" />
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }} />
+        
         {stream.thumbnailUrl ? (
           <img src={stream.thumbnailUrl} alt={stream.title} className="w-full h-full object-cover" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800/50 to-slate-900/50">
-            <Icon className="w-10 h-10 text-white/30" />
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40">
+            <div className="p-4 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
+              <Play className="w-8 h-8 text-cyan-300 fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+            </div>
+            <Icon className="absolute bottom-4 right-4 w-10 h-10 text-white/20" />
           </div>
         )}
         
-        {/* Gradient overlay for better badge visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent opacity-80" />
         
         {/* Top row: Status left, Viewers right */}
-        <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20">
           {/* Status badge */}
           <div>
             {isLive && (
-              <div className="flex items-center gap-1.5 bg-red-600 rounded px-2 py-1 shadow-lg">
-                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-[11px] font-bold text-white uppercase tracking-wide">Live</span>
+              <div className="relative flex items-center gap-2 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
+                </span>
+                <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">Live</span>
               </div>
             )}
             {isScheduled && (
-              <div className="flex items-center gap-1.5 bg-amber-600 rounded px-2 py-1 shadow-lg">
-                <Calendar className="w-3 h-3 text-white" />
-                <span className="text-[11px] font-bold text-white">Scheduled</span>
+              <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                <Calendar className="w-3 h-3 text-amber-400" />
+                <span className="text-[11px] font-bold text-amber-400">Scheduled</span>
               </div>
             )}
           </div>
           
           {/* Viewer count */}
           {isLive && stream.currentViewers !== undefined && (
-            <div className="flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
-              <Users className="w-3 h-3 text-slate-300" />
-              <span className="text-[11px] font-medium text-white">{stream.currentViewers}</span>
+            <div className="flex items-center gap-2 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-cyan-500/30">
+              <Users className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+              <span className="text-sm font-mono font-bold text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">{stream.currentViewers}</span>
             </div>
           )}
         </div>
         
         {/* Bottom row: Stream type left, KA badge right */}
-        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-          {/* Stream type badge */}
-          <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
-            <Icon className="w-3 h-3 text-white" />
-            <span className="text-[10px] font-medium text-white">
-              {streamTypeLabels[stream.streamType] || stream.streamType}
-            </span>
-          </div>
+        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end z-20">
+          <Badge variant="outline" className="text-[10px] capitalize font-medium px-2 py-0.5 bg-slate-950/80 backdrop-blur-sm border-slate-600/50 text-slate-300">
+            <Icon className="w-3 h-3 mr-1" />
+            {streamTypeLabels[stream.streamType] || stream.streamType}
+          </Badge>
           
-          {/* Knowledge Avatar indicator */}
           {stream.isKnowledgeAvatar && (
-            <div className="flex items-center gap-1 bg-purple-600/90 backdrop-blur-sm rounded px-2 py-1">
-              <Brain className="w-3 h-3 text-white" />
-              <span className="text-[10px] font-bold text-white">KA</span>
-            </div>
+            <Badge className="bg-slate-950/80 backdrop-blur-md text-cyan-300 text-[10px] px-2.5 py-1 font-bold border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+              <Shield className="w-3 h-3 mr-1.5 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+              KA
+            </Badge>
           )}
         </div>
       </div>
       
       {/* Content Area */}
-      <div className="p-4">
-        {/* Title */}
-        <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-purple-300 transition-colors mb-3">
+      <div className="p-4 relative">
+        <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-cyan-300 transition-colors mb-3">
           {stream.title}
         </h3>
         
         {/* Host info row */}
         <div className="flex items-center gap-2.5">
-          <div className="relative flex-shrink-0">
+          <div className="relative group/avatar flex-shrink-0">
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500" />
             {stream.hostAvatar ? (
-              <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-8 h-8 rounded-full object-cover ring-2 ring-slate-700" />
+              <img src={stream.hostAvatar} alt={stream.hostUsername} className="relative w-9 h-9 rounded-full object-cover ring-2 ring-cyan-500/30" />
             ) : stream.isKnowledgeAvatar ? (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center ring-2 ring-purple-500/30">
+              <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center ring-2 ring-cyan-500/30">
                 <Bot className="w-4 h-4 text-white" />
               </div>
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center ring-2 ring-slate-600">
+              <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center ring-2 ring-slate-600">
                 <User className="w-4 h-4 text-white" />
               </div>
             )}
@@ -189,22 +215,22 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
         
         {/* Scheduled time */}
         {isScheduled && stream.scheduledStart && (
-          <div className="flex items-center gap-1.5 mt-3 text-amber-400 bg-amber-500/10 rounded px-2 py-1.5">
+          <div className="flex items-center gap-1.5 mt-3 text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-1.5">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">{new Date(stream.scheduledStart).toLocaleString()}</span>
           </div>
         )}
         
-        {/* Tags - max 2 with consistent styling */}
+        {/* Tags */}
         {stream.tags && stream.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {stream.tags.slice(0, 2).map((tag, i) => (
-              <span key={i} className="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-400 font-medium">
+              <span key={i} className="px-2 py-0.5 bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded text-[10px] text-slate-400 font-medium">
                 {tag}
               </span>
             ))}
             {stream.tags.length > 2 && (
-              <span className="px-2 py-0.5 bg-slate-800/50 rounded text-[10px] text-slate-500">
+              <span className="px-2 py-0.5 bg-slate-800/40 rounded text-[10px] text-slate-500">
                 +{stream.tags.length - 2}
               </span>
             )}
@@ -344,19 +370,17 @@ export default function StreamDiscoveryPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500">
-                <Radio className="w-6 h-6 text-white" />
-              </div>
-              Live Streams
-            </h1>
-            <p className="text-slate-400 mt-2">Watch AI Avatars and creators stream live</p>
-          </div>
+          <SectionHeader
+            title="Live Streams"
+            subtitle="Watch AI Avatars and creators stream live"
+            badge="Streaming"
+            badgeIcon={<Radio className="h-3 w-3" />}
+            align="left"
+          />
           
           <Button 
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
+            className="relative overflow-hidden bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 border-0 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300"
             data-testid="button-start-stream"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -364,17 +388,17 @@ export default function StreamDiscoveryPage() {
           </Button>
         </div>
 
-        {/* Host Type Filter Tabs */}
+        {/* Host Type Filter Tabs - Glassmorphism style */}
         <div className="flex items-center gap-2 mb-6">
           <Button
             variant={hostFilter === 'all' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setHostFilter('all')}
             className={cn(
-              "rounded-full transition-all",
+              "rounded-lg transition-all duration-300",
               hostFilter === 'all' 
-                ? "bg-purple-600 hover:bg-purple-700 text-white" 
-                : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+                ? "bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]" 
+                : "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
             )}
             data-testid="filter-host-all"
           >
@@ -385,10 +409,10 @@ export default function StreamDiscoveryPage() {
             size="sm"
             onClick={() => setHostFilter('ai')}
             className={cn(
-              "rounded-full transition-all",
+              "rounded-lg transition-all duration-300",
               hostFilter === 'ai' 
-                ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white" 
-                : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+                ? "bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-cyan-400/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]" 
+                : "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
             )}
             data-testid="filter-host-ai"
           >
@@ -400,10 +424,10 @@ export default function StreamDiscoveryPage() {
             size="sm"
             onClick={() => setHostFilter('creators')}
             className={cn(
-              "rounded-full transition-all",
+              "rounded-lg transition-all duration-300",
               hostFilter === 'creators' 
-                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white" 
-                : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+                ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                : "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 text-slate-400 hover:border-amber-500/30 hover:text-amber-300"
             )}
             data-testid="filter-host-creators"
           >
@@ -414,19 +438,19 @@ export default function StreamDiscoveryPage() {
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cyan-400" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search streams..."
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400"
+              className="pl-10 bg-slate-900/40 backdrop-blur-xl border-slate-700/50 text-white placeholder:text-slate-500 focus:border-cyan-500/50 focus:ring-cyan-500/20"
               data-testid="input-search-streams"
             />
           </div>
           
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-48 bg-slate-800/50 border-slate-700 text-white" data-testid="select-stream-type">
-              <Filter className="w-4 h-4 mr-2 text-slate-400" />
+            <SelectTrigger className="w-full sm:w-48 bg-slate-900/40 backdrop-blur-xl border-slate-700/50 text-white focus:border-cyan-500/50" data-testid="select-stream-type">
+              <Filter className="w-4 h-4 mr-2 text-cyan-400" />
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent>
@@ -439,32 +463,32 @@ export default function StreamDiscoveryPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border border-slate-700/50 mb-6">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 mb-6 p-1">
             <TabsTrigger 
               value="live" 
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-400/40 data-[state=active]:text-cyan-300 data-[state=active]:shadow-[0_0_15px_rgba(6,182,212,0.2)] rounded-lg transition-all"
               data-testid="tab-live"
             >
               <Radio className="w-4 h-4 mr-2" />
               Live
               {filteredLive.length > 0 && (
-                <Badge className="ml-2 bg-red-500 text-white">{filteredLive.length}</Badge>
+                <Badge className="ml-2 bg-red-500/80 text-white border border-red-400/50 shadow-[0_0_10px_rgba(239,68,68,0.4)]">{filteredLive.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger 
               value="scheduled"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-400/40 data-[state=active]:text-cyan-300 data-[state=active]:shadow-[0_0_15px_rgba(6,182,212,0.2)] rounded-lg transition-all"
               data-testid="tab-scheduled"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Upcoming
               {filteredScheduled.length > 0 && (
-                <Badge className="ml-2 bg-amber-500 text-white">{filteredScheduled.length}</Badge>
+                <Badge className="ml-2 bg-amber-500/80 text-white border border-amber-400/50 shadow-[0_0_10px_rgba(245,158,11,0.4)]">{filteredScheduled.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger 
               value="ended"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-400/40 data-[state=active]:text-cyan-300 data-[state=active]:shadow-[0_0_15px_rgba(6,182,212,0.2)] rounded-lg transition-all"
               data-testid="tab-ended"
             >
               <History className="w-4 h-4 mr-2" />
