@@ -198,12 +198,13 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
 
   return (
     <Link href={`/stream/${stream.id}`}>
-      <div className="group relative cursor-pointer overflow-hidden rounded-2xl aspect-[16/9] min-w-[320px] sm:min-w-[400px] lg:min-w-[500px] transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-br",
-          config.gradient
-        )}>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />
+      <div className="group relative cursor-pointer overflow-hidden rounded-2xl aspect-[16/9] min-w-[320px] sm:min-w-[400px] lg:min-w-[500px] transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-slate-700/50 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+        <div className="absolute inset-0 bg-slate-900">
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-5" style={{
+            backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
+            backgroundSize: '20px 20px'
+          }} />
         </div>
         
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
@@ -256,15 +257,9 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <div className="flex items-end gap-4">
             <div className="relative">
-              <div className={cn(
-                "w-14 h-14 rounded-full ring-3 flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br",
-                config.gradient,
-                "ring-white/30"
-              )}>
-                {stream.hostAvatar ? (
+              <div className="w-14 h-14 rounded-full ring-3 bg-slate-800 overflow-hidden ring-white/30">
+                {stream.hostAvatar && (
                   <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  stream.hostUsername?.[0]?.toUpperCase() || '?'
                 )}
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-950" />
@@ -337,17 +332,12 @@ const StreamCard = memo(function StreamCard({
           onClick={handleClick}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className={cn(
-            "relative w-16 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br overflow-hidden",
-            config.gradient
-          )}>
-            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px]" />
-            <Icon className="w-5 h-5 text-white/80 relative z-10" />
+          <div className="relative w-16 h-12 rounded-lg bg-slate-800 overflow-hidden">
             {isLive && (
-              <div className="absolute -top-1 -left-1 z-20">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-gradient-to-r from-cyan-400 to-purple-500 shadow-lg shadow-cyan-400/50"></span>
+              <div className="absolute top-1 left-1 z-20">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
                 </span>
               </div>
             )}
@@ -401,26 +391,19 @@ const StreamCard = memo(function StreamCard({
       )}
       
       <Card className="overflow-hidden bg-transparent border-0 shadow-none">
-        <div className={cn(
-          "relative aspect-video bg-gradient-to-br overflow-hidden",
-          config.gradient
-        )}>
-          {/* Scanline overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.05)_50%)] bg-[length:100%_4px] pointer-events-none z-10" />
-          
-          {/* Grid pattern overlay */}
-          <div className="absolute inset-0 opacity-10" style={{
+        <div className="relative aspect-video bg-slate-900 overflow-hidden">
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 opacity-5" style={{
             backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
             backgroundSize: '20px 20px'
           }} />
           
-          <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
+          {/* Play button on hover */}
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="p-4 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
               <Play className="w-8 h-8 text-cyan-300 fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
             </div>
           </div>
-          
-          <Icon className="absolute bottom-4 right-4 w-10 h-10 text-white/20 drop-shadow-lg" />
           
           {/* Enhanced LIVE indicator with neon glow */}
           {isLive && (
@@ -489,17 +472,9 @@ const StreamCard = memo(function StreamCard({
             {/* Avatar with animated ring */}
             <div className="relative group/avatar">
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500 animate-[spin_4s_linear_infinite]" />
-              <div className={cn(
-                "relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 bg-gradient-to-br overflow-hidden",
-                config.gradient,
-                "ring-cyan-500/30"
-              )}>
-                {stream.hostAvatar ? (
+              <div className="relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 bg-slate-800 overflow-hidden ring-cyan-500/30">
+                {stream.hostAvatar && (
                   <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-sm font-bold text-white">
-                    {stream.hostUsername?.[0]?.toUpperCase() || '?'}
-                  </span>
                 )}
               </div>
               {isLive && (
@@ -642,38 +617,29 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
   return (
     <Link href={`/replay/${stream.id}`}>
       <div className="group cursor-pointer min-w-[280px] sm:min-w-[320px] transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" data-testid={`past-stream-${stream.id}`}>
-        <Card className="overflow-hidden bg-slate-900/60 border border-slate-700/40 hover:border-purple-500/40 transition-all">
-          <div className={cn(
-            "relative aspect-video bg-gradient-to-br",
-            config.gradient,
-            "opacity-50"
-          )}>
-            <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center">
-              <div className="p-3 rounded-full bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors">
-                <Play className="w-8 h-8 text-white fill-white" />
+        <Card className="overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 hover:border-cyan-500/40 transition-all">
+          <div className="relative aspect-video bg-slate-900">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="p-3 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 group-hover:bg-cyan-500/30 transition-colors">
+                <Play className="w-8 h-8 text-cyan-300 fill-cyan-300" />
               </div>
             </div>
             
             <div className="absolute bottom-2 left-2">
-              <Badge className="bg-slate-900/80 text-slate-300 text-[10px] px-2 py-0.5">
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-slate-300 text-[10px] px-2 py-0.5 border border-slate-700/50">
                 <Clock className="w-3 h-3 mr-1" />
                 {formatDuration(stream.durationSeconds)}
               </Badge>
             </div>
             
             <div className="absolute bottom-2 right-2">
-              <Badge className="bg-slate-900/80 text-slate-400 text-[10px] px-2 py-0.5">
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-slate-400 text-[10px] px-2 py-0.5 border border-slate-700/50">
                 {formatTimeAgo(stream.actualEnd)}
               </Badge>
             </div>
             
             <div className="absolute top-2 left-2">
-              <Badge className={cn(
-                "text-[10px] px-2 py-0.5",
-                config.bgColor,
-                config.color,
-                "border-0"
-              )}>
+              <Badge className="bg-slate-950/80 backdrop-blur-md text-slate-300 text-[10px] px-2 py-0.5 border border-slate-600/50">
                 <Icon className="w-3 h-3 mr-1" />
                 {config.label}
               </Badge>
@@ -682,17 +648,13 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
 
           <div className="p-3">
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center flex-shrink-0">
-                {stream.hostAvatar ? (
-                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-xs font-bold text-white">
-                    {stream.hostUsername?.[0]?.toUpperCase() || '?'}
-                  </span>
+              <div className="w-8 h-8 rounded-full bg-slate-800 overflow-hidden flex-shrink-0 ring-2 ring-cyan-500/20">
+                {stream.hostAvatar && (
+                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full object-cover" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-white line-clamp-1 group-hover:text-purple-300 transition-colors">
+                <h3 className="text-sm font-medium text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
                   {stream.title}
                 </h3>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -732,18 +694,14 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
     <Link href={streamer.isLive && streamer.streamId ? `/stream/${streamer.streamId}` : `/profile/${streamer.id}`}>
       <div className="group flex flex-col items-center gap-2 min-w-[80px] cursor-pointer" data-testid={`top-streamer-${streamer.id}`}>
         <div className={cn(
-          "relative w-16 h-16 rounded-full ring-2 flex items-center justify-center bg-gradient-to-br",
+          "relative w-16 h-16 rounded-full ring-2 bg-slate-800 overflow-hidden",
           getRankColor()
         )}>
-          {streamer.avatar ? (
+          {streamer.avatar && (
             <img src={streamer.avatar} alt="" className="w-full h-full rounded-full object-cover" />
-          ) : (
-            <span className="text-lg font-bold text-white">
-              {streamer.username?.[0]?.toUpperCase() || '?'}
-            </span>
           )}
           {streamer.isLive && (
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-[0_0_10px_rgba(239,68,68,0.6)]">
               Live
             </div>
           )}

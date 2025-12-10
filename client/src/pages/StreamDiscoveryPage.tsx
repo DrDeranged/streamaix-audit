@@ -108,12 +108,9 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-purple-500/0 group-hover:from-cyan-500/10 group-hover:via-transparent group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none z-10" />
       
       {/* Thumbnail Area */}
-      <div className={cn("h-36 bg-gradient-to-br relative overflow-hidden", gradient)}>
-        {/* Scanline overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.05)_50%)] bg-[length:100%_4px] pointer-events-none z-10" />
-        
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-10" style={{
+      <div className="h-36 bg-slate-900 relative overflow-hidden">
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
           backgroundSize: '20px 20px'
         }} />
@@ -121,11 +118,10 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
         {stream.thumbnailUrl ? (
           <img src={stream.thumbnailUrl} alt={stream.title} className="w-full h-full object-cover" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="p-4 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
               <Play className="w-8 h-8 text-cyan-300 fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
             </div>
-            <Icon className="absolute bottom-4 right-4 w-10 h-10 text-white/20" />
           </div>
         )}
         
@@ -187,17 +183,11 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
         <div className="flex items-center gap-2.5">
           <div className="relative group/avatar flex-shrink-0">
             <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500" />
-            {stream.hostAvatar ? (
-              <img src={stream.hostAvatar} alt={stream.hostUsername} className="relative w-9 h-9 rounded-full object-cover ring-2 ring-cyan-500/30" />
-            ) : stream.isKnowledgeAvatar ? (
-              <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center ring-2 ring-cyan-500/30">
-                <Bot className="w-4 h-4 text-white" />
-              </div>
-            ) : (
-              <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center ring-2 ring-slate-600">
-                <User className="w-4 h-4 text-white" />
-              </div>
-            )}
+            <div className="relative w-9 h-9 rounded-full bg-slate-800 overflow-hidden ring-2 ring-cyan-500/30">
+              {stream.hostAvatar && (
+                <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+              )}
+            </div>
             {stream.isVerified && (
               <div className="absolute -bottom-0.5 -right-0.5 bg-cyan-500 rounded-full p-0.5 ring-2 ring-slate-900">
                 <CheckCircle2 className="w-2.5 h-2.5 text-white" />
