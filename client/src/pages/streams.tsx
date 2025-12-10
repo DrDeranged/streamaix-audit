@@ -692,27 +692,29 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
 
   return (
     <Link href={streamer.isLive && streamer.streamId ? `/stream/${streamer.streamId}` : `/profile/${streamer.id}`}>
-      <div className="group flex flex-col items-center gap-2 min-w-[80px] cursor-pointer" data-testid={`top-streamer-${streamer.id}`}>
-        <div className={cn(
-          "relative w-16 h-16 rounded-full ring-2 bg-slate-800 overflow-hidden",
-          getRankColor()
-        )}>
-          {streamer.avatar && (
-            <img src={streamer.avatar} alt="" className="w-full h-full rounded-full object-cover" />
-          )}
-          {streamer.isLive && (
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-[0_0_10px_rgba(239,68,68,0.6)]">
-              Live
-            </div>
-          )}
+      <div className="group flex flex-col items-center gap-1 min-w-[80px] cursor-pointer" data-testid={`top-streamer-${streamer.id}`}>
+        <div className="relative">
+          <div className={cn(
+            "w-16 h-16 rounded-full ring-2 bg-slate-800 overflow-hidden",
+            getRankColor()
+          )}>
+            {streamer.avatar && (
+              <img src={streamer.avatar} alt="" className="w-full h-full object-cover" />
+            )}
+          </div>
           {rank <= 3 && (
             <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
               {getRankIcon()}
             </div>
           )}
         </div>
+        {streamer.isLive && (
+          <div className="bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase shadow-[0_0_10px_rgba(239,68,68,0.6)] -mt-2">
+            Live
+          </div>
+        )}
         <div className="text-center">
-          <p className="text-xs font-medium text-white group-hover:text-purple-300 transition-colors line-clamp-1 max-w-[70px]">
+          <p className="text-xs font-medium text-white group-hover:text-cyan-300 transition-colors line-clamp-1 max-w-[70px]">
             {streamer.username}
           </p>
           <p className="text-[10px] text-slate-500">{formatViewers(streamer.totalViewers)} views</p>
