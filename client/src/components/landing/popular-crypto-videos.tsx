@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SectionHeader } from "@/components/ui/section-header";
 import { motion } from "framer-motion";
 import { Play, Clock, Zap, ChevronLeft, ChevronRight, Loader2, ExternalLink, Eye, Brain, BarChart3, FileText, Wifi } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -211,12 +212,10 @@ export function PopularCryptoVideos() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-4 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-            Live AI Processing
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            See real AI analysis in action with trending crypto content
-          </p>
+          <SectionHeader
+            title="Live AI Processing"
+            subtitle="See real AI analysis in action with trending crypto content"
+          />
         </motion.div>
         
         <div className="flex items-center justify-between mb-6">

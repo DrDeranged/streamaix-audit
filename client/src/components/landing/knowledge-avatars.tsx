@@ -673,12 +673,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              Knowledge Avatars
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              <span className="animate-pulse">Loading alpha network...</span>
-            </p>
+            <SectionHeader
+              title="Alpha Network"
+              subtitle="Loading alpha network..."
+            />
           </motion.div>
 
           {/* Skeleton Cards */}
@@ -715,7 +713,6 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           <SectionHeader
             title="Alpha Network"
             subtitle="Real-time intelligence on crypto's top minds"
-            highlightWord="Alpha"
           />
         </motion.div>
         

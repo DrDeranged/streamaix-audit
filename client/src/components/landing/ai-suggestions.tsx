@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SectionHeader } from "@/components/ui/section-header";
 import { 
   Sparkles, 
   Brain, 
@@ -84,9 +85,10 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              AI-Powered Recommendations
-            </h2>
+            <SectionHeader
+              title="AI-Powered Recommendations"
+              subtitle="Sign in to get personalized content"
+            />
           </motion.div>
 
           <motion.div
@@ -106,11 +108,11 @@ export function AISuggestions() {
                   </div>
                 </div>
 
-                <h3 className="text-3xl font-bold text-center mb-4 text-white">
+                <h3 className="text-2xl font-bold text-center mb-4 text-white">
                   Unlock Personalized Recommendations
                 </h3>
                 
-                <p className="text-lg text-gray-400 text-center mb-10 max-w-xl mx-auto">
+                <p className="text-base text-gray-400 text-center mb-10 max-w-xl mx-auto">
                   Sign in to get AI-powered content recommendations tailored to your interests and followed avatars
                 </p>
 
@@ -145,9 +147,10 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              AI-Powered Recommendations
-            </h2>
+            <SectionHeader
+              title="AI-Powered Recommendations"
+              subtitle="Loading your recommendations..."
+            />
           </motion.div>
           
           <div className="flex justify-center items-center py-20">
@@ -170,12 +173,10 @@ export function AISuggestions() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              AI-Powered Recommendations
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-              Follow some knowledge avatars to get personalized recommendations
-            </p>
+            <SectionHeader
+              title="AI-Powered Recommendations"
+              subtitle="Follow some knowledge avatars to get personalized recommendations"
+            />
             <Link href="/discover">
               <button 
                 className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-purple-500/30"

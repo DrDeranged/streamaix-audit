@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionHeader } from "@/components/ui/section-header";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -107,12 +108,10 @@ export function Bounties() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl font-orbitron font-bold mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-            Summary Bounty Board
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Earn STREAM points by creating valuable summaries and completing bounties
-          </p>
+          <SectionHeader
+            title="Summary Bounty Board"
+            subtitle="Earn STREAM points by creating valuable summaries"
+          />
         </motion.div>
         
         {bountiesLoading ? (

@@ -237,7 +237,6 @@ export function PredictionMarketSection() {
           <SectionHeader
             title="Prediction Markets"
             subtitle="Trade the future with AI-powered predictions"
-            highlightWord="Markets"
             badge="Prediction Markets"
             badgeIcon={<Sparkles className="w-3 h-3" />}
           />

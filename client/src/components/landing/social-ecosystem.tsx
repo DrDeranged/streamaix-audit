@@ -1,5 +1,6 @@
 import { MessageCircle, Users, Image, Edit3, Zap, Share2, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { SectionHeader } from "@/components/ui/section-header";
 import navalAvatar from "@/assets/naval-avatar.svg";
 import vitalikAvatar from "@/assets/vitalik-avatar.svg";
 
@@ -57,12 +58,10 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-            Social + Ecosystem
-          </h2>
-          <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
-            Seamlessly integrated with your favorite Web3 social platforms
-          </p>
+          <SectionHeader
+            title="Social + Ecosystem"
+            subtitle="Seamlessly integrated with your favorite Web3 social platforms"
+          />
         </motion.div>
         
         {/* Platform Logos */}

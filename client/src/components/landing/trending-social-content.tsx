@@ -4,6 +4,7 @@ import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tansta
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SectionHeader } from '@/components/ui/section-header';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -1094,10 +1095,10 @@ export function TrendingSocialContent() {
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:via-purple-200 dark:to-cyan-200 bg-clip-text text-transparent mb-2">
-            Discover
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">Stay updated with the latest in crypto conversations</p>
+          <SectionHeader
+            title="Discover"
+            subtitle="Stay updated with the latest in crypto conversations"
+          />
         </motion.div>
 
         {/* Tab Navigation */}

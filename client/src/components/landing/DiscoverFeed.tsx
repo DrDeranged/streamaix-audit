@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
 import { SocialPost } from '@/components/social/SocialPost';
 import { PostCreationModal } from '@/components/social/PostCreationModal';
 import { CompactBountyCard, CompactMarketCard, CompactStoryCard, MacroDataCard } from '@/components/social/CompactCards';
@@ -264,12 +265,10 @@ export function DiscoverFeed() {
           viewport={{ once: true }}
           className="text-center mb-8"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            Discover
-          </h2>
-          <p className="text-gray-400 text-sm">
-            Live feed of bounties, predictions, stories, and market data
-          </p>
+          <SectionHeader
+            title="Discover"
+            subtitle="Live feed of bounties, predictions, stories, and market data"
+          />
         </motion.div>
 
         {/* Tabs */}

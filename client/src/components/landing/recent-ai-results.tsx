@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Clock, 
@@ -88,16 +89,12 @@ export function RecentAIResults() {
     return (
       <section className="py-20 px-4 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950">
         <div className="container mx-auto max-w-7xl text-center">
-          <Badge className="mb-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
-            <Brain className="h-3 w-3 mr-1" />
-            AI Content Analysis
-          </Badge>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent mb-4">
-            See AI Content Intelligence in Action
-          </h2>
-          <p className="text-gray-300 text-lg max-w-3xl mx-auto mb-8">
-            Process your first video or podcast above to see how our AI transforms content into actionable insights with TLDR summaries, comprehensive analysis, and market intelligence.
-          </p>
+          <SectionHeader
+            title="AI Content Intelligence"
+            subtitle="Process your first video or podcast to see AI in action"
+            badge="AI Content Analysis"
+            badgeIcon={<Brain className="h-3 w-3" />}
+          />
           <Button 
             size="lg" 
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
@@ -133,17 +130,12 @@ export function RecentAIResults() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <Badge className="mb-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
-            <Brain className="h-3 w-3 mr-1" />
-            Live AI Processing Results
-          </Badge>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent mb-4">
-            Real Content Intelligence in Action
-          </h2>
-          <p className="text-gray-300 text-lg max-w-3xl mx-auto">
-            See how our AI transforms long-form content into actionable insights. 
-            Each result showcases different content formats optimized for maximum value extraction.
-          </p>
+          <SectionHeader
+            title="Content Intelligence in Action"
+            subtitle="See how our AI transforms long-form content into actionable insights"
+            badge="Live AI Processing"
+            badgeIcon={<Brain className="h-3 w-3" />}
+          />
         </motion.div>
 
         {/* Content Results Grid */}

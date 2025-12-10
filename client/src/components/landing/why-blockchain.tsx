@@ -1,6 +1,7 @@
 import { Database, Coins, UserCheck, ShieldCheck, Users, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { SectionHeader } from "@/components/ui/section-header";
 
 export function WhyBlockchain() {
   const features = [
@@ -52,12 +53,10 @@ export function WhyBlockchain() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            Why Blockchain?
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Hover to explore Web3 advantages
-          </p>
+          <SectionHeader
+            title="Why Blockchain?"
+            subtitle="Hover to explore Web3 advantages"
+          />
         </motion.div>
         
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6 max-w-5xl mx-auto">

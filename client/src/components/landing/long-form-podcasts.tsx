@@ -4,6 +4,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -281,17 +282,11 @@ export function LongFormPodcasts() {
           viewport={{ once: true }}
         >
           <div className="flex items-center gap-4 mb-4 lg:mb-0">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <BookOpen className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-foreground">
-                Long-Form Crypto Podcasts
-              </h2>
-              <p className="text-muted-foreground">
-                Transform 60+ minute episodes into actionable insights
-              </p>
-            </div>
+            <SectionHeader
+              title="Long-Form Crypto Podcasts"
+              subtitle="Transform 60+ minute episodes into actionable insights"
+              align="left"
+            />
           </div>
           
           {/* Controls */}

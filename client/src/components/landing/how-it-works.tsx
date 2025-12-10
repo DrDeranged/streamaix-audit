@@ -1,6 +1,7 @@
 import { Upload, Brain, Coins, Youtube, Mic, Database, Share2, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { SectionHeader } from "@/components/ui/section-header";
 
 export function HowItWorks() {
   const steps = [
@@ -43,12 +44,10 @@ export function HowItWorks() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl font-orbitron font-bold mb-4 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            How It Works
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Hover over each step to learn more
-          </p>
+          <SectionHeader
+            title="How It Works"
+            subtitle="Hover over each step to learn more"
+          />
         </motion.div>
         
         <div className="flex justify-center gap-8 md:gap-16 max-w-5xl mx-auto relative">

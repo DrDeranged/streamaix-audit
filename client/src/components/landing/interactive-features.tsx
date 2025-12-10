@@ -12,6 +12,7 @@ import {
   Zap
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { SectionHeader } from '@/components/ui/section-header';
 
 interface FeatureCardData {
   icon: any;
@@ -112,18 +113,12 @@ export function InteractiveFeatures() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-6">
-            <Zap className="h-4 w-4 text-cyan-400" />
-            <span className="text-cyan-300 text-sm font-medium">Explore Platform</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              Access Everything
-            </span>
-          </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Navigate directly to any section of the platform. Real-time data, AI-powered insights, and decentralized features at your fingertips.
-          </p>
+          <SectionHeader
+            title="Access Everything"
+            subtitle="Navigate directly to any section of the platform"
+            badge="Explore Platform"
+            badgeIcon={<Zap className="h-3 w-3" />}
+          />
         </motion.div>
 
         {/* Features Grid */}
