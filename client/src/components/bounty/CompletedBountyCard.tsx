@@ -102,7 +102,7 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
             <div className="text-right flex-shrink-0">
               <div className="flex items-center gap-1 text-green-400">
                 <Trophy className="w-4 h-4" />
-                <span className="font-bold">{bounty.reward}</span>
+                <span className="font-bold">{(bounty.reward || 0).toLocaleString()}</span>
               </div>
               <span className="text-xs text-gray-400">$STREAM</span>
             </div>

@@ -10,9 +10,17 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useBounties } from '@/hooks/useBounties';
 import { useEngagement } from '@/hooks/useEngagement';
-import { formatTokenAmount } from '@/lib/contracts';
 import { format, formatDistanceToNow } from 'date-fns';
+
 import type { Bounty } from '@shared/schema';
+
+// Format numbers with commas
+const formatNumber = (num: number | string | undefined): string => {
+  if (num === undefined || num === null) return '0';
+  const n = typeof num === 'string' ? parseFloat(num) : num;
+  if (isNaN(n)) return '0';
+  return n.toLocaleString('en-US');
+};
 
 interface EnrichedBounty extends Bounty {
   summaryPreview?: string[];
@@ -177,7 +185,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             <div>
               <p className="text-xs text-gray-400">Reward</p>
               <p className="text-sm font-semibold text-white" data-testid={`bounty-reward-${bounty.id}`}>
-                {bounty.reward} $STREAM
+                {formatNumber(bounty.reward)} $STREAM
               </p>
             </div>
           </div>
@@ -186,7 +194,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             <div>
               <p className="text-xs text-gray-400">Tip Pool</p>
               <p className="text-sm font-semibold text-white" data-testid={`bounty-tip-pool-${bounty.id}`}>
-                {bounty.tipPool || 0} $STREAM
+                {formatNumber(bounty.tipPool || 0)} $STREAM
               </p>
             </div>
           </div>

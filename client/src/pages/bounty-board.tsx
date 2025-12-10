@@ -16,8 +16,15 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWeb3 } from '@/hooks/useWeb3';
-import { formatTokenAmount } from '@/lib/contracts';
 import type { Bounty } from '@shared/schema';
+
+// Format numbers with commas
+const formatNumber = (num: number | string | undefined): string => {
+  if (num === undefined || num === null) return '0';
+  const n = typeof num === 'string' ? parseFloat(num) : num;
+  if (isNaN(n)) return '0';
+  return n.toLocaleString('en-US');
+};
 
 import BountyCard from '@/components/bounty/BountyCard';
 import CompletedBountyCard from '@/components/bounty/CompletedBountyCard';
@@ -313,7 +320,7 @@ export default function BountyBoard() {
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
                           <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
                         </div>
                       </div>
@@ -341,7 +348,7 @@ export default function BountyBoard() {
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
                           <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
                         </div>
                       </div>
@@ -369,7 +376,7 @@ export default function BountyBoard() {
                       >
                         <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatTokenAmount(bounty.reward.toString())} {bounty.tokenType}</span>
+                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
                           <span className="text-xs text-gray-400">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
                         </div>
                       </div>

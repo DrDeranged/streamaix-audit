@@ -266,7 +266,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
           <div className="flex items-center gap-6 mt-4 text-sm">
             <div className="flex items-center gap-1.5 text-green-300">
               <Trophy className="w-4 h-4" />
-              <span className="font-semibold">{bounty.reward} $STREAM</span>
+              <span className="font-semibold">{(bounty.reward || 0).toLocaleString()} $STREAM</span>
             </div>
             <div className="flex items-center gap-1.5 text-cyan-300">
               <Eye className="w-4 h-4" />
@@ -289,8 +289,8 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
           </div>
         </div>
 
-        {/* Scrollable Content */}
-        <ScrollArea className="flex-1 max-h-[calc(90vh-180px)]">
+        {/* Scrollable Content - with visible scrollbar */}
+        <ScrollArea className="flex-1 max-h-[calc(90vh-180px)] [&>div>div]:!block [&_[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:!flex [&_[data-radix-scroll-area-scrollbar]]:!w-2.5 [&_[data-radix-scroll-area-scrollbar]]:bg-slate-800 [&_[data-radix-scroll-area-thumb]]:!bg-green-500/50 [&_[data-radix-scroll-area-thumb]]:rounded-full">
           <div className="px-6 py-4 space-y-6">
             {/* Winner Section */}
             <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30 rounded-xl p-4">

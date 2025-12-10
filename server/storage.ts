@@ -681,9 +681,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(bounties);
 
-    // Apply status filter if provided
+    // Apply status filter if provided - supports comma-separated values
     if (status) {
-      query = query.where(eq(bounties.status, status)) as any;
+      const statusList = status.split(',').map(s => s.trim()).filter(Boolean);
+      if (statusList.length === 1) {
+        query = query.where(eq(bounties.status, statusList[0])) as any;
+      } else if (statusList.length > 1) {
+        query = query.where(inArray(bounties.status, statusList)) as any;
+      }
     }
 
     // Apply category filter if provided  
