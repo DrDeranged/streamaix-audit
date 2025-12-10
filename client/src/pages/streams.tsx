@@ -35,8 +35,18 @@ import {
   Grid2X2,
   X,
   FlaskConical,
-  Loader2
+  Loader2,
+  Hexagon,
+  CircleDot,
+  Gem,
+  Cpu,
+  Rocket,
+  Wallet,
+  BarChart3,
+  Brain,
+  Globe
 } from 'lucide-react';
+import { SiEthereum, SiX, SiOpenai } from 'react-icons/si';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -147,6 +157,35 @@ const streamTypeConfig: Record<string, { icon: any; label: string; color: string
 };
 
 const categories = ['all', 'crypto', 'trading', 'defi', 'nft', 'education', 'ama', 'news', 'analysis'];
+
+// Brand icon mapping for Knowledge Avatars when profile images fail to load
+const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: string }> = {
+  'Hayden Adams': { icon: Hexagon, color: 'text-pink-400', bgColor: 'bg-pink-500/20' }, // Uniswap
+  'Vitalik Buterin': { icon: SiEthereum, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Gavin Wood': { icon: CircleDot, color: 'text-pink-500', bgColor: 'bg-pink-500/20' }, // Polkadot
+  'Anatoly Yakovenko': { icon: Gem, color: 'text-gradient-to-r from-purple-400 to-cyan-400', bgColor: 'bg-gradient-to-br from-purple-500/20 to-cyan-500/20' }, // Solana
+  'Brian Armstrong': { icon: Coins, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Coinbase
+  'Jesse Powell': { icon: Wallet, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Kraken
+  'Sam Altman': { icon: SiOpenai, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' }, // OpenAI
+  'Elon Musk': { icon: SiX, color: 'text-white', bgColor: 'bg-slate-700' }, // X/Twitter
+  'Stani Kulechov': { icon: Zap, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' }, // Aave
+  'Arthur Hayes': { icon: BarChart3, color: 'text-red-400', bgColor: 'bg-red-500/20' }, // BitMEX
+  'Andre Cronje': { icon: Rocket, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Yearn
+  'Charles Hoskinson': { icon: Cpu, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Cardano
+  'Justin Sun': { icon: Zap, color: 'text-red-500', bgColor: 'bg-red-500/20' }, // Tron
+  'Marc Andreessen': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' }, // a16z
+  'Chris Dixon': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' }, // a16z
+  'Anthony Pompliano': { icon: Coins, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Bitcoin
+  'Adam Back': { icon: Coins, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Bitcoin
+  'Brad Garlinghouse': { icon: Zap, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Ripple
+  'Katie Haun': { icon: Shield, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Haun Ventures
+  'Robert Leshner': { icon: BarChart3, color: 'text-green-400', bgColor: 'bg-green-500/20' }, // Compound
+};
+
+const getAvatarFallback = (username?: string) => {
+  if (!username) return null;
+  return avatarBrandIcons[username] || null;
+};
 
 const formatViewers = (count: number) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
@@ -676,11 +715,15 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
 });
 
 const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { streamer: TopStreamer; rank: number }) {
+  const [imageError, setImageError] = useState(false);
+  const brandFallback = getAvatarFallback(streamer.username);
+  const BrandIcon = brandFallback?.icon;
+  
   const getRankColor = () => {
-    if (rank === 1) return 'from-amber-500 to-yellow-500 ring-amber-400/50';
-    if (rank === 2) return 'from-slate-400 to-slate-300 ring-slate-400/50';
-    if (rank === 3) return 'from-amber-700 to-amber-600 ring-amber-600/50';
-    return 'from-purple-600 to-fuchsia-600 ring-purple-500/30';
+    if (rank === 1) return 'ring-amber-400/60';
+    if (rank === 2) return 'ring-slate-400/60';
+    if (rank === 3) return 'ring-amber-600/60';
+    return 'ring-cyan-500/30';
   };
 
   const getRankIcon = () => {
@@ -690,16 +733,28 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
     return null;
   };
 
+  const showImage = streamer.avatar && !imageError;
+  const showBrandIcon = !showImage && brandFallback;
+
   return (
     <Link href={streamer.isLive && streamer.streamId ? `/stream/${streamer.streamId}` : `/profile/${streamer.id}`}>
       <div className="group flex flex-col items-center gap-1 min-w-[80px] cursor-pointer" data-testid={`top-streamer-${streamer.id}`}>
         <div className="relative">
           <div className={cn(
-            "w-16 h-16 rounded-full ring-2 bg-slate-800 overflow-hidden",
-            getRankColor()
+            "w-16 h-16 rounded-full ring-2 overflow-hidden flex items-center justify-center",
+            getRankColor(),
+            showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
           )}>
-            {streamer.avatar && (
-              <img src={streamer.avatar} alt="" className="w-full h-full object-cover" />
+            {showImage && (
+              <img 
+                src={streamer.avatar} 
+                alt="" 
+                className="w-full h-full object-cover" 
+                onError={() => setImageError(true)}
+              />
+            )}
+            {showBrandIcon && BrandIcon && (
+              <BrandIcon className={cn("w-7 h-7", brandFallback.color)} />
             )}
           </div>
           {rank <= 3 && (
