@@ -46,7 +46,16 @@ import {
   Brain,
   Globe
 } from 'lucide-react';
-import { SiEthereum, SiX, SiOpenai } from 'react-icons/si';
+import { 
+  SiEthereum, 
+  SiX, 
+  SiOpenai,
+  SiSolana,
+  SiBitcoin,
+  SiCoinbase,
+  SiPolkadot,
+  SiCardano
+} from 'react-icons/si';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -159,24 +168,25 @@ const streamTypeConfig: Record<string, { icon: any; label: string; color: string
 const categories = ['all', 'crypto', 'trading', 'defi', 'nft', 'education', 'ama', 'news', 'analysis'];
 
 // Brand icon mapping for Knowledge Avatars when profile images fail to load
+// Uses official brand icons from react-icons/si where available, Lucide for others
 const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: string }> = {
-  'Hayden Adams': { icon: Hexagon, color: 'text-pink-400', bgColor: 'bg-pink-500/20' }, // Uniswap
-  'Vitalik Buterin': { icon: SiEthereum, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-  'Gavin Wood': { icon: CircleDot, color: 'text-pink-500', bgColor: 'bg-pink-500/20' }, // Polkadot
-  'Anatoly Yakovenko': { icon: Gem, color: 'text-gradient-to-r from-purple-400 to-cyan-400', bgColor: 'bg-gradient-to-br from-purple-500/20 to-cyan-500/20' }, // Solana
-  'Brian Armstrong': { icon: Coins, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Coinbase
-  'Jesse Powell': { icon: Wallet, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Kraken
+  'Hayden Adams': { icon: Hexagon, color: 'text-pink-400', bgColor: 'bg-pink-500/20' }, // Uniswap (pink hexagon)
+  'Vitalik Buterin': { icon: SiEthereum, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Ethereum
+  'Gavin Wood': { icon: SiPolkadot, color: 'text-pink-400', bgColor: 'bg-pink-500/20' }, // Polkadot
+  'Anatoly Yakovenko': { icon: SiSolana, color: 'text-purple-400', bgColor: 'bg-gradient-to-br from-purple-500/20 to-cyan-500/20' }, // Solana
+  'Brian Armstrong': { icon: SiCoinbase, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Coinbase
+  'Jesse Powell': { icon: Wallet, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Kraken (wallet icon)
   'Sam Altman': { icon: SiOpenai, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' }, // OpenAI
   'Elon Musk': { icon: SiX, color: 'text-white', bgColor: 'bg-slate-700' }, // X/Twitter
-  'Stani Kulechov': { icon: Zap, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' }, // Aave
-  'Arthur Hayes': { icon: BarChart3, color: 'text-red-400', bgColor: 'bg-red-500/20' }, // BitMEX
-  'Andre Cronje': { icon: Rocket, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Yearn
-  'Charles Hoskinson': { icon: Cpu, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Cardano
-  'Justin Sun': { icon: Zap, color: 'text-red-500', bgColor: 'bg-red-500/20' }, // Tron
+  'Stani Kulechov': { icon: Zap, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' }, // Aave (ghost/zap)
+  'Arthur Hayes': { icon: BarChart3, color: 'text-red-400', bgColor: 'bg-red-500/20' }, // BitMEX (trading chart)
+  'Andre Cronje': { icon: Rocket, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Yearn (innovation)
+  'Charles Hoskinson': { icon: SiCardano, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Cardano
+  'Justin Sun': { icon: Zap, color: 'text-red-500', bgColor: 'bg-red-500/20' }, // Tron (energy)
   'Marc Andreessen': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' }, // a16z
   'Chris Dixon': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' }, // a16z
-  'Anthony Pompliano': { icon: Coins, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Bitcoin
-  'Adam Back': { icon: Coins, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Bitcoin
+  'Anthony Pompliano': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Bitcoin
+  'Adam Back': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Bitcoin/Blockstream
   'Brad Garlinghouse': { icon: Zap, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Ripple
   'Katie Haun': { icon: Shield, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Haun Ventures
   'Robert Leshner': { icon: BarChart3, color: 'text-green-400', bgColor: 'bg-green-500/20' }, // Compound
@@ -232,8 +242,13 @@ const formatLiveTime = (dateStr?: string) => {
 };
 
 const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream: LiveStream }) {
+  const [imageError, setImageError] = useState(false);
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
+  const brandFallback = getAvatarFallback(stream.hostUsername);
+  const BrandIcon = brandFallback?.icon;
+  const showImage = stream.hostAvatar && !imageError;
+  const showBrandIcon = !showImage && brandFallback;
 
   return (
     <Link href={`/stream/${stream.id}`}>
@@ -296,9 +311,21 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <div className="flex items-end gap-4">
             <div className="relative">
-              <div className="w-14 h-14 rounded-full ring-3 bg-slate-800 overflow-hidden ring-white/30">
-                {stream.hostAvatar && (
-                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
+              <div className={cn(
+                "w-14 h-14 rounded-full ring-3 overflow-hidden ring-white/30 flex items-center justify-center",
+                showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
+              )}>
+                {showImage && (
+                  <img 
+                    src={stream.hostAvatar} 
+                    alt="" 
+                    loading="lazy" 
+                    className="w-full h-full rounded-full object-cover" 
+                    onError={() => setImageError(true)}
+                  />
+                )}
+                {showBrandIcon && BrandIcon && (
+                  <BrandIcon className={cn("w-6 h-6", brandFallback.color)} />
                 )}
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-950" />
@@ -351,9 +378,14 @@ const StreamCard = memo(function StreamCard({
   isSelected?: boolean;
   onSelect?: (streamId: string) => void;
 }) {
+  const [imageError, setImageError] = useState(false);
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
   const isLive = stream.status === 'live';
+  const brandFallback = getAvatarFallback(stream.hostUsername);
+  const BrandIcon = brandFallback?.icon;
+  const showImage = stream.hostAvatar && !imageError;
+  const showBrandIcon = !showImage && brandFallback;
 
   const handleClick = (e: React.MouseEvent) => {
     if (selectionMode && onSelect) {
@@ -511,9 +543,21 @@ const StreamCard = memo(function StreamCard({
             {/* Avatar with animated ring */}
             <div className="relative group/avatar">
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500 animate-[spin_4s_linear_infinite]" />
-              <div className="relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 bg-slate-800 overflow-hidden ring-cyan-500/30">
-                {stream.hostAvatar && (
-                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full rounded-full object-cover" />
+              <div className={cn(
+                "relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 overflow-hidden ring-cyan-500/30",
+                showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
+              )}>
+                {showImage && (
+                  <img 
+                    src={stream.hostAvatar} 
+                    alt="" 
+                    loading="lazy" 
+                    className="w-full h-full rounded-full object-cover" 
+                    onError={() => setImageError(true)}
+                  />
+                )}
+                {showBrandIcon && BrandIcon && (
+                  <BrandIcon className={cn("w-5 h-5", brandFallback.color)} />
                 )}
               </div>
               {isLive && (
@@ -650,8 +694,13 @@ const ScheduledStreamCard = memo(function ScheduledStreamCard({ stream }: { stre
 });
 
 const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastStream }) {
+  const [imageError, setImageError] = useState(false);
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
   const Icon = config.icon;
+  const brandFallback = getAvatarFallback(stream.hostUsername);
+  const BrandIcon = brandFallback?.icon;
+  const showImage = stream.hostAvatar && !imageError;
+  const showBrandIcon = !showImage && brandFallback;
 
   return (
     <Link href={`/replay/${stream.id}`}>
@@ -687,9 +736,21 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
 
           <div className="p-3">
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-full bg-slate-800 overflow-hidden flex-shrink-0 ring-2 ring-cyan-500/20">
-                {stream.hostAvatar && (
-                  <img src={stream.hostAvatar} alt="" loading="lazy" className="w-full h-full object-cover" />
+              <div className={cn(
+                "w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-cyan-500/20 flex items-center justify-center",
+                showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
+              )}>
+                {showImage && (
+                  <img 
+                    src={stream.hostAvatar} 
+                    alt="" 
+                    loading="lazy" 
+                    className="w-full h-full object-cover" 
+                    onError={() => setImageError(true)}
+                  />
+                )}
+                {showBrandIcon && BrandIcon && (
+                  <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
                 )}
               </div>
               <div className="flex-1 min-w-0">
