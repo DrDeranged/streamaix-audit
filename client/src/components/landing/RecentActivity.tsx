@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { SectionHeader } from "@/components/ui/section-header";
 import { 
   Activity, 
   UserPlus, 
@@ -16,7 +17,7 @@ import { useRef } from "react";
 export function RecentActivity() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const { data: activityData, isLoading } = useQuery({
+  const { data: activityData, isLoading } = useQuery<{ activities: any[] }>({
     queryKey: ['/api/activity'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
@@ -44,12 +45,11 @@ export function RecentActivity() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-orbitron font-bold mb-4 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-            Live Platform Activity
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto">
-            Real-time actions from our community of AI hunters and traders
-          </p>
+          <SectionHeader
+            title="Live Platform Activity"
+            subtitle="Real-time actions from our community"
+            highlightWord="Platform"
+          />
         </motion.div>
 
         <motion.div

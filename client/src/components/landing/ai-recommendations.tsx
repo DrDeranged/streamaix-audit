@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Sparkles, 
@@ -95,13 +96,12 @@ export function AIRecommendations() {
                     <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-blue-400" />
                   </div>
                   
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent px-2">
-                    Unlock AI-Powered Recommendations
-                  </h2>
-                  
-                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-200/80 max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8 px-2">
-                    Get personalized insights tailored to your interests. Our AI analyzes your behavior to recommend the most relevant influencers, content, and trending topics just for you.
-                  </p>
+                  <SectionHeader
+                    title="AI-Powered Recommendations"
+                    subtitle="Personalized insights for your interests"
+                    highlightWord="AI-Powered"
+                    className="mb-6 sm:mb-8"
+                  />
                 </motion.div>
 
                 <motion.div
@@ -185,15 +185,11 @@ export function AIRecommendations() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Brain className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-4xl md:text-5xl font-orbitron font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              AI-Powered Recommendations
-            </h2>
-          </div>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Personalized insights based on your interests and behavior
-          </p>
+          <SectionHeader
+            title="AI-Powered Recommendations"
+            subtitle="Personalized insights for your interests"
+            highlightWord="AI-Powered"
+          />
         </motion.div>
 
         {/* Trending Topics */}

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { SectionHeader } from "@/components/ui/section-header";
 import { ApiErrorCard } from "@/components/ApiErrorFallback";
 import { 
   ChevronLeft, 
@@ -711,12 +712,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-orbitron font-bold mb-4 md:mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-700 bg-clip-text text-transparent">
-            Alpha Network
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Real-time intelligence on crypto's most influential minds. Track investments, predictions, and market impact with Bloomberg Terminal precision.
-          </p>
+          <SectionHeader
+            title="Alpha Network"
+            subtitle="Real-time intelligence on crypto's top minds"
+            highlightWord="Alpha"
+          />
         </motion.div>
         
         {/* Enhanced Carousel Container */}

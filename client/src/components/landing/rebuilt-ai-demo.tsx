@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 import UserNotesModal from '@/components/UserNotesModal';
 import { EnhancedPredictionMarketCard } from '@/components/prediction/EnhancedPredictionMarketCard';
+import { SectionHeader } from "@/components/ui/section-header";
 import { 
   Brain, 
   Zap, 
@@ -333,12 +334,11 @@ export function AIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl sm:text-3xl font-orbitron font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-500 dark:to-purple-600 bg-clip-text text-transparent">
-            Live AI Content Intelligence
-          </h2>
-          <p className="text-base sm:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto px-4">
-            Paste any YouTube URL below and watch real AI extract insights, analyze market sentiment, and generate comprehensive intelligence reports
-          </p>
+          <SectionHeader
+            title="Live AI Content Intelligence"
+            subtitle="Paste a YouTube URL and extract AI insights instantly"
+            highlightWord="AI"
+          />
         </motion.div>
 
         <div className="max-w-4xl mx-auto">

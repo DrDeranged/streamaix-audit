@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SectionHeader } from "@/components/ui/section-header";
 import { motion } from "framer-motion";
-import { Play, Clock, Wifi, ChevronLeft, ChevronRight, Loader2, Eye, Brain, BarChart3, FileText, RefreshCw } from "lucide-react";
+import { Play, Clock, Wifi, ChevronLeft, ChevronRight, Loader2, Eye, Brain, BarChart3, FileText, RefreshCw, Circle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -120,12 +121,13 @@ export default function LiveCryptoVideos() {
       <section className="py-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-xl sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
-              Live AI Processing
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See real AI analysis in action with trending crypto content
-            </p>
+            <SectionHeader
+              title="Live AI Processing"
+              subtitle="Real-time analysis of trending crypto content"
+              highlightWord="AI"
+              badge="Live"
+              badgeIcon={<Circle className="w-2 h-2 fill-green-400 text-green-400" />}
+            />
           </div>
           
           <div className="flex items-center justify-center py-12">
@@ -144,12 +146,13 @@ export default function LiveCryptoVideos() {
       <section className="py-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-xl sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
-              Live AI Processing
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See real AI analysis in action with trending crypto content
-            </p>
+            <SectionHeader
+              title="Live AI Processing"
+              subtitle="Real-time analysis of trending crypto content"
+              highlightWord="AI"
+              badge="Live"
+              badgeIcon={<Circle className="w-2 h-2 fill-green-400 text-green-400" />}
+            />
           </div>
           
           <div className="text-center py-12">
@@ -169,24 +172,16 @@ export default function LiveCryptoVideos() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Header with Live Status */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <h2 className="text-xl sm:text-2xl font-orbitron font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-4">
-              Live AI Processing
-            </h2>
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-400 font-medium">
-                {isFetching ? 'Updating...' : 'Live'}
-              </span>
-            </div>
-          </div>
-          
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
-            See real AI analysis in action with trending crypto content
-          </p>
+          <SectionHeader
+            title="Live AI Processing"
+            subtitle="Real-time analysis of trending crypto content"
+            highlightWord="AI"
+            badge="Live"
+            badgeIcon={<Circle className="w-2 h-2 fill-green-400 text-green-400" />}
+          />
           
           {lastUpdated && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-2">
               Last updated: {new Date(lastUpdated).toLocaleTimeString()}
             </p>
           )}

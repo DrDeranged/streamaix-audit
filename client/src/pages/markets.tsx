@@ -198,30 +198,11 @@ export default function Markets() {
           
           <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-cyan-400" />
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                  Prediction Markets ✨
-                </h1>
-              </div>
-              
-              <p className="text-slate-300 text-sm mb-2 font-light">
-                🚀 <span className="font-semibold text-cyan-300">Trade the future.</span> Predict outcomes. <span className="font-semibold text-purple-300">Earn STREAM.</span>
-              </p>
-              
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <Badge className="bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-200 border-purple-500/30 px-2 py-0.5">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  AI-Powered Predictions
-                </Badge>
-                <Badge className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 border-cyan-500/30 px-2 py-0.5">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Live Trading
-                </Badge>
-                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200 border-green-500/30 px-2 py-0.5">
-                  Base Network
-                </Badge>
-              </div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">
+                <span className="text-white">Prediction </span>
+                <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Markets</span>
+              </h1>
+              <p className="text-sm text-gray-400">Trade the future. Predict outcomes. Earn STREAM.</p>
             </div>
             
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">

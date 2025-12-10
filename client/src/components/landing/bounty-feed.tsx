@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/ui/section-header";
 import { Clock, Coins, TrendingUp, Flame, Zap, Loader2, ArrowRight, Target } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
@@ -232,21 +233,13 @@ export function BountyFeed() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-purple-500/20 border border-purple-500/30 backdrop-blur-sm mb-6">
-            <Target className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-            <span className="text-sm font-medium text-purple-600 dark:text-purple-300">Live Bounties</span>
-          </div>
-
-          <h2 className="text-3xl font-orbitron font-bold mb-6">
-            <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 dark:from-white dark:via-indigo-200 dark:to-purple-300 bg-clip-text text-transparent">
-              Bounty Feed
-            </span>
-          </h2>
-
-          <p className="text-lg sm:text-xl text-slate-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Earn <span className="text-purple-600 dark:text-purple-400 font-semibold">STREAM points</span> by completing bounties.
-            Create summaries, analyze content, and contribute to the ecosystem.
-          </p>
+          <SectionHeader
+            title="Bounty Feed"
+            subtitle="Earn STREAM points by completing bounties"
+            highlightWord="Bounty"
+            badge="Live Bounties"
+            badgeIcon={<Target className="w-3 h-3" />}
+          />
         </motion.div>
 
         {/* Stats Bar */}

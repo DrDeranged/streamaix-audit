@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
 import { SocialFeedCard } from '@/components/social/SocialFeedCard';
 import { InlineMarketCard } from '@/components/prediction/InlineMarketCard';
 import { useAuth } from '@/hooks/useAuth';
@@ -287,12 +288,10 @@ export function SocialFeed() {
           viewport={{ once: true }}
           className="text-center mb-4 sm:mb-6"
         >
-          <h2 className="text-xl sm:text-2xl font-orbitron font-bold mb-2 sm:mb-3 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">
-            Social Feed
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
-            Engage with markets, predictions, and real-time data
-          </p>
+          <SectionHeader
+            title="Social Feed"
+            subtitle="Engage with markets and real-time data"
+          />
         </motion.div>
 
         {/* Incentive Banner */}
