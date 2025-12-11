@@ -323,7 +323,14 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
         {/* Best Calls Tab */}
         <TabsContent value="best" className="space-y-4">
           <div className="grid gap-4">
-            {entrepreneur.bestCalls.map((call, idx) => (
+            {(!entrepreneur.bestCalls || entrepreneur.bestCalls.length === 0) ? (
+              <Card className="border-green-500/20 bg-green-500/5">
+                <CardContent className="pt-6 text-center">
+                  <CheckCircle2 className="h-8 w-8 text-green-500/50 mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">No notable winning investments recorded yet</p>
+                </CardContent>
+              </Card>
+            ) : entrepreneur.bestCalls.map((call, idx) => (
               <Card key={idx} className="border-green-500/20 bg-green-500/5">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-3">
@@ -377,7 +384,14 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
         {/* Worst Calls Tab */}
         <TabsContent value="worst" className="space-y-4">
           <div className="grid gap-4">
-            {entrepreneur.worstCalls.map((call, idx) => (
+            {(!entrepreneur.worstCalls || entrepreneur.worstCalls.length === 0) ? (
+              <Card className="border-red-500/20 bg-red-500/5">
+                <CardContent className="pt-6 text-center">
+                  <AlertTriangle className="h-8 w-8 text-red-500/50 mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">No notable losing investments recorded yet</p>
+                </CardContent>
+              </Card>
+            ) : entrepreneur.worstCalls.map((call, idx) => (
               <Card key={idx} className="border-red-500/20 bg-red-500/5">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-3">
@@ -425,7 +439,12 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {entrepreneur.recentActivity.map((activity, idx) => (
+                {(!entrepreneur.recentActivity || entrepreneur.recentActivity.length === 0) ? (
+                  <div className="text-center py-4">
+                    <Clock className="h-8 w-8 text-blue-500/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground text-sm">No recent activity recorded yet</p>
+                  </div>
+                ) : entrepreneur.recentActivity.map((activity, idx) => (
                   <div 
                     key={idx} 
                     className="flex gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/10"
