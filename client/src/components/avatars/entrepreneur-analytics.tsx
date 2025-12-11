@@ -439,7 +439,7 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[320px] pr-4">
+              <ScrollArea className="h-[240px] md:h-[320px] pr-4">
                 <div className="space-y-4">
                   {(!entrepreneur.recentActivity || entrepreneur.recentActivity.length === 0) ? (
                     <div className="text-center py-4">
