@@ -414,6 +414,7 @@ function CorrelationHeatmap() {
 }
 
 export default function Discover() {
+  const { isVisible } = useWidgetSettings();
   const [pulseExpanded, setPulseExpanded] = useState(false);
   const [macroExpanded, setMacroExpanded] = useState(true);
   const [sectorExpanded, setSectorExpanded] = useState(false);
@@ -1624,6 +1625,7 @@ export default function Discover() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             
             {/* Fear & Greed Index */}
+            {isVisible('fear-greed') && (
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-orange-500/30 transition-all">
@@ -1665,8 +1667,10 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Market Dominance */}
+            {isVisible('market-dominance') && (
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-yellow-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:border-amber-500/30 transition-all">
@@ -1699,6 +1703,7 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Gas Tracker */}
             <div className="relative group">
@@ -1771,9 +1776,11 @@ export default function Discover() {
           </div>
 
           {/* Row 2: Top Gainers & Losers - Compact */}
+          {(isVisible('top-gainers') || isVisible('top-losers')) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             
             {/* Top Gainers */}
+            {isVisible('top-gainers') && (
             <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
@@ -1801,8 +1808,10 @@ export default function Discover() {
                 )}
               </div>
             </div>
+            )}
 
             {/* Top Losers */}
+            {isVisible('top-losers') && (
             <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingDown className="w-5 h-5 text-red-400" />
@@ -1830,7 +1839,9 @@ export default function Discover() {
                 )}
               </div>
             </div>
+            )}
           </div>
+          )}
 
           {/* Row 3: Trending Tokens & DeFi TVL - Compact */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
