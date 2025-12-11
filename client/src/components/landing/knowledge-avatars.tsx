@@ -707,8 +707,29 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
 
   const markets = marketsData?.markets || [];
 
-  if (isLoading || markets.length === 0) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5 px-1">
+          <TrendingUp className="h-3.5 w-3.5 text-purple-500/50" />
+          <span className="text-xs font-semibold text-muted-foreground">Loading Markets...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (markets.length === 0) {
+    return (
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5 px-1">
+          <TrendingUp className="h-3.5 w-3.5 text-purple-500/50" />
+          <span className="text-xs font-semibold text-foreground">Prediction Markets</span>
+        </div>
+        <div className="bg-purple-500/5 border border-purple-500/10 rounded-lg p-2.5 text-center">
+          <span className="text-[10px] text-muted-foreground">No prediction markets created by {avatarName} yet</span>
+        </div>
+      </div>
+    );
   }
 
   return (
