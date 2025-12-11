@@ -11,6 +11,7 @@ import { ChatWidget } from "@/components/chat/ChatWidget";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { PWAInstallPrompt, PWAUpdatePrompt } from "@/components/pwa/PWAInstallPrompt";
 import { GlobalMobileHeader } from "@/components/GlobalMobileHeader";
+import { WidgetSettingsProvider } from "@/contexts/WidgetSettingsContext";
 
 // Immediate load for critical pages
 import Landing from "@/pages/landing";
@@ -293,15 +294,17 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="dark" storageKey="streamaix-theme">
-          <TooltipProvider>
-            <Toaster />
-            <GlobalMobileHeader />
-            <Router />
-            <ChatWidget />
-            <OnboardingTour />
-            <PWAInstallPrompt />
-            <PWAUpdatePrompt />
-          </TooltipProvider>
+          <WidgetSettingsProvider>
+            <TooltipProvider>
+              <Toaster />
+              <GlobalMobileHeader />
+              <Router />
+              <ChatWidget />
+              <OnboardingTour />
+              <PWAInstallPrompt />
+              <PWAUpdatePrompt />
+            </TooltipProvider>
+          </WidgetSettingsProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

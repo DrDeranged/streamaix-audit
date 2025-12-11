@@ -80,6 +80,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { WidgetSettingsPanel } from "@/components/WidgetSettingsPanel";
+import { useWidgetSettings } from "@/contexts/WidgetSettingsContext";
 
 interface PredictionMarket {
   id: string;
@@ -1016,6 +1018,7 @@ export default function Discover() {
                 <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 sm:mr-1.5 animate-pulse" />
                 <span>Live</span>
               </Badge>
+              <WidgetSettingsPanel />
               <Link href="/markets">
                 <Button 
                   size="sm"
