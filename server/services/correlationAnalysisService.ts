@@ -1,4 +1,5 @@
 import { MarketDataService, CryptoQuote, StockQuote } from './marketDataService';
+import axios from 'axios';
 
 export interface CorrelationData {
   assetPair: {
@@ -183,20 +184,54 @@ export class CorrelationAnalysisService {
     return 'very_strong';
   }
 
+  private historicalPriceCache = new Map<string, { prices: number[]; timestamp: number }>();
+  private readonly historicalCacheTimeout = 3600000; // 1 hour cache for historical data (to reduce API calls)
+
   /**
-   * Generate mock historical price data for demonstration
-   * In production, this would fetch real historical data
+   * Fetch real historical price data from CoinGecko Pro API
    */
-  private generateMockPriceHistory(basePrice: number, volatility: number, days: number): number[] {
-    const prices: number[] = [basePrice];
-    
-    for (let i = 1; i < days; i++) {
-      const change = (Math.random() - 0.5) * volatility * 2;
-      const newPrice = prices[i - 1] * (1 + change / 100);
-      prices.push(Math.max(newPrice, basePrice * 0.1)); // Prevent negative prices
+  private async fetchRealHistoricalPrices(symbol: string, days: number): Promise<number[]> {
+    const cacheKey = `historical_${symbol}_${days}`;
+    const cached = this.historicalPriceCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.historicalCacheTimeout) {
+      return cached.prices;
     }
-    
-    return prices;
+
+    const coinGeckoIds: { [key: string]: string } = {
+      'BTC': 'bitcoin', 'ETH': 'ethereum', 'SOL': 'solana', 'BNB': 'binancecoin',
+      'XRP': 'ripple', 'ADA': 'cardano', 'AVAX': 'avalanche-2', 'DOT': 'polkadot',
+      'MATIC': 'matic-network', 'LINK': 'chainlink'
+    };
+
+    const coinId = coinGeckoIds[symbol];
+    if (!coinId) {
+      console.log(`⚠️ No CoinGecko ID for ${symbol}`);
+      return [];
+    }
+
+    try {
+      const apiKey = process.env.COINGECKO_PRO_API_KEY;
+      const baseUrl = apiKey ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
+      
+      const response = await axios.get(`${baseUrl}/coins/${coinId}/market_chart`, {
+        params: { vs_currency: 'usd', days },
+        headers: apiKey ? { 'x-cg-pro-api-key': apiKey } : {},
+        timeout: 10000
+      });
+
+      const priceData = response.data?.prices || [];
+      const prices = priceData.map((p: [number, number]) => p[1]);
+      
+      if (prices.length > 0) {
+        this.historicalPriceCache.set(cacheKey, { prices, timestamp: Date.now() });
+        console.log(`✅ Fetched ${prices.length} historical prices for ${symbol}`);
+      }
+      
+      return prices;
+    } catch (error: any) {
+      console.error(`❌ Failed to fetch historical prices for ${symbol}:`, error.message);
+      return [];
+    }
   }
 
   /**
@@ -262,31 +297,50 @@ export class CorrelationAnalysisService {
   }
 
   /**
-   * Calculate cross-asset correlations for correlation matrix
+   * Calculate cross-asset correlations for correlation matrix using real historical data
    */
   async getCorrelationMatrix(timeframe: '7d' | '30d' | '90d' = '30d'): Promise<CorrelationHeatmapData> {
     const cacheKey = `correlation_matrix_${timeframe}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
-    console.log(`📊 Calculating correlation matrix for ${timeframe} timeframe`);
+    console.log(`📊 Calculating correlation matrix for ${timeframe} timeframe with real data`);
 
     const assets = await this.getCurrentAssetPrices();
     const matrix: Array<{ asset1: string; asset2: string; correlation: number; strength: string }> = [];
     
     const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
 
-    // Generate correlation matrix
-    for (let i = 0; i < assets.length; i++) {
-      for (let j = i + 1; j < assets.length; j++) {
-        const asset1 = assets[i];
-        const asset2 = assets[j];
+    // Fetch real historical price data for all assets
+    const priceHistories = new Map<string, number[]>();
+    await Promise.all(
+      assets.map(async (asset) => {
+        const prices = await this.fetchRealHistoricalPrices(asset.symbol, days);
+        if (prices.length > 0) {
+          priceHistories.set(asset.symbol, prices);
+        }
+      })
+    );
 
-        // Generate mock price histories for demonstration
-        const prices1 = this.generateMockPriceHistory(asset1.price, Math.abs(asset1.change24h) * 2, days);
-        const prices2 = this.generateMockPriceHistory(asset2.price, Math.abs(asset2.change24h) * 2, days);
+    // Only compute correlations for assets with real historical data
+    const assetsWithData = assets.filter(a => priceHistories.has(a.symbol));
 
-        const { correlation } = this.calculateCorrelation(prices1, prices2);
+    for (let i = 0; i < assetsWithData.length; i++) {
+      for (let j = i + 1; j < assetsWithData.length; j++) {
+        const asset1 = assetsWithData[i];
+        const asset2 = assetsWithData[j];
+
+        const prices1 = priceHistories.get(asset1.symbol) || [];
+        const prices2 = priceHistories.get(asset2.symbol) || [];
+
+        // Align price arrays to same length
+        const minLen = Math.min(prices1.length, prices2.length);
+        if (minLen < 2) continue;
+
+        const alignedPrices1 = prices1.slice(-minLen);
+        const alignedPrices2 = prices2.slice(-minLen);
+
+        const { correlation } = this.calculateCorrelation(alignedPrices1, alignedPrices2);
         const strength = this.classifyCorrelationStrength(correlation);
 
         matrix.push({
@@ -300,13 +354,13 @@ export class CorrelationAnalysisService {
 
     const result: CorrelationHeatmapData = {
       matrix,
-      assets,
+      assets: assetsWithData,
       timeframe,
       lastUpdated: new Date().toISOString()
     };
 
     this.setCache(cacheKey, result);
-    console.log(`✅ Generated correlation matrix with ${matrix.length} pairs`);
+    console.log(`✅ Generated correlation matrix with ${matrix.length} pairs using real data`);
     return result;
   }
 
@@ -508,7 +562,7 @@ export class CorrelationAnalysisService {
   }
 
   /**
-   * Get specific asset pair correlations with detailed analysis
+   * Get specific asset pair correlations with detailed analysis using real data
    */
   async getAssetPairCorrelations(asset1: string, asset2: string, timeframes: Array<'7d' | '30d' | '90d'> = ['7d', '30d', '90d']): Promise<CorrelationData[]> {
     const results: CorrelationData[] = [];
@@ -518,20 +572,26 @@ export class CorrelationAnalysisService {
       let cached = this.getFromCache(cacheKey);
       
       if (!cached) {
-        console.log(`📊 Calculating ${asset1}-${asset2} correlation for ${timeframe}`);
+        console.log(`📊 Calculating ${asset1}-${asset2} correlation for ${timeframe} using real data`);
         
         const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
         
-        // Mock price data generation (in production, fetch real historical data)
-        const basePrice1 = 100 + Math.random() * 500;
-        const basePrice2 = 50 + Math.random() * 200;
-        const volatility1 = 5 + Math.random() * 15;
-        const volatility2 = 5 + Math.random() * 15;
+        // Fetch real historical price data
+        const prices1 = await this.fetchRealHistoricalPrices(asset1, days);
+        const prices2 = await this.fetchRealHistoricalPrices(asset2, days);
         
-        const prices1 = this.generateMockPriceHistory(basePrice1, volatility1, days);
-        const prices2 = this.generateMockPriceHistory(basePrice2, volatility2, days);
+        // Validate we have enough data
+        if (prices1.length < 2 || prices2.length < 2) {
+          console.log(`⚠️ Insufficient historical data for ${asset1}-${asset2}`);
+          continue;
+        }
         
-        const { correlation, pValue } = this.calculateCorrelation(prices1, prices2);
+        // Align price arrays to same length
+        const minLen = Math.min(prices1.length, prices2.length);
+        const alignedPrices1 = prices1.slice(-minLen);
+        const alignedPrices2 = prices2.slice(-minLen);
+        
+        const { correlation, pValue } = this.calculateCorrelation(alignedPrices1, alignedPrices2);
         const strength = this.classifyCorrelationStrength(correlation);
         const direction = correlation > 0.05 ? 'positive' : correlation < -0.05 ? 'negative' : 'neutral';
         
@@ -557,7 +617,7 @@ export class CorrelationAnalysisService {
       results.push(cached);
     }
 
-    console.log(`✅ Calculated correlations for ${asset1}-${asset2} across ${timeframes.length} timeframes`);
+    console.log(`✅ Calculated correlations for ${asset1}-${asset2} across ${results.length} timeframes`);
     return results;
   }
 
