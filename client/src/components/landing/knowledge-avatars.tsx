@@ -698,6 +698,372 @@ const getRecentActivity = (name: string) => {
   ];
 };
 
+// Comprehensive avatar profile fallback data - ensures all avatars display complete info
+const getAvatarProfileFallback = (name: string): {
+  investmentThesis: string;
+  netWorth: string;
+  portfolioRoi: number;
+  investmentCount: number;
+  category: string;
+  riskScore: number;
+  volatility: number;
+  marketOutlook: string;
+} => {
+  const profiles: Record<string, any> = {
+    'Naval Ravikant': {
+      investmentThesis: 'Seek asymmetric upside through angel investing. Build long-term wealth through equity, not wages. Focus on founders with specific knowledge and leverage.',
+      netWorth: '$3.2B',
+      portfolioRoi: 847,
+      investmentCount: 200,
+      category: 'Venture Capital',
+      riskScore: 65,
+      volatility: 45,
+      marketOutlook: 'Bullish on AI-native startups and decentralized systems. Believes next decade belongs to founder-led companies with network effects.'
+    },
+    'Vitalik Buterin': {
+      investmentThesis: 'Build infrastructure for decentralized coordination. Ethereum enables programmable money and trustless agreements at global scale.',
+      netWorth: '$1.5B',
+      portfolioRoi: 450000,
+      investmentCount: 25,
+      category: 'Blockchain',
+      riskScore: 75,
+      volatility: 60,
+      marketOutlook: 'Focused on Ethereum scaling through L2s and proto-danksharding. Sees rollups as path to mass adoption.'
+    },
+    'Michael Saylor': {
+      investmentThesis: 'Bitcoin is digital gold and superior store of value. Corporate treasuries should hold Bitcoin as reserve asset. Long-term accumulation strategy.',
+      netWorth: '$4.5B',
+      portfolioRoi: 2150,
+      investmentCount: 8,
+      category: 'Bitcoin Treasury',
+      riskScore: 85,
+      volatility: 70,
+      marketOutlook: 'Extremely bullish Bitcoin. Expects institutional adoption to drive price to $500K+. MicroStrategy will continue accumulating.'
+    },
+    'Brian Armstrong': {
+      investmentThesis: 'Build compliant infrastructure for crypto adoption. Coinbase as bridge between traditional finance and digital assets.',
+      netWorth: '$8.2B',
+      portfolioRoi: 1200,
+      investmentCount: 45,
+      category: 'Crypto Infrastructure',
+      riskScore: 60,
+      volatility: 55,
+      marketOutlook: 'Optimistic on regulatory clarity. Base L2 will drive onchain adoption. Stablecoins are killer app.'
+    },
+    'Changpeng Zhao': {
+      investmentThesis: 'Grow crypto ecosystem through exchange dominance and strategic investments. BNB Chain as foundation for DeFi and NFTs.',
+      netWorth: '$33B',
+      portfolioRoi: 100000,
+      investmentCount: 150,
+      category: 'Exchange',
+      riskScore: 90,
+      volatility: 80,
+      marketOutlook: 'Post-legal settlement, focused on compliance. Bullish on global crypto adoption despite regulatory challenges.'
+    },
+    'Cathie Wood': {
+      investmentThesis: 'Disruptive innovation creates exponential growth. Focus on convergence of AI, blockchain, genomics, robotics, and energy storage.',
+      netWorth: '$250M',
+      portfolioRoi: 156,
+      investmentCount: 35,
+      category: 'Innovation Investing',
+      riskScore: 80,
+      volatility: 75,
+      marketOutlook: 'Bitcoin to $1M by 2030. AI and crypto convergence will create unprecedented value. Deflation, not inflation.'
+    },
+    'Sam Altman': {
+      investmentThesis: 'AI will be the most transformative technology in human history. Build and invest in AI infrastructure and applications.',
+      netWorth: '$2B',
+      portfolioRoi: 115,
+      investmentCount: 400,
+      category: 'AI & Tech',
+      riskScore: 70,
+      volatility: 50,
+      marketOutlook: 'AGI within 5 years. OpenAI leading the way. AI agents will transform every industry.'
+    },
+    'Elon Musk': {
+      investmentThesis: 'Accelerate sustainable energy and make life multi-planetary. AI is critical but existential risk. Long-term thinking over quarterly results.',
+      netWorth: '$400B',
+      portfolioRoi: 42,
+      investmentCount: 8,
+      category: 'Technology & Space',
+      riskScore: 90,
+      volatility: 85,
+      marketOutlook: 'Mars colonization is essential. AI regulation needed. X will become everything app. Tesla FSD imminent.'
+    },
+    'Jack Dorsey': {
+      investmentThesis: 'Bitcoin is the native currency of the internet. Decentralization is essential for open and free internet.',
+      netWorth: '$4.5B',
+      portfolioRoi: 340,
+      investmentCount: 18,
+      category: 'Bitcoin & Payments',
+      riskScore: 65,
+      volatility: 55,
+      marketOutlook: 'Bitcoin maximalist. Block building Bitcoin infrastructure. Nostr for decentralized social. Lightning for payments.'
+    },
+    'Marc Andreessen': {
+      investmentThesis: 'Software is eating the world. Back bold founders building monopolies. AI and crypto are the future platforms.',
+      netWorth: '$1.9B',
+      portfolioRoi: 3500,
+      investmentCount: 500,
+      category: 'Venture Capital',
+      riskScore: 70,
+      volatility: 50,
+      marketOutlook: 'Techno-optimist. AI will create abundance. Crypto enables new economic models. Build, don\'t fear technology.'
+    },
+    'Peter Thiel': {
+      investmentThesis: 'Seek monopoly positions through unique insight. Contrarian bets on transformative technology. Competition is for losers.',
+      netWorth: '$9.5B',
+      portfolioRoi: 4200,
+      investmentCount: 120,
+      category: 'Venture Capital',
+      riskScore: 75,
+      volatility: 55,
+      marketOutlook: 'Skeptical of incremental progress. Bullish on AI and defense tech. Bitcoin as hedge against monetary debasement.'
+    },
+    'Tyler Winklevoss': {
+      investmentThesis: 'Bitcoin is digital gold. Build compliant crypto infrastructure. Long-term holders will be rewarded.',
+      netWorth: '$3.2B',
+      portfolioRoi: 54445,
+      investmentCount: 35,
+      category: 'Bitcoin & Exchange',
+      riskScore: 70,
+      volatility: 60,
+      marketOutlook: 'Bitcoin to $500K. Institutional adoption accelerating. Gemini focused on compliance and custody.'
+    },
+    'Cameron Winklevoss': {
+      investmentThesis: 'Bitcoin as store of value superior to gold. Regulatory clarity will unlock institutional capital.',
+      netWorth: '$3.2B',
+      portfolioRoi: 54445,
+      investmentCount: 35,
+      category: 'Bitcoin & Exchange',
+      riskScore: 70,
+      volatility: 60,
+      marketOutlook: 'Bitcoin ETF approval was just the beginning. 10x from here as pensions and sovereigns allocate.'
+    },
+    'Balaji Srinivasan': {
+      investmentThesis: 'The network state is the future of governance. Build digital-first communities with shared purpose and cryptocurrency.',
+      netWorth: '$100M',
+      portfolioRoi: 1500,
+      investmentCount: 75,
+      category: 'Tech & Crypto',
+      riskScore: 85,
+      volatility: 70,
+      marketOutlook: 'Fiat system fragile. Bitcoin as insurance. Network states will compete with nation states.'
+    },
+    'Paul Graham': {
+      investmentThesis: 'Back exceptional founders early. Great companies solve real problems. Essays spread ideas that find founders.',
+      netWorth: '$2.5B',
+      portfolioRoi: 8900,
+      investmentCount: 2000,
+      category: 'Venture Capital',
+      riskScore: 55,
+      volatility: 40,
+      marketOutlook: 'AI startups are the new wave. Y Combinator alumni network compounds value. Early stage remains best risk-adjusted.'
+    },
+    'Chris Dixon': {
+      investmentThesis: 'Read Write Own - web3 enables digital ownership and creator empowerment. Crypto is the next computing platform.',
+      netWorth: '$300M',
+      portfolioRoi: 2800,
+      investmentCount: 85,
+      category: 'Crypto Venture',
+      riskScore: 75,
+      volatility: 65,
+      marketOutlook: 'Onchain is the next online. NFTs enable digital property rights. DeFi rebuilds finance from first principles.'
+    },
+    'Adam Back': {
+      investmentThesis: 'Bitcoin is the only truly decentralized cryptocurrency. Build infrastructure that strengthens Bitcoin network.',
+      netWorth: '$100M',
+      portfolioRoi: 39900,
+      investmentCount: 12,
+      category: 'Bitcoin Infrastructure',
+      riskScore: 65,
+      volatility: 50,
+      marketOutlook: 'Bitcoin maximalist. Layer 2 solutions like Lightning and Liquid scale Bitcoin. Sidechains enable innovation.'
+    },
+    'Charles Hoskinson': {
+      investmentThesis: 'Build blockchain with academic rigor and peer review. Cardano enables financial operating system for unbanked.',
+      netWorth: '$600M',
+      portfolioRoi: 8500,
+      investmentCount: 15,
+      category: 'Blockchain',
+      riskScore: 70,
+      volatility: 65,
+      marketOutlook: 'Proof of stake is superior. Cardano Voltaire era brings true decentralization. Africa is key market.'
+    },
+    'Justin Sun': {
+      investmentThesis: 'Aggressive growth through acquisitions and marketing. TRON as global blockchain for entertainment and stablecoins.',
+      netWorth: '$2B',
+      portfolioRoi: 1500,
+      investmentCount: 45,
+      category: 'Blockchain',
+      riskScore: 90,
+      volatility: 85,
+      marketOutlook: 'Stablecoins on TRON dominate USDT transfers. HTX exchange growing. Aggressive acquisition strategy continues.'
+    },
+    'Hayden Adams': {
+      investmentThesis: 'Automated market makers enable permissionless trading. Uniswap is core DeFi infrastructure.',
+      netWorth: '$500M',
+      portfolioRoi: 15000,
+      investmentCount: 5,
+      category: 'DeFi',
+      riskScore: 70,
+      volatility: 60,
+      marketOutlook: 'DEXs will surpass CEXs in volume. Uniswap v4 hooks enable infinite customization. Fee switch coming.'
+    },
+    'Anatoly Yakovenko': {
+      investmentThesis: 'Performance matters - Solana optimizes for speed and low cost. Mobile-first crypto experience with Saga.',
+      netWorth: '$300M',
+      portfolioRoi: 2500,
+      investmentCount: 8,
+      category: 'Blockchain',
+      riskScore: 80,
+      volatility: 75,
+      marketOutlook: 'Firedancer client brings decentralization. Solana is the blockchain for consumer apps. 65K TPS is just the start.'
+    },
+    'Stani Kulechov': {
+      investmentThesis: 'DeFi protocols are new financial primitives. Aave enables permissionless lending. Lens builds social graph.',
+      netWorth: '$400M',
+      portfolioRoi: 3500,
+      investmentCount: 12,
+      category: 'DeFi',
+      riskScore: 70,
+      volatility: 60,
+      marketOutlook: 'DeFi will absorb TradFi. GHO stablecoin enables Aave to capture more value. Lens Protocol is web3 social layer.'
+    },
+    'Arthur Hayes': {
+      investmentThesis: 'Macro drives crypto. Trade volatility through derivatives. Bitcoin is response to central bank money printing.',
+      netWorth: '$700M',
+      portfolioRoi: 9900,
+      investmentCount: 20,
+      category: 'Trading',
+      riskScore: 90,
+      volatility: 85,
+      marketOutlook: 'Fed pivot imminent. Bitcoin to rally as liquidity returns. Ethena stablecoin is yield innovation.'
+    },
+    'Rune Christensen': {
+      investmentThesis: 'Decentralized stablecoins are DeFi foundation. MakerDAO enables permissionless lending and DAI stability.',
+      netWorth: '$200M',
+      portfolioRoi: 5000,
+      investmentCount: 5,
+      category: 'DeFi',
+      riskScore: 65,
+      volatility: 50,
+      marketOutlook: 'Endgame restructuring makes MakerDAO sustainable. DAI will remain leading decentralized stablecoin.'
+    },
+    'Jesse Pollak': {
+      investmentThesis: 'Onchain is the next online. Base brings a billion users to Ethereum ecosystem through Coinbase distribution.',
+      netWorth: '$50M',
+      portfolioRoi: 500,
+      investmentCount: 3,
+      category: 'L2 Blockchain',
+      riskScore: 60,
+      volatility: 55,
+      marketOutlook: 'Base is fastest growing L2. Onchain summer success proves consumer demand. Smart wallets remove UX friction.'
+    },
+    'Anthony Pompliano': {
+      investmentThesis: 'Bitcoin is the best performing asset of the decade. Long-term holders win. Educate the masses.',
+      netWorth: '$200M',
+      portfolioRoi: 3900,
+      investmentCount: 50,
+      category: 'Bitcoin Investment',
+      riskScore: 70,
+      volatility: 60,
+      marketOutlook: 'Bitcoin halving cycles drive price. Institutional adoption accelerating. Every portfolio needs Bitcoin exposure.'
+    },
+    'Brad Garlinghouse': {
+      investmentThesis: 'Cross-border payments need blockchain rails. RippleNet provides enterprise-grade infrastructure.',
+      netWorth: '$600M',
+      portfolioRoi: 800,
+      investmentCount: 25,
+      category: 'Enterprise Blockchain',
+      riskScore: 65,
+      volatility: 55,
+      marketOutlook: 'SEC victory proves XRP is not a security. Banks will adopt crypto for payments. CBDCs create opportunity.'
+    },
+    'Katie Haun': {
+      investmentThesis: 'Crypto enables new economic models. Back builders creating web3 infrastructure and applications.',
+      netWorth: '$500M',
+      portfolioRoi: 1800,
+      investmentCount: 60,
+      category: 'Crypto Venture',
+      riskScore: 65,
+      volatility: 55,
+      marketOutlook: 'Regulatory clarity coming. Haun Ventures deploying into infrastructure and gaming. Long-term thesis intact.'
+    },
+    'Gavin Wood': {
+      investmentThesis: 'Interoperability is the future. Polkadot enables heterogeneous blockchain ecosystem. Substrate empowers builders.',
+      netWorth: '$400M',
+      portfolioRoi: 6000,
+      investmentCount: 15,
+      category: 'Blockchain Infrastructure',
+      riskScore: 70,
+      volatility: 60,
+      marketOutlook: 'JAM protocol is next evolution. Polkadot 2.0 brings elastic scaling. Parachains prove multichain thesis.'
+    },
+    'Robert Leshner': {
+      investmentThesis: 'Algorithmic money markets are DeFi primitive. Compound pioneered lending. Superstate bridges TradFi.',
+      netWorth: '$150M',
+      portfolioRoi: 2500,
+      investmentCount: 8,
+      category: 'DeFi',
+      riskScore: 60,
+      volatility: 50,
+      marketOutlook: 'Institutional DeFi is next wave. Superstate tokenized treasuries growing. Compound remains core protocol.'
+    },
+    'Elizabeth Stark': {
+      investmentThesis: 'Lightning Network scales Bitcoin for payments. Build infrastructure that makes Bitcoin programmable.',
+      netWorth: '$100M',
+      portfolioRoi: 1200,
+      investmentCount: 6,
+      category: 'Bitcoin Infrastructure',
+      riskScore: 60,
+      volatility: 45,
+      marketOutlook: 'Taproot Assets enable stablecoins on Lightning. Bitcoin L2 ecosystem growing. Payments use case expanding.'
+    },
+    'Jesse Powell': {
+      investmentThesis: 'Build exchange with proof of reserves and regulatory compliance. Long-term thinking over short-term gains.',
+      netWorth: '$1.2B',
+      portfolioRoi: 9900,
+      investmentCount: 15,
+      category: 'Exchange',
+      riskScore: 65,
+      volatility: 55,
+      marketOutlook: 'Kraken Bank enables new services. Proof of reserves should be industry standard. Compliance is competitive advantage.'
+    },
+    'Andre Cronje': {
+      investmentThesis: 'Build DeFi protocols with sustainable tokenomics. Fair launch creates aligned community. Move fast and ship.',
+      netWorth: '$60M',
+      portfolioRoi: 1500,
+      investmentCount: 10,
+      category: 'DeFi',
+      riskScore: 85,
+      volatility: 80,
+      marketOutlook: 'Returned to building after sabbatical. Sonic chain will be fast L1. ve(3,3) model spreading across DeFi.'
+    },
+    'Su Zhu': {
+      investmentThesis: 'Trade crypto with leverage and conviction. [3AC collapsed in 2022 due to excessive leverage and poor risk management.]',
+      netWorth: '-$2B',
+      portfolioRoi: -100,
+      investmentCount: 50,
+      category: 'Hedge Fund (Defunct)',
+      riskScore: 100,
+      volatility: 100,
+      marketOutlook: 'Facing legal proceedings. OPNX exchange shut down. Cautionary tale of overleveraged crypto trading.'
+    }
+  };
+  
+  return profiles[name] || {
+    investmentThesis: 'Building and investing in transformative technology that creates long-term value and positive impact.',
+    netWorth: 'Undisclosed',
+    portfolioRoi: 50,
+    investmentCount: 10,
+    category: 'Technology',
+    riskScore: 60,
+    volatility: 50,
+    marketOutlook: 'Optimistic on technology innovation and digital asset adoption over the long term.'
+  };
+};
+
 // Avatar Markets Section Component
 function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avatarName: string }) {
   const { data: marketsData, isLoading } = useQuery<{ markets: any[] }>({
@@ -1202,10 +1568,19 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               }}
             >
               {avatars.map((avatar, index) => {
-                // Use real database values instead of hardcoded data
-                const portfolioRoi = avatar.portfolioRoi ?? 0;
+                // Get comprehensive fallback data for this avatar
+                const profileFallback = getAvatarProfileFallback(avatar.name);
+                
+                // Use database values with fallback to profile data
+                const portfolioRoi = avatar.portfolioRoi ?? profileFallback.portfolioRoi;
                 const accuracyPercentage = avatar.accuracyPercentage ?? 50;
-                const netWorth = avatar.netWorth || 'Undisclosed';
+                const netWorth = avatar.netWorth || profileFallback.netWorth;
+                const investmentThesis = avatar.investmentThesis || profileFallback.investmentThesis;
+                const investmentCount = avatar.investmentCount ?? profileFallback.investmentCount;
+                const category = avatar.category || profileFallback.category;
+                const riskScore = avatar.riskScore ?? profileFallback.riskScore;
+                const volatility = avatar.volatility ?? profileFallback.volatility;
+                const marketOutlook = avatar.marketOutlook || profileFallback.marketOutlook;
                 const trend = portfolioRoi >= 0 ? 'up' : 'down';
                 
                 const sentimentData = sentimentMap[avatar.name];
@@ -1549,16 +1924,14 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                               </div>
                             </div>
                             
-                            {/* Investment Thesis - Condensed */}
-                            {avatar.investmentThesis && (
-                              <div className="mt-auto hidden md:block">
-                                <div className="flex items-center gap-1 mb-1">
-                                  <Target className="h-3 w-3 text-purple-500" />
-                                  <span className="text-xs font-semibold text-foreground">Investment Thesis</span>
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{avatar.investmentThesis}</p>
+                            {/* Investment Thesis - Condensed - Always show with fallback */}
+                            <div className="mt-auto hidden md:block">
+                              <div className="flex items-center gap-1 mb-1">
+                                <Target className="h-3 w-3 text-purple-500" />
+                                <span className="text-xs font-semibold text-foreground">Investment Thesis</span>
                               </div>
-                            )}
+                              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{investmentThesis}</p>
+                            </div>
                           </div>
                           
                           {/* RIGHT CONTENT AREA */}
@@ -1612,32 +1985,30 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             {/* Prediction Markets Section */}
                             <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
                             
-                            {/* Compact Analytics Chart Section */}
-                            {avatar.investmentThesis && (
-                              <div className="flex-1 min-h-0 overflow-hidden">
-                                <EntrepreneurAnalytics 
-                                  entrepreneur={{
-                                    name: avatar.name,
-                                    investmentThesis: avatar.investmentThesis || '',
-                                    bestCalls: bestCallsData,
-                                    worstCalls: worstCallsData,
-                                    recentActivity: recentActivityData.map(activity => ({
-                                      date: activity.time || 'Recent',
-                                      action: activity.text || 'Activity update',
-                                      details: `${(activity.type || 'update').toUpperCase()} - Market impact: ${activity.impact || 'medium'}`
-                                    })),
-                                    category: avatar.category || '',
-                                    riskScore: avatar.riskScore || 50,
-                                    volatility: avatar.volatility || 50,
-                                    marketOutlook: avatar.marketOutlook || '',
-                                    netWorth: netWorth,
-                                    portfolioRoi: portfolioRoi
-                                  }}
-                                  showThesis={false}
-                                  showMetrics={false}
-                                />
-                              </div>
-                            )}
+                            {/* Compact Analytics Chart Section - Always render with fallback data */}
+                            <div className="flex-1 min-h-0 overflow-hidden">
+                              <EntrepreneurAnalytics 
+                                entrepreneur={{
+                                  name: avatar.name,
+                                  investmentThesis: investmentThesis,
+                                  bestCalls: bestCallsData,
+                                  worstCalls: worstCallsData,
+                                  recentActivity: recentActivityData.map(activity => ({
+                                    date: activity.time || 'Recent',
+                                    action: activity.text || 'Activity update',
+                                    details: `${(activity.type || 'update').toUpperCase()} - Market impact: ${activity.impact || 'medium'}`
+                                  })),
+                                  category: category,
+                                  riskScore: riskScore,
+                                  volatility: volatility,
+                                  marketOutlook: marketOutlook,
+                                  netWorth: netWorth,
+                                  portfolioRoi: portfolioRoi
+                                }}
+                                showThesis={false}
+                                showMetrics={false}
+                              />
+                            </div>
                           </div>
                         </div>
                       </DialogContent>
