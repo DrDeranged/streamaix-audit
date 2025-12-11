@@ -400,6 +400,7 @@ class CryptoIntelligenceService {
 
     // Try multiple gas APIs in order of reliability
     const gasApis = [
+      this.fetchGasFromDefiSaver.bind(this),
       this.fetchGasFromOwlracle.bind(this),
       this.fetchGasFromBlocknative.bind(this),
       this.fetchGasFromEthGasStation.bind(this)
@@ -420,6 +421,38 @@ class CryptoIntelligenceService {
     // No mock data - throw error when all APIs fail
     console.log('❌ All gas APIs failed - no real gas data available');
     throw new Error('Gas data unavailable - all APIs failed');
+  }
+
+  private async fetchGasFromDefiSaver(): Promise<GasTracker> {
+    // DeFi Saver - Free gas API, no key required
+    const response = await axios.get('https://app.defisaver.com/api/gas-price/current', {
+      timeout: 5000
+    });
+
+    const data = response.data;
+    // DeFi Saver returns prices in wei, convert to gwei
+    const slow = (data.slow || 0) / 1e9;
+    const standard = (data.standard || 0) / 1e9;
+    const fast = (data.fast || 0) / 1e9;
+    const instant = (data.fastest || fast * 1.2) / 1e9;
+    const baseFee = (data.baseFee || standard * 0.8e9) / 1e9;
+
+    let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
+    if (baseFee > 100) congestionLevel = 'extreme';
+    else if (baseFee > 50) congestionLevel = 'high';
+    else if (baseFee > 20) congestionLevel = 'medium';
+
+    return {
+      ethereum: {
+        slow: Math.round(slow),
+        standard: Math.round(standard),
+        fast: Math.round(fast),
+        instant: Math.round(instant),
+        baseFee: Math.round(baseFee),
+        congestionLevel
+      },
+      lastUpdated: new Date().toISOString()
+    };
   }
 
   private async fetchGasFromOwlracle(): Promise<GasTracker> {
@@ -523,55 +556,110 @@ class CryptoIntelligenceService {
     const cached = this.getCached<FundingRates>(cacheKey, LONG_CACHE_DURATION);
     if (cached) return cached;
 
-    try {
-      const response = await axios.get('https://fapi.binance.com/fapi/v1/premiumIndex', {
-        params: { symbol: 'BTCUSDT' },
-        timeout: 5000
-      });
+    // Try OKX first (free, no auth, globally accessible), then Bybit as fallback
+    const fundingApis = [
+      this.fetchFundingFromOKX.bind(this),
+      this.fetchFundingFromBybit.bind(this)
+    ];
 
-      const btcData = response.data;
-      
-      const ethResponse = await axios.get('https://fapi.binance.com/fapi/v1/premiumIndex', {
-        params: { symbol: 'ETHUSDT' },
-        timeout: 5000
-      });
-      
-      const ethData = ethResponse.data;
-
-      const btcRate = parseFloat(btcData.lastFundingRate) * 100;
-      const ethRate = parseFloat(ethData.lastFundingRate) * 100;
-      const avgRate = (btcRate + ethRate) / 2;
-
-      let sentiment: 'bullish' | 'bearish' | 'neutral' = 'neutral';
-      if (avgRate < -0.01) sentiment = 'bullish';
-      else if (avgRate > 0.03) sentiment = 'bearish';
-
-      const result: FundingRates = {
-        btc: {
-          rate: btcRate,
-          predicted: parseFloat(btcData.estimatedSettlePrice) || 0,
-          exchange: 'Binance'
-        },
-        eth: {
-          rate: ethRate,
-          predicted: parseFloat(ethData.estimatedSettlePrice) || 0,
-          exchange: 'Binance'
-        },
-        sentiment,
-        averageRate: avgRate
-      };
-
-      this.setCache(cacheKey, result);
-      return result;
-    } catch (error) {
-      console.error('❌ Funding rates API error:', error);
-      return {
-        btc: { rate: 0.01, predicted: 0, exchange: 'Binance' },
-        eth: { rate: 0.01, predicted: 0, exchange: 'Binance' },
-        sentiment: 'neutral',
-        averageRate: 0.01
-      };
+    for (const fetchFunding of fundingApis) {
+      try {
+        const result = await fetchFunding();
+        if (result && result.btc.rate !== 0) {
+          this.setCache(cacheKey, result);
+          return result;
+        }
+      } catch (error) {
+        continue;
+      }
     }
+
+    console.log('❌ All funding rate APIs failed');
+    throw new Error('Funding rates unavailable - all APIs failed');
+  }
+
+  private async fetchFundingFromOKX(): Promise<FundingRates> {
+    // OKX - Free public API, no auth required, globally accessible
+    const [btcRes, ethRes] = await Promise.all([
+      axios.get('https://www.okx.com/api/v5/public/funding-rate', {
+        params: { instId: 'BTC-USDT-SWAP' },
+        timeout: 5000
+      }),
+      axios.get('https://www.okx.com/api/v5/public/funding-rate', {
+        params: { instId: 'ETH-USDT-SWAP' },
+        timeout: 5000
+      })
+    ]);
+
+    const btcData = btcRes.data?.data?.[0];
+    const ethData = ethRes.data?.data?.[0];
+
+    if (!btcData || !ethData) throw new Error('OKX funding rate data missing');
+
+    const btcRate = parseFloat(btcData.fundingRate) * 100;
+    const ethRate = parseFloat(ethData.fundingRate) * 100;
+    const avgRate = (btcRate + ethRate) / 2;
+
+    let sentiment: 'bullish' | 'bearish' | 'neutral' = 'neutral';
+    if (avgRate < -0.01) sentiment = 'bullish';
+    else if (avgRate > 0.03) sentiment = 'bearish';
+
+    return {
+      btc: {
+        rate: btcRate,
+        predicted: parseFloat(btcData.nextFundingRate) * 100 || 0,
+        exchange: 'OKX'
+      },
+      eth: {
+        rate: ethRate,
+        predicted: parseFloat(ethData.nextFundingRate) * 100 || 0,
+        exchange: 'OKX'
+      },
+      sentiment,
+      averageRate: avgRate
+    };
+  }
+
+  private async fetchFundingFromBybit(): Promise<FundingRates> {
+    // Bybit - Free public API, no auth required
+    const [btcRes, ethRes] = await Promise.all([
+      axios.get('https://api.bybit.com/v5/market/tickers', {
+        params: { category: 'linear', symbol: 'BTCUSDT' },
+        timeout: 5000
+      }),
+      axios.get('https://api.bybit.com/v5/market/tickers', {
+        params: { category: 'linear', symbol: 'ETHUSDT' },
+        timeout: 5000
+      })
+    ]);
+
+    const btcData = btcRes.data?.result?.list?.[0];
+    const ethData = ethRes.data?.result?.list?.[0];
+
+    if (!btcData || !ethData) throw new Error('Bybit funding rate data missing');
+
+    const btcRate = parseFloat(btcData.fundingRate) * 100;
+    const ethRate = parseFloat(ethData.fundingRate) * 100;
+    const avgRate = (btcRate + ethRate) / 2;
+
+    let sentiment: 'bullish' | 'bearish' | 'neutral' = 'neutral';
+    if (avgRate < -0.01) sentiment = 'bullish';
+    else if (avgRate > 0.03) sentiment = 'bearish';
+
+    return {
+      btc: {
+        rate: btcRate,
+        predicted: 0,
+        exchange: 'Bybit'
+      },
+      eth: {
+        rate: ethRate,
+        predicted: 0,
+        exchange: 'Bybit'
+      },
+      sentiment,
+      averageRate: avgRate
+    };
   }
 
   async getWhaleAlerts(): Promise<WhaleAlert[]> {
