@@ -6952,17 +6952,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DIAGNOSTIC ENDPOINTS
   // =============================================================================
   
-  // Simple health check to verify routing works at all
+  // Enhanced health check with avatar count for production debugging
   console.log('📍 Registering health check endpoint: GET /api/health');
-  app.get('/api/health', (req: Request, res: Response) => {
+  app.get('/api/health', asyncHandler(async (req: Request, res: Response) => {
     console.log('✅ Health check endpoint hit!');
+    
+    // Get avatar count from database
+    let avatarCount = 0;
+    let avatarNames: string[] = [];
+    try {
+      const avatars = await db.select({ id: knowledgeAvatars.id, name: knowledgeAvatars.name }).from(knowledgeAvatars);
+      avatarCount = avatars.length;
+      avatarNames = avatars.map(a => a.name).slice(0, 10); // First 10 for preview
+    } catch (err: any) {
+      console.error('Health check DB error:', err.message);
+    }
+    
     res.status(200).json({ 
       status: 'ok', 
       message: 'Server is running',
       timestamp: new Date().toISOString(),
-      env: process.env.NODE_ENV
+      env: process.env.NODE_ENV,
+      database: {
+        avatarCount,
+        avatarPreview: avatarNames,
+        hasAvatars: avatarCount > 0
+      },
+      flags: {
+        quietMode: process.env.QUIET_MODE === 'true',
+        openaiPaused: process.env.PAUSE_OPENAI_API === 'true',
+        hasOpenaiKey: !!process.env.OPENAI_API_KEY
+      }
     });
-  });
+  }));
   console.log('✅ Health check endpoint registered');
   
   // CRITICAL: Diagnostic probe endpoint - NO asyncHandler wrapper
@@ -7022,6 +7044,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   console.log('✅ Echo POST test registered');
+  
+  // =============================================================================
+  // ADMIN ENDPOINTS - Reseed avatars in production
+  // =============================================================================
+  
+  // Admin reseed endpoint - requires admin auth or secret key
+  console.log('📍 Registering admin reseed endpoint: POST /api/admin/reseed');
+  app.post('/api/admin/reseed', asyncHandler(async (req: Request, res: Response) => {
+    console.log('🔄 Admin reseed endpoint hit!');
+    
+    // Verify admin access via secret key or admin username
+    const adminSecret = req.headers['x-admin-secret'] as string;
+    const expectedSecret = process.env.ADMIN_RESEED_SECRET || 'streamaix-reseed-2024';
+    
+    // @ts-ignore - req.user may be added by optional auth
+    const user = req.user;
+    const isAdminUser = user && ADMIN_USERNAMES.includes(user.username);
+    const hasValidSecret = adminSecret === expectedSecret;
+    
+    if (!isAdminUser && !hasValidSecret) {
+      console.log('❌ Unauthorized reseed attempt');
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized. Provide admin auth or X-Admin-Secret header.' 
+      });
+    }
+    
+    console.log(`✅ Authorized reseed request from: ${isAdminUser ? user.username : 'secret key'}`);
+    
+    // Import and run auto-seed
+    try {
+      const { autoSeedDatabase } = await import('./auto-seed');
+      
+      console.log('🌱 Starting manual reseed...');
+      const startTime = Date.now();
+      await autoSeedDatabase();
+      const duration = Date.now() - startTime;
+      
+      // Get new avatar count
+      const avatars = await db.select({ id: knowledgeAvatars.id, name: knowledgeAvatars.name }).from(knowledgeAvatars);
+      
+      console.log(`✅ Reseed completed in ${duration}ms. ${avatars.length} avatars now in database.`);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Database reseeded successfully',
+        duration: `${duration}ms`,
+        avatarCount: avatars.length,
+        avatarNames: avatars.map(a => a.name)
+      });
+    } catch (error: any) {
+      console.error('❌ Reseed failed:', error.message);
+      res.status(500).json({
+        success: false,
+        error: 'Reseed failed',
+        message: error.message
+      });
+    }
+  }));
+  console.log('✅ Admin reseed endpoint registered');
   
   // =============================================================================
   // REAL PROCESSING ENDPOINTS
