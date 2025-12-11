@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -438,36 +439,38 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {(!entrepreneur.recentActivity || entrepreneur.recentActivity.length === 0) ? (
-                  <div className="text-center py-4">
-                    <Clock className="h-8 w-8 text-blue-500/50 mx-auto mb-3" />
-                    <p className="text-muted-foreground text-sm">No recent activity recorded yet</p>
-                  </div>
-                ) : entrepreneur.recentActivity.map((activity, idx) => (
-                  <div 
-                    key={idx} 
-                    className="flex gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/10"
-                  >
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                        <Clock className="h-5 w-5 text-blue-500" />
+              <ScrollArea className="h-[320px] pr-4">
+                <div className="space-y-4">
+                  {(!entrepreneur.recentActivity || entrepreneur.recentActivity.length === 0) ? (
+                    <div className="text-center py-4">
+                      <Clock className="h-8 w-8 text-blue-500/50 mx-auto mb-3" />
+                      <p className="text-muted-foreground text-sm">No recent activity recorded yet</p>
+                    </div>
+                  ) : entrepreneur.recentActivity.map((activity, idx) => (
+                    <div 
+                      key={idx} 
+                      className="flex gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/10"
+                    >
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                          <Clock className="h-5 w-5 text-blue-500" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-1">
+                          <h4 className="font-semibold text-sm">{activity.action}</h4>
+                          <Badge variant="outline" className="text-xs">
+                            {activity.date}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {activity.details}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-1">
-                        <h4 className="font-semibold text-sm">{activity.action}</h4>
-                        <Badge variant="outline" className="text-xs">
-                          {activity.date}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {activity.details}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
 
