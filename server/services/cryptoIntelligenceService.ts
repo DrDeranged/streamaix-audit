@@ -400,9 +400,8 @@ class CryptoIntelligenceService {
 
     // Try multiple gas APIs in order of reliability
     const gasApis = [
-      this.fetchGasFromDefiSaver.bind(this),
-      this.fetchGasFromOwlracle.bind(this),
       this.fetchGasFromBlocknative.bind(this),
+      this.fetchGasFromOwlracle.bind(this),
       this.fetchGasFromEthGasStation.bind(this)
     ];
 
@@ -423,32 +422,39 @@ class CryptoIntelligenceService {
     throw new Error('Gas data unavailable - all APIs failed');
   }
 
-  private async fetchGasFromDefiSaver(): Promise<GasTracker> {
-    // DeFi Saver - Free gas API, no key required
-    const response = await axios.get('https://app.defisaver.com/api/gas-price/current', {
+  private async fetchGasFromBlocknative(): Promise<GasTracker> {
+    // Blocknative Gas Platform - free tier, most reliable
+    const response = await axios.get('https://api.blocknative.com/gasprices/blockprices', {
       timeout: 5000
     });
 
     const data = response.data;
-    // DeFi Saver returns prices in wei, convert to gwei
-    const slow = (data.slow || 0) / 1e9;
-    const standard = (data.standard || 0) / 1e9;
-    const fast = (data.fast || 0) / 1e9;
-    const instant = (data.fastest || fast * 1.2) / 1e9;
-    const baseFee = (data.baseFee || standard * 0.8e9) / 1e9;
+    const prices = data.blockPrices?.[0]?.estimatedPrices || [];
+    const baseFee = data.blockPrices?.[0]?.baseFeePerGas || 0;
+    
+    // Find prices by confidence level - use maxFeePerGas for total cost
+    const p99 = prices.find((p: any) => p.confidence === 99);
+    const p95 = prices.find((p: any) => p.confidence === 95);
+    const p90 = prices.find((p: any) => p.confidence === 90);
+    
+    const slow = p90?.maxFeePerGas || baseFee * 1.1;
+    const standard = p95?.maxFeePerGas || baseFee * 1.2;
+    const fast = p99?.maxFeePerGas || baseFee * 1.3;
+    const instant = fast * 1.2;
 
     let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
     if (baseFee > 100) congestionLevel = 'extreme';
     else if (baseFee > 50) congestionLevel = 'high';
     else if (baseFee > 20) congestionLevel = 'medium';
 
+    // Return values rounded to 2 decimal places for display (gas is currently very low)
     return {
       ethereum: {
-        slow: Math.round(slow),
-        standard: Math.round(standard),
-        fast: Math.round(fast),
-        instant: Math.round(instant),
-        baseFee: Math.round(baseFee),
+        slow: Math.max(1, Math.round(slow * 10) / 10),
+        standard: Math.max(1, Math.round(standard * 10) / 10),
+        fast: Math.max(1, Math.round(fast * 10) / 10),
+        instant: Math.max(1, Math.round(instant * 10) / 10),
+        baseFee: Math.max(0.1, Math.round(baseFee * 100) / 100),
         congestionLevel
       },
       lastUpdated: new Date().toISOString()
@@ -456,7 +462,7 @@ class CryptoIntelligenceService {
   }
 
   private async fetchGasFromOwlracle(): Promise<GasTracker> {
-    // Owlracle - Free gas API
+    // Owlracle - Free gas API (v4)
     const response = await axios.get('https://api.owlracle.info/v4/eth/gas', {
       params: { accept: '100' },
       timeout: 5000
@@ -464,11 +470,16 @@ class CryptoIntelligenceService {
 
     const data = response.data;
     const speeds = data.speeds || [];
-    const slow = speeds.find((s: any) => s.acceptance >= 0.35)?.gasPrice || 0;
-    const standard = speeds.find((s: any) => s.acceptance >= 0.60)?.gasPrice || 0;
-    const fast = speeds.find((s: any) => s.acceptance >= 0.90)?.gasPrice || 0;
-    const instant = speeds.find((s: any) => s.acceptance >= 0.99)?.gasPrice || fast * 1.2;
-    const baseFee = data.baseFee || standard * 0.8;
+    
+    // Owlracle v4 returns a single speed with maxFeePerGas
+    const speed = speeds[0] || {};
+    const baseFee = speed.baseFee || data.baseFee || 0;
+    const maxFee = speed.maxFeePerGas || baseFee * 1.5;
+    
+    const slow = baseFee * 1.1;
+    const standard = maxFee;
+    const fast = maxFee * 1.2;
+    const instant = maxFee * 1.5;
 
     let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
     if (baseFee > 100) congestionLevel = 'extreme';
@@ -477,43 +488,11 @@ class CryptoIntelligenceService {
 
     return {
       ethereum: {
-        slow: Math.round(slow),
-        standard: Math.round(standard),
-        fast: Math.round(fast),
-        instant: Math.round(instant),
-        baseFee: Math.round(baseFee),
-        congestionLevel
-      },
-      lastUpdated: new Date().toISOString()
-    };
-  }
-
-  private async fetchGasFromBlocknative(): Promise<GasTracker> {
-    // Blocknative Gas Platform - free tier
-    const response = await axios.get('https://api.blocknative.com/gasprices/blockprices', {
-      timeout: 5000
-    });
-
-    const data = response.data;
-    const prices = data.blockPrices?.[0]?.estimatedPrices || [];
-    const slow = prices.find((p: any) => p.confidence >= 70)?.price || 0;
-    const standard = prices.find((p: any) => p.confidence >= 90)?.price || 0;
-    const fast = prices.find((p: any) => p.confidence >= 95)?.price || 0;
-    const instant = prices.find((p: any) => p.confidence >= 99)?.price || fast * 1.2;
-    const baseFee = data.blockPrices?.[0]?.baseFeePerGas || standard * 0.8;
-
-    let congestionLevel: 'low' | 'medium' | 'high' | 'extreme' = 'low';
-    if (baseFee > 100) congestionLevel = 'extreme';
-    else if (baseFee > 50) congestionLevel = 'high';
-    else if (baseFee > 20) congestionLevel = 'medium';
-
-    return {
-      ethereum: {
-        slow: Math.round(slow),
-        standard: Math.round(standard),
-        fast: Math.round(fast),
-        instant: Math.round(instant),
-        baseFee: Math.round(baseFee),
+        slow: Math.max(1, Math.round(slow * 10) / 10),
+        standard: Math.max(1, Math.round(standard * 10) / 10),
+        fast: Math.max(1, Math.round(fast * 10) / 10),
+        instant: Math.max(1, Math.round(instant * 10) / 10),
+        baseFee: Math.max(0.1, Math.round(baseFee * 100) / 100),
         congestionLevel
       },
       lastUpdated: new Date().toISOString()
