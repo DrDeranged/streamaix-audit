@@ -4162,6 +4162,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get avatar positions for a specific market
+  app.get('/api/markets/:marketId/avatar-positions', asyncHandler(async (req: Request, res: Response) => {
+    const { marketId } = req.params;
+    try {
+      const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
+      const positions = await avatarMarketParticipationService.getMarketAvatarPositions(marketId);
+      res.json({ success: true, positions });
+    } catch (error: any) {
+      console.error('Error fetching avatar positions:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch avatar positions' });
+    }
+  }));
+
+  // Get avatar trading statistics
+  app.get('/api/avatars/:avatarId/trading-stats', asyncHandler(async (req: Request, res: Response) => {
+    const { avatarId } = req.params;
+    try {
+      const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
+      const stats = await avatarMarketParticipationService.getAvatarTradingStats(avatarId);
+      res.json({ success: true, ...stats });
+    } catch (error: any) {
+      console.error('Error fetching avatar trading stats:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch trading stats' });
+    }
+  }));
+
   // Get user engagement predictions
   app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;

@@ -164,6 +164,176 @@ function MarketTradesTab({ marketId }: { marketId: string }) {
   );
 }
 
+interface AvatarPosition {
+  avatar: {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+  };
+  outcome: string;
+  shares: number;
+  invested: number;
+}
+
+function AvatarPositionsSection({ marketId }: { marketId: string }) {
+  const { data, isLoading } = useQuery<{ success: boolean; positions: AvatarPosition[] }>({
+    queryKey: ["/api/markets", marketId, "avatar-positions"],
+    refetchInterval: 30000,
+  });
+
+  const positions = data?.positions || [];
+
+  if (isLoading) {
+    return (
+      <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-cyan-400" />
+            Knowledge Avatar Positions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-16 bg-cyan-900/20 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (positions.length === 0) {
+    return (
+      <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-cyan-400" />
+            Knowledge Avatar Positions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Users className="w-12 h-12 mx-auto mb-3 text-cyan-400 opacity-50" />
+            <p className="text-slate-400">No avatars have traded this market yet</p>
+            <p className="text-slate-500 text-sm mt-1">Avatar trading cycles run periodically</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const yesPositions = positions.filter(p => p.outcome === 'YES');
+  const noPositions = positions.filter(p => p.outcome === 'NO');
+
+  return (
+    <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-white flex items-center gap-2 text-lg">
+          <Users className="w-5 h-5 text-cyan-400" />
+          Knowledge Avatar Positions
+          <Badge variant="outline" className="ml-auto border-cyan-500/30 text-cyan-300">
+            {positions.length} avatars trading
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* YES Positions */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span className="text-emerald-300 font-semibold text-sm">YES Positions</span>
+              <Badge variant="outline" className="border-emerald-500/30 text-emerald-300 text-xs">
+                {yesPositions.length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {yesPositions.length > 0 ? yesPositions.map((pos) => (
+                <Link key={pos.avatar.id} href={`/avatars/${pos.avatar.id}`}>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/40 transition-all cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center overflow-hidden">
+                      {pos.avatar.imageUrl ? (
+                        <img src={pos.avatar.imageUrl} alt={pos.avatar.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Users className="w-5 h-5 text-emerald-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white truncate">{pos.avatar.name}</div>
+                      <div className="text-xs text-slate-400">
+                        {pos.shares.toLocaleString()} shares
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-emerald-400">
+                        {(pos.invested / 1000).toFixed(1)}K
+                      </div>
+                      <div className="text-xs text-slate-500">STREAM</div>
+                    </div>
+                  </motion.div>
+                </Link>
+              )) : (
+                <div className="text-center py-4 text-slate-500 text-sm">No YES positions</div>
+              )}
+            </div>
+          </div>
+
+          {/* NO Positions */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingDown className="w-4 h-4 text-rose-400" />
+              <span className="text-rose-300 font-semibold text-sm">NO Positions</span>
+              <Badge variant="outline" className="border-rose-500/30 text-rose-300 text-xs">
+                {noPositions.length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {noPositions.length > 0 ? noPositions.map((pos) => (
+                <Link key={pos.avatar.id} href={`/avatars/${pos.avatar.id}`}>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 hover:border-rose-400/40 transition-all cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-fuchsia-500/20 border border-rose-500/30 flex items-center justify-center overflow-hidden">
+                      {pos.avatar.imageUrl ? (
+                        <img src={pos.avatar.imageUrl} alt={pos.avatar.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Users className="w-5 h-5 text-rose-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white truncate">{pos.avatar.name}</div>
+                      <div className="text-xs text-slate-400">
+                        {pos.shares.toLocaleString()} shares
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-rose-400">
+                        {(pos.invested / 1000).toFixed(1)}K
+                      </div>
+                      <div className="text-xs text-slate-500">STREAM</div>
+                    </div>
+                  </motion.div>
+                </Link>
+              )) : (
+                <div className="text-center py-4 text-slate-500 text-sm">No NO positions</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface Market {
   id: string;
   question: string;
@@ -945,6 +1115,9 @@ export default function PredictionMarket() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Avatar Positions */}
+                <AvatarPositionsSection marketId={market.id} />
               </TabsContent>
             </Tabs>
           </div>

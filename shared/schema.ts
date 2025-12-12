@@ -4705,6 +4705,41 @@ export const marketPredictors = pgTable("market_predictors", {
 });
 
 // =============================================================================
+// AVATAR MARKET TRADING SYSTEM
+// =============================================================================
+
+export const avatarTrades = pgTable("avatar_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  tradeType: text("trade_type").notNull(), // BUY, SELL
+  outcome: text("outcome").notNull(), // YES, NO
+  shares: integer("shares").notNull(),
+  price: integer("price").notNull(), // price per share in basis points
+  streamAmount: integer("stream_amount").notNull(), // total STREAM spent/received
+  reasoning: text("reasoning"), // AI-generated reasoning for the trade
+  tradingStyle: text("trading_style"), // avatar's trading style at time of trade
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const avatarPositions = pgTable("avatar_positions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  outcome: text("outcome").notNull(), // YES, NO
+  shares: integer("shares").notNull().default(0),
+  averagePrice: integer("average_price").notNull().default(5000), // basis points
+  totalInvested: integer("total_invested").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AvatarTrade = typeof avatarTrades.$inferSelect;
+export type InsertAvatarTrade = typeof avatarTrades.$inferInsert;
+export type AvatarPosition = typeof avatarPositions.$inferSelect;
+export type InsertAvatarPosition = typeof avatarPositions.$inferInsert;
+
+// =============================================================================
 // AI AGENT TRADING SYSTEM
 // =============================================================================
 

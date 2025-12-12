@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { knowledgeAvatars, predictionMarkets, marketPositions, marketTrades } from '@shared/schema';
+import { knowledgeAvatars, predictionMarkets, marketPositions, marketTrades, avatarTrades, avatarPositions } from '@shared/schema';
 import { eq, and, gt, lt, desc, sql, isNull, ne } from 'drizzle-orm';
 
 type TradingStyle = 'dip_buyer' | 'momentum' | 'swing_trader' | 'contrarian' | 'value' | 'growth';
@@ -265,6 +265,49 @@ class AvatarMarketParticipationService {
         streamAmount: decision.positionSize,
         fee: Math.floor(decision.positionSize * 0.005),
       });
+
+      // Also save to avatar_trades for historical tracking
+      await db.insert(avatarTrades).values({
+        avatarId: decision.avatarId,
+        marketId: decision.marketId,
+        tradeType: 'BUY',
+        outcome: decision.decision,
+        shares: shares,
+        price: price * 100,
+        streamAmount: decision.positionSize,
+        reasoning: decision.reasoning,
+        tradingStyle: 'value',
+      }).catch(() => {
+        // Silently fail if avatar_trades table doesn't exist yet
+      });
+
+      // Update avatar_positions table
+      const existingAvatarPosition = await db.query.avatarPositions.findFirst({
+        where: and(
+          eq(avatarPositions.avatarId, decision.avatarId),
+          eq(avatarPositions.marketId, decision.marketId)
+        ),
+      }).catch(() => null);
+
+      if (existingAvatarPosition) {
+        await db.update(avatarPositions)
+          .set({
+            shares: sql`${avatarPositions.shares} + ${shares}`,
+            totalInvested: sql`${avatarPositions.totalInvested} + ${decision.positionSize}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(avatarPositions.id, existingAvatarPosition.id))
+          .catch(() => {});
+      } else {
+        await db.insert(avatarPositions).values({
+          avatarId: decision.avatarId,
+          marketId: decision.marketId,
+          outcome: decision.decision,
+          shares: shares,
+          averagePrice: price * 100,
+          totalInvested: decision.positionSize,
+        }).catch(() => {});
+      }
 
       const existingPosition = await db.query.marketPositions.findFirst({
         where: and(
