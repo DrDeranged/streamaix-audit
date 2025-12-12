@@ -79,7 +79,7 @@ import {
   streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
   streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
-  avatarTrades as avatarTradesTable, avatarPositions
+  avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
@@ -14177,6 +14177,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // STREAM CONVERSATION API - Real-time voice conversations between users/avatars
+  // =============================================================================
+
+  // Get conversation room info
+  app.get("/api/streams/:id/conversation", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { getStreamConversationService } = await import('./services/streamConversationService');
+      const conversationService = getStreamConversationService();
+      const roomInfo = conversationService.getRoomInfo(req.params.id);
+      
+      res.json({ 
+        success: true, 
+        room: roomInfo,
+        wsEndpoint: `/ws/conversation?streamId=${req.params.id}`
+      });
+    } catch (error: any) {
+      console.error('[Conversation API] Error getting room info:', error);
+      res.json({ success: false, error: error.message });
+    }
+  }));
+
+  // Transcribe audio (for human speech-to-text)
+  app.post("/api/streams/:id/conversation/transcribe", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    try {
+      const { audioBase64 } = req.body;
+      if (!audioBase64) {
+        return res.status(400).json({ success: false, error: 'Audio data required' });
+      }
+
+      const audioBuffer = Buffer.from(audioBase64, 'base64');
+      
+      const { getStreamConversationService } = await import('./services/streamConversationService');
+      const conversationService = getStreamConversationService();
+      const transcription = await conversationService.transcribeAudio(audioBuffer);
+      
+      res.json({ success: true, text: transcription });
+    } catch (error: any) {
+      console.error('[Conversation API] Transcription error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  // Get conversation history for a stream
+  app.get("/api/streams/:id/conversation/history", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      const messages = await db.select()
+        .from(streamConversationMessages)
+        .where(eq(streamConversationMessages.streamId, req.params.id))
+        .orderBy(desc(streamConversationMessages.createdAt))
+        .limit(limit);
+      
+      res.json({ 
+        success: true, 
+        messages: messages.reverse()
+      });
+    } catch (error: any) {
+      console.error('[Conversation API] Error getting history:', error);
+      res.json({ success: true, messages: [] });
+    }
+  }));
+
+  // =============================================================================
   // ENHANCED STREAMING v2 - Polls, Leaderboard, Reminders, Clips, Achievements
   // =============================================================================
 
@@ -15033,6 +15101,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // STREAM CONVERSATION WEBSOCKET SERVER (Real-time voice conversations)
+  // =============================================================================
+  
+  const conversationWss = new WebSocketServer({ noServer: true });
+  const { getStreamConversationService } = await import('./services/streamConversationService');
+  const conversationService = getStreamConversationService();
+  
+  conversationWss.on('connection', (ws: WebSocket, req) => {
+    console.log(`🎙️ [WS] Conversation WebSocket connection attempt received`);
+    
+    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    const streamId = url.searchParams.get('streamId');
+    const userId = url.searchParams.get('userId');
+    const avatarId = url.searchParams.get('avatarId');
+    const role = url.searchParams.get('role') as 'host' | 'co_host' | 'speaker' | 'viewer' || 'viewer';
+    const audioPreference = url.searchParams.get('audioPreference') as 'microphone' | 'tts' | 'text_only' || 'text_only';
+    
+    if (!streamId) {
+      console.log(`❌ [WS Conversation] Rejecting connection - Missing streamId`);
+      ws.close(1008, 'Missing streamId');
+      return;
+    }
+    
+    console.log(`🎙️ Conversation connection for stream ${streamId} by ${avatarId ? 'avatar ' + avatarId : 'user ' + userId}`);
+    
+    conversationService.handleConnection(
+      ws,
+      streamId,
+      userId || undefined,
+      avatarId || undefined,
+      role,
+      audioPreference
+    );
+  });
+
+  // =============================================================================
   // EXPLICIT WEBSOCKET UPGRADE HANDLING
   // This ensures WebSocket upgrades are handled BEFORE Vite's HMR can intercept them
   // =============================================================================
@@ -15056,6 +15160,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔌 [WS Upgrade] Routing to streaming WebSocket server (/ws/stream)`);
       streamingWss.handleUpgrade(request, socket, head, (ws) => {
         streamingWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/conversation') {
+      console.log(`🔌 [WS Upgrade] Routing to conversation WebSocket server (/ws/conversation)`);
+      conversationWss.handleUpgrade(request, socket, head, (ws) => {
+        conversationWss.emit('connection', ws, request);
       });
     } else {
       // Let other upgrade requests pass through (e.g., Vite HMR)
