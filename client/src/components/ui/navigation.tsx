@@ -28,11 +28,10 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
     { path: "/create-summary", icon: Plus, label: "Create" },
-    { path: "/defi-dashboard", icon: PieChart, label: "DeFi" },
-    { path: "/nft-gallery", icon: Image, label: "NFTs" },
-    { path: "/governance", icon: Users, label: "DAO" },
-    { path: "/social-trading", icon: TrendingUp, label: "Trading" },
-    { path: "/web3-wallet", icon: Shield, label: "Wallet" },
+    { path: "/discover", icon: PieChart, label: "Discover" },
+    { path: "/markets", icon: TrendingUp, label: "Markets" },
+    { path: "/bounties", icon: Users, label: "Bounties" },
+    { path: "/points", icon: Shield, label: "Points" },
   ];
 
   const handleLogout = () => {

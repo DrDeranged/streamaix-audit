@@ -41,7 +41,6 @@ import {
   MessageCircle,
   Bot,
   Users,
-  Vote,
   Briefcase,
   Award,
   Play,
@@ -418,11 +417,11 @@ export function Navigation() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/governance" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-violet-500/20 transition-all duration-200 rounded-md mx-1">
-                      <Vote className="w-4 h-4 text-violet-400" />
+                    <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-emerald-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Coins className="w-4 h-4 text-emerald-400" />
                       <div>
-                        <span className="font-medium block">Governance</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Vote on proposals</span>
+                        <span className="font-medium block">STREAM Points</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Earn & track rewards</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -828,13 +827,13 @@ export function Navigation() {
                     Dashboard
                   </button>
                 </Link>
-                <Link href="/governance" className="block">
+                <Link href="/points" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-violet-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-emerald-500/20 transition-all duration-200 font-medium text-sm"
                   >
-                    <Vote className="w-4 h-4 text-violet-400" />
-                    Governance
+                    <Coins className="w-4 h-4 text-emerald-400" />
+                    STREAM Points
                   </button>
                 </Link>
                 <button 
