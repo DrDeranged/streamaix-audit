@@ -178,6 +178,289 @@ interface AvatarInsight {
   published_at: string;
 }
 
+interface AvatarTradingStats {
+  avatarId: string;
+  totalTrades: number;
+  totalVolume: number;
+  activePositions: number;
+  winRate: number;
+  avgTradeRoi: number;
+  tradingPersona: {
+    tradingStyle: string;
+    riskTolerance: string;
+    expertiseDomains: string[];
+    decisionBias: string;
+  };
+  recentTrades: Array<{
+    id: string;
+    marketId: string;
+    marketQuestion: string;
+    outcome: string;
+    shares: number;
+    entryPrice: number;
+    invested: number;
+    reasoning: string;
+    createdAt: string;
+  }>;
+  positions: Array<{
+    marketId: string;
+    marketQuestion: string;
+    outcome: string;
+    shares: number;
+    invested: number;
+  }>;
+}
+
+function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avatarName: string }) {
+  const { data, isLoading } = useQuery<{ success: boolean } & AvatarTradingStats>({
+    queryKey: ['/api/avatars', avatarId, 'trading-stats'],
+    refetchInterval: 60000,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-white/10 rounded w-1/3"></div>
+              <div className="grid grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-20 bg-white/10 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const stats = data;
+  const hasTraded = (stats?.totalTrades || 0) > 0;
+
+  if (!hasTraded) {
+    return (
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-8 text-center">
+          <BarChart3 className="w-12 h-12 mx-auto mb-4 text-purple-400 opacity-50" />
+          <h3 className="text-lg font-semibold text-white mb-2">No Trading Activity Yet</h3>
+          <p className="text-white/60 text-sm max-w-md mx-auto">
+            {avatarName} hasn't participated in prediction markets yet. 
+            Avatar trading cycles run periodically based on their expertise domains.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const tradingPersona = stats?.tradingPersona;
+  const recentTrades = stats?.recentTrades || [];
+  const positions = stats?.positions || [];
+
+  const getStyleColor = (style: string) => {
+    const colors: Record<string, string> = {
+      swing_trader: 'border-cyan-500/30 text-cyan-300',
+      dip_buyer: 'border-emerald-500/30 text-emerald-300',
+      momentum: 'border-orange-500/30 text-orange-300',
+      contrarian: 'border-purple-500/30 text-purple-300',
+      value: 'border-blue-500/30 text-blue-300',
+      growth: 'border-fuchsia-500/30 text-fuchsia-300',
+    };
+    return colors[style] || 'border-white/30 text-white';
+  };
+
+  const getRiskColor = (risk: string) => {
+    const colors: Record<string, string> = {
+      conservative: 'text-emerald-400',
+      moderate: 'text-amber-400',
+      aggressive: 'text-rose-400',
+    };
+    return colors[risk] || 'text-white';
+  };
+
+  return (
+    <div className="space-y-4 md:space-y-6">
+      {/* Trading Stats Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card className="bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border-purple-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-white/60">Total Trades</span>
+            </div>
+            <div className="text-2xl font-bold text-white">{stats?.totalTrades || 0}</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-white/60">Volume</span>
+            </div>
+            <div className="text-2xl font-bold text-white">
+              {((stats?.totalVolume || 0) / 1000).toFixed(1)}K
+            </div>
+            <div className="text-xs text-white/40">STREAM</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs text-white/60">Win Rate</span>
+            </div>
+            <div className="text-2xl font-bold text-emerald-400">
+              {((stats?.winRate || 0) * 100).toFixed(0)}%
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <PieChart className="w-4 h-4 text-amber-400" />
+              <span className="text-xs text-white/60">Active Positions</span>
+            </div>
+            <div className="text-2xl font-bold text-white">{stats?.activePositions || 0}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Trading Persona */}
+      {tradingPersona && (
+        <Card className="bg-white/5 border-white/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-white flex items-center gap-2 text-base">
+              <Brain className="w-5 h-5 text-purple-400" />
+              Trading Persona
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Badge variant="outline" className={getStyleColor(tradingPersona.tradingStyle)}>
+                {tradingPersona.tradingStyle?.replace('_', ' ').toUpperCase()}
+              </Badge>
+              <Badge variant="outline" className={`border-white/20 ${getRiskColor(tradingPersona.riskTolerance)}`}>
+                {tradingPersona.riskTolerance?.toUpperCase()} RISK
+              </Badge>
+              <Badge variant="outline" className="border-white/20 text-white/70">
+                {tradingPersona.decisionBias?.replace('_', ' ')}
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {tradingPersona.expertiseDomains?.map((domain, i) => (
+                <Badge key={i} variant="outline" className="border-purple-400/30 text-purple-300 text-xs">
+                  {domain}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Active Positions */}
+      {positions.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-white flex items-center gap-2 text-base">
+              <Target className="w-5 h-5 text-cyan-400" />
+              Active Positions
+              <Badge variant="outline" className="ml-auto border-cyan-500/30 text-cyan-300 text-xs">
+                {positions.length} markets
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-3">
+              {positions.slice(0, 5).map((pos, i) => (
+                <Link key={i} href={`/markets/${pos.marketId}`}>
+                  <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                      pos.outcome === 'YES' 
+                        ? 'bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/40' 
+                        : 'bg-rose-500/10 border border-rose-500/20 hover:border-rose-400/40'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white/90 line-clamp-1 mb-1">{pos.marketQuestion}</p>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-xs ${
+                            pos.outcome === 'YES' 
+                              ? 'bg-emerald-500/20 text-emerald-300' 
+                              : 'bg-rose-500/20 text-rose-300'
+                          }`}>
+                            {pos.outcome}
+                          </Badge>
+                          <span className="text-xs text-white/50">
+                            {pos.shares.toLocaleString()} shares
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-sm font-bold ${pos.outcome === 'YES' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {(pos.invested / 1000).toFixed(1)}K
+                        </div>
+                        <div className="text-xs text-white/40">STREAM</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Trades */}
+      {recentTrades.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-white flex items-center gap-2 text-base">
+              <Zap className="w-5 h-5 text-amber-400" />
+              Recent Trades
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-3">
+              {recentTrades.slice(0, 5).map((trade, i) => (
+                <Link key={i} href={`/markets/${trade.marketId}`}>
+                  <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-purple-400/30 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <p className="text-sm text-white/90 line-clamp-1 flex-1">{trade.marketQuestion}</p>
+                      <Badge className={`text-xs shrink-0 ${
+                        trade.outcome === 'YES' 
+                          ? 'bg-emerald-500/20 text-emerald-300' 
+                          : 'bg-rose-500/20 text-rose-300'
+                      }`}>
+                        {trade.outcome}
+                      </Badge>
+                    </div>
+                    {trade.reasoning && (
+                      <p className="text-xs text-white/50 line-clamp-2 mb-2 italic">"{trade.reasoning}"</p>
+                    )}
+                    <div className="flex items-center justify-between text-xs text-white/40">
+                      <span>{trade.shares.toLocaleString()} shares @ {(trade.entryPrice / 100).toFixed(0)}%</span>
+                      <span>{new Date(trade.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // Helper functions for data transformation - Bloomberg Terminal-style intelligence
 const getAvatarGradient = (name: string) => {
   const gradients: Record<string, string> = {
@@ -620,8 +903,9 @@ export default function AvatarProfile() {
       <div className="container mx-auto px-3 sm:px-4 md:px-6 pb-12 md:pb-20">
         <Tabs defaultValue="overview" className="w-full">
           <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 mb-4 md:mb-8">
-            <TabsList className="grid w-full min-w-[600px] md:min-w-0 grid-cols-8 bg-white/5 border-white/10">
+            <TabsList className="grid w-full min-w-[700px] md:min-w-0 grid-cols-9 bg-white/5 border-white/10">
               <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Overview</TabsTrigger>
+              <TabsTrigger value="trading" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Trading</TabsTrigger>
               <TabsTrigger value="investments" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Invest</TabsTrigger>
               <TabsTrigger value="companies" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Co's</TabsTrigger>
               <TabsTrigger value="podcasts" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Pods</TabsTrigger>
@@ -730,6 +1014,11 @@ export default function AvatarProfile() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Trading Tab - Prediction Market Activity */}
+          <TabsContent value="trading" className="space-y-4 md:space-y-6">
+            <AvatarTradingSection avatarId={avatar.id} avatarName={avatar.name} />
           </TabsContent>
 
           {/* Investments Tab */}

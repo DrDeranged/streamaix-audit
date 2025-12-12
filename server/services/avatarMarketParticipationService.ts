@@ -403,29 +403,120 @@ class AvatarMarketParticipationService {
   }
 
   async getAvatarTradingStats(avatarId: string): Promise<{
+    avatarId: string;
     totalTrades: number;
-    totalInvested: number;
-    currentValue: number;
-    pnl: number;
-    positions: any[];
+    totalVolume: number;
+    activePositions: number;
+    winRate: number;
+    avgTradeRoi: number;
+    tradingPersona: {
+      tradingStyle: string;
+      riskTolerance: string;
+      expertiseDomains: string[];
+      decisionBias: string;
+    };
+    recentTrades: Array<{
+      id: string;
+      marketId: string;
+      marketQuestion: string;
+      outcome: string;
+      shares: number;
+      entryPrice: number;
+      invested: number;
+      reasoning: string;
+      createdAt: string;
+    }>;
+    positions: Array<{
+      marketId: string;
+      marketQuestion: string;
+      outcome: string;
+      shares: number;
+      invested: number;
+    }>;
   }> {
+    // Get avatar info including trading persona
+    const avatar = await db.query.knowledgeAvatars.findFirst({
+      where: eq(knowledgeAvatars.id, avatarId),
+    });
+
+    // Get all positions for this avatar
     const positions = await db.query.marketPositions.findMany({
       where: eq(marketPositions.userWallet, `avatar:${avatarId}`),
     });
 
+    // Get all trades for this avatar
     const trades = await db.query.marketTrades.findMany({
       where: eq(marketTrades.userWallet, `avatar:${avatarId}`),
+      orderBy: (trades, { desc }) => [desc(trades.createdAt)],
+      limit: 20,
     });
 
-    const totalInvested = positions.reduce((sum, p) => sum + (p.totalInvested || 0), 0);
-    const currentValue = positions.reduce((sum, p) => sum + (p.currentValue || 0), 0);
+    // Get market questions for positions and trades
+    const allMarketIds = [
+      ...positions.map(p => p.marketId),
+      ...trades.map(t => t.marketId)
+    ];
+    const marketIds = Array.from(new Set(allMarketIds));
+
+    const markets = await db.query.predictionMarkets.findMany({
+      where: sql`${predictionMarkets.id} IN ${marketIds.length > 0 ? sql`(${sql.join(marketIds.map(id => sql`${id}`), sql`, `)})` : sql`('')`}`,
+    });
+
+    const marketMap = new Map(markets.map(m => [m.id, m]));
+
+    const totalVolume = trades.reduce((sum, t) => sum + (t.streamAmount || 0), 0);
+    const activePositions = positions.filter(p => p.shares > 0).length;
+
+    // Calculate win rate from avatar's stored stats
+    const winRate = (avatar as any)?.winRate || 0;
+    const avgTradeRoi = (avatar as any)?.avgTradeRoi || 0;
+
+    // Build trading persona from avatar data
+    const tradingPersona = {
+      tradingStyle: (avatar as any)?.tradingStyle || 'value',
+      riskTolerance: (avatar as any)?.riskTolerance || 'moderate',
+      expertiseDomains: (avatar as any)?.expertiseDomains || avatar?.primaryInterests || [],
+      decisionBias: (avatar as any)?.decisionBias || 'fundamental',
+    };
+
+    // Map recent trades with market questions and reasoning
+    const recentTrades = trades.slice(0, 10).map(trade => {
+      const market = marketMap.get(trade.marketId);
+      return {
+        id: trade.id,
+        marketId: trade.marketId,
+        marketQuestion: market?.question || 'Unknown market',
+        outcome: trade.outcome,
+        shares: trade.shares,
+        entryPrice: trade.price,
+        invested: trade.streamAmount || 0,
+        reasoning: (trade as any).reasoning || '',
+        createdAt: trade.createdAt?.toISOString() || new Date().toISOString(),
+      };
+    });
+
+    // Map positions with market questions
+    const positionsWithMarkets = positions.filter(p => p.shares > 0).map(pos => {
+      const market = marketMap.get(pos.marketId);
+      return {
+        marketId: pos.marketId,
+        marketQuestion: market?.question || 'Unknown market',
+        outcome: pos.outcome,
+        shares: pos.shares,
+        invested: pos.totalInvested || 0,
+      };
+    });
 
     return {
+      avatarId,
       totalTrades: trades.length,
-      totalInvested,
-      currentValue,
-      pnl: currentValue - totalInvested,
-      positions,
+      totalVolume,
+      activePositions,
+      winRate,
+      avgTradeRoi,
+      tradingPersona,
+      recentTrades,
+      positions: positionsWithMarkets,
     };
   }
 
