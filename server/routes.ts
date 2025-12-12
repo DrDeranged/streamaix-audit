@@ -545,40 +545,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Unified Points Leaderboard - combines users and AI agents
   app.get('/api/points/leaderboard', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 50;
-    const type = (req.query.type as string) || 'all'; // 'all', 'users', 'bots'
+    const filterType = (req.query.type as string) || 'all'; // 'all', 'users', 'bots'
     
     try {
-      // Get top users by points
-      const topUsers = await db.select({
+      // Get top users by points (only select actual database columns)
+      const topUsersRaw = await db.select({
         id: users.id,
         name: users.username,
         avatar: users.avatar,
-        points: users.streamPoints,
-        type: sql<string>`'user'`
+        points: users.streamPoints
       })
       .from(users)
       .where(sql`${users.streamPoints} > 0`)
       .orderBy(desc(users.streamPoints))
       .limit(limit);
       
-      // Get top AI agents by points
-      const topAgents = await db.select({
+      // Add type field after query
+      const topUsers = topUsersRaw.map(u => ({ ...u, type: 'user' as const }));
+      
+      // Get top AI agents by points (only select actual database columns)
+      const topAgentsRaw = await db.select({
         id: aiAgents.id,
         name: aiAgents.name,
         avatar: aiAgents.avatar,
-        points: aiAgents.streamPointsEarned,
-        type: sql<string>`'bot'`
+        points: aiAgents.streamPointsEarned
       })
       .from(aiAgents)
       .where(sql`${aiAgents.streamPointsEarned} > 0`)
       .orderBy(desc(aiAgents.streamPointsEarned))
       .limit(limit);
       
+      // Add type field after query
+      const topAgents = topAgentsRaw.map(a => ({ ...a, type: 'bot' as const }));
+      
       let leaderboard: any[] = [];
       
-      if (type === 'users') {
+      if (filterType === 'users') {
         leaderboard = topUsers.map((u, i) => ({ ...u, rank: i + 1, isBot: false }));
-      } else if (type === 'bots') {
+      } else if (filterType === 'bots') {
         leaderboard = topAgents.map((a, i) => ({ ...a, rank: i + 1, isBot: true }));
       } else {
         // Combine and sort
