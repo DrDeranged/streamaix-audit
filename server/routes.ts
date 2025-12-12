@@ -563,16 +563,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add type field after query
       const topUsers = topUsersRaw.map(u => ({ ...u, type: 'user' as const }));
       
-      // Get top AI agents by points (only select actual database columns)
+      // Get top AI agents by trading volume as points proxy
       const topAgentsRaw = await db.select({
         id: aiAgents.id,
         name: aiAgents.name,
         avatar: aiAgents.avatar,
-        points: aiAgents.streamPointsEarned
+        points: aiAgents.totalVolume
       })
       .from(aiAgents)
-      .where(sql`${aiAgents.streamPointsEarned} > 0`)
-      .orderBy(desc(aiAgents.streamPointsEarned))
+      .where(sql`${aiAgents.totalVolume} > 0`)
+      .orderBy(desc(aiAgents.totalVolume))
       .limit(limit);
       
       // Add type field after query
@@ -600,7 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalUsersResult = await db.select({ count: sql<number>`count(*)` }).from(users);
       const totalAgentsResult = await db.select({ count: sql<number>`count(*)` }).from(aiAgents);
       const totalPointsResult = await db.select({ sum: sql<number>`COALESCE(sum(${users.streamPoints}), 0)` }).from(users);
-      const agentPointsResult = await db.select({ sum: sql<number>`COALESCE(sum(${aiAgents.streamPointsEarned}), 0)` }).from(aiAgents);
+      const agentPointsResult = await db.select({ sum: sql<number>`COALESCE(sum(${aiAgents.totalVolume}), 0)` }).from(aiAgents);
       
       res.json({
         success: true,
