@@ -104,19 +104,19 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "You're Ready!",
-    subtitle: "Start Earning STREAM",
-    description: "Create summaries, trade markets, win leagues. Your dashboard tracks everything.",
-    icon: Rocket,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    title: "You've Earned 2,500 STREAM!",
+    subtitle: "Your Signup Bonus is Ready",
+    description: "Welcome to StreamAiX! You've been awarded 2,500 STREAM points to get started. Trade markets, submit bounties, and earn more!",
+    icon: Coins,
+    gradient: "from-emerald-500 via-cyan-500 to-purple-500",
     instructions: [
-      "Visit your Dashboard to track progress",
-      "Complete bounties for bonus rewards",
-      "Invite friends to earn referral bonuses"
+      "2,500 STREAM bonus added to your wallet",
+      "Earn more by trading, streaming, and bounties",
+      "Daily login streaks multiply your rewards"
     ],
     action: {
-      label: "Start Exploring →",
-      path: "/"
+      label: "Check My Balance →",
+      path: "/points"
     }
   }
 ];
