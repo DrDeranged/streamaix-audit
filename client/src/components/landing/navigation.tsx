@@ -54,9 +54,11 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NotificationSettings } from "@/components/NotificationSettings";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { usePointsBalance, formatPoints, useDailyLogin } from "@/hooks/usePoints";
+import { Coins } from "lucide-react";
 
 export function Navigation() {
   const { theme, setTheme } = useTheme();
@@ -73,6 +75,15 @@ export function Navigation() {
     disconnect, 
     formatAddress
   } = useWeb3();
+
+  const { data: pointsData } = usePointsBalance();
+  const dailyLoginMutation = useDailyLogin();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dailyLoginMutation.mutate();
+    }
+  }, [isAuthenticated]);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -427,6 +438,25 @@ export function Navigation() {
                 </DropdownMenuContent>
               </DropdownMenu>
               
+              {/* STREAM Points Balance */}
+              {isAuthenticated && pointsData && (
+                <Link href="/points">
+                  <motion.div 
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 cursor-pointer hover:border-emerald-400/50 transition-all"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    data-testid="points-balance-nav"
+                  >
+                    <div className="p-1 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500">
+                      <Coins className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-400">
+                      {formatPoints(pointsData.balance)}
+                    </span>
+                  </motion.div>
+                </Link>
+              )}
+              
               {/* Authentication - Glassmorphism Avatar */}
               {isAuthenticated ? (
                 <DropdownMenu>
@@ -476,6 +506,17 @@ export function Navigation() {
                         <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
                           <Compass className="w-4 h-4 text-cyan-400" />
                           <span className="font-medium">Discover</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-emerald-500/20 transition-all duration-200 rounded-md mx-1">
+                          <Coins className="w-4 h-4 text-emerald-400" />
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">STREAM Points</span>
+                            {pointsData && (
+                              <span className="text-xs text-emerald-400 font-semibold">{formatPoints(pointsData.balance)}</span>
+                            )}
+                          </div>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>

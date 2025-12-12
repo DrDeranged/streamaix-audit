@@ -80,7 +80,7 @@ import {
   streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
   streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
-  avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages
+  avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 

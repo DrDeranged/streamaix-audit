@@ -55,6 +55,7 @@ const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const Gamification = React.lazy(() => import("@/pages/gamification"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 const StreamDiscovery = React.lazy(() => import("@/pages/StreamDiscoveryPage"));
+const Points = React.lazy(() => import("@/pages/points"));
 
 function Router() {
   return (
@@ -258,6 +259,12 @@ function Router() {
       <Route path="/gamification">
         <Suspense fallback={<DashboardSkeleton />}>
           <Gamification />
+        </Suspense>
+      </Route>
+      
+      <Route path="/points">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <Points />
         </Suspense>
       </Route>
       
