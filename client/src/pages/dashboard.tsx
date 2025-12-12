@@ -19,6 +19,7 @@ import { FollowButton } from '@/components/avatars/follow-button';
 import BountyBoardSection from '@/components/bounty/BountyBoardSection';
 import RelatedBountiesWidget from '@/components/bounty/RelatedBountiesWidget';
 import ActivePredictionMarkets from '@/components/dashboard/ActivePredictionMarkets';
+import HotAvatarTrades from '@/components/dashboard/HotAvatarTrades';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -646,8 +647,15 @@ export default function Dashboard() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="markets" className="mt-6">
-                  <ActivePredictionMarkets />
+                <TabsContent value="markets" className="mt-6 space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <ActivePredictionMarkets />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <HotAvatarTrades limit={6} />
+                    </div>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="avatars" className="space-y-4 mt-4">
