@@ -23,10 +23,6 @@ import NotFound from "@/pages/not-found";
 const Dashboard = React.lazy(() => import("@/pages/dashboard"));
 const CreateSummary = React.lazy(() => import("@/pages/create-summary"));
 const WalletDashboard = React.lazy(() => import("@/pages/wallet-dashboard"));
-const Web3WalletPage = React.lazy(() => import("@/pages/web3-wallet"));
-const DeFiDashboard = React.lazy(() => import("@/pages/defi-dashboard"));
-const NFTGallery = React.lazy(() => import("@/pages/nft-gallery"));
-const GovernancePage = React.lazy(() => import("@/pages/governance"));
 const BountyBoard = React.lazy(() => import("@/pages/bounty-board"));
 const BountyDetail = React.lazy(() => import("@/pages/bounty-detail"));
 const Leaderboard = React.lazy(() => import("@/pages/leaderboard"));
@@ -35,8 +31,6 @@ const SummaryView = React.lazy(() => import("@/pages/summary-view"));
 const ProcessingResults = React.lazy(() => import("@/pages/processing-results"));
 const FarcasterActivity = React.lazy(() => import("@/pages/farcaster-activity"));
 const AvatarProfile = React.lazy(() => import("@/pages/avatar-profile"));
-const InsightsDashboard = React.lazy(() => import("@/pages/InsightsDashboard"));
-const AnalyticsDashboard = React.lazy(() => import("@/pages/AnalyticsDashboard"));
 const Markets = React.lazy(() => import("@/pages/markets"));
 const PredictionMarket = React.lazy(() => import("@/pages/prediction-market"));
 const ChatPage = React.lazy(() => import("@/pages/chat"));
@@ -52,7 +46,6 @@ const StreamView = React.lazy(() => import("@/pages/stream-view"));
 const GoLive = React.lazy(() => import("@/pages/go-live"));
 const Streams = React.lazy(() => import("@/pages/streams"));
 const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
-const Gamification = React.lazy(() => import("@/pages/gamification"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 const StreamDiscovery = React.lazy(() => import("@/pages/StreamDiscoveryPage"));
 const Points = React.lazy(() => import("@/pages/points"));
@@ -79,30 +72,6 @@ function Router() {
       <Route path="/wallet-dashboard">
         <Suspense fallback={<DashboardSkeleton />}>
           <WalletDashboard />
-        </Suspense>
-      </Route>
-      
-      <Route path="/web3-wallet">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <Web3WalletPage />
-        </Suspense>
-      </Route>
-      
-      <Route path="/defi-dashboard">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <DeFiDashboard />
-        </Suspense>
-      </Route>
-      
-      <Route path="/nft-gallery">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <NFTGallery />
-        </Suspense>
-      </Route>
-      
-      <Route path="/governance">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <GovernancePage />
         </Suspense>
       </Route>
       
@@ -150,13 +119,13 @@ function Router() {
       
       <Route path="/insights">
         <Suspense fallback={<DashboardSkeleton />}>
-          <InsightsDashboard />
+          <Discover />
         </Suspense>
       </Route>
       
       <Route path="/analytics">
         <Suspense fallback={<DashboardSkeleton />}>
-          <AnalyticsDashboard />
+          <Discover />
         </Suspense>
       </Route>
       
@@ -258,7 +227,7 @@ function Router() {
       
       <Route path="/gamification">
         <Suspense fallback={<DashboardSkeleton />}>
-          <Gamification />
+          <Points />
         </Suspense>
       </Route>
       

@@ -542,6 +542,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Unified Points Leaderboard - combines users and AI agents
+  app.get('/api/points/leaderboard', asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const type = (req.query.type as string) || 'all'; // 'all', 'users', 'bots'
+    
+    try {
+      // Get top users by points
+      const topUsers = await db.select({
+        id: users.id,
+        name: users.username,
+        avatar: users.avatar,
+        points: users.streamPoints,
+        type: sql<string>`'user'`
+      })
+      .from(users)
+      .where(sql`${users.streamPoints} > 0`)
+      .orderBy(desc(users.streamPoints))
+      .limit(limit);
+      
+      // Get top AI agents by points
+      const topAgents = await db.select({
+        id: aiAgents.id,
+        name: aiAgents.name,
+        avatar: aiAgents.avatar,
+        points: aiAgents.streamPointsEarned,
+        type: sql<string>`'bot'`
+      })
+      .from(aiAgents)
+      .where(sql`${aiAgents.streamPointsEarned} > 0`)
+      .orderBy(desc(aiAgents.streamPointsEarned))
+      .limit(limit);
+      
+      let leaderboard: any[] = [];
+      
+      if (type === 'users') {
+        leaderboard = topUsers.map((u, i) => ({ ...u, rank: i + 1, isBot: false }));
+      } else if (type === 'bots') {
+        leaderboard = topAgents.map((a, i) => ({ ...a, rank: i + 1, isBot: true }));
+      } else {
+        // Combine and sort
+        const combined = [
+          ...topUsers.map(u => ({ ...u, isBot: false })),
+          ...topAgents.map(a => ({ ...a, isBot: true }))
+        ].sort((a, b) => (b.points || 0) - (a.points || 0))
+        .slice(0, limit)
+        .map((item, i) => ({ ...item, rank: i + 1 }));
+        
+        leaderboard = combined;
+      }
+      
+      // Get stats
+      const totalUsersResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+      const totalAgentsResult = await db.select({ count: sql<number>`count(*)` }).from(aiAgents);
+      const totalPointsResult = await db.select({ sum: sql<number>`COALESCE(sum(${users.streamPoints}), 0)` }).from(users);
+      const agentPointsResult = await db.select({ sum: sql<number>`COALESCE(sum(${aiAgents.streamPointsEarned}), 0)` }).from(aiAgents);
+      
+      res.json({
+        success: true,
+        leaderboard,
+        stats: {
+          totalParticipants: (totalUsersResult[0]?.count || 0) + (totalAgentsResult[0]?.count || 0),
+          totalUsers: totalUsersResult[0]?.count || 0,
+          totalBots: totalAgentsResult[0]?.count || 0,
+          totalPointsDistributed: (totalPointsResult[0]?.sum || 0) + (agentPointsResult[0]?.sum || 0)
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching points leaderboard:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch leaderboard' });
+    }
+  }));
+
   // =============================================================================
   // USER ROUTES
   // =============================================================================
