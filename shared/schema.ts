@@ -6710,3 +6710,90 @@ export type CoStreamSession = typeof coStreamSessions.$inferSelect;
 
 export type InsertStreamViewerLeaderboard = z.infer<typeof insertStreamViewerLeaderboardSchema>;
 export type StreamViewerLeaderboard = typeof streamViewerLeaderboard.$inferSelect;
+
+// ==========================================
+// STREAM POINTS ECONOMY
+// ==========================================
+
+export const pointsTransactions = pgTable("points_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  
+  // Transaction details
+  amount: integer("amount").notNull(), // Positive for earn, negative for spend
+  type: text("type").notNull(), // 'earn' | 'spend' | 'bonus' | 'refund' | 'adjustment'
+  
+  // Source of points (what activity triggered this)
+  source: text("source").notNull(), // 'signup', 'daily_login', 'bounty_submit', 'bounty_accepted', 'prediction_win', 'stream_watch', 'voice_conversation', 'referral', 'profile_complete', 'tip_sent', 'tip_received', 'market_trade', 'league_entry', 'subscription', 'admin_adjustment'
+  
+  // Reference to related entity (optional)
+  referenceId: varchar("reference_id"), // bountyId, marketId, streamId, etc.
+  referenceType: text("reference_type"), // 'bounty', 'market', 'stream', 'user', etc.
+  
+  // Balance tracking
+  balanceBefore: integer("balance_before").notNull(),
+  balanceAfter: integer("balance_after").notNull(),
+  
+  // Metadata
+  description: text("description"), // Human-readable description
+  metadata: jsonb("metadata"), // Additional context: { multiplier, streak, quality_score, etc. }
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Daily login tracking for streak bonuses
+export const dailyLoginStreak = pgTable("daily_login_streak", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastLoginDate: timestamp("last_login_date"), // Date of last login (for streak calculation)
+  
+  // Total stats
+  totalLogins: integer("total_logins").default(0),
+  totalPointsFromLogins: integer("total_points_from_logins").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Points configuration (for easy tuning)
+export const pointsConfig = pgTable("points_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(), // 'signup_bonus', 'daily_login_base', 'bounty_submit', etc.
+  value: integer("value").notNull(), // Points amount
+  description: text("description"),
+  multiplierEnabled: boolean("multiplier_enabled").default(false),
+  maxDaily: integer("max_daily"), // Optional daily cap
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema exports
+export const insertPointsTransactionSchema = createInsertSchema(pointsTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDailyLoginStreakSchema = createInsertSchema(dailyLoginStreak).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPointsConfigSchema = createInsertSchema(pointsConfig).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// Types
+export type InsertPointsTransaction = z.infer<typeof insertPointsTransactionSchema>;
+export type PointsTransaction = typeof pointsTransactions.$inferSelect;
+
+export type InsertDailyLoginStreak = z.infer<typeof insertDailyLoginStreakSchema>;
+export type DailyLoginStreak = typeof dailyLoginStreak.$inferSelect;
+
+export type InsertPointsConfig = z.infer<typeof insertPointsConfigSchema>;
+export type PointsConfig = typeof pointsConfig.$inferSelect;
