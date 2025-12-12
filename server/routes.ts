@@ -10735,7 +10735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     marketTrades
   } = await import("../shared/schema");
 
-  // Get enhanced leaderboards with multiple metrics
+  // Get enhanced leaderboards with multiple metrics (includes both users AND avatars)
   app.get("/api/markets/leaderboards/:metric", asyncHandler(async (req: Request, res: Response) => {
     const { metric } = req.params;
     const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
@@ -10778,7 +10778,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rankColumn = userTradingStats.profitRank;
     }
 
-    const leaderboard = await db
+    // Get user leaderboard entries
+    const userLeaderboard = await db
       .select({
         userId: userTradingStats.userId,
         username: users.username,
@@ -10798,6 +10799,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .orderBy(orderByColumn)
       .limit(limit)
       .offset(offset);
+
+    // Get avatar trading stats from market trades (avatars use wallet like 'avatar:xxx')
+    const avatarTrades = await db
+      .select({
+        userWallet: marketTrades.userWallet,
+        totalVolume: sql<number>`SUM(${marketTrades.streamAmount})`,
+        totalTrades: sql<number>`COUNT(*)`,
+      })
+      .from(marketTrades)
+      .where(sql`${marketTrades.userWallet} LIKE 'avatar:%'`)
+      .groupBy(marketTrades.userWallet);
+
+    // Get avatar details for those with trades
+    const avatarIds = avatarTrades.map(t => t.userWallet.replace('avatar:', ''));
+    const avatars = avatarIds.length > 0 
+      ? await db.query.knowledgeAvatars.findMany({
+          where: sql`${knowledgeAvatars.id} IN (${sql.join(avatarIds.map(id => sql`${id}`), sql`, `)})`
+        })
+      : [];
+
+    const avatarMap = new Map(avatars.map(a => [a.id, a]));
+
+    // Format avatar entries
+    const avatarLeaderboardEntries = avatarTrades
+      .filter(t => t.totalTrades > 0)
+      .map(trade => {
+        const avatarId = trade.userWallet.replace('avatar:', '');
+        const avatar = avatarMap.get(avatarId);
+        return {
+          id: avatarId,
+          type: 'avatar' as const,
+          avatarId,
+          username: avatar?.name || 'Unknown Avatar',
+          avatar: avatar?.imageUrl || null,
+          netProfit: 0,
+          totalVolume: Number(trade.totalVolume) || 0,
+          winRate: (avatar as any)?.winRate || 0,
+          roi: (avatar as any)?.avgTradeRoi || 0,
+          totalTrades: Number(trade.totalTrades) || 0,
+          winningTrades: Math.floor((Number(trade.totalTrades) || 0) * ((avatar as any)?.winRate || 0.5)),
+          currentWinStreak: 0,
+          longestWinStreak: 0,
+          rank: null
+        };
+      });
+
+    // Format user entries
+    const userLeaderboardEntries = userLeaderboard.map(entry => ({
+      id: entry.userId,
+      type: 'user' as const,
+      userId: entry.userId,
+      username: entry.username || 'Anonymous',
+      avatar: entry.avatar,
+      netProfit: entry.netProfit || 0,
+      totalVolume: entry.totalVolume || 0,
+      winRate: entry.winRate || 0,
+      roi: entry.roi || 0,
+      totalTrades: entry.totalTrades || 0,
+      winningTrades: entry.winningTrades || 0,
+      currentWinStreak: entry.currentWinStreak || 0,
+      longestWinStreak: entry.longestWinStreak || 0,
+      rank: entry.rank
+    }));
+
+    // Merge and sort by the selected metric
+    const combined = [...userLeaderboardEntries, ...avatarLeaderboardEntries];
+    
+    combined.sort((a, b) => {
+      switch (metric) {
+        case 'profit': return (b.netProfit || 0) - (a.netProfit || 0);
+        case 'volume': return (b.totalVolume || 0) - (a.totalVolume || 0);
+        case 'winrate': return (b.winRate || 0) - (a.winRate || 0);
+        case 'roi': return (b.roi || 0) - (a.roi || 0);
+        default: return (b.netProfit || 0) - (a.netProfit || 0);
+      }
+    });
+
+    // Assign ranks
+    const leaderboard = combined.slice(0, limit).map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
 
     res.json({
       success: true,

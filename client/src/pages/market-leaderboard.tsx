@@ -3,13 +3,17 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, TrendingUp, Target, Award, Zap, ArrowLeft, Flame, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Trophy, TrendingUp, Target, Award, Zap, ArrowLeft, Flame, Star, Bot, User } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
 type LeaderboardEntry = {
-  userId: string;
+  id: string;
+  type: 'user' | 'avatar';
+  userId?: string;
+  avatarId?: string;
   username: string;
   avatar: string | null;
   netProfit: number;
@@ -184,16 +188,21 @@ export default function MarketLeaderboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {leaderboard?.leaderboard.map((entry, index) => (
+                      {leaderboard?.leaderboard.map((entry, index) => {
+                        const isAvatar = entry.type === 'avatar';
+                        const profileLink = isAvatar ? `/avatars/${entry.avatarId || entry.id}` : `/profile/${entry.userId || entry.id}`;
+                        
+                        return (
                         <motion.div
-                          key={entry.userId}
+                          key={entry.id || entry.userId}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.4, delay: index * 0.05 }}
                           whileHover={{ scale: 1.02, x: 4 }}
                         >
+                          <Link href={profileLink}>
                           <Card
-                            className={`bg-gradient-to-r ${getRankColor(entry.rank || index + 1)} p-[1px] ${getRankGlow(entry.rank || index + 1)} transition-all duration-300`}
+                            className={`bg-gradient-to-r ${getRankColor(entry.rank || index + 1)} p-[1px] ${getRankGlow(entry.rank || index + 1)} transition-all duration-300 cursor-pointer`}
                             data-testid={`leaderboard-entry-${index}`}
                           >
                             <div className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-lg p-4">
@@ -203,14 +212,24 @@ export default function MarketLeaderboard() {
                                   {getRankIcon(entry.rank || index + 1)}
                                 </div>
 
-                                {/* User info */}
+                                {/* User/Avatar info */}
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
+                                    {isAvatar ? (
+                                      <Bot className="w-4 h-4 text-cyan-400 shrink-0" />
+                                    ) : (
+                                      <User className="w-4 h-4 text-purple-400 shrink-0" />
+                                    )}
                                     <span className="font-bold text-white text-lg truncate">
                                       {entry.username}
                                     </span>
+                                    {isAvatar && (
+                                      <Badge variant="outline" className="border-cyan-500/30 text-cyan-300 text-xs shrink-0">
+                                        Avatar
+                                      </Badge>
+                                    )}
                                     {entry.currentWinStreak >= 3 && (
-                                      <div className="flex items-center gap-1 px-2 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full">
+                                      <div className="flex items-center gap-1 px-2 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full shrink-0">
                                         <Flame className="w-3 h-3 text-orange-400" />
                                         <span className="text-xs text-orange-300 font-semibold">{entry.currentWinStreak} streak</span>
                                       </div>
@@ -249,8 +268,10 @@ export default function MarketLeaderboard() {
                               </div>
                             </div>
                           </Card>
+                          </Link>
                         </motion.div>
-                      ))}
+                      );
+                      })}
                     </div>
                   )}
                 </TabsContent>
