@@ -260,12 +260,14 @@ class AutonomousTradingEngine {
         })
         .where(eq(predictionMarkets.id, market.id));
 
-      // Update agent trading volume
+      // Update agent trading volume and award points for trading activity
+      const pointsEarned = Math.round(amount * 0.1); // 10% of trade amount as points
       await db
         .update(aiAgents)
         .set({
           totalVolume: agent.totalVolume + Math.round(amount),
           totalPredictions: agent.totalPredictions + 1,
+          streamPointsEarned: sql`COALESCE(${aiAgents.streamPointsEarned}, 0) + ${pointsEarned}`,
           updatedAt: new Date()
         })
         .where(eq(aiAgents.id, agent.id));
