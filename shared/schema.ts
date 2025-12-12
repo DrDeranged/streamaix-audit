@@ -5351,10 +5351,12 @@ export const liveStreams = pgTable("live_streams", {
 export const streamParticipants = pgTable("stream_participants", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id),
   
   // Role in stream
   role: text("role").notNull().default("viewer"), // host, co_host, speaker, viewer, moderator
+  participantType: text("participant_type").notNull().default("user"), // user, avatar
   
   // Participation state
   isActive: boolean("is_active").default(true),
@@ -5362,6 +5364,12 @@ export const streamParticipants = pgTable("stream_participants", {
   isVideoOn: boolean("is_video_on").default(false),
   isScreenSharing: boolean("is_screen_sharing").default(false),
   handRaised: boolean("hand_raised").default(false),
+  
+  // Real-time conversation audio settings
+  audioPreference: text("audio_preference").default("text_only"), // microphone, tts, text_only
+  speakingStatus: text("speaking_status").default("idle"), // idle, speaking, requested, queued
+  speakerQueuePosition: integer("speaker_queue_position"),
+  lastAudioActivity: timestamp("last_audio_activity"),
   
   // For audio spaces - speaking request queue
   speakRequestedAt: timestamp("speak_requested_at"),
@@ -5375,6 +5383,36 @@ export const streamParticipants = pgTable("stream_participants", {
   
   joinedAt: timestamp("joined_at").defaultNow(),
   leftAt: timestamp("left_at"),
+});
+
+// Stream Conversation Transcripts - Real-time spoken messages (TTS/audio)
+export const streamConversationMessages = pgTable("stream_conversation_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
+  participantId: varchar("participant_id").references(() => streamParticipants.id).notNull(),
+  
+  // Speaker info (denormalized for quick access)
+  speakerType: text("speaker_type").notNull(), // user, avatar
+  speakerUserId: varchar("speaker_user_id").references(() => users.id),
+  speakerAvatarId: varchar("speaker_avatar_id").references(() => knowledgeAvatars.id),
+  speakerName: text("speaker_name").notNull(),
+  
+  // Message content
+  textContent: text("text_content").notNull(), // The spoken/typed message
+  audioUrl: text("audio_url"), // TTS-generated audio URL (if applicable)
+  audioDurationMs: integer("audio_duration_ms"),
+  
+  // Source of the message
+  sourceType: text("source_type").notNull(), // microphone_transcription, tts_generated, text_input
+  
+  // For AI avatar responses
+  promptContext: text("prompt_context"), // The context that generated this response
+  replyToMessageId: varchar("reply_to_message_id"),
+  
+  // Moderation
+  isDeleted: boolean("is_deleted").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const streamTips = pgTable("stream_tips", {
@@ -5474,6 +5512,11 @@ export const insertLiveStreamSchema = createInsertSchema(liveStreams).omit({
 export const insertStreamParticipantSchema = createInsertSchema(streamParticipants).omit({
   id: true,
   joinedAt: true,
+});
+
+export const insertStreamConversationMessageSchema = createInsertSchema(streamConversationMessages).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertStreamTipSchema = createInsertSchema(streamTips).omit({
@@ -5640,6 +5683,9 @@ export type LiveStream = typeof liveStreams.$inferSelect;
 
 export type InsertStreamParticipant = z.infer<typeof insertStreamParticipantSchema>;
 export type StreamParticipant = typeof streamParticipants.$inferSelect;
+
+export type InsertStreamConversationMessage = z.infer<typeof insertStreamConversationMessageSchema>;
+export type StreamConversationMessage = typeof streamConversationMessages.$inferSelect;
 
 export type InsertStreamTip = z.infer<typeof insertStreamTipSchema>;
 export type StreamTip = typeof streamTips.$inferSelect;
