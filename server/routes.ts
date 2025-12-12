@@ -78,7 +78,8 @@ import {
   liveStreams, streamParticipants, streamMessages, streamTips, streamPredictions,
   streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
-  streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries
+  streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
+  avatarTrades as avatarTradesTable, avatarPositions
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
@@ -2547,12 +2548,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get recent AI agent trades
+  // Get recent AI agent trades (includes both AI agents and Knowledge Avatars)
   app.get('/api/ai-agents/trades', asyncHandler(async (req: Request, res: Response) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
+      const includeAvatars = req.query.includeAvatars !== 'false';
       
-      const trades = await db
+      // Get AI Agent trades
+      const agentTrades = await db
         .select({
           id: aiTrades.id,
           agentId: aiTrades.agentId,
@@ -2576,8 +2579,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .leftJoin(predictionMarkets, eq(aiTrades.marketId, predictionMarkets.id))
         .orderBy(desc(aiTrades.createdAt))
         .limit(limit);
+
+      // Format agent trades with type indicator
+      const formattedAgentTrades = agentTrades.map(t => ({
+        ...t,
+        traderType: 'agent' as const
+      }));
+
+      // Get Avatar trades if requested
+      let formattedAvatarTrades: any[] = [];
+      if (includeAvatars) {
+        const avatarTrades = await db
+          .select({
+            id: avatarTradesTable.id,
+            avatarId: avatarTradesTable.avatarId,
+            avatarName: knowledgeAvatars.name,
+            avatarImageUrl: knowledgeAvatars.imageUrl,
+            tradingPersona: avatarTradesTable.tradingPersona,
+            marketId: avatarTradesTable.marketId,
+            marketQuestion: predictionMarkets.question,
+            marketCategory: predictionMarkets.category,
+            outcome: avatarTradesTable.outcome,
+            tradeType: avatarTradesTable.tradeType,
+            streamAmount: avatarTradesTable.streamAmount,
+            shares: avatarTradesTable.shares,
+            price: avatarTradesTable.price,
+            fee: avatarTradesTable.fee,
+            reasoning: avatarTradesTable.reasoning,
+            confidence: avatarTradesTable.confidence,
+            createdAt: avatarTradesTable.createdAt
+          })
+          .from(avatarTradesTable)
+          .leftJoin(knowledgeAvatars, eq(avatarTradesTable.avatarId, knowledgeAvatars.id))
+          .leftJoin(predictionMarkets, eq(avatarTradesTable.marketId, predictionMarkets.id))
+          .orderBy(desc(avatarTradesTable.createdAt))
+          .limit(limit);
+
+        formattedAvatarTrades = avatarTrades.map(t => ({
+          id: t.id,
+          agentId: t.avatarId,
+          agentName: t.avatarName || 'Unknown Avatar',
+          agentPersonality: t.tradingPersona || 'balanced',
+          marketId: t.marketId,
+          marketQuestion: t.marketQuestion,
+          marketCategory: t.marketCategory,
+          outcome: t.outcome,
+          tradeType: t.tradeType,
+          streamAmount: t.streamAmount,
+          shares: t.shares,
+          price: t.price,
+          fee: t.fee,
+          reasoning: t.reasoning,
+          probability: t.confidence,
+          createdAt: t.createdAt,
+          traderType: 'avatar' as const,
+          avatarImageUrl: t.avatarImageUrl
+        }));
+      }
+
+      // Merge and sort by createdAt
+      const allTrades = [...formattedAgentTrades, ...formattedAvatarTrades]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, limit);
       
-      res.json({ trades });
+      res.json({ trades: allTrades });
     } catch (error) {
       console.error('Error fetching AI trades:', error);
       res.status(500).json({ error: 'Failed to fetch trades' });

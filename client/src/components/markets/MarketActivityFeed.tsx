@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bot, TrendingUp, TrendingDown, Clock, Sparkles, Zap, Shield, BarChart2, RefreshCw } from "lucide-react";
+import { Bot, TrendingUp, TrendingDown, Clock, Sparkles, Zap, Shield, BarChart2, RefreshCw, User } from "lucide-react";
+import { Link } from "wouter";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -31,6 +33,8 @@ interface AITrade {
   reasoning: string;
   probability: number | null;
   createdAt: string;
+  traderType?: 'agent' | 'avatar';
+  avatarImageUrl?: string | null;
 }
 
 interface MarketActivityFeedProps {
@@ -177,6 +181,8 @@ export function MarketActivityFeed({
             const probability = trade.probability || 0;
             const tradeSizeBadge = getTradeSizeBadge(trade.streamAmount);
             const personalityInfo = personalityIcons[trade.agentPersonality] || personalityIcons.quantitative;
+            const isAvatar = trade.traderType === 'avatar';
+            const traderLink = isAvatar ? `/avatars/${trade.agentId}` : undefined;
             
             return (
               <CarouselItem 
@@ -190,41 +196,73 @@ export function MarketActivityFeed({
                   transition={{ delay: index * 0.05, duration: 0.4 }}
                   className="slide-in-trade"
                 >
-                  <Card className={`bg-gradient-to-br ${personalityColors[trade.agentPersonality] || personalityColors.quantitative} border backdrop-blur-sm p-4 card-3d-hover`}>
+                  <Card className={`bg-gradient-to-br ${isAvatar ? 'from-cyan-500/20 to-purple-500/20 border-cyan-400/30' : (personalityColors[trade.agentPersonality] || personalityColors.quantitative)} border backdrop-blur-sm p-4 card-3d-hover`}>
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 relative">
-                        <ConfidenceRing 
-                          confidence={probability} 
-                          size={64} 
-                          strokeWidth={4}
-                          showPercentage={false}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center text-3xl">
-                          {personalityInfo.emoji}
-                        </div>
+                        {isAvatar && trade.avatarImageUrl ? (
+                          <Link href={traderLink!}>
+                            <Avatar className="w-16 h-16 border-2 border-cyan-400/50 cursor-pointer hover:border-cyan-400 transition-colors">
+                              <AvatarImage src={trade.avatarImageUrl} alt={trade.agentName} />
+                              <AvatarFallback className="bg-gradient-to-br from-cyan-500/30 to-purple-500/30 text-lg">
+                                {trade.agentName.slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </Link>
+                        ) : (
+                          <>
+                            <ConfidenceRing 
+                              confidence={probability} 
+                              size={64} 
+                              strokeWidth={4}
+                              showPercentage={false}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center text-3xl">
+                              {personalityInfo.emoji}
+                            </div>
+                          </>
+                        )}
                         <motion.div
-                          className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-background border-2 border-primary/40 flex items-center justify-center shadow-lg"
+                          className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-background border-2 ${isAvatar ? 'border-cyan-400/60' : 'border-primary/40'} flex items-center justify-center shadow-lg`}
                           animate={{ scale: [1, 1.1, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         >
-                          <span className={`text-[10px] font-bold ${getConfidenceColor(probability)}`}>
-                            {probability.toFixed(0)}%
-                          </span>
+                          {isAvatar ? (
+                            <User className="w-4 h-4 text-cyan-400" />
+                          ) : (
+                            <span className={`text-[10px] font-bold ${getConfidenceColor(probability)}`}>
+                              {probability.toFixed(0)}%
+                            </span>
+                          )}
                         </motion.div>
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-bold text-base truncate" data-testid={`text-agent-name-${trade.id}`}>
-                              {trade.agentName}
-                            </span>
-                            <Badge 
-                              variant="outline" 
-                              className="text-xs flex-shrink-0 bg-slate-700/50 border-slate-600"
-                            >
-                              {trade.agentPersonality}
-                            </Badge>
+                            {isAvatar ? (
+                              <Link href={traderLink!} className="font-bold text-base truncate hover:text-cyan-400 transition-colors cursor-pointer" data-testid={`text-agent-name-${trade.id}`}>
+                                {trade.agentName}
+                              </Link>
+                            ) : (
+                              <span className="font-bold text-base truncate" data-testid={`text-agent-name-${trade.id}`}>
+                                {trade.agentName}
+                              </span>
+                            )}
+                            {isAvatar ? (
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs flex-shrink-0 bg-cyan-500/20 border-cyan-500/40 text-cyan-300"
+                              >
+                                Avatar
+                              </Badge>
+                            ) : (
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs flex-shrink-0 bg-slate-700/50 border-slate-600"
+                              >
+                                {trade.agentPersonality}
+                              </Badge>
+                            )}
                           </div>
                           <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
                             {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
