@@ -496,6 +496,17 @@ export const knowledgeAvatars = pgTable("knowledge_avatars", {
   podcastAppearances: jsonb("podcast_appearances"), // [{name, episode, url, date, duration, keyTopics: []}]
   recommendedBooks: jsonb("recommended_books"), // [{title, author, reason, category, url}]
   mentors: jsonb("mentors"), // [{name, relationship, influence, active: boolean}]
+  // Autonomous Trading Persona Fields
+  tradingStyle: text("trading_style"), // swing_trader, dip_buyer, momentum, contrarian, value, growth
+  expertiseDomains: text("expertise_domains").array(), // defi, l1, l2, ai_tokens, memecoins, infrastructure, payments
+  riskTolerance: text("risk_tolerance"), // conservative, moderate, aggressive
+  maxPositionPct: real("max_position_pct").default(10), // max % of balance per trade
+  decisionBias: text("decision_bias"), // technical, fundamental, sentiment, news_driven
+  tradingFrequency: text("trading_frequency"), // daily, weekly, opportunistic
+  streamBalance: integer("stream_balance").default(100000), // STREAM points for trading
+  totalTrades: integer("total_trades").default(0),
+  winRate: real("win_rate").default(0),
+  avgTradeRoi: real("avg_trade_roi").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
