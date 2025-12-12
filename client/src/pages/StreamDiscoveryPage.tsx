@@ -176,16 +176,20 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
       {/* Content Area */}
       <div className="p-4 relative">
         <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-cyan-300 transition-colors mb-3">
-          {stream.title}
+          {stream.title.replace(/\s*[-–—]\s*(LIVE|Live|live)\s*$/i, '').trim()}
         </h3>
         
         {/* Host info row */}
         <div className="flex items-center gap-2.5">
           <div className="relative group/avatar flex-shrink-0">
             <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500" />
-            <div className="relative w-9 h-9 rounded-full bg-slate-800 overflow-hidden ring-2 ring-cyan-500/30">
-              {stream.hostAvatar && (
+            <div className="relative w-9 h-9 rounded-full bg-slate-800 overflow-hidden ring-2 ring-cyan-500/30 flex items-center justify-center">
+              {stream.hostAvatar ? (
                 <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-bold text-cyan-300">
+                  {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
+                </span>
               )}
             </div>
             {stream.isVerified && (
