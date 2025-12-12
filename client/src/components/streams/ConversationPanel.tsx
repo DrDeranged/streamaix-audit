@@ -17,11 +17,13 @@ import {
   Radio,
   Users,
   Bot,
-  User,
   MessageSquare,
   Loader2,
   CheckCircle2,
   Crown,
+  Headphones,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -134,6 +136,53 @@ export function ConversationPanel({
 
   const canSpeak = myParticipant?.speakingStatus === 'speaking';
   const isInQueue = myParticipant?.speakingStatus === 'queued' || myParticipant?.speakingStatus === 'requested';
+  const showOnboarding = !isConnected && messages.length === 0;
+
+  // Onboarding view when not connected yet
+  if (showOnboarding) {
+    return (
+      <div className={cn(
+        "flex flex-col items-center justify-center h-full bg-slate-900/80 backdrop-blur-xl border border-cyan-500/20 rounded-xl p-6 text-center",
+        className
+      )}>
+        <div className="relative mb-4">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 rounded-full blur-xl animate-pulse" />
+          <div className="relative p-4 bg-gradient-to-br from-cyan-600/20 to-purple-600/20 rounded-full border border-cyan-500/30">
+            <Headphones className="w-10 h-10 text-cyan-400" />
+          </div>
+        </div>
+        
+        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber-400" />
+          Live Voice Conversation
+        </h3>
+        
+        <p className="text-sm text-slate-400 mb-4 max-w-[280px]">
+          Chat with AI avatars in real-time using voice or text. Ask questions, share ideas, and have natural conversations.
+        </p>
+
+        <div className="space-y-2 text-left w-full max-w-[280px] mb-4">
+          <div className="flex items-center gap-2 text-sm text-slate-300">
+            <MessageSquare className="w-4 h-4 text-cyan-400" />
+            <span>Type messages or use your microphone</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-300">
+            <Hand className="w-4 h-4 text-amber-400" />
+            <span>Raise your hand to speak</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-300">
+            <Bot className="w-4 h-4 text-purple-400" />
+            <span>AI avatars respond with voice</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          Connecting to conversation...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn(
@@ -260,23 +309,57 @@ export function ConversationPanel({
       </ScrollArea>
 
       {/* Input area */}
-      <div className="p-3 border-t border-slate-700/50 bg-slate-800/30">
+      <div className="p-3 border-t border-slate-700/50 bg-slate-800/30 space-y-2">
+        {/* Mic permission helper */}
+        {hasPermission === false && (
+          <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
+            <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0" />
+            <span className="text-xs text-amber-300">Microphone access needed for voice chat</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-xs h-6 text-amber-300 hover:text-amber-200"
+              onClick={requestPermission}
+            >
+              Enable
+            </Button>
+          </div>
+        )}
+
+        {/* Speaking status indicator */}
+        {canSpeak && (
+          <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-xs text-green-300 font-medium">You're live! Speak or type your message.</span>
+          </div>
+        )}
+
         {/* Controls */}
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2">
           {/* Raise hand / Cancel */}
           {!canSpeak && (
-            <Button
-              variant={isInQueue ? "destructive" : "outline"}
-              size="sm"
-              className={cn(
-                "gap-1",
-                isInQueue && "bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/30"
-              )}
-              onClick={isInQueue ? cancelSpeakRequest : requestSpeak}
-            >
-              <Hand className="h-3.5 w-3.5" />
-              {isInQueue ? 'Cancel' : 'Raise Hand'}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isInQueue ? "destructive" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "gap-1",
+                    isInQueue 
+                      ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/30" 
+                      : "border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
+                  )}
+                  onClick={isInQueue ? cancelSpeakRequest : requestSpeak}
+                  data-testid="raise-hand-button"
+                >
+                  <Hand className={cn("h-3.5 w-3.5", isInQueue && "animate-bounce")} />
+                  {isInQueue ? `In Queue (#${myParticipant?.queuePosition || '?'})` : 'Raise Hand'}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isInQueue ? 'Cancel your request to speak' : 'Request permission to speak with voice'}
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* Mic controls (when speaking) */}
@@ -285,54 +368,76 @@ export function ConversationPanel({
               <Button
                 variant={isRecording ? "destructive" : "default"}
                 size="sm"
-                className="gap-1"
+                className={cn(
+                  "gap-1",
+                  isRecording 
+                    ? "bg-red-600 hover:bg-red-500" 
+                    : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500"
+                )}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={hasPermission === false}
+                data-testid="mic-button"
               >
                 {isRecording ? (
                   <>
+                    <div className="h-2 w-2 rounded-full bg-white animate-pulse mr-1" />
                     <MicOff className="h-3.5 w-3.5" />
-                    Stop
+                    Recording...
                   </>
                 ) : (
                   <>
                     <Mic className="h-3.5 w-3.5" />
-                    Speak
+                    Start Mic
                   </>
                 )}
               </Button>
               {isTranscribing && (
-                <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
+                <div className="flex items-center gap-1 text-xs text-cyan-400">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Transcribing...
+                </div>
               )}
             </>
           )}
 
+          <div className="flex-1" />
+
           {myParticipant?.isMuted ? (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={unmute}>
-              <VolumeX className="h-4 w-4 text-red-400" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={unmute}>
+                  <VolumeX className="h-4 w-4 text-red-400" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Unmute yourself</TooltipContent>
+            </Tooltip>
           ) : (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={mute}>
-              <Volume2 className="h-4 w-4 text-green-400" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={mute}>
+                  <Volume2 className="h-4 w-4 text-green-400" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Mute yourself</TooltipContent>
+            </Tooltip>
           )}
         </div>
 
         {/* Text input */}
         <div className="flex items-center gap-2">
           <Input
-            placeholder="Type a message..."
+            placeholder="Type a message to the avatar..."
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+            className="flex-1 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-cyan-500/50"
             data-testid="conversation-input"
           />
           <Button 
             size="icon" 
             onClick={handleSendText}
             disabled={!textInput.trim()}
-            className="bg-cyan-600 hover:bg-cyan-500"
+            className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50"
             data-testid="send-message-button"
           >
             <Send className="h-4 w-4" />
@@ -341,7 +446,10 @@ export function ConversationPanel({
 
         {/* Error display */}
         {error && (
-          <p className="text-xs text-red-400 mt-1">{error}</p>
+          <div className="flex items-center gap-2 text-xs text-red-400">
+            <AlertCircle className="h-3 w-3" />
+            {error}
+          </div>
         )}
       </div>
     </div>
