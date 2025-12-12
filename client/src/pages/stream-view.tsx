@@ -82,6 +82,7 @@ import {
   PinnedMessagesBar,
   CoStreamPanel
 } from '@/components/streaming/EnhancedStreamingFeatures';
+import { ConversationPanel } from '@/components/streams/ConversationPanel';
 
 interface LiveStream {
   id: string;
@@ -454,7 +455,7 @@ export default function StreamViewPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [streamDuration, setStreamDuration] = useState(0);
-  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe' | 'costream'>('chat');
+  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe' | 'costream' | 'converse'>('chat');
   const [isCopied, setIsCopied] = useState(false);
   const [isFloatingChat, setIsFloatingChat] = useState(false);
   const [showCommandsHelp, setShowCommandsHelp] = useState(false);
@@ -1259,7 +1260,7 @@ export default function StreamViewPage() {
             "flex flex-col transition-all duration-300 ease-out overflow-hidden",
             isChatExpanded ? "h-[420px] sm:h-[480px] lg:h-full lg:flex-1" : "h-0 lg:h-full lg:flex-1"
           )}>
-            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream')} className="flex flex-col h-full">
+            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">
                 <TabsList className="bg-transparent w-full justify-start rounded-none h-11 p-0">
                   <TabsTrigger 
@@ -1289,6 +1290,13 @@ export default function StreamViewPage() {
                   >
                     <Radio className="w-3.5 h-3.5 mr-1 text-cyan-400" />
                     Co-Stream
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="converse" 
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent text-xs"
+                  >
+                    <Mic className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                    Voice
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1560,6 +1568,32 @@ export default function StreamViewPage() {
                   sessionId={streamId || ''} 
                   avatars={[]}
                 />
+              </TabsContent>
+
+              <TabsContent value="converse" className="flex-1 flex flex-col m-0 overflow-hidden">
+                {isAuthenticated && streamId ? (
+                  <ConversationPanel
+                    streamId={streamId}
+                    userId={user?.id?.toString()}
+                    isHost={isHost}
+                    className="h-full"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                    <Mic className="w-12 h-12 text-emerald-400/50 mb-4" />
+                    <h3 className="text-lg font-semibold text-white mb-2">Voice Conversation</h3>
+                    <p className="text-sm text-slate-400 mb-4">
+                      Join the live voice conversation with the host and other viewers
+                    </p>
+                    {!isAuthenticated && (
+                      <Link href="/auth">
+                        <Button className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500">
+                          Sign in to Join
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>
