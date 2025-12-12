@@ -34,6 +34,7 @@ import { bountyHunterService } from "./services/bountyHunterService";
 import { qualityScorerService } from "./services/qualityScorerService";
 import { trendingService } from "./services/trendingService";
 import { autonomousTradingEngine } from "./services/autonomousTradingEngine";
+import { pointsService } from "./services/pointsService";
 import passport from "passport";
 import axios from "axios";
 
@@ -221,7 +222,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalSignups: (referralCodeRecord.totalSignups || 0) + 1,
           totalRewardsEarned: (referralCodeRecord.totalRewardsEarned || 0) + rewardAmount
         });
+
+        // Award referrer bonus points
+        await pointsService.awardReferral(referralCodeRecord.userId, user.id);
       }
+
+      // Award signup bonus points (2,500 STREAM points)
+      const signupBonus = await pointsService.awardSignupBonus(user.id);
+      const signupBonusAmount = signupBonus?.amount || 0;
 
       // Generate token
       const token = AuthService.generateToken({
@@ -241,9 +249,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ensName: user.ensName,
           avatar: user.avatar,
           bio: user.bio,
+          streamPoints: signupBonusAmount,
           createdAt: user.createdAt
         },
-        token
+        token,
+        signupBonus: signupBonusAmount
       });
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -444,6 +454,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: user.createdAt
       },
       stats
+    });
+  }));
+
+  // =============================================================================
+  // STREAM POINTS ROUTES
+  // =============================================================================
+
+  // Get user's points balance and stats
+  app.get('/api/points/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const stats = await pointsService.getStats(userId);
+    res.json({ success: true, ...stats });
+  }));
+
+  // Get points transaction history
+  app.get('/api/points/history', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const transactions = await pointsService.getHistory(userId, limit, offset);
+    const stats = await pointsService.getStats(userId);
+    
+    res.json({ 
+      success: true, 
+      transactions,
+      balance: stats.balance,
+      totalEarned: stats.totalEarned,
+      totalSpent: stats.totalSpent
+    });
+  }));
+
+  // Get recent activity (last 24 hours)
+  app.get('/api/points/recent', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const hours = parseInt(req.query.hours as string) || 24;
+    
+    const transactions = await pointsService.getRecentActivity(userId, hours);
+    res.json({ success: true, transactions });
+  }));
+
+  // Process daily login (called when user logs in)
+  app.post('/api/points/daily-login', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const result = await pointsService.processDailyLogin(userId);
+    
+    res.json({ 
+      success: true, 
+      pointsAwarded: result.pointsAwarded,
+      streak: result.streak,
+      isNewLogin: result.pointsAwarded > 0
+    });
+  }));
+
+  // Award points for stream watching (called periodically by frontend)
+  app.post('/api/points/stream-watch', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const { streamId, minutesWatched } = req.body;
+    
+    if (!streamId || !minutesWatched) {
+      return res.status(400).json({ error: 'streamId and minutesWatched required' });
+    }
+    
+    const transaction = await pointsService.awardStreamWatch(userId, streamId, minutesWatched);
+    res.json({ 
+      success: true, 
+      pointsAwarded: transaction?.amount || 0,
+      transaction 
+    });
+  }));
+
+  // Award points for voice conversation
+  app.post('/api/points/voice-conversation', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const { streamId } = req.body;
+    
+    if (!streamId) {
+      return res.status(400).json({ error: 'streamId required' });
+    }
+    
+    const transaction = await pointsService.awardVoiceConversation(userId, streamId);
+    res.json({ 
+      success: true, 
+      pointsAwarded: transaction?.amount || 0,
+      transaction 
     });
   }));
 
