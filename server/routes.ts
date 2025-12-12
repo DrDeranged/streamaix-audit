@@ -4092,6 +4092,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get avatar trading stats (prediction market positions)
+  app.get('/api/avatars/:avatarId/trading-stats', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
+      const stats = await avatarMarketParticipationService.getAvatarTradingStats(req.params.avatarId);
+      
+      res.json({ 
+        success: true,
+        ...stats,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Avatar trading stats error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to fetch trading stats', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Get avatar positions for a specific market
+  app.get('/api/markets/:marketId/avatar-positions', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
+      const positions = await avatarMarketParticipationService.getMarketAvatarPositions(req.params.marketId);
+      
+      res.json({ 
+        success: true,
+        positions,
+        count: positions.length,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Market avatar positions error:', error);
+      res.status(500).json({ 
+        success: false,
+        positions: [],
+        error: 'Failed to fetch avatar positions', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
+  // Trigger avatar trading cycle (admin only)
+  app.post('/api/admin/avatar-trading-cycle', asyncHandler(async (req: Request, res: Response) => {
+    const adminSecret = req.headers['x-admin-secret'];
+    if (adminSecret !== 'streamaix-reseed-2024') {
+      return res.status(403).json({ success: false, error: 'Unauthorized' });
+    }
+
+    try {
+      const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
+      const result = await avatarMarketParticipationService.runTradingCycle();
+      
+      res.json({ 
+        success: true,
+        ...result,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error: any) {
+      console.error('Avatar trading cycle error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to run trading cycle', 
+        timestamp: new Date().toISOString() 
+      });
+    }
+  }));
+
   // Get user engagement predictions
   app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
