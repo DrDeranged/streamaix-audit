@@ -18,6 +18,10 @@ import {
   Radio,
   Zap,
   ArrowRight,
+  Mic,
+  MessageSquare,
+  History,
+  Brain,
   Wifi
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -52,26 +56,29 @@ const streamTypeConfig = {
   broadcast: {
     icon: Video,
     label: 'Broadcasts',
-    color: 'from-purple-500 to-fuchsia-500',
-    textColor: 'text-purple-400',
-    bgColor: 'bg-purple-500/10',
-    borderColor: 'border-purple-500/30',
-  },
-  trading_room: {
-    icon: TrendingUp,
-    label: 'Trading',
     color: 'from-emerald-500 to-cyan-500',
     textColor: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
     borderColor: 'border-emerald-500/30',
+    shadowColor: 'shadow-emerald-500/20',
   },
-  audio_space: {
-    icon: Headphones,
-    label: 'Spaces',
+  trading_room: {
+    icon: TrendingUp,
+    label: 'Trading',
     color: 'from-cyan-500 to-blue-500',
     textColor: 'text-cyan-400',
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/30',
+    shadowColor: 'shadow-cyan-500/20',
+  },
+  audio_space: {
+    icon: Headphones,
+    label: 'Spaces',
+    color: 'from-violet-500 to-purple-500',
+    textColor: 'text-violet-400',
+    bgColor: 'bg-violet-500/10',
+    borderColor: 'border-violet-500/30',
+    shadowColor: 'shadow-violet-500/20',
   },
   live_bounty: {
     icon: Target,
@@ -80,6 +87,7 @@ const streamTypeConfig = {
     textColor: 'text-amber-400',
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30',
+    shadowColor: 'shadow-amber-500/20',
   },
 };
 
@@ -108,44 +116,40 @@ function StreamCard({ stream }: { stream: LiveStream }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -3, scale: 1.01 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className="group cursor-pointer"
       onClick={handleJoin}
+      data-testid={`stream-card-${stream.id}`}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 hover:border-purple-500/40 transition-all duration-300 shadow-xl hover:shadow-purple-500/10">
-        {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-fuchsia-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative overflow-hidden rounded-2xl bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/40 transition-all duration-300 shadow-xl hover:shadow-emerald-500/10">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
-        {/* Top accent line */}
         <div className={cn("absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r", config.color)} />
         
         <div className="relative p-4">
-          {/* Header Row */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className={cn("p-2 rounded-xl bg-gradient-to-br", config.color)}>
+              <div className={cn("p-2 rounded-xl bg-gradient-to-br shadow-lg", config.color, config.shadowColor)}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               {stream.status === 'live' && (
-                <Badge className="bg-red-500/90 text-white border-0 text-[10px] px-2 py-0.5 font-semibold shadow-lg shadow-red-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1.5" />
+                <Badge className="bg-red-500/90 text-white border-0 text-[10px] px-2 py-0.5 font-semibold shadow-lg shadow-red-500/30 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
                   LIVE
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/50 px-2 py-1 rounded-lg">
-              <Eye className="w-3.5 h-3.5" />
-              <span className="font-medium">{stream.currentViewers}</span>
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/30">
+              <Eye className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="font-medium text-emerald-300">{stream.currentViewers}</span>
             </div>
           </div>
           
-          {/* Title */}
-          <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-purple-200 transition-colors leading-tight">
+          <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-emerald-200 transition-colors leading-tight">
             {stream.title}
           </h3>
           
-          {/* Footer Row */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className={cn("w-7 h-7 rounded-full bg-gradient-to-br flex items-center justify-center text-[10px] font-bold text-white shadow-lg", config.color)}>
@@ -161,10 +165,11 @@ function StreamCard({ stream }: { stream: LiveStream }) {
                 handleJoin();
               }}
               disabled={isNavigating}
+              data-testid={`join-stream-${stream.id}`}
               className={cn(
                 "h-8 px-4 text-xs font-semibold rounded-xl bg-gradient-to-r border-0 shadow-lg transition-all",
-                config.color,
-                "hover:shadow-xl hover:brightness-110"
+                "from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500",
+                "hover:shadow-xl hover:shadow-emerald-500/30"
               )}
             >
               {isNavigating ? (
@@ -192,19 +197,20 @@ function ScheduledCard({ stream }: { stream: LiveStream }) {
     <motion.div 
       whileHover={{ x: 4 }}
       onClick={() => setLocation(`/stream/${stream.id}`)}
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30 hover:border-purple-500/30 cursor-pointer transition-all duration-200 group"
+      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30 hover:border-emerald-500/30 cursor-pointer transition-all duration-200 group"
+      data-testid={`scheduled-stream-${stream.id}`}
     >
       <div className={cn("p-2 rounded-lg bg-gradient-to-br", config.color, "opacity-80")}>
         <Calendar className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-white truncate group-hover:text-purple-200 transition-colors">{stream.title}</h4>
+        <h4 className="text-sm font-medium text-white truncate group-hover:text-emerald-200 transition-colors">{stream.title}</h4>
         <div className="flex items-center gap-1 text-[11px] text-slate-500">
           <Clock className="w-3 h-3" />
           {scheduledDate?.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) || 'TBD'}
         </div>
       </div>
-      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
+      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
     </motion.div>
   );
 }
@@ -249,45 +255,46 @@ export function LiveStreamingTerminal() {
   };
   
   return (
-    <section className="py-10 sm:py-16 px-4">
+    <section className="py-10 sm:py-16 px-4" data-testid="streaming-section">
       <div className="max-w-5xl mx-auto">
-        {/* Main Container with enhanced glassmorphism */}
         <div className="relative overflow-hidden rounded-3xl">
-          {/* Background layers */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-purple-950/40 to-slate-900/95" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-emerald-950/20 to-slate-900/95" />
           <div className="absolute inset-0 backdrop-blur-3xl" />
           
-          {/* Animated gradient border */}
-          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-purple-500/50 via-fuchsia-500/30 to-cyan-500/50" />
+          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-emerald-500/50 via-cyan-500/30 to-emerald-500/50" />
           
-          {/* Inner content container */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
+          
           <div className="relative m-[1px] rounded-3xl bg-slate-900/80 overflow-hidden">
-            {/* Top glow accent */}
-            <div className="absolute top-0 left-1/4 right-1/4 h-32 bg-gradient-to-b from-purple-500/20 via-fuchsia-500/10 to-transparent blur-2xl" />
+            <div className="absolute top-0 left-1/4 right-1/4 h-40 bg-gradient-to-b from-emerald-500/15 via-cyan-500/10 to-transparent blur-3xl" />
+            
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+              backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(16, 185, 129, 0.1) 2px, rgba(16, 185, 129, 0.1) 4px)`
+            }} />
             
             <div className="relative p-5 sm:p-8">
-              {/* Header Section */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-4">
-                  {/* Animated Icon */}
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-2xl blur-lg opacity-60 animate-pulse" />
-                    <div className="relative p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-lg">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl blur-xl opacity-50 animate-pulse" />
+                    <div className="relative p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/30">
                       <Radio className="w-6 h-6 text-white" />
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-purple-200 to-fuchsia-200 bg-clip-text text-transparent">
+                    <h2 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-emerald-200 to-cyan-200 bg-clip-text text-transparent">
                       StreamAiX Live
                     </h2>
-                    <p className="text-sm text-slate-400 mt-0.5">Real-time broadcasts & trading rooms</p>
+                    <p className="text-sm text-slate-400 mt-0.5 flex items-center gap-2">
+                      <Brain className="w-3.5 h-3.5 text-emerald-400" />
+                      AI-powered voice conversations & trading rooms
+                    </p>
                   </div>
                 </div>
                 
-                {/* Stats and Actions */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  {/* Live indicator */}
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-slate-700/50">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-emerald-500/20">
                     <div className="relative flex items-center justify-center">
                       <span className="absolute w-3 h-3 rounded-full bg-red-500 animate-ping opacity-50" />
                       <span className="relative w-2 h-2 rounded-full bg-red-500" />
@@ -295,16 +302,15 @@ export function LiveStreamingTerminal() {
                     <span className="text-sm font-semibold text-red-400">{totalLive} Live</span>
                   </div>
                   
-                  {/* Viewers */}
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-slate-700/50">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-cyan-500/20">
                     <Users className="w-4 h-4 text-cyan-400" />
                     <span className="text-sm font-semibold text-cyan-400">{totalViewers}</span>
                   </div>
                   
-                  {/* Go Live Button */}
                   <Button 
                     onClick={handleGoLive}
-                    className="h-10 px-5 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-500 hover:via-fuchsia-500 hover:to-purple-500 text-white font-semibold border-0 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all rounded-xl"
+                    data-testid="go-live-button"
+                    className="h-10 px-5 bg-gradient-to-r from-emerald-600 via-cyan-600 to-emerald-600 hover:from-emerald-500 hover:via-cyan-500 hover:to-emerald-500 text-white font-semibold border-0 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all rounded-xl"
                   >
                     <Video className="w-4 h-4 mr-2" />
                     Go Live
@@ -312,7 +318,6 @@ export function LiveStreamingTerminal() {
                 </div>
               </div>
               
-              {/* Tab Navigation */}
               <div className="flex gap-1 p-1.5 mb-6 rounded-2xl bg-slate-800/50 border border-slate-700/30 backdrop-blur-sm">
                 {streamTypes.map((type) => {
                   const config = streamTypeConfig[type];
@@ -326,6 +331,7 @@ export function LiveStreamingTerminal() {
                       onClick={() => setActiveTab(type)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      data-testid={`tab-${type}`}
                       className={cn(
                         "flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200",
                         isActive 
@@ -350,7 +356,6 @@ export function LiveStreamingTerminal() {
                 })}
               </div>
               
-              {/* Content Area */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -362,7 +367,7 @@ export function LiveStreamingTerminal() {
                   {isLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-36 rounded-2xl bg-slate-800/30 animate-pulse" />
+                        <div key={i} className="h-36 rounded-2xl bg-gradient-to-br from-slate-800/30 to-slate-800/10 animate-pulse border border-slate-700/20" />
                       ))}
                     </div>
                   ) : filteredLiveStreams.length > 0 ? (
@@ -373,11 +378,10 @@ export function LiveStreamingTerminal() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Empty State */}
-                      <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-slate-800/30 border border-slate-700/30 text-center">
+                      <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-slate-800/30 border border-slate-700/30 text-center backdrop-blur-sm">
                         <div className="relative mb-4">
-                          <div className={cn("absolute inset-0 bg-gradient-to-br rounded-2xl blur-lg opacity-40", streamTypeConfig[activeTab].color)} />
-                          <div className={cn("relative p-4 rounded-2xl bg-gradient-to-br", streamTypeConfig[activeTab].color)}>
+                          <div className={cn("absolute inset-0 bg-gradient-to-br rounded-2xl blur-xl opacity-40", streamTypeConfig[activeTab].color)} />
+                          <div className={cn("relative p-4 rounded-2xl bg-gradient-to-br shadow-lg", streamTypeConfig[activeTab].color)}>
                             {(() => {
                               const Icon = streamTypeConfig[activeTab].icon;
                               return <Icon className="w-7 h-7 text-white" />;
@@ -387,18 +391,18 @@ export function LiveStreamingTerminal() {
                         <p className="text-sm text-slate-400 mb-4">No {streamTypeConfig[activeTab].label.toLowerCase()} live right now</p>
                         <Button 
                           onClick={handleGoLive}
-                          className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 border-0 shadow-lg shadow-purple-500/20 rounded-xl"
+                          data-testid="be-first-button"
+                          className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 border-0 shadow-lg shadow-emerald-500/20 rounded-xl"
                         >
                           <Zap className="w-4 h-4 mr-2" />
                           Be the First
                         </Button>
                       </div>
                       
-                      {/* Upcoming */}
                       {filteredScheduled.length > 0 && (
-                        <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+                        <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30 backdrop-blur-sm">
                           <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-fuchsia-400" />
+                            <Calendar className="w-4 h-4 text-cyan-400" />
                             Coming Up
                           </h4>
                           <div className="space-y-2">
@@ -413,30 +417,90 @@ export function LiveStreamingTerminal() {
                 </motion.div>
               </AnimatePresence>
               
-              {/* Footer Features */}
               <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-5 border-t border-slate-700/30">
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-500">
-                  <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/40 border border-slate-700/30">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-slate-300">AI Summaries</span>
-                  </span>
-                  <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/40 border border-slate-700/30">
-                    <Target className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-slate-300">Predictions</span>
-                  </span>
-                  <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/40 border border-slate-700/30">
-                    <Coins className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-slate-300">STREAM Tips</span>
-                  </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <motion.span 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 cursor-default"
+                  >
+                    <Mic className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs text-emerald-300 font-medium">Voice Chat</span>
+                  </motion.span>
+                  <motion.span 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 cursor-default"
+                  >
+                    <Brain className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-xs text-cyan-300 font-medium">AI Insights</span>
+                  </motion.span>
+                  <motion.span 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-violet-500/5 border border-violet-500/20 cursor-default"
+                  >
+                    <History className="w-3.5 h-3.5 text-violet-400" />
+                    <span className="text-xs text-violet-300 font-medium">Replay</span>
+                  </motion.span>
+                  <motion.span 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 cursor-default"
+                  >
+                    <Coins className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-xs text-amber-300 font-medium">STREAM Tips</span>
+                  </motion.span>
+                  <motion.span 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500/10 to-rose-500/5 border border-rose-500/20 cursor-default"
+                  >
+                    <Target className="w-3.5 h-3.5 text-rose-400" />
+                    <span className="text-xs text-rose-300 font-medium">Predictions</span>
+                  </motion.span>
                 </div>
                 
                 <Link href="/streams">
-                  <Button variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded-xl">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    data-testid="view-all-streams"
+                    className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-xl font-medium"
+                  >
                     View All
                     <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </Link>
               </div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-cyan-500/5 to-emerald-500/5 border border-emerald-500/20"
+              >
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20">
+                      <Mic className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Real-Time AI Voice Conversations</h4>
+                      <p className="text-xs text-slate-400">Talk directly with Knowledge Avatars using your microphone</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-auto">
+                    <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium px-2 py-1 rounded-lg bg-emerald-500/10">
+                      <Wifi className="w-3 h-3" />
+                      WebSocket
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] text-cyan-400 font-medium px-2 py-1 rounded-lg bg-cyan-500/10">
+                      <Sparkles className="w-3 h-3" />
+                      GPT-4o
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] text-violet-400 font-medium px-2 py-1 rounded-lg bg-violet-500/10">
+                      <MessageSquare className="w-3 h-3" />
+                      TTS
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
