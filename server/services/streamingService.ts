@@ -4,6 +4,7 @@ import { liveStreams, streamMessages, users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { pushNotificationService } from './pushNotificationService';
 import { getAutonomousAvatarStreamService } from './autonomousAvatarStreamService';
+import { getEnhancedStreamingService } from './enhancedStreamingService';
 
 interface StreamMessage {
   type: 'join' | 'leave' | 'chat' | 'tip' | 'reaction' | 'viewer-count' | 'stream-end' | 'ai-message' | 
@@ -652,14 +653,45 @@ export class StreamingService {
     }
 
     session.isLive = false;
+    const durationMs = Date.now() - session.startedAt;
+    const durationSeconds = Math.floor(durationMs / 1000);
 
-    // Update database
+    // Update database with duration
     await db.update(liveStreams)
       .set({ 
         status: 'ended',
         actualEnd: new Date(),
+        durationSeconds: durationSeconds,
       })
       .where(eq(liveStreams.id, streamId));
+
+    // Create stream recording for replays
+    try {
+      const enhancedService = getEnhancedStreamingService();
+      if (enhancedService) {
+        // Create recording entry (recordingUrl is the streamId for now - could be enhanced with actual video URL)
+        const recordingId = await enhancedService.createStreamRecording(
+          streamId,
+          `/api/streams/${streamId}/replay`, // Virtual replay URL
+          durationSeconds
+        );
+        
+        if (recordingId) {
+          console.log(`[Streaming] 📹 Created replay recording ${recordingId} for stream ${streamId.slice(0, 8)}...`);
+          
+          // Generate AI summary for the stream (async, don't wait)
+          enhancedService.generateStreamSummary(streamId).then(summary => {
+            if (summary) {
+              console.log(`[Streaming] 📝 Generated AI summary for stream ${streamId.slice(0, 8)}...`);
+            }
+          }).catch(err => {
+            console.error(`[Streaming] Error generating summary for ${streamId}:`, err);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[Streaming] Error creating stream recording:', error);
+    }
 
     // Notify all viewers
     this.broadcastToStream(streamId, {
@@ -667,7 +699,7 @@ export class StreamingService {
       streamId,
       userId: hostId,
       data: {
-        duration: Date.now() - session.startedAt,
+        duration: durationMs,
         peakViewers: session.peakViewers,
         totalMessages: session.messages.length,
         totalTips: session.tips.reduce((sum, t) => sum + t.amount, 0),
