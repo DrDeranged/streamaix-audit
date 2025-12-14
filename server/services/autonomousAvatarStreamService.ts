@@ -42,8 +42,8 @@ export class AutonomousAvatarStreamService {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log('🎙️ [Avatar Voice] ⏸️ OpenAI API is paused - voice streaming disabled');
+    if (process.env.PAUSE_OPENAI_API === 'true' || process.env.DISABLE_OPENAI_TTS === 'true') {
+      console.log('🎙️ [Avatar Voice] ⏸️ TTS is disabled - voice streaming disabled');
       return;
     }
 

@@ -92,6 +92,12 @@ export class AvatarVoiceService {
     avatarName: string,
     options?: { useCache?: boolean }
   ): Promise<Buffer> {
+    // Check if TTS is explicitly disabled or API is paused
+    if (process.env.DISABLE_OPENAI_TTS === 'true') {
+      console.log(`[TTS] ⏸️ TTS is disabled - skipping TTS generation for ${avatarName}`);
+      throw new Error('OpenAI TTS is disabled');
+    }
+    
     // Check if API is paused AND avatar is not in the allowed list
     if (process.env.PAUSE_OPENAI_API === 'true') {
       if (!this.isAvatarTtsEnabled(avatarName)) {
