@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStreamConversation, ConversationMessage, ConversationParticipant } from '@/hooks/useStreamConversation';
 import { useMicrophone } from '@/hooks/useMicrophone';
+import { useAwardVoiceConversation } from '@/hooks/usePoints';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -47,6 +48,9 @@ export function ConversationPanel({
   const audioQueueRef = useRef<string[]>([]);
   const isPlayingRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pointsAwardedRef = useRef(false);
+  
+  const awardVoiceConversation = useAwardVoiceConversation();
 
   const handleAudioReceived = (audioBase64: string, speakerName: string) => {
     if (!audioEnabled) return;
@@ -124,6 +128,11 @@ export function ConversationPanel({
     if (textInput.trim()) {
       sendTextInput(textInput.trim());
       setTextInput('');
+      
+      if (!pointsAwardedRef.current) {
+        pointsAwardedRef.current = true;
+        awardVoiceConversation.mutate({ streamId });
+      }
     }
   };
 
