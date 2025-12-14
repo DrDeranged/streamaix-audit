@@ -791,7 +791,7 @@ export default function StreamViewPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
+      <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
         <div className="flex flex-col lg:flex-row h-screen">
           <div className="flex-1 flex flex-col">
             <div className="h-14 bg-slate-900/80 border-b border-purple-500/20 animate-pulse" />
@@ -834,7 +834,7 @@ export default function StreamViewPage() {
 
   if (!stream) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 flex flex-col items-center justify-center gap-4 px-4 safe-area-inset">
+      <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 flex flex-col items-center justify-center gap-4 px-4 safe-area-inset">
         <div className="w-20 h-20 rounded-full bg-slate-800/60 flex items-center justify-center mb-2">
           <Video className="w-10 h-10 text-slate-600" />
         </div>
@@ -856,7 +856,7 @@ export default function StreamViewPage() {
 
   return (
     <div className={cn(
-      "min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset flex flex-col",
+      "min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset flex flex-col",
       isTheaterMode && "bg-black"
     )}>
       <div className={cn(
@@ -958,7 +958,7 @@ export default function StreamViewPage() {
           <Card className={cn(
             "relative overflow-hidden border border-purple-500/20",
             isTheaterMode 
-              ? "aspect-auto h-[60vh] sm:h-[70vh] lg:h-[80vh] rounded-none border-0 bg-black" 
+              ? "aspect-auto h-[60dvh] sm:h-[70dvh] lg:h-[80dvh] rounded-none border-0 bg-black" 
               : "aspect-video bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90"
           )}>
             {isLive && streamId && <MarketPriceOverlay streamId={streamId} />}
@@ -1290,7 +1290,7 @@ export default function StreamViewPage() {
 
           <div className={cn(
             "flex flex-col transition-all duration-300 ease-out overflow-hidden",
-            isChatExpanded ? "h-[50vh] sm:h-[55vh] lg:h-full lg:flex-1 max-h-[calc(100vh-200px)]" : "h-0 lg:h-full lg:flex-1"
+            isChatExpanded ? "h-[50dvh] sm:h-[55dvh] lg:h-full lg:flex-1 max-h-[calc(100dvh-200px)]" : "h-0 lg:h-full lg:flex-1"
           )}>
             <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">
