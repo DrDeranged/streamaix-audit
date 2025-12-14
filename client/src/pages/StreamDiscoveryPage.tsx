@@ -87,14 +87,15 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, scale: 1.01 }}
+      whileHover={{ y: -6, scale: 1.02 }}
       onClick={onClick}
       className={cn(
         "relative rounded-2xl overflow-hidden cursor-pointer group",
-        "bg-slate-900/40 backdrop-blur-xl",
-        "border border-slate-700/50",
-        "hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]",
-        "transition-all duration-500"
+        "bg-slate-800/60 backdrop-blur-xl",
+        "border border-slate-600/60",
+        "hover:border-cyan-400/60 hover:shadow-[0_0_40px_rgba(6,182,212,0.25)]",
+        "hover:bg-slate-700/50",
+        "transition-all duration-400"
       )}
       data-testid={`card-stream-${stream.id}`}
     >
