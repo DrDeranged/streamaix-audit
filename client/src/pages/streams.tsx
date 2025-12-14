@@ -189,6 +189,16 @@ const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: stri
   'Brad Garlinghouse': { icon: Zap, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Ripple
   'Katie Haun': { icon: Shield, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // Haun Ventures
   'Robert Leshner': { icon: BarChart3, color: 'text-green-400', bgColor: 'bg-green-500/20' }, // Compound
+  'Naval Ravikant': { icon: Brain, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' }, // AngelList
+  'Cameron Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Gemini
+  'Tyler Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // Gemini
+  'Balaji Srinivasan': { icon: Brain, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // a16z/Coinbase
+  'Cathie Wood': { icon: TrendingUp, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }, // ARK Invest
+  'Jesse Pollak': { icon: SiCoinbase, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Base/Coinbase
+  'Paul Graham': { icon: Rocket, color: 'text-orange-400', bgColor: 'bg-orange-500/20' }, // Y Combinator
+  'Michael Saylor': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // MicroStrategy
+  'Jack Dorsey': { icon: SiX, color: 'text-white', bgColor: 'bg-slate-700' }, // Block/Twitter
+  'Raoul Pal': { icon: TrendingUp, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' }, // Real Vision
 };
 
 const getAvatarFallback = (username?: string) => {

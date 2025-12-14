@@ -22,8 +22,24 @@ import {
   MessageSquare,
   History,
   Brain,
-  Wifi
+  Wifi,
+  Shield,
+  Wallet,
+  BarChart3,
+  Rocket,
+  Globe,
+  Hexagon
 } from 'lucide-react';
+import { 
+  SiEthereum, 
+  SiX, 
+  SiOpenai,
+  SiSolana,
+  SiBitcoin,
+  SiCoinbase,
+  SiPolkadot,
+  SiCardano
+} from 'react-icons/si';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -91,6 +107,49 @@ const streamTypeConfig = {
   },
 };
 
+const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: string }> = {
+  'Hayden Adams': { icon: Hexagon, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  'Vitalik Buterin': { icon: SiEthereum, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Gavin Wood': { icon: SiPolkadot, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  'Anatoly Yakovenko': { icon: SiSolana, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Brian Armstrong': { icon: SiCoinbase, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Jesse Powell': { icon: Wallet, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Sam Altman': { icon: SiOpenai, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+  'Elon Musk': { icon: SiX, color: 'text-white', bgColor: 'bg-slate-700' },
+  'Stani Kulechov': { icon: Zap, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
+  'Arthur Hayes': { icon: BarChart3, color: 'text-red-400', bgColor: 'bg-red-500/20' },
+  'Andre Cronje': { icon: Rocket, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Charles Hoskinson': { icon: SiCardano, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Justin Sun': { icon: Zap, color: 'text-red-500', bgColor: 'bg-red-500/20' },
+  'Marc Andreessen': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+  'Chris Dixon': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+  'Anthony Pompliano': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Adam Back': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Brad Garlinghouse': { icon: Zap, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Katie Haun': { icon: Shield, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Robert Leshner': { icon: BarChart3, color: 'text-green-400', bgColor: 'bg-green-500/20' },
+  'Naval Ravikant': { icon: Brain, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
+  'Cameron Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Tyler Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Balaji Srinivasan': { icon: Brain, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Cathie Wood': { icon: TrendingUp, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  'Jesse Pollak': { icon: SiCoinbase, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Paul Graham': { icon: Rocket, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+  'Michael Saylor': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Jack Dorsey': { icon: SiX, color: 'text-white', bgColor: 'bg-slate-700' },
+  'Raoul Pal': { icon: TrendingUp, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+};
+
+const getAvatarFallback = (username?: string) => {
+  if (!username) return null;
+  return avatarBrandIcons[username] || null;
+};
+
+const getDiceBearAvatar = (username?: string) => {
+  if (!username) return 'https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous';
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
+};
+
 function StreamCard({ stream }: { stream: LiveStream }) {
   const config = streamTypeConfig[stream.streamType];
   const Icon = config.icon;
@@ -152,9 +211,26 @@ function StreamCard({ stream }: { stream: LiveStream }) {
           
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className={cn("w-7 h-7 rounded-full bg-gradient-to-br flex items-center justify-center text-[10px] font-bold text-white shadow-lg", config.color)}>
-                {stream.hostUsername?.[0]?.toUpperCase() || '?'}
-              </div>
+              {(() => {
+                const brandFallback = getAvatarFallback(stream.hostUsername);
+                const BrandIcon = brandFallback?.icon;
+                const showBrandIcon = brandFallback != null;
+                
+                if (showBrandIcon && BrandIcon) {
+                  return (
+                    <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shadow-lg", brandFallback.bgColor)}>
+                      <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
+                    </div>
+                  );
+                }
+                return (
+                  <img 
+                    src={getDiceBearAvatar(stream.hostUsername)} 
+                    alt="" 
+                    className="w-7 h-7 rounded-full object-cover shadow-lg"
+                  />
+                );
+              })()}
               <span className="text-xs text-slate-400 font-medium">@{stream.hostUsername || 'anon'}</span>
             </div>
             
