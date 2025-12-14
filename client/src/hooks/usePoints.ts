@@ -77,8 +77,7 @@ export function useDailyLogin() {
 
   return useMutation<DailyLoginResponse, Error>({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/points/daily-login');
-      return response.json();
+      return apiRequest('/api/points/daily-login', { method: 'POST' });
     },
     onSuccess: (data) => {
       if (data.isNewLogin && data.pointsAwarded > 0) {
@@ -98,8 +97,10 @@ export function useAwardStreamWatch() {
 
   return useMutation<{ success: boolean; pointsAwarded: number }, Error, { streamId: string; minutesWatched: number }>({
     mutationFn: async ({ streamId, minutesWatched }) => {
-      const response = await apiRequest('POST', '/api/points/stream-watch', { streamId, minutesWatched });
-      return response.json();
+      return apiRequest('/api/points/stream-watch', { 
+        method: 'POST',
+        body: JSON.stringify({ streamId, minutesWatched })
+      });
     },
     onSuccess: (data) => {
       if (data.pointsAwarded > 0) {
@@ -119,8 +120,10 @@ export function useAwardVoiceConversation() {
 
   return useMutation<{ success: boolean; pointsAwarded: number }, Error, { streamId: string }>({
     mutationFn: async ({ streamId }) => {
-      const response = await apiRequest('POST', '/api/points/voice-conversation', { streamId });
-      return response.json();
+      return apiRequest('/api/points/voice-conversation', { 
+        method: 'POST',
+        body: JSON.stringify({ streamId })
+      });
     },
     onSuccess: (data) => {
       if (data.pointsAwarded > 0) {

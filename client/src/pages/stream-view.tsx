@@ -66,6 +66,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useStreamSocket } from '@/hooks/useStreamSocket';
+import { useAwardStreamWatch, useAwardVoiceConversation } from '@/hooks/usePoints';
 import { useViewerStream } from '@/hooks/useViewerStream';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
@@ -465,8 +466,13 @@ export default function StreamViewPage() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const viewerVideoRef = useRef<HTMLVideoElement>(null);
   const streamId = params?.id || null;
+  const watchTimeRef = useRef<number>(0);
+  const lastPointsAwardedRef = useRef<number>(0);
   
   const { isConnected, viewerCount, messages, sendMessage, onAvatarAudio } = useStreamSocket(streamId);
+  
+  const awardStreamWatch = useAwardStreamWatch();
+  const awardVoiceConversation = useAwardVoiceConversation();
   
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
     queryKey: ['/api/streams', streamId],
@@ -565,6 +571,31 @@ export default function StreamViewPage() {
     }
     return () => clearInterval(interval);
   }, [isRecording]);
+
+  useEffect(() => {
+    if (!streamId || !isAuthenticated || !stream?.status) return;
+    
+    const POINTS_INTERVAL_MS = 5 * 60 * 1000;
+    
+    const interval = setInterval(() => {
+      watchTimeRef.current += 5;
+      
+      if (watchTimeRef.current >= 5 && watchTimeRef.current > lastPointsAwardedRef.current) {
+        const minutesToAward = watchTimeRef.current - lastPointsAwardedRef.current;
+        if (minutesToAward >= 5) {
+          awardStreamWatch.mutate({ streamId, minutesWatched: minutesToAward });
+          lastPointsAwardedRef.current = watchTimeRef.current;
+          console.log(`[StreamView] Awarded points for ${minutesToAward} minutes watched`);
+        }
+      }
+    }, POINTS_INTERVAL_MS);
+    
+    return () => {
+      clearInterval(interval);
+      watchTimeRef.current = 0;
+      lastPointsAwardedRef.current = 0;
+    };
+  }, [streamId, isAuthenticated, stream?.status, awardStreamWatch]);
 
   const removeTipAlert = useCallback((id: string) => {
     setActiveTipAlerts(prev => prev.filter(a => a.id !== id));
