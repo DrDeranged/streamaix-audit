@@ -72,11 +72,11 @@ const streamTypeConfig = {
   broadcast: {
     icon: Video,
     label: 'Broadcasts',
-    color: 'from-emerald-500 to-cyan-500',
-    textColor: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/30',
-    shadowColor: 'shadow-emerald-500/20',
+    color: 'from-amber-500 to-orange-500',
+    textColor: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
+    borderColor: 'border-amber-500/30',
+    shadowColor: 'shadow-amber-500/20',
   },
   trading_room: {
     icon: TrendingUp,
@@ -181,8 +181,8 @@ function StreamCard({ stream }: { stream: LiveStream }) {
       onClick={handleJoin}
       data-testid={`stream-card-${stream.id}`}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/40 transition-all duration-300 shadow-xl hover:shadow-emerald-500/10">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative overflow-hidden rounded-2xl bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 hover:border-amber-500/40 transition-all duration-300 shadow-xl hover:shadow-amber-500/10">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         <div className={cn("absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r", config.color)} />
         
@@ -200,12 +200,12 @@ function StreamCard({ stream }: { stream: LiveStream }) {
               )}
             </div>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/30">
-              <Eye className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="font-medium text-emerald-300">{stream.currentViewers}</span>
+              <Eye className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-medium text-amber-300">{stream.currentViewers}</span>
             </div>
           </div>
           
-          <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-emerald-200 transition-colors leading-tight">
+          <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-amber-200 transition-colors leading-tight">
             {stream.title}
           </h3>
           
@@ -244,8 +244,8 @@ function StreamCard({ stream }: { stream: LiveStream }) {
               data-testid={`join-stream-${stream.id}`}
               className={cn(
                 "h-8 px-4 text-xs font-semibold rounded-xl bg-gradient-to-r border-0 shadow-lg transition-all",
-                "from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500",
-                "hover:shadow-xl hover:shadow-emerald-500/30"
+                "from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400",
+                "hover:shadow-xl hover:shadow-amber-500/30"
               )}
             >
               {isNavigating ? (
@@ -273,20 +273,20 @@ function ScheduledCard({ stream }: { stream: LiveStream }) {
     <motion.div 
       whileHover={{ x: 4 }}
       onClick={() => setLocation(`/stream/${stream.id}`)}
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30 hover:border-emerald-500/30 cursor-pointer transition-all duration-200 group"
+      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30 hover:border-amber-500/30 cursor-pointer transition-all duration-200 group"
       data-testid={`scheduled-stream-${stream.id}`}
     >
       <div className={cn("p-2 rounded-lg bg-gradient-to-br", config.color, "opacity-80")}>
         <Calendar className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-white truncate group-hover:text-emerald-200 transition-colors">{stream.title}</h4>
+        <h4 className="text-sm font-medium text-white truncate group-hover:text-amber-200 transition-colors">{stream.title}</h4>
         <div className="flex items-center gap-1 text-[11px] text-slate-500">
           <Clock className="w-3 h-3" />
           {scheduledDate?.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) || 'TBD'}
         </div>
       </div>
-      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
     </motion.div>
   );
 }
@@ -334,16 +334,16 @@ export function LiveStreamingTerminal() {
     <section className="py-10 sm:py-16 px-4" data-testid="streaming-section">
       <div className="max-w-5xl mx-auto">
         <div className="relative overflow-hidden rounded-3xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-emerald-950/20 to-slate-900/95" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-amber-950/20 to-slate-900/95" />
           <div className="absolute inset-0 backdrop-blur-3xl" />
           
-          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-emerald-500/50 via-cyan-500/30 to-emerald-500/50" />
+          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-amber-500/50 via-cyan-500/30 to-amber-500/50" />
           
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
           
           <div className="relative m-[1px] rounded-3xl bg-slate-900/80 overflow-hidden">
-            <div className="absolute top-0 left-1/4 right-1/4 h-40 bg-gradient-to-b from-emerald-500/15 via-cyan-500/10 to-transparent blur-3xl" />
+            <div className="absolute top-0 left-1/4 right-1/4 h-40 bg-gradient-to-b from-amber-500/15 via-cyan-500/10 to-transparent blur-3xl" />
             
             <div className="absolute inset-0 opacity-[0.03]" style={{
               backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(16, 185, 129, 0.1) 2px, rgba(16, 185, 129, 0.1) 4px)`
@@ -353,24 +353,24 @@ export function LiveStreamingTerminal() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl blur-xl opacity-50 animate-pulse" />
-                    <div className="relative p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/30">
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl blur-xl opacity-50 animate-pulse" />
+                    <div className="relative p-3.5 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30">
                       <Radio className="w-6 h-6 text-white" />
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-emerald-200 to-cyan-200 bg-clip-text text-transparent">
+                    <h2 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-amber-200 to-cyan-200 bg-clip-text text-transparent">
                       StreamAiX Live
                     </h2>
                     <p className="text-sm text-slate-400 mt-0.5 flex items-center gap-2">
-                      <Brain className="w-3.5 h-3.5 text-emerald-400" />
+                      <Brain className="w-3.5 h-3.5 text-amber-400" />
                       AI-powered voice conversations & trading rooms
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-emerald-500/20">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-amber-500/20">
                     <div className="relative flex items-center justify-center">
                       <span className="absolute w-3 h-3 rounded-full bg-red-500 animate-ping opacity-50" />
                       <span className="relative w-2 h-2 rounded-full bg-red-500" />
@@ -386,7 +386,7 @@ export function LiveStreamingTerminal() {
                   <Button 
                     onClick={handleGoLive}
                     data-testid="go-live-button"
-                    className="h-10 px-5 bg-gradient-to-r from-emerald-600 via-cyan-600 to-emerald-600 hover:from-emerald-500 hover:via-cyan-500 hover:to-emerald-500 text-white font-semibold border-0 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all rounded-xl"
+                    className="h-10 px-5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:via-orange-400 hover:to-amber-400 text-white font-semibold border-0 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all rounded-xl"
                   >
                     <Video className="w-4 h-4 mr-2" />
                     Go Live
@@ -468,7 +468,7 @@ export function LiveStreamingTerminal() {
                         <Button 
                           onClick={handleGoLive}
                           data-testid="be-first-button"
-                          className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 border-0 shadow-lg shadow-emerald-500/20 rounded-xl"
+                          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0 shadow-lg shadow-amber-500/20 rounded-xl"
                         >
                           <Zap className="w-4 h-4 mr-2" />
                           Be the First
@@ -497,10 +497,10 @@ export function LiveStreamingTerminal() {
                 <div className="flex flex-wrap items-center gap-3">
                   <motion.span 
                     whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 cursor-default"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 cursor-default"
                   >
-                    <Mic className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-xs text-emerald-300 font-medium">Voice Chat</span>
+                    <Mic className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-xs text-amber-300 font-medium">Voice Chat</span>
                   </motion.span>
                   <motion.span 
                     whileHover={{ scale: 1.05 }}
@@ -537,7 +537,7 @@ export function LiveStreamingTerminal() {
                     variant="ghost" 
                     size="sm" 
                     data-testid="view-all-streams"
-                    className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-xl font-medium"
+                    className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 rounded-xl font-medium"
                   >
                     View All
                     <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -549,11 +549,11 @@ export function LiveStreamingTerminal() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-cyan-500/5 to-emerald-500/5 border border-emerald-500/20"
+                className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/5 via-cyan-500/5 to-amber-500/5 border border-amber-500/20"
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20">
                       <Mic className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -562,7 +562,7 @@ export function LiveStreamingTerminal() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-auto">
-                    <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium px-2 py-1 rounded-lg bg-emerald-500/10">
+                    <span className="flex items-center gap-1.5 text-[10px] text-amber-400 font-medium px-2 py-1 rounded-lg bg-amber-500/10">
                       <Wifi className="w-3 h-3" />
                       WebSocket
                     </span>
