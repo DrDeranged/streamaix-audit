@@ -13579,18 +13579,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       isActive: true,
     });
 
-    // If stream is going live immediately, notify followers
+    // If stream is going live immediately, notify followers AND all subscribed users
     if (!scheduledStart) {
       try {
         const { pushNotificationService } = await import('./services/pushNotificationService');
+        const streamerName = req.user.username || 'Creator';
+        
+        // Notify followers specifically
         pushNotificationService.notifyFollowersStreamLive(
           req.user.id,
-          req.user.username || 'Creator',
+          streamerName,
           title,
           streamType as 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
           newStream.id,
           req.user.avatar
         ).catch(err => console.error('🔔 Error notifying followers of stream:', err));
+        
+        // Also broadcast to ALL users with stream_live notifications enabled
+        pushNotificationService.sendToAll({
+          title: `📺 @${streamerName} went live!`,
+          body: title.length > 60 ? title.substring(0, 57) + '...' : title,
+          url: `/stream/${newStream.id}`,
+          tag: `stream-live-${newStream.id}`,
+          requireInteraction: true,
+        }, 'stream_live').catch(err => console.error('🔔 Error broadcasting stream live:', err));
       } catch (error) {
         console.error('🔔 Error importing push service:', error);
       }
@@ -13627,17 +13639,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(eq(liveStreams.id, req.params.id))
       .returning();
 
-    // Notify followers that the scheduled stream is now live
+    // Notify followers that the scheduled stream is now live AND broadcast to all users
     try {
       const { pushNotificationService } = await import('./services/pushNotificationService');
+      const streamerName = req.user.username || 'Creator';
+      
+      // Notify followers specifically
       pushNotificationService.notifyFollowersStreamLive(
         req.user.id,
-        req.user.username || 'Creator',
+        streamerName,
         stream.title,
         stream.streamType as 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
         stream.id,
         req.user.avatar
       ).catch(err => console.error('🔔 Error notifying followers of stream start:', err));
+      
+      // Also broadcast to ALL users with stream_live notifications enabled
+      pushNotificationService.sendToAll({
+        title: `📺 @${streamerName} went live!`,
+        body: stream.title.length > 60 ? stream.title.substring(0, 57) + '...' : stream.title,
+        url: `/stream/${stream.id}`,
+        tag: `stream-live-${stream.id}`,
+        requireInteraction: true,
+      }, 'stream_live').catch(err => console.error('🔔 Error broadcasting stream live:', err));
     } catch (error) {
       console.error('🔔 Error importing push service:', error);
     }
