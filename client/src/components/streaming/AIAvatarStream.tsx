@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Sparkles, Activity, Mic, Radio, Brain, Zap, TrendingUp, Volume2, VolumeX, MessageCircle, Lightbulb, Target, BarChart3, Shield, Flame, Heart } from 'lucide-react';
+import { Bot, Sparkles, Activity, Mic, Radio, Brain, Zap, TrendingUp, Volume2, VolumeX, MessageCircle, Lightbulb, Target, BarChart3, Shield, Flame, Heart, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface AIAvatarStreamProps {
   hostName: string;
@@ -113,15 +114,15 @@ const getPersonaFromName = (name: string): AIPersona => {
     expertise: ['Crypto', 'Market Analysis', 'Trading'],
     mood: 'Engaged',
     icon: Bot,
-    gradient: 'from-purple-500 to-fuchsia-500',
+    gradient: 'from-fuchsia-500 to-purple-500',
   };
 };
 
 const avatarStyles: Record<string, { gradient: string; icon: any; pulseColor: string }> = {
   broadcast: {
-    gradient: 'from-purple-500 via-fuchsia-500 to-pink-500',
+    gradient: 'from-fuchsia-500 via-purple-500 to-cyan-500',
     icon: Radio,
-    pulseColor: 'rgb(168, 85, 247)',
+    pulseColor: 'rgb(217, 70, 239)',
   },
   trading_room: {
     gradient: 'from-emerald-500 via-cyan-500 to-blue-500',
@@ -139,113 +140,16 @@ const avatarStyles: Record<string, { gradient: string; icon: any; pulseColor: st
     pulseColor: 'rgb(245, 158, 11)',
   },
   avatar_alpha: {
-    gradient: 'from-purple-600 via-pink-500 to-orange-400',
+    gradient: 'from-fuchsia-600 via-purple-500 to-cyan-400',
     icon: Brain,
-    pulseColor: 'rgb(168, 85, 247)',
+    pulseColor: 'rgb(217, 70, 239)',
   },
 };
-
-const thoughtBubbles = [
-  "Analyzing market data...",
-  "Processing on-chain metrics...",
-  "Evaluating trade setups...",
-  "Checking price patterns...",
-  "Reviewing sentiment...",
-  "Computing risk levels...",
-  "Scanning for alpha...",
-  "Updating predictions...",
-];
-
-function NeuralNetwork() {
-  return (
-    <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 200 200">
-      <defs>
-        <linearGradient id="neural-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a855f7" />
-          <stop offset="50%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#10b981" />
-        </linearGradient>
-      </defs>
-      {[...Array(8)].map((_, i) => (
-        <motion.circle
-          key={`node-${i}`}
-          cx={100 + Math.cos((i * Math.PI * 2) / 8) * 60}
-          cy={100 + Math.sin((i * Math.PI * 2) / 8) * 60}
-          r="4"
-          fill="url(#neural-gradient)"
-          initial={{ opacity: 0.3 }}
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: i * 0.2,
-          }}
-        />
-      ))}
-      {[...Array(8)].map((_, i) => (
-        <motion.line
-          key={`line-${i}`}
-          x1={100 + Math.cos((i * Math.PI * 2) / 8) * 60}
-          y1={100 + Math.sin((i * Math.PI * 2) / 8) * 60}
-          x2={100 + Math.cos(((i + 1) * Math.PI * 2) / 8) * 60}
-          y2={100 + Math.sin(((i + 1) * Math.PI * 2) / 8) * 60}
-          stroke="url(#neural-gradient)"
-          strokeWidth="1"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: [0.2, 0.6, 0.2] }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            delay: i * 0.3,
-          }}
-        />
-      ))}
-      <motion.circle
-        cx="100"
-        cy="100"
-        r="20"
-        fill="none"
-        stroke="url(#neural-gradient)"
-        strokeWidth="2"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.3, 0.8, 0.3] }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-        }}
-      />
-    </svg>
-  );
-}
-
-function EnhancedSpeakingIndicator({ isActive }: { isActive: boolean }) {
-  return (
-    <div className="flex items-center justify-center gap-1">
-      {[...Array(7)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="w-1.5 bg-gradient-to-t from-cyan-400 via-purple-400 to-fuchsia-400 rounded-full shadow-sm shadow-purple-400/50"
-          animate={isActive ? {
-            height: [8, 24 + Math.sin(i * 0.5) * 16, 8],
-            opacity: [0.7, 1, 0.7],
-            boxShadow: ['0 0 4px rgba(168,85,247,0.3)', '0 0 12px rgba(168,85,247,0.6)', '0 0 4px rgba(168,85,247,0.3)'],
-          } : { height: 8, opacity: 0.4, boxShadow: '0 0 0px rgba(168,85,247,0)' }}
-          transition={{
-            duration: isActive ? 0.25 + (i * 0.03) : 0.4,
-            repeat: isActive ? Infinity : 0,
-            delay: i * 0.04,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 function FloatingParticles() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(15)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
@@ -254,7 +158,7 @@ function FloatingParticles() {
             top: `${Math.random() * 100}%`,
             width: 2 + Math.random() * 3,
             height: 2 + Math.random() * 3,
-            background: `linear-gradient(135deg, rgba(168,85,247,0.6), rgba(6,182,212,0.6))`,
+            background: `linear-gradient(135deg, rgba(217,70,239,0.6), rgba(6,182,212,0.6))`,
           }}
           animate={{
             y: [-20, -50, -20],
@@ -273,221 +177,162 @@ function FloatingParticles() {
   );
 }
 
-function ThinkingBubble({ text, position }: { text: string; position: 'left' | 'right' }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.8, y: -10 }}
-      className={cn(
-        "absolute top-1/4 z-20 max-w-[140px]",
-        position === 'left' ? 'left-4' : 'right-4'
-      )}
-    >
-      <div className="relative">
-        <div className="bg-slate-800/90 backdrop-blur-xl rounded-xl px-3 py-2 border border-purple-500/30 shadow-lg">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Lightbulb className="w-3 h-3 text-amber-400" />
-            <span className="text-[10px] text-amber-400 font-medium">Thinking</span>
-          </div>
-          <p className="text-[11px] text-slate-300 leading-tight">{text}</p>
-        </div>
-        <div className={cn(
-          "absolute bottom-0 w-2 h-2 rounded-full bg-slate-800/90 border border-purple-500/30",
-          position === 'left' ? '-right-3 translate-y-3' : '-left-3 translate-y-3'
-        )} />
-        <div className={cn(
-          "absolute bottom-0 w-1.5 h-1.5 rounded-full bg-slate-800/80",
-          position === 'left' ? '-right-5 translate-y-5' : '-left-5 translate-y-5'
-        )} />
-      </div>
-    </motion.div>
-  );
-}
-
-function PersonaInfoPanel({ persona, isLive }: { persona: AIPersona; isLive: boolean }) {
+function SpeakingAvatar({ 
+  hostName, 
+  hostAvatar, 
+  isSpeaking, 
+  persona,
+  style 
+}: { 
+  hostName: string;
+  hostAvatar?: string;
+  isSpeaking: boolean;
+  persona: AIPersona;
+  style: { gradient: string; icon: any; pulseColor: string };
+}) {
   const PersonaIcon = persona.icon;
-  
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="absolute top-4 left-4 z-10 bg-slate-900/80 backdrop-blur-xl rounded-xl border border-purple-500/30 p-3 max-w-[160px]"
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <div className={cn("p-1.5 rounded-lg bg-gradient-to-br", persona.gradient)}>
-          <PersonaIcon className="w-3.5 h-3.5 text-white" />
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-white">{persona.name}</p>
-          <p className="text-[10px] text-slate-400 capitalize">{persona.style}</p>
-        </div>
-      </div>
-      
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5">
-          <Heart className="w-3 h-3 text-pink-400" />
-          <span className="text-[10px] text-slate-300">Mood: {persona.mood}</span>
+    <div className="relative flex flex-col items-center">
+      <motion.div
+        className="relative"
+        animate={isSpeaking ? { scale: [1, 1.02, 1] } : {}}
+        transition={{ duration: 0.6, repeat: isSpeaking ? Infinity : 0 }}
+      >
+        {isSpeaking && (
+          <>
+            <motion.div
+              className={cn("absolute -inset-3 rounded-full bg-gradient-to-br opacity-60 blur-xl", style.gradient)}
+              animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.7, 0.4] }}
+              transition={{ duration: 0.5, repeat: Infinity }}
+            />
+            <motion.div
+              className={cn("absolute -inset-1.5 rounded-full bg-gradient-to-br", style.gradient)}
+              animate={{ opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 0.4, repeat: Infinity }}
+              style={{ filter: 'blur(2px)' }}
+            />
+          </>
+        )}
+        
+        {!isSpeaking && (
+          <motion.div
+            className={cn("absolute -inset-2 rounded-full bg-gradient-to-br opacity-30 blur-lg", style.gradient)}
+            animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          />
+        )}
+        
+        <div className={cn(
+          "relative w-28 h-28 sm:w-36 sm:h-36 rounded-full flex items-center justify-center overflow-hidden border-2 shadow-2xl",
+          isSpeaking ? "border-fuchsia-400/80" : "border-white/20",
+          `bg-gradient-to-br ${style.gradient}`
+        )}>
+          {hostAvatar ? (
+            <img src={hostAvatar} alt={hostName} className="w-full h-full object-cover" />
+          ) : (
+            <Bot className="w-1/2 h-1/2 text-white/90" />
+          )}
         </div>
         
-        <div className="flex flex-wrap gap-1">
-          {persona.expertise.slice(0, 2).map((exp, i) => (
-            <span
-              key={i}
-              className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/20"
-            >
-              {exp}
-            </span>
-          ))}
-        </div>
-      </div>
-      
-      {isLive && (
         <motion.div
-          className="mt-2 pt-2 border-t border-purple-500/20 flex items-center gap-1.5"
-          animate={{ opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          className={cn(
+            "absolute -bottom-1 -right-1 rounded-full p-2 shadow-lg border border-white/20",
+            `bg-gradient-to-br ${persona.gradient}`
+          )}
+          animate={isSpeaking ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+          transition={{ duration: 0.5, repeat: isSpeaking ? Infinity : 0 }}
         >
-          <Brain className="w-3 h-3 text-cyan-400" />
-          <span className="text-[10px] text-cyan-300">AI Active</span>
+          <PersonaIcon className="w-4 h-4 text-white" />
         </motion.div>
-      )}
-    </motion.div>
-  );
-}
 
-function EngagementMetrics({ viewerCount }: { viewerCount?: number }) {
-  const [engagement, setEngagement] = useState(75);
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setEngagement(prev => Math.min(100, Math.max(50, prev + (Math.random() * 10 - 5))));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="absolute top-4 right-4 z-10 bg-slate-900/80 backdrop-blur-xl rounded-xl border border-cyan-500/30 p-3"
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <Activity className="w-4 h-4 text-cyan-400" />
-        <span className="text-xs font-semibold text-white">Engagement</span>
-      </div>
-      
-      <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden mb-1.5">
-        <motion.div
-          className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${engagement}%` }}
-          transition={{ duration: 0.5 }}
-        />
-      </div>
-      <p className="text-[10px] text-slate-400 text-center">{Math.round(engagement)}% Active</p>
-      
-      {viewerCount !== undefined && (
-        <div className="mt-2 pt-2 border-t border-cyan-500/20 text-center">
-          <span className="text-lg font-bold text-white">{viewerCount}</span>
-          <span className="text-[10px] text-slate-400 ml-1">viewers</span>
-        </div>
-      )}
-    </motion.div>
-  );
-}
-
-function MobileAudioOverlay({ onEnable }: { onEnable: () => void }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
-      onClick={onEnable}
-      onTouchEnd={onEnable}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="flex flex-col items-center gap-4 p-8"
-      >
-        <motion.div
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-purple-500/30"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <Volume2 className="w-10 h-10 text-white" />
-        </motion.div>
-        <div className="text-center">
-          <p className="text-lg font-semibold text-white mb-1">Tap to Enable Audio</p>
-          <p className="text-sm text-slate-400">Listen to live AI commentary</p>
-        </div>
-        <motion.div
-          className="flex items-center gap-1 mt-2"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <div className="w-2 h-2 rounded-full bg-purple-400" />
-          <div className="w-2 h-2 rounded-full bg-cyan-400" />
-          <div className="w-2 h-2 rounded-full bg-purple-400" />
-        </motion.div>
+        {isSpeaking && (
+          <motion.div
+            className="absolute -top-1 -left-1 bg-gradient-to-br from-fuchsia-500 to-purple-500 rounded-full p-2 shadow-lg border border-white/20"
+            initial={{ scale: 0 }}
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ duration: 0.4, repeat: Infinity }}
+          >
+            <MessageCircle className="w-3.5 h-3.5 text-white" />
+          </motion.div>
+        )}
       </motion.div>
-    </motion.div>
+
+      <motion.div
+        className="mt-4 text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h3 className="text-lg sm:text-xl font-bold text-white font-orbitron">{hostName}</h3>
+        <p className="text-xs sm:text-sm text-slate-400 capitalize">{persona.style} • {persona.mood}</p>
+      </motion.div>
+    </div>
   );
 }
 
-function AudioController({ 
-  isMuted, 
-  onToggleMute,
-  isPlaying,
-  currentText 
+function StatusBar({ 
+  isLive, 
+  viewerCount, 
+  isSpeaking, 
+  isMuted,
+  persona 
 }: { 
+  isLive: boolean;
+  viewerCount?: number;
+  isSpeaking: boolean;
   isMuted: boolean;
-  onToggleMute: () => void;
-  isPlaying: boolean;
-  currentText?: string;
+  persona: AIPersona;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="absolute bottom-4 left-4 right-4 md:right-auto z-20 flex items-center justify-between md:justify-start gap-3"
-    >
-      <Button
-        onClick={onToggleMute}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          onToggleMute();
-        }}
-        variant="outline"
-        className={cn(
-          "rounded-full border-2 transition-all min-h-[48px] min-w-[48px] px-4 py-3 md:py-2 md:min-h-0",
-          isMuted 
-            ? "border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 active:bg-red-500/30" 
-            : "border-purple-500/50 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 active:bg-purple-500/30"
+    <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        {isLive && (
+          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px] sm:text-xs px-2 py-0.5">
+            <motion.span 
+              className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5 inline-block"
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+            LIVE
+          </Badge>
         )}
-        data-testid="button-toggle-audio"
-      >
-        {isMuted ? <VolumeX className="w-5 h-5 md:w-4 md:h-4" /> : <Volume2 className="w-5 h-5 md:w-4 md:h-4" />}
-        <span className="ml-2 text-sm md:text-xs font-medium">{isMuted ? 'Tap to Listen' : 'Listening'}</span>
-      </Button>
-      
-      {isPlaying && !isMuted && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center gap-2 bg-purple-500/20 rounded-full px-3 py-2 border border-purple-500/30"
-        >
+        
+        <Badge className="bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30 text-[10px] sm:text-xs px-2 py-0.5">
+          <Brain className="w-3 h-3 mr-1" />
+          AI Host
+        </Badge>
+
+        {viewerCount !== undefined && (
+          <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 text-[10px] sm:text-xs px-2 py-0.5">
+            <Users className="w-3 h-3 mr-1" />
+            {viewerCount}
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {isSpeaking && !isMuted && (
           <motion.div
-            className="w-2.5 h-2.5 rounded-full bg-green-400"
-            animate={{ scale: [1, 1.3, 1] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-          />
-          <span className="text-sm md:text-xs text-purple-300 whitespace-nowrap">Playing</span>
-        </motion.div>
-      )}
-    </motion.div>
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-1.5 bg-fuchsia-500/20 rounded-full px-2.5 py-1 border border-fuchsia-500/30"
+          >
+            <motion.div
+              className="w-2 h-2 rounded-full bg-fuchsia-400"
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 0.4, repeat: Infinity }}
+            />
+            <span className="text-[10px] sm:text-xs text-fuchsia-300 font-medium">Speaking</span>
+          </motion.div>
+        )}
+        
+        {isMuted && (
+          <Badge variant="outline" className="border-slate-500/30 text-slate-400 text-[10px] sm:text-xs px-2 py-0.5">
+            <VolumeX className="w-3 h-3" />
+          </Badge>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -510,44 +355,112 @@ function SpeechBubble({ text, segmentType }: { text: string; segmentType?: strin
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="absolute bottom-24 md:bottom-20 left-3 right-3 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 max-w-lg mx-auto"
+      className="w-full max-w-lg mx-auto px-3"
     >
-      <div className="relative px-5 md:px-6 py-4 md:py-5 bg-gradient-to-br from-slate-900/98 via-purple-900/40 to-slate-900/98 backdrop-blur-2xl rounded-2xl md:rounded-3xl border-2 border-purple-500/50 shadow-2xl shadow-purple-500/30">
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <div className="px-3 py-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-full shadow-lg">
-            <span className="text-[10px] md:text-xs text-white font-semibold tracking-wide">{getSegmentLabel()}</span>
+      <div className="relative px-4 py-3 sm:px-5 sm:py-4 bg-gradient-to-br from-slate-900/95 via-purple-900/30 to-slate-900/95 backdrop-blur-2xl rounded-2xl border border-fuchsia-500/40 shadow-xl shadow-fuchsia-500/10">
+        <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2">
+          <div className="px-2.5 py-0.5 bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-full shadow-lg">
+            <span className="text-[10px] text-white font-semibold tracking-wide">{getSegmentLabel()}</span>
           </div>
         </div>
-        <p className="text-sm md:text-base text-white leading-relaxed mt-1 font-medium">{truncatedText}</p>
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900/98 border-b-2 border-r-2 border-purple-500/50 rotate-45" />
+        <p className="text-sm sm:text-base text-white leading-relaxed mt-1 font-medium text-center">{truncatedText}</p>
       </div>
     </motion.div>
   );
 }
 
-function MobileHostBadge({ hostName, isLive, viewerCount }: { hostName: string; isLive: boolean; viewerCount?: number }) {
+function AudioControls({ 
+  isMuted, 
+  onToggleMute,
+  isPlaying 
+}: { 
+  isMuted: boolean;
+  onToggleMute: () => void;
+  isPlaying: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <Button
+        onClick={onToggleMute}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          onToggleMute();
+        }}
+        className={cn(
+          "rounded-full border-2 transition-all h-12 px-5 font-medium",
+          isMuted 
+            ? "border-slate-500/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50" 
+            : "border-fuchsia-500/50 bg-fuchsia-500/20 text-fuchsia-300 hover:bg-fuchsia-500/30"
+        )}
+        data-testid="button-toggle-audio"
+      >
+        {isMuted ? <VolumeX className="w-5 h-5 mr-2" /> : <Volume2 className="w-5 h-5 mr-2" />}
+        {isMuted ? 'Enable Audio' : 'Listening'}
+      </Button>
+      
+      {isPlaying && !isMuted && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-1"
+        >
+          {[...Array(4)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="w-1 bg-gradient-to-t from-fuchsia-500 to-cyan-400 rounded-full"
+              animate={{ height: [8, 16 + Math.sin(i * 0.8) * 8, 8] }}
+              transition={{
+                duration: 0.3 + (i * 0.05),
+                repeat: Infinity,
+                delay: i * 0.05,
+              }}
+            />
+          ))}
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+function MobileAudioOverlay({ onEnable }: { onEnable: () => void }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 md:hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
+      onClick={onEnable}
+      onTouchEnd={(e) => {
+        e.preventDefault();
+        onEnable();
+      }}
     >
-      <div className="bg-slate-900/90 backdrop-blur-xl rounded-full border border-purple-500/30 px-4 py-2 flex items-center gap-3">
-        {isLive && (
-          <div className="flex items-center gap-1.5">
-            <motion.div
-              className="w-2 h-2 rounded-full bg-red-500"
-              animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            />
-            <span className="text-xs font-medium text-red-400">LIVE</span>
-          </div>
-        )}
-        <span className="text-sm font-medium text-white">{hostName}</span>
-        {viewerCount !== undefined && (
-          <span className="text-xs text-slate-400">{viewerCount} watching</span>
-        )}
-      </div>
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="flex flex-col items-center gap-4 p-8"
+      >
+        <motion.div
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-fuchsia-500/30"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Volume2 className="w-10 h-10 text-white" />
+        </motion.div>
+        <div className="text-center">
+          <p className="text-lg font-semibold text-white mb-1">Tap to Enable Audio</p>
+          <p className="text-sm text-slate-400">Listen to live AI commentary</p>
+        </div>
+        <motion.div
+          className="flex items-center gap-1 mt-2"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <div className="w-2 h-2 rounded-full bg-fuchsia-400" />
+          <div className="w-2 h-2 rounded-full bg-cyan-400" />
+          <div className="w-2 h-2 rounded-full bg-fuchsia-400" />
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -562,9 +475,6 @@ export function AIAvatarStream({
   onAudioMessage
 }: AIAvatarStreamProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isThinking, setIsThinking] = useState(false);
-  const [currentThought, setCurrentThought] = useState('');
-  const [thoughtPosition, setThoughtPosition] = useState<'left' | 'right'>('left');
   const [isMuted, setIsMuted] = useState(true);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentSpeechText, setCurrentSpeechText] = useState<string | null>(null);
@@ -578,7 +488,6 @@ export function AIAvatarStream({
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
   
   const style = avatarStyles[streamType] || avatarStyles.broadcast;
-  const TypeIcon = style.icon;
   const persona = useMemo(() => getPersonaFromName(hostName), [hostName]);
 
   const initAudioContext = useCallback(() => {
@@ -650,7 +559,6 @@ export function AIAvatarStream({
   }, [isMuted, initAudioContext]);
 
   const handleAudioMessage = useCallback((audio: AvatarAudioData) => {
-    
     const queueItem: AudioQueueItem = {
       id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       text: audio.text,
@@ -713,245 +621,64 @@ export function AIAvatarStream({
   }, []);
 
   useEffect(() => {
-    if (currentMessage) {
-      setIsSpeaking(true);
-      setIsThinking(false);
-      const timeout = setTimeout(() => setIsSpeaking(false), 3000);
-      return () => clearTimeout(timeout);
+    if (currentMessage && !currentSpeechText) {
+      const timer = setTimeout(() => {
+        setCurrentSpeechText(currentMessage);
+        setIsSpeaking(true);
+        setTimeout(() => {
+          setCurrentSpeechText(null);
+          setIsSpeaking(false);
+        }, 8000);
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [currentMessage]);
-
-  useEffect(() => {
-    if (isLive && !currentMessage && !isPlayingAudio) {
-      const interval = setInterval(() => {
-        const rand = Math.random();
-        if (rand > 0.7) {
-          setIsSpeaking(true);
-          setTimeout(() => setIsSpeaking(false), 2000 + Math.random() * 2000);
-        } else if (rand > 0.4) {
-          setIsThinking(true);
-          setCurrentThought(thoughtBubbles[Math.floor(Math.random() * thoughtBubbles.length)]);
-          setThoughtPosition(Math.random() > 0.5 ? 'left' : 'right');
-          setTimeout(() => setIsThinking(false), 3000 + Math.random() * 2000);
-        }
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isLive, currentMessage, isPlayingAudio]);
+  }, [currentMessage, currentSpeechText]);
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 flex items-center justify-center overflow-hidden touch-manipulation">
+    <div className="absolute inset-0 flex flex-col bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 overflow-hidden">
       <FloatingParticles />
-      <NeuralNetwork />
       
-      <AnimatePresence>
-        {showMobileOverlay && isLive && !hasUserInteracted && (
-          <MobileAudioOverlay onEnable={handleEnableAudio} />
-        )}
-      </AnimatePresence>
-      
-      <MobileHostBadge hostName={hostName} isLive={isLive} viewerCount={viewerCount} />
-      
-      <div className="hidden md:block">
-        <PersonaInfoPanel persona={persona} isLive={isLive} />
-      </div>
-      <div className="hidden sm:block">
-        <EngagementMetrics viewerCount={viewerCount} />
-      </div>
-      
-      <AudioController
+      <StatusBar 
+        isLive={isLive}
+        viewerCount={viewerCount}
+        isSpeaking={isSpeaking}
         isMuted={isMuted}
-        onToggleMute={toggleMute}
-        isPlaying={isPlayingAudio}
-        currentText={currentSpeechText || undefined}
+        persona={persona}
       />
-      
-      <AnimatePresence>
-        {isThinking && !isSpeaking && (
-          <ThinkingBubble text={currentThought} position={thoughtPosition} />
-        )}
-      </AnimatePresence>
-      
-      <div className="relative z-10 flex flex-col items-center">
-        <motion.div
-          className="relative"
-          animate={isLive ? { y: [0, -5, 0] } : {}}
-          transition={{ duration: 3, repeat: Infinity }}
-        >
-          <motion.div
-            className={cn(
-              "absolute -inset-6 rounded-full bg-gradient-to-br opacity-20 blur-2xl",
-              style.gradient
-            )}
-            animate={isSpeaking ? { scale: [1, 1.4, 1], opacity: [0.2, 0.5, 0.2] } : { scale: [1, 1.1, 1], opacity: [0.2, 0.3, 0.2] }}
-            transition={{ duration: isSpeaking ? 0.4 : 2, repeat: Infinity }}
-          />
-          
-          <motion.div
-            animate={isLive ? { rotate: 360 } : {}}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className={cn(
-              "absolute -inset-2 rounded-full bg-gradient-to-br",
-              style.gradient
-            )}
-            style={{ opacity: 0.6 }}
-          >
-            <div className="w-full h-full rounded-full bg-slate-900" style={{ margin: 2 }} />
-          </motion.div>
-          
-          <div className={cn(
-            "relative w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-br flex items-center justify-center overflow-hidden border-2 border-white/10 shadow-2xl",
-            style.gradient
-          )}>
-            {hostAvatar ? (
-              <img src={hostAvatar} alt={hostName} className="w-full h-full object-cover" />
-            ) : (
-              <Bot className="w-14 h-14 sm:w-18 sm:h-18 text-white/90" />
-            )}
-            
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
-              animate={isSpeaking ? { opacity: [0.3, 0.5, 0.3] } : { opacity: 0.3 }}
-              transition={{ duration: 0.4, repeat: isSpeaking ? Infinity : 0 }}
-            />
-            
-            {isThinking && (
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center bg-slate-900/30"
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <Brain className="w-8 h-8 text-cyan-400" />
-                </motion.div>
-              </motion.div>
-            )}
-          </div>
 
-          {isLive && (
-            <motion.div
-              className="absolute -bottom-1 -right-1 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-full p-2.5 shadow-lg shadow-cyan-500/30"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            >
-              <Brain className="w-4 h-4 text-white" />
-            </motion.div>
-          )}
-          
-          {isSpeaking && (
-            <motion.div
-              className="absolute -top-1 -left-1 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full p-2 shadow-lg shadow-purple-500/30"
-              initial={{ scale: 0 }}
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 0.5, repeat: Infinity }}
-            >
-              <MessageCircle className="w-3.5 h-3.5 text-white" />
-            </motion.div>
-          )}
-        </motion.div>
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-12 gap-6">
+        <SpeakingAvatar
+          hostName={hostName}
+          hostAvatar={hostAvatar}
+          isSpeaking={isSpeaking}
+          persona={persona}
+          style={style}
+        />
 
-        <motion.div
-          className="mt-6 text-center"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-        >
-          <motion.div 
-            className="flex items-center justify-center gap-2 mb-3 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 border border-cyan-400/40 backdrop-blur-sm shadow-lg shadow-cyan-500/20"
-            animate={{ 
-              boxShadow: ['0 4px 20px 0 rgba(6,182,212,0.15)', '0 4px 30px 0 rgba(6,182,212,0.3)', '0 4px 20px 0 rgba(6,182,212,0.15)'],
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Bot className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-bold text-cyan-300 uppercase tracking-widest">AI Host</span>
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-          </motion.div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-2 drop-shadow-lg">{hostName}</h3>
-          
-          <div className="flex items-center justify-center gap-2">
-            <motion.div
-              className={cn(
-                "px-3 py-1.5 rounded-full bg-gradient-to-r flex items-center gap-2 shadow-lg",
-                style.gradient
-              )}
-              animate={isSpeaking ? { scale: [1, 1.05, 1] } : {}}
-              transition={{ duration: 0.3, repeat: isSpeaking ? Infinity : 0 }}
-            >
-              <TypeIcon className="w-4 h-4 text-white" />
-              <span className="text-xs font-medium text-white capitalize">
-                {streamType.replace('_', ' ')}
-              </span>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        <div className="mt-6 h-12">
+        <div className="w-full min-h-[100px] flex items-center justify-center">
           <AnimatePresence mode="wait">
-            {isSpeaking && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="flex items-center gap-4 bg-gradient-to-r from-purple-900/60 via-slate-800/70 to-purple-900/60 backdrop-blur-xl rounded-full px-5 py-2.5 border-2 border-purple-400/40 shadow-lg shadow-purple-500/25"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.15, 1] }}
-                  transition={{ duration: 0.6, repeat: Infinity }}
-                >
-                  <Volume2 className="w-5 h-5 text-purple-300" />
-                </motion.div>
-                <EnhancedSpeakingIndicator isActive={isSpeaking} />
-                <span className="text-sm text-purple-200 font-semibold tracking-wide">Speaking</span>
-              </motion.div>
+            {currentSpeechText && (
+              <SpeechBubble 
+                key="speech"
+                text={currentSpeechText} 
+                segmentType={currentSegmentType} 
+              />
             )}
           </AnimatePresence>
         </div>
 
-        <AnimatePresence>
-          {currentSpeechText && (
-            <SpeechBubble text={currentSpeechText} segmentType={currentSegmentType} />
-          )}
-          {!currentSpeechText && currentMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="absolute bottom-6 left-1/2 transform -translate-x-1/2 max-w-sm px-6 py-4 bg-gradient-to-br from-slate-800/95 via-purple-900/30 to-slate-800/95 backdrop-blur-xl rounded-2xl border border-purple-500/40 shadow-2xl shadow-purple-500/20"
-            >
-              <div className="flex items-start gap-2">
-                <MessageCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-white leading-relaxed">{currentMessage}</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <AudioControls
+          isMuted={isMuted}
+          onToggleMute={toggleMute}
+          isPlaying={isPlayingAudio}
+        />
       </div>
 
-      {isLive && (
-        <motion.div
-          className="absolute top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-red-500/90 rounded-full px-4 py-2 shadow-lg shadow-red-500/30"
-          animate={{ opacity: [1, 0.8, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <motion.div
-            className="w-2 h-2 rounded-full bg-white"
-            animate={{ scale: [1, 1.3, 1] }}
-            transition={{ duration: 0.8, repeat: Infinity }}
-          />
-          <span className="text-xs font-bold text-white tracking-wider">LIVE</span>
-        </motion.div>
-      )}
-
-      <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-slate-900/80 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-500/30 shadow-lg">
-        <Activity className="w-3 h-3 text-emerald-400" />
-        <span className="text-xs text-slate-300 font-medium">AI Powered</span>
-        <Sparkles className="w-3 h-3 text-purple-400" />
-      </div>
+      <AnimatePresence>
+        {showMobileOverlay && !hasUserInteracted && (
+          <MobileAudioOverlay onEnable={handleEnableAudio} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
