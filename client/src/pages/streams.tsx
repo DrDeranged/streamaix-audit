@@ -34,7 +34,6 @@ import {
   Volume2,
   Grid2X2,
   X,
-  FlaskConical,
   Loader2,
   Hexagon,
   CircleDot,
@@ -896,35 +895,6 @@ export default function StreamsPage() {
   const [primaryStreamId, setPrimaryStreamId] = useState<string | undefined>();
   const { toast } = useToast();
 
-  const startTestStreamMutation = useMutation({
-    mutationFn: async () => {
-      const data = await apiRequest('/api/streams/start-test-stream', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          avatarName: 'Vitalik Buterin',
-          durationMinutes: 5,
-          maxSegments: 4
-        })
-      });
-      return data;
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Test Stream Started!",
-        description: `Vitalik Buterin is now live for 5 minutes. Stream ID: ${data.streamId?.slice(0, 8)}...`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/streams/live'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to start test stream",
-        description: error.message || "Please try again",
-        variant: "destructive"
-      });
-    }
-  });
-
   const handleToggleStreamSelection = (streamId: string) => {
     if (selectedStreams.includes(streamId)) {
       setSelectedStreams(selectedStreams.filter(id => id !== streamId));
@@ -1053,21 +1023,6 @@ export default function StreamsPage() {
               <Badge className="sm:hidden streaming-viewer-glow text-red-400 text-xs font-semibold">
                 {liveStreams.length} Live
               </Badge>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="streaming-pill-glass border-amber-500/30 text-amber-300 hover:text-amber-100 hover:bg-amber-500/20 h-9 gap-1.5 rounded-xl"
-                onClick={() => startTestStreamMutation.mutate()}
-                disabled={startTestStreamMutation.isPending}
-                data-testid="button-start-test-stream"
-              >
-                {startTestStreamMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <FlaskConical className="w-4 h-4" />
-                )}
-                <span className="hidden sm:inline">Test Stream</span>
-              </Button>
               <Link href="/replays">
                 <Button variant="outline" size="sm" className="streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white h-9 gap-1.5 rounded-xl">
                   <Play className="w-4 h-4" />
