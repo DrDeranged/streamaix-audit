@@ -196,6 +196,11 @@ const getAvatarFallback = (username?: string) => {
   return avatarBrandIcons[username] || null;
 };
 
+const getDiceBearAvatar = (username?: string) => {
+  if (!username) return 'https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous';
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
+};
+
 const formatViewers = (count: number) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
@@ -248,6 +253,7 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
   const BrandIcon = brandFallback?.icon;
   const showImage = stream.hostAvatar && !imageError;
   const showBrandIcon = !showImage && brandFallback;
+  const showDiceBear = !showImage && !showBrandIcon;
 
   return (
     <Link href={`/stream/${stream.id}`}>
@@ -326,6 +332,13 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
                 {showBrandIcon && BrandIcon && (
                   <BrandIcon className={cn("w-6 h-6", brandFallback.color)} />
                 )}
+                {showDiceBear && (
+                  <img 
+                    src={getDiceBearAvatar(stream.hostUsername)} 
+                    alt="" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                )}
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-950" />
             </div>
@@ -385,6 +398,7 @@ const StreamCard = memo(function StreamCard({
   const BrandIcon = brandFallback?.icon;
   const showImage = stream.hostAvatar && !imageError;
   const showBrandIcon = !showImage && brandFallback;
+  const showDiceBear = !showImage && !showBrandIcon;
 
   const handleClick = (e: React.MouseEvent) => {
     if (selectionMode && onSelect) {
@@ -558,6 +572,13 @@ const StreamCard = memo(function StreamCard({
                 {showBrandIcon && BrandIcon && (
                   <BrandIcon className={cn("w-5 h-5", brandFallback.color)} />
                 )}
+                {showDiceBear && (
+                  <img 
+                    src={getDiceBearAvatar(stream.hostUsername)} 
+                    alt="" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                )}
               </div>
               {isLive && (
                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-slate-900 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
@@ -700,6 +721,7 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
   const BrandIcon = brandFallback?.icon;
   const showImage = stream.hostAvatar && !imageError;
   const showBrandIcon = !showImage && brandFallback;
+  const showDiceBear = !showImage && !showBrandIcon;
 
   return (
     <Link href={`/replay/${stream.id}`}>
@@ -751,6 +773,13 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
                 {showBrandIcon && BrandIcon && (
                   <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
                 )}
+                {showDiceBear && (
+                  <img 
+                    src={getDiceBearAvatar(stream.hostUsername)} 
+                    alt="" 
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-medium text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
@@ -795,6 +824,7 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
 
   const showImage = streamer.avatar && !imageError;
   const showBrandIcon = !showImage && brandFallback;
+  const showDiceBear = !showImage && !showBrandIcon;
 
   return (
     <Link href={streamer.isLive && streamer.streamId ? `/stream/${streamer.streamId}` : `/profile/${streamer.id}`}>
@@ -815,6 +845,13 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
             )}
             {showBrandIcon && BrandIcon && (
               <BrandIcon className={cn("w-7 h-7", brandFallback.color)} />
+            )}
+            {showDiceBear && (
+              <img 
+                src={getDiceBearAvatar(streamer.username)} 
+                alt="" 
+                className="w-full h-full object-cover"
+              />
             )}
           </div>
           {rank <= 3 && (
