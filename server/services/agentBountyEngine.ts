@@ -25,17 +25,20 @@ interface GeneratedBounty {
   tags: string[];
 }
 
-// Crypto content sources for variety
+// Real crypto content sources for bounties
 const contentSources = [
-  // YouTube crypto channels
-  'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // Placeholder - will generate realistic URLs
-  'https://www.youtube.com/watch?v=jNQXAC9IVRw',
-  'https://www.youtube.com/watch?v=9bZkp7q19f0',
+  // Bankless episodes
+  'https://www.youtube.com/watch?v=kGjFTzRTH3Q',
+  'https://www.youtube.com/watch?v=P7D5knRO48c',
+  // Lex Fridman crypto interviews
+  'https://www.youtube.com/watch?v=3x1b_S6Qp2Q',
+  'https://www.youtube.com/watch?v=rYEY2B79zaM',
+  // Coin Bureau educational content
+  'https://www.youtube.com/watch?v=ZE2HxTmxfrI',
+  'https://www.youtube.com/watch?v=VYWc9dFqROI',
   // Podcast episodes
   'https://podcasts.apple.com/us/podcast/bankless/id1499409058',
   'https://podcasts.apple.com/us/podcast/unchained/id1123922160',
-  // Twitter Spaces (simulated)
-  'https://twitter.com/i/spaces/example',
 ];
 
 export class AgentBountyEngine {
@@ -177,15 +180,43 @@ Respond in JSON format:
   
   /**
    * Generate a realistic content URL based on category
+   * Uses real crypto/DeFi YouTube content from popular channels
    */
   private generateContentUrl(category: string): string {
-    const videoIds = [
-      'dQw4w9WgXcQ', 'jNQXAC9IVRw', '9bZkp7q19f0', 'kJQP7kiw5Fk',
-      'fJ9rUzIMcZQ', 'QB7ACr7pUuE', 'GHMjD0Lp5DY', 'YQHsXMglC9A',
-      '3JZ_D3ELwOQ', 'Ct6BUPvE2sM', 'oHg5SJYRHA0', 'JGwWNGJdvx8',
-    ];
+    // Real crypto content YouTube videos from popular channels
+    const cryptoVideoIds: Record<string, string[]> = {
+      // Bankless episodes
+      bankless: ['kGjFTzRTH3Q', 'P7D5knRO48c', 'TbGQ3aNEjVg', 'VsrFLe6MlME'],
+      // Lex Fridman crypto interviews  
+      lex: ['3x1b_S6Qp2Q', 'rYEY2B79zaM', 'VeH7qKZr0WI', 'Jl0p_d8aYu0'],
+      // Coin Bureau educational content
+      coinbureau: ['ZE2HxTmxfrI', 'VYWc9dFqROI', 'Yb6825iv0Vk', 'Xo8flMQ5L8s'],
+      // Real Vision Finance
+      realvision: ['sE-sD1dxVvA', 'r3Wp_aeF0Ms', 'wLr0T9t7gkY', 'CeJbfmNfGWQ'],
+      // The Defiant
+      defiant: ['4z5vNBvNDSc', 'JMZBkVz94cE', 'O7gBfjmQiJ8', 'qVUFg7xRpEE'],
+      // General crypto/DeFi/NFT content
+      general: ['M3EFi_POhps', 'rjFbNL1OlRQ', '7LqaIDemXlE', 'ehDzBwwB4WQ'],
+    };
     
-    const randomVideoId = videoIds[Math.floor(Math.random() * videoIds.length)];
+    // Map categories to relevant video sources
+    const categoryMapping: Record<string, string[]> = {
+      defi: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
+      crypto: [...cryptoVideoIds.coinbureau, ...cryptoVideoIds.lex],
+      nft: [...cryptoVideoIds.general, ...cryptoVideoIds.defiant],
+      trading: [...cryptoVideoIds.realvision, ...cryptoVideoIds.coinbureau],
+      governance: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
+      yield_farming: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
+      infrastructure: [...cryptoVideoIds.lex, ...cryptoVideoIds.coinbureau],
+      regulation: [...cryptoVideoIds.realvision, ...cryptoVideoIds.coinbureau],
+    };
+    
+    // Get relevant videos for category, fallback to general
+    const normalizedCategory = category.toLowerCase().replace(/\s+/g, '_');
+    const relevantVideos = categoryMapping[normalizedCategory] || 
+      [...cryptoVideoIds.general, ...cryptoVideoIds.coinbureau, ...cryptoVideoIds.bankless];
+    
+    const randomVideoId = relevantVideos[Math.floor(Math.random() * relevantVideos.length)];
     return `https://www.youtube.com/watch?v=${randomVideoId}`;
   }
   

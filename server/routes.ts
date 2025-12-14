@@ -1694,6 +1694,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           qualityScore.overallScore || 70
         );
 
+        // Award STREAM points to the bounty completer
+        const totalReward = bounty.reward + (bounty.tipPool || 0);
+        await pointsService.awardPoints({
+          userId: bounty.assigneeId,
+          amount: totalReward,
+          source: 'bounty_accepted',
+          type: 'earn',
+          description: `Completed bounty: ${bounty.title}`,
+          referenceId: req.params.id,
+          referenceType: 'bounty',
+          metadata: { qualityScore: qualityScore.overallScore, tipPool: bounty.tipPool || 0 }
+        });
+        console.log(`[Bounty] Awarded ${totalReward} STREAM points to user ${bounty.assigneeId} for completing bounty ${req.params.id}`);
+
         // Track engagement for completion
         await storage.createBountyEngagement({
           bountyId: req.params.id,

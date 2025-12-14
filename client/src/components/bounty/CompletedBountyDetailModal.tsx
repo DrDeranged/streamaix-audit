@@ -289,8 +289,8 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
           </div>
         </div>
 
-        {/* Scrollable Content - with visible scrollbar */}
-        <ScrollArea className="flex-1 max-h-[calc(90vh-180px)] [&>div>div]:!block [&_[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:!flex [&_[data-radix-scroll-area-scrollbar]]:!w-2.5 [&_[data-radix-scroll-area-scrollbar]]:bg-slate-800 [&_[data-radix-scroll-area-thumb]]:!bg-green-500/50 [&_[data-radix-scroll-area-thumb]]:rounded-full">
+        {/* Scrollable Content - with always visible scrollbar */}
+        <div className="flex-1 max-h-[calc(90vh-180px)] overflow-y-auto scrollbar-thin scrollbar-thumb-green-500/50 scrollbar-track-slate-800 hover:scrollbar-thumb-green-500/70" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(34, 197, 94, 0.5) rgb(30, 41, 59)' }}>
           <div className="px-6 py-4 space-y-6">
             {/* Winner Section */}
             <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30 rounded-xl p-4">
@@ -666,7 +666,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
               </TabsContent>
             </Tabs>
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Sticky Footer Actions */}
         <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-xl border-t border-green-500/30 px-6 py-4">
