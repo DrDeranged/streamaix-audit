@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { 
   Radio, Calendar, History, Play, Users, Bot, User, 
-  Sparkles, Bell, BellOff, Plus, Search, Filter, 
-  TrendingUp, Mic, Zap, Brain, Crown, Clock, CheckCircle2, Shield
+  Sparkles, Plus, Search, Filter, 
+  TrendingUp, Mic, Zap, Brain, Clock, CheckCircle2, Shield,
+  ChevronLeft, ChevronRight, Flame, Clock3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -77,7 +77,112 @@ const streamTypeGradients: Record<string, string> = {
   avatar_alpha: 'from-purple-600 to-pink-500',
 };
 
-function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => void }) {
+function FeaturedHeroStream({ stream, onClick }: { stream: StreamData; onClick: () => void }) {
+  const Icon = streamTypeIcons[stream.streamType] || Radio;
+  const gradient = streamTypeGradients[stream.streamType] || 'from-purple-500 to-pink-500';
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={onClick}
+      className="relative w-full h-[400px] rounded-3xl overflow-hidden cursor-pointer group mb-10"
+      data-testid="featured-stream"
+    >
+      <div className={cn("absolute inset-0 bg-gradient-to-br", gradient)} />
+      
+      <div className="absolute inset-0 opacity-20" style={{
+        backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                          radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 40%)`,
+      }} />
+      
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+      
+      <div className="absolute top-6 left-6 flex items-center gap-3 z-10">
+        <div className="relative flex items-center gap-2 bg-red-500/90 backdrop-blur-md rounded-full px-4 py-2 shadow-[0_0_30px_rgba(239,68,68,0.5)]">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+          </span>
+          <span className="text-sm font-bold text-white uppercase tracking-wider">Live Now</span>
+        </div>
+        
+        <Badge className="bg-white/20 backdrop-blur-md text-white border-0 px-3 py-1.5">
+          <Icon className="w-4 h-4 mr-1.5" />
+          {streamTypeLabels[stream.streamType] || stream.streamType}
+        </Badge>
+        
+        {stream.isKnowledgeAvatar && (
+          <Badge className="bg-cyan-500/30 backdrop-blur-md text-cyan-100 border border-cyan-400/50 px-3 py-1.5">
+            <Shield className="w-4 h-4 mr-1.5" />
+            AI Avatar
+          </Badge>
+        )}
+      </div>
+      
+      {stream.currentViewers !== undefined && (
+        <div className="absolute top-6 right-6 flex items-center gap-2 bg-slate-950/60 backdrop-blur-md rounded-full px-4 py-2 z-10">
+          <Users className="w-4 h-4 text-cyan-400" />
+          <span className="text-lg font-mono font-bold text-white">{stream.currentViewers}</span>
+          <span className="text-sm text-slate-300">watching</span>
+        </div>
+      )}
+      
+      <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
+        <div className="flex items-end justify-between">
+          <div className="flex-1 max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full bg-slate-800/80 overflow-hidden ring-4 ring-white/20 flex items-center justify-center">
+                  {stream.hostAvatar ? (
+                    <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-bold text-white">
+                      {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
+                    </span>
+                  )}
+                </div>
+                {stream.isVerified && (
+                  <div className="absolute -bottom-1 -right-1 bg-cyan-500 rounded-full p-1 ring-2 ring-slate-900">
+                    <CheckCircle2 className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <p className="text-white font-semibold">{stream.hostUsername}</p>
+                {stream.hostHandle && <p className="text-white/60 text-sm">@{stream.hostHandle}</p>}
+              </div>
+            </div>
+            
+            <h2 className="text-3xl font-bold text-white mb-3 line-clamp-2">
+              {stream.title.replace(/\s*[-–—]\s*(LIVE|Live|live)\s*$/i, '').trim()}
+            </h2>
+            
+            {stream.tags && stream.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {stream.tags.slice(0, 4).map((tag, i) => (
+                  <span key={i} className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm text-white/80">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <Button 
+            size="lg" 
+            className="bg-white text-slate-900 hover:bg-white/90 rounded-full px-8 shadow-[0_0_40px_rgba(255,255,255,0.3)] group-hover:scale-105 transition-transform"
+          >
+            <Play className="w-5 h-5 mr-2 fill-current" />
+            Watch Now
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function CompactStreamCard({ stream, onClick }: { stream: StreamData; onClick: () => void }) {
   const Icon = streamTypeIcons[stream.streamType] || Radio;
   const gradient = streamTypeGradients[stream.streamType] || 'from-purple-500 to-pink-500';
   const isLive = stream.status === 'live';
@@ -85,183 +190,189 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={{ scale: 1.03, y: -4 }}
       onClick={onClick}
       className={cn(
-        "relative rounded-2xl overflow-hidden cursor-pointer group",
-        "bg-slate-800/60 backdrop-blur-xl",
-        "border border-slate-600/60",
-        "hover:border-cyan-400/60 hover:shadow-[0_0_40px_rgba(6,182,212,0.25)]",
-        "hover:bg-slate-700/50",
-        "transition-all duration-400"
+        "flex-shrink-0 w-72 rounded-xl overflow-hidden cursor-pointer group",
+        "bg-slate-800/80 backdrop-blur-xl",
+        "border border-slate-700/60",
+        "hover:border-cyan-400/60 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)]",
+        "transition-all duration-300"
       )}
       data-testid={`card-stream-${stream.id}`}
     >
-      {/* Corner brackets for HUD effect */}
-      <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-cyan-500/40 rounded-tl-lg z-20" />
-      <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-cyan-500/40 rounded-tr-lg z-20" />
-      <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-purple-500/40 rounded-bl-lg z-20" />
-      <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-purple-500/40 rounded-br-lg z-20" />
-
-      {/* Animated gradient on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-purple-500/0 group-hover:from-cyan-500/10 group-hover:via-transparent group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none z-10" />
-      
-      {/* Thumbnail Area */}
-      <div className="h-40 bg-slate-900 relative overflow-hidden">
-        {/* Animated gradient background based on stream type */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-br opacity-60",
-          gradient
-        )} />
+      <div className="h-40 relative overflow-hidden">
+        <div className={cn("absolute inset-0 bg-gradient-to-br opacity-70", gradient)} />
         
-        {/* Subtle grid pattern overlay */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: '20px 20px'
-        }} />
-        
-        {stream.thumbnailUrl ? (
-          <img src={stream.thumbnailUrl} alt={stream.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Large avatar as focal point */}
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-full opacity-40 blur-xl animate-pulse" />
-              <div className="relative w-20 h-20 rounded-full bg-slate-800/80 backdrop-blur-sm overflow-hidden ring-4 ring-white/20 flex items-center justify-center">
-                {stream.hostAvatar ? (
-                  <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-bold text-white/80">
-                    {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
-                  </span>
-                )}
-              </div>
-              {/* Stream type icon overlay */}
-              <div className={cn(
-                "absolute -bottom-1 -right-1 p-2 rounded-full bg-gradient-to-r shadow-lg",
-                gradient
-              )}>
-                <Icon className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            {/* Play button on hover */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/30 backdrop-blur-sm">
-              <div className="p-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform">
-                <Play className="w-8 h-8 text-white fill-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent opacity-90" />
-        
-        {/* Top row: Status left, Viewers right */}
-        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20">
-          {/* Status badge */}
-          <div>
-            {isLive && (
-              <div className="relative flex items-center gap-2 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full bg-slate-800/80 backdrop-blur-sm overflow-hidden ring-4 ring-white/20 flex items-center justify-center">
+              {stream.hostAvatar ? (
+                <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-white/80">
+                  {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
                 </span>
-                <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">Live</span>
-              </div>
-            )}
-            {isScheduled && (
-              <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                <Calendar className="w-3 h-3 text-amber-400" />
-                <span className="text-[11px] font-bold text-amber-400">Scheduled</span>
-              </div>
-            )}
+              )}
+            </div>
+            <div className={cn("absolute -bottom-1 -right-1 p-1.5 rounded-full bg-gradient-to-r shadow-lg", gradient)}>
+              <Icon className="w-3 h-3 text-white" />
+            </div>
           </div>
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90" />
+        
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
+          <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+            <Play className="w-6 h-6 text-white fill-white" />
+          </div>
+        </div>
+        
+        <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10">
+          {isLive && (
+            <div className="flex items-center gap-1.5 bg-red-500/90 rounded-full px-2.5 py-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              <span className="text-[10px] font-bold text-white uppercase">Live</span>
+            </div>
+          )}
+          {isScheduled && (
+            <div className="flex items-center gap-1 bg-amber-500/90 rounded-full px-2.5 py-1">
+              <Calendar className="w-3 h-3 text-white" />
+              <span className="text-[10px] font-bold text-white">Scheduled</span>
+            </div>
+          )}
           
-          {/* Viewer count */}
           {isLive && stream.currentViewers !== undefined && (
-            <div className="flex items-center gap-2 bg-slate-950/80 backdrop-blur-md rounded-lg px-3 py-1.5 border border-cyan-500/30">
-              <Users className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
-              <span className="text-sm font-mono font-bold text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">{stream.currentViewers}</span>
+            <div className="flex items-center gap-1.5 bg-slate-900/80 rounded-full px-2.5 py-1">
+              <Users className="w-3 h-3 text-cyan-400" />
+              <span className="text-xs font-bold text-white">{stream.currentViewers}</span>
             </div>
           )}
         </div>
         
-        {/* Bottom row: Stream type left, KA badge right */}
-        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end z-20">
-          <Badge variant="outline" className="text-[10px] capitalize font-medium px-2 py-0.5 bg-slate-950/80 backdrop-blur-sm border-slate-600/50 text-slate-300">
-            <Icon className="w-3 h-3 mr-1" />
+        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end z-10">
+          <Badge variant="outline" className="text-[9px] capitalize font-medium px-2 py-0.5 bg-slate-900/80 border-slate-600/50 text-slate-300">
             {streamTypeLabels[stream.streamType] || stream.streamType}
           </Badge>
           
           {stream.isKnowledgeAvatar && (
-            <Badge className="bg-slate-950/80 backdrop-blur-md text-cyan-300 text-[10px] px-2.5 py-1 font-bold border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-              <Shield className="w-3 h-3 mr-1.5 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
-              KA
+            <Badge className="bg-cyan-500/30 text-cyan-200 text-[9px] px-2 py-0.5 border border-cyan-500/50">
+              <Shield className="w-2.5 h-2.5 mr-1" />
+              AI
             </Badge>
           )}
         </div>
       </div>
       
-      {/* Content Area */}
-      <div className="p-4 relative">
-        <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-cyan-300 transition-colors mb-3">
+      <div className="p-3">
+        <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-cyan-300 transition-colors mb-2">
           {stream.title.replace(/\s*[-–—]\s*(LIVE|Live|live)\s*$/i, '').trim()}
         </h3>
         
-        {/* Host info row */}
-        <div className="flex items-center gap-2.5">
-          <div className="relative group/avatar flex-shrink-0">
-            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500" />
-            <div className="relative w-9 h-9 rounded-full bg-slate-800 overflow-hidden ring-2 ring-cyan-500/30 flex items-center justify-center">
-              {stream.hostAvatar ? (
-                <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold text-cyan-300">
-                  {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
-                </span>
-              )}
-            </div>
-            {stream.isVerified && (
-              <div className="absolute -bottom-0.5 -right-0.5 bg-cyan-500 rounded-full p-0.5 ring-2 ring-slate-900">
-                <CheckCircle2 className="w-2.5 h-2.5 text-white" />
-              </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+            {stream.hostAvatar ? (
+              <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold text-cyan-300">
+                {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
+              </span>
             )}
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <span className="text-sm text-slate-300 truncate block">{stream.hostUsername}</span>
-            {stream.hostHandle && (
-              <span className="text-xs text-slate-500 truncate block">@{stream.hostHandle}</span>
-            )}
-          </div>
+          <span className="text-xs text-slate-400 truncate">{stream.hostUsername}</span>
+          {stream.isVerified && <CheckCircle2 className="w-3 h-3 text-cyan-400 flex-shrink-0" />}
         </div>
         
-        {/* Scheduled time */}
         {isScheduled && stream.scheduledStart && (
-          <div className="flex items-center gap-1.5 mt-3 text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-1.5">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">{new Date(stream.scheduledStart).toLocaleString()}</span>
-          </div>
-        )}
-        
-        {/* Tags */}
-        {stream.tags && stream.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {stream.tags.slice(0, 2).map((tag, i) => (
-              <span key={i} className="px-2 py-0.5 bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded text-[10px] text-slate-400 font-medium">
-                {tag}
-              </span>
-            ))}
-            {stream.tags.length > 2 && (
-              <span className="px-2 py-0.5 bg-slate-800/40 rounded text-[10px] text-slate-500">
-                +{stream.tags.length - 2}
-              </span>
-            )}
+          <div className="flex items-center gap-1 mt-2 text-amber-400 text-[10px]">
+            <Clock className="w-3 h-3" />
+            <span>{new Date(stream.scheduledStart).toLocaleDateString()}</span>
           </div>
         )}
       </div>
     </motion.div>
+  );
+}
+
+function StreamCarousel({ 
+  title, 
+  icon: IconComponent, 
+  streams, 
+  onStreamClick,
+  emptyMessage 
+}: { 
+  title: string; 
+  icon: any; 
+  streams: StreamData[];
+  onStreamClick: (id: string) => void;
+  emptyMessage?: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
+  if (streams.length === 0) {
+    return null;
+  }
+  
+  return (
+    <div className="mb-10">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <IconComponent className="w-5 h-5 text-cyan-400" />
+          <h2 className="text-lg font-bold text-white">{title}</h2>
+          <Badge variant="secondary" className="bg-slate-800/80 text-slate-300 text-xs">
+            {streams.length}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => scroll('left')}
+            className="w-8 h-8 rounded-full bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-white"
+            data-testid={`carousel-left-${title.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => scroll('right')}
+            className="w-8 h-8 rounded-full bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-white"
+            data-testid={`carousel-right-${title.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div 
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4"
+      >
+        {streams.map((stream) => (
+          <CompactStreamCard 
+            key={stream.id} 
+            stream={stream} 
+            onClick={() => onStreamClick(stream.id)} 
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -294,11 +405,8 @@ function EmptyState({ type, onCreateStream }: { type: 'live' | 'scheduled' | 'en
 export default function StreamDiscoveryPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('live');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [hostFilter, setHostFilter] = useState<string>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { data: liveStreams = [], isLoading: loadingLive } = useQuery<StreamData[]>({
@@ -308,10 +416,6 @@ export default function StreamDiscoveryPage() {
 
   const { data: scheduledStreams = [], isLoading: loadingScheduled } = useQuery<StreamData[]>({
     queryKey: ['/api/streams/scheduled'],
-  });
-
-  const { data: endedStreams = [], isLoading: loadingEnded } = useQuery<StreamData[]>({
-    queryKey: ['/api/streams/ended'],
   });
 
   const { data: avatars = [] } = useQuery<AvatarData[]>({
@@ -350,50 +454,46 @@ export default function StreamDiscoveryPage() {
     await createStreamMutation.mutateAsync(data);
   };
 
+  const allLiveStreams: StreamData[] = (liveStreams as any)?.streams || liveStreams;
+  const allScheduledStreams: StreamData[] = (scheduledStreams as any)?.streams || scheduledStreams;
+  
   const filterStreams = (streams: StreamData[]) => {
     return streams.filter((stream) => {
       const matchesSearch = !searchQuery || 
         stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         stream.hostUsername.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesType = typeFilter === 'all' || stream.streamType === typeFilter;
-      const matchesHost = hostFilter === 'all' || 
-        (hostFilter === 'ai' && stream.isKnowledgeAvatar) ||
-        (hostFilter === 'creators' && !stream.isKnowledgeAvatar);
-      const matchesCategory = !categoryFilter || 
-        stream.category?.toLowerCase() === categoryFilter.toLowerCase() ||
-        stream.tags?.some(tag => tag.toLowerCase().includes(categoryFilter.toLowerCase()));
-      return matchesSearch && matchesType && matchesHost && matchesCategory;
+      return matchesSearch && matchesType;
     });
   };
 
-  const filteredLive = filterStreams((liveStreams as any)?.streams || liveStreams);
-  const filteredScheduled = filterStreams((scheduledStreams as any)?.streams || scheduledStreams);
-  const filteredEnded = filterStreams((endedStreams as any)?.streams || endedStreams);
+  const filteredLive = filterStreams(allLiveStreams);
+  const filteredScheduled = filterStreams(allScheduledStreams);
+  
+  const featuredStream = filteredLive.length > 0 
+    ? [...filteredLive].sort((a, b) => (b.currentViewers || 0) - (a.currentViewers || 0))[0]
+    : null;
+  
+  const remainingLive = filteredLive.filter(s => s.id !== featuredStream?.id);
+  
+  const trendingStreams = [...remainingLive].sort((a, b) => (b.currentViewers || 0) - (a.currentViewers || 0));
+  
+  const recentStreams = [...remainingLive].sort((a, b) => {
+    const dateA = a.actualStart ? new Date(a.actualStart).getTime() : 0;
+    const dateB = b.actualStart ? new Date(b.actualStart).getTime() : 0;
+    return dateB - dateA;
+  });
+  
+  const aiAvatarStreams = remainingLive.filter(s => s.isKnowledgeAvatar);
+  const creatorStreams = remainingLive.filter(s => !s.isKnowledgeAvatar);
+
+  const handleStreamClick = (id: string) => navigate(`/stream/${id}`);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-purple-500/10"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: 100 + Math.random() * 200,
-              height: 100 + Math.random() * 200,
-            }}
-            animate={{
-              x: [0, Math.random() * 50 - 25, 0],
-              y: [0, Math.random() * 50 - 25, 0],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: 10 + Math.random() * 10,
-              repeat: Infinity,
-            }}
-          />
-        ))}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
@@ -416,78 +516,7 @@ export default function StreamDiscoveryPage() {
           </Button>
         </div>
 
-        {/* Host Type Filter Tabs - Glassmorphism style */}
-        <div className="flex items-center gap-2 mb-6">
-          <Button
-            variant={hostFilter === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setHostFilter('all')}
-            className={cn(
-              "rounded-lg transition-all duration-300",
-              hostFilter === 'all' 
-                ? "bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]" 
-                : "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
-            )}
-            data-testid="filter-host-all"
-          >
-            All
-          </Button>
-          <Button
-            variant={hostFilter === 'ai' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setHostFilter('ai')}
-            className={cn(
-              "rounded-lg transition-all duration-300",
-              hostFilter === 'ai' 
-                ? "bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-cyan-400/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]" 
-                : "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
-            )}
-            data-testid="filter-host-ai"
-          >
-            <Brain className="w-3.5 h-3.5 mr-1.5" />
-            AI Avatars
-          </Button>
-          <Button
-            variant={hostFilter === 'creators' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setHostFilter('creators')}
-            className={cn(
-              "rounded-lg transition-all duration-300",
-              hostFilter === 'creators' 
-                ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
-                : "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 text-slate-400 hover:border-amber-500/30 hover:text-amber-300"
-            )}
-            data-testid="filter-host-creators"
-          >
-            <User className="w-3.5 h-3.5 mr-1.5" />
-            Creators
-          </Button>
-        </div>
-
-        {/* Category Slider */}
-        <div className="mb-6 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 pb-2 min-w-max">
-            {['All', 'Trading', 'DeFi', 'Market Analysis', 'Alpha Calls', 'NFTs', 'Macro', 'Technical Analysis', 'News'].map((category) => (
-              <Button
-                key={category}
-                variant="outline"
-                size="sm"
-                onClick={() => setCategoryFilter(category === 'All' ? '' : category)}
-                className={cn(
-                  "rounded-full px-4 transition-all duration-300 whitespace-nowrap",
-                  categoryFilter === (category === 'All' ? '' : category)
-                    ? "bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border-cyan-400/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                    : "bg-slate-800/40 border-slate-700/50 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
-                )}
-                data-testid={`filter-category-${category.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cyan-400" />
             <Input
@@ -513,106 +542,64 @@ export default function StreamDiscoveryPage() {
           </Select>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 mb-6 p-1">
-            <TabsTrigger 
-              value="live" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-400/40 data-[state=active]:text-cyan-300 data-[state=active]:shadow-[0_0_15px_rgba(6,182,212,0.2)] rounded-lg transition-all"
-              data-testid="tab-live"
-            >
-              <Radio className="w-4 h-4 mr-2" />
-              Live
-              {filteredLive.length > 0 && (
-                <Badge className="ml-2 bg-red-500/80 text-white border border-red-400/50 shadow-[0_0_10px_rgba(239,68,68,0.4)]">{filteredLive.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="scheduled"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-400/40 data-[state=active]:text-cyan-300 data-[state=active]:shadow-[0_0_15px_rgba(6,182,212,0.2)] rounded-lg transition-all"
-              data-testid="tab-scheduled"
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              Upcoming
-              {filteredScheduled.length > 0 && (
-                <Badge className="ml-2 bg-amber-500/80 text-white border border-amber-400/50 shadow-[0_0_10px_rgba(245,158,11,0.4)]">{filteredScheduled.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="ended"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-400/40 data-[state=active]:text-cyan-300 data-[state=active]:shadow-[0_0_15px_rgba(6,182,212,0.2)] rounded-lg transition-all"
-              data-testid="tab-ended"
-            >
-              <History className="w-4 h-4 mr-2" />
-              Past
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="live">
-            {loadingLive ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-slate-800/50 rounded-xl h-64 animate-pulse" />
-                ))}
-              </div>
-            ) : filteredLive.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredLive.map((stream) => (
-                  <StreamCard 
-                    key={stream.id} 
-                    stream={stream} 
-                    onClick={() => navigate(`/stream/${stream.id}`)} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState type="live" onCreateStream={() => setShowCreateModal(true)} />
+        {loadingLive ? (
+          <div className="space-y-8">
+            <div className="h-[400px] bg-slate-800/50 rounded-3xl animate-pulse" />
+            <div className="flex gap-4 overflow-hidden">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="w-72 h-56 bg-slate-800/50 rounded-xl animate-pulse flex-shrink-0" />
+              ))}
+            </div>
+          </div>
+        ) : filteredLive.length > 0 ? (
+          <>
+            {featuredStream && (
+              <FeaturedHeroStream 
+                stream={featuredStream} 
+                onClick={() => handleStreamClick(featuredStream.id)} 
+              />
             )}
-          </TabsContent>
-
-          <TabsContent value="scheduled">
-            {loadingScheduled ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-slate-800/50 rounded-xl h-64 animate-pulse" />
-                ))}
-              </div>
-            ) : filteredScheduled.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredScheduled.map((stream) => (
-                  <StreamCard 
-                    key={stream.id} 
-                    stream={stream} 
-                    onClick={() => navigate(`/stream/${stream.id}`)} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState type="scheduled" />
-            )}
-          </TabsContent>
-
-          <TabsContent value="ended">
-            {loadingEnded ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-slate-800/50 rounded-xl h-64 animate-pulse" />
-                ))}
-              </div>
-            ) : filteredEnded.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredEnded.map((stream) => (
-                  <StreamCard 
-                    key={stream.id} 
-                    stream={stream} 
-                    onClick={() => navigate(`/stream/${stream.id}`)} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState type="ended" />
-            )}
-          </TabsContent>
-        </Tabs>
+            
+            <StreamCarousel
+              title="Trending Now"
+              icon={Flame}
+              streams={trendingStreams}
+              onStreamClick={handleStreamClick}
+            />
+            
+            <StreamCarousel
+              title="Just Started"
+              icon={Clock3}
+              streams={recentStreams}
+              onStreamClick={handleStreamClick}
+            />
+            
+            <StreamCarousel
+              title="AI Avatar Streams"
+              icon={Brain}
+              streams={aiAvatarStreams}
+              onStreamClick={handleStreamClick}
+            />
+            
+            <StreamCarousel
+              title="Creator Streams"
+              icon={User}
+              streams={creatorStreams}
+              onStreamClick={handleStreamClick}
+            />
+          </>
+        ) : (
+          <EmptyState type="live" onCreateStream={() => setShowCreateModal(true)} />
+        )}
+        
+        {filteredScheduled.length > 0 && (
+          <StreamCarousel
+            title="Upcoming Streams"
+            icon={Calendar}
+            streams={filteredScheduled}
+            onStreamClick={handleStreamClick}
+          />
+        )}
 
         {avatars.length > 0 && (
           <div className="mt-12">
