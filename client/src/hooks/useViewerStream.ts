@@ -42,6 +42,7 @@ export interface UseViewerStreamReturn extends ViewerStreamState {
   sendMessage: (content: string) => void;
   sendReaction: (reaction: string) => void;
   disconnect: () => void;
+  retryConnection: () => void;
 }
 
 export function useViewerStream(streamId: string | null, enabled: boolean = true): UseViewerStreamReturn {
@@ -116,12 +117,13 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
 
   const requestOffer = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
+      console.log('[Viewer] Sending request-offer to broadcaster');
       wsRef.current.send(JSON.stringify({
         type: 'request-offer',
         streamId,
         userId: user?.id,
         username: user?.username,
-        data: { viewerKey: `${user?.id}-${Date.now()}` },
+        data: { viewerId: user?.id, viewerKey: `${user?.id}-${Date.now()}` },
       }));
     }
   }, [streamId, user?.id, user?.username]);
@@ -340,6 +342,15 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
     setConnectionState('disconnected');
   }, []);
 
+  const retryConnection = useCallback(() => {
+    console.log('[Viewer] Manually retrying connection...');
+    disconnect();
+    setError(null);
+    setTimeout(() => {
+      connect();
+    }, 500);
+  }, [disconnect, connect]);
+
   useEffect(() => {
     if (streamId && isAuthenticated && enabled) {
       connect();
@@ -361,5 +372,6 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
     sendMessage,
     sendReaction,
     disconnect,
+    retryConnection,
   };
 }

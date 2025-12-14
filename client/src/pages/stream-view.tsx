@@ -488,6 +488,7 @@ export default function StreamViewPage() {
     remoteStream,
     connectionState: videoConnectionState,
     error: videoError,
+    retryConnection: retryVideoConnection,
   } = useViewerStream(streamId, !isAvatarStream && !!stream);
   
   const { data: pinnedData } = useQuery<{ messages: { id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[] }>({
@@ -1025,8 +1026,10 @@ export default function StreamViewPage() {
                       config.gradient,
                       "border-white/20"
                     )}>
-                      {videoConnectionState === 'connecting' ? (
+                      {videoConnectionState === 'connecting' || videoConnectionState === 'reconnecting' ? (
                         <Radio className="w-12 h-12 text-white animate-pulse" />
+                      ) : videoConnectionState === 'failed' || videoError ? (
+                        <WifiOff className="w-12 h-12 text-white" />
                       ) : (
                         <Icon className="w-12 h-12 text-white" />
                       )}
@@ -1034,18 +1037,23 @@ export default function StreamViewPage() {
                     <p className="text-lg font-bold text-white mb-2 font-orbitron">
                       {videoConnectionState === 'connecting' ? 'Connecting to Stream...' : 
                        videoConnectionState === 'reconnecting' ? 'Reconnecting...' :
-                       videoError ? 'Connection Failed' : 'Stream is Live'}
+                       videoConnectionState === 'failed' || videoError ? 'Connection Failed' : 'Stream is Live'}
                     </p>
-                    <p className="text-sm text-slate-400 flex items-center justify-center gap-2">
+                    <p className="text-sm text-slate-400 flex items-center justify-center gap-2 mb-3">
                       {videoConnectionState === 'connecting' ? (
                         <>
                           <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
                           Establishing video connection...
                         </>
-                      ) : videoError ? (
+                      ) : videoConnectionState === 'reconnecting' ? (
+                        <>
+                          <Radio className="w-4 h-4 text-amber-400 animate-pulse" />
+                          Attempting to reconnect...
+                        </>
+                      ) : videoConnectionState === 'failed' || videoError ? (
                         <>
                           <WifiOff className="w-4 h-4 text-red-400" />
-                          {videoError}
+                          {videoError || 'Unable to connect to video stream'}
                         </>
                       ) : (
                         <>
@@ -1054,6 +1062,16 @@ export default function StreamViewPage() {
                         </>
                       )}
                     </p>
+                    {(videoConnectionState === 'failed' || videoError) && (
+                      <Button
+                        onClick={retryVideoConnection}
+                        className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white"
+                        data-testid="button-retry-video"
+                      >
+                        <Radio className="w-4 h-4 mr-2" />
+                        Retry Connection
+                      </Button>
+                    )}
                   </div>
                 ) : isScheduled ? (
                   <div className="text-center px-4">
