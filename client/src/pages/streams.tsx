@@ -486,14 +486,47 @@ const StreamCard = memo(function StreamCard({
       
       <Card className="overflow-hidden bg-transparent border-0 shadow-none">
         <div className="relative aspect-video bg-slate-900 overflow-hidden">
+          {/* Gradient background based on stream type */}
+          <div className={cn(
+            "absolute inset-0 bg-gradient-to-br opacity-60",
+            config.gradient
+          )} />
+          
           {/* Subtle grid pattern overlay */}
           <div className="absolute inset-0 opacity-5" style={{
             backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
             backgroundSize: '20px 20px'
           }} />
           
+          {/* Avatar/brand icon centered in thumbnail */}
+          <div className="absolute inset-0 flex items-center justify-center z-10 group-hover:opacity-0 transition-opacity duration-300">
+            <div className={cn(
+              "w-20 h-20 rounded-full flex items-center justify-center shadow-xl",
+              showBrandIcon ? cn(brandFallback.bgColor, "ring-2 ring-white/20") : 'bg-slate-800/80 ring-2 ring-white/20'
+            )}>
+              {showImage && (
+                <img 
+                  src={stream.hostAvatar} 
+                  alt="" 
+                  className="w-full h-full rounded-full object-cover" 
+                  onError={() => setImageError(true)}
+                />
+              )}
+              {showBrandIcon && BrandIcon && (
+                <BrandIcon className={cn("w-10 h-10", brandFallback.color)} />
+              )}
+              {showDiceBear && (
+                <img 
+                  src={getDiceBearAvatar(stream.hostUsername)} 
+                  alt="" 
+                  className="w-full h-full rounded-full object-cover"
+                />
+              )}
+            </div>
+          </div>
+          
           {/* Play button on hover */}
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="p-4 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
               <Play className="w-8 h-8 text-cyan-300 fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
             </div>
