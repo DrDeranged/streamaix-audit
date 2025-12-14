@@ -108,10 +108,16 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-purple-500/0 group-hover:from-cyan-500/10 group-hover:via-transparent group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none z-10" />
       
       {/* Thumbnail Area */}
-      <div className="h-36 bg-slate-900 relative overflow-hidden">
+      <div className="h-40 bg-slate-900 relative overflow-hidden">
+        {/* Animated gradient background based on stream type */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-br opacity-60",
+          gradient
+        )} />
+        
         {/* Subtle grid pattern overlay */}
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
           backgroundSize: '20px 20px'
         }} />
         
@@ -119,13 +125,36 @@ function StreamCard({ stream, onClick }: { stream: StreamData; onClick: () => vo
           <img src={stream.thumbnailUrl} alt={stream.title} className="w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="p-4 rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
-              <Play className="w-8 h-8 text-cyan-300 fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+            {/* Large avatar as focal point */}
+            <div className="relative">
+              <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-full opacity-40 blur-xl animate-pulse" />
+              <div className="relative w-20 h-20 rounded-full bg-slate-800/80 backdrop-blur-sm overflow-hidden ring-4 ring-white/20 flex items-center justify-center">
+                {stream.hostAvatar ? (
+                  <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-bold text-white/80">
+                    {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
+                  </span>
+                )}
+              </div>
+              {/* Stream type icon overlay */}
+              <div className={cn(
+                "absolute -bottom-1 -right-1 p-2 rounded-full bg-gradient-to-r shadow-lg",
+                gradient
+              )}>
+                <Icon className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            {/* Play button on hover */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/30 backdrop-blur-sm">
+              <div className="p-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform">
+                <Play className="w-8 h-8 text-white fill-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+              </div>
             </div>
           </div>
         )}
         
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent opacity-90" />
         
         {/* Top row: Status left, Viewers right */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20">
@@ -268,6 +297,7 @@ export default function StreamDiscoveryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [hostFilter, setHostFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { data: liveStreams = [], isLoading: loadingLive } = useQuery<StreamData[]>({
@@ -328,7 +358,10 @@ export default function StreamDiscoveryPage() {
       const matchesHost = hostFilter === 'all' || 
         (hostFilter === 'ai' && stream.isKnowledgeAvatar) ||
         (hostFilter === 'creators' && !stream.isKnowledgeAvatar);
-      return matchesSearch && matchesType && matchesHost;
+      const matchesCategory = !categoryFilter || 
+        stream.category?.toLowerCase() === categoryFilter.toLowerCase() ||
+        stream.tags?.some(tag => tag.toLowerCase().includes(categoryFilter.toLowerCase()));
+      return matchesSearch && matchesType && matchesHost && matchesCategory;
     });
   };
 
@@ -428,6 +461,29 @@ export default function StreamDiscoveryPage() {
             <User className="w-3.5 h-3.5 mr-1.5" />
             Creators
           </Button>
+        </div>
+
+        {/* Category Slider */}
+        <div className="mb-6 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 pb-2 min-w-max">
+            {['All', 'Trading', 'DeFi', 'Market Analysis', 'Alpha Calls', 'NFTs', 'Macro', 'Technical Analysis', 'News'].map((category) => (
+              <Button
+                key={category}
+                variant="outline"
+                size="sm"
+                onClick={() => setCategoryFilter(category === 'All' ? '' : category)}
+                className={cn(
+                  "rounded-full px-4 transition-all duration-300 whitespace-nowrap",
+                  categoryFilter === (category === 'All' ? '' : category)
+                    ? "bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border-cyan-400/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    : "bg-slate-800/40 border-slate-700/50 text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300"
+                )}
+                data-testid={`filter-category-${category.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
