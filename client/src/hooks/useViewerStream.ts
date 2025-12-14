@@ -166,14 +166,16 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
         if (offerRequestTimeoutRef.current) {
           clearTimeout(offerRequestTimeoutRef.current);
         }
-        offerRequestTimeoutRef.current = setTimeout(requestOffer, 500);
+        // Request offer immediately when broadcaster is ready (reduced from 500ms)
+        offerRequestTimeoutRef.current = setTimeout(requestOffer, 50);
         break;
 
       case 'broadcaster-not-ready':
         if (offerRequestTimeoutRef.current) {
           clearTimeout(offerRequestTimeoutRef.current);
         }
-        offerRequestTimeoutRef.current = setTimeout(requestOffer, 2000);
+        // Retry faster when broadcaster not ready (reduced from 2000ms)
+        offerRequestTimeoutRef.current = setTimeout(requestOffer, 500);
         break;
 
       case 'webrtc-offer':
@@ -257,7 +259,8 @@ export function useViewerStream(streamId: string | null, enabled: boolean = true
         setIsConnected(true);
         setError(null);
         
-        offerRequestTimeoutRef.current = setTimeout(requestOffer, 1000);
+        // Request offer faster on connect (reduced from 1000ms to 100ms)
+        offerRequestTimeoutRef.current = setTimeout(requestOffer, 100);
       };
 
       ws.onmessage = (messageEvent) => {

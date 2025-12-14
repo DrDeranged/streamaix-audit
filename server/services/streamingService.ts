@@ -87,10 +87,17 @@ export class StreamingService {
   ) {
     // Get or create session
     let session = this.sessions.get(streamId);
+    let hostAvatarId: string | null = null;
     
     if (!session) {
-      // Check if stream exists in database
-      const [streamRecord] = await db.select()
+      // Check if stream exists in database - single query for all needed fields
+      const [streamRecord] = await db.select({
+        id: liveStreams.id,
+        hostId: liveStreams.hostId,
+        title: liveStreams.title,
+        status: liveStreams.status,
+        hostAvatarId: liveStreams.hostAvatarId,
+      })
         .from(liveStreams)
         .where(eq(liveStreams.id, streamId))
         .limit(1);
@@ -100,6 +107,8 @@ export class StreamingService {
         ws.close();
         return;
       }
+      
+      hostAvatarId = streamRecord.hostAvatarId;
       
       // Get host username
       const [hostUser] = await db.select({ username: users.username })
@@ -149,7 +158,7 @@ export class StreamingService {
     if (currentViewerCount > session.peakViewers) {
       session.peakViewers = currentViewerCount;
       
-      // Check viewer milestones
+      // Check viewer milestones (non-blocking)
       const viewerMilestones = [10, 25, 50, 100, 250, 500, 1000, 5000];
       for (const milestone of viewerMilestones) {
         if (currentViewerCount >= milestone && !session.notifiedMilestones.has(milestone)) {
@@ -165,10 +174,12 @@ export class StreamingService {
       }
     }
 
-    // Update database viewer count
-    await this.updateViewerCount(streamId);
+    // Update database viewer count (non-blocking - don't wait)
+    this.updateViewerCount(streamId).catch(err => 
+      console.error('Error updating viewer count:', err)
+    );
 
-    // Broadcast viewer count update
+    // Broadcast viewer count update immediately
     this.broadcastToStream(streamId, {
       type: 'viewer-count',
       streamId,
@@ -178,14 +189,18 @@ export class StreamingService {
 
     // Check if this is a Knowledge Avatar stream and activate voice on-demand
     // CRITICAL: Only activate TTS when a REAL (non-AI) viewer joins to save API costs
-    const [streamRecord] = await db.select({ hostAvatarId: liveStreams.hostAvatarId })
-      .from(liveStreams)
-      .where(eq(liveStreams.id, streamId))
-      .limit(1);
+    // Use cached hostAvatarId if we have it, otherwise query
+    if (hostAvatarId === null) {
+      const [streamRecord] = await db.select({ hostAvatarId: liveStreams.hostAvatarId })
+        .from(liveStreams)
+        .where(eq(liveStreams.id, streamId))
+        .limit(1);
+      hostAvatarId = streamRecord?.hostAvatarId || null;
+    }
     
-    console.log(`[Streaming] 🔍 Checking stream ${streamId.slice(0, 8)}... hostAvatarId: ${streamRecord?.hostAvatarId || 'none'}, isAiAgent: ${isAiAgent}`);
+    console.log(`[Streaming] 🔍 Checking stream ${streamId.slice(0, 8)}... hostAvatarId: ${hostAvatarId || 'none'}, isAiAgent: ${isAiAgent}`);
     
-    if (streamRecord?.hostAvatarId && !isAiAgent) {
+    if (hostAvatarId && !isAiAgent) {
       // Only trigger voice activation for real human viewers (not AI agents)
       const avatarService = getAutonomousAvatarStreamService();
       const isVoiceActive = avatarService?.isVoiceActiveForStream(streamId);
@@ -197,7 +212,7 @@ export class StreamingService {
           console.error(`[Streaming] Failed to activate voice for stream ${streamId}:`, err)
         );
       }
-    } else if (streamRecord?.hostAvatarId && isAiAgent) {
+    } else if (hostAvatarId && isAiAgent) {
       console.log(`[Streaming] ⏸️ AI agent joined stream ${streamId.slice(0, 8)}... - NOT activating TTS (on-demand mode)`);
     }
 
@@ -263,19 +278,7 @@ export class StreamingService {
           session.messages = session.messages.slice(-500);
         }
 
-        // Save to database
-        try {
-          await db.insert(streamMessages).values({
-            streamId,
-            userId,
-            content: message.data.content,
-            messageType: 'chat',
-          });
-        } catch (error) {
-          console.error('Error saving stream message:', error);
-        }
-
-        // Broadcast to all viewers
+        // Broadcast to all viewers FIRST (low latency priority)
         this.broadcastToStream(streamId, {
           type: 'chat',
           streamId,
@@ -283,6 +286,16 @@ export class StreamingService {
           username,
           isAiAgent,
           data: chatMessage,
+        });
+
+        // Save to database async (non-blocking - don't wait)
+        db.insert(streamMessages).values({
+          streamId,
+          userId,
+          content: message.data.content,
+          messageType: 'chat',
+        }).catch(error => {
+          console.error('Error saving stream message:', error);
         });
         break;
 
