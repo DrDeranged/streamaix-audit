@@ -1,0 +1,259 @@
+1. App Overview
+
+Purpose: Nail the one-liner + vision
+
+App name:
+
+App URL (if deployed):
+
+One-sentence description (plain English):
+
+Primary user persona:
+
+Core problem the app solves:
+
+Core outcome users achieve:
+
+What makes this app fundamentally different from alternatives?
+
+2. Product Status & Maturity
+
+Purpose: Show execution and velocity
+
+Current stage:
+
+☐ Idea
+
+☐ MVP
+
+☐ Live product
+
+☐ Revenue-generating
+
+Date development started:
+
+Current version:
+
+Major milestones shipped so far:
+
+Known limitations or features still in progress:
+
+Is the product production-ready today? Why or why not?
+
+3. Core Features (User-Facing)
+
+Purpose: Populate solution + product slides
+
+List the 5–7 most important features, including:
+
+Feature name
+
+What problem it solves
+
+Why it matters to the user
+
+Example format:
+
+Feature X – allows users to Y, removing Z friction
+
+4. User Flow & Experience
+
+Purpose: Product walkthrough slide
+
+How does a new user get started?
+
+Key steps from signup → value delivered:
+
+Average time to first “aha” moment:
+
+Any onboarding or automation built in?
+
+How does the app retain users?
+
+5. Technical Architecture (High Level)
+
+Purpose: Technology & defensibility slide
+
+Frontend stack (frameworks, languages):
+
+Backend stack:
+
+Database(s) used:
+
+Authentication method:
+
+APIs or third-party services integrated:
+
+AI models / inference (if any):
+
+Blockchain / Web3 components (if any):
+
+Hosting / deployment setup on Replit:
+
+Scalability considerations:
+
+What parts of the system are hardest to replicate?
+
+6. AI / Automation (If Applicable)
+
+Purpose: “Why now” + tech moat
+
+Where is AI used in the app?
+
+Models used (OpenAI, open-source, custom, etc.):
+
+Is AI core or supportive?
+
+How does AI improve efficiency or user experience?
+
+Any proprietary prompts, pipelines, or workflows?
+
+7. Data & Network Effects
+
+Purpose: Long-term defensibility
+
+Does the app generate unique data over time?
+
+Does usage improve the product?
+
+Any user-to-user interactions?
+
+Any feedback loops built in?
+
+8. Traction & Metrics
+
+Purpose: Investor proof
+
+Total users:
+
+Active users (DAU / WAU / MAU):
+
+Growth rate:
+
+Retention (if known):
+
+Revenue (if any):
+
+Conversion metrics:
+
+Notable user feedback or testimonials:
+
+Partnerships or pilots:
+
+9. Business Model
+
+Purpose: Revenue slide
+
+Monetization model:
+
+Pricing tiers:
+
+Free vs paid features:
+
+Who pays?
+
+Why users are willing to pay:
+
+Future monetization paths:
+
+10. Competitive Landscape
+
+Purpose: Positioning slide
+
+Direct competitors:
+
+Indirect / legacy alternatives:
+
+How your app wins vs each:
+
+Key differentiators:
+
+Switching costs (if any):
+
+11. Go-To-Market Strategy
+
+Purpose: Growth plan
+
+Primary acquisition channels:
+
+Initial target niche:
+
+Distribution advantages:
+
+Paid vs organic strategy:
+
+CAC assumptions (even directional):
+
+Community or viral loops (if any):
+
+12. Roadmap (Next 12–24 Months)
+
+Purpose: Vision & momentum
+
+Top 3 upcoming features:
+
+Platform expansion plans:
+
+Market expansion plans:
+
+Technical milestones:
+
+Monetization milestones:
+
+13. Security, Compliance & Risk
+
+Purpose: De-risk for investors
+
+Data privacy approach:
+
+Security measures:
+
+Compliance considerations:
+
+Known risks:
+
+Mitigation strategies:
+
+14. Team & Ownership
+
+Purpose: Team slide
+
+Founder(s):
+
+Roles:
+
+Who built what:
+
+Advisors (if any):
+
+Equity structure (high-level, optional):
+
+15. Funding & Needs
+
+Purpose: The Ask
+
+Capital raised to date:
+
+Amount seeking:
+
+Runway with this raise:
+
+Use of funds:
+
+Key milestones this funding unlocks:
+
+16. Replit-Specific Advantages (IMPORTANT)
+
+Purpose: Unique execution narrative
+
+Why Replit was chosen:
+
+Speed of development vs traditional stack:
+
+Cost savings:
+
+Collaboration advantages:
+
+How Replit enables faster iteration:
+
+How Replit supports future scaling:
