@@ -65,6 +65,10 @@ class MarketIntelligenceNotifier {
   private lastStockAlerts: Map<string, number> = new Map();
   private previousNarrativeMomentum: Map<string, number> = new Map();
   
+  // Notification deduplication to prevent duplicate messages
+  private sentNotificationHashes: Map<string, number> = new Map();
+  private readonly NOTIFICATION_DEDUPE_TTL = 60 * 60 * 1000; // 1 hour dedup window
+  
   private readonly TRACKED_CRYPTO = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
   private readonly TRACKED_STOCKS = ['MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'TSLA'];
   private readonly PRICE_ALERT_THRESHOLD = 3; // 3% in 1 hour
@@ -311,31 +315,18 @@ class MarketIntelligenceNotifier {
 
   async sendMorningBriefing(): Promise<void> {
     try {
-      const [cryptoData, stockData, economicEvents, topNews] = await Promise.all([
+      const [cryptoData, economicEvents] = await Promise.all([
         marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO),
-        marketDataService.getCryptoStocks(),
-        marketDataService.getEconomicCalendar({ timeRange: '1d', impact: ['high'] }),
-        newsService.getCryptoNews(3)
+        marketDataService.getEconomicCalendar({ timeRange: '1d', impact: ['high'] })
       ]);
+
+      if (cryptoData.length === 0) {
+        console.log('⚠️ No crypto data available for morning briefing');
+        return;
+      }
 
       const btc = cryptoData.find(c => c.symbol === 'BTC');
       const eth = cryptoData.find(c => c.symbol === 'ETH');
-
-      // Get trading metrics for AI analysis
-      let tradingMetrics;
-      try {
-        const [btcPositioning, ethPositioning] = await Promise.all([
-          derivativesAnalyticsService.getFuturesPositioning('BTC'),
-          derivativesAnalyticsService.getFuturesPositioning('ETH')
-        ]);
-        tradingMetrics = {
-          btcFunding: btcPositioning?.fundingRateHistory?.[0]?.rate,
-          ethFunding: ethPositioning?.fundingRateHistory?.[0]?.rate,
-          totalOI: (btcPositioning?.totalLongOI || 0) + (btcPositioning?.totalShortOI || 0)
-        };
-      } catch (e) {
-        console.log('⚠️ Could not fetch trading metrics for morning briefing');
-      }
 
       // Today's key events
       const todayEvents = economicEvents.filter(e => {
@@ -344,37 +335,39 @@ class MarketIntelligenceNotifier {
         return eventDate.toDateString() === today.toDateString();
       }).slice(0, 3);
 
-      // Generate AI-powered morning briefing
-      const marketContextData = cryptoData.map(c => ({
-        symbol: c.symbol,
-        price: c.price,
-        change24h: c.percentChange24h,
-        change7d: c.percentChange7d,
-        volume24h: c.volume24h,
-        marketCap: c.marketCap
-      }));
-
-      const insight = await alphaInsightsEngine.generateMorningBriefing(
-        marketContextData,
-        todayEvents,
-        tradingMetrics
-      );
-
-      // Market sentiment emoji
+      // Market sentiment based on actual data
       const avgChange = cryptoData.reduce((sum, c) => sum + c.percentChange24h, 0) / cryptoData.length;
       const sentimentEmoji = avgChange > 2 ? '🟢' : avgChange < -2 ? '🔴' : '🟡';
-
-      // AI-enhanced notification body
-      let body = `📊 ${insight.marketRegime}\n\n`;
-      body += `🎯 ${insight.topOpportunity}\n\n`;
-      body += `⚠️ ${insight.riskWarning}`;
       
-      if (insight.watchList.length > 0) {
-        body += `\n\n👀 Watch: ${insight.watchList.join(', ')}`;
+      // Sort by change to find top movers
+      const sorted = [...cryptoData].sort((a, b) => Math.abs(b.percentChange24h) - Math.abs(a.percentChange24h));
+      const topMover = sorted[0];
+
+      // Data-only notification body (no OpenAI)
+      let body = '';
+      if (btc) {
+        body += `📊 BTC: $${btc.price.toLocaleString()} (${this.formatChange(btc.percentChange24h)})\n`;
+      }
+      if (eth) {
+        body += `📊 ETH: $${eth.price.toLocaleString()} (${this.formatChange(eth.percentChange24h)})\n`;
+      }
+      
+      body += `\n🔥 Top Mover: ${topMover.symbol} ${this.formatChange(topMover.percentChange24h)}`;
+      
+      if (todayEvents.length > 0) {
+        body += `\n\n📅 ${todayEvents.length} high-impact event${todayEvents.length > 1 ? 's' : ''} today`;
       }
 
-      // Dynamic AI-powered title
-      const title = `${sentimentEmoji} ${insight.dayTraderFocus.substring(0, 40)}`;
+      // Simple factual title based on market direction
+      const marketDirection = avgChange > 2 ? 'Markets Up' : avgChange < -2 ? 'Markets Down' : 'Markets Steady';
+      const title = `${sentimentEmoji} Good Morning! ${marketDirection}`;
+
+      // Check deduplication
+      const hash = this.generateNotificationHash(title, body);
+      if (this.isDuplicateNotification(hash)) {
+        console.log('⚠️ Morning briefing skipped - duplicate content');
+        return;
+      }
 
       await pushNotificationService.sendToAll({
         title,
@@ -388,7 +381,8 @@ class MarketIntelligenceNotifier {
         ]
       }, 'morning_briefing');
 
-      console.log('✅ AI-enhanced morning briefing sent');
+      this.markNotificationSent(hash);
+      console.log('✅ Morning briefing sent (CoinGecko data only)');
     } catch (error) {
       console.error('❌ Failed to send morning briefing:', error);
     }
@@ -505,19 +499,17 @@ class MarketIntelligenceNotifier {
           const isUp = hourlyChange > 0;
           const emoji = isUp ? '🚀' : '💥';
           
-          // Generate AI-powered insight for this price move
-          const insight = await alphaInsightsEngine.generatePriceAlertInsight(
-            crypto.symbol,
-            oldestPrice,
-            currentPrice,
-            hourlyChange,
-            crypto.percentChange24h,
-            { volume24h: crypto.volume24h }
-          );
+          // Data-only notification (no OpenAI)
+          const direction = isUp ? 'surging' : 'dropping';
+          const title = `${emoji} ${crypto.symbol} ${direction} ${this.formatChange(hourlyChange)} in 1hr`;
+          const body = `💰 Price: $${currentPrice.toLocaleString()}\n📊 24h: ${this.formatChange(crypto.percentChange24h)}\n📈 Volume: $${(crypto.volume24h / 1e6).toFixed(1)}M`;
           
-          // AI-enhanced notification with unique alpha
-          const title = `${emoji} ${insight.headline}`;
-          const body = `${insight.whyItMoved}\n\n💡 ${insight.whatItMeans}\n\n⚡ ${insight.actionAdvice}`;
+          // Check deduplication
+          const hash = this.generateNotificationHash(title, body);
+          if (this.isDuplicateNotification(hash)) {
+            console.log(`⚠️ Price alert for ${key} skipped - duplicate`);
+            continue;
+          }
           
           await pushNotificationService.sendToAll({
             title,
@@ -531,9 +523,10 @@ class MarketIntelligenceNotifier {
             ]
           }, 'price_alert');
 
+          this.markNotificationSent(hash);
           this.lastPriceAlerts.set(key, now);
           alertsSent++;
-          console.log(`🚨 AI-enhanced price alert sent for ${key}: ${hourlyChange.toFixed(2)}% in 1h`);
+          console.log(`🚨 Price alert sent for ${key}: ${hourlyChange.toFixed(2)}% in 1h (CoinGecko data only)`);
         }
       }
 
@@ -594,46 +587,50 @@ class MarketIntelligenceNotifier {
 
   async sendEveningRecap(): Promise<void> {
     try {
-      const [cryptoData, tradingMetrics] = await Promise.all([
-        marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO),
-        this.getTradingMetricsSummary()
-      ]);
+      const cryptoData = await marketDataService.getCryptoQuotes(this.TRACKED_CRYPTO);
+      
+      if (cryptoData.length === 0) {
+        console.log('⚠️ No crypto data available for evening recap');
+        return;
+      }
       
       const btc = cryptoData.find(c => c.symbol === 'BTC');
       const eth = cryptoData.find(c => c.symbol === 'ETH');
       
       // Calculate overall market performance
       const avgChange = cryptoData.reduce((sum, c) => sum + c.percentChange24h, 0) / cryptoData.length;
-
-      // Generate AI-powered evening recap
-      const marketContextData = cryptoData.map(c => ({
-        symbol: c.symbol,
-        price: c.price,
-        change24h: c.percentChange24h,
-        change7d: c.percentChange7d,
-        volume24h: c.volume24h,
-        marketCap: c.marketCap
-      }));
-
-      const insight = await alphaInsightsEngine.generateEveningRecap(
-        marketContextData,
-        tradingMetrics ? {
-          totalLiquidations: tradingMetrics.totalLiquidations,
-          dominantSide: tradingMetrics.avgFundingRate > 0 ? 'longs' : 'shorts'
-        } : undefined
-      );
+      
+      // Sort to find best and worst performers
+      const sorted = [...cryptoData].sort((a, b) => b.percentChange24h - a.percentChange24h);
+      const bestPerformer = sorted[0];
+      const worstPerformer = sorted[sorted.length - 1];
 
       // Market sentiment emoji
       const sentimentEmoji = avgChange > 2 ? '🟢' : avgChange < -2 ? '🔴' : '🟡';
 
-      // AI-enhanced notification body
-      let body = `📊 ${insight.dayAnalysis}\n\n`;
-      body += `💡 ${insight.keyTakeaway}\n\n`;
-      body += `🌙 ${insight.overnightSetup}\n\n`;
-      body += `📈 ${insight.positionAdvice}`;
+      // Data-only notification body (no OpenAI)
+      let body = '';
+      if (btc) {
+        body += `📊 BTC: $${btc.price.toLocaleString()} (${this.formatChange(btc.percentChange24h)})\n`;
+      }
+      if (eth) {
+        body += `📊 ETH: $${eth.price.toLocaleString()} (${this.formatChange(eth.percentChange24h)})\n`;
+      }
+      
+      body += `\n🏆 Best: ${bestPerformer.symbol} ${this.formatChange(bestPerformer.percentChange24h)}`;
+      body += `\n📉 Worst: ${worstPerformer.symbol} ${this.formatChange(worstPerformer.percentChange24h)}`;
+      body += `\n\n📈 Market Avg: ${this.formatChange(avgChange)}`;
 
-      // Dynamic AI-powered title
-      const title = `${sentimentEmoji} ${insight.tomorrowOutlook.substring(0, 40)}`;
+      // Simple factual title
+      const marketDirection = avgChange > 2 ? 'ended up' : avgChange < -2 ? 'ended down' : 'closed flat';
+      const title = `${sentimentEmoji} Markets ${marketDirection} today`;
+
+      // Check deduplication
+      const hash = this.generateNotificationHash(title, body);
+      if (this.isDuplicateNotification(hash)) {
+        console.log('⚠️ Evening recap skipped - duplicate content');
+        return;
+      }
 
       await pushNotificationService.sendToAll({
         title,
@@ -647,7 +644,8 @@ class MarketIntelligenceNotifier {
         ]
       }, 'evening_recap');
 
-      console.log('✅ AI-enhanced evening recap sent');
+      this.markNotificationSent(hash);
+      console.log('✅ Evening recap sent (CoinGecko data only)');
     } catch (error) {
       console.error('❌ Failed to send evening recap:', error);
     }
@@ -1793,6 +1791,31 @@ class MarketIntelligenceNotifier {
     const emoji = change >= 2 ? '🟢' : change <= -2 ? '🔴' : '';
     const sign = change >= 0 ? '+' : '';
     return `${emoji}${sign}${change.toFixed(1)}%`;
+  }
+
+  private generateNotificationHash(title: string, body: string): string {
+    return `${title}:${body}`.slice(0, 100);
+  }
+
+  private isDuplicateNotification(hash: string): boolean {
+    const now = Date.now();
+    this.cleanupExpiredHashes();
+    const lastSent = this.sentNotificationHashes.get(hash);
+    if (!lastSent) return false;
+    return (now - lastSent) < this.NOTIFICATION_DEDUPE_TTL;
+  }
+
+  private markNotificationSent(hash: string): void {
+    this.sentNotificationHashes.set(hash, Date.now());
+  }
+
+  private cleanupExpiredHashes(): void {
+    const now = Date.now();
+    for (const [hash, timestamp] of this.sentNotificationHashes.entries()) {
+      if (now - timestamp > this.NOTIFICATION_DEDUPE_TTL) {
+        this.sentNotificationHashes.delete(hash);
+      }
+    }
   }
 
   private formatLargeNumber(num: number): string {
