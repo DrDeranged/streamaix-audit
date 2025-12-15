@@ -1,9 +1,22 @@
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { autoSeedDatabase } from "./auto-seed";
 
 const app = express();
+
+// Enable GZIP compression for all responses
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
 
 const SERVER_BUILD_TIME = new Date().toISOString();
 const SERVER_VERSION = `v${Date.now()}`;
