@@ -1,0 +1,125 @@
+Hey — I’m preparing an investor-ready PPM and need an “evidence pack” + a few technical clarifications exported from the codebase. Please produce ONE consolidated document (Markdown) plus the requested screenshots/recordings using the checklist below.
+
+========================
+STREAMAIX PPM EVIDENCE PACK + TECH CLARIFICATIONS (REQUEST)
+========================
+
+1) EXPORT THESE 6 MARKDOWN FILES (use the exact filenames)
+
+A) /02_Technical_Specs/Wallet_Base_Readiness.md
+- Confirm wallet auth method is NOT EIP-4361 SIWE (custom signed message challenge)
+- Include exact signed message format (e.g., “Sign this message to authenticate with StreamAiX: [nonce]”)
+- Signature verification method (ethers.js verifyMessage)
+- Wallet binding rules: one wallet per user (wallet_address UNIQUE), wallet change allowed + re-auth required
+- Supported networks: Base Mainnet (8453), Base Sepolia (84532), Ethereum Mainnet (1)
+- Current on-chain status: ALL settlement is OFF-CHAIN today (DB + internal balances)
+- Rollout phases: Off-chain → Hybrid (tips/settlement on-chain) → Full on-chain state
+
+B) /02_Technical_Specs/Market_Mechanism_Resolution.md
+- Confirm prediction markets are LIVE, but settlement is OFF-CHAIN today
+- Market AMM: CPMM (yes_pool * no_pool = k) + exact trade execution steps
+- Price calculation: price_yes = yes_pool/(yes_pool+no_pool), price_no similarly
+- Fee: 0.5% PROFIT ONLY (provide formula + example)
+- Resolution priority: AI resolver primary + manual admin override; UMA planned (NOT live)
+- Dispute window: 24h; dispute stake currency is INTERNAL POINTS today (100 points), STREAM later
+- Integrity controls: max position 10% of pool, max 10 trades/min/user, creator cannot trade own market (market.created_by === user.id), min liquidity 1000, slippage revert >5%
+- Include sample market JSON object + list the DB tables involved
+
+C) /02_Technical_Specs/Streaming_Scalability.md
+- Current WebRTC model: pure P2P with WebSocket signaling
+- Current recommended max viewers/stream (~50) and why
+- STUN servers used; TURN status: NOT deployed
+- TURN plan: Q1 2026 (60 days), cost estimate ($50–100/mo), vendor options (Twilio or coturn)
+- SFU plan: Q2 2026 (120 days), options (Mediasoup/Janus vs managed LiveKit), trigger (when a stream exceeds 30 viewers)
+- Failover behavior: chat + overlays remain functional even if WebRTC fails; audio-only planned for NAT issues
+
+D) /02_Technical_Specs/Avatar_Safety_Spec.md
+- Confirm 17 Knowledge Avatars are LIVE today and are PURELY FICTIONAL (original names/voices/likeness)
+- Explicit future policy: written permission required before any real-person identifiable avatar
+- Avatar UX: user question → model response → TTS → audio streamed + transcript
+- Market update injection logic: >2% move in 5 min, >3x volume spike, breaking news keyword match
+- Anti-spam: min 10 minutes between injections, max 6/hr, user mute option
+- Audit log schema including system_prompt, completion, data_snapshot, tokens_used; retention 90 days
+
+E) /02_Technical_Specs/Agent_Governance_Controls.md
+- Confirm 100 AI agents are LIVE; list counts by persona type + activity tier table
+- Confirm agents use INTERNAL BALANCES ONLY (no on-chain wallets), segregated from user wallets
+- Confirm agents cannot create markets (planned only with admin approval)
+- Action permissions + frequency limits + spend limits
+- Kill switches: PAUSE_OPENAI_API, QUIET_MODE, pause single agent endpoint, pause-all endpoint
+- Market manipulation prevention rules (no >5% liquidity, no coordinated trades within 5 minutes, randomized timing)
+
+F) /02_Technical_Specs/Security_Compliance_Readiness.md
+- Auth methods live: email/password (bcrypt), Twitter OAuth, MetaMask wallet auth
+- Sessions (express-session + pg), JWT usage for API/WebSockets
+- Rate limiting plan (auth endpoints 5/min/IP, API 100/min/user, WS 60/min/conn) and implementation status
+- WebSocket auth requirement: yes; read-only access only for public streams if unauthenticated
+- Data collected + retention (emails, wallet addr, watch history 90d, chat 30d, IP logs 7d, trades permanent)
+- Geo-blocking plan: prediction markets DISABLED for U.S. users at launch; streaming/bounties/tips enabled
+- KYC/AML plan: required for withdrawals >$10k equivalent (Q1 2026 pre-launch)
+
+2) CREATE THE “PPM DATAROOM” FOLDER STRUCTURE
+Create:
+ /StreamAiX-PPM-DataRoom/
+   00_Readme_Index.md
+   01_Product_Proof/
+     WalletConnect_Base/
+     Markets_Lifecycle/
+     Bounties_Lifecycle/
+     Streaming_Core/
+     Avatars_Live/
+     Agents_Admin/
+   02_Technical_Specs/  (put the 6 docs here)
+   03_Architecture/
+   04_Logs_Samples/
+   05_Risk_Limitations/
+
+3) CAPTURE THE REQUIRED PROOF (SCREENSHOTS + SHORT MP4S)
+Please provide either a zipped folder or links to the files.
+
+A) Wallet connect proof (MetaMask + Base)
+- Video: landing → connect wallet → sign message → authenticated state showing wallet linked
+- Screenshots: signed message prompt, base chain config (8453/84532)
+
+B) Market lifecycle proof
+- Video: /markets list → open market → trade YES/NO → show position → resolve market → show payout + fee deducted on profit
+- Screenshots: before/after balance, dispute window indicator, fee example
+
+C) Bounty lifecycle proof
+- Video: create bounty → claim → submit summary → show scoring breakdown → payout rule applied
+- Screenshots: scoring breakdown + payout example
+
+D) Streaming proof
+- Video: /go-live → start stream → open /stream/:id in incognito → show viewer count realtime, chat, market overlay
+- Screenshots: market overlay on stream, viewer count update
+
+E) Avatar proof
+- Video: avatar stream → ask question → avatar responds (text + TTS) → show disclaimer banner
+- Screenshots: AI disclaimer banner, avatar response transcript
+
+F) Agents admin proof
+- Video: agent dashboard showing limits + pause single agent + pause all agents
+- Screenshots: pause-all success, agent limits screen
+
+4) QUICK TECHNICAL EXPORTS (append to /04_Logs_Samples/)
+- Sample market resolution record JSON (with proposed outcome + timestamps)
+- Sample avatar audit log JSON (system_prompt + completion + data_snapshot)
+- Sample agent action log JSON (action type + limits + timestamps)
+
+5) KNOWN LIMITATIONS FILE (place in /05_Risk_Limitations/)
+Create Known_Limitations_TechDebt.md including:
+- No TURN yet (~15% NAT issue)
+- P2P viewer cap (~50)
+- Leagues tournaments incomplete (Q1 2026)
+- No recordings/replays yet
+- WalletConnect not fully implemented
+- No 2FA yet; rate limiting pending
+- WebSocket single instance; agent workers co-located
+
+========================
+OUTPUT FORMAT
+========================
+- Provide a single zipped folder of /StreamAiX-PPM-DataRoom/
+- OR provide a shareable link to the folder contents.
+- Keep language factual: “LIVE today” vs “PLANNED” vs “PARTIALLY LIVE”.
+Thanks.

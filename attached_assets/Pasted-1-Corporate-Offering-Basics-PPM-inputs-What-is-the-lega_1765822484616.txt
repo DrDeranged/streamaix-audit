@@ -1,0 +1,251 @@
+1) Corporate + Offering Basics (PPM inputs)
+
+What is the legal entity name/type (LLC/C-Corp), state of formation, and date formed?
+
+Who owns what today? Provide cap table (founder %, any advisors, any SAFEs/notes).
+
+Are there any existing investors, outstanding SAFEs/notes, or token promises?
+
+What offering structure are you targeting: SAFE / note / equity? Any target raise, min check, valuation cap/discount?
+
+Are you planning Reg D 506(b) or 506(c)? (Even if “TBD,” what’s most likely and why?)
+
+2) Product Status: What’s Live vs Planned (line-by-line truth)
+
+For each module (Landing, Streams, Stream View, Go Live, Bounties, Markets, Leagues, Intelligence Hub), mark:
+
+Live in production
+
+Feature-flagged / partially live
+
+Mocked / staged
+
+Planned
+
+What are the current daily/weekly active users, if any? If none, confirm it’s pre-public.
+
+List the top 10 most-used routes/endpoints in production (helps establish what’s real).
+
+3) Wallet Connect + Base (critical investor diligence)
+
+Confirm wallet connect flows supported.
+
+MetaMask? WalletConnect?
+
+Sign-in with Ethereum style message signing?
+
+Confirm Base integration:
+
+Is Base mainnet used or only testnet?
+
+What chain IDs are supported?
+
+Where are wallet addresses stored and how is identity linked (user table schema summary)?
+
+Any on-chain transactions performed today? If yes, list the exact transaction types.
+
+4) Prediction Markets (PPM needs precision here)
+
+Market types supported today (price/event/custom/creator milestones) — what’s actually shipped?
+
+Market mechanics:
+
+AMM formula used (e.g., constant product, LMSR, custom)?
+
+How do odds/prices update?
+
+Fees: confirm 0.5% on winnings implementation details.
+
+Settlement:
+
+What resolves markets today (manual, AI resolver, oracle)?
+
+Is UMA integrated yet or planned? What’s the fallback if UMA isn’t live?
+
+Disputes:
+
+Is there a dispute window? Who arbitrates?
+
+What happens if data sources disagree?
+
+Market integrity protections:
+
+anti-manipulation measures
+
+min liquidity requirements
+
+creator/user permissions for creating markets
+
+Provide a sample market object (JSON shape) + database schema tables involved.
+
+5) Leagues / Seasons / Tournaments (retention mechanics)
+
+Are leagues live? If yes, describe rules:
+
+scoring method
+
+season length
+
+rewards distribution
+
+anti-cheat measures
+
+If not live, what is the planned MVP league format and timeline?
+
+6) Bounties + Knowledge Assets (inventory + moat)
+
+Are bounties live? Confirm:
+
+bounty creation
+
+claim limits
+
+deadlines
+
+submission flow
+
+AI scoring:
+
+exact rubric fields (accuracy, completeness, originality, writing)
+
+how scores are computed and stored
+
+how scores affect payouts/reputation
+
+“Knowledge asset” ownership:
+
+Is anything tokenized today?
+
+If not, how is ownership/monetization represented off-chain?
+
+7) Live Streaming Tech (reliability + cost + risks)
+
+Confirm streaming implementation:
+
+WebRTC architecture (P2P vs SFU/relay)
+
+STUN/TURN usage (TURN is huge for reliability—do you have it?)
+
+What happens on NAT-restricted networks? Any fallback (audio-only)?
+
+If recording/replays exist: where stored and how long?
+
+Any concurrency limits or rate limits for streams?
+
+8) “Expert Avatar” Live Streaming (the centerpiece)
+
+Describe the exact UX:
+
+how a user starts a conversation
+
+how the avatar responds
+
+how “real-time market updates” are injected into dialogue
+
+Data sources feeding these avatars:
+
+curated datasets? public content? user-uploaded?
+
+how you prevent hallucinations / misinformation?
+
+Identity + permissions plan:
+
+Are you using real names/likeness/voice of specific people?
+
+If yes, do you have consent/licensing? If no, how are you avoiding impersonation?
+
+Safety controls:
+
+disclaimers shown to user
+
+content filtering
+
+audit logs of avatar responses
+
+9) Autonomous AI Agents (100+)
+
+Where do the agents run (cron jobs, queues, workers)? Frequency?
+
+What actions can agents take (create bounties, trade, chat, moderate, etc.)?
+
+Guardrails:
+
+hard limits on actions per time window
+
+budget/cost ceilings
+
+“kill switch” / pause flags
+
+How do you ensure agents can’t grief markets or manipulate outcomes?
+
+Provide an “agent” schema: persona config fields, memory, permissions, logs.
+
+10) Market Intelligence Hub (data provenance)
+
+List all data providers in use (CoinGecko Pro, CoinMarketCap, Dune, Finnhub, etc.) and which features depend on which provider.
+
+Explain fallback logic and caching TTLs (investors love resilience).
+
+Any proprietary indices or computed signals? If yes, document how they’re calculated.
+
+11) Security, Privacy, and Compliance (PPM must disclose accurately)
+
+Authentication methods live today (email/password, OAuth, wallet, etc.)
+
+Password hashing, session management, JWT strategy—any known risks?
+
+What user data is collected, stored, and for how long?
+
+Do you have:
+
+privacy policy draft
+
+terms of service draft
+
+risk disclosures in-product (markets, trading, not financial advice)
+
+Any KYC/AML planned? Geo-blocking planned?
+
+12) Financials + Operating Metrics (even if early)
+
+Current monthly run-rate costs (AI, data APIs, infra). Confirm your stated ~$15–30/mo AI estimate and what drives it.
+
+What are the top cost risks (OpenAI spikes, data provider price changes)?
+
+What metrics do you currently track (DAU/WAU, watch time, trades, volume, submissions)?
+
+13) IP, Licensing, and Third-Party Dependencies
+
+Who owns the code/IP (any contractors? assignments signed?)
+
+Any copied/derived datasets? Any licensing constraints?
+
+List major third-party libs/services with risk:
+
+streaming stack
+
+AI providers
+
+data APIs
+
+Any trademark filings or brand protections?
+
+14) Evidence Pack (what I want attached for the PPM file room)
+
+Architecture diagram (1-page)
+
+Database schema export (or summary)
+
+Sample API docs / routes list
+
+Screenshots or short screen recording of:
+
+wallet connect + Base network flows
+
+a market lifecycle (create → trade → resolve)
+
+bounty lifecycle (create → submit → score → reward)
+
+expert avatar live conversation
+
+Known limitations / technical debt list (honest, bullet form)

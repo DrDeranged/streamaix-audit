@@ -1,0 +1,191 @@
+Below is what I still need (and what I’d ask your coding agent / ops stack to produce) before drafting the PPM.
+
+1) First: a few inconsistencies to resolve (must be clean in a PPM)
+A) Knowledge Avatars count
+
+In earlier notes: 35 Knowledge Avatars
+
+In this packet: 17 Knowledge Avatars
+Pick one truth:
+
+If 17 are live and 35 are planned, we’ll write it exactly like that.
+
+B) Timeline references are outdated (important)
+
+Your response says:
+
+“Full tournament mode: Q1 2025”
+But today is Dec 15, 2025. That’s already past.
+We need updated timelines:
+
+“Q1 2026 / Q2 2026” etc., or “in 90 days / 180 days” style.
+
+C) “Replit hosting” appears in the cost table
+
+You told me earlier you don’t want build tooling mentioned in investor materials.
+We’ll remove it from the PPM, but we still need:
+
+current hosting costs and scaling plan described as “current hosting/infrastructure environment”.
+
+2) Missing founder/business inputs (non-technical, but required for PPM)
+
+Your coding agent correctly deferred these — but the PPM cannot be completed without them:
+
+Issuer entity (exact legal name, state, date formed)
+
+Cap table (even if simple: 100% founder)
+
+Any prior commitments: SAFEs/notes, advisor equity, token promises, informal allocations
+
+Target raise details (range is fine): instrument, amount, minimum check, intended use
+
+Planned offering path: 506(b) vs 506(c) and whether you will market publicly
+
+If you want, I can draft the PPM with placeholders — but it won’t be “final” until those are filled.
+
+3) PPM-grade questions for the coding agent (what we still need clarified)
+A) Wallet connect + Base (investors will ask this immediately)
+
+Confirm the exact wallet-auth standard: is it full SIWE (EIP-4361) format or a custom signed message?
+
+Where is wallet-to-user binding enforced:
+
+one wallet per user (you said yes) — but can a user change wallets?
+
+When Base mainnet goes live:
+
+what “on-chain actions” are enabled day 1 (trade settlement? token mint? tips?)
+
+Deliverable: a short “Wallet Identity & Base Readiness” memo (1 page).
+
+B) Prediction markets: integrity, settlement truth, and regulatory posture
+
+Your market spec is good — but PPM language must be precise:
+
+Settlement reality check:
+
+Right now, is settlement off-chain, testnet, or mainnet?
+
+What exactly happens on resolution today (DB updates only? testnet token mint? simulated payouts?)
+
+“0.5% fee on winnings”:
+
+confirm fee is calculated on profit only vs payout vs volume
+
+UMA integration:
+
+you wrote “planned”; confirm there is no oracle live today and settlement is AI/manual.
+
+Dispute system:
+
+You have a dispute stake (100 STREAM) but STREAM token isn’t live.
+
+What is the dispute stake denominated in today? (points? internal balance? test token?)
+
+Market creator restriction: “creators can’t trade own markets”
+
+define how “creator” is determined (user_id match, wallet match, admin rule)
+
+Market-maker formula:
+
+confirm this is truly CPMM and not LMSR; include exact formula and how you handle edge cases.
+
+Deliverable: “Market Mechanism & Resolution Spec” (2–3 pages) + example lifecycle walkthrough.
+
+C) Live streaming reliability: TURN absence and scalability
+
+This is a big diligence point because you’re P2P:
+
+Expected viewer scale strategy:
+
+you say P2P caps ~50 viewers/stream
+
+what’s the plan for SFU migration (vendor or self-host)?
+
+TURN plan:
+
+since TURN isn’t deployed, what’s your timeline + cost estimate?
+
+Failover behavior:
+
+when WebRTC fails, what % can still use chat + overlays?
+
+any “audio-only” fallback timeline?
+
+Deliverable: “Streaming Scalability Plan” (1–2 pages).
+
+D) The “Expert Avatar Live Streaming” centerpiece
+
+This section is excellent and PPM-friendly because you’re currently fictional personas (reduces impersonation risk). We just need clarity:
+
+Are expert-style avatars purely fictional in name/voice/likeness across the board today? (You said yes.)
+
+When/if you introduce real-person-inspired “data-aggregated” personas:
+
+will you require explicit written permission before using any identifiable traits?
+
+How market updates are injected:
+
+confirm thresholds and logic (e.g., >2% move, then interrupt) and how you avoid spam.
+
+Audit logs:
+
+confirm logs include prompt + completion + data snapshot used for market update injection.
+
+Deliverable: “Avatar Product & Safety Spec” (1–2 pages).
+
+E) AI agents: controls, market manipulation risk, and auditability
+
+You’ve got strong guardrails. Investors will still ask:
+
+Are agent wallets segregated from user wallets?
+
+Can agents ever create markets? (planned)
+
+Are agent actions labeled in UI (bot icon / “AI agent”) everywhere consistently?
+
+Can the admin pause a single agent instantly?
+
+Provide total agent inventory: count by persona + activity tier.
+
+Deliverable: “Agent Governance & Controls” (1–2 pages).
+
+F) Security and compliance readiness
+
+This is the #1 area to tighten before PPM:
+
+Add rate limiting plan for auth endpoints (you flagged it as missing)
+
+Confirm whether WebSockets require auth on all channels
+
+Confirm storage encryption posture:
+
+are any secrets encrypted at rest?
+
+is DB encrypted at rest (managed provider default)?
+
+KYC/AML:
+
+your plan says KYC for withdrawals > $10k and geoblocking US for markets (planned)
+
+clarify whether markets will be disabled for US IPs at launch or only later
+
+Deliverable: “Security & Compliance Readiness Checklist” (1 page).
+
+4) Evidence pack you should generate now (this makes the PPM believable)
+
+Ask your coding agent to produce these as attachments (or give you screenshots):
+
+Architecture diagram (1 page)
+
+Market lifecycle proof: create → trade → resolve (screenshots + timestamps)
+
+Bounty lifecycle proof: create → claim → submit → score → payout
+
+Wallet connect proof: MetaMask connect + SIWE message + Base network config screenshot
+
+Agent dashboard proof: showing quotas/limits + pause-all
+
+Streaming proof: a live stream page showing overlays/chat + viewer count updates
+
+Risk & limitations list (you already have this — keep it)
