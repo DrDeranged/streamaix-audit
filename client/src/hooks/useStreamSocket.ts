@@ -15,10 +15,20 @@ interface StreamEvent {
   streamId?: string;
   userId?: string;
   username?: string;
+  avatar?: string;
   isAiAgent?: boolean;
   data?: any;
   timestamp?: number;
   message?: string;
+}
+
+export interface ViewerPresenceEvent {
+  type: 'join' | 'leave';
+  userId: string;
+  username: string;
+  avatar?: string;
+  isAiAgent?: boolean;
+  timestamp: number;
 }
 
 export interface AvatarAudioData {
@@ -33,14 +43,18 @@ export interface AvatarAudioData {
 
 type AvatarAudioCallback = (audio: AvatarAudioData) => void;
 
+type ViewerPresenceCallback = (event: ViewerPresenceEvent) => void;
+
 interface UseStreamSocketReturn {
   isConnected: boolean;
   viewerCount: number;
   messages: StreamMessage[];
+  recentJoins: ViewerPresenceEvent[];
   sendMessage: (content: string) => void;
   sendReaction: (reaction: string) => void;
   disconnect: () => void;
   onAvatarAudio: (callback: AvatarAudioCallback) => () => void;
+  onViewerPresence: (callback: ViewerPresenceCallback) => () => void;
   isSpeaking: boolean;
 }
 
@@ -49,10 +63,12 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
   const [isConnected, setIsConnected] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
   const [messages, setMessages] = useState<StreamMessage[]>([]);
+  const [recentJoins, setRecentJoins] = useState<ViewerPresenceEvent[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const audioCallbacksRef = useRef<Set<AvatarAudioCallback>>(new Set());
+  const presenceCallbacksRef = useRef<Set<ViewerPresenceCallback>>(new Set());
 
   const connect = useCallback(() => {
     if (!streamId) return;
@@ -132,9 +148,35 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
         break;
         
       case 'join':
+        if (event.userId && event.username) {
+          const joinEvent: ViewerPresenceEvent = {
+            type: 'join',
+            userId: event.userId,
+            username: event.username,
+            avatar: event.avatar,
+            isAiAgent: event.isAiAgent,
+            timestamp: event.timestamp || Date.now(),
+          };
+          setRecentJoins(prev => [...prev.slice(-9), joinEvent]);
+          presenceCallbacksRef.current.forEach(cb => cb(joinEvent));
+          setTimeout(() => {
+            setRecentJoins(prev => prev.filter(j => j.userId !== event.userId || j.timestamp !== joinEvent.timestamp));
+          }, 5000);
+        }
         break;
         
       case 'leave':
+        if (event.userId && event.username) {
+          const leaveEvent: ViewerPresenceEvent = {
+            type: 'leave',
+            userId: event.userId,
+            username: event.username,
+            avatar: event.avatar,
+            isAiAgent: event.isAiAgent,
+            timestamp: event.timestamp || Date.now(),
+          };
+          presenceCallbacksRef.current.forEach(cb => cb(leaveEvent));
+        }
         break;
         
       case 'tip':
@@ -232,6 +274,13 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     };
   }, []);
 
+  const onViewerPresence = useCallback((callback: ViewerPresenceCallback) => {
+    presenceCallbacksRef.current.add(callback);
+    return () => {
+      presenceCallbacksRef.current.delete(callback);
+    };
+  }, []);
+
   useEffect(() => {
     // Connect for any viewer (guest or authenticated) when streamId is available
     if (streamId) {
@@ -271,10 +320,12 @@ export function useStreamSocket(streamId: string | null): UseStreamSocketReturn 
     isConnected,
     viewerCount,
     messages,
+    recentJoins,
     sendMessage,
     sendReaction,
     disconnect,
     onAvatarAudio,
+    onViewerPresence,
     isSpeaking,
   };
 }
