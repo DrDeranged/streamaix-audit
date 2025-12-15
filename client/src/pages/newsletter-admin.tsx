@@ -56,31 +56,89 @@ export default function NewsletterAdmin() {
   }, [user, userLoading, setLocation, toast]);
 
   // Fetch admin stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery<{
+    stats: {
+      totalUsers: number;
+      activeUsers: number;
+      activeUsers24h?: number;
+      newUsers24h?: number;
+      totalBounties: number;
+      completedBounties: number;
+      bountiesCreated24h?: number;
+      totalMarkets: number;
+      activeMarkets: number;
+      marketsCreated24h?: number;
+      totalVolume: number;
+      totalTrades?: number;
+      aiAgentsCount: number;
+      totalSummaries?: number;
+      summariesCreated24h?: number;
+    }
+  }>({
     queryKey: ['/api/admin/stats'],
-    refetchInterval: 30000 // Refresh every 30 seconds
+    refetchInterval: 30000
   });
 
   // Fetch admin activity
-  const { data: activityData, isLoading: activityLoading } = useQuery({
+  const { data: activityData, isLoading: activityLoading } = useQuery<{
+    activities: Array<{
+      id: string;
+      type: string;
+      description: string;
+      createdAt: string;
+      userId?: string;
+      metadata?: Record<string, any>;
+    }>
+  }>({
     queryKey: ['/api/admin/activity'],
   });
 
   // Fetch newsletter status
-  const { data: status } = useQuery({
+  const { data: status } = useQuery<{
+    isRunning: boolean;
+    nextMonday: string;
+    nextFriday: string;
+    subscriberCount: number;
+  }>({
     queryKey: ['/api/newsletter/status'],
     refetchInterval: 30000
   });
 
   // Fetch newsletter history
-  const { data: history } = useQuery({
+  const { data: history } = useQuery<{
+    newsletters: Array<{
+      id: string;
+      subject: string;
+      sentAt: string;
+      recipientCount: number;
+      openRate?: number;
+    }>
+  }>({
     queryKey: ['/api/newsletter/history'],
   });
 
   // Fetch autonomous systems status with 30-second auto-refresh (optimized)
-  const { data: systemsData, isLoading: systemsLoading } = useQuery({
+  const { data: systemsData, isLoading: systemsLoading } = useQuery<{
+    systems: Array<{
+      name: string;
+      status: string;
+      lastRun?: string;
+      nextRun?: string;
+    }>;
+    platformMetrics: {
+      totalStreams: number;
+      activeStreams: number;
+      totalAvatars: number;
+      totalAgents: number;
+      totalSystems?: number;
+      activeSystems?: number;
+      warningSystems?: number;
+      errorSystems?: number;
+      overallSuccessRate?: number;
+    }
+  }>({
     queryKey: ['/api/admin/systems/status'],
-    refetchInterval: 30000, // Reduced from 10s to 30s for performance
+    refetchInterval: 30000,
     staleTime: 15000,
   });
 
@@ -205,7 +263,13 @@ export default function NewsletterAdmin() {
   };
 
   // Fetch AI agents for token distribution
-  const { data: aiAgents } = useQuery({
+  const { data: aiAgents } = useQuery<{
+    agents: Array<{
+      id: string;
+      name: string;
+      walletAddress?: string;
+    }>
+  }>({
     queryKey: ['/api/users/ai-agents'],
     enabled: walletConnected,
   });
@@ -987,18 +1051,18 @@ export default function NewsletterAdmin() {
                           <p className="text-sm text-indigo-200">Recent newsletter broadcasts</p>
                         </div>
                       </div>
-                      {history?.newsletters?.length > 0 && (
+                      {(history?.newsletters?.length ?? 0) > 0 && (
                         <div className="px-3 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30">
                           <span className="text-sm font-semibold text-indigo-300">
-                            {history.newsletters.length} Total
+                            {history?.newsletters?.length ?? 0} Total
                           </span>
                         </div>
                       )}
                     </div>
                     
-                    {history?.newsletters?.length > 0 ? (
+                    {(history?.newsletters?.length ?? 0) > 0 ? (
                       <div className="space-y-3">
-                        {history.newsletters.slice(0, 5).map((newsletter: any, index: number) => (
+                        {history?.newsletters?.slice(0, 5).map((newsletter: any, index: number) => (
                           <div
                             key={newsletter.id}
                             className="group relative"

@@ -59,6 +59,7 @@ export function AvatarWithFallback({
           src={src} 
           alt={name} 
           className="w-full h-full object-cover"
+          loading="lazy"
           onError={() => setImgError(true)}
         />
       </div>
@@ -72,6 +73,7 @@ export function AvatarWithFallback({
           src={dicebearUrl} 
           alt={name} 
           className="w-full h-full object-cover"
+          loading="lazy"
           onError={() => setDicebearError(true)}
         />
       </div>

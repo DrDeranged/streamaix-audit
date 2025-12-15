@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage, DatabaseStorage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
+import { cacheService } from "./services/cacheService";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
 import RebuiltContentProcessor from "./services/rebuiltContentProcessor";
@@ -2019,10 +2020,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AVATAR ROUTES
   // =============================================================================
 
-  // Get all avatars for landing page
+  // Get all avatars for landing page (cached for 5 minutes)
   app.get('/api/avatars', asyncHandler(async (req: Request, res: Response) => {
     try {
+      const cacheKey = 'avatars:all';
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        return res.json({ avatars: cached });
+      }
+      
       const avatars = await storage.getKnowledgeAvatars(50, 0);
+      cacheService.set(cacheKey, avatars, 300); // Cache for 5 minutes
       res.json({ avatars });
     } catch (error) {
       console.error('Error fetching avatars:', error);
@@ -9681,13 +9689,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { ammService } = await import('./services/ammService');
   const { resolutionService } = await import('./services/resolutionService');
   
-  // Get all active markets
+  // Get all active markets (cached for 2 minutes)
   app.get("/api/prediction-markets", asyncHandler(async (req: Request, res: Response) => {
     const category = req.query.category as string | undefined;
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
     
+    const cacheKey = `markets:${category || 'all'}:${limit}:${offset}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      return res.json({
+        success: true,
+        markets: cached,
+        count: (cached as any[]).length
+      });
+    }
+    
     const markets = await predictionMarketService.getActiveMarkets({ category, limit, offset });
+    cacheService.set(cacheKey, markets, 120); // Cache for 2 minutes
     
     res.json({
       success: true,
@@ -9696,10 +9715,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
   
-  // Get trending markets
+  // Get trending markets (cached for 3 minutes)
   app.get("/api/prediction-markets/trending", asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
+    
+    const cacheKey = `markets:trending:${limit}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      return res.json({
+        success: true,
+        markets: cached,
+        count: (cached as any[]).length
+      });
+    }
+    
     const markets = await predictionMarketService.getTrendingMarkets(limit);
+    cacheService.set(cacheKey, markets, 180); // Cache for 3 minutes
     
     res.json({
       success: true,
