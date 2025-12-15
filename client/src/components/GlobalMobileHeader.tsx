@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation, Link } from "wouter";
-import { Home, ChevronUp } from "lucide-react";
+import { Home, ChevronUp, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePointsBalance, formatPoints } from "@/hooks/usePoints";
+import { useAuth } from "@/hooks/useAuth";
 
 export function GlobalMobileHeader() {
   const [location] = useLocation();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { data: pointsData } = usePointsBalance();
 
   // Don't show on landing page - it has its own navigation
   const isLandingPage = location === "/";
@@ -90,29 +94,47 @@ export function GlobalMobileHeader() {
             </span>
           </button>
 
-          {/* Right: Scroll to top button (visible when scrolled) */}
-          <AnimatePresence>
-            {showScrollTop ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={scrollToTop}
-                  className={`text-slate-300 hover:text-white hover:bg-white/10 px-2 ${isScrolling ? 'animate-pulse' : ''}`}
-                  data-testid="button-scroll-top"
+          {/* Right: STREAM Points + Scroll to top */}
+          <div className="flex items-center gap-2">
+            {/* STREAM Points Display */}
+            {isAuthenticated && pointsData && (
+              <Link href="/points">
+                <motion.div
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  data-testid="mobile-points-display"
                 >
-                  <ChevronUp className={`w-5 h-5 ${isScrolling ? 'text-cyan-400' : ''}`} />
-                </Button>
-              </motion.div>
-            ) : (
-              <div className="w-9" /> // Placeholder to maintain layout
+                  <Coins className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm font-bold text-emerald-400">
+                    {formatPoints(pointsData.balance || 0)}
+                  </span>
+                </motion.div>
+              </Link>
             )}
-          </AnimatePresence>
+            
+            {/* Scroll to top button (visible when scrolled) */}
+            <AnimatePresence>
+              {showScrollTop && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={scrollToTop}
+                    className={`text-slate-300 hover:text-white hover:bg-white/10 px-2 ${isScrolling ? 'animate-pulse' : ''}`}
+                    data-testid="button-scroll-top"
+                  >
+                    <ChevronUp className={`w-5 h-5 ${isScrolling ? 'text-cyan-400' : ''}`} />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </motion.header>
 
