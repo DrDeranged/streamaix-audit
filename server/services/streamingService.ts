@@ -222,6 +222,19 @@ export class StreamingService {
       data: session.messages.slice(-50), // Last 50 messages
     }));
 
+    // If broadcaster is already ready, notify this new viewer immediately
+    // This fixes the issue where viewers joining after broadcaster is live
+    // don't receive the broadcaster-ready signal
+    if (session.broadcasterWs && session.broadcasterWs.readyState === WebSocket.OPEN && session.broadcasterUserId) {
+      ws.send(JSON.stringify({
+        type: 'broadcaster-ready',
+        streamId,
+        userId: session.broadcasterUserId,
+        timestamp: Date.now(),
+      }));
+      console.log(`[WebRTC] Notified new viewer ${username} that broadcaster is already ready`);
+    }
+
     // Notify others about join (include avatar for presence indicators)
     this.broadcastToStream(streamId, {
       type: 'join',
