@@ -17,6 +17,7 @@ import { CreateStreamModal, StreamFormData } from '@/components/streaming/Create
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
+import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback';
 
 interface StreamData {
   id: string;
@@ -133,15 +134,12 @@ function FeaturedHeroStream({ stream, onClick }: { stream: StreamData; onClick: 
           <div className="flex-1 max-w-2xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="relative">
-                <div className="w-14 h-14 rounded-full bg-slate-800/80 overflow-hidden ring-4 ring-white/20 flex items-center justify-center">
-                  {stream.hostAvatar ? (
-                    <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-2xl font-bold text-white">
-                      {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
-                    </span>
-                  )}
-                </div>
+                <AvatarWithFallback 
+                  src={stream.hostAvatar} 
+                  name={stream.hostUsername || 'Unknown'} 
+                  size="lg"
+                  ringClassName="ring-4 ring-white/20"
+                />
                 {stream.isVerified && (
                   <div className="absolute -bottom-1 -right-1 bg-cyan-500 rounded-full p-1 ring-2 ring-slate-900">
                     <CheckCircle2 className="w-3 h-3 text-white" />
@@ -206,15 +204,13 @@ function CompactStreamCard({ stream, onClick }: { stream: StreamData; onClick: (
         
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-slate-800/80 backdrop-blur-sm overflow-hidden ring-4 ring-white/20 flex items-center justify-center">
-              {stream.hostAvatar ? (
-                <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-2xl font-bold text-white/80">
-                  {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
-                </span>
-              )}
-            </div>
+            <AvatarWithFallback 
+              src={stream.hostAvatar} 
+              name={stream.hostUsername || 'Unknown'} 
+              size="xl"
+              ringClassName="ring-4 ring-white/20"
+              className="backdrop-blur-sm"
+            />
             <div className={cn("absolute -bottom-1 -right-1 p-1.5 rounded-full bg-gradient-to-r shadow-lg", gradient)}>
               <Icon className="w-3 h-3 text-white" />
             </div>
@@ -274,15 +270,11 @@ function CompactStreamCard({ stream, onClick }: { stream: StreamData; onClick: (
         </h3>
         
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
-            {stream.hostAvatar ? (
-              <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-xs font-bold text-cyan-300">
-                {stream.hostUsername?.charAt(0)?.toUpperCase() || '?'}
-              </span>
-            )}
-          </div>
+          <AvatarWithFallback 
+            src={stream.hostAvatar} 
+            name={stream.hostUsername || 'Unknown'} 
+            size="xs"
+          />
           <span className="text-xs text-slate-400 truncate">{stream.hostUsername}</span>
           {stream.isVerified && <CheckCircle2 className="w-3 h-3 text-cyan-400 flex-shrink-0" />}
         </div>
