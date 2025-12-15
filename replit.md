@@ -24,6 +24,28 @@ To manage API usage, aggressive caching and schedule optimization have been impl
 ### Quiet Mode & API Pause Feature
 `QUIET_MODE=true` disables all background polling services, only fetching data on-demand, leading to a 95%+ reduction in API calls. `PAUSE_OPENAI_API=true` immediately halts all OpenAI API consumption for emergency cost control, pausing services like Avatar Voice Streaming and Autonomous AI Agents while keeping the platform operational.
 
+### Performance Optimizations (December 2025)
+Comprehensive performance optimizations have been applied to reduce lag and improve responsiveness:
+
+**Backend Optimizations:**
+- GZIP compression (level 6) enabled on Express server for all responses >1KB
+- 19 database indexes added for frequently queried fields (user_id, market_id, created_at, agent_id, status, etc.)
+- In-memory cache service (`cacheService.ts`) with TTL-based invalidation
+- AI agent/trading bot cycles extended to 5-7 hours (down from minutes) to reduce database load
+
+**Frontend Optimizations:**
+- React Query global staleTime increased to 10 minutes, gcTime to 30 minutes
+- Aggressive refetch interval reductions across all pages (10s → 30-60s)
+- Lazy loading for all heavy pages via React.lazy() and Suspense
+- WebSocket throttling for real-time updates
+
+**Key Refetch Interval Changes:**
+- AI trades feed: 10s → 60s
+- Volume stats: 5s → 30s  
+- Stream data: 10s → 30s
+- Market activity: 10s → 60s
+- Co-hosts display: 10s → 30s
+
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, TailwindCSS, shadcn/ui, Radix UI, TanStack React Query, wouter, Framer Motion.
 - **Backend**: Node.js with Express.js and TypeScript, using Vite and esbuild.
