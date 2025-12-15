@@ -1,0 +1,109 @@
+{
+  "resolution_id": "res_abc123def456",
+  "market_id": "mkt_btc_100k_2025",
+  "market_question": "Will Bitcoin reach $100,000 by December 31, 2025?",
+  "market_category": "Crypto",
+  "market_deadline": "2025-12-31T23:59:59.000Z",
+  
+  "resolution_process": {
+    "initiated_at": "2026-01-01T00:00:05.000Z",
+    "initiated_by": "system",
+    "method": "ai_resolver",
+    "model_used": "gpt-4o-mini"
+  },
+  
+  "ai_analysis": {
+    "system_prompt": "You are an AI market resolver. Analyze the market question and available data to determine the correct outcome.",
+    "data_sources_consulted": [
+      {
+        "source": "CoinGecko",
+        "data_type": "price_history",
+        "timestamp": "2025-12-31T23:59:59.000Z",
+        "value": {
+          "btc_usd_price": 104523.45,
+          "btc_usd_high_24h": 105892.00,
+          "btc_usd_low_24h": 102100.00
+        }
+      },
+      {
+        "source": "CoinMarketCap",
+        "data_type": "price_confirmation",
+        "timestamp": "2025-12-31T23:59:59.000Z",
+        "value": {
+          "btc_usd_price": 104489.22
+        }
+      }
+    ],
+    "ai_reasoning": "Bitcoin reached and exceeded $100,000 on December 5, 2025, and closed the year at approximately $104,500. Multiple data sources confirm BTC/USD traded above $100,000 threshold during December 2025. The market question asks 'Will Bitcoin reach $100,000' - this condition was satisfied.",
+    "ai_confidence": 0.98,
+    "proposed_outcome": "YES"
+  },
+  
+  "proposed_resolution": {
+    "outcome": "YES",
+    "proposed_at": "2026-01-01T00:00:08.000Z",
+    "dispute_window_ends": "2026-01-02T00:00:08.000Z",
+    "dispute_window_hours": 24
+  },
+  
+  "dispute_status": {
+    "disputes_received": 0,
+    "dispute_stake_required": 100,
+    "dispute_stake_currency": "STREAM_POINTS",
+    "disputes": []
+  },
+  
+  "final_resolution": {
+    "outcome": "YES",
+    "finalized_at": "2026-01-02T00:00:10.000Z",
+    "finalized_by": "auto_finalize",
+    "override_applied": false
+  },
+  
+  "payout_summary": {
+    "total_positions": 847,
+    "winning_positions": 623,
+    "losing_positions": 224,
+    "total_payout": 156750,
+    "platform_fees_collected": 392,
+    "currency": "STREAM_POINTS"
+  },
+  
+  "audit_trail": [
+    {
+      "timestamp": "2026-01-01T00:00:05.000Z",
+      "action": "resolution_initiated",
+      "actor": "system"
+    },
+    {
+      "timestamp": "2026-01-01T00:00:08.000Z",
+      "action": "outcome_proposed",
+      "actor": "ai_resolver",
+      "details": { "outcome": "YES", "confidence": 0.98 }
+    },
+    {
+      "timestamp": "2026-01-01T00:00:08.000Z",
+      "action": "dispute_window_opened",
+      "actor": "system",
+      "details": { "ends_at": "2026-01-02T00:00:08.000Z" }
+    },
+    {
+      "timestamp": "2026-01-02T00:00:10.000Z",
+      "action": "dispute_window_closed",
+      "actor": "system",
+      "details": { "disputes_received": 0 }
+    },
+    {
+      "timestamp": "2026-01-02T00:00:10.000Z",
+      "action": "resolution_finalized",
+      "actor": "auto_finalize",
+      "details": { "outcome": "YES" }
+    },
+    {
+      "timestamp": "2026-01-02T00:00:12.000Z",
+      "action": "payouts_distributed",
+      "actor": "system",
+      "details": { "positions_paid": 623, "total_amount": 156750 }
+    }
+  ]
+}
