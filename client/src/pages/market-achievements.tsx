@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 type Achievement = {
   id: string;
@@ -24,7 +25,8 @@ type Achievement = {
 
 export default function MarketAchievements() {
   const [activeCategory, setActiveCategory] = useState<'all' | 'trading' | 'prediction' | 'social' | 'milestone'>('all');
-  const userId = "1"; // TODO: Get from auth context
+  const { user } = useAuth();
+  const userId = user?.id || "1";
 
   const { data: achievements, isLoading } = useQuery<{ achievements: Achievement[] }>({
     queryKey: ['/api/achievements'],
@@ -321,7 +323,7 @@ export default function MarketAchievements() {
                                 <div className="flex items-center gap-1 text-xs">
                                   <span className="text-slate-500">Reward:</span>
                                   <span className={`font-bold ${achievement.completed ? 'text-amber-400' : 'text-slate-600'}`}>
-                                    <AnimatedCounter value={achievement.rewardAmount} formatValue={(v) => formatNumber(v)} /> STREAM
+                                    <AnimatedCounter value={achievement.reward} formatValue={(v) => formatNumber(v)} /> STREAM
                                   </span>
                                 </div>
                                 {achievement.unlockedAt && (

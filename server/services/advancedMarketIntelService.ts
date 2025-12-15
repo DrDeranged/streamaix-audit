@@ -333,7 +333,9 @@ class AdvancedMarketIntelService {
     try {
       const priceRes = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${asset.toLowerCase() === 'btc' ? 'bitcoin' : 'ethereum'}&vs_currencies=usd`, { timeout: 5000 });
       currentPrice = priceRes.data?.bitcoin?.usd || priceRes.data?.ethereum?.usd || currentPrice;
-    } catch (e) {}
+    } catch (e) {
+      console.warn('⚠️ Failed to fetch price for liquidation heatmap, using cached value');
+    }
 
     const priceRange = currentPrice * 0.15;
     const levels: LiquidationLevel[] = [];
@@ -453,7 +455,9 @@ class AdvancedMarketIntelService {
       const priceRes = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true', { timeout: 5000 });
       btcPrice = priceRes.data?.bitcoin?.usd || btcPrice;
       ethPrice = priceRes.data?.ethereum?.usd || ethPrice;
-    } catch (e) {}
+    } catch (e) {
+      console.warn('⚠️ Failed to fetch ETF price data, using cached values');
+    }
 
     const etfs: ETFData[] = [
       {

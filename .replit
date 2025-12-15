@@ -51,3 +51,4 @@ VITE_VAPID_PUBLIC_KEY = "BKNmCH2NvdV_JlPkkVrBpw14S6GAGnir26wQdbw_wveMUVjXLWsictE
 PAUSE_OPENAI_API = "false"
 QUIET_MODE = "false"
 DISABLE_OPENAI_TTS = "true"
+ADMIN_USERNAMES = "admin,arslan,streamaix-admin"

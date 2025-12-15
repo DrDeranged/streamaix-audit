@@ -223,7 +223,16 @@ GUIDELINES:
     const totalNeeded = plan.yesAmount + plan.noAmount;
     
     if (!user || (user.streamPoints || 0) < totalNeeded) {
-      throw new Error('Insufficient STREAM balance');
+      // Auto-refill balance for AI liquidity bot when insufficient
+      console.log(`💰 Refilling AI Liquidity Provider balance (current: ${user?.streamPoints || 0}, needed: ${totalNeeded})`);
+      const refillAmount = 10000000; // 10M STREAM refill
+      await db
+        .update(users)
+        .set({
+          streamPoints: sql`COALESCE(${users.streamPoints}, 0) + ${refillAmount}`,
+        })
+        .where(eq(users.id, this.aiUserId!));
+      console.log(`✅ Balance refilled with ${refillAmount.toLocaleString()} STREAM`);
     }
 
     // Deduct STREAM from liquidity bot

@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import { Strategy as TwitterStrategy } from 'passport-twitter';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { storage } from './storage';
 
 export interface JWTPayload {
@@ -23,7 +23,13 @@ export interface TwitterProfile {
 }
 
 export interface AuthRequest extends Request {
-  user?: JWTPayload;
+  user?: JWTPayload | Express.User;
+}
+
+declare global {
+  namespace Express {
+    interface User extends JWTPayload {}
+  }
 }
 
 export class AuthService {
@@ -185,8 +191,11 @@ export class AuthService {
           }
         }
 
-        console.log(`✅ Twitter OAuth successful for user: ${user.id} (${user.username})`);
-        return done(null, user);
+        if (user) {
+          console.log(`✅ Twitter OAuth successful for user: ${user.id} (${user.username})`);
+          return done(null, user);
+        }
+        return done(new Error('Failed to create or find user'), null);
       } catch (error: any) {
         console.error('❌ Twitter OAuth error:', error);
         console.error(`💬 Error type: ${error.constructor?.name}`);

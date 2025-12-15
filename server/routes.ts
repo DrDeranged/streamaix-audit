@@ -101,8 +101,8 @@ const asyncHandler = (fn: (req: any, res: Response, next: Function) => Promise<a
     Promise.resolve(fn(req, res, next)).catch((err: any) => next(err));
   };
 
-// Admin usernames allowed to access admin endpoints
-const ADMIN_USERNAMES = ['arslan'];
+// Admin usernames allowed to access admin endpoints (configured via ADMIN_USERNAMES env var, comma-separated)
+const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || 'admin').split(',').map(u => u.trim()).filter(Boolean);
 
 // Helper function to check if user is admin
 const isAdmin = (req: AuthRequest): boolean => {
