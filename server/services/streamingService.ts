@@ -222,12 +222,13 @@ export class StreamingService {
       data: session.messages.slice(-50), // Last 50 messages
     }));
 
-    // Notify others about join
+    // Notify others about join (include avatar for presence indicators)
     this.broadcastToStream(streamId, {
       type: 'join',
       streamId,
       userId,
       username,
+      avatar,
       isAiAgent,
       timestamp: Date.now(),
     }, userId);
@@ -244,7 +245,7 @@ export class StreamingService {
 
     // Handle disconnection
     ws.on('close', () => {
-      this.handleDisconnection(streamId, viewerKey, userId, username, isAiAgent);
+      this.handleDisconnection(streamId, viewerKey, userId, username, isAiAgent, avatar);
     });
 
     console.log(`[Streaming] ${isAiAgent ? 'AI Agent' : 'User'} ${username} joined stream ${streamId}. Viewers: ${currentViewerCount}`);
@@ -489,16 +490,23 @@ export class StreamingService {
     viewerKey: string,
     userId: string, 
     username: string,
-    isAiAgent: boolean
+    isAiAgent: boolean,
+    avatar?: string
   ) {
     const session = this.sessions.get(streamId);
     if (!session) return;
 
+    // Get avatar from viewer before deleting (fallback)
+    const viewer = session.viewers.get(viewerKey);
+    const viewerAvatar = avatar || viewer?.avatar;
+
     session.viewers.delete(viewerKey);
     this.viewerStreams.get(userId)?.delete(streamId);
 
-    // Update database viewer count
-    await this.updateViewerCount(streamId);
+    // Update database viewer count (non-blocking)
+    this.updateViewerCount(streamId).catch(err => 
+      console.error('Error updating viewer count:', err)
+    );
 
     // Broadcast viewer count update
     this.broadcastToStream(streamId, {
@@ -508,12 +516,13 @@ export class StreamingService {
       data: { count: session.viewers.size },
     });
 
-    // Notify others about leave
+    // Notify others about leave (include avatar for presence indicators)
     this.broadcastToStream(streamId, {
       type: 'leave',
       streamId,
       userId,
       username,
+      avatar: viewerAvatar,
       isAiAgent,
       timestamp: Date.now(),
     });
