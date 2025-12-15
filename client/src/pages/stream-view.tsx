@@ -71,6 +71,7 @@ import { useViewerStream } from '@/hooks/useViewerStream';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
+import { ViewerPresence } from '@/components/streaming/MobileStreamViewer';
 import { StreamReactions, QuickReactButtons } from '@/components/streaming/StreamReactions';
 import { StreamPoll, CreatePollForm } from '@/components/streaming/StreamPoll';
 import { BroadcasterView } from '@/components/streaming/BroadcasterView';
@@ -469,7 +470,7 @@ export default function StreamViewPage() {
   const watchTimeRef = useRef<number>(0);
   const lastPointsAwardedRef = useRef<number>(0);
   
-  const { isConnected, viewerCount, messages, sendMessage, onAvatarAudio } = useStreamSocket(streamId);
+  const { isConnected, viewerCount, messages, recentJoins, sendMessage, onAvatarAudio } = useStreamSocket(streamId);
   
   const awardStreamWatch = useAwardStreamWatch();
   const awardVoiceConversation = useAwardVoiceConversation();
@@ -965,6 +966,12 @@ export default function StreamViewPage() {
             {isLive && streamId && <MarketPriceOverlay streamId={streamId} />}
             {isLive && streamId && <CoHostsDisplay streamId={streamId} />}
             
+            {isLive && recentJoins.length > 0 && (
+              <div className="absolute left-3 top-16 z-20 space-y-1">
+                <ViewerPresence recentJoins={recentJoins} />
+              </div>
+            )}
+            
             {activeTipAlerts.map((tip) => (
               <TipAlertAnimation
                 key={tip.id}
@@ -1266,7 +1273,7 @@ export default function StreamViewPage() {
           "w-full lg:w-[380px] xl:w-[420px] flex flex-col border-t lg:border-t-0 lg:border-l border-purple-500/30 overflow-hidden",
           isTheaterMode && !isFloatingChat && "hidden",
           isTheaterMode && isFloatingChat && "fixed bottom-4 right-4 w-[360px] h-[500px] rounded-xl border shadow-2xl z-50 bg-slate-900",
-          !isTheaterMode && "bg-gradient-to-b from-slate-900/60 to-slate-900/80 lg:max-h-screen lg:sticky lg:top-14"
+          !isTheaterMode && "bg-gradient-to-b from-slate-900/60 to-slate-900/80 lg:h-[calc(100vh-56px)] lg:sticky lg:top-14"
         )}>
           {isTheaterMode && isFloatingChat && (
             <div className="flex items-center justify-between p-3 border-b border-slate-700/50">
@@ -1308,7 +1315,7 @@ export default function StreamViewPage() {
 
           <div className={cn(
             "flex flex-col transition-all duration-300 ease-out overflow-hidden",
-            isChatExpanded ? "h-[50dvh] sm:h-[55dvh] lg:h-full lg:flex-1 max-h-[calc(100dvh-200px)]" : "h-0 lg:h-full lg:flex-1"
+            isChatExpanded ? "h-[50dvh] sm:h-[55dvh] lg:flex-1 max-h-[calc(100dvh-200px)] lg:max-h-none" : "h-0 lg:flex-1"
           )}>
             <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">

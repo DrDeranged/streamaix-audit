@@ -250,32 +250,43 @@ export function MobileStreamViewer({
   );
 }
 
+interface ViewerJoinInfo {
+  id?: string;
+  oderId?: string;
+  username: string;
+  avatar?: string;
+  isAiAgent?: boolean;
+}
+
 interface ViewerPresenceProps {
-  recentJoins: ViewerInfo[];
+  recentJoins: ViewerJoinInfo[];
   className?: string;
 }
 
 export function ViewerPresence({ recentJoins, className }: ViewerPresenceProps) {
   return (
     <AnimatePresence>
-      {recentJoins.slice(0, 3).map((viewer, index) => (
-        <motion.div
-          key={viewer.id}
-          initial={{ opacity: 0, x: -50, y: 0 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          exit={{ opacity: 0, x: 50 }}
-          transition={{ delay: index * 0.1 }}
-          className={cn(
-            "flex items-center gap-2 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full",
-            className
-          )}
-        >
-          <AvatarWithFallback src={viewer.avatar} name={viewer.username} size="xs" />
-          <span className="text-white text-xs font-medium">
-            {viewer.username} joined
-          </span>
-        </motion.div>
-      ))}
+      {recentJoins.slice(0, 3).map((viewer, index) => {
+        const viewerId = viewer.id || (viewer as any).userId || `viewer-${index}`;
+        return (
+          <motion.div
+            key={`${viewerId}-${index}`}
+            initial={{ opacity: 0, x: -50, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ delay: index * 0.1 }}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full",
+              className
+            )}
+          >
+            <AvatarWithFallback src={viewer.avatar} name={viewer.username} size="xs" />
+            <span className="text-white text-xs font-medium">
+              {viewer.username} joined
+            </span>
+          </motion.div>
+        );
+      })}
     </AnimatePresence>
   );
 }
