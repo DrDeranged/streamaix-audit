@@ -479,7 +479,8 @@ export default function StreamViewPage() {
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
     queryKey: ['/api/streams', streamId],
     enabled: !!streamId,
-    refetchInterval: 10000,
+    refetchInterval: 30000, // Reduced from 10s to 30s for performance
+    staleTime: 15000,
   });
   
   const stream = streamData?.stream;

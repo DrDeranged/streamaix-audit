@@ -77,10 +77,11 @@ export default function NewsletterAdmin() {
     queryKey: ['/api/newsletter/history'],
   });
 
-  // Fetch autonomous systems status with 10-second auto-refresh
+  // Fetch autonomous systems status with 30-second auto-refresh (optimized)
   const { data: systemsData, isLoading: systemsLoading } = useQuery({
     queryKey: ['/api/admin/systems/status'],
-    refetchInterval: 10000 // Refresh every 10 seconds
+    refetchInterval: 30000, // Reduced from 10s to 30s for performance
+    staleTime: 15000,
   });
 
   // Send test newsletter mutation

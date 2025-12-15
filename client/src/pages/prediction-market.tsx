@@ -489,7 +489,8 @@ interface VolumeStats {
 function LiveTradeFeed({ marketId }: { marketId: string }) {
   const { data, isLoading } = useQuery<{ success: boolean; stats: VolumeStats }>({
     queryKey: ["/api/prediction-markets", marketId, "volume-stats"],
-    refetchInterval: 5000,
+    refetchInterval: 30000, // Reduced from 5s to 30s for performance
+    staleTime: 15000,
   });
 
   const stats = data?.stats;
@@ -605,7 +606,8 @@ export default function PredictionMarket() {
 
   const { data: volumeStatsData } = useQuery<{ success: boolean; stats: VolumeStats }>({
     queryKey: ["/api/prediction-markets", id, "volume-stats"],
-    refetchInterval: 5000,
+    refetchInterval: 30000, // Reduced from 5s to 30s for performance
+    staleTime: 15000,
   });
 
   const volumeStats = volumeStatsData?.stats;
