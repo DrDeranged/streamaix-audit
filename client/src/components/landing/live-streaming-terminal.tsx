@@ -299,7 +299,8 @@ export function LiveStreamingTerminal() {
   
   const { data: streamsData, isLoading } = useQuery<{ streams: LiveStream[] }>({
     queryKey: ['/api/streams/live'],
-    refetchInterval: 10000,
+    refetchInterval: 30000, // Reduced from 10s to 30s for performance
+    staleTime: 15000,
   });
   
   const { data: scheduledData } = useQuery<{ streams: LiveStream[] }>({

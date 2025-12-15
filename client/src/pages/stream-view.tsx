@@ -265,7 +265,8 @@ const CoHostsDisplay = memo(function CoHostsDisplay({ streamId }: { streamId: st
   const { data } = useQuery<{ coHosts: CoHost[] }>({
     queryKey: ['/api/streams', streamId, 'co-hosts'],
     enabled: !!streamId,
-    refetchInterval: 10000,
+    refetchInterval: 30000, // Reduced from 10s to 30s for performance
+    staleTime: 15000,
   });
 
   if (!data?.coHosts?.length) return null;

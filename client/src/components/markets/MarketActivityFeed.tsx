@@ -67,7 +67,8 @@ export function MarketActivityFeed({
 
   const { data, isLoading } = useQuery<{ trades: AITrade[] }>({
     queryKey: [`/api/ai-agents/trades?limit=${limit}`],
-    refetchInterval: 10000,
+    refetchInterval: 60000, // Reduced from 10s to 60s for performance
+    staleTime: 30000,
   });
 
   const allTrades = data?.trades || [];

@@ -55,7 +55,8 @@ interface AITrade {
 function MarketTradesTab({ marketId }: { marketId: string }) {
   const { data, isLoading } = useQuery<{ success: boolean; trades: Array<{ ai_trades: AITrade; ai_agents: any }> }>({
     queryKey: [`/api/ai-agents/trades/${marketId}`],
-    refetchInterval: 10000,
+    refetchInterval: 60000, // Reduced from 10s to 60s for performance
+    staleTime: 30000,
   });
 
   const trades = data?.trades || [];
