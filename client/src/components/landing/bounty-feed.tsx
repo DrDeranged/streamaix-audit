@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
-import { Clock, Coins, TrendingUp, Flame, Zap, Loader2, ArrowRight, Target } from "lucide-react";
+import { Clock, Coins, TrendingUp, Flame, Zap, Loader2, ArrowRight, Target, Brain, HelpCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
 import type { Bounty } from "@shared/schema";
@@ -87,6 +87,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
   const difficultyBadge = getDifficultyBadge(bounty.difficulty || undefined);
   const rewardColor = getCategoryColor(bounty.category || undefined);
   const urgencyColor = getUrgencyColor(bounty.deadline);
+  const isKnowledgeQuestion = (bounty as any).bountyType === 'knowledge_question';
 
   return (
     <motion.div
@@ -97,16 +98,36 @@ function BountyCard({ bounty, index }: BountyCardProps) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="h-full"
     >
-      <Card className="group h-full bg-white dark:bg-slate-900/80 border-gray-200 dark:border-purple-500/40 backdrop-blur-xl hover:border-purple-400 dark:hover:border-fuchsia-400 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 overflow-hidden relative">
+      <Card className={`group h-full bg-white dark:bg-slate-900/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 overflow-hidden relative ${
+        isKnowledgeQuestion 
+          ? 'border-cyan-400 dark:border-cyan-500/50 hover:border-cyan-400 dark:hover:border-cyan-400' 
+          : 'border-gray-200 dark:border-purple-500/40 hover:border-purple-400 dark:hover:border-fuchsia-400'
+      }`}>
         {/* Hover gradient effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-fuchsia-500/10 transition-all duration-500 pointer-events-none" />
+        <div className={`absolute inset-0 transition-all duration-500 pointer-events-none ${
+          isKnowledgeQuestion
+            ? 'bg-gradient-to-br from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/10 group-hover:to-blue-500/10'
+            : 'bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-fuchsia-500/10'
+        }`} />
+        
+        {/* Knowledge Question Badge */}
+        {isKnowledgeQuestion && (
+          <div className="absolute top-0 right-0 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg flex items-center gap-1">
+            <Brain className="w-3 h-3" />
+            AI Verified Q&A
+          </div>
+        )}
         
         <CardContent className="p-6 flex flex-col h-full relative">
           {/* Header with reward */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                <Target className="w-5 h-5 text-white" />
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                isKnowledgeQuestion 
+                  ? 'bg-gradient-to-br from-cyan-500 to-blue-500' 
+                  : 'bg-gradient-to-br from-purple-500 to-cyan-500'
+              }`}>
+                {isKnowledgeQuestion ? <HelpCircle className="w-5 h-5 text-white" /> : <Target className="w-5 h-5 text-white" />}
               </div>
               <div>
                 <p className="text-xs text-slate-600 dark:text-gray-400">
@@ -114,7 +135,7 @@ function BountyCard({ bounty, index }: BountyCardProps) {
                 </p>
               </div>
             </div>
-            <div className={`bg-gradient-to-r ${rewardColor} text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg`}>
+            <div className={`bg-gradient-to-r ${isKnowledgeQuestion ? 'from-cyan-500 to-blue-500' : rewardColor} text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg`}>
               <Coins className="w-4 h-4" />
               {formatReward(bounty.reward, bounty.tokenType)}
             </div>

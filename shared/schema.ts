@@ -84,6 +84,9 @@ export const bounties = pgTable("bounties", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   contentUrl: text("content_url").notNull(),
+  bountyType: text("bounty_type").notNull().default("content"), // content (YouTube/podcast) or knowledge_question (AI-verified Q&A)
+  expectedAnswer: text("expected_answer"), // For knowledge_question: AI-generated expected answer criteria
+  verificationCriteria: jsonb("verification_criteria"), // For knowledge_question: criteria for AI to verify answer correctness
   reward: integer("reward").notNull(), // reward amount in smallest unit
   tokenType: text("token_type").notNull().default("STREAM"), // STREAM, ETH, USDC
   tokenAddress: text("token_address"), // contract address for the token

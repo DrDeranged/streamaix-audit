@@ -1881,6 +1881,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Verify knowledge question answer (AI-powered)
+  app.post('/api/bounties/:id/verify-answer', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bounty = await storage.getBounty(req.params.id);
+    if (!bounty) {
+      return res.status(404).json({ error: 'Bounty not found' });
+    }
+
+    if ((bounty as any).bountyType !== 'knowledge_question') {
+      return res.status(400).json({ error: 'This bounty is not a knowledge question' });
+    }
+
+    if (bounty.status !== 'claimed' && bounty.status !== 'in_progress') {
+      return res.status(400).json({ error: 'Bounty must be claimed first' });
+    }
+
+    if (bounty.assigneeId !== req.user!.id) {
+      return res.status(403).json({ error: 'Only the assigned user can submit an answer' });
+    }
+
+    const { answer } = req.body;
+    if (!answer || typeof answer !== 'string' || answer.trim().length < 50) {
+      return res.status(400).json({ error: 'Answer must be at least 50 characters' });
+    }
+
+    const { knowledgeQuestionService } = await import('./services/knowledgeQuestionService');
+    const verification = await knowledgeQuestionService.verifyAnswer(req.params.id, answer);
+
+    if (verification.isCorrect && verification.score >= 60) {
+      const totalReward = bounty.reward + (bounty.tipPool || 0);
+      const qualityBonus = verification.score >= 90 ? Math.floor(totalReward * 0.2) : 
+                          verification.score >= 80 ? Math.floor(totalReward * 0.1) : 0;
+      const finalReward = totalReward + qualityBonus;
+
+      await storage.updateBounty(req.params.id, {
+        status: 'completed',
+        completedAt: new Date()
+      });
+
+      await pointsService.awardPoints({
+        userId: req.user!.id,
+        amount: finalReward,
+        source: 'bounty_accepted',
+        type: 'earn',
+        description: `Knowledge Question: ${bounty.title} (Score: ${verification.score}%)`,
+        referenceId: req.params.id,
+        referenceType: 'bounty',
+        metadata: { 
+          score: verification.score, 
+          qualityBonus,
+          bountyType: 'knowledge_question'
+        }
+      });
+
+      res.json({
+        success: true,
+        verification,
+        reward: finalReward,
+        qualityBonus,
+        message: 'Answer verified and bounty completed!'
+      });
+    } else {
+      res.json({
+        success: false,
+        verification,
+        message: 'Answer needs improvement. Please review the feedback and try again.'
+      });
+    }
+  }));
+
   // Track bounty engagement
   app.post('/api/bounties/:id/track', optionalAuth, asyncHandler(async (req: any, res: Response) => {
     const { engagementType, metadata } = req.body;

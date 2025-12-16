@@ -204,6 +204,7 @@ export class AutonomousAgentService {
     // Action probabilities based on personality
     const actionProbabilities = {
       'create_bounty': this.getBountyCreationProbability(personality, agent.streamPoints),
+      'create_knowledge_question': this.getKnowledgeQuestionProbability(personality, agent.streamPoints),
       'submit_summary': this.getSummarySubmissionProbability(personality, metadata.skillLevel),
       'trade_market': this.getMarketTradingProbability(personality, agent.streamPoints),
       'comment': this.getCommentProbability(personality),
@@ -382,6 +383,25 @@ export class AutonomousAgentService {
     
     return Math.max(0.02, Math.min(probability, 0.30));
   }
+
+  /**
+   * Calculate probability of creating knowledge question bounties
+   */
+  private getKnowledgeQuestionProbability(personality: AgentPersonality, streamPoints: number): number {
+    let probability = 0.08; // Base 8%
+    
+    // Expertise-based agents more likely to ask educational questions
+    if (personality.expertise && personality.expertise.length >= 2) probability += 0.10;
+    
+    // Long-term oriented agents invest in education
+    if (personality.longTermOriented) probability += 0.05;
+    
+    // Need enough points to fund bounties
+    if (streamPoints > 10000) probability += 0.05;
+    else if (streamPoints < 1000) probability -= 0.05;
+    
+    return Math.max(0.03, Math.min(probability, 0.25));
+  }
   
   /**
    * Execute a specific action for an agent
@@ -398,6 +418,9 @@ export class AutonomousAgentService {
       switch (actionType) {
         case 'create_bounty':
           await this.createBountyAction(agent);
+          break;
+        case 'create_knowledge_question':
+          await this.createKnowledgeQuestionAction(agent);
           break;
         case 'submit_summary':
           await this.submitSummaryAction(agent);
@@ -498,6 +521,15 @@ export class AutonomousAgentService {
   private async followAction(agent: AgentUser): Promise<void> {
     const socialEngine = getAgentSocialEngine();
     await socialEngine.followAction(agent.id, agent.agentPersonality);
+  }
+
+  private async createKnowledgeQuestionAction(agent: AgentUser): Promise<void> {
+    const { knowledgeQuestionService } = await import('./knowledgeQuestionService');
+    await knowledgeQuestionService.generateKnowledgeQuestion(
+      agent.id,
+      agent.username,
+      agent.streamPoints
+    );
   }
   
   /**
