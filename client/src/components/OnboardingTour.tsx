@@ -212,11 +212,15 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
+    // Navigate to the page for this step
+    setLocation(path);
+    
     if (currentStep === steps.length - 1) {
+      // Last step - close tour after navigating
       handleClose();
-      setLocation(path);
       return;
     }
+    // Advance to next step while navigating
     handleNext();
   };
 
