@@ -427,6 +427,24 @@ export default function Discover() {
   const [metricsExpanded, setMetricsExpanded] = useState(false);
   const [contentFilter, setContentFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('overview');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        refetchCrypto(),
+        refetchOverview(),
+        refetchSignals(),
+        refetchGlobal(),
+        refetchMovers(),
+      ]);
+      setLastRefresh(new Date());
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Prediction Markets Data - with staleTime to cache and reduce refetches
   const { data: marketsData } = useQuery<{ markets: PredictionMarket[] }>({
@@ -504,10 +522,11 @@ export default function Discover() {
     refetchInterval: 600000,
   });
 
-  // Market Data Queries - with caching
-  const { data: cryptoData, isLoading: cryptoLoading, isError: cryptoError } = useQuery({
+  // Market Data Queries - faster refresh for real-time feel
+  const { data: cryptoData, isLoading: cryptoLoading, isError: cryptoError, refetch: refetchCrypto } = useQuery({
     queryKey: ['/api/analytics/live/crypto'],
-    staleTime: 2 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60000, // 1 minute
   });
 
   const { data: sectorsData } = useQuery({
@@ -515,9 +534,10 @@ export default function Discover() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: marketOverview } = useQuery({
+  const { data: marketOverview, refetch: refetchOverview } = useQuery({
     queryKey: ['/api/market/overview'],
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 120000, // 2 minutes
   });
 
   const { data: marketNews } = useQuery({
@@ -634,10 +654,10 @@ export default function Discover() {
   });
 
   // Market Intelligence Hub Data - with caching
-  const { data: marketSignalsData } = useQuery<{ signals: MarketSignal[] }>({
+  const { data: marketSignalsData, refetch: refetchSignals } = useQuery<{ signals: MarketSignal[] }>({
     queryKey: ['/api/market-intelligence/signals'],
-    staleTime: 30 * 1000,
-    refetchInterval: 60000,
+    staleTime: 15 * 1000, // 15 seconds
+    refetchInterval: 30000, // 30 seconds
   });
 
   const { data: whaleMovementsData } = useQuery<{ movements: WhaleMovement[] }>({
@@ -659,16 +679,16 @@ export default function Discover() {
     refetchInterval: 600000,
   });
 
-  const { data: cgGlobalData } = useQuery({
+  const { data: cgGlobalData, refetch: refetchGlobal } = useQuery({
     queryKey: ['/api/market/coingecko/global'],
-    staleTime: 2 * 60 * 1000,
-    refetchInterval: 120000,
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 90000, // 90 seconds
   });
 
-  const { data: cgMoversData } = useQuery({
+  const { data: cgMoversData, refetch: refetchMovers } = useQuery({
     queryKey: ['/api/market/coingecko/movers'],
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 300000,
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 120000, // 2 minutes
   });
 
   // Alpha Features Data - with caching
@@ -1015,6 +1035,17 @@ export default function Discover() {
             </div>
             
             <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="text-gray-400 hover:text-white hover:bg-white/10 rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0"
+                data-testid="button-refresh-data"
+                title="Refresh all data"
+              >
+                <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
+              </Button>
               <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium">
                 <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 sm:mr-1.5 animate-pulse" />
                 <span>Live</span>
