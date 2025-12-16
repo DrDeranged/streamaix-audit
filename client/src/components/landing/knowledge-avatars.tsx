@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ApiErrorCard } from "@/components/ApiErrorFallback";
+import { AvatarChatButton } from "@/components/avatars/avatar-chat-button";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -39,7 +40,8 @@ import {
   Award,
   Podcast,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  Sparkles
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -1811,6 +1813,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                 size="sm"
                                 className="flex-1"
                               />
+                              {/* Chat Button */}
+                              <AvatarChatButton avatar={avatar} />
                               {/* Compare Button with Glassmorphism */}
                               <div className="relative group">
                                 <div className={`absolute -inset-[1px] rounded-lg bg-gradient-to-r ${
