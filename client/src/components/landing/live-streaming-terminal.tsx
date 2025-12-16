@@ -186,21 +186,21 @@ function StreamCard({ stream }: { stream: LiveStream }) {
         
         <div className={cn("absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r", config.color)} />
         
-        <div className="relative p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className={cn("p-2 rounded-xl bg-gradient-to-br shadow-lg", config.color, config.shadowColor)}>
-                <Icon className="w-4 h-4 text-white" />
+        <div className="relative p-3 md:p-4">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <div className={cn("p-1.5 md:p-2 rounded-lg md:rounded-xl bg-gradient-to-br shadow-lg", config.color, config.shadowColor)}>
+                <Icon className="w-3 h-3 md:w-4 md:h-4 text-white" />
               </div>
               {stream.status === 'live' && (
-                <Badge className="bg-red-500/90 text-white border-0 text-[10px] px-2 py-0.5 font-semibold shadow-lg shadow-red-500/30 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
+                <Badge className="bg-red-500/90 text-white border-0 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 font-semibold shadow-lg shadow-red-500/30 animate-pulse">
+                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white mr-1" />
                   LIVE
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/30">
-              <Eye className="w-3.5 h-3.5 text-fuchsia-400" />
+            <div className="flex items-center gap-1 text-slate-400 text-[10px] md:text-xs bg-slate-800/60 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-md md:rounded-lg border border-slate-700/30">
+              <Eye className="w-3 h-3 md:w-3.5 md:h-3.5 text-fuchsia-400" />
               <span className="font-medium text-fuchsia-300">{stream.currentViewers}</span>
             </div>
           </div>

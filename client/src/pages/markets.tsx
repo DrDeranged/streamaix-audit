@@ -109,13 +109,13 @@ const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
             )}
 
             <div className="flex gap-2">
-              <div className="flex-1 bg-green-500/20 rounded p-2 border border-green-500/30">
-                <div className="text-xs text-green-300">YES</div>
-                <div className="text-lg font-bold text-green-400">{yesPercentage}%</div>
+              <div className="flex-1 bg-green-500/20 rounded-lg p-3 border border-green-500/40 shadow-inner">
+                <div className="text-xs font-medium text-green-300 mb-0.5">YES</div>
+                <div className="text-xl md:text-2xl font-bold text-green-400">{yesPercentage}%</div>
               </div>
-              <div className="flex-1 bg-red-500/20 rounded p-2 border border-red-500/30">
-                <div className="text-xs text-red-300">NO</div>
-                <div className="text-lg font-bold text-red-400">{noPercentage}%</div>
+              <div className="flex-1 bg-red-500/20 rounded-lg p-3 border border-red-500/40 shadow-inner">
+                <div className="text-xs font-medium text-red-300 mb-0.5">NO</div>
+                <div className="text-xl md:text-2xl font-bold text-red-400">{noPercentage}%</div>
               </div>
             </div>
 

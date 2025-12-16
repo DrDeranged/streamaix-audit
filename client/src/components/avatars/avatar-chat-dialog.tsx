@@ -129,7 +129,7 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[80vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border-purple-500/30">
+      <DialogContent className="max-w-2xl h-[80vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border-purple-500/30 z-[100]">
         <DialogHeader className="px-6 py-4 border-b border-purple-500/20 bg-slate-950/80 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="relative">
