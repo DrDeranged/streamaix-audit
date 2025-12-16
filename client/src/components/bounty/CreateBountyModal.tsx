@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CalendarIcon, Plus, X, FileText, BarChart3, TrendingUp, Sparkles } from 'lucide-react';
+import { CalendarIcon, Plus, X, FileText, BarChart3, TrendingUp, Sparkles, Coins, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBounties } from '@/hooks/useBounties';
+import { usePointsBalance } from '@/hooks/usePoints';
 import { cn } from '@/lib/utils';
 
 type EngagementTier = 'basic' | 'analysis' | 'prediction';
@@ -66,10 +67,13 @@ const TIER_CONFIG = {
 
 export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps) {
   const { createBounty } = useBounties();
+  const { data: pointsData, isLoading: pointsLoading } = usePointsBalance();
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [analysisQuestions, setAnalysisQuestions] = useState<string[]>([]);
   const [questionInput, setQuestionInput] = useState('');
+  
+  const userBalance = pointsData?.balance || 0;
 
   const form = useForm<CreateBountyFormData>({
     resolver: zodResolver(createBountySchema),
@@ -150,6 +154,8 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
     onSuccess?.();
   };
 
+  const hasInsufficientBalance = finalReward > userBalance;
+
   return (
     <div className="space-y-6">
       <div>
@@ -159,6 +165,28 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
         <p className="text-sm text-gray-400">
           Offer STREAM points to creators who transform your requested content into summaries
         </p>
+      </div>
+
+      {/* Balance Display */}
+      <div className={cn(
+        "flex items-center justify-between p-4 rounded-lg border",
+        hasInsufficientBalance 
+          ? "bg-red-500/10 border-red-500/30" 
+          : "bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border-purple-500/30"
+      )}>
+        <div className="flex items-center gap-2">
+          <Coins className={cn("w-5 h-5", hasInsufficientBalance ? "text-red-400" : "text-amber-400")} />
+          <span className="text-gray-300">Your Balance:</span>
+          <span className={cn("font-bold", hasInsufficientBalance ? "text-red-400" : "text-amber-400")}>
+            {pointsLoading ? "..." : userBalance.toLocaleString()} STREAM
+          </span>
+        </div>
+        {hasInsufficientBalance && (
+          <div className="flex items-center gap-2 text-red-400 text-sm">
+            <AlertTriangle className="w-4 h-4" />
+            <span>Insufficient balance for {finalReward.toLocaleString()} STREAM reward</span>
+          </div>
+        )}
       </div>
 
       <Form {...form}>
@@ -514,16 +542,26 @@ export default function CreateBountyModal({ onSuccess }: CreateBountyModalProps)
           <div className="flex gap-3 pt-4 border-t border-cyan-500/20">
             <Button
               type="submit"
-              disabled={createBounty.isPending}
-              className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+              disabled={createBounty.isPending || hasInsufficientBalance}
+              className={cn(
+                "flex-1",
+                hasInsufficientBalance 
+                  ? "bg-gray-600 cursor-not-allowed" 
+                  : "bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+              )}
               data-testid="button-submit-bounty"
             >
               {createBounty.isPending ? (
                 'Creating Bounty...'
+              ) : hasInsufficientBalance ? (
+                <>
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Insufficient Balance
+                </>
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Bounty ({finalReward} $STREAM)
+                  Create Bounty ({finalReward.toLocaleString()} STREAM)
                 </>
               )}
             </Button>
