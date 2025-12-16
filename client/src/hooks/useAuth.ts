@@ -31,6 +31,9 @@ export function useLogin() {
       setAuthToken(data.token);
       queryClient.setQueryData(['auth', 'current-user'], data);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
+      // Invalidate points queries so they refetch with new auth
+      queryClient.invalidateQueries({ queryKey: ['/api/points/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/points/history'] });
       toast({
         title: 'Welcome back!',
         description: `Successfully logged in as ${data.user.username}`,
@@ -66,6 +69,9 @@ export function useRegister() {
       setAuthToken(data.token);
       queryClient.setQueryData(['auth', 'current-user'], data);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
+      // Invalidate points queries so they refetch with new auth
+      queryClient.invalidateQueries({ queryKey: ['/api/points/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/points/history'] });
       toast({
         title: 'Account created!',
         description: `Welcome to StreamAiX, ${data.user.username}!`,
@@ -96,6 +102,9 @@ export function useWalletLogin() {
       setAuthToken(data.token);
       queryClient.setQueryData(['auth', 'current-user'], data);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
+      // Invalidate points queries so they refetch with new auth
+      queryClient.invalidateQueries({ queryKey: ['/api/points/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/points/history'] });
       toast({
         title: 'Wallet connected!',
         description: `Welcome, ${data.user.username}!`,
