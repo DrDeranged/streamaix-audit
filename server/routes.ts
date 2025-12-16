@@ -430,6 +430,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Auto-recovery: Ensure signup bonus is awarded
+    await pointsService.ensureSignupBonus(req.user!.id);
+
+    // Get fresh user data after potential points update
+    const freshUser = await storage.getUser(req.user!.id);
+
     // Get user stats
     const summaries = await storage.getSummariesByUser(req.user!.id);
     const bounties = await storage.getBountiesByUser(req.user!.id);
@@ -445,16 +451,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     res.json({
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        walletAddress: user.walletAddress,
-        ensName: user.ensName,
-        avatar: user.avatar,
-        bio: user.bio,
-        createdAt: user.createdAt
+        id: freshUser!.id,
+        username: freshUser!.username,
+        email: freshUser!.email,
+        walletAddress: freshUser!.walletAddress,
+        ensName: freshUser!.ensName,
+        avatar: freshUser!.avatar,
+        bio: freshUser!.bio,
+        streamPoints: freshUser!.streamPoints || 0,
+        createdAt: freshUser!.createdAt
       },
       stats
+    });
+  }));
+
+  // Alias for /api/user -> /api/users/me (used by prediction markets)
+  app.get('/api/user', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const user = await storage.getUser(req.user!.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Auto-recovery: Ensure signup bonus is awarded
+    await pointsService.ensureSignupBonus(req.user!.id);
+
+    // Get fresh user data after potential points update
+    const freshUser = await storage.getUser(req.user!.id);
+
+    res.json({
+      user: {
+        id: freshUser!.id,
+        username: freshUser!.username,
+        streamPoints: freshUser!.streamPoints || 0,
+      }
     });
   }));
 

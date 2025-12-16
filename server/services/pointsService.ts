@@ -498,6 +498,9 @@ class PointsService {
     longestStreak: number;
     transactionCount: number;
   }> {
+    // Auto-recovery: Award signup bonus if user never received it
+    await this.ensureSignupBonus(userId);
+
     const [balanceResult, streakResult, statsResult] = await Promise.all([
       this.getBalance(userId),
       db.select().from(dailyLoginStreak).where(eq(dailyLoginStreak.userId, userId)).limit(1),
@@ -518,6 +521,28 @@ class PointsService {
       longestStreak: streakResult[0]?.longestStreak ?? 0,
       transactionCount: statsResult[0]?.count ?? 0,
     };
+  }
+
+  async ensureSignupBonus(userId: string): Promise<boolean> {
+    try {
+      const existing = await db.select()
+        .from(pointsTransactions)
+        .where(and(
+          eq(pointsTransactions.userId, userId),
+          eq(pointsTransactions.source, 'signup')
+        ))
+        .limit(1);
+
+      if (existing.length === 0) {
+        console.log(`[Points] Auto-recovery: Awarding missing signup bonus to user ${userId}`);
+        const result = await this.awardSignupBonus(userId);
+        return result !== null;
+      }
+      return false;
+    } catch (error) {
+      console.error('[Points] Error in ensureSignupBonus:', error);
+      return false;
+    }
   }
 }
 
