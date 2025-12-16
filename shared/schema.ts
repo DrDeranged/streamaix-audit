@@ -511,6 +511,17 @@ export const knowledgeAvatars = pgTable("knowledge_avatars", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Avatar Conversations - Chat history between users and knowledge avatars
+export const avatarConversations = pgTable("avatar_conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  messages: jsonb("messages").default([]).notNull(), // [{role: 'user'|'assistant', content: string, timestamp: string}]
+  title: text("title"), // Auto-generated conversation title
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Avatar Following System
 export const avatarFollows = pgTable("avatar_follows", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1338,6 +1349,13 @@ export const insertKnowledgeAvatarSchema = createInsertSchema(knowledgeAvatars).
   recentThoughts: true,
 });
 
+export const insertAvatarConversationSchema = createInsertSchema(avatarConversations).pick({
+  userId: true,
+  avatarId: true,
+  messages: true,
+  title: true,
+});
+
 export const insertAvatarFollowSchema = createInsertSchema(avatarFollows).pick({
   userId: true,
   avatarId: true,
@@ -1541,6 +1559,9 @@ export type LearningResource = typeof learningResources.$inferSelect;
 
 export type InsertKnowledgeAvatar = z.infer<typeof insertKnowledgeAvatarSchema>;
 export type KnowledgeAvatar = typeof knowledgeAvatars.$inferSelect;
+
+export type InsertAvatarConversation = z.infer<typeof insertAvatarConversationSchema>;
+export type AvatarConversation = typeof avatarConversations.$inferSelect;
 
 export type InsertAvatarFollow = z.infer<typeof insertAvatarFollowSchema>;
 export type AvatarFollow = typeof avatarFollows.$inferSelect;
