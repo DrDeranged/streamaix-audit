@@ -59,6 +59,8 @@ export function usePointsHistory(limit = 50, offset = 0) {
   return useQuery<PointsHistoryResponse>({
     queryKey: ['/api/points/history', { limit, offset }],
     enabled: isAuthenticated,
+    refetchInterval: 30000,
+    staleTime: 15000,
   });
 }
 
