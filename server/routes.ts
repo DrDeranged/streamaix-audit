@@ -664,13 +664,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       updates.password = await AuthService.hashPassword(updates.password);
     }
 
+    // Get current user to check profile completion status
+    const currentUser = await storage.getUser(req.user!.id);
+    
     const user = await storage.updateUser(req.user!.id, updates);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Check if profile is now complete (has bio and avatar)
+    const wasProfileComplete = currentUser?.bio && currentUser?.avatar;
+    const isProfileNowComplete = user.bio && user.avatar;
+    
+    let profileBonusAwarded = false;
+    if (!wasProfileComplete && isProfileNowComplete) {
+      const bonus = await pointsService.awardProfileComplete(req.user!.id);
+      profileBonusAwarded = !!bonus;
+    }
+
     res.json({
       message: 'Profile updated successfully',
+      profileBonusAwarded,
       user: {
         id: user.id,
         username: user.username,
@@ -678,7 +692,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletAddress: user.walletAddress,
         ensName: user.ensName,
         avatar: user.avatar,
-        bio: user.bio
+        bio: user.bio,
+        streamPoints: user.streamPoints || 0
       }
     });
   }));
