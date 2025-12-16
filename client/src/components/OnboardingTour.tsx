@@ -212,24 +212,12 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
-    if (currentStep === 0) {
-      handleNext();
-      return;
-    }
-    
     if (currentStep === steps.length - 1) {
       handleClose();
       setLocation(path);
       return;
     }
-    
-    setLocation(path);
-    setIsMinimized(true);
-    
-    setTimeout(() => {
-      setCurrentStep(currentStep + 1);
-      setIsMinimized(false);
-    }, 2000);
+    handleNext();
   };
 
   const toggleMinimize = () => {
@@ -495,103 +483,67 @@ export function OnboardingTour() {
                         </div>
                       </motion.div>
 
-                      {/* Main Action Button - Premium Design */}
+                      {/* Main Action Button - Sleek Modern Design */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
-                        className="flex justify-center mb-4 sm:mb-5"
+                        className="flex justify-center mb-3 sm:mb-4"
                       >
                         <motion.button
                           onClick={() => handleAction(currentStepData.action.path)}
-                          className="group relative overflow-hidden"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          className={`group relative px-5 py-2 bg-gradient-to-r ${currentStepData.gradient} rounded-lg overflow-hidden`}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
                           data-testid={`button-action-step-${currentStep}`}
                         >
-                          {/* Outer glow */}
-                          <div 
-                            className="absolute -inset-1 rounded-2xl blur-xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-                            style={{ background: `linear-gradient(135deg, ${currentStepData.glowColor}, transparent)` }}
-                          />
+                          {/* Subtle shimmer on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:translate-x-full transition-all duration-700" />
                           
-                          {/* Button container */}
-                          <div className={`relative px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r ${currentStepData.gradient} rounded-xl shadow-2xl`}>
-                            {/* Shimmer effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl" />
-                            
-                            {/* Button content */}
-                            <span className="relative flex items-center gap-2 text-sm sm:text-base font-bold text-white tracking-wide">
-                              {currentStepData.action.label}
-                              <motion.span
-                                animate={{ x: [0, 4, 0] }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                              >
-                                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-                              </motion.span>
-                            </span>
-                          </div>
+                          <span className="relative flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white">
+                            {currentStepData.action.label}
+                            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          </span>
                         </motion.button>
                       </motion.div>
 
-                      {/* Navigation Footer - Enhanced Design */}
-                      <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/10">
-                        {/* Previous Button */}
-                        <motion.button
+                      {/* Navigation Footer */}
+                      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-white/10">
+                        <button
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
-                          className="group flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20"
-                          whileHover={{ x: currentStep === 0 ? 0 : -2 }}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
                           data-testid="button-previous-step"
                         >
-                          <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-                          <span className="text-xs sm:text-sm font-medium">Back</span>
-                        </motion.button>
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                          Back
+                        </button>
 
-                        {/* Step Indicators - Enhanced Pills */}
-                        <div className="flex items-center gap-1.5 sm:gap-2">
+                        {/* Step Dots */}
+                        <div className="flex items-center gap-1.5">
                           {steps.map((step, index) => (
-                            <motion.button
+                            <button
                               key={index}
                               onClick={() => setCurrentStep(index)}
-                              className={`relative h-2 rounded-full transition-all duration-500 cursor-pointer ${
+                              className={`h-1.5 rounded-full transition-all duration-300 ${
                                 index === currentStep 
-                                  ? 'w-8 sm:w-10' 
-                                  : 'w-2 hover:w-3'
+                                  ? `w-6 bg-gradient-to-r ${step.gradient}` 
+                                  : index < currentStep
+                                  ? 'w-1.5 bg-emerald-500'
+                                  : 'w-1.5 bg-white/25 hover:bg-white/40'
                               }`}
-                              initial={{ scale: 0.8 }}
-                              animate={{ scale: 1 }}
-                              whileHover={{ scale: 1.1 }}
-                            >
-                              {index === currentStep ? (
-                                <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${step.gradient} shadow-lg`}>
-                                  <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
-                                </div>
-                              ) : index < currentStep ? (
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 to-green-500 shadow-sm" />
-                              ) : (
-                                <div className="absolute inset-0 rounded-full bg-white/20 hover:bg-white/30" />
-                              )}
-                            </motion.button>
+                            />
                           ))}
                         </div>
 
-                        {/* Next/Skip Button */}
-                        <motion.button
+                        <button
                           onClick={currentStep === steps.length - 1 ? handleClose : handleNext}
-                          className={`group flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 backdrop-blur-sm border ${
-                            currentStep === steps.length - 1 
-                              ? 'text-white bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-emerald-500/30 hover:border-emerald-500/50'
-                              : 'text-gray-400 hover:text-white border-transparent hover:border-white/20 hover:bg-white/10'
-                          }`}
-                          whileHover={{ x: 2 }}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
                           data-testid="button-next-step"
                         >
-                          <span className="text-xs sm:text-sm font-medium">
-                            {currentStep === steps.length - 1 ? 'Finish' : 'Skip'}
-                          </span>
-                          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                        </motion.button>
+                          {currentStep === steps.length - 1 ? 'Done' : 'Skip'}
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </div>
                   </div>
