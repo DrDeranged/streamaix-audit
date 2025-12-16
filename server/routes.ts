@@ -13733,6 +13733,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(403).json({ success: false, error: 'Only the host can end the stream' });
     }
     
+    // Use streamingService.endStream() to properly end the stream and create recording
+    try {
+      const { getStreamingService } = await import('./services/streamingService');
+      const streamingService = getStreamingService();
+      const endedViaService = await streamingService.endStream(req.params.id, req.user.id);
+      
+      if (endedViaService) {
+        // Streaming service handled everything including recording creation
+        const [updatedStream] = await db.select()
+          .from(liveStreams)
+          .where(eq(liveStreams.id, req.params.id))
+          .limit(1);
+        
+        // Mark all participants as inactive
+        await db.update(streamParticipants)
+          .set({ isActive: false, leftAt: new Date() })
+          .where(eq(streamParticipants.streamId, req.params.id));
+        
+        return res.json({ success: true, stream: updatedStream });
+      }
+    } catch (error) {
+      console.error('[Routes] Error ending stream via service:', error);
+    }
+    
+    // Fallback: update database directly if streaming service fails
     const actualEnd = new Date();
     const durationSeconds = stream.actualStart 
       ? Math.floor((actualEnd.getTime() - new Date(stream.actualStart).getTime()) / 1000)
