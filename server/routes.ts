@@ -36,6 +36,7 @@ import { qualityScorerService } from "./services/qualityScorerService";
 import { trendingService } from "./services/trendingService";
 import { autonomousTradingEngine } from "./services/autonomousTradingEngine";
 import { pointsService } from "./services/pointsService";
+import * as avatarChatService from "./services/avatarChatService";
 import passport from "passport";
 import axios from "axios";
 
@@ -2360,6 +2361,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching similar avatars:', error);
       res.status(500).json({ error: 'Failed to fetch similar avatars' });
+    }
+  }));
+
+  // Avatar Chat - Chat with AI personas of Knowledge Avatars
+  app.post('/api/avatars/:avatarId/chat', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { avatarId } = req.params;
+    const { message } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    try {
+      const result = await avatarChatService.generateAvatarChatResponse(
+        avatarId,
+        userId,
+        message.trim()
+      );
+      res.json(result);
+    } catch (error) {
+      console.error('Avatar chat error:', error);
+      res.status(500).json({ error: 'Failed to generate response' });
+    }
+  }));
+
+  // Get chat history with an avatar
+  app.get('/api/avatars/:avatarId/chat/history', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { avatarId } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    try {
+      const messages = await avatarChatService.getConversationHistory(userId, avatarId);
+      res.json({ messages });
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+      res.status(500).json({ error: 'Failed to fetch chat history' });
+    }
+  }));
+
+  // Clear chat history with an avatar
+  app.delete('/api/avatars/:avatarId/chat/history', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { avatarId } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    try {
+      await avatarChatService.clearConversation(userId, avatarId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+      res.status(500).json({ error: 'Failed to clear chat history' });
     }
   }));
 
