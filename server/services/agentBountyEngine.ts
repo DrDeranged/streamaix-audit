@@ -264,7 +264,11 @@ Respond in JSON format:
     // Ensure reward doesn't exceed 30% of agent's balance
     const maxReward = Math.floor(streamPoints * 0.3);
     
-    return Math.min(finalReward, maxReward);
+    // Ensure minimum reward of 50 STREAM for visibility
+    const minReward = 50;
+    const cappedReward = Math.min(finalReward, maxReward);
+    
+    return Math.max(cappedReward, minReward);
   }
   
   /**

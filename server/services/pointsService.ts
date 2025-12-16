@@ -73,6 +73,7 @@ interface SpendPointsParams {
 class PointsService {
   private configCache: Map<string, number> = new Map();
   private configLoaded = false;
+  private signupBonusLocks: Set<string> = new Set();
 
   async loadConfig() {
     if (this.configLoaded) return;
@@ -218,31 +219,48 @@ class PointsService {
   }
 
   async awardSignupBonus(userId: string): Promise<PointsTransaction | null> {
-    await this.loadConfig();
-    const amount = this.getPointsValue('SIGNUP_BONUS');
-    
-    // Check if already awarded
-    const existing = await db.select()
-      .from(pointsTransactions)
-      .where(and(
-        eq(pointsTransactions.userId, userId),
-        eq(pointsTransactions.source, 'signup')
-      ))
-      .limit(1);
-
-    if (existing.length > 0) {
-      console.log(`[Points] Signup bonus already awarded to ${userId}`);
+    // Prevent concurrent signup bonus awards with in-memory lock
+    if (this.signupBonusLocks.has(userId)) {
+      console.log(`[Points] Signup bonus already in progress for ${userId}, skipping`);
       return null;
     }
+    
+    this.signupBonusLocks.add(userId);
+    
+    try {
+      await this.loadConfig();
+      const amount = this.getPointsValue('SIGNUP_BONUS');
+      
+      // Check if already awarded
+      const existing = await db.select()
+        .from(pointsTransactions)
+        .where(and(
+          eq(pointsTransactions.userId, userId),
+          eq(pointsTransactions.source, 'signup')
+        ))
+        .limit(1);
 
-    return this.awardPoints({
-      userId,
-      amount,
-      source: 'signup',
-      type: 'bonus',
-      description: `Welcome bonus! You received ${amount} STREAM points to get started.`,
-      metadata: { isWelcomeBonus: true }
-    });
+      if (existing.length > 0) {
+        console.log(`[Points] Signup bonus already awarded to ${userId}`);
+        return null;
+      }
+
+      const result = await this.awardPoints({
+        userId,
+        amount,
+        source: 'signup',
+        type: 'bonus',
+        description: `Welcome bonus! You received ${amount} STREAM points to get started.`,
+        metadata: { isWelcomeBonus: true }
+      });
+      
+      return result;
+    } finally {
+      // Keep lock for 5 seconds to prevent rapid re-attempts
+      setTimeout(() => {
+        this.signupBonusLocks.delete(userId);
+      }, 5000);
+    }
   }
 
   async awardProfileComplete(userId: string): Promise<PointsTransaction | null> {

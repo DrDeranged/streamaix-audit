@@ -534,15 +534,23 @@ export function LiveStreamingTerminal() {
                 </div>
                 
                 <Link href="/streams">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    data-testid="view-all-streams"
-                    className="text-fuchsia-400 hover:text-fuchsia-300 hover:bg-fuchsia-500/10 rounded-xl font-medium"
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    View All
-                    <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Button>
+                    <Button 
+                      size="default" 
+                      data-testid="view-all-streams"
+                      className="relative bg-gradient-to-r from-fuchsia-600 via-purple-600 to-cyan-600 hover:from-fuchsia-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 overflow-hidden group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="relative flex items-center gap-2">
+                        <Play className="w-4 h-4" />
+                        View All Streams
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      </span>
+                    </Button>
+                  </motion.div>
                 </Link>
               </div>
               
