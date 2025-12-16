@@ -353,7 +353,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
 
                     {/* Executive Summary Tab */}
                     <TabsContent value="analysis" className="space-y-3">
-                      {/* Executive Summary */}
+                      {/* Executive Summary - Concise Version */}
                       <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
                         <h5 className="text-sm sm:text-base font-semibold text-blue-400 mb-2 flex items-center gap-2">
                           <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -361,7 +361,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleCopy(summary.executiveSummary || summary.summary || '', 'executive')}
+                            onClick={() => handleCopy(summary.tldrSummary || summary.executiveSummary || summary.summary || '', 'executive')}
                             className="text-gray-600 dark:text-gray-400 hover:text-white p-1"
                           >
                             {copySuccess === 'executive' ? (
@@ -371,50 +371,10 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                             )}
                           </Button>
                         </h5>
-                        <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
-                          <div 
-                            className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed"
-                            style={{lineHeight: '1.8', fontSize: '16px'}}
-                            dangerouslySetInnerHTML={{
-                              __html: (summary.executiveSummary || summary.summary || summary.blogPost || '')
-                                .replace(/# (.*)/g, '<h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">$1</h3>')
-                                .replace(/## (.*)/g, '<h4 class="text-lg sm:text-xl font-semibold text-blue-200 mt-4 mb-3">$1</h4>')
-                                .replace(/### (.*)/g, '<h5 class="text-base sm:text-lg font-medium text-purple-200 mt-3 mb-2">$1</h5>')
-                                .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-3 p-2 bg-blue-500/10 rounded border-l-2 border-blue-400"><strong class="text-blue-300 text-base">$1:</strong> <span class="text-gray-200 text-base block mt-1">$2</span></div>')
-                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white font-semibold">$1</strong>')
-                                .replace(/\n\n/g, '<div class="mb-4"></div>')
-                                .replace(/\n/g, '<br class="mb-2">')
-                            }}
-                          />
-                        </div>
+                        <p className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed">
+                          {summary.tldrSummary || summary.executiveSummary || summary.summary || ''}
+                        </p>
                       </div>
-                      
-                      {/* Additional Insights */}
-                      {summary.blogPost && summary.blogPost !== summary.executiveSummary && summary.blogPost !== summary.summary && (
-                        <div className="p-3 sm:p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
-                          <h5 className="text-sm sm:text-base font-semibold text-purple-400 mb-2 flex items-center gap-2">
-                            <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
-                            Comprehensive Analysis
-                          </h5>
-                          <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
-                            <div 
-                              className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed"
-                              style={{lineHeight: '1.8', fontSize: '16px'}}
-                              dangerouslySetInnerHTML={{
-                                __html: summary.blogPost
-                                  .replace(/# (.*)/g, '<h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">$1</h3>')
-                                  .replace(/## (.*)/g, '<h4 class="text-lg sm:text-xl font-semibold text-purple-200 mt-4 mb-3">$1</h4>')
-                                  .replace(/### (.*)/g, '<h5 class="text-base sm:text-lg font-medium text-pink-200 mt-3 mb-2">$1</h5>')
-                                  .replace(/- \*\*(.*?)\*\*: (.*)/g, '<div class="mb-3 p-2 bg-purple-500/10 rounded border-l-2 border-purple-400"><strong class="text-purple-300 text-base">$1:</strong> <span class="text-gray-200 text-base block mt-1">$2</span></div>')
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-white font-semibold">$1</strong>')
-                                  .replace(/\n\n/g, '<div class="mb-4"></div>')
-                                  .replace(/\n/g, '<br class="mb-2">')
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      
                     </TabsContent>
 
                     {/* Key Insights Tab - MACRO TRENDS ONLY */}

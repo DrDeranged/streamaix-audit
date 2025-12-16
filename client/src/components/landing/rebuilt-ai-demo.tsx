@@ -537,17 +537,6 @@ export function AIProcessor() {
                               </h5>
                               <p className="text-foreground leading-relaxed text-base">{result.tldrSummary}</p>
                             </div>
-                            <div className="p-4 bg-muted/50 rounded-lg">
-                              <h5 className="text-lg font-semibold mb-3 flex items-center gap-2 text-slate-900 dark:text-white">
-                                <BarChart3 className="w-5 h-5" />
-                                Market & Trend Analysis
-                              </h5>
-                              <div className="text-slate-800 dark:text-slate-200 leading-relaxed space-y-3">
-                                {result.summary.split('\n\n').map((paragraph: string, idx: number) => (
-                                  <p key={idx} className="text-sm leading-relaxed text-slate-800 dark:text-slate-200">{paragraph}</p>
-                                ))}
-                              </div>
-                            </div>
                           </TabsContent>
 
                           {/* Insights Tab */}
