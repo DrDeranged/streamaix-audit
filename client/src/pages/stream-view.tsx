@@ -241,16 +241,16 @@ const MarketPriceOverlay = memo(function MarketPriceOverlay({ streamId }: { stre
   if (!data?.marketData?.length) return null;
 
   return (
-    <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+    <div className="absolute top-12 right-3 z-10 flex flex-col gap-1.5">
       {data.marketData.map((coin) => (
         <div
           key={coin.symbol}
-          className="bg-slate-900/80 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-slate-700/50 flex items-center gap-2 animate-fade-in"
+          className="bg-slate-900/80 backdrop-blur-sm rounded-lg px-2.5 py-1 border border-slate-700/50 flex items-center gap-1.5 animate-fade-in"
         >
-          <span className="text-xs font-bold text-white">{coin.symbol}</span>
-          <span className="text-xs text-slate-300">${coin.price.toLocaleString()}</span>
+          <span className="text-[10px] font-bold text-white">{coin.symbol}</span>
+          <span className="text-[10px] text-slate-300">${coin.price.toLocaleString()}</span>
           <span className={cn(
-            "text-[10px] font-medium",
+            "text-[9px] font-medium",
             coin.change24h >= 0 ? "text-emerald-400" : "text-red-400"
           )}>
             {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
