@@ -559,6 +559,23 @@ export function Navigation() {
               )}
             </div>
             
+            {/* Mobile STREAM Points Display - Only on mobile, next to theme toggle */}
+            {isAuthenticated && pointsData && (
+              <Link href="/points" className="md:hidden">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all duration-200"
+                  data-testid="mobile-landing-points-display"
+                >
+                  <Coins className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm font-bold text-emerald-400">
+                    {formatPoints(pointsData.balance || 0)}
+                  </span>
+                </motion.div>
+              </Link>
+            )}
+
             {/* Theme Toggle - Glassmorphism */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
               <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
