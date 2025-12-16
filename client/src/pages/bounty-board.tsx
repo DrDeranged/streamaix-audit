@@ -46,11 +46,14 @@ export default function BountyBoard() {
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append('status', 'open,claimed,in_progress');
+      params.append('limit', '50');
       if (categoryFilter !== 'all') params.append('category', categoryFilter);
       const response = await fetch(`/api/bounties?${params}`);
       if (!response.ok) throw new Error('Failed to fetch bounties');
       return response.json();
     },
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 
   // Fetch completed bounties
@@ -59,22 +62,27 @@ export default function BountyBoard() {
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append('status', 'completed');
+      params.append('limit', '50');
       if (categoryFilter !== 'all') params.append('category', categoryFilter);
       const response = await fetch(`/api/bounties?${params}`);
       if (!response.ok) throw new Error('Failed to fetch bounties');
       return response.json();
     },
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 
   // Fetch my bounties (created by or assigned to current user)
   const { data: myBountiesData, isLoading: myBountiesLoading } = useQuery<{ bounties: Bounty[] }>({
     queryKey: ['/api/bounties', 'my', wallet?.address, user?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/bounties?creatorWallet=${wallet?.address || ''}&userId=${user?.id || ''}`);
+      const response = await fetch(`/api/bounties?creatorWallet=${wallet?.address || ''}&userId=${user?.id || ''}&limit=50`);
       if (!response.ok) throw new Error('Failed to fetch bounties');
       return response.json();
     },
     enabled: !!(wallet?.address || user?.id),
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 
   // Fetch stats
@@ -92,6 +100,8 @@ export default function BountyBoard() {
       if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 
   // Fetch trending bounties
