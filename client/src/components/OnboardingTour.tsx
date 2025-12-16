@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronRight, ChevronLeft, Sparkles, Coins, TrendingUp, Bot, Wallet, 
   Zap, Users, Shield, Trophy, BarChart3, Radio, Rocket, Globe, Crown,
-  LineChart, ArrowRight, MousePointer2, CheckCircle2, Target, Share2
+  LineChart, ArrowRight, MousePointer2, CheckCircle2, Target, Share2,
+  MessageCircle, Brain, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
@@ -15,6 +16,7 @@ interface OnboardingStep {
   description: string;
   icon: any;
   gradient: string;
+  glowColor: string;
   instructions: string[];
   action: {
     label: string;
@@ -26,17 +28,52 @@ const steps: OnboardingStep[] = [
   {
     title: "Welcome to StreamAiX",
     subtitle: "AI-Powered Prediction Markets on Base",
-    description: "Turn videos into insights, trade on predictions, and compete in leagues. 100+ AI agents trading 24/7.",
+    description: "Turn videos into insights, trade on predictions, and chat with AI experts. 100+ AI agents trading 24/7.",
     icon: Sparkles,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    gradient: "from-violet-600 via-purple-500 to-fuchsia-500",
+    glowColor: "rgba(139, 92, 246, 0.5)",
     instructions: [
       "Explore each feature with 'Try It' buttons",
       "Earn STREAM points for activity",
-      "Join leagues to compete for prizes"
+      "Chat with Knowledge Avatars for insights"
     ],
     action: {
-      label: "Let's Go →",
+      label: "Begin Tour",
       path: "/"
+    }
+  },
+  {
+    title: "Knowledge Avatars",
+    subtitle: "Chat with AI Crypto Experts",
+    description: "Talk to AI personas of top crypto thinkers like Vitalik, CZ, and Cathie Wood. Get personalized insights and market analysis.",
+    icon: Brain,
+    gradient: "from-cyan-500 via-blue-500 to-purple-600",
+    glowColor: "rgba(6, 182, 212, 0.5)",
+    instructions: [
+      "Choose from 17+ AI expert personas",
+      "Ask questions about crypto, markets, DeFi",
+      "Get real-time analysis in their unique style"
+    ],
+    action: {
+      label: "Meet Avatars",
+      path: "/avatars"
+    }
+  },
+  {
+    title: "Prediction Markets",
+    subtitle: "Trade YES/NO on Future Events",
+    description: "Bet on crypto predictions, DeFi events, and market outcomes. Join leagues to compete for prize pools up to 100K STREAM.",
+    icon: TrendingUp,
+    gradient: "from-emerald-500 via-green-500 to-teal-500",
+    glowColor: "rgba(16, 185, 129, 0.5)",
+    instructions: [
+      "Browse trending markets and predictions",
+      "Trade YES/NO positions with STREAM",
+      "Join leagues and climb leaderboards"
+    ],
+    action: {
+      label: "Explore Markets",
+      path: "/markets"
     }
   },
   {
@@ -44,78 +81,66 @@ const steps: OnboardingStep[] = [
     subtitle: "Video → Summary → Market",
     description: "Paste any YouTube URL. AI extracts insights and creates tradeable prediction markets automatically.",
     icon: Zap,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    gradient: "from-amber-500 via-orange-500 to-red-500",
+    glowColor: "rgba(245, 158, 11, 0.5)",
     instructions: [
       "Paste a YouTube or podcast URL",
       "AI generates summary + key predictions",
       "One-click to launch a prediction market"
     ],
     action: {
-      label: "Try AI Processor →",
+      label: "Try AI Processor",
       path: "/create-summary"
     }
   },
   {
-    title: "Markets & Leagues",
-    subtitle: "Trade Predictions, Win Prizes",
-    description: "Trade YES/NO on crypto, DeFi, and events. Join leagues to compete for prize pools up to 100K STREAM.",
-    icon: TrendingUp,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "Trade YES/NO positions on any market",
-      "Join leagues and climb leaderboards",
-      "Win from weekly prize pools"
-    ],
-    action: {
-      label: "Explore Markets →",
-      path: "/markets"
-    }
-  },
-  {
-    title: "Discover & Analytics",
-    subtitle: "Real-Time Crypto Intelligence",
-    description: "Live prices, AI signals, sentiment analysis. Everything you need to make informed predictions.",
-    icon: BarChart3,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
-    instructions: [
-      "View live crypto prices and charts",
-      "Check AI-powered trading signals",
-      "Analyze market sentiment"
-    ],
-    action: {
-      label: "Open Discover →",
-      path: "/discover"
-    }
-  },
-  {
     title: "Live Streams",
-    subtitle: "AI-Powered Voice Commentary",
-    description: "Watch AI Avatars and creators stream live with real-time TTS, Q&A queues, debates, and market reactions.",
+    subtitle: "24/7 AI-Powered Broadcasting",
+    description: "Watch AI Avatars stream live with voice commentary, Q&A sessions, debates, and real-time market reactions.",
     icon: Radio,
-    gradient: "from-purple-500 via-fuchsia-500 to-cyan-500",
+    gradient: "from-rose-500 via-pink-500 to-purple-500",
+    glowColor: "rgba(244, 63, 94, 0.5)",
     instructions: [
       "Watch live streams from AI Avatars",
       "Ask questions and vote on Q&A",
       "Join debates and react to markets"
     ],
     action: {
-      label: "Browse Streams →",
+      label: "Watch Streams",
       path: "/streams/discover"
+    }
+  },
+  {
+    title: "Discover & Analytics",
+    subtitle: "Real-Time Crypto Intelligence",
+    description: "Live prices, AI signals, whale tracking, and sentiment analysis. Everything you need for informed predictions.",
+    icon: BarChart3,
+    gradient: "from-blue-500 via-indigo-500 to-violet-500",
+    glowColor: "rgba(99, 102, 241, 0.5)",
+    instructions: [
+      "View live crypto prices and charts",
+      "Track whale movements and AI signals",
+      "Analyze market sentiment trends"
+    ],
+    action: {
+      label: "Open Discover",
+      path: "/discover"
     }
   },
   {
     title: "You've Earned 2,500 STREAM!",
     subtitle: "Your Signup Bonus is Ready",
-    description: "Welcome to StreamAiX! You've been awarded 2,500 STREAM points to get started. Trade markets, submit bounties, and earn more!",
+    description: "Welcome to StreamAiX! Start trading, chatting with avatars, and earning more rewards today.",
     icon: Coins,
-    gradient: "from-emerald-500 via-cyan-500 to-purple-500",
+    gradient: "from-yellow-400 via-amber-500 to-orange-500",
+    glowColor: "rgba(251, 191, 36, 0.5)",
     instructions: [
       "2,500 STREAM bonus added to your wallet",
-      "Earn more by trading, streaming, and bounties",
-      "Daily login streaks multiply your rewards"
+      "Earn more by trading and streaming",
+      "Daily login streaks multiply rewards"
     ],
     action: {
-      label: "Check My Balance →",
+      label: "Start Earning",
       path: "/points"
     }
   }
@@ -470,68 +495,103 @@ export function OnboardingTour() {
                         </div>
                       </motion.div>
 
-                      {/* Main Action Button */}
+                      {/* Main Action Button - Premium Design */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
-                        className="flex justify-center mb-3 sm:mb-4"
+                        className="flex justify-center mb-4 sm:mb-5"
                       >
-                        <Button
+                        <motion.button
                           onClick={() => handleAction(currentStepData.action.path)}
-                          className={`px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r ${currentStepData.gradient} hover:scale-105 text-white shadow-lg hover:shadow-purple-500/30 transition-all duration-300 rounded-lg`}
+                          className="group relative overflow-hidden"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           data-testid={`button-action-step-${currentStep}`}
                         >
-                          <span className="flex items-center gap-1.5">
-                            {currentStepData.action.label}
-                            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </span>
-                        </Button>
+                          {/* Outer glow */}
+                          <div 
+                            className="absolute -inset-1 rounded-2xl blur-xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                            style={{ background: `linear-gradient(135deg, ${currentStepData.glowColor}, transparent)` }}
+                          />
+                          
+                          {/* Button container */}
+                          <div className={`relative px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r ${currentStepData.gradient} rounded-xl shadow-2xl`}>
+                            {/* Shimmer effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl" />
+                            
+                            {/* Button content */}
+                            <span className="relative flex items-center gap-2 text-sm sm:text-base font-bold text-white tracking-wide">
+                              {currentStepData.action.label}
+                              <motion.span
+                                animate={{ x: [0, 4, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                              >
+                                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                              </motion.span>
+                            </span>
+                          </div>
+                        </motion.button>
                       </motion.div>
 
-                      {/* Navigation Footer */}
-                      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-white/10">
-                        <Button
+                      {/* Navigation Footer - Enhanced Design */}
+                      <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/10">
+                        {/* Previous Button */}
+                        <motion.button
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed px-2 sm:px-2.5 py-1 hover:bg-white/10 rounded-lg transition-all text-xs"
+                          className="group flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20"
+                          whileHover={{ x: currentStep === 0 ? 0 : -2 }}
                           data-testid="button-previous-step"
                         >
-                          <ChevronLeft className="mr-0.5 h-3 w-3" />
-                          <span className="hidden sm:inline">Previous</span>
-                          <span className="sm:hidden">Prev</span>
-                        </Button>
+                          <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                          <span className="text-xs sm:text-sm font-medium">Back</span>
+                        </motion.button>
 
-                        <div className="flex items-center gap-1">
-                          {steps.map((_, index) => (
-                            <motion.div
+                        {/* Step Indicators - Enhanced Pills */}
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          {steps.map((step, index) => (
+                            <motion.button
                               key={index}
-                              className={`h-1 rounded-full transition-all duration-300 ${
+                              onClick={() => setCurrentStep(index)}
+                              className={`relative h-2 rounded-full transition-all duration-500 cursor-pointer ${
                                 index === currentStep 
-                                  ? `w-5 bg-gradient-to-r ${currentStepData.gradient}` 
-                                  : index < currentStep
-                                  ? 'w-1 bg-green-500'
-                                  : 'w-1 bg-white/20'
+                                  ? 'w-8 sm:w-10' 
+                                  : 'w-2 hover:w-3'
                               }`}
                               initial={{ scale: 0.8 }}
-                              animate={{ scale: index === currentStep ? 1 : 0.8 }}
-                            />
+                              animate={{ scale: 1 }}
+                              whileHover={{ scale: 1.1 }}
+                            >
+                              {index === currentStep ? (
+                                <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${step.gradient} shadow-lg`}>
+                                  <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
+                                </div>
+                              ) : index < currentStep ? (
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 to-green-500 shadow-sm" />
+                              ) : (
+                                <div className="absolute inset-0 rounded-full bg-white/20 hover:bg-white/30" />
+                              )}
+                            </motion.button>
                           ))}
                         </div>
 
-                        <Button
-                          onClick={handleNext}
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-white px-2 sm:px-2.5 py-1 hover:bg-white/10 rounded-lg transition-all text-xs"
+                        {/* Next/Skip Button */}
+                        <motion.button
+                          onClick={currentStep === steps.length - 1 ? handleClose : handleNext}
+                          className={`group flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 backdrop-blur-sm border ${
+                            currentStep === steps.length - 1 
+                              ? 'text-white bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-emerald-500/30 hover:border-emerald-500/50'
+                              : 'text-gray-400 hover:text-white border-transparent hover:border-white/20 hover:bg-white/10'
+                          }`}
+                          whileHover={{ x: 2 }}
                           data-testid="button-next-step"
                         >
-                          <span className="hidden sm:inline">{currentStep === steps.length - 1 ? 'Finish' : 'Next'}</span>
-                          <span className="sm:hidden">{currentStep === steps.length - 1 ? 'Done' : 'Next'}</span>
-                          <ChevronRight className="ml-0.5 h-3 w-3" />
-                        </Button>
+                          <span className="text-xs sm:text-sm font-medium">
+                            {currentStep === steps.length - 1 ? 'Finish' : 'Skip'}
+                          </span>
+                          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                        </motion.button>
                       </div>
                     </div>
                   </div>
