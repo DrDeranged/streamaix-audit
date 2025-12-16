@@ -1570,8 +1570,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: validation.error });
     }
 
-    const bountyData = { ...validation.data as any, creatorId: req.user!.id };
-    const bounty = await storage.createBounty(bountyData);
+    const bountyData = validation.data as any;
+    const rewardAmount = bountyData.reward || 0;
+
+    // Deduct reward from creator's balance (if reward > 0)
+    if (rewardAmount > 0) {
+      const spendResult = await pointsService.spendPoints({
+        userId: req.user!.id,
+        amount: rewardAmount,
+        source: 'bounty_submit',
+        description: `Created bounty with ${rewardAmount} STREAM reward`,
+        referenceType: 'bounty_creation',
+        metadata: { title: bountyData.title }
+      });
+
+      if (!spendResult.success) {
+        return res.status(400).json({ 
+          error: spendResult.error || 'Insufficient STREAM points for bounty reward',
+          required: rewardAmount
+        });
+      }
+    }
+
+    const bounty = await storage.createBounty({ ...bountyData, creatorId: req.user!.id });
 
     res.status(201).json({
       message: 'Bounty created successfully',
@@ -9939,14 +9960,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fee: quote.fee
     });
 
-    // Update user's STREAM points
+    // Update user's STREAM points with transaction logging
     if (isBuy) {
-      await storage.updateUser(userId, {
-        streamPoints: (user.streamPoints || 0) - amount
+      await pointsService.spendPoints({
+        userId,
+        amount,
+        source: 'market_trade',
+        description: `Bought ${sharesTraded.toFixed(2)} ${isYes ? 'YES' : 'NO'} shares`,
+        referenceId: marketId,
+        referenceType: 'prediction_market',
+        metadata: { outcome: isYes ? 'YES' : 'NO', shares: sharesTraded, price: quote.effectivePrice }
       });
     } else {
-      await storage.updateUser(userId, {
-        streamPoints: (user.streamPoints || 0) + quote.amountOut
+      await pointsService.awardPoints({
+        userId,
+        amount: quote.amountOut,
+        source: 'market_trade',
+        type: 'earn',
+        description: `Sold ${sharesTraded.toFixed(2)} ${isYes ? 'YES' : 'NO'} shares`,
+        referenceId: marketId,
+        referenceType: 'prediction_market',
+        metadata: { outcome: isYes ? 'YES' : 'NO', shares: sharesTraded, amountOut: quote.amountOut }
       });
     }
 
@@ -10549,15 +10583,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Check and deduct entry fee
     if (league.entryFee && league.entryFee > 0) {
-      const [user] = await db.select().from(users).where(eq(users.id, userId));
-      if (!user || (user.streamPoints || 0) < league.entryFee) {
+      // Deduct entry fee using pointsService
+      const spendResult = await pointsService.spendPoints({
+        userId,
+        amount: league.entryFee,
+        source: 'league_entry',
+        description: `Entry fee for league: ${league.name}`,
+        referenceId: leagueId,
+        referenceType: 'prediction_league',
+        metadata: { leagueName: league.name }
+      });
+      
+      if (!spendResult.success) {
         return res.status(400).json({ error: "Insufficient STREAM points for entry fee" });
       }
-      
-      // Deduct entry fee
-      await db.update(users)
-        .set({ streamPoints: (user.streamPoints || 0) - league.entryFee })
-        .where(eq(users.id, userId));
       
       // Add to prize pool
       await db.update(predictionLeagues)
@@ -13909,21 +13948,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ success: false, error: 'Stream not found' });
     }
     
-    // Check user balance
-    const user = await storage.getUser(req.user.id);
-    if (!user || (user.streamPoints || 0) < amount) {
-      return res.status(400).json({ success: false, error: 'Insufficient STREAM points' });
+    // Deduct from tipper using pointsService
+    const spendResult = await pointsService.spendPoints({
+      userId: req.user.id,
+      amount,
+      source: 'tip_sent',
+      description: `Tipped ${amount} STREAM to stream host`,
+      referenceId: req.params.id,
+      referenceType: 'stream_tip',
+      metadata: { recipientId: stream.hostId, message }
+    });
+    
+    if (!spendResult.success) {
+      return res.status(400).json({ success: false, error: spendResult.error || 'Insufficient STREAM points' });
     }
     
-    // Deduct from tipper
-    await db.update(users)
-      .set({ streamPoints: sql`${users.streamPoints} - ${amount}` })
-      .where(eq(users.id, req.user.id));
-    
-    // Add to streamer
-    await db.update(users)
-      .set({ streamPoints: sql`${users.streamPoints} + ${amount}` })
-      .where(eq(users.id, stream.hostId));
+    // Award to streamer using pointsService
+    await pointsService.awardPoints({
+      userId: stream.hostId,
+      amount,
+      source: 'tip_received',
+      description: `Received ${amount} STREAM tip from viewer`,
+      referenceId: req.params.id,
+      referenceType: 'stream_tip',
+      metadata: { tipperId: req.user.id, message }
+    });
     
     // Record the tip
     const [tip] = await db.insert(streamTips).values({
