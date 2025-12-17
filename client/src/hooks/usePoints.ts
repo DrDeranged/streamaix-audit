@@ -57,7 +57,14 @@ export function usePointsHistory(limit = 50, offset = 0) {
   const { isAuthenticated } = useAuth();
 
   return useQuery<PointsHistoryResponse>({
-    queryKey: ['/api/points/history', { limit, offset }],
+    queryKey: ['/api/points/history', limit, offset],
+    queryFn: async () => {
+      const response = await fetch(`/api/points/history?limit=${limit}&offset=${offset}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch points history');
+      return response.json();
+    },
     enabled: isAuthenticated,
     refetchInterval: 30000,
     staleTime: 15000,
@@ -68,7 +75,14 @@ export function useRecentActivity(hours = 24) {
   const { isAuthenticated } = useAuth();
 
   return useQuery<{ success: boolean; transactions: PointsTransaction[] }>({
-    queryKey: ['/api/points/recent', { hours }],
+    queryKey: ['/api/points/recent', hours],
+    queryFn: async () => {
+      const response = await fetch(`/api/points/recent?hours=${hours}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch recent activity');
+      return response.json();
+    },
     enabled: isAuthenticated,
   });
 }
