@@ -565,7 +565,7 @@ class PointsService {
           source: transaction.source,
           description: transaction.description ?? undefined,
           balanceAfter: transaction.balanceAfter,
-          createdAt: transaction.createdAt
+          createdAt: transaction.createdAt ?? new Date()
         }
       );
     } catch (error) {
