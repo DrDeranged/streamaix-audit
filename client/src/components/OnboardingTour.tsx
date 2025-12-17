@@ -288,8 +288,9 @@ export function OnboardingTour() {
       handleClose();
       return;
     }
-    // Advance to next step while navigating
-    handleNext();
+    // Advance to next step and minimize so user can see the page
+    setCurrentStep(currentStep + 1);
+    setIsMinimized(true);
   };
 
   const toggleMinimize = () => {
