@@ -15628,6 +15628,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // POINTS WEBSOCKET SERVER (Real-time balance updates)
+  // =============================================================================
+  
+  const pointsWss = new WebSocketServer({ noServer: true });
+  const { pointsWebSocketService } = await import('./services/pointsWebSocketService');
+  
+  pointsWss.on('connection', (ws: WebSocket, req) => {
+    console.log(`💰 [WS] Points WebSocket connection attempt received`);
+    
+    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    const userId = url.searchParams.get('userId');
+    const token = url.searchParams.get('token');
+    
+    if (!userId) {
+      console.log(`❌ [WS Points] Rejecting connection - Missing userId`);
+      ws.close(1008, 'Missing userId');
+      return;
+    }
+    
+    // Register the connection for this user
+    pointsWebSocketService.registerConnection(userId, ws);
+    
+    // Send initial connection confirmation
+    ws.send(JSON.stringify({
+      type: 'connected',
+      message: 'Connected to real-time points updates',
+      userId: userId,
+      timestamp: new Date().toISOString()
+    }));
+  });
+
+  // =============================================================================
   // EXPLICIT WEBSOCKET UPGRADE HANDLING
   // This ensures WebSocket upgrades are handled BEFORE Vite's HMR can intercept them
   // =============================================================================
@@ -15656,6 +15688,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔌 [WS Upgrade] Routing to conversation WebSocket server (/ws/conversation)`);
       conversationWss.handleUpgrade(request, socket, head, (ws) => {
         conversationWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/points') {
+      console.log(`🔌 [WS Upgrade] Routing to points WebSocket server (/ws/points)`);
+      pointsWss.handleUpgrade(request, socket, head, (ws) => {
+        pointsWss.emit('connection', ws, request);
       });
     } else {
       // Let other upgrade requests pass through (e.g., Vite HMR)
