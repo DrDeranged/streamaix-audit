@@ -8,6 +8,7 @@ import {
   type DailyLoginStreak
 } from '@shared/schema';
 import { eq, desc, and, sql, gte } from 'drizzle-orm';
+import { pointsWebSocketService } from './pointsWebSocketService';
 
 // Default points values (used if not in config table)
 const DEFAULT_POINTS = {
@@ -141,6 +142,9 @@ class PointsService {
 
       console.log(`[Points] Awarded ${amount} to user ${userId} for ${source}. Balance: ${currentBalance} → ${newBalance}`);
       
+      // Broadcast real-time update via WebSocket
+      this.broadcastPointsUpdate(userId, transaction);
+      
       return transaction;
     } catch (error) {
       console.error('[Points] Error awarding points:', error);
@@ -189,6 +193,9 @@ class PointsService {
         .returning();
 
       console.log(`[Points] User ${userId} spent ${amount} on ${source}. Balance: ${currentBalance} → ${newBalance}`);
+      
+      // Broadcast real-time update via WebSocket
+      this.broadcastPointsUpdate(userId, transaction);
       
       return { success: true, transaction };
     } catch (error) {
@@ -538,6 +545,53 @@ class PointsService {
       streak: streakResult[0]?.currentStreak ?? 0,
       longestStreak: streakResult[0]?.longestStreak ?? 0,
       transactionCount: statsResult[0]?.count ?? 0,
+    };
+  }
+
+  private async broadcastPointsUpdate(userId: string, transaction: PointsTransaction) {
+    try {
+      // Get updated stats for the user
+      const stats = await this.getStatsInternal(userId);
+      
+      pointsWebSocketService.notifyPointsChange(
+        userId,
+        stats.balance,
+        stats.totalEarned,
+        stats.totalSpent,
+        {
+          id: transaction.id,
+          amount: transaction.amount,
+          type: transaction.type,
+          source: transaction.source,
+          description: transaction.description ?? undefined,
+          balanceAfter: transaction.balanceAfter,
+          createdAt: transaction.createdAt
+        }
+      );
+    } catch (error) {
+      console.error('[Points] Error broadcasting WebSocket update:', error);
+    }
+  }
+
+  private async getStatsInternal(userId: string): Promise<{
+    balance: number;
+    totalEarned: number;
+    totalSpent: number;
+  }> {
+    const [balanceResult, statsResult] = await Promise.all([
+      this.getBalance(userId),
+      db.select({
+        totalEarned: sql<number>`COALESCE(SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END), 0)`,
+        totalSpent: sql<number>`COALESCE(SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END), 0)`,
+      })
+        .from(pointsTransactions)
+        .where(eq(pointsTransactions.userId, userId))
+    ]);
+
+    return {
+      balance: balanceResult,
+      totalEarned: statsResult[0]?.totalEarned ?? 0,
+      totalSpent: statsResult[0]?.totalSpent ?? 0,
     };
   }
 
