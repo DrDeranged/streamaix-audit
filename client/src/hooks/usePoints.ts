@@ -59,8 +59,12 @@ export function usePointsHistory(limit = 50, offset = 0) {
   return useQuery<PointsHistoryResponse>({
     queryKey: ['/api/points/history', limit, offset],
     queryFn: async () => {
+      const authToken = localStorage.getItem('auth_token');
       const response = await fetch(`/api/points/history?limit=${limit}&offset=${offset}`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
       });
       if (!response.ok) throw new Error('Failed to fetch points history');
       return response.json();
@@ -77,8 +81,12 @@ export function useRecentActivity(hours = 24) {
   return useQuery<{ success: boolean; transactions: PointsTransaction[] }>({
     queryKey: ['/api/points/recent', hours],
     queryFn: async () => {
+      const authToken = localStorage.getItem('auth_token');
       const response = await fetch(`/api/points/recent?hours=${hours}`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
       });
       if (!response.ok) throw new Error('Failed to fetch recent activity');
       return response.json();
