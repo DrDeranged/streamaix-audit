@@ -56,7 +56,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Meet Avatars",
-      path: "/chat"
+      path: "/#knowledge-avatars"
     }
   },
   {
@@ -221,6 +221,7 @@ export function OnboardingTour() {
   const [, setLocation] = useLocation();
   const [particles, setParticles] = useState<Array<{ id: number; delay: number; x: number }>>([]);
   const modalRef = useRef<HTMLDivElement>(null);
+  const [countdown, setCountdown] = useState(4);
 
   useEffect(() => {
     // Check for ?tour=1 URL parameter for testing
@@ -280,8 +281,20 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
-    // Navigate to the page for this step
-    setLocation(path);
+    // Handle hash navigation for landing page sections
+    if (path.startsWith('/#')) {
+      const sectionId = path.substring(2);
+      setLocation('/');
+      // Wait for navigation then scroll to section
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      setLocation(path);
+    }
     
     if (currentStep === steps.length - 1) {
       // Last step - close tour after navigating
@@ -297,6 +310,29 @@ export function OnboardingTour() {
     setIsMinimized(!isMinimized);
   };
 
+  // Auto-timer: bring tour back after 4 seconds when minimized with countdown
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let countdownInterval: NodeJS.Timeout;
+    
+    if (isMinimized) {
+      setCountdown(4);
+      
+      countdownInterval = setInterval(() => {
+        setCountdown(prev => prev > 0 ? prev - 1 : 0);
+      }, 1000);
+      
+      timer = setTimeout(() => {
+        setIsMinimized(false);
+      }, 4000);
+    }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (countdownInterval) clearInterval(countdownInterval);
+    };
+  }, [isMinimized, currentStep]);
+
   const progress = ((currentStep + 1) / steps.length) * 100;
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
@@ -309,29 +345,50 @@ export function OnboardingTour() {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Minimized Floating Widget */}
+          {/* Minimized Floating Widget - Mobile Responsive */}
           {isMinimized && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 100 }}
-              className="fixed bottom-6 right-6 z-50"
+              className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
             >
               <button
                 onClick={toggleMinimize}
-                className="group relative p-4 neural-glass rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden"
+                className="group relative p-2.5 sm:p-4 neural-glass rounded-2xl sm:rounded-3xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 glow-pulse overflow-hidden"
                 data-testid="button-tour-minimized"
               >
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className={`p-3 bg-gradient-to-br ${currentStepData.gradient} rounded-2xl shadow-lg`}>
-                    <Icon className="h-6 w-6 text-white" />
+                <div className="flex items-center gap-2 sm:gap-4 relative z-10">
+                  <div className={`p-2 sm:p-3 bg-gradient-to-br ${currentStepData.gradient} rounded-xl sm:rounded-2xl shadow-lg`}>
+                    <Icon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <div className="text-left pr-2">
-                    <p className="text-xs text-white/80 font-medium font-orbitron">Tour Active</p>
-                    <p className="text-sm text-white font-bold">Step {currentStep + 1}/{steps.length}</p>
+                  <div className="text-left pr-1 sm:pr-2">
+                    <p className="text-[10px] sm:text-xs text-white/80 font-medium font-orbitron">Resuming in {countdown}s</p>
+                    <p className="text-xs sm:text-sm text-white font-bold">Step {currentStep + 1}/{steps.length}</p>
                   </div>
-                  <div className="relative w-12 h-12">
-                    <svg className="w-12 h-12 transform -rotate-90">
+                  <div className="relative w-8 h-8 sm:w-12 sm:h-12">
+                    <svg className="w-8 h-8 sm:w-12 sm:h-12 transform -rotate-90">
+                      <circle
+                        cx="50%"
+                        cy="50%"
+                        r="12"
+                        stroke="rgba(255,255,255,0.2)"
+                        strokeWidth="2"
+                        fill="none"
+                        className="sm:hidden"
+                      />
+                      <circle
+                        cx="50%"
+                        cy="50%"
+                        r="12"
+                        stroke="url(#progress-gradient-mini)"
+                        strokeWidth="2"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 12}`}
+                        strokeDashoffset={`${2 * Math.PI * 12 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        className="energy-flow sm:hidden"
+                      />
                       <circle
                         cx="24"
                         cy="24"
@@ -339,6 +396,7 @@ export function OnboardingTour() {
                         stroke="rgba(255,255,255,0.2)"
                         strokeWidth="3"
                         fill="none"
+                        className="hidden sm:block"
                       />
                       <circle
                         cx="24"
@@ -350,7 +408,7 @@ export function OnboardingTour() {
                         strokeDasharray={`${2 * Math.PI * 20}`}
                         strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
                         strokeLinecap="round"
-                        className="energy-flow"
+                        className="energy-flow hidden sm:block"
                       />
                       <defs>
                         <linearGradient id="progress-gradient-mini" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -361,7 +419,7 @@ export function OnboardingTour() {
                       </defs>
                     </svg>
                     <motion.div
-                      className="absolute inset-0 flex items-center justify-center text-xl"
+                      className="absolute inset-0 flex items-center justify-center text-sm sm:text-xl"
                       animate={{ rotate: [0, 10, -10, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
@@ -370,18 +428,18 @@ export function OnboardingTour() {
                   </div>
                 </div>
                 
-                <div className="absolute inset-0 iridescent-shimmer rounded-3xl" />
+                <div className="absolute inset-0 iridescent-shimmer rounded-2xl sm:rounded-3xl" />
               </button>
             </motion.div>
           )}
 
-          {/* Full Tour Modal */}
+          {/* Full Tour Modal - Mobile Responsive */}
           {!isMinimized && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-2 sm:p-4"
               onClick={handleSkip}
             >
               {/* Neural Network Background */}
@@ -389,18 +447,18 @@ export function OnboardingTour() {
                 <NeuralNetworkBackground />
               </div>
 
-              {/* Modal Container */}
+              {/* Modal Container - Better mobile sizing */}
               <motion.div
                 ref={modalRef}
                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 50 }}
                 transition={{ type: "spring", duration: 0.7, bounce: 0.25 }}
-                className="relative w-full max-w-4xl max-h-[90vh]"
+                className="relative w-full max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Main Card with Liquid Gradient Background */}
-                <div className="relative neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border liquid-gradient">
+                <div className="relative neural-glass rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden iridescent-border liquid-gradient">
                   {/* Flowing Particle Stream - Reduced opacity */}
                   <div className="particle-stream opacity-30">
                     {particles.map((p) => (
@@ -434,8 +492,8 @@ export function OnboardingTour() {
                     </button>
                   </div>
 
-                  {/* Content Container */}
-                  <div className="overflow-y-auto max-h-[85vh] scrollbar-thin relative z-10">
+                  {/* Content Container - Mobile optimized */}
+                  <div className="overflow-y-auto max-h-[75vh] sm:max-h-[85vh] scrollbar-thin relative z-10">
                     <div className="p-3 sm:p-4 md:p-6">
                       {/* Header Section */}
                       <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-5 mb-4 sm:mb-5">
