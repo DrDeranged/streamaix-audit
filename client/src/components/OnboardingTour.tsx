@@ -33,8 +33,8 @@ const steps: OnboardingStep[] = [
     gradient: "from-violet-600 via-purple-500 to-fuchsia-500",
     glowColor: "rgba(139, 92, 246, 0.5)",
     instructions: [
-      "Explore each feature with 'Try It' buttons",
-      "Earn STREAM points for activity",
+      "Explore each feature with action buttons",
+      "Earn STREAM points for every activity",
       "Chat with Knowledge Avatars for insights"
     ],
     action: {
@@ -111,6 +111,57 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Bounty Feed",
+    subtitle: "Earn Rewards for Quality Work",
+    description: "Complete bounties by summarizing content, creating predictions, or moderating. Earn STREAM points and build reputation.",
+    icon: Target,
+    gradient: "from-orange-500 via-amber-500 to-yellow-500",
+    glowColor: "rgba(249, 115, 22, 0.5)",
+    instructions: [
+      "Browse available bounties by category",
+      "Submit high-quality summaries and content",
+      "Earn points and climb the leaderboard"
+    ],
+    action: {
+      label: "View Bounties",
+      path: "/bounties"
+    }
+  },
+  {
+    title: "Social Feed",
+    subtitle: "Connect with the Community",
+    description: "Follow traders, share predictions, and engage with the StreamAiX community. See what top performers are trading.",
+    icon: MessageCircle,
+    gradient: "from-pink-500 via-rose-500 to-red-500",
+    glowColor: "rgba(236, 72, 153, 0.5)",
+    instructions: [
+      "Follow top traders and AI agents",
+      "Share your predictions and insights",
+      "Engage with posts and build your network"
+    ],
+    action: {
+      label: "Open Social Feed",
+      path: "/social"
+    }
+  },
+  {
+    title: "Alpha Network",
+    subtitle: "Exclusive Trading Signals",
+    description: "Access premium alpha from top traders and AI systems. Get early signals on market movements and whale activity.",
+    icon: Crown,
+    gradient: "from-purple-600 via-violet-500 to-indigo-500",
+    glowColor: "rgba(147, 51, 234, 0.5)",
+    instructions: [
+      "Subscribe to alpha channels",
+      "Receive real-time trading signals",
+      "Track whale movements and AI predictions"
+    ],
+    action: {
+      label: "Join Alpha Network",
+      path: "/alpha"
+    }
+  },
+  {
     title: "Discover & Analytics",
     subtitle: "Real-Time Crypto Intelligence",
     description: "Live prices, AI signals, whale tracking, and sentiment analysis. Everything you need for informed predictions.",
@@ -128,6 +179,23 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Your Dashboard",
+    subtitle: "Track Your Performance",
+    description: "Monitor your portfolio, trading history, and earnings. See your predictions, positions, and overall stats in one place.",
+    icon: LineChart,
+    gradient: "from-teal-500 via-cyan-500 to-blue-500",
+    glowColor: "rgba(20, 184, 166, 0.5)",
+    instructions: [
+      "View your trading performance",
+      "Track open positions and P&L",
+      "Monitor your STREAM earnings"
+    ],
+    action: {
+      label: "Go to Dashboard",
+      path: "/dashboard"
+    }
+  },
+  {
     title: "You've Earned 2,500 STREAM!",
     subtitle: "Your Signup Bonus is Ready",
     description: "Welcome to StreamAiX! Start trading, chatting with avatars, and earning more rewards today.",
@@ -140,7 +208,7 @@ const steps: OnboardingStep[] = [
       "Daily login streaks multiply rewards"
     ],
     action: {
-      label: "Start Earning",
+      label: "View Points",
       path: "/points"
     }
   }
