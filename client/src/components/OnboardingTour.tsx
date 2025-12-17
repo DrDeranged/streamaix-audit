@@ -204,7 +204,7 @@ export function OnboardingTour() {
   const [, setLocation] = useLocation();
   const [particles, setParticles] = useState<Array<{ id: number; delay: number; x: number }>>([]);
   const modalRef = useRef<HTMLDivElement>(null);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState(6);
 
   useEffect(() => {
     // Check for ?tour=1 URL parameter for testing
@@ -293,13 +293,13 @@ export function OnboardingTour() {
     setIsMinimized(!isMinimized);
   };
 
-  // Auto-timer: bring tour back after 4 seconds when minimized with countdown
+  // Auto-timer: bring tour back after 6 seconds when minimized with countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
     let countdownInterval: NodeJS.Timeout;
     
     if (isMinimized) {
-      setCountdown(4);
+      setCountdown(6);
       
       countdownInterval = setInterval(() => {
         setCountdown(prev => prev > 0 ? prev - 1 : 0);
@@ -307,7 +307,7 @@ export function OnboardingTour() {
       
       timer = setTimeout(() => {
         setIsMinimized(false);
-      }, 4000);
+      }, 6000);
     }
     
     return () => {
