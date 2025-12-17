@@ -90,7 +90,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Try AI Processor",
-      path: "/create-summary"
+      path: "/#ai-processor"
     }
   },
   {
@@ -142,23 +142,6 @@ const steps: OnboardingStep[] = [
     action: {
       label: "View Following",
       path: "/following"
-    }
-  },
-  {
-    title: "Insights Hub",
-    subtitle: "Exclusive Trading Signals",
-    description: "Access premium alpha from top traders and AI systems. Get early signals on market movements and whale activity.",
-    icon: Crown,
-    gradient: "from-purple-600 via-violet-500 to-indigo-500",
-    glowColor: "rgba(147, 51, 234, 0.5)",
-    instructions: [
-      "Subscribe to alpha channels",
-      "Receive real-time trading signals",
-      "Track whale movements and AI predictions"
-    ],
-    action: {
-      label: "Open Insights",
-      path: "/insights"
     }
   },
   {
