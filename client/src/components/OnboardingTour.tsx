@@ -128,7 +128,7 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Following Feed",
+    title: "Social Feed",
     subtitle: "Connect with the Community",
     description: "Follow traders, share predictions, and engage with the StreamAiX community. See what top performers are trading.",
     icon: MessageCircle,
@@ -140,8 +140,8 @@ const steps: OnboardingStep[] = [
       "Engage with posts and build your network"
     ],
     action: {
-      label: "View Following",
-      path: "/following"
+      label: "View Social Feed",
+      path: "/#social-feed"
     }
   },
   {
@@ -277,6 +277,10 @@ export function OnboardingTour() {
       }, 100);
     } else {
       setLocation(path);
+      // Scroll to top of page for non-section navigation
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
     }
     
     if (currentStep === steps.length - 1) {
