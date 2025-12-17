@@ -1,7 +1,7 @@
-import { usePointsHistory, formatPoints, getSourceIcon, getSourceLabel } from '@/hooks/usePoints';
+import { usePointsHistory, usePointsWebSocket, formatPoints, getSourceIcon, getSourceLabel } from '@/hooks/usePoints';
 import { Navigation } from '@/components/landing/navigation';
 import { motion } from 'framer-motion';
-import { Coins, TrendingUp, TrendingDown, Calendar, Flame, Award, ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react';
+import { Coins, TrendingUp, TrendingDown, Calendar, Flame, Award, ArrowUpRight, ArrowDownRight, Loader2, Wifi, WifiOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground';
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 
 export default function PointsPage() {
   const { data, isLoading } = usePointsHistory(100, 0);
+  const { isConnected } = usePointsWebSocket();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -40,7 +41,18 @@ export default function PointsPage() {
                 <h1 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-emerald-200 to-cyan-200 bg-clip-text text-transparent">
                   STREAM Points
                 </h1>
-                <p className="text-slate-400">Track your earnings and spending</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-slate-400">Track your earnings and spending</p>
+                  <div className={cn(
+                    "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs",
+                    isConnected 
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                      : "bg-slate-700/50 text-slate-500 border border-slate-600/30"
+                  )}>
+                    {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                    {isConnected ? 'Live' : 'Offline'}
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
