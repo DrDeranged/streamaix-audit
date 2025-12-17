@@ -543,18 +543,37 @@ class PointsService {
 
   async ensureSignupBonus(userId: string): Promise<boolean> {
     try {
-      const existing = await db.select()
+      // Check if user has ANY transactions
+      const existingTx = await db.select()
         .from(pointsTransactions)
-        .where(and(
-          eq(pointsTransactions.userId, userId),
-          eq(pointsTransactions.source, 'signup')
-        ))
+        .where(eq(pointsTransactions.userId, userId))
         .limit(1);
 
-      if (existing.length === 0) {
-        console.log(`[Points] Auto-recovery: Awarding missing signup bonus to user ${userId}`);
-        const result = await this.awardSignupBonus(userId);
-        return result !== null;
+      if (existingTx.length === 0) {
+        // User has no transactions - check if they have existing balance
+        const currentBalance = await this.getBalance(userId);
+        
+        if (currentBalance > 0) {
+          // User has balance but no transactions - create a sync transaction
+          console.log(`[Points] Syncing existing balance ${currentBalance} for user ${userId}`);
+          await db.insert(pointsTransactions)
+            .values({
+              userId,
+              amount: currentBalance,
+              type: 'bonus',
+              source: 'signup',
+              balanceBefore: 0,
+              balanceAfter: currentBalance,
+              description: `Welcome bonus! You received ${currentBalance} STREAM points to get started.`,
+              metadata: { isWelcomeBonus: true, synced: true }
+            });
+          return true;
+        } else {
+          // User has no balance and no transactions - award signup bonus
+          console.log(`[Points] Awarding signup bonus to new user ${userId}`);
+          const result = await this.awardSignupBonus(userId);
+          return result !== null;
+        }
       }
       return false;
     } catch (error) {
