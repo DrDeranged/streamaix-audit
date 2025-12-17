@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from './use-toast';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 interface PointsStats {
   balance: number;
@@ -206,4 +207,125 @@ export function getSourceLabel(source: string): string {
     admin_adjustment: 'Adjustment',
   };
   return labels[source] || source;
+}
+
+interface PointsWebSocketUpdate {
+  type: 'points_update' | 'connected';
+  data?: {
+    balance: number;
+    totalEarned: number;
+    totalSpent: number;
+    transaction?: PointsTransaction;
+  };
+  message?: string;
+  timestamp: string;
+}
+
+export function usePointsWebSocket() {
+  const { user, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const wsRef = useRef<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 5;
+
+  const connect = useCallback(() => {
+    if (!isAuthenticated || !user?.id) {
+      return;
+    }
+
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/points?userId=${user.id}`;
+    
+    try {
+      wsRef.current = new WebSocket(wsUrl);
+      
+      wsRef.current.onopen = () => {
+        console.log('💰 [WS] Points WebSocket connected');
+        setIsConnected(true);
+        reconnectAttemptsRef.current = 0;
+      };
+      
+      wsRef.current.onmessage = (event) => {
+        try {
+          const update: PointsWebSocketUpdate = JSON.parse(event.data);
+          
+          if (update.type === 'points_update' && update.data) {
+            console.log('💰 [WS] Received points update:', update.data);
+            
+            // Invalidate queries to refresh data
+            queryClient.invalidateQueries({ queryKey: ['/api/points/balance'] });
+            queryClient.invalidateQueries({ queryKey: ['/api/points/history'] });
+            queryClient.invalidateQueries({ queryKey: ['/api/points/recent'] });
+            
+            // Show toast for the new transaction
+            if (update.data.transaction) {
+              const tx = update.data.transaction;
+              const isPositive = tx.amount > 0;
+              toast({
+                title: `${isPositive ? '+' : ''}${formatPoints(tx.amount)} STREAM`,
+                description: tx.description || getSourceLabel(tx.source),
+                variant: isPositive ? 'default' : 'destructive',
+              });
+            }
+          }
+        } catch (err) {
+          console.error('💰 [WS] Failed to parse message:', err);
+        }
+      };
+      
+      wsRef.current.onclose = () => {
+        console.log('💰 [WS] Points WebSocket disconnected');
+        setIsConnected(false);
+        
+        // Attempt to reconnect with exponential backoff
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+          reconnectAttemptsRef.current++;
+          console.log(`💰 [WS] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
+          reconnectTimeoutRef.current = setTimeout(connect, delay);
+        }
+      };
+      
+      wsRef.current.onerror = (error) => {
+        console.error('💰 [WS] Points WebSocket error:', error);
+      };
+    } catch (error) {
+      console.error('💰 [WS] Failed to create WebSocket:', error);
+    }
+  }, [isAuthenticated, user?.id, queryClient, toast]);
+
+  const disconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    
+    setIsConnected(false);
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      connect();
+    } else {
+      disconnect();
+    }
+    
+    return () => {
+      disconnect();
+    };
+  }, [isAuthenticated, user?.id, connect, disconnect]);
+
+  return { isConnected };
 }
