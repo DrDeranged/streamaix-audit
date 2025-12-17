@@ -56,7 +56,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Meet Avatars",
-      path: "/avatars"
+      path: "/chat"
     }
   },
   {
@@ -128,7 +128,7 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Social Feed",
+    title: "Following Feed",
     subtitle: "Connect with the Community",
     description: "Follow traders, share predictions, and engage with the StreamAiX community. See what top performers are trading.",
     icon: MessageCircle,
@@ -140,12 +140,12 @@ const steps: OnboardingStep[] = [
       "Engage with posts and build your network"
     ],
     action: {
-      label: "Open Social Feed",
-      path: "/social"
+      label: "View Following",
+      path: "/following"
     }
   },
   {
-    title: "Alpha Network",
+    title: "Insights Hub",
     subtitle: "Exclusive Trading Signals",
     description: "Access premium alpha from top traders and AI systems. Get early signals on market movements and whale activity.",
     icon: Crown,
@@ -157,8 +157,8 @@ const steps: OnboardingStep[] = [
       "Track whale movements and AI predictions"
     ],
     action: {
-      label: "Join Alpha Network",
-      path: "/alpha"
+      label: "Open Insights",
+      path: "/insights"
     }
   },
   {
