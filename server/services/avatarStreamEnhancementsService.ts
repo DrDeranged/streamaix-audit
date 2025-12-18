@@ -55,7 +55,7 @@ export function addToSessionMemory(
     // Extract topics mentioned
     const topics = extractTopics(content);
     memory.mentionedTopics.push(...topics);
-    memory.mentionedTopics = [...new Set(memory.mentionedTopics)].slice(-30);
+    memory.mentionedTopics = Array.from(new Set(memory.mentionedTopics)).slice(-30);
   }
 }
 
