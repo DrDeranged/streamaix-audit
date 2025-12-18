@@ -15212,6 +15212,280 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // AVATAR STREAM ENHANCEMENTS - Polls, Trivia, Watch Parties, Sentiment, etc.
+  // =============================================================================
+  
+  const { avatarStreamEnhancements } = await import('./services/avatarStreamEnhancementsService');
+
+  // Get viewer sentiment for a stream
+  app.get("/api/streams/:id/sentiment", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const sentiment = await avatarStreamEnhancements.analyzeViewerSentiment(req.params.id);
+      res.json({ success: true, sentiment });
+    } catch (error: any) {
+      res.json({ success: false, error: error.message });
+    }
+  }));
+
+  // Create a live poll
+  app.post("/api/streams/:id/polls", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { question, options, duration } = req.body;
+    if (!question || !options || options.length < 2) {
+      return res.status(400).json({ success: false, error: 'Question and at least 2 options required' });
+    }
+    
+    const poll = avatarStreamEnhancements.createPoll(
+      req.params.id,
+      question,
+      options,
+      req.user.id,
+      duration || 60
+    );
+    
+    res.json({ success: true, poll: { ...poll, voters: undefined } });
+  }));
+
+  // Vote on a poll
+  app.post("/api/streams/polls/:pollId/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { optionId } = req.body;
+    const success = avatarStreamEnhancements.votePoll(req.params.pollId, optionId, req.user.id);
+    
+    if (success) {
+      const poll = avatarStreamEnhancements.getPollResults(req.params.pollId);
+      res.json({ success: true, poll: poll ? { ...poll, voters: undefined } : null });
+    } else {
+      res.json({ success: false, error: 'Could not vote (already voted or poll closed)' });
+    }
+  }));
+
+  // Get active polls for a stream
+  app.get("/api/streams/:id/polls", asyncHandler(async (req: Request, res: Response) => {
+    const polls = avatarStreamEnhancements.getActivePolls(req.params.id);
+    res.json({ success: true, polls: polls.map(p => ({ ...p, voters: undefined })) });
+  }));
+
+  // Get poll results
+  app.get("/api/streams/polls/:pollId/results", asyncHandler(async (req: Request, res: Response) => {
+    const poll = avatarStreamEnhancements.getPollResults(req.params.pollId);
+    res.json({ success: true, poll: poll ? { ...poll, voters: undefined } : null });
+  }));
+
+  // Start a trivia question
+  app.post("/api/streams/:id/trivia", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { category } = req.body;
+    const trivia = await avatarStreamEnhancements.generateTriviaQuestion(
+      req.params.id,
+      category || 'general'
+    );
+    
+    if (trivia) {
+      res.json({ 
+        success: true, 
+        trivia: { 
+          id: trivia.id, 
+          question: trivia.question, 
+          options: trivia.options, 
+          pointsReward: trivia.pointsReward,
+          timeLimit: trivia.timeLimit,
+          isActive: trivia.isActive,
+        } 
+      });
+    } else {
+      res.json({ success: false, error: 'Could not generate trivia' });
+    }
+  }));
+
+  // Answer a trivia question
+  app.post("/api/streams/trivia/:triviaId/answer", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { answerIndex } = req.body;
+    const result = avatarStreamEnhancements.answerTrivia(req.params.triviaId, req.user.id, answerIndex);
+    
+    if (result) {
+      // Award points if correct
+      if (result.correct && result.points > 0) {
+        await storage.updateUserPoints(req.user.id, result.points);
+      }
+      res.json({ success: true, ...result });
+    } else {
+      res.json({ success: false, error: 'Could not submit answer (already answered or trivia closed)' });
+    }
+  }));
+
+  // Get trivia results
+  app.get("/api/streams/trivia/:triviaId/results", asyncHandler(async (req: Request, res: Response) => {
+    const trivia = avatarStreamEnhancements.getTriviaResults(req.params.triviaId);
+    if (trivia) {
+      res.json({ 
+        success: true, 
+        trivia: {
+          id: trivia.id,
+          question: trivia.question,
+          options: trivia.options,
+          correctIndex: trivia.correctIndex,
+          pointsReward: trivia.pointsReward,
+          isActive: trivia.isActive,
+          totalAnswers: trivia.answers.size,
+        }
+      });
+    } else {
+      res.json({ success: false, error: 'Trivia not found' });
+    }
+  }));
+
+  // Create a watch party
+  app.post("/api/streams/:id/watch-party", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const user = await storage.getUser(req.user.id);
+    const party = avatarStreamEnhancements.createWatchParty(
+      req.params.id,
+      req.user.id,
+      user?.username || 'Anonymous'
+    );
+    
+    res.json({ 
+      success: true, 
+      partyCode: party.partyCode,
+      partyId: party.id,
+    });
+  }));
+
+  // Join a watch party
+  app.post("/api/watch-party/:code/join", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const user = await storage.getUser(req.user.id);
+    const party = avatarStreamEnhancements.joinWatchParty(
+      req.params.code,
+      req.user.id,
+      user?.username || 'Anonymous'
+    );
+    
+    if (party) {
+      res.json({ 
+        success: true, 
+        streamId: party.hostStreamId,
+        partyCode: party.partyCode,
+        memberCount: party.members.size,
+      });
+    } else {
+      res.json({ success: false, error: 'Watch party not found or inactive' });
+    }
+  }));
+
+  // Leave a watch party
+  app.post("/api/watch-party/:code/leave", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    avatarStreamEnhancements.leaveWatchParty(req.params.code, req.user.id);
+    res.json({ success: true });
+  }));
+
+  // Get watch party info
+  app.get("/api/watch-party/:code", asyncHandler(async (req: Request, res: Response) => {
+    const party = avatarStreamEnhancements.getWatchParty(req.params.code);
+    if (party) {
+      res.json({ 
+        success: true, 
+        party: {
+          id: party.id,
+          streamId: party.hostStreamId,
+          partyCode: party.partyCode,
+          memberCount: party.members.size,
+          members: Array.from(party.members.entries()).map(([id, m]) => ({ id, username: m.username })),
+          syncState: party.syncState,
+          isActive: party.isActive,
+        }
+      });
+    } else {
+      res.json({ success: false, error: 'Watch party not found' });
+    }
+  }));
+
+  // Sync watch party playback
+  app.post("/api/watch-party/:code/sync", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { position, isPlaying } = req.body;
+    avatarStreamEnhancements.syncWatchParty(req.params.code, position || 0, isPlaying ?? true);
+    res.json({ success: true });
+  }));
+
+  // Start debate mode between two avatars
+  app.post("/api/streams/:id/debate/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const { avatar1Id, avatar2Id, topic } = req.body;
+    if (!avatar1Id || !avatar2Id || !topic) {
+      return res.status(400).json({ success: false, error: 'Two avatars and a topic required' });
+    }
+    
+    const session = await avatarStreamEnhancements.startDebateMode(
+      req.params.id,
+      avatar1Id,
+      avatar2Id,
+      topic
+    );
+    
+    res.json({ success: true, session: session ? { ...session, exchanges: [] } : null });
+  }));
+
+  // Get next debate response
+  app.post("/api/streams/:id/debate/next", asyncHandler(async (req: Request, res: Response) => {
+    const { previousStatement } = req.body;
+    const response = await avatarStreamEnhancements.generateDebateResponse(req.params.id, previousStatement);
+    res.json({ success: !!response, response });
+  }));
+
+  // End debate mode
+  app.post("/api/streams/:id/debate/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    avatarStreamEnhancements.endDebateMode(req.params.id);
+    res.json({ success: true });
+  }));
+
+  // Generate market prediction from avatar
+  app.post("/api/avatars/:id/predict", asyncHandler(async (req: Request, res: Response) => {
+    const { asset, marketContext } = req.body;
+    if (!asset) {
+      return res.status(400).json({ success: false, error: 'Asset required' });
+    }
+    
+    const prediction = await avatarStreamEnhancements.generateMarketPrediction(
+      req.params.id,
+      asset,
+      marketContext || ''
+    );
+    
+    res.json({ success: !!prediction, prediction });
+  }));
+
+  // =============================================================================
   // GAMIFICATION SYSTEM - Daily Quests, Weekly Missions, XP, Season Pass
   // =============================================================================
 
