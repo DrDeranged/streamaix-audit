@@ -266,10 +266,49 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
   const [showTipPanel, setShowTipPanel] = useState(false);
   const [tipAmount, setTipAmount] = useState('');
   const [tipMessage, setTipMessage] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // ESC key handler to exit immersive mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // If in browser fullscreen, exit that first
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+        onExit();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onExit]);
+
+  // Fullscreen API sync
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleBrowserFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement && containerRef.current) {
+        await containerRef.current.requestFullscreen();
+      } else if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.warn('Fullscreen not supported:', err);
+    }
+  }, []);
 
   const visibleMessages = messages.slice(-8);
 
@@ -652,6 +691,15 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                     data-testid="button-toggle-mute"
                   >
                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </Button>
+
+                  <Button
+                    size="icon"
+                    onClick={toggleBrowserFullscreen}
+                    className="h-12 w-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+                    data-testid="button-toggle-fullscreen"
+                  >
+                    {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
                   </Button>
                 </div>
               </div>

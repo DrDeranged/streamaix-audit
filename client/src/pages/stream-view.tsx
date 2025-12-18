@@ -891,7 +891,15 @@ export default function StreamViewPage() {
         isMuted={isMuted}
         isConnected={isConnected}
         connectionState={videoConnectionState === 'disconnected' ? 'failed' : videoConnectionState}
-        messages={messages as any}
+        messages={messages.map(m => ({
+          id: m.id,
+          username: m.username,
+          content: m.content,
+          isAiAgent: m.isAiAgent,
+          timestamp: m.timestamp,
+          isModerator: (m as any).isModerator,
+          isSubscriber: (m as any).isSubscriber,
+        }))}
         videoRef={viewerVideoRef}
         remoteStream={remoteStream}
         onSendMessage={handleImmersiveSendMessage}
@@ -1004,7 +1012,7 @@ export default function StreamViewPage() {
               >
                 {isTheaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
-              {isLive && !isHost && (
+              {isLive && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1013,7 +1021,7 @@ export default function StreamViewPage() {
                   data-testid="button-immersive-mode"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span className="text-xs hidden md:inline">Immersive</span>
+                  <span className="text-xs hidden md:inline">{isHost ? 'Preview' : 'Immersive'}</span>
                 </Button>
               )}
             </div>
