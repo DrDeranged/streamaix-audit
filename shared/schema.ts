@@ -6795,6 +6795,52 @@ export const pointsConfig = pgTable("points_config", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ==========================================
+// SCHEDULED AVATAR DEBATES
+// ==========================================
+
+export const scheduledDebates = pgTable("scheduled_debates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Debate participants
+  avatar1Id: varchar("avatar1_id").references(() => knowledgeAvatars.id).notNull(),
+  avatar2Id: varchar("avatar2_id").references(() => knowledgeAvatars.id).notNull(),
+  
+  // Debate details
+  topic: text("topic").notNull(),
+  description: text("description"),
+  category: text("category").default("crypto"), // crypto, defi, trading, macro, technology
+  
+  // Scheduling
+  scheduledStartTime: timestamp("scheduled_start_time").notNull(),
+  actualStartTime: timestamp("actual_start_time"),
+  endTime: timestamp("end_time"),
+  
+  // Debate configuration
+  maxRounds: integer("max_rounds").default(6), // Total exchanges (3 per avatar)
+  turnDurationSeconds: integer("turn_duration_seconds").default(45), // Time between turns
+  enableVoice: boolean("enable_voice").default(true), // TTS enabled
+  
+  // Status
+  status: text("status").notNull().default("scheduled"), // scheduled, live, completed, cancelled
+  currentRound: integer("current_round").default(0),
+  currentSpeaker: integer("current_speaker").default(1), // 1 or 2
+  
+  // Associated stream
+  streamId: varchar("stream_id").references(() => liveStreams.id),
+  
+  // Results
+  exchanges: jsonb("exchanges").default([]), // [{speakerId, speakerName, content, audioBase64?, timestamp}]
+  viewerVotes: jsonb("viewer_votes").default({ avatar1: 0, avatar2: 0 }), // Who won votes
+  totalViewers: integer("total_viewers").default(0),
+  
+  // Creator
+  createdBy: varchar("created_by").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema exports
 export const insertPointsTransactionSchema = createInsertSchema(pointsTransactions).omit({
   id: true,
@@ -6821,3 +6867,13 @@ export type DailyLoginStreak = typeof dailyLoginStreak.$inferSelect;
 
 export type InsertPointsConfig = z.infer<typeof insertPointsConfigSchema>;
 export type PointsConfig = typeof pointsConfig.$inferSelect;
+
+// Scheduled Debates schema and types
+export const insertScheduledDebateSchema = createInsertSchema(scheduledDebates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertScheduledDebate = z.infer<typeof insertScheduledDebateSchema>;
+export type ScheduledDebate = typeof scheduledDebates.$inferSelect;
