@@ -45,6 +45,7 @@ const LeagueDetail = React.lazy(() => import("@/pages/league-detail"));
 const StreamView = React.lazy(() => import("@/pages/stream-view"));
 const GoLive = React.lazy(() => import("@/pages/go-live"));
 const Streams = React.lazy(() => import("@/pages/streams"));
+const DebateView = React.lazy(() => import("@/pages/debate-view"));
 const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 const StreamDiscovery = React.lazy(() => import("@/pages/StreamDiscoveryPage"));
@@ -198,6 +199,12 @@ function Router() {
       <Route path="/stream/:id">
         <Suspense fallback={<DashboardSkeleton />}>
           <StreamView />
+        </Suspense>
+      </Route>
+      
+      <Route path="/debate/:id">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <DebateView />
         </Suspense>
       </Route>
       
