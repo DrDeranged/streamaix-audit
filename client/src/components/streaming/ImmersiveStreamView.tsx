@@ -80,6 +80,7 @@ interface ImmersiveStreamViewProps {
   onTip: (amount: number, message?: string) => void;
   onExit: () => void;
   isHost?: boolean;
+  autoFullscreen?: boolean;
   children?: React.ReactNode;
 }
 
@@ -255,6 +256,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
   onTip,
   onExit,
   isHost = false,
+  autoFullscreen = false,
   children,
 }: ImmersiveStreamViewProps) {
   const [showControls, setShowControls] = useState(true);
@@ -297,6 +299,23 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  // Auto-enter fullscreen on mount for hosts (Instagram/FaceTime style)
+  useEffect(() => {
+    if ((autoFullscreen || isHost) && containerRef.current && !document.fullscreenElement) {
+      const enterFullscreen = async () => {
+        try {
+          await containerRef.current?.requestFullscreen();
+          console.log('[ImmersiveStreamView] Auto-entered fullscreen mode');
+        } catch (err) {
+          console.warn('[ImmersiveStreamView] Could not auto-enter fullscreen:', err);
+        }
+      };
+      
+      const timeoutId = setTimeout(enterFullscreen, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoFullscreen, isHost]);
 
   const toggleBrowserFullscreen = useCallback(async () => {
     try {

@@ -466,9 +466,11 @@ export default function StreamViewPage() {
   const [showCommandsHelp, setShowCommandsHelp] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<{ id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[]>([]);
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+  const [hasAutoEnteredImmersive, setHasAutoEnteredImmersive] = useState(false);
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const viewerVideoRef = useRef<HTMLVideoElement>(null);
+  const streamContainerRef = useRef<HTMLDivElement>(null);
   const streamId = params?.id || null;
   const watchTimeRef = useRef<number>(0);
   const lastPointsAwardedRef = useRef<number>(0);
@@ -517,6 +519,20 @@ export default function StreamViewPage() {
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
   const isHost = user?.id === stream?.hostId;
+  const isLiveStream = stream?.status === 'live';
+
+  useEffect(() => {
+    if (isHost && isLiveStream && !hasAutoEnteredImmersive && !stream?.isKnowledgeAvatar) {
+      console.log('[StreamView] Auto-entering immersive fullscreen mode for host');
+      setIsImmersiveMode(true);
+      setHasAutoEnteredImmersive(true);
+      
+      toast({
+        title: "You're Live!",
+        description: "Swipe down or press ESC to exit fullscreen",
+      });
+    }
+  }, [isHost, isLiveStream, hasAutoEnteredImmersive, stream?.isKnowledgeAvatar, toast]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -908,6 +924,7 @@ export default function StreamViewPage() {
         onTip={handleImmersiveTip}
         onExit={() => setIsImmersiveMode(false)}
         isHost={isHost}
+        autoFullscreen={isHost}
       >
         {stream.isKnowledgeAvatar && (
           <AIAvatarStream

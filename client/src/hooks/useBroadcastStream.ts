@@ -50,6 +50,7 @@ export function useBroadcastStream(streamId: string | null): UseBroadcastStreamR
   const peerConnectionsRef = useRef<Map<string, PeerConnection>>(new Map());
   const localStreamRef = useRef<MediaStream | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   const createPeerConnection = useCallback((viewerId: string): RTCPeerConnection => {
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
@@ -195,31 +196,39 @@ export function useBroadcastStream(streamId: string | null): UseBroadcastStreamR
   }, [createPeerConnection, streamId, user?.id]);
 
   const connect = useCallback(() => {
-    if (!streamId || !isAuthenticated || !user) return;
+    if (!streamId || !isAuthenticated || !user) {
+      console.log('[Broadcast] Cannot connect: missing streamId, auth, or user');
+      return;
+    }
+
+    if (!isMountedRef.current) return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    const params = new URLSearchParams({
-      streamId,
-      userId: user.id || 'guest',
-      username: user.username || 'Anonymous',
-      avatar: user.avatar || '',
-      isAiAgent: 'false',
-    });
-    
-    const wsUrl = `${protocol}//${host}/ws/stream?${params.toString()}`;
     
     try {
+      const params = new URLSearchParams({
+        streamId,
+        userId: user.id || 'guest',
+        username: user.username || 'Anonymous',
+        avatar: user.avatar || '',
+        isAiAgent: 'false',
+      });
+      
+      const wsUrl = `${protocol}//${host}/ws/stream?${params.toString()}`;
+      
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (!isMountedRef.current) return;
         console.log('[Broadcast] WebSocket connected');
         setIsConnected(true);
         setError(null);
       };
 
       ws.onmessage = (event) => {
+        if (!isMountedRef.current) return;
         try {
           const data: StreamEvent = JSON.parse(event.data);
           handleSignalingMessage(data);
@@ -229,23 +238,29 @@ export function useBroadcastStream(streamId: string | null): UseBroadcastStreamR
       };
 
       ws.onclose = () => {
+        if (!isMountedRef.current) return;
         console.log('[Broadcast] WebSocket disconnected');
         setIsConnected(false);
         
-        if (isBroadcasting && streamId) {
+        if (isBroadcasting && streamId && isMountedRef.current) {
           reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
+            if (isMountedRef.current) {
+              connect();
+            }
           }, 3000);
         }
       };
 
       ws.onerror = (err) => {
+        if (!isMountedRef.current) return;
         console.error('[Broadcast] WebSocket error:', err);
-        setError('Connection error');
+        setError('Connection error - retrying...');
       };
     } catch (err) {
       console.error('[Broadcast] Error connecting:', err);
-      setError('Failed to connect');
+      if (isMountedRef.current) {
+        setError('Failed to connect');
+      }
     }
   }, [streamId, isAuthenticated, user, handleSignalingMessage, isBroadcasting]);
 
@@ -306,11 +321,14 @@ export function useBroadcastStream(streamId: string | null): UseBroadcastStreamR
   }, [streamId, user?.id, user?.username]);
 
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (streamId && isAuthenticated) {
       connect();
     }
     
     return () => {
+      isMountedRef.current = false;
       stopBroadcast();
     };
   }, [streamId, isAuthenticated]);
