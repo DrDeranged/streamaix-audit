@@ -86,6 +86,7 @@ import {
 } from '@/components/streaming/EnhancedStreamingFeatures';
 import { ConversationPanel } from '@/components/streams/ConversationPanel';
 import { ConversationReplay } from '@/components/streams/ConversationReplay';
+import { ImmersiveStreamView } from '@/components/streaming/ImmersiveStreamView';
 
 interface LiveStream {
   id: string;
@@ -464,6 +465,7 @@ export default function StreamViewPage() {
   const [isFloatingChat, setIsFloatingChat] = useState(false);
   const [showCommandsHelp, setShowCommandsHelp] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<{ id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[]>([]);
+  const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const viewerVideoRef = useRef<HTMLVideoElement>(null);
@@ -858,6 +860,62 @@ export default function StreamViewPage() {
   const isScheduled = stream.status === 'scheduled';
   const displayViewerCount = isConnected ? viewerCount : stream.currentViewers;
 
+  const handleImmersiveSendMessage = useCallback((msg: string) => {
+    if (isConnected) {
+      sendMessage(msg);
+    }
+  }, [isConnected, sendMessage]);
+
+  const handleImmersiveReaction = useCallback((emoji: string) => {
+    if (isConnected) {
+      sendMessage(`[reaction:${emoji}]`);
+    }
+  }, [isConnected, sendMessage]);
+
+  const handleImmersiveTip = useCallback((amount: number, tipMsg?: string) => {
+    if (streamId) {
+      tipMutation.mutate({ amount, message: tipMsg });
+    }
+  }, [streamId, tipMutation]);
+
+  if (isImmersiveMode && stream && isLive) {
+    return (
+      <ImmersiveStreamView
+        streamId={stream.id}
+        title={stream.title}
+        hostUsername={stream.hostUsername || 'Anonymous'}
+        hostAvatar={stream.hostAvatar}
+        viewerCount={displayViewerCount}
+        streamDuration={streamDuration}
+        isLive={isLive}
+        isMuted={isMuted}
+        isConnected={isConnected}
+        connectionState={videoConnectionState === 'disconnected' ? 'failed' : videoConnectionState}
+        messages={messages as any}
+        videoRef={viewerVideoRef}
+        remoteStream={remoteStream}
+        onSendMessage={handleImmersiveSendMessage}
+        onToggleMute={() => setIsMuted(!isMuted)}
+        onReaction={handleImmersiveReaction}
+        onTip={handleImmersiveTip}
+        onExit={() => setIsImmersiveMode(false)}
+        isHost={isHost}
+      >
+        {stream.isKnowledgeAvatar && (
+          <AIAvatarStream
+            hostName={stream.hostUsername || 'AI Host'}
+            hostAvatar={stream.hostAvatar}
+            streamType={stream.streamType}
+            isLive={isLive}
+            currentMessage={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
+            viewerCount={displayViewerCount}
+            onAudioMessage={onAvatarAudio}
+          />
+        )}
+      </ImmersiveStreamView>
+    );
+  }
+
   return (
     <div className={cn(
       "min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset flex flex-col",
@@ -946,6 +1004,18 @@ export default function StreamViewPage() {
               >
                 {isTheaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
+              {isLive && !isHost && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsImmersiveMode(true)}
+                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20 h-8 px-2 gap-1"
+                  data-testid="button-immersive-mode"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-xs hidden md:inline">Immersive</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
