@@ -549,8 +549,13 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [currentAudioIndex, setCurrentAudioIndex] = useState(-1);
+  const [activeTab, setActiveTab] = useState<'transcript' | 'chat' | 'questions'>('transcript');
+  const [chatMessage, setChatMessage] = useState('');
+  const [questionText, setQuestionText] = useState('');
+  const [tipAmount, setTipAmount] = useState(10);
 
   const { data, isLoading, refetch } = useQuery<{
     success: boolean;
@@ -559,6 +564,21 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
   }>({
     queryKey: ['/api/debates', debateId, 'state'],
     refetchInterval: 3000,
+  });
+
+  const { data: chatData, refetch: refetchChat } = useQuery<{ success: boolean; messages: any[] }>({
+    queryKey: ['/api/debates', debateId, 'chat'],
+    refetchInterval: 2000,
+  });
+
+  const { data: questionsData, refetch: refetchQuestions } = useQuery<{ success: boolean; questions: any[] }>({
+    queryKey: ['/api/debates', debateId, 'questions'],
+    refetchInterval: 5000,
+  });
+
+  const { data: engagementData } = useQuery<{ success: boolean; stats: any }>({
+    queryKey: ['/api/debates', debateId, 'engagement'],
+    refetchInterval: 5000,
   });
 
   const voteMutation = useMutation({
@@ -575,9 +595,85 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
     },
   });
 
+  const sendChatMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const res = await apiRequest(`/api/debates/${debateId}/chat`, {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+      });
+      return res;
+    },
+    onSuccess: () => {
+      setChatMessage('');
+      refetchChat();
+    },
+    onError: () => {
+      toast({ title: 'Could not send message', variant: 'destructive' });
+    },
+  });
+
+  const tipMutation = useMutation({
+    mutationFn: async ({ avatarNumber, amount }: { avatarNumber: 1 | 2; amount: number }) => {
+      const res = await apiRequest(`/api/debates/${debateId}/tip`, {
+        method: 'POST',
+        body: JSON.stringify({ avatarNumber, amount }),
+      });
+      return res;
+    },
+    onSuccess: (_, vars) => {
+      toast({ title: `Sent ${vars.amount} STREAM!` });
+    },
+    onError: () => {
+      toast({ title: 'Tip failed', variant: 'destructive' });
+    },
+  });
+
+  const submitQuestionMutation = useMutation({
+    mutationFn: async (question: string) => {
+      const res = await apiRequest(`/api/debates/${debateId}/question`, {
+        method: 'POST',
+        body: JSON.stringify({ question }),
+      });
+      return res;
+    },
+    onSuccess: () => {
+      setQuestionText('');
+      refetchQuestions();
+      toast({ title: 'Question submitted!' });
+    },
+    onError: () => {
+      toast({ title: 'Could not submit question', variant: 'destructive' });
+    },
+  });
+
+  const upvoteQuestionMutation = useMutation({
+    mutationFn: async (questionId: string) => {
+      const res = await apiRequest(`/api/debates/${debateId}/questions/${questionId}/upvote`, {
+        method: 'POST',
+      });
+      return res;
+    },
+    onSuccess: () => {
+      refetchQuestions();
+    },
+  });
+
+  const reactMutation = useMutation({
+    mutationFn: async (reaction: string) => {
+      const res = await apiRequest(`/api/debates/${debateId}/react`, {
+        method: 'POST',
+        body: JSON.stringify({ reaction }),
+      });
+      return res;
+    },
+  });
+
   const debate = data?.debate;
   const isLive = data?.isLive;
   const exchanges = debate?.exchanges || [];
+  const chatMessages = chatData?.messages || [];
+  const questions = questionsData?.questions || [];
+  const stats = engagementData?.stats;
 
   useEffect(() => {
     if (exchanges.length > currentAudioIndex + 1 && !isMuted) {
@@ -589,6 +685,12 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
       }
     }
   }, [exchanges.length, currentAudioIndex, isMuted]);
+
+  useEffect(() => {
+    if (chatContainerRef.current && activeTab === 'chat') {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages.length, activeTab]);
 
   if (isLoading) {
     return (
@@ -605,6 +707,15 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
       </div>
     );
   }
+
+  const reactionEmojis = [
+    { key: 'fire', emoji: '🔥' },
+    { key: 'idea', emoji: '💡' },
+    { key: 'clap', emoji: '👏' },
+    { key: 'think', emoji: '🤔' },
+    { key: 'love', emoji: '❤️' },
+    { key: 'wow', emoji: '😮' },
+  ];
 
   return (
     <div className="space-y-4">
@@ -628,6 +739,12 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
               <span className="text-xs text-slate-400">
                 Round {debate.currentRound || exchanges.length}/{debate.maxRounds || 6}
               </span>
+              {stats && (
+                <span className="text-xs text-emerald-400 flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {stats.viewerCount || 0}
+                </span>
+              )}
             </div>
           </div>
           
@@ -650,18 +767,31 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
               {debate.avatar1?.name?.[0] || 'A'}
             </div>
             <p className="text-sm text-white mt-2 font-medium">{debate.avatar1?.name || 'Avatar 1'}</p>
-            {isAuthenticated && isLive && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-2 text-cyan-400 border-cyan-500/30"
-                onClick={() => voteMutation.mutate(1)}
-                disabled={voteMutation.isPending}
-              >
-                <ThumbsUp className="w-3 h-3 mr-1" />
-                {debate.viewerVotes?.avatar1 || 0}
-              </Button>
-            )}
+            <div className="flex gap-1 mt-2">
+              {isAuthenticated && isLive && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-cyan-400 border-cyan-500/30 h-7 px-2"
+                    onClick={() => voteMutation.mutate(1)}
+                    disabled={voteMutation.isPending}
+                  >
+                    <ThumbsUp className="w-3 h-3 mr-1" />
+                    {debate.viewerVotes?.avatar1 || 0}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-amber-400 border-amber-500/30 h-7 px-2"
+                    onClick={() => tipMutation.mutate({ avatarNumber: 1, amount: tipAmount })}
+                    disabled={tipMutation.isPending}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col items-center">
@@ -677,18 +807,31 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
               {debate.avatar2?.name?.[0] || 'B'}
             </div>
             <p className="text-sm text-white mt-2 font-medium">{debate.avatar2?.name || 'Avatar 2'}</p>
-            {isAuthenticated && isLive && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-2 text-pink-400 border-pink-500/30"
-                onClick={() => voteMutation.mutate(2)}
-                disabled={voteMutation.isPending}
-              >
-                <ThumbsUp className="w-3 h-3 mr-1" />
-                {debate.viewerVotes?.avatar2 || 0}
-              </Button>
-            )}
+            <div className="flex gap-1 mt-2">
+              {isAuthenticated && isLive && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-pink-400 border-pink-500/30 h-7 px-2"
+                    onClick={() => voteMutation.mutate(2)}
+                    disabled={voteMutation.isPending}
+                  >
+                    <ThumbsUp className="w-3 h-3 mr-1" />
+                    {debate.viewerVotes?.avatar2 || 0}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-amber-400 border-amber-500/30 h-7 px-2"
+                    onClick={() => tipMutation.mutate({ avatarNumber: 2, amount: tipAmount })}
+                    disabled={tipMutation.isPending}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -698,55 +841,197 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
             className="h-1.5 bg-slate-700" 
           />
         )}
+
+        {isLive && isAuthenticated && (
+          <div className="flex items-center justify-center gap-2 mt-4">
+            {reactionEmojis.map(({ key, emoji }) => (
+              <Button
+                key={key}
+                variant="ghost"
+                size="sm"
+                className="text-lg h-9 w-9 p-0 hover:scale-125 transition-transform"
+                onClick={() => reactMutation.mutate(key)}
+              >
+                {emoji}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium text-slate-400 flex items-center gap-2">
-          <MessageSquare className="w-4 h-4" />
-          Debate Transcript
-        </h3>
-        
-        <div className="space-y-3 max-h-[400px] overflow-y-auto">
-          <AnimatePresence>
-            {exchanges.map((exchange: DebateExchange, index: number) => {
-              const isAvatar1 = index % 2 === 0;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    "p-3 rounded-lg",
-                    isAvatar1 
-                      ? "bg-cyan-500/10 border border-cyan-500/20 ml-0 mr-8" 
-                      : "bg-pink-500/10 border border-pink-500/20 ml-8 mr-0"
-                  )}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={cn(
-                      "text-xs font-medium",
-                      isAvatar1 ? "text-cyan-400" : "text-pink-400"
-                    )}>
-                      {exchange.speakerName}
-                    </span>
-                    {exchange.hasAudio && (
-                      <Mic className="w-3 h-3 text-emerald-400" />
+      <div className="flex gap-2 border-b border-slate-700 pb-2">
+        <Button
+          variant={activeTab === 'transcript' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('transcript')}
+          className={activeTab === 'transcript' ? 'bg-purple-600' : ''}
+        >
+          <MessageSquare className="w-3 h-3 mr-1" />
+          Transcript
+        </Button>
+        <Button
+          variant={activeTab === 'chat' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('chat')}
+          className={activeTab === 'chat' ? 'bg-purple-600' : ''}
+        >
+          <MessageSquare className="w-3 h-3 mr-1" />
+          Chat {chatMessages.length > 0 && `(${chatMessages.length})`}
+        </Button>
+        <Button
+          variant={activeTab === 'questions' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('questions')}
+          className={activeTab === 'questions' ? 'bg-purple-600' : ''}
+        >
+          Q&A {questions.length > 0 && `(${questions.length})`}
+        </Button>
+      </div>
+
+      {activeTab === 'transcript' && (
+        <div className="space-y-3">
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            <AnimatePresence>
+              {exchanges.map((exchange: DebateExchange, index: number) => {
+                const isAvatar1 = index % 2 === 0;
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                      "p-3 rounded-lg",
+                      isAvatar1 
+                        ? "bg-cyan-500/10 border border-cyan-500/20 ml-0 mr-8" 
+                        : "bg-pink-500/10 border border-pink-500/20 ml-8 mr-0"
                     )}
-                  </div>
-                  <p className="text-sm text-slate-200">{exchange.content}</p>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={cn(
+                        "text-xs font-medium",
+                        isAvatar1 ? "text-cyan-400" : "text-pink-400"
+                      )}>
+                        {exchange.speakerName}
+                      </span>
+                      {exchange.hasAudio && (
+                        <Mic className="w-3 h-3 text-emerald-400" />
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-200">{exchange.content}</p>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+            
+            {isLive && exchanges.length === 0 && (
+              <div className="text-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-400 mx-auto mb-2" />
+                <p className="text-sm text-slate-400">Waiting for first response...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'chat' && (
+        <div className="space-y-3">
+          <div 
+            ref={chatContainerRef}
+            className="space-y-2 max-h-[300px] overflow-y-auto bg-slate-900/50 rounded-lg p-3"
+          >
+            {chatMessages.length === 0 ? (
+              <p className="text-center text-slate-500 text-sm py-4">No messages yet. Be the first!</p>
+            ) : (
+              chatMessages.map((msg: any) => (
+                <div key={msg.id} className="text-sm">
+                  <span className="text-purple-400 font-medium">{msg.username}: </span>
+                  <span className="text-slate-300">{msg.message}</span>
+                </div>
+              ))
+            )}
+          </div>
           
-          {isLive && exchanges.length === 0 && (
-            <div className="text-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-purple-400 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">Waiting for first response...</p>
+          {isAuthenticated && isLive && (
+            <div className="flex gap-2">
+              <Input
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="bg-slate-800 border-slate-700 flex-1"
+                maxLength={500}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && chatMessage.trim()) {
+                    sendChatMutation.mutate(chatMessage.trim());
+                  }
+                }}
+              />
+              <Button
+                onClick={() => chatMessage.trim() && sendChatMutation.mutate(chatMessage.trim())}
+                disabled={!chatMessage.trim() || sendChatMutation.isPending}
+                className="bg-purple-600"
+              >
+                Send
+              </Button>
             </div>
           )}
         </div>
-      </div>
+      )}
+
+      {activeTab === 'questions' && (
+        <div className="space-y-3">
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {questions.length === 0 ? (
+              <p className="text-center text-slate-500 text-sm py-4">No questions yet. Submit one!</p>
+            ) : (
+              questions.map((q: any) => (
+                <div key={q.id} className="bg-slate-800/50 rounded-lg p-3 flex items-start gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-col h-auto py-1 px-2"
+                    onClick={() => upvoteQuestionMutation.mutate(q.id)}
+                    disabled={upvoteQuestionMutation.isPending}
+                  >
+                    <ChevronRight className="w-4 h-4 rotate-[-90deg]" />
+                    <span className="text-xs text-emerald-400">{q.upvotes}</span>
+                  </Button>
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-200">{q.question}</p>
+                    <p className="text-xs text-slate-500 mt-1">by {q.username}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          {isAuthenticated && isLive && (
+            <div className="flex gap-2">
+              <Input
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+                placeholder="Ask a question for the avatars..."
+                className="bg-slate-800 border-slate-700 flex-1"
+                maxLength={300}
+              />
+              <Button
+                onClick={() => questionText.trim() && submitQuestionMutation.mutate(questionText.trim())}
+                disabled={!questionText.trim() || submitQuestionMutation.isPending}
+                className="bg-purple-600"
+              >
+                Ask
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {stats && (
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-700/50">
+          <span>{stats.messageCount || 0} messages</span>
+          <span>{stats.totalTips || 0} STREAM tipped</span>
+          <span>{stats.questionCount || 0} questions</span>
+        </div>
+      )}
     </div>
   );
 });

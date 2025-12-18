@@ -485,4 +485,190 @@ Guidelines:
     activeDebates.clear();
     debateSubscribers.clear();
   }
+
+  // In-memory engagement storage (persisted to DB periodically)
+  private static debateEngagement = new Map<string, {
+    chatMessages: any[];
+    tips: any[];
+    viewerQuestions: any[];
+    reactions: Record<string, number>;
+    viewerIds: Set<string>;
+  }>();
+
+  private static getOrCreateEngagement(debateId: string) {
+    if (!this.debateEngagement.has(debateId)) {
+      this.debateEngagement.set(debateId, {
+        chatMessages: [],
+        tips: [],
+        viewerQuestions: [],
+        reactions: { fire: 0, idea: 0, clap: 0, think: 0, love: 0, wow: 0 },
+        viewerIds: new Set(),
+      });
+    }
+    return this.debateEngagement.get(debateId)!;
+  }
+
+  static async addChatMessage(debateId: string, message: {
+    userId: number;
+    username: string;
+    message: string;
+    timestamp: number;
+  }) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    const chatMessage = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      ...message,
+    };
+    engagement.chatMessages.push(chatMessage);
+    
+    // Keep only last 200 messages
+    if (engagement.chatMessages.length > 200) {
+      engagement.chatMessages = engagement.chatMessages.slice(-200);
+    }
+
+    this.broadcastDebateEvent(debateId, {
+      type: 'chat-message',
+      debateId,
+      message: chatMessage,
+    });
+
+    return chatMessage;
+  }
+
+  static async getChatMessages(debateId: string) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    return engagement.chatMessages.slice(-100);
+  }
+
+  static async tipAvatar(debateId: string, tip: {
+    userId: number;
+    username: string;
+    avatarNumber: 1 | 2;
+    amount: number;
+    timestamp: number;
+  }) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    const tipRecord = {
+      id: `tip_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      ...tip,
+    };
+    engagement.tips.push(tipRecord);
+
+    this.broadcastDebateEvent(debateId, {
+      type: 'tip',
+      debateId,
+      tip: tipRecord,
+    });
+
+    return tipRecord;
+  }
+
+  static async getTips(debateId: string) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    return {
+      tips: engagement.tips,
+      totalAvatar1: engagement.tips.filter(t => t.avatarNumber === 1).reduce((sum, t) => sum + t.amount, 0),
+      totalAvatar2: engagement.tips.filter(t => t.avatarNumber === 2).reduce((sum, t) => sum + t.amount, 0),
+      topTippers: this.getTopTippers(engagement.tips),
+    };
+  }
+
+  private static getTopTippers(tips: any[]) {
+    const tipsByUser = new Map<string, { username: string; total: number }>();
+    tips.forEach(tip => {
+      const key = tip.userId.toString();
+      if (!tipsByUser.has(key)) {
+        tipsByUser.set(key, { username: tip.username, total: 0 });
+      }
+      tipsByUser.get(key)!.total += tip.amount;
+    });
+    return Array.from(tipsByUser.values())
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+  }
+
+  static async addViewerQuestion(debateId: string, question: {
+    userId: number;
+    username: string;
+    question: string;
+    timestamp: number;
+    upvotes: number;
+  }) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    const viewerQuestion = {
+      id: `q_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      ...question,
+      upvotedBy: new Set<string>(),
+    };
+    engagement.viewerQuestions.push(viewerQuestion);
+
+    this.broadcastDebateEvent(debateId, {
+      type: 'new-question',
+      debateId,
+      question: { ...viewerQuestion, upvotedBy: undefined },
+    });
+
+    return { ...viewerQuestion, upvotedBy: undefined };
+  }
+
+  static async getViewerQuestions(debateId: string) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    return engagement.viewerQuestions
+      .map(q => ({ ...q, upvotedBy: undefined }))
+      .sort((a, b) => b.upvotes - a.upvotes);
+  }
+
+  static async upvoteQuestion(debateId: string, questionId: string, userId: number) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    const question = engagement.viewerQuestions.find(q => q.id === questionId);
+    if (!question) return { success: false };
+
+    const userKey = userId.toString();
+    if (question.upvotedBy.has(userKey)) {
+      return { success: false, message: 'Already upvoted' };
+    }
+
+    question.upvotedBy.add(userKey);
+    question.upvotes++;
+
+    this.broadcastDebateEvent(debateId, {
+      type: 'question-upvote',
+      debateId,
+      questionId,
+      upvotes: question.upvotes,
+    });
+
+    return { success: true, upvotes: question.upvotes };
+  }
+
+  static async addReaction(debateId: string, reaction: string, userId: number) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    engagement.reactions[reaction] = (engagement.reactions[reaction] || 0) + 1;
+
+    this.broadcastDebateEvent(debateId, {
+      type: 'reaction',
+      debateId,
+      reaction,
+      count: engagement.reactions[reaction],
+      userId,
+    });
+
+    return engagement.reactions;
+  }
+
+  static async getEngagementStats(debateId: string) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    return {
+      viewerCount: engagement.viewerIds.size,
+      messageCount: engagement.chatMessages.length,
+      totalTips: engagement.tips.reduce((sum, t) => sum + t.amount, 0),
+      questionCount: engagement.viewerQuestions.length,
+      reactions: engagement.reactions,
+    };
+  }
+
+  static trackViewer(debateId: string, viewerId: string) {
+    const engagement = this.getOrCreateEngagement(debateId);
+    engagement.viewerIds.add(viewerId);
+  }
 }

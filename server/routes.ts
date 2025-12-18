@@ -15682,6 +15682,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // Send a chat message in a debate
+  app.post("/api/debates/:id/chat", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { message } = req.body;
+    if (!message || typeof message !== 'string' || message.length > 500) {
+      return res.status(400).json({ success: false, error: 'Invalid message' });
+    }
+
+    const chatMessage = await DebateManagerService.addChatMessage(req.params.id, {
+      userId: req.user.id,
+      username: req.user.username || `User${req.user.id}`,
+      message: message.trim(),
+      timestamp: Date.now(),
+    });
+
+    res.json({ success: true, message: chatMessage });
+  }));
+
+  // Get chat messages for a debate
+  app.get("/api/debates/:id/chat", asyncHandler(async (req: Request, res: Response) => {
+    const messages = await DebateManagerService.getChatMessages(req.params.id);
+    res.json({ success: true, messages });
+  }));
+
+  // Tip an avatar during a debate
+  app.post("/api/debates/:id/tip", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { avatarNumber, amount } = req.body;
+    if (avatarNumber !== 1 && avatarNumber !== 2) {
+      return res.status(400).json({ success: false, error: 'avatarNumber must be 1 or 2' });
+    }
+    if (!amount || typeof amount !== 'number' || amount < 1 || amount > 10000) {
+      return res.status(400).json({ success: false, error: 'Invalid tip amount (1-10000)' });
+    }
+
+    const tip = await DebateManagerService.tipAvatar(req.params.id, {
+      userId: req.user.id,
+      username: req.user.username || `User${req.user.id}`,
+      avatarNumber,
+      amount,
+      timestamp: Date.now(),
+    });
+
+    if (!tip) {
+      return res.status(400).json({ success: false, error: 'Could not process tip' });
+    }
+
+    res.json({ success: true, tip });
+  }));
+
+  // Get tips for a debate
+  app.get("/api/debates/:id/tips", asyncHandler(async (req: Request, res: Response) => {
+    const tips = await DebateManagerService.getTips(req.params.id);
+    res.json({ success: true, tips });
+  }));
+
+  // Submit a question for avatars
+  app.post("/api/debates/:id/question", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { question } = req.body;
+    if (!question || typeof question !== 'string' || question.length > 300) {
+      return res.status(400).json({ success: false, error: 'Invalid question (max 300 chars)' });
+    }
+
+    const viewerQuestion = await DebateManagerService.addViewerQuestion(req.params.id, {
+      userId: req.user.id,
+      username: req.user.username || `User${req.user.id}`,
+      question: question.trim(),
+      timestamp: Date.now(),
+      upvotes: 0,
+    });
+
+    res.json({ success: true, question: viewerQuestion });
+  }));
+
+  // Get viewer questions for a debate
+  app.get("/api/debates/:id/questions", asyncHandler(async (req: Request, res: Response) => {
+    const questions = await DebateManagerService.getViewerQuestions(req.params.id);
+    res.json({ success: true, questions });
+  }));
+
+  // Upvote a viewer question
+  app.post("/api/debates/:id/questions/:questionId/upvote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const result = await DebateManagerService.upvoteQuestion(req.params.id, req.params.questionId, req.user.id);
+    res.json({ success: true, ...result });
+  }));
+
+  // Add a reaction to the debate
+  app.post("/api/debates/:id/react", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { reaction } = req.body;
+    const validReactions = ['fire', 'idea', 'clap', 'think', 'love', 'wow'];
+    if (!validReactions.includes(reaction)) {
+      return res.status(400).json({ success: false, error: 'Invalid reaction type' });
+    }
+
+    const reactions = await DebateManagerService.addReaction(req.params.id, reaction, req.user.id);
+    res.json({ success: true, reactions });
+  }));
+
+  // Get engagement stats for a debate
+  app.get("/api/debates/:id/engagement", asyncHandler(async (req: Request, res: Response) => {
+    const stats = await DebateManagerService.getEngagementStats(req.params.id);
+    res.json({ success: true, stats });
+  }));
+
   // =============================================================================
   // GAMIFICATION SYSTEM - Daily Quests, Weekly Missions, XP, Season Pass
   // =============================================================================
