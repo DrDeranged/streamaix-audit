@@ -15486,6 +15486,203 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // SCHEDULED AVATAR DEBATES - Automatic Turn-Taking with Voice Synthesis
+  // =============================================================================
+
+  const { DebateManagerService } = await import('./services/debateManagerService');
+  
+  // Initialize the debate manager
+  DebateManagerService.initialize();
+
+  // Schedule a new debate between two avatars
+  app.post("/api/debates/schedule", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { 
+      avatar1Id, 
+      avatar2Id, 
+      topic, 
+      description,
+      category,
+      scheduledStartTime,
+      maxRounds,
+      turnDurationSeconds,
+      enableVoice 
+    } = req.body;
+
+    if (!avatar1Id || !avatar2Id || !topic || !scheduledStartTime) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'avatar1Id, avatar2Id, topic, and scheduledStartTime are required' 
+      });
+    }
+
+    try {
+      const debate = await DebateManagerService.scheduleDebate({
+        avatar1Id,
+        avatar2Id,
+        topic,
+        description,
+        category,
+        scheduledStartTime: new Date(scheduledStartTime),
+        maxRounds,
+        turnDurationSeconds,
+        enableVoice,
+        createdBy: req.user.id,
+      });
+
+      res.json({ success: true, debate });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }));
+
+  // Get upcoming and live debates
+  app.get("/api/debates/upcoming", asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const debates = await DebateManagerService.getUpcomingDebates(limit);
+    
+    // Enrich with avatar names
+    const enrichedDebates = await Promise.all(debates.map(async (debate) => {
+      const [avatar1] = await db.select({ name: knowledgeAvatars.name, imageUrl: knowledgeAvatars.imageUrl })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, debate.avatar1Id))
+        .limit(1);
+      const [avatar2] = await db.select({ name: knowledgeAvatars.name, imageUrl: knowledgeAvatars.imageUrl })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, debate.avatar2Id))
+        .limit(1);
+      
+      return {
+        ...debate,
+        avatar1Name: avatar1?.name,
+        avatar1Image: avatar1?.imageUrl,
+        avatar2Name: avatar2?.name,
+        avatar2Image: avatar2?.imageUrl,
+      };
+    }));
+
+    res.json({ success: true, debates: enrichedDebates });
+  }));
+
+  // Get live debates
+  app.get("/api/debates/live", asyncHandler(async (req: Request, res: Response) => {
+    const debates = await DebateManagerService.getLiveDebates();
+    res.json({ success: true, debates });
+  }));
+
+  // Get recent completed debates
+  app.get("/api/debates/recent", asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const debates = await DebateManagerService.getRecentDebates(limit);
+    res.json({ success: true, debates });
+  }));
+
+  // Get a specific debate by ID
+  app.get("/api/debates/:id", asyncHandler(async (req: Request, res: Response) => {
+    const debate = await DebateManagerService.getDebateById(req.params.id);
+    if (!debate) {
+      return res.status(404).json({ success: false, error: 'Debate not found' });
+    }
+
+    // Enrich with avatar info
+    const [avatar1] = await db.select()
+      .from(knowledgeAvatars)
+      .where(eq(knowledgeAvatars.id, debate.avatar1Id))
+      .limit(1);
+    const [avatar2] = await db.select()
+      .from(knowledgeAvatars)
+      .where(eq(knowledgeAvatars.id, debate.avatar2Id))
+      .limit(1);
+
+    res.json({ 
+      success: true, 
+      debate: {
+        ...debate,
+        avatar1: avatar1 ? { id: avatar1.id, name: avatar1.name, imageUrl: avatar1.imageUrl } : null,
+        avatar2: avatar2 ? { id: avatar2.id, name: avatar2.name, imageUrl: avatar2.imageUrl } : null,
+      }
+    });
+  }));
+
+  // Manually start a scheduled debate (admin/creator only)
+  app.post("/api/debates/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const activeDebate = await DebateManagerService.startDebate(req.params.id);
+    if (!activeDebate) {
+      return res.status(400).json({ success: false, error: 'Could not start debate' });
+    }
+
+    res.json({ success: true, debate: { ...activeDebate, turnTimer: undefined } });
+  }));
+
+  // End a debate early
+  app.post("/api/debates/:id/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    await DebateManagerService.endDebate(req.params.id, 'cancelled');
+    res.json({ success: true });
+  }));
+
+  // Vote for which avatar is winning
+  app.post("/api/debates/:id/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const { avatarNumber } = req.body;
+    if (avatarNumber !== 1 && avatarNumber !== 2) {
+      return res.status(400).json({ success: false, error: 'avatarNumber must be 1 or 2' });
+    }
+
+    const votes = await DebateManagerService.voteForAvatar(req.params.id, avatarNumber, req.user.id);
+    res.json({ success: true, votes });
+  }));
+
+  // Get active debate state (for real-time updates)
+  app.get("/api/debates/:id/state", asyncHandler(async (req: Request, res: Response) => {
+    const activeDebate = DebateManagerService.getActiveDebate(req.params.id);
+    if (!activeDebate) {
+      const storedDebate = await DebateManagerService.getDebateById(req.params.id);
+      if (storedDebate) {
+        return res.json({ 
+          success: true, 
+          isLive: false, 
+          debate: storedDebate 
+        });
+      }
+      return res.status(404).json({ success: false, error: 'Debate not found' });
+    }
+
+    res.json({ 
+      success: true, 
+      isLive: true,
+      debate: {
+        debateId: activeDebate.debateId,
+        topic: activeDebate.topic,
+        avatar1: activeDebate.avatar1,
+        avatar2: activeDebate.avatar2,
+        currentRound: activeDebate.currentRound,
+        maxRounds: activeDebate.maxRounds,
+        currentSpeaker: activeDebate.currentSpeaker,
+        exchanges: activeDebate.exchanges.map(e => ({
+          speakerName: e.speakerName,
+          content: e.content,
+          timestamp: e.timestamp,
+          hasAudio: !!e.audioBase64,
+        })),
+      }
+    });
+  }));
+
+  // =============================================================================
   // GAMIFICATION SYSTEM - Daily Quests, Weekly Missions, XP, Season Pass
   // =============================================================================
 
