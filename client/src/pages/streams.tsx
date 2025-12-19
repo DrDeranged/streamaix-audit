@@ -270,9 +270,8 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
 
   return (
     <Link href={`/stream/${stream.id}`}>
-      <div className="group relative cursor-pointer overflow-hidden rounded-2xl aspect-[16/9] min-w-[320px] sm:min-w-[400px] lg:min-w-[500px] transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-slate-700/50 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+      <div className="group relative cursor-pointer overflow-hidden rounded-2xl aspect-[16/9] min-w-[280px] sm:min-w-[400px] lg:min-w-[500px] transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-slate-700/50 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]">
         <div className="absolute inset-0 bg-slate-900">
-          {/* Subtle grid pattern */}
           <div className="absolute inset-0 opacity-5" style={{
             backgroundImage: `linear-gradient(rgba(6,182,212,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.3) 1px, transparent 1px)`,
             backgroundSize: '20px 20px'
@@ -288,95 +287,69 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
           </div>
         </div>
         
-        {/* Watch Now button - visible on mobile */}
-        <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-10">
-          <Button size="sm" className="bg-white/90 hover:bg-white text-slate-900 font-semibold rounded-full px-3 sm:px-4 py-1.5 sm:py-2 gap-1.5 shadow-lg text-xs sm:text-sm">
-            <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
-            Watch Now
-          </Button>
-        </div>
-        
-        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex items-center gap-1.5 sm:gap-2 flex-wrap max-w-[60%]">
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-red-500 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-lg shadow-red-500/30">
-            <span className="relative flex h-2 w-2">
+        {/* Top badges row */}
+        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex items-center gap-1 sm:gap-2 z-10">
+          <div className="flex items-center gap-1 bg-red-500 rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1.5 shadow-lg shadow-red-500/30">
+            <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-white"></span>
             </span>
-            <span className="text-[10px] sm:text-xs font-bold text-white uppercase tracking-wider">Live Now</span>
-          </div>
-          {stream.isAiHost && (
-            <Badge className="bg-cyan-500/90 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 hidden sm:flex">
-              <Bot className="w-3 h-3 mr-1" />
-              AI
-            </Badge>
-          )}
-        </div>
-        
-        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-900/80 backdrop-blur-sm rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
-            <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400" />
-            <span className="text-xs sm:text-sm font-semibold text-white">{formatViewers(stream.currentViewers)}</span>
-            <span className="text-[10px] text-slate-400 hidden sm:inline">watching</span>
+            <span className="text-[8px] sm:text-xs font-bold text-white uppercase">Live</span>
           </div>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5">
-          <div className="flex items-end gap-3 sm:gap-4">
-            <div className="relative flex-shrink-0">
-              <div className={cn(
-                "w-10 h-10 sm:w-14 sm:h-14 rounded-full ring-2 sm:ring-3 overflow-hidden ring-white/30 flex items-center justify-center",
-                showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
-              )}>
-                {showImage && (
-                  <img 
-                    src={stream.hostAvatar} 
-                    alt="" 
-                    loading="lazy" 
-                    className="w-full h-full rounded-full object-cover" 
-                    onError={() => setImageError(true)}
-                  />
-                )}
-                {showBrandIcon && BrandIcon && (
-                  <BrandIcon className={cn("w-4 h-4 sm:w-6 sm:h-6", brandFallback.color)} />
-                )}
-                {showDiceBear && (
-                  <img 
-                    src={getDiceBearAvatar(stream.hostUsername)} 
-                    alt="" 
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-slate-950" />
-            </div>
-            <div className="flex-1 min-w-0 overflow-hidden">
-              <h3 className="text-base sm:text-xl font-bold text-white line-clamp-2 group-hover:text-purple-200 transition-colors leading-tight break-words">
-                {stream.title}
-              </h3>
-              <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 flex-wrap overflow-hidden">
-                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-                  <span className="text-xs sm:text-sm text-slate-300 font-medium truncate max-w-[100px] sm:max-w-none">{stream.hostUsername || 'Anonymous'}</span>
-                  {stream.isKnowledgeAvatar && (
-                    <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 flex-shrink-0" />
+        {/* Viewer count - top right */}
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1 bg-slate-900/80 backdrop-blur-sm rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1.5 z-10">
+          <Users className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-cyan-400" />
+          <span className="text-[10px] sm:text-sm font-semibold text-white">{formatViewers(stream.currentViewers)}</span>
+        </div>
+        
+        {/* Bottom content */}
+        <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-5 z-10">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4">
+            {/* Avatar and info */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className="relative flex-shrink-0">
+                <div className={cn(
+                  "w-8 h-8 sm:w-14 sm:h-14 rounded-full ring-2 overflow-hidden ring-white/30 flex items-center justify-center",
+                  showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
+                )}>
+                  {showImage && (
+                    <img 
+                      src={stream.hostAvatar} 
+                      alt="" 
+                      loading="lazy" 
+                      className="w-full h-full rounded-full object-cover" 
+                      onError={() => setImageError(true)}
+                    />
                   )}
-                  {stream.hostHandle && (
-                    <span className="text-[10px] sm:text-xs text-slate-500 truncate max-w-[60px] sm:max-w-none hidden sm:inline">@{stream.hostHandle}</span>
+                  {showBrandIcon && BrandIcon && (
+                    <BrandIcon className={cn("w-3 h-3 sm:w-6 sm:h-6", brandFallback.color)} />
+                  )}
+                  {showDiceBear && (
+                    <img 
+                      src={getDiceBearAvatar(stream.hostUsername)} 
+                      alt="" 
+                      className="w-full h-full rounded-full object-cover"
+                    />
                   )}
                 </div>
-                {stream.category && (
-                  <Badge variant="outline" className="text-[10px] sm:text-xs text-slate-400 border-slate-600 capitalize px-1.5 sm:px-2 py-0 sm:py-0.5 flex-shrink-0">
-                    {stream.category}
-                  </Badge>
-                )}
-                <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1 flex-shrink-0 hidden sm:flex">
-                  <Clock className="w-3 h-3" />
-                  {formatLiveTime(stream.actualStart)}
-                </span>
               </div>
-              {stream.hostExpertise && (
-                <p className="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-1.5 line-clamp-1 hidden sm:block">{stream.hostExpertise}</p>
-              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm sm:text-xl font-bold text-white line-clamp-1 sm:line-clamp-2 group-hover:text-purple-200 transition-colors leading-tight">
+                  {stream.title}
+                </h3>
+                <p className="text-[10px] sm:text-sm text-slate-300 font-medium truncate">
+                  {stream.hostUsername || 'Anonymous'}
+                </p>
+              </div>
             </div>
+            
+            {/* Watch Now button */}
+            <Button size="sm" className="bg-white/90 hover:bg-white text-slate-900 font-semibold rounded-full px-3 sm:px-4 py-1.5 gap-1 shadow-lg text-xs sm:text-sm flex-shrink-0 w-full sm:w-auto">
+              <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+              Watch Now
+            </Button>
           </div>
         </div>
       </div>
