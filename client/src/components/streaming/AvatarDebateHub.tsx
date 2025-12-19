@@ -761,10 +761,18 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
         <div className="flex items-center justify-center gap-6 mb-4">
           <div className="text-center">
             <div className={cn(
-              "w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-2xl font-bold transition-all",
+              "w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-2xl font-bold transition-all",
               debate.currentSpeaker === 1 && isLive && "ring-4 ring-cyan-500/50 scale-110"
             )}>
-              {debate.avatar1?.name?.[0] || 'A'}
+              {debate.avatar1?.imageUrl ? (
+                <img 
+                  src={debate.avatar1.imageUrl} 
+                  alt={debate.avatar1?.name || 'Avatar 1'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white">{debate.avatar1?.name?.[0] || 'A'}</span>
+              )}
             </div>
             <p className="text-sm text-white mt-2 font-medium">{debate.avatar1?.name || 'Avatar 1'}</p>
             <div className="flex gap-1 mt-2">
@@ -801,10 +809,18 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
 
           <div className="text-center">
             <div className={cn(
-              "w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-2xl font-bold transition-all",
+              "w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-2xl font-bold transition-all",
               debate.currentSpeaker === 2 && isLive && "ring-4 ring-pink-500/50 scale-110"
             )}>
-              {debate.avatar2?.name?.[0] || 'B'}
+              {debate.avatar2?.imageUrl ? (
+                <img 
+                  src={debate.avatar2.imageUrl} 
+                  alt={debate.avatar2?.name || 'Avatar 2'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white">{debate.avatar2?.name?.[0] || 'B'}</span>
+              )}
             </div>
             <p className="text-sm text-white mt-2 font-medium">{debate.avatar2?.name || 'Avatar 2'}</p>
             <div className="flex gap-1 mt-2">
