@@ -46,6 +46,7 @@ const STREAM_TYPE_ICONS = {
   trading_room: TrendingUp,
   crypto_spaces: Headphones,
   live_bounty: Target,
+  debate: Sparkles,
 };
 
 const STREAM_TYPE_COLORS = {
@@ -53,6 +54,7 @@ const STREAM_TYPE_COLORS = {
   trading_room: 'from-emerald-500 to-cyan-500',
   crypto_spaces: 'from-amber-500 to-orange-500',
   live_bounty: 'from-blue-500 to-indigo-500',
+  debate: 'from-cyan-500 to-blue-500',
 };
 
 function formatDuration(seconds: number) {
@@ -173,7 +175,7 @@ export default function StreamReplays() {
   const [sortBy, setSortBy] = useState<string>('recent');
 
   const { data: recordingsData, isLoading } = useQuery<{ recordings: Recording[] }>({
-    queryKey: ['/api/streams/recordings', typeFilter, sortBy],
+    queryKey: ['/api/streams/replays', typeFilter, sortBy],
   });
 
   const recordings = recordingsData?.recordings || [];
@@ -240,6 +242,7 @@ export default function StreamReplays() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="debate">AI Debates</SelectItem>
                 <SelectItem value="creator_broadcast">Creator Broadcast</SelectItem>
                 <SelectItem value="trading_room">Trading Room</SelectItem>
                 <SelectItem value="crypto_spaces">Crypto Spaces</SelectItem>

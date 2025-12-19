@@ -82,7 +82,8 @@ import {
   streamPolls, streamPollVotes, streamReactions, streamScheduleReminders, streamClips,
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
   streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
-  avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak
+  avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
+  scheduledDebates
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
 
@@ -13766,6 +13767,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get stream replays (VOD) - includes completed debates
+  // IMPORTANT: Must be defined BEFORE /api/streams/:id to avoid route conflict
+  app.get("/api/streams/replays", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const typeFilter = req.query.type as string;
+      const sortBy = req.query.sort as string || 'recent';
+      
+      // Get completed debates from database
+      const completedDebates = await db.select({
+        id: scheduledDebates.id,
+        topic: scheduledDebates.topic,
+        avatar1Id: scheduledDebates.avatar1Id,
+        avatar2Id: scheduledDebates.avatar2Id,
+        actualStartTime: scheduledDebates.actualStartTime,
+        endTime: scheduledDebates.endTime,
+        totalViewers: scheduledDebates.totalViewers,
+        exchanges: scheduledDebates.exchanges,
+      })
+        .from(scheduledDebates)
+        .where(eq(scheduledDebates.status, 'completed'))
+        .orderBy(desc(scheduledDebates.endTime))
+        .limit(limit);
+
+      // Get avatar details for debates
+      const debateRecordings = await Promise.all(completedDebates.map(async (debate) => {
+        const [avatar1, avatar2] = await Promise.all([
+          db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, debate.avatar1Id)).limit(1),
+          db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, debate.avatar2Id)).limit(1),
+        ]);
+
+        const startTime = debate.actualStartTime ? new Date(debate.actualStartTime).getTime() : Date.now();
+        const endTime = debate.endTime ? new Date(debate.endTime).getTime() : Date.now();
+        const durationSeconds = Math.round((endTime - startTime) / 1000);
+
+        return {
+          id: debate.id,
+          streamId: debate.id,
+          title: debate.topic,
+          description: `AI Debate between ${avatar1[0]?.name || 'Unknown'} and ${avatar2[0]?.name || 'Unknown'}`,
+          streamType: 'debate',
+          hostUsername: avatar1[0]?.name || 'AI Avatar',
+          hostAvatar: avatar1[0]?.avatarUrl,
+          duration: durationSeconds > 0 ? durationSeconds : 300,
+          viewCount: debate.totalViewers || 0,
+          thumbnailUrl: null,
+          recordedAt: debate.endTime || debate.actualStartTime || new Date().toISOString(),
+          category: 'AI Debates',
+          tags: ['ai', 'debate', 'avatar'],
+          exchanges: debate.exchanges,
+          avatar1: avatar1[0],
+          avatar2: avatar2[0],
+        };
+      }));
+
+      // Also get regular stream replays
+      const regularReplays = await enhancedStreamingService.getStreamReplays(limit);
+      
+      // Combine and format regular replays
+      const formattedReplays = regularReplays.map((replay: any) => ({
+        id: replay.id,
+        streamId: replay.id,
+        title: replay.title,
+        description: replay.description,
+        streamType: replay.streamType || 'creator_broadcast',
+        hostUsername: replay.hostUsername || 'Unknown',
+        hostAvatar: replay.hostAvatar,
+        duration: replay.duration || 0,
+        viewCount: replay.viewCount || 0,
+        thumbnailUrl: replay.thumbnailUrl,
+        recordedAt: replay.recordedAt || replay.endedAt,
+        category: replay.category,
+        tags: replay.tags,
+      }));
+
+      // Combine all recordings
+      let allRecordings = [...debateRecordings, ...formattedReplays];
+
+      // Filter by type if specified
+      if (typeFilter && typeFilter !== 'all') {
+        allRecordings = allRecordings.filter(r => r.streamType === typeFilter);
+      }
+
+      // Sort recordings
+      if (sortBy === 'views') {
+        allRecordings.sort((a, b) => b.viewCount - a.viewCount);
+      } else if (sortBy === 'duration') {
+        allRecordings.sort((a, b) => b.duration - a.duration);
+      } else {
+        // Default: sort by recordedAt date descending
+        allRecordings.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime());
+      }
+
+      res.json({ success: true, recordings: allRecordings });
+    } catch (error: any) {
+      console.error('[Replays] Error fetching replays:', error);
+      res.json({ success: true, recordings: [] });
+    }
+  }));
+
   // Get single stream details
   app.get("/api/streams/:id", asyncHandler(async (req: Request, res: Response) => {
     try {
@@ -14328,17 +14429,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const summary = await enhancedStreamingService.generateStreamSummary(req.params.id);
     res.json({ success: !!summary, summary });
-  }));
-
-  // Get stream replays (VOD)
-  app.get("/api/streams/replays", asyncHandler(async (req: Request, res: Response) => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 20;
-      const replays = await enhancedStreamingService.getStreamReplays(limit);
-      res.json({ success: true, replays });
-    } catch (error: any) {
-      res.json({ success: true, replays: [] });
-    }
   }));
 
   // Add co-host to stream
@@ -15007,7 +15097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Get stream recordings (VOD)
+  // Get stream recordings for specific stream (VOD)
   app.get("/api/streams/:id/recordings", asyncHandler(async (req: Request, res: Response) => {
     try {
       const recordings = await db.select()
