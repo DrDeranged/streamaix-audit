@@ -43,7 +43,10 @@ import {
   Wallet,
   BarChart3,
   Brain,
-  Globe
+  Globe,
+  MessageSquare,
+  ThumbsUp,
+  HelpCircle
 } from 'lucide-react';
 import { 
   SiEthereum, 
@@ -279,55 +282,49 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-transparent" />
         
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           <div className="p-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
             <Play className="w-10 h-10 text-white fill-white" />
           </div>
         </div>
         
-        <div className="absolute top-4 left-4 flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-red-500 rounded-full px-3 py-1.5 shadow-lg shadow-red-500/30">
+        {/* Watch Now button - visible on mobile */}
+        <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-10">
+          <Button size="sm" className="bg-white/90 hover:bg-white text-slate-900 font-semibold rounded-full px-3 sm:px-4 py-1.5 sm:py-2 gap-1.5 shadow-lg text-xs sm:text-sm">
+            <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+            Watch Now
+          </Button>
+        </div>
+        
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex items-center gap-1.5 sm:gap-2 flex-wrap max-w-[60%]">
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-red-500 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-lg shadow-red-500/30">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Live</span>
+            <span className="text-[10px] sm:text-xs font-bold text-white uppercase tracking-wider">Live Now</span>
           </div>
-          <Badge className={cn(
-            "text-xs px-2.5 py-1 font-medium",
-            config.bgColor,
-            config.color,
-            "border-0 backdrop-blur-sm"
-          )}>
-            <Icon className="w-3.5 h-3.5 mr-1" />
-            {config.label}
-          </Badge>
           {stream.isAiHost && (
-            <Badge className="bg-cyan-500/90 text-white text-xs px-2 py-1">
+            <Badge className="bg-cyan-500/90 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 hidden sm:flex">
               <Bot className="w-3 h-3 mr-1" />
-              AI Host
-            </Badge>
-          )}
-          {stream.tags?.includes('alpha') && (
-            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-2 py-1 animate-pulse shadow-lg shadow-amber-500/30">
-              <Sparkles className="w-3 h-3 mr-1" />
-              ALPHA
+              AI
             </Badge>
           )}
         </div>
         
-        <div className="absolute top-4 right-4 flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-sm rounded-full px-3 py-1.5">
-            <Eye className="w-3.5 h-3.5 text-red-400" />
-            <span className="text-sm font-semibold text-white">{formatViewers(stream.currentViewers)}</span>
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-900/80 backdrop-blur-sm rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
+            <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400" />
+            <span className="text-xs sm:text-sm font-semibold text-white">{formatViewers(stream.currentViewers)}</span>
+            <span className="text-[10px] text-slate-400 hidden sm:inline">watching</span>
           </div>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <div className="flex items-end gap-4">
-            <div className="relative">
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5">
+          <div className="flex items-end gap-3 sm:gap-4">
+            <div className="relative flex-shrink-0">
               <div className={cn(
-                "w-14 h-14 rounded-full ring-3 overflow-hidden ring-white/30 flex items-center justify-center",
+                "w-10 h-10 sm:w-14 sm:h-14 rounded-full ring-2 sm:ring-3 overflow-hidden ring-white/30 flex items-center justify-center",
                 showBrandIcon ? brandFallback.bgColor : 'bg-slate-800'
               )}>
                 {showImage && (
@@ -340,7 +337,7 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
                   />
                 )}
                 {showBrandIcon && BrandIcon && (
-                  <BrandIcon className={cn("w-6 h-6", brandFallback.color)} />
+                  <BrandIcon className={cn("w-4 h-4 sm:w-6 sm:h-6", brandFallback.color)} />
                 )}
                 {showDiceBear && (
                   <img 
@@ -350,34 +347,34 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
                   />
                 )}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-950" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-slate-950" />
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold text-white line-clamp-2 group-hover:text-purple-200 transition-colors leading-tight">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h3 className="text-base sm:text-xl font-bold text-white line-clamp-2 group-hover:text-purple-200 transition-colors leading-tight break-words">
                 {stream.title}
               </h3>
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm text-slate-300 font-medium">{stream.hostUsername || 'Anonymous'}</span>
+              <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 flex-wrap overflow-hidden">
+                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                  <span className="text-xs sm:text-sm text-slate-300 font-medium truncate max-w-[100px] sm:max-w-none">{stream.hostUsername || 'Anonymous'}</span>
                   {stream.isKnowledgeAvatar && (
-                    <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                    <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 flex-shrink-0" />
                   )}
                   {stream.hostHandle && (
-                    <span className="text-xs text-slate-500">@{stream.hostHandle}</span>
+                    <span className="text-[10px] sm:text-xs text-slate-500 truncate max-w-[60px] sm:max-w-none hidden sm:inline">@{stream.hostHandle}</span>
                   )}
                 </div>
                 {stream.category && (
-                  <Badge variant="outline" className="text-xs text-slate-400 border-slate-600 capitalize">
+                  <Badge variant="outline" className="text-[10px] sm:text-xs text-slate-400 border-slate-600 capitalize px-1.5 sm:px-2 py-0 sm:py-0.5 flex-shrink-0">
                     {stream.category}
                   </Badge>
                 )}
-                <span className="text-xs text-slate-400 flex items-center gap-1">
+                <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1 flex-shrink-0 hidden sm:flex">
                   <Clock className="w-3 h-3" />
                   {formatLiveTime(stream.actualStart)}
                 </span>
               </div>
               {stream.hostExpertise && (
-                <p className="text-xs text-slate-400 mt-1.5 line-clamp-1">{stream.hostExpertise}</p>
+                <p className="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-1.5 line-clamp-1 hidden sm:block">{stream.hostExpertise}</p>
               )}
             </div>
           </div>
@@ -628,35 +625,36 @@ const StreamCard = memo(function StreamCard({
               )}
             </div>
             
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-cyan-300 transition-colors leading-snug">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-cyan-300 transition-colors leading-snug break-words">
                 {stream.title}
               </h3>
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="text-xs text-slate-300 font-medium">
+              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                <span className="text-xs text-slate-300 font-medium truncate max-w-[120px] sm:max-w-none">
                   {stream.hostUsername || 'Anonymous'}
                 </span>
                 {stream.isKnowledgeAvatar && (
-                  <Shield className="w-3 h-3 text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.6)]" />
+                  <Shield className="w-3 h-3 text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.6)] flex-shrink-0" />
                 )}
                 {stream.hostHandle && (
-                  <span className="text-xs text-slate-500">@{stream.hostHandle}</span>
+                  <span className="text-xs text-slate-500 truncate max-w-[80px] sm:max-w-none">@{stream.hostHandle}</span>
                 )}
               </div>
               {stream.hostExpertise && (
                 <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{stream.hostExpertise}</p>
               )}
-              <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-2 overflow-x-auto scrollbar-hide">
                 <Badge variant="outline" className={cn(
-                  "text-[10px] capitalize font-medium px-2 py-0.5",
+                  "text-[10px] capitalize font-medium px-1.5 sm:px-2 py-0.5 flex-shrink-0",
                   "bg-slate-800/60 backdrop-blur-sm border-slate-600/50",
                   config.color
                 )}>
-                  <Icon className="w-3 h-3 mr-1" />
-                  {config.label}
+                  <Icon className="w-3 h-3 mr-0.5 sm:mr-1" />
+                  <span className="hidden xs:inline">{config.label}</span>
+                  <span className="xs:hidden">{config.label.slice(0, 4)}</span>
                 </Badge>
                 {stream.category && (
-                  <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700/50 bg-slate-800/40 capitalize">
+                  <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700/50 bg-slate-800/40 capitalize px-1.5 sm:px-2 py-0.5 flex-shrink-0">
                     {stream.category}
                   </Badge>
                 )}
@@ -1079,8 +1077,8 @@ export default function StreamsPage() {
                 <Radio className="w-5 h-5 text-red-400 relative z-10" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white font-orbitron tracking-tight streaming-glow-text">StreamAiX Live</h1>
-                <p className="text-xs text-slate-400 hidden sm:block">Real-time broadcasts & trading rooms</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white font-orbitron tracking-tight streaming-glow-text">Live Streams</h1>
+                <p className="text-xs text-slate-400 hidden sm:block">Watch AI Avatars and creators stream live</p>
               </div>
             </div>
 
@@ -1111,8 +1109,9 @@ export default function StreamsPage() {
               </Link>
               <Link href="/go-live">
                 <Button size="sm" className="streaming-neon-btn text-white h-9 gap-1.5 rounded-xl font-semibold">
-                  <Zap className="w-4 h-4" />
-                  <span>Go Live</span>
+                  <span className="text-lg leading-none">+</span>
+                  <span className="hidden sm:inline">Start Streaming</span>
+                  <span className="sm:hidden">Stream</span>
                 </Button>
               </Link>
             </div>
@@ -1159,6 +1158,57 @@ export default function StreamsPage() {
             </ScrollArea>
           </section>
         )}
+
+        {/* Features Section */}
+        <section className="py-4">
+          <div className="streaming-glass-panel rounded-2xl p-4 sm:p-6 border border-purple-500/20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  Enhanced Streaming Features
+                </h2>
+                <p className="text-sm text-slate-400 mt-1">Live debates, chat, tipping, and more</p>
+              </div>
+              <Link href="/debates">
+                <Button size="sm" className="streaming-neon-btn text-white gap-2 rounded-xl">
+                  <Zap className="w-4 h-4" />
+                  Watch Debates
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-cyan-500/20">
+                <MessageSquare className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white truncate">Live Chat</p>
+                  <p className="text-[10px] text-slate-400 truncate">Real-time messages</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-amber-500/20">
+                <Coins className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white truncate">STREAM Tips</p>
+                  <p className="text-[10px] text-slate-400 truncate">Support creators</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-emerald-500/20">
+                <HelpCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white truncate">Q&A Queue</p>
+                  <p className="text-[10px] text-slate-400 truncate">Ask questions</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-pink-500/20">
+                <Heart className="w-5 h-5 text-pink-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white truncate">Reactions</p>
+                  <p className="text-[10px] text-slate-400 truncate">Emoji reactions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
