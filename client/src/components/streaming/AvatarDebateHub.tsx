@@ -561,6 +561,7 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [isContinuousMode, setIsContinuousMode] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<{
     success: boolean;
@@ -768,8 +769,25 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
         onTimeUpdate={(e) => setAudioProgress(e.currentTarget.currentTime)}
         onDurationChange={(e) => setAudioDuration(e.currentTarget.duration)}
         onEnded={() => {
-          setIsAudioPlaying(false);
-          setPlayingExchangeIndex(null);
+          if (isContinuousMode && playingExchangeIndex !== null) {
+            const nextIndex = playingExchangeIndex + 1;
+            const nextExchange = exchanges[nextIndex];
+            if (nextExchange?.audioBase64) {
+              setPlayingExchangeIndex(nextIndex);
+              setAudioProgress(0);
+              if (audioRef.current) {
+                audioRef.current.src = `data:audio/mp3;base64,${nextExchange.audioBase64}`;
+                audioRef.current.play().catch(console.error);
+              }
+            } else {
+              setIsAudioPlaying(false);
+              setPlayingExchangeIndex(null);
+              setIsContinuousMode(false);
+            }
+          } else {
+            setIsAudioPlaying(false);
+            setPlayingExchangeIndex(null);
+          }
         }}
         onPause={() => setIsAudioPlaying(false)}
         onPlay={() => setIsAudioPlaying(true)}
@@ -802,21 +820,70 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
             </div>
           </div>
           
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsMuted(!isMuted)}
-            className={cn("h-10 w-10", isMuted && "text-red-400")}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </Button>
+          <div className="flex items-center gap-2">
+            {exchanges.some((ex: DebateExchange) => ex.audioBase64) && !isLive && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (isAudioPlaying && isContinuousMode) {
+                    if (audioRef.current) audioRef.current.pause();
+                    setIsContinuousMode(false);
+                    setIsAudioPlaying(false);
+                    setPlayingExchangeIndex(null);
+                  } else {
+                    const firstAudioIndex = exchanges.findIndex((ex: DebateExchange) => ex.audioBase64);
+                    if (firstAudioIndex >= 0 && exchanges[firstAudioIndex].audioBase64) {
+                      setIsContinuousMode(true);
+                      setPlayingExchangeIndex(firstAudioIndex);
+                      setAudioProgress(0);
+                      if (audioRef.current) {
+                        audioRef.current.src = `data:audio/mp3;base64,${exchanges[firstAudioIndex].audioBase64}`;
+                        audioRef.current.play().catch(console.error);
+                      }
+                    }
+                  }
+                }}
+                className={cn(
+                  "h-10 px-4 gap-2",
+                  isAudioPlaying && isContinuousMode
+                    ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500"
+                    : "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                )}
+              >
+                {isAudioPlaying && isContinuousMode ? (
+                  <>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                    </svg>
+                    Pause
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    Play All
+                  </>
+                )}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsMuted(!isMuted)}
+              className={cn("h-10 w-10", isMuted && "text-red-400")}
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center justify-center gap-6 mb-4">
           <div className="text-center">
             <div className={cn(
-              "w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-2xl font-bold transition-all",
-              debate.currentSpeaker === 1 && isLive && "ring-4 ring-cyan-500/50 scale-110"
+              "w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-2xl font-bold transition-all duration-300",
+              (isAudioPlaying && playingExchangeIndex !== null && exchanges[playingExchangeIndex]?.speakerName === debate.avatar1?.name)
+                ? "ring-4 ring-cyan-400 shadow-lg shadow-cyan-500/50 scale-110 animate-pulse"
+                : debate.currentSpeaker === 1 && isLive && "ring-4 ring-cyan-500/50 scale-110"
             )}>
               {debate.avatar1?.imageUrl ? (
                 <img 
@@ -863,8 +930,10 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
 
           <div className="text-center">
             <div className={cn(
-              "w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-2xl font-bold transition-all",
-              debate.currentSpeaker === 2 && isLive && "ring-4 ring-pink-500/50 scale-110"
+              "w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-2xl font-bold transition-all duration-300",
+              (isAudioPlaying && playingExchangeIndex !== null && exchanges[playingExchangeIndex]?.speakerName === debate.avatar2?.name)
+                ? "ring-4 ring-pink-400 shadow-lg shadow-pink-500/50 scale-110 animate-pulse"
+                : debate.currentSpeaker === 2 && isLive && "ring-4 ring-pink-500/50 scale-110"
             )}>
               {debate.avatar2?.imageUrl ? (
                 <img 

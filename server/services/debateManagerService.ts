@@ -17,8 +17,8 @@ interface DebateExchange {
 
 interface ActiveDebate {
   debateId: string;
-  avatar1: { id: string; name: string; tradingStyle?: string; marketOutlook?: string };
-  avatar2: { id: string; name: string; tradingStyle?: string; marketOutlook?: string };
+  avatar1: { id: string; name: string; imageUrl?: string; tradingStyle?: string; marketOutlook?: string };
+  avatar2: { id: string; name: string; imageUrl?: string; tradingStyle?: string; marketOutlook?: string };
   topic: string;
   maxRounds: number;
   turnDurationMs: number;
@@ -29,6 +29,7 @@ interface ActiveDebate {
   isActive: boolean;
   turnTimer: NodeJS.Timeout | null;
   streamId?: string;
+  hasIntroductions?: boolean;
 }
 
 const activeDebates = new Map<string, ActiveDebate>();
@@ -148,12 +149,14 @@ export class DebateManagerService {
       avatar1: {
         id: avatar1[0].id,
         name: avatar1[0].name,
+        imageUrl: avatar1[0].imageUrl || undefined,
         tradingStyle: avatar1[0].tradingStyle || undefined,
         marketOutlook: avatar1[0].marketOutlook || undefined,
       },
       avatar2: {
         id: avatar2[0].id,
         name: avatar2[0].name,
+        imageUrl: avatar2[0].imageUrl || undefined,
         tradingStyle: avatar2[0].tradingStyle || undefined,
         marketOutlook: avatar2[0].marketOutlook || undefined,
       },
@@ -167,6 +170,7 @@ export class DebateManagerService {
       isActive: true,
       turnTimer: null,
       streamId: debate.streamId || undefined,
+      hasIntroductions: false,
     };
 
     activeDebates.set(debateId, activeDebate);
@@ -184,11 +188,12 @@ export class DebateManagerService {
       type: 'debate-started',
       debateId,
       topic: debate.topic,
-      avatar1: { id: avatar1[0].id, name: avatar1[0].name },
-      avatar2: { id: avatar2[0].id, name: avatar2[0].name },
+      avatar1: { id: avatar1[0].id, name: avatar1[0].name, imageUrl: avatar1[0].imageUrl },
+      avatar2: { id: avatar2[0].id, name: avatar2[0].name, imageUrl: avatar2[0].imageUrl },
       maxRounds: activeDebate.maxRounds,
     });
 
+    await this.generateIntroductions(debateId);
     this.scheduleNextTurn(debateId);
 
     return activeDebate;
@@ -204,6 +209,93 @@ export class DebateManagerService {
     }
 
     this.executeTurn(debateId);
+  }
+
+  private static async generateIntroductions(debateId: string) {
+    const debate = activeDebates.get(debateId);
+    if (!debate || !debate.isActive || debate.hasIntroductions) return;
+
+    console.log(`[DebateManager] Generating introductions for debate: ${debate.topic}`);
+
+    try {
+      for (const avatar of [debate.avatar1, debate.avatar2]) {
+        const introText = await this.generateIntroductionText(avatar, debate.topic);
+        if (!introText) continue;
+
+        let audioBase64: string | undefined;
+        if (debate.enableVoice && process.env.PAUSE_OPENAI_API !== 'true') {
+          try {
+            audioBase64 = await AvatarVoiceService.textToSpeechBase64(introText, avatar.name);
+          } catch (audioError) {
+            console.warn(`[DebateManager] TTS failed for intro ${avatar.name}:`, audioError);
+          }
+        }
+
+        const introExchange: DebateExchange = {
+          speakerId: avatar.id,
+          speakerName: avatar.name,
+          content: introText,
+          audioBase64,
+          timestamp: Date.now(),
+        };
+
+        debate.exchanges.push(introExchange);
+
+        this.broadcastDebateEvent(debateId, {
+          type: 'introduction',
+          debateId,
+          speakerName: avatar.name,
+          speakerId: avatar.id,
+          content: introText,
+          audioBase64,
+        });
+      }
+
+      debate.hasIntroductions = true;
+
+      await db.update(scheduledDebates)
+        .set({
+          exchanges: debate.exchanges,
+          updatedAt: new Date(),
+        })
+        .where(eq(scheduledDebates.id, debateId));
+
+      console.log(`[DebateManager] Introductions complete for: ${debate.topic}`);
+    } catch (error) {
+      console.error(`[DebateManager] Error generating introductions:`, error);
+    }
+  }
+
+  private static async generateIntroductionText(
+    avatar: { id: string; name: string; tradingStyle?: string; marketOutlook?: string },
+    topic: string
+  ): Promise<string | null> {
+    if (process.env.PAUSE_OPENAI_API === 'true') {
+      return `Hi everyone, I'm ${avatar.name}. Excited to be here discussing ${topic} today.`;
+    }
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are ${avatar.name}. Introduce yourself briefly for a debate. Trading style: ${avatar.tradingStyle || 'balanced'}. Be personable and mention your relevant expertise. Keep it under 2 sentences.`
+          },
+          {
+            role: 'user',
+            content: `Introduce yourself for a debate about: "${topic}". Start with "Hi everyone, I'm ${avatar.name}..." Be brief and engaging.`
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 100,
+      });
+
+      return response.choices[0]?.message?.content || null;
+    } catch (error) {
+      console.error(`[DebateManager] Intro generation error:`, error);
+      return `Hi everyone, I'm ${avatar.name}. Looking forward to this discussion on ${topic}.`;
+    }
   }
 
   private static async executeTurn(debateId: string) {

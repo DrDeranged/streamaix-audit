@@ -15775,8 +15775,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       debate: {
         debateId: activeDebate.debateId,
         topic: activeDebate.topic,
-        avatar1: activeDebate.avatar1,
-        avatar2: activeDebate.avatar2,
+        avatar1: {
+          id: activeDebate.avatar1.id,
+          name: activeDebate.avatar1.name,
+          imageUrl: activeDebate.avatar1.imageUrl,
+        },
+        avatar2: {
+          id: activeDebate.avatar2.id,
+          name: activeDebate.avatar2.name,
+          imageUrl: activeDebate.avatar2.imageUrl,
+        },
         currentRound: activeDebate.currentRound,
         maxRounds: activeDebate.maxRounds,
         currentSpeaker: activeDebate.currentSpeaker,
@@ -15785,6 +15793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           content: e.content,
           timestamp: e.timestamp,
           hasAudio: !!e.audioBase64,
+          audioBase64: e.audioBase64,
         })),
       }
     });
