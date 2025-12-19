@@ -48,7 +48,6 @@ const Streams = React.lazy(() => import("@/pages/streams"));
 const DebateView = React.lazy(() => import("@/pages/debate-view"));
 const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
-const StreamDiscovery = React.lazy(() => import("@/pages/StreamDiscoveryPage"));
 const Points = React.lazy(() => import("@/pages/points"));
 
 function Router() {
@@ -222,7 +221,7 @@ function Router() {
       
       <Route path="/streams/discover">
         <Suspense fallback={<DashboardSkeleton />}>
-          <StreamDiscovery />
+          <Streams />
         </Suspense>
       </Route>
       
