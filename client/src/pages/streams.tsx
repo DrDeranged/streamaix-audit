@@ -1068,10 +1068,10 @@ export default function StreamsPage() {
               <Badge className="lg:hidden streaming-viewer-glow text-red-400 text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5">
                 {liveStreams.length} Live
               </Badge>
-              <Link href="/replays" className="hidden sm:block">
+              <Link href="/replays">
                 <Button variant="outline" size="sm" className="streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white h-8 sm:h-9 gap-1 rounded-xl text-xs">
                   <Play className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden md:inline">Replays</span>
+                  <span className="hidden sm:inline">Replays</span>
                 </Button>
               </Link>
               <Link href="/go-live">
@@ -1110,9 +1110,11 @@ export default function StreamsPage() {
                 <Crown className="w-5 h-5 text-amber-400" />
                 <h2 className="text-lg font-bold text-white">Top Streamers</h2>
               </div>
-              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white text-xs">
-                View All <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+              <Link href="/leaderboard">
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white text-xs">
+                  View All <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
             </div>
             <ScrollArea className="w-full">
               <div className="flex gap-4 pb-2">
