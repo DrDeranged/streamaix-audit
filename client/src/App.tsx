@@ -214,6 +214,12 @@ function Router() {
         </Suspense>
       </Route>
       
+      <Route path="/debates/:id">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <DebateView />
+        </Suspense>
+      </Route>
+      
       <Route path="/go-live">
         <Suspense fallback={<DashboardSkeleton />}>
           <GoLive />

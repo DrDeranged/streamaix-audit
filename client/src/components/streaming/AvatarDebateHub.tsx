@@ -557,6 +557,10 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
   const [chatMessage, setChatMessage] = useState('');
   const [questionText, setQuestionText] = useState('');
   const [tipAmount, setTipAmount] = useState(10);
+  const [playingExchangeIndex, setPlayingExchangeIndex] = useState<number | null>(null);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<{
     success: boolean;
@@ -718,9 +722,58 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
     { key: 'wow', emoji: '😮' },
   ];
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+      setAudioProgress(newTime);
+    }
+  };
+
+  const playExchangeAudio = (index: number, audioBase64: string) => {
+    if (audioRef.current) {
+      if (playingExchangeIndex === index && isAudioPlaying) {
+        audioRef.current.pause();
+        setIsAudioPlaying(false);
+      } else {
+        audioRef.current.src = `data:audio/mp3;base64,${audioBase64}`;
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(console.error);
+        setPlayingExchangeIndex(index);
+        setIsAudioPlaying(true);
+        setAudioProgress(0);
+      }
+    }
+  };
+
+  const skipTime = (seconds: number) => {
+    if (audioRef.current) {
+      const newTime = Math.max(0, Math.min(audioDuration, audioRef.current.currentTime + seconds));
+      audioRef.current.currentTime = newTime;
+      setAudioProgress(newTime);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <audio ref={audioRef} className="hidden" />
+      <audio 
+        ref={audioRef} 
+        className="hidden"
+        onTimeUpdate={(e) => setAudioProgress(e.currentTarget.currentTime)}
+        onDurationChange={(e) => setAudioDuration(e.currentTarget.duration)}
+        onEnded={() => {
+          setIsAudioPlaying(false);
+          setPlayingExchangeIndex(null);
+        }}
+        onPause={() => setIsAudioPlaying(false)}
+        onPlay={() => setIsAudioPlaying(true)}
+      />
       
       <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-xl border border-purple-500/30 p-4">
         <div className="flex items-center justify-between mb-4">
@@ -923,30 +976,91 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
                         : "bg-pink-500/10 border border-pink-500/20 ml-8 mr-0"
                     )}
                   >
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-2">
                       <span className={cn(
                         "text-xs font-medium",
                         isAvatar1 ? "text-cyan-400" : "text-pink-400"
                       )}>
                         {exchange.speakerName}
                       </span>
-                      {(exchange.audioBase64 || exchange.hasAudio) && (
-                        <button
-                          onClick={() => {
-                            if (exchange.audioBase64 && audioRef.current) {
-                              audioRef.current.src = `data:audio/mp3;base64,${exchange.audioBase64}`;
-                              audioRef.current.play().catch(console.error);
-                            }
-                          }}
-                          className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
-                          title="Play audio"
-                        >
-                          <Play className="w-3 h-3" />
+                      {exchange.audioBase64 && (
+                        <span className="text-xs text-emerald-400 flex items-center gap-1">
                           <Mic className="w-3 h-3" />
-                        </button>
+                          Voice
+                        </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-200">{exchange.content}</p>
+                    <p className="text-sm text-slate-200 mb-3">{exchange.content}</p>
+                    
+                    {exchange.audioBase64 && (
+                      <div className={cn(
+                        "flex flex-col gap-2 p-2 rounded-lg",
+                        isAvatar1 ? "bg-cyan-500/5" : "bg-pink-500/5"
+                      )}>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => skipTime(-10)}
+                            disabled={playingExchangeIndex !== index}
+                            className="p-1 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            title="Rewind 10s"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12.5 3C17.15 3 21.08 6.03 22.47 10.22L20.1 11C19.05 7.81 16.04 5.5 12.5 5.5C10.54 5.5 8.77 6.22 7.38 7.38L10 10H3V3L5.6 5.6C7.45 4 9.85 3 12.5 3M10 12V22H8V14H6V12H10M18 14V20C18 21.11 17.11 22 16 22H14C12.9 22 12 21.1 12 20V14C12 12.9 12.9 12 14 12H16C17.11 12 18 12.9 18 14M14 14V20H16V14H14Z"/>
+                            </svg>
+                          </button>
+                          
+                          <button
+                            onClick={() => exchange.audioBase64 && playExchangeAudio(index, exchange.audioBase64)}
+                            className={cn(
+                              "p-2 rounded-full transition-all",
+                              playingExchangeIndex === index && isAudioPlaying
+                                ? "bg-emerald-500 text-white"
+                                : isAvatar1 
+                                  ? "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30"
+                                  : "bg-pink-500/20 text-pink-400 hover:bg-pink-500/30"
+                            )}
+                            title={playingExchangeIndex === index && isAudioPlaying ? "Pause" : "Play"}
+                          >
+                            {playingExchangeIndex === index && isAudioPlaying ? (
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                              </svg>
+                            ) : (
+                              <Play className="w-4 h-4" />
+                            )}
+                          </button>
+                          
+                          <button
+                            onClick={() => skipTime(10)}
+                            disabled={playingExchangeIndex !== index}
+                            className="p-1 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            title="Forward 10s"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M10 3C4.08 3 0 8 0 12C0 17.5 4.5 22 10 22C14.12 22 17.59 19.42 19 15.74L16.64 15C15.58 17.54 13 19.5 10 19.5C5.86 19.5 2.5 16.14 2.5 12C2.5 7.86 5.86 4.5 10 4.5C12.45 4.5 14.67 5.7 16.04 7.5H13V10H20V3H17.5V5.09C15.69 3.64 13.45 3 10 3M18 14V22H16V16H14V14H18M12 14V18C12 19.11 12.9 20 14 20V22C11.79 22 10 20.21 10 18V14H12Z"/>
+                            </svg>
+                          </button>
+                          
+                          <div className="flex-1 flex items-center gap-2">
+                            <input
+                              type="range"
+                              min="0"
+                              max={playingExchangeIndex === index ? audioDuration || 100 : 100}
+                              value={playingExchangeIndex === index ? audioProgress : 0}
+                              onChange={handleSeek}
+                              disabled={playingExchangeIndex !== index}
+                              className="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-emerald-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
+                            />
+                          </div>
+                          
+                          <span className="text-xs text-slate-400 min-w-[70px] text-right">
+                            {playingExchangeIndex === index 
+                              ? `${formatTime(audioProgress)} / ${formatTime(audioDuration)}`
+                              : '0:00'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
