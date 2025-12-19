@@ -176,6 +176,15 @@ export default function StreamReplays() {
 
   const { data: recordingsData, isLoading } = useQuery<{ recordings: Recording[] }>({
     queryKey: ['/api/streams/replays', typeFilter, sortBy],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
+      if (sortBy) params.append('sort', sortBy);
+      const url = `/api/streams/replays${params.toString() ? `?${params.toString()}` : ''}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch recordings');
+      return res.json();
+    },
   });
 
   const recordings = recordingsData?.recordings || [];
