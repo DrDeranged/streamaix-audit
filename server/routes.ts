@@ -15742,10 +15742,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!activeDebate) {
       const storedDebate = await DebateManagerService.getDebateById(req.params.id);
       if (storedDebate) {
+        // Fetch avatar details for completed debates
+        const [avatar1Data, avatar2Data] = await Promise.all([
+          db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, storedDebate.avatar1Id)).limit(1),
+          db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, storedDebate.avatar2Id)).limit(1),
+        ]);
+        
         return res.json({ 
           success: true, 
           isLive: false, 
-          debate: storedDebate 
+          debate: {
+            ...storedDebate,
+            avatar1: avatar1Data[0] ? { 
+              id: avatar1Data[0].id, 
+              name: avatar1Data[0].name, 
+              imageUrl: avatar1Data[0].imageUrl 
+            } : null,
+            avatar2: avatar2Data[0] ? { 
+              id: avatar2Data[0].id, 
+              name: avatar2Data[0].name, 
+              imageUrl: avatar2Data[0].imageUrl 
+            } : null,
+          }
         });
       }
       return res.status(404).json({ success: false, error: 'Debate not found' });
