@@ -51,6 +51,7 @@ interface DebateExchange {
   content: string;
   timestamp: number;
   hasAudio?: boolean;
+  audioBase64?: string;
 }
 
 interface ScheduledDebate {
@@ -929,8 +930,20 @@ export const LiveDebateViewer = memo(function LiveDebateViewer({ debateId }: { d
                       )}>
                         {exchange.speakerName}
                       </span>
-                      {exchange.hasAudio && (
-                        <Mic className="w-3 h-3 text-emerald-400" />
+                      {(exchange.audioBase64 || exchange.hasAudio) && (
+                        <button
+                          onClick={() => {
+                            if (exchange.audioBase64 && audioRef.current) {
+                              audioRef.current.src = `data:audio/mp3;base64,${exchange.audioBase64}`;
+                              audioRef.current.play().catch(console.error);
+                            }
+                          }}
+                          className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
+                          title="Play audio"
+                        >
+                          <Play className="w-3 h-3" />
+                          <Mic className="w-3 h-3" />
+                        </button>
                       )}
                     </div>
                     <p className="text-sm text-slate-200">{exchange.content}</p>
