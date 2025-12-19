@@ -103,8 +103,8 @@ export class DebateManagerService {
       description: params.description,
       category: params.category || 'crypto',
       scheduledStartTime: params.scheduledStartTime,
-      maxRounds: params.maxRounds || 6,
-      turnDurationSeconds: params.turnDurationSeconds || 45,
+      maxRounds: params.maxRounds || 20,
+      turnDurationSeconds: params.turnDurationSeconds || 30,
       enableVoice: params.enableVoice !== false,
       createdBy: params.createdBy,
       status: 'scheduled',
@@ -161,8 +161,8 @@ export class DebateManagerService {
         marketOutlook: avatar2[0].marketOutlook || undefined,
       },
       topic: debate.topic,
-      maxRounds: debate.maxRounds || 6,
-      turnDurationMs: (debate.turnDurationSeconds || 45) * 1000,
+      maxRounds: debate.maxRounds || 20,
+      turnDurationMs: (debate.turnDurationSeconds || 30) * 1000,
       enableVoice: debate.enableVoice !== false,
       currentRound: 0,
       currentSpeaker: 1,
@@ -271,7 +271,7 @@ export class DebateManagerService {
     topic: string
   ): Promise<string | null> {
     if (process.env.PAUSE_OPENAI_API === 'true') {
-      return `Hi everyone, I'm ${avatar.name}. Excited to be here discussing ${topic} today.`;
+      return `Hey everyone, I'm ${avatar.name}. Really excited to dive into ${topic} today - this is going to be a great conversation.`;
     }
 
     try {
@@ -280,21 +280,25 @@ export class DebateManagerService {
         messages: [
           {
             role: 'system',
-            content: `You are ${avatar.name}. Introduce yourself briefly for a debate. Trading style: ${avatar.tradingStyle || 'balanced'}. Be personable and mention your relevant expertise. Keep it under 2 sentences.`
+            content: `You are ${avatar.name} introducing yourself at the start of a podcast conversation. Background: ${avatar.tradingStyle || 'experienced professional'}. 
+
+Be warm and natural like you're greeting friends. Don't be formal or stiff. Use natural speech like "Hey everyone" or "What's up, I'm..." 
+
+Keep it to 1-2 short sentences. Mention why you're excited about today's topic.`
           },
           {
             role: 'user',
-            content: `Introduce yourself for a debate about: "${topic}". Start with "Hi everyone, I'm ${avatar.name}..." Be brief and engaging.`
+            content: `Give a brief, warm podcast introduction for a conversation about: "${topic}". Be yourself - natural and engaging.`
           }
         ],
-        temperature: 0.8,
-        max_tokens: 100,
+        temperature: 0.9,
+        max_tokens: 80,
       });
 
       return response.choices[0]?.message?.content || null;
     } catch (error) {
       console.error(`[DebateManager] Intro generation error:`, error);
-      return `Hi everyone, I'm ${avatar.name}. Looking forward to this discussion on ${topic}.`;
+      return `Hey there, I'm ${avatar.name}. Super excited to chat about ${topic} today.`;
     }
   }
 
@@ -390,25 +394,42 @@ export class DebateManagerService {
     }
 
     try {
-      const conversationContext = debate.exchanges.slice(-4)
+      const conversationContext = debate.exchanges.slice(-6)
         .map(e => `${e.speakerName}: "${e.content}"`)
         .join('\n');
 
-      const systemPrompt = `You are ${avatar.name}, a knowledge avatar participating in a debate about "${debate.topic}".
-Your trading style: ${avatar.tradingStyle || 'balanced'}
-Your market outlook: ${avatar.marketOutlook || 'neutral'}
+      const otherAvatar = avatar.id === debate.avatar1.id ? debate.avatar2 : debate.avatar1;
+      const roundProgress = debate.currentRound / debate.maxRounds;
+      
+      let conversationPhase = 'opening';
+      if (roundProgress > 0.7) conversationPhase = 'conclusion';
+      else if (roundProgress > 0.3) conversationPhase = 'deep-dive';
+      
+      const phaseGuidance = {
+        opening: 'Share your initial perspective and set up your key arguments. Be welcoming and engaging.',
+        'deep-dive': 'Dig deeper into specifics. Share examples, data points, or personal insights. Build on what\'s been said.',
+        conclusion: 'Start wrapping up. Summarize key points, find common ground, or make final compelling arguments.'
+      };
 
-Guidelines:
-- Be conversational and engaging, like a podcast discussion
-- Make clear, compelling arguments in 2-3 sentences
-- Acknowledge valid points from the other side when appropriate
-- Stay focused on the debate topic
-- Use your unique perspective and expertise
-- Be respectful but confident in your position`;
+      const systemPrompt = `You are ${avatar.name}, having a natural podcast-style conversation with ${otherAvatar.name} about "${debate.topic}".
+
+Your background: ${avatar.tradingStyle || 'experienced professional'}, ${avatar.marketOutlook || 'balanced perspective'}
+
+CRITICAL RULES FOR NATURAL CONVERSATION:
+- Speak naturally like a real person on a podcast, NOT like you're reading a script
+- Use conversational phrases: "You know what's interesting...", "I think the thing is...", "That's a great point, but..."
+- Sometimes agree with ${otherAvatar.name}, sometimes push back politely
+- Share specific examples, anecdotes, or data to support your points
+- React to what was just said - don't ignore it
+- Keep responses to 2-4 sentences - brief but substantive
+- Use natural speech patterns with occasional filler words
+- ${phaseGuidance[conversationPhase as keyof typeof phaseGuidance]}
+
+This is round ${debate.currentRound + 1} of ${debate.maxRounds}. ${conversationPhase === 'conclusion' ? 'Start wrapping up the conversation.' : ''}`;
 
       const userPrompt = previousStatement
-        ? `Recent discussion:\n${conversationContext}\n\nThe other debater just said: "${previousStatement}"\n\nRespond with your perspective (2-3 sentences).`
-        : `You're starting this debate on "${debate.topic}". Give your opening statement (2-3 sentences).`;
+        ? `Conversation so far:\n${conversationContext}\n\n${otherAvatar.name} just said: "${previousStatement}"\n\nRespond naturally as ${avatar.name}.`
+        : `You're starting this conversation on "${debate.topic}" with ${otherAvatar.name}. Give a warm, engaging opening that sets the stage.`;
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
@@ -416,8 +437,8 @@ Guidelines:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.8,
-        max_tokens: 200,
+        temperature: 0.85,
+        max_tokens: 250,
       });
 
       return response.choices[0]?.message?.content || null;
