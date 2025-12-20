@@ -13798,9 +13798,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, debate.avatar2Id)).limit(1),
         ]);
 
-        const startTime = debate.actualStartTime ? new Date(debate.actualStartTime).getTime() : Date.now();
-        const endTime = debate.endTime ? new Date(debate.endTime).getTime() : Date.now();
-        const durationSeconds = Math.round((endTime - startTime) / 1000);
+        const exchangeCount = Array.isArray(debate.exchanges) ? debate.exchanges.length : 0;
+        const estimatedDurationSeconds = exchangeCount * 30;
 
         return {
           id: debate.id,
@@ -13810,7 +13809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           streamType: 'debate',
           hostUsername: avatar1[0]?.name || 'AI Avatar',
           hostAvatar: avatar1[0]?.avatarUrl,
-          duration: durationSeconds > 0 ? durationSeconds : 300,
+          duration: estimatedDurationSeconds > 0 ? estimatedDurationSeconds : 60,
           viewCount: debate.totalViewers || 0,
           thumbnailUrl: null,
           recordedAt: debate.endTime || debate.actualStartTime || new Date().toISOString(),
