@@ -18,10 +18,10 @@ export function HowItWorks() {
       number: 2,
       icon: Brain,
       title: "Real AI Processing",
-      description: "OpenAI Whisper transcribes with 98% accuracy, GPT-4o analyzes and summarizes",
+      description: "AI transcribes with 98% accuracy, analyzes and summarizes content",
       color: "from-purple-500 via-fuchsia-500 to-cyan-500",
       badgeColor: "bg-fuchsia-500",
-      techBadges: ["OpenAI Whisper", "GPT-4o"]
+      techBadges: ["AI Transcription", "AI Analysis"]
     },
     {
       number: 3,

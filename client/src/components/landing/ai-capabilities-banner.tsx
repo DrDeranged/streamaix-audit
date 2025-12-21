@@ -11,7 +11,7 @@ export function AICapabilitiesBanner() {
   const capabilities = [
     { icon: Mic, text: "Real Audio Extraction", detail: "yt-dlp + ffmpeg" },
     { icon: Brain, text: "OpenAI Whisper AI", detail: "98% accuracy transcription" },
-    { icon: Zap, text: "GPT-4o Analysis", detail: "Comprehensive summaries" },
+    { icon: Zap, text: "AI Analysis", detail: "Comprehensive summaries" },
     { icon: Database, text: "Decentralized Storage", detail: "IPFS + Arweave" }
   ];
 
@@ -55,7 +55,7 @@ export function AICapabilitiesBanner() {
             REAL AI PROCESSING
           </Badge>
           <span className="text-sm font-medium">
-            Now powered by OpenAI Whisper & GPT-4o
+            Now powered by Advanced AI
           </span>
 
         </div>

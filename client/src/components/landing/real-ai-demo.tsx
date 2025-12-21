@@ -282,7 +282,7 @@ export function RealAIProcessor() {
   const processingSteps = [
     { name: "Extract Audio", icon: Mic, description: "yt-dlp extracts audio from video" },
     { name: "AI Transcription", icon: Brain, description: "OpenAI Whisper converts speech to text" },
-    { name: "AI Analysis", icon: Zap, description: "GPT-4o generates insights and summary" },
+    { name: "AI Analysis", icon: Zap, description: "AI generates insights and summary" },
     { name: "Store Results", icon: Database, description: "Save to IPFS and database" }
   ];
 
@@ -685,7 +685,7 @@ export function RealAIProcessor() {
                         🧠 AI Intelligence Report
                       </div>
                       <p className="text-sm text-muted-foreground font-normal">
-                        Advanced content analysis powered by GPT-4 and Whisper AI
+                        Advanced content analysis powered by AI
                       </p>
                     </CardTitle>
                   </CardHeader>
@@ -1136,9 +1136,9 @@ export function RealAIProcessor() {
                             </div>
                             <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40 rounded-xl border border-blue-200 dark:border-blue-700">
                               <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
-                                GPT-4o
+                                Advanced
                               </div>
-                              <div className="text-xs text-muted-foreground">AI Model</div>
+                              <div className="text-xs text-muted-foreground">AI Engine</div>
                             </div>
                           </div>
 

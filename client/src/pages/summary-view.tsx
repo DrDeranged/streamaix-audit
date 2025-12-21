@@ -998,9 +998,9 @@ export default function SummaryView() {
                       </div>
                       <div className="text-center p-3 bg-gradient-to-br from-blue-900/40 to-blue-800/40 rounded-xl border border-blue-700">
                         <div className="text-lg font-bold text-blue-400 mb-1">
-                          GPT-4o
+                          Advanced
                         </div>
-                        <div className="text-xs text-muted-foreground">AI Model</div>
+                        <div className="text-xs text-muted-foreground">AI Engine</div>
                       </div>
                     </div>
 

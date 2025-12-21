@@ -3060,7 +3060,7 @@ export default function Discover() {
                 )}
                 <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/30 text-xs">
                   <Brain className="w-2.5 h-2.5 mr-1" />
-                  GPT-4
+                  AI
                 </Badge>
               </div>
             </div>

@@ -577,7 +577,7 @@ export function LiveStreamingTerminal() {
                     </span>
                     <span className="flex items-center gap-1.5 text-[10px] text-cyan-400 font-medium px-2 py-1 rounded-lg bg-cyan-500/10">
                       <Sparkles className="w-3 h-3" />
-                      GPT-4o
+                      AI
                     </span>
                     <span className="flex items-center gap-1.5 text-[10px] text-violet-400 font-medium px-2 py-1 rounded-lg bg-violet-500/10">
                       <MessageSquare className="w-3 h-3" />

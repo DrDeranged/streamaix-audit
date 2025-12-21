@@ -579,7 +579,7 @@ const getRecentActivity = (name: string) => {
       { type: 'tweet', text: 'Posted about Mars colonization timeline update', time: '3d ago', impact: 'medium' }
     ],
     'Sam Altman': [
-      { type: 'product', text: 'OpenAI launched GPT-4o with voice capabilities', time: '1w ago', impact: 'high' },
+      { type: 'product', text: 'OpenAI launched advanced AI with voice capabilities', time: '1w ago', impact: 'high' },
       { type: 'funding', text: 'OpenAI closed $6.6B funding at $157B valuation', time: '2w ago', impact: 'high' },
       { type: 'conference', text: 'Keynote at OpenAI DevDay on agent capabilities', time: '1m ago', impact: 'medium' }
     ],
