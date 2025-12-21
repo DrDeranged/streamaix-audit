@@ -19,14 +19,11 @@ import {
   TrendingUp, 
   TrendingDown, 
   Target, 
-  Shield, 
   Brain, 
   Activity, 
   BarChart3,
-  Clock,
   Zap,
   AlertTriangle,
-  ChevronRight,
   RefreshCw,
   Coins,
   Building2,
@@ -34,32 +31,18 @@ import {
   ArrowDownRight,
   Minus,
   Gauge,
-  Waves,
-  DollarSign,
-  Eye,
   ChevronDown,
   ChevronUp,
   Flame,
   Signal,
-  Scale,
-  LineChart,
   Bell,
   BellPlus,
   Star,
   StarOff,
   Download,
-  Play,
-  Pause,
-  TrendingUpIcon,
   BarChart2,
   PieChart,
   History,
-  Wallet,
-  Calculator,
-  Settings,
-  X,
-  Check,
-  Plus,
   Newspaper
 } from 'lucide-react';
 
@@ -260,11 +243,15 @@ function ConfluenceBar({ label, value, color }: { label: string; value: number; 
   );
 }
 
-function MiniChart({ symbol }: { symbol: string }) {
+function MiniChart({ symbol, currentPrice, priceChange24h }: { symbol: string; currentPrice: number; priceChange24h: number }) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
+
+    const isPositive = priceChange24h >= 0;
+    const lineColor = isPositive ? '#10b981' : '#ef4444';
+    const topColor = isPositive ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)';
 
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
@@ -277,14 +264,14 @@ function MiniChart({ symbol }: { symbol: string }) {
     });
 
     const areaSeries = chart.addSeries(AreaSeries, {
-      lineColor: '#8b5cf6',
-      topColor: 'rgba(139, 92, 246, 0.4)',
-      bottomColor: 'rgba(139, 92, 246, 0.0)',
+      lineColor,
+      topColor,
+      bottomColor: 'rgba(0, 0, 0, 0)',
       lineWidth: 2,
     });
 
-    const mockData = generateMockLineData(50, symbol);
-    areaSeries.setData(mockData);
+    const chartData = generatePriceHistory(50, currentPrice, priceChange24h);
+    areaSeries.setData(chartData);
     chart.timeScale().fitContent();
 
     const handleResize = () => {
@@ -298,26 +285,27 @@ function MiniChart({ symbol }: { symbol: string }) {
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [symbol]);
+  }, [symbol, currentPrice, priceChange24h]);
 
   return <div ref={chartContainerRef} className="w-full h-[120px]" />;
 }
 
-function generateMockLineData(count: number, symbol: string) {
+function generatePriceHistory(count: number, currentPrice: number, priceChange24h: number) {
   const data: { time: Time; value: number }[] = [];
-  const symbolHash = symbol.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  let basePrice = 50 + (symbolHash % 150);
   const now = Math.floor(Date.now() / 1000);
-  const trend = symbolHash % 2 === 0 ? 0.002 : -0.001;
+  const changeDecimal = priceChange24h / 100;
+  const startPrice = currentPrice / (1 + changeDecimal);
+  const pricePerStep = (currentPrice - startPrice) / count;
   
   for (let i = 0; i < count; i++) {
-    const noise = (Math.random() - 0.5) * 0.04;
-    basePrice = basePrice * (1 + trend + noise);
+    const baseValue = startPrice + (pricePerStep * i);
+    const noise = baseValue * (Math.random() - 0.5) * 0.01;
     data.push({
       time: (now - (count - i) * 3600) as Time,
-      value: basePrice,
+      value: baseValue + noise,
     });
   }
+  data.push({ time: now as Time, value: currentPrice });
   return data;
 }
 
@@ -358,72 +346,6 @@ function CorrelationHeatmap({ signals }: { signals: TradingSignal[] }) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function PaperTradingPanel({ signal }: { signal: TradingSignal }) {
-  const [quantity, setQuantity] = useState(1);
-  const [side, setSide] = useState<'long' | 'short'>('long');
-  const { toast } = useToast();
-
-  const positionValue = quantity * signal.currentPrice;
-  const riskAmount = Math.abs(signal.currentPrice - signal.stopLoss) * quantity;
-  const potentialProfit = Math.abs(signal.targets[0]?.price - signal.currentPrice) * quantity;
-
-  const executeTrade = () => {
-    toast({
-      title: "Paper Trade Executed",
-      description: `${side.toUpperCase()} ${quantity} ${signal.asset.symbol} @ $${signal.currentPrice.toFixed(2)}`,
-    });
-  };
-
-  return (
-    <div className="space-y-4 bg-slate-800/30 rounded-lg p-4">
-      <h4 className="text-sm font-medium text-white flex items-center gap-2">
-        <Calculator className="w-4 h-4 text-purple-400" />
-        Paper Trade Simulator
-      </h4>
-      
-      <div className="grid grid-cols-2 gap-3">
-        <Button 
-          variant={side === 'long' ? 'default' : 'outline'} 
-          className={side === 'long' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
-          onClick={() => setSide('long')}
-          data-testid="btn-side-long"
-        >
-          <TrendingUp className="w-4 h-4 mr-1" /> Long
-        </Button>
-        <Button 
-          variant={side === 'short' ? 'default' : 'outline'} 
-          className={side === 'short' ? 'bg-red-500 hover:bg-red-600' : ''}
-          onClick={() => setSide('short')}
-          data-testid="btn-side-short"
-        >
-          <TrendingDown className="w-4 h-4 mr-1" /> Short
-        </Button>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs text-slate-400">Quantity</Label>
-        <Input 
-          type="number" 
-          value={quantity} 
-          onChange={(e) => setQuantity(Number(e.target.value))}
-          className="bg-slate-900/50 border-slate-700"
-          data-testid="input-quantity"
-        />
-      </div>
-
-      <div className="space-y-1 text-xs">
-        <div className="flex justify-between"><span className="text-slate-400">Position Value</span><span className="text-white">${positionValue.toFixed(2)}</span></div>
-        <div className="flex justify-between"><span className="text-slate-400">Risk Amount</span><span className="text-red-400">${riskAmount.toFixed(2)}</span></div>
-        <div className="flex justify-between"><span className="text-slate-400">Target Profit</span><span className="text-emerald-400">${potentialProfit.toFixed(2)}</span></div>
-      </div>
-
-      <Button className="w-full bg-purple-500 hover:bg-purple-600" onClick={executeTrade} data-testid="btn-execute-trade">
-        <Play className="w-4 h-4 mr-2" /> Execute Paper Trade
-      </Button>
     </div>
   );
 }
@@ -653,7 +575,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
           </div>
         </div>
 
-        <MiniChart symbol={signal.asset.symbol} />
+        <MiniChart symbol={signal.asset.symbol} currentPrice={signal.currentPrice} priceChange24h={signal.priceChange24h} />
 
         <div className="grid grid-cols-3 gap-2 my-3">
           <div className="bg-slate-800/50 rounded-lg p-2 text-center">
@@ -718,12 +640,11 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
               <div className="pt-4 space-y-4 border-t border-slate-700/50 mt-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="bg-slate-800/50 border border-slate-700/50 w-full grid grid-cols-5">
+                  <TabsList className="bg-slate-800/50 border border-slate-700/50 w-full grid grid-cols-4">
                     <TabsTrigger value="overview" className="text-[10px] data-[state=active]:bg-purple-500/30">AI</TabsTrigger>
                     <TabsTrigger value="technical" className="text-[10px] data-[state=active]:bg-cyan-500/30">Tech</TabsTrigger>
                     <TabsTrigger value="onchain" className="text-[10px] data-[state=active]:bg-emerald-500/30">Chain</TabsTrigger>
                     <TabsTrigger value="sentiment" className="text-[10px] data-[state=active]:bg-amber-500/30">Sent</TabsTrigger>
-                    <TabsTrigger value="trade" className="text-[10px] data-[state=active]:bg-pink-500/30">Trade</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="overview" className="mt-3 space-y-3">
@@ -874,9 +795,6 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                     )}
                   </TabsContent>
 
-                  <TabsContent value="trade" className="mt-3">
-                    <PaperTradingPanel signal={signal} />
-                  </TabsContent>
                 </Tabs>
 
                 <p className="text-[10px] text-slate-500 text-center">GPT-4o | {new Date(signal.generatedAt).toLocaleString()}</p>
@@ -1131,30 +1049,6 @@ export default function AITrading() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700/50 md:col-span-2">
-              <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Wallet className="w-4 h-4 text-pink-400" />Paper Trading Portfolio</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-4 gap-4 mb-4">
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-xl font-bold text-white">$100,000</p>
-                    <p className="text-xs text-slate-400">Balance</p>
-                  </div>
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-xl font-bold text-emerald-400">$0</p>
-                    <p className="text-xs text-slate-400">Total P&L</p>
-                  </div>
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-xl font-bold text-cyan-400">0</p>
-                    <p className="text-xs text-slate-400">Open Trades</p>
-                  </div>
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-xl font-bold text-purple-400">0</p>
-                    <p className="text-xs text-slate-400">Total Trades</p>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-500 text-center">Use the Trade tab on any signal card to place paper trades</p>
-              </CardContent>
-            </Card>
           </div>
         )}
 
