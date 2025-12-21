@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
+import { createChart, ColorType, CandlestickData, Time, CandlestickSeriesPartialOptions } from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -262,8 +262,6 @@ function ConfluenceBar({ label, value, color }: { label: string; value: number; 
 
 function MiniChart({ symbol, data }: { symbol: string; data?: CandlestickData<Time>[] }) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -278,8 +276,8 @@ function MiniChart({ symbol, data }: { symbol: string; data?: CandlestickData<Ti
       crosshair: { mode: 0 },
     });
 
-    chartRef.current = chart;
-    const candleSeries = chart.addCandlestickSeries({
+    const candleSeries = chart.addSeries({
+      type: 'Candlestick',
       upColor: '#10b981',
       downColor: '#ef4444',
       borderUpColor: '#10b981',
@@ -287,7 +285,6 @@ function MiniChart({ symbol, data }: { symbol: string; data?: CandlestickData<Ti
       wickUpColor: '#10b981',
       wickDownColor: '#ef4444',
     });
-    seriesRef.current = candleSeries;
 
     const mockData = generateMockCandles(50);
     candleSeries.setData(mockData);
