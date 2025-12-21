@@ -938,14 +938,14 @@ export default function AITrading() {
           </Card>
         </div>
 
-        <div className="flex gap-2 mb-6 flex-wrap">
-          <Button variant={mainView === 'signals' ? 'default' : 'outline'} onClick={() => setMainView('signals')} className={mainView === 'signals' ? 'bg-purple-500' : 'border-slate-700'} data-testid="btn-view-signals">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+          <Button variant={mainView === 'signals' ? 'default' : 'outline'} onClick={() => setMainView('signals')} className={`flex-shrink-0 ${mainView === 'signals' ? 'bg-purple-500' : 'border-slate-700'}`} data-testid="btn-view-signals">
             <BarChart3 className="w-4 h-4 mr-2" /> Signals
           </Button>
-          <Button variant={mainView === 'analytics' ? 'default' : 'outline'} onClick={() => setMainView('analytics')} className={mainView === 'analytics' ? 'bg-cyan-500' : 'border-slate-700'} data-testid="btn-view-analytics">
+          <Button variant={mainView === 'analytics' ? 'default' : 'outline'} onClick={() => setMainView('analytics')} className={`flex-shrink-0 ${mainView === 'analytics' ? 'bg-cyan-500' : 'border-slate-700'}`} data-testid="btn-view-analytics">
             <PieChart className="w-4 h-4 mr-2" /> Analytics
           </Button>
-          <Button variant={mainView === 'correlation' ? 'default' : 'outline'} onClick={() => setMainView('correlation')} className={mainView === 'correlation' ? 'bg-amber-500' : 'border-slate-700'} data-testid="btn-view-correlation">
+          <Button variant={mainView === 'correlation' ? 'default' : 'outline'} onClick={() => setMainView('correlation')} className={`flex-shrink-0 ${mainView === 'correlation' ? 'bg-amber-500' : 'border-slate-700'}`} data-testid="btn-view-correlation">
             <BarChart2 className="w-4 h-4 mr-2" /> Correlation
           </Button>
         </div>
@@ -963,12 +963,14 @@ export default function AITrading() {
         {mainView === 'signals' && (
           <>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-              <TabsList className="bg-slate-800/50 border border-slate-700/50">
-                <TabsTrigger value="all" className="data-[state=active]:bg-purple-500/30" data-testid="tab-all">All ({signals.length})</TabsTrigger>
-                <TabsTrigger value="crypto" className="data-[state=active]:bg-amber-500/30" data-testid="tab-crypto"><Coins className="w-4 h-4 mr-1" />Crypto ({cryptoSignals.length})</TabsTrigger>
-                <TabsTrigger value="stocks" className="data-[state=active]:bg-blue-500/30" data-testid="tab-stocks"><Building2 className="w-4 h-4 mr-1" />Stocks ({stockSignals.length})</TabsTrigger>
-                <TabsTrigger value="watchlist" className="data-[state=active]:bg-pink-500/30" data-testid="tab-watchlist"><Star className="w-4 h-4 mr-1" />Watchlist ({watchlist.size})</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <TabsList className="bg-slate-800/50 border border-slate-700/50 inline-flex w-auto min-w-full md:min-w-0">
+                  <TabsTrigger value="all" className="data-[state=active]:bg-purple-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-all">All ({signals.length})</TabsTrigger>
+                  <TabsTrigger value="crypto" className="data-[state=active]:bg-amber-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-crypto"><Coins className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Crypto ({cryptoSignals.length})</TabsTrigger>
+                  <TabsTrigger value="stocks" className="data-[state=active]:bg-blue-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-stocks"><Building2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Stocks ({stockSignals.length})</TabsTrigger>
+                  <TabsTrigger value="watchlist" className="data-[state=active]:bg-pink-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-watchlist"><Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Watchlist ({watchlist.size})</TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
