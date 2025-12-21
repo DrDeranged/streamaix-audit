@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio } from "lucide-react";
+import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio, LineChart } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { WaitlistModal } from "@/components/WaitlistModal";
@@ -123,6 +123,19 @@ export function HeroSection() {
                 AI Analysis
               </Button>
             </motion.div>
+
+            <Link href="/ai-trading">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="outline"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-orange-500/50 hover:bg-orange-500/5 text-slate-300 hover:text-orange-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  data-testid="button-ai-trading"
+                >
+                  <LineChart className="w-4 h-4 mr-2 text-orange-400 group-hover:text-orange-300" />
+                  AI Trading
+                </Button>
+              </motion.div>
+            </Link>
 
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
