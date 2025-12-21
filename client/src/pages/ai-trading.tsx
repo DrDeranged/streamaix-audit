@@ -649,7 +649,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
                   <TabsContent value="overview" className="mt-3 space-y-3">
                     <div>
-                      <p className="text-xs text-slate-400 uppercase font-medium mb-2 flex items-center gap-1"><Brain className="w-3 h-3" /> GPT-4o Analysis</p>
+                      <p className="text-xs text-slate-400 uppercase font-medium mb-2 flex items-center gap-1"><Brain className="w-3 h-3" /> AI Analysis</p>
                       <p className="text-sm text-slate-300 bg-slate-800/30 rounded-lg p-3">{signal.reasoning}</p>
                     </div>
                     <div>
@@ -797,7 +797,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
                 </Tabs>
 
-                <p className="text-[10px] text-slate-500 text-center">GPT-4o | {new Date(signal.generatedAt).toLocaleString()}</p>
+                <p className="text-[10px] text-slate-500 text-center">{new Date(signal.generatedAt).toLocaleString()}</p>
               </div>
             </motion.div>
           )}
@@ -887,7 +887,7 @@ export default function AITrading() {
                 <Brain className="w-8 h-8 text-purple-400" />
                 AI Trading Intelligence
               </h1>
-              <p className="text-slate-400 mt-2">GPT-4o multi-factor analysis with live charts, alerts & paper trading</p>
+              <p className="text-slate-400 mt-2">AI-powered multi-factor analysis with live charts and alerts</p>
             </div>
             
             <div className="flex items-center gap-3">
@@ -1064,7 +1064,7 @@ export default function AITrading() {
 
         <div className="mt-12 text-center text-xs text-slate-500 space-y-1">
           <p>Signals refresh every 30s (live mode) | 15min cache TTL | Multi-factor confluence</p>
-          <p>Data: CoinGecko, Finnhub, Alternative.me | Analysis: GPT-4o</p>
+          <p>Data: CoinGecko, Finnhub, Alternative.me | AI-Powered Analysis</p>
         </div>
       </div>
     </div>

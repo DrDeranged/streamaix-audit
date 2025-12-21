@@ -648,7 +648,7 @@ export function ChatWidget() {
                     </Button>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1.5 text-center hidden sm:block">
-                    Powered by GPT-4o • Press Enter to send
+                    AI-Powered • Press Enter to send
                   </p>
                 </div>
             </>
