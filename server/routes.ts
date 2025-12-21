@@ -29,6 +29,7 @@ import { RecommendationEngine } from "./recommendation-engine";
 import { cryptoIntelligenceService } from "./services/cryptoIntelligenceService";
 import { macroDataService } from "./services/macroDataService";
 import { advancedMarketIntelService } from "./services/advancedMarketIntelService";
+import { aiTradingSignalsService } from "./services/aiTradingSignalsService";
 import { registerWeb3Routes } from "./web3Routes";
 import socialTradingRoutes from "./socialTradingRoutes";
 import { bountyHunterService } from "./services/bountyHunterService";
@@ -7506,6 +7507,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
   
   // Enhanced health check with avatar count for production debugging
+  // AI Trading Signals endpoint
+  app.get('/api/ai-trading-signals', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const signals = await aiTradingSignalsService.getAllSignals();
+      res.json({ success: true, signals });
+    } catch (error: any) {
+      console.error('AI Trading Signals error:', error);
+      res.json({ success: false, signals: [], error: error.message });
+    }
+  }));
+
+  app.get('/api/ai-trading-signals/:symbol', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const signal = await aiTradingSignalsService.getSignalForAsset(req.params.symbol);
+      if (!signal) {
+        return res.status(404).json({ success: false, error: 'Asset not found' });
+      }
+      res.json({ success: true, signal });
+    } catch (error: any) {
+      console.error('AI Trading Signal error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
   console.log('📍 Registering health check endpoint: GET /api/health');
   app.get('/api/health', asyncHandler(async (req: Request, res: Response) => {
     console.log('✅ Health check endpoint hit!');

@@ -50,6 +50,7 @@ const Debates = React.lazy(() => import("@/pages/debates"));
 const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 const Points = React.lazy(() => import("@/pages/points"));
+const AITrading = React.lazy(() => import("@/pages/ai-trading"));
 
 function Router() {
   return (
@@ -133,6 +134,12 @@ function Router() {
       <Route path="/discover">
         <Suspense fallback={<DashboardSkeleton />}>
           <Discover />
+        </Suspense>
+      </Route>
+      
+      <Route path="/ai-trading">
+        <Suspense fallback={<TradingSkeleton />}>
+          <AITrading />
         </Suspense>
       </Route>
       

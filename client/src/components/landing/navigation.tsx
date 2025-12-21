@@ -182,6 +182,15 @@ export function Navigation() {
                       </div>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/ai-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                      <LineChart className="w-4 h-4 text-amber-400" />
+                      <div>
+                        <span className="font-medium block">AI Trading Signals</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Crypto & mining stocks</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -767,6 +776,15 @@ export function Navigation() {
                   >
                     <Brain className="w-4 h-4 text-blue-400" />
                     AI Insights
+                  </button>
+                </Link>
+                <Link href="/ai-trading" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <LineChart className="w-4 h-4 text-amber-400" />
+                    AI Trading Signals
                   </button>
                 </Link>
 
