@@ -6877,3 +6877,141 @@ export const insertScheduledDebateSchema = createInsertSchema(scheduledDebates).
 
 export type InsertScheduledDebate = z.infer<typeof insertScheduledDebateSchema>;
 export type ScheduledDebate = typeof scheduledDebates.$inferSelect;
+
+// ==========================================
+// AI TRADING INTELLIGENCE
+// ==========================================
+
+export const tradingSignalHistory = pgTable("trading_signal_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(),
+  assetName: text("asset_name").notNull(),
+  assetType: text("asset_type").notNull(),
+  signalType: text("signal_type").notNull(),
+  direction: text("direction").notNull(),
+  confidence: integer("confidence").notNull(),
+  entryLow: real("entry_low").notNull(),
+  entryHigh: real("entry_high").notNull(),
+  stopLoss: real("stop_loss").notNull(),
+  target1: real("target_1"),
+  target2: real("target_2"),
+  target3: real("target_3"),
+  priceAtSignal: real("price_at_signal").notNull(),
+  confluenceScore: integer("confluence_score"),
+  technicalScore: integer("technical_score"),
+  onChainScore: integer("on_chain_score"),
+  sentimentScore: integer("sentiment_score"),
+  marketRegime: text("market_regime"),
+  reasoning: text("reasoning"),
+  timeframe: text("timeframe"),
+  alertPriority: text("alert_priority"),
+  outcome: text("outcome"),
+  pnlPercent: real("pnl_percent"),
+  hitTarget: integer("hit_target"),
+  hitStopLoss: boolean("hit_stop_loss"),
+  closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const tradingWatchlist = pgTable("trading_watchlist", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  symbol: text("symbol").notNull(),
+  assetName: text("asset_name").notNull(),
+  assetType: text("asset_type").notNull(),
+  notes: text("notes"),
+  alertEnabled: boolean("alert_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const aiTradingAlerts = pgTable("ai_trading_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  symbol: text("symbol").notNull(),
+  alertType: text("alert_type").notNull(),
+  condition: text("condition").notNull(),
+  targetPrice: real("target_price"),
+  percentChange: real("percent_change"),
+  isActive: boolean("is_active").default(true),
+  triggered: boolean("triggered").default(false),
+  triggeredAt: timestamp("triggered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const paperTrades = pgTable("paper_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  signalId: varchar("signal_id").references(() => tradingSignalHistory.id),
+  symbol: text("symbol").notNull(),
+  side: text("side").notNull(),
+  entryPrice: real("entry_price").notNull(),
+  quantity: real("quantity").notNull(),
+  stopLoss: real("stop_loss"),
+  takeProfit: real("take_profit"),
+  currentPrice: real("current_price"),
+  pnl: real("pnl"),
+  pnlPercent: real("pnl_percent"),
+  status: text("status").notNull().default("open"),
+  closedPrice: real("closed_price"),
+  closedAt: timestamp("closed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userTradingProfile = pgTable("user_trading_profile", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  riskTolerance: text("risk_tolerance").default("moderate"),
+  preferredTimeframe: text("preferred_timeframe").default("4H"),
+  portfolioSize: real("portfolio_size"),
+  maxPositionSize: real("max_position_size").default(5),
+  defaultStopLossPercent: real("default_stop_loss_percent").default(3),
+  paperBalance: real("paper_balance").default(100000),
+  totalPaperTrades: integer("total_paper_trades").default(0),
+  winningTrades: integer("winning_trades").default(0),
+  losingTrades: integer("losing_trades").default(0),
+  totalPnl: real("total_pnl").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTradingSignalHistorySchema = createInsertSchema(tradingSignalHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTradingWatchlistSchema = createInsertSchema(tradingWatchlist).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAiTradingAlertSchema = createInsertSchema(aiTradingAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPaperTradeSchema = createInsertSchema(paperTrades).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserTradingProfileSchema = createInsertSchema(userTradingProfile).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTradingSignalHistory = z.infer<typeof insertTradingSignalHistorySchema>;
+export type TradingSignalHistory = typeof tradingSignalHistory.$inferSelect;
+
+export type InsertTradingWatchlist = z.infer<typeof insertTradingWatchlistSchema>;
+export type TradingWatchlist = typeof tradingWatchlist.$inferSelect;
+
+export type InsertAiTradingAlert = z.infer<typeof insertAiTradingAlertSchema>;
+export type AiTradingAlert = typeof aiTradingAlerts.$inferSelect;
+
+export type InsertPaperTrade = z.infer<typeof insertPaperTradeSchema>;
+export type PaperTrade = typeof paperTrades.$inferSelect;
+
+export type InsertUserTradingProfile = z.infer<typeof insertUserTradingProfileSchema>;
+export type UserTradingProfile = typeof userTradingProfile.$inferSelect;
