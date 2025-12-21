@@ -326,25 +326,37 @@ function CorrelationHeatmap({ signals }: { signals: TradingSignal[] }) {
     return 'bg-red-500';
   };
 
+  const gridCols = assets.length + 1;
+
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[400px]">
-        <div className="flex">
-          <div className="w-12" />
-          {assets.map((a, i) => (
-            <div key={i} className="w-12 text-center text-[10px] text-slate-400 font-medium">{a}</div>
-          ))}
-        </div>
+    <div className="w-full">
+      <div 
+        className="grid gap-1 w-full" 
+        style={{ gridTemplateColumns: `80px repeat(${assets.length}, 1fr)` }}
+      >
+        <div />
+        {assets.map((a, i) => (
+          <div key={i} className="text-center text-xs sm:text-sm text-slate-400 font-medium py-2 truncate">{a}</div>
+        ))}
         {assets.map((asset, i) => (
-          <div key={i} className="flex items-center">
-            <div className="w-12 text-[10px] text-slate-400 font-medium">{asset}</div>
+          <>
+            <div key={`label-${i}`} className="text-xs sm:text-sm text-slate-400 font-medium py-3 truncate">{asset}</div>
             {correlations[i].map((corr, j) => (
-              <div key={j} className={`w-12 h-8 flex items-center justify-center ${getColor(corr)} bg-opacity-30`}>
-                <span className="text-[9px] text-white font-medium">{corr.toFixed(2)}</span>
+              <div 
+                key={`${i}-${j}`} 
+                className={`flex items-center justify-center ${getColor(corr)} bg-opacity-30 rounded-md py-3 sm:py-4 transition-all hover:bg-opacity-50 cursor-pointer`}
+              >
+                <span className="text-xs sm:text-sm text-white font-medium">{corr.toFixed(2)}</span>
               </div>
             ))}
-          </div>
+          </>
         ))}
+      </div>
+      <div className="flex items-center justify-center gap-6 mt-6 text-xs text-slate-400">
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-emerald-500 bg-opacity-30" /> High (0.7+)</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-cyan-500 bg-opacity-30" /> Medium (0.4-0.7)</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-amber-500 bg-opacity-30" /> Low (0-0.4)</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-red-500 bg-opacity-30" /> Negative</div>
       </div>
     </div>
   );
