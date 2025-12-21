@@ -65,7 +65,7 @@ export function GlobalMobileHeader() {
         animate={{ y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <div className="flex items-center justify-between h-14 px-3">
+        <div className="relative flex items-center justify-between h-14 px-3">
           {/* Left: Back to Home button */}
           <Link href="/">
             <Button
@@ -79,10 +79,10 @@ export function GlobalMobileHeader() {
             </Button>
           </Link>
 
-          {/* Center: StreamAiX Logo - tappable to go home */}
+          {/* Center: StreamAiX Logo - absolutely positioned for true centering on mobile */}
           <button
             onClick={goHome}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all duration-200 active:scale-95"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all duration-200 active:scale-95"
             aria-label="Go to StreamAiX home"
             data-testid="button-logo-home"
           >
