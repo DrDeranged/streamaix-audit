@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createChart, ColorType, CandlestickData, Time, CandlestickSeriesPartialOptions } from 'lightweight-charts';
+import { createChart, ColorType, LineSeries, AreaSeries, Time } from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -260,7 +260,7 @@ function ConfluenceBar({ label, value, color }: { label: string; value: number; 
   );
 }
 
-function MiniChart({ symbol, data }: { symbol: string; data?: CandlestickData<Time>[] }) {
+function MiniChart({ symbol }: { symbol: string }) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -276,18 +276,15 @@ function MiniChart({ symbol, data }: { symbol: string; data?: CandlestickData<Ti
       crosshair: { mode: 0 },
     });
 
-    const candleSeries = chart.addSeries({
-      type: 'Candlestick',
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderUpColor: '#10b981',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
+    const areaSeries = chart.addSeries(AreaSeries, {
+      lineColor: '#8b5cf6',
+      topColor: 'rgba(139, 92, 246, 0.4)',
+      bottomColor: 'rgba(139, 92, 246, 0.0)',
+      lineWidth: 2,
     });
 
-    const mockData = generateMockCandles(50);
-    candleSeries.setData(mockData);
+    const mockData = generateMockLineData(50, symbol);
+    areaSeries.setData(mockData);
     chart.timeScale().fitContent();
 
     const handleResize = () => {
@@ -306,29 +303,22 @@ function MiniChart({ symbol, data }: { symbol: string; data?: CandlestickData<Ti
   return <div ref={chartContainerRef} className="w-full h-[120px]" />;
 }
 
-function generateMockCandles(count: number): CandlestickData<Time>[] {
-  const candles: CandlestickData<Time>[] = [];
-  let basePrice = 100 + Math.random() * 100;
+function generateMockLineData(count: number, symbol: string) {
+  const data: { time: Time; value: number }[] = [];
+  const symbolHash = symbol.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  let basePrice = 50 + (symbolHash % 150);
   const now = Math.floor(Date.now() / 1000);
+  const trend = symbolHash % 2 === 0 ? 0.002 : -0.001;
   
   for (let i = 0; i < count; i++) {
-    const volatility = 0.02 + Math.random() * 0.03;
-    const trend = Math.random() > 0.5 ? 1 : -1;
-    const open = basePrice;
-    const close = open * (1 + trend * volatility * Math.random());
-    const high = Math.max(open, close) * (1 + Math.random() * 0.01);
-    const low = Math.min(open, close) * (1 - Math.random() * 0.01);
-    
-    candles.push({
+    const noise = (Math.random() - 0.5) * 0.04;
+    basePrice = basePrice * (1 + trend + noise);
+    data.push({
       time: (now - (count - i) * 3600) as Time,
-      open,
-      high,
-      low,
-      close,
+      value: basePrice,
     });
-    basePrice = close;
   }
-  return candles;
+  return data;
 }
 
 function CorrelationHeatmap({ signals }: { signals: TradingSignal[] }) {
