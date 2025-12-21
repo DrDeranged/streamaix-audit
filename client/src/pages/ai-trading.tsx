@@ -938,15 +938,15 @@ export default function AITrading() {
           </Card>
         </div>
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-          <Button variant={mainView === 'signals' ? 'default' : 'outline'} onClick={() => setMainView('signals')} className={`flex-shrink-0 ${mainView === 'signals' ? 'bg-purple-500' : 'border-slate-700'}`} data-testid="btn-view-signals">
-            <BarChart3 className="w-4 h-4 mr-2" /> Signals
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          <Button variant={mainView === 'signals' ? 'default' : 'outline'} onClick={() => setMainView('signals')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'signals' ? 'bg-purple-500' : 'border-slate-700'}`} data-testid="btn-view-signals">
+            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Signals
           </Button>
-          <Button variant={mainView === 'analytics' ? 'default' : 'outline'} onClick={() => setMainView('analytics')} className={`flex-shrink-0 ${mainView === 'analytics' ? 'bg-cyan-500' : 'border-slate-700'}`} data-testid="btn-view-analytics">
-            <PieChart className="w-4 h-4 mr-2" /> Analytics
+          <Button variant={mainView === 'analytics' ? 'default' : 'outline'} onClick={() => setMainView('analytics')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'analytics' ? 'bg-cyan-500' : 'border-slate-700'}`} data-testid="btn-view-analytics">
+            <PieChart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Analytics
           </Button>
-          <Button variant={mainView === 'correlation' ? 'default' : 'outline'} onClick={() => setMainView('correlation')} className={`flex-shrink-0 ${mainView === 'correlation' ? 'bg-amber-500' : 'border-slate-700'}`} data-testid="btn-view-correlation">
-            <BarChart2 className="w-4 h-4 mr-2" /> Correlation
+          <Button variant={mainView === 'correlation' ? 'default' : 'outline'} onClick={() => setMainView('correlation')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'correlation' ? 'bg-amber-500' : 'border-slate-700'}`} data-testid="btn-view-correlation">
+            <BarChart2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Correlation
           </Button>
         </div>
 
