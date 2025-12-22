@@ -162,6 +162,23 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "AI Trading Intelligence",
+    subtitle: "Multi-Factor Signal Analysis",
+    description: "Get AI-powered trading signals with confluence scoring, live charts, whale alerts, and correlation heatmaps for crypto and stocks.",
+    icon: TrendingUp,
+    gradient: "from-purple-500 via-fuchsia-500 to-pink-500",
+    glowColor: "rgba(168, 85, 247, 0.5)",
+    instructions: [
+      "View AI trading signals with confidence scores",
+      "Analyze technical, on-chain, and sentiment data",
+      "Track correlations and set price alerts"
+    ],
+    action: {
+      label: "Open AI Trading",
+      path: "/ai-trading"
+    }
+  },
+  {
     title: "Your Dashboard",
     subtitle: "Track Your Performance",
     description: "Monitor your portfolio, trading history, and earnings. See your predictions, positions, and overall stats in one place.",
