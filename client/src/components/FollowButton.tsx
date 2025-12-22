@@ -24,7 +24,7 @@ export function FollowUserButton({
   const queryClient = useQueryClient();
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const { data: followStatus, isLoading: checkingStatus } = useQuery({
+  const { data: followStatus, isLoading: checkingStatus } = useQuery<{ isFollowing: boolean }>({
     queryKey: ['/api/users', userId, 'follow', 'status'],
   });
 
@@ -193,7 +193,7 @@ export function FollowCategoryButton({
   const queryClient = useQueryClient();
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const { data: followStatus, isLoading: checkingStatus } = useQuery({
+  const { data: followStatus, isLoading: checkingStatus } = useQuery<{ isFollowing: boolean }>({
     queryKey: ['/api/categories', category, 'follow', 'status'],
   });
 
