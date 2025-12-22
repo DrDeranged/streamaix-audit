@@ -11812,34 +11812,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const marketService = MarketDataService.getInstance();
-      const crossMarketService = new CrossMarketSignalService();
-      const patternService = new (await import('./services/patternRecognitionService')).PatternRecognitionService();
       
-      // Get comprehensive market data
-      const [stocks, cryptos, correlations, regime] = await Promise.allSettled([
+      // Only fetch lightweight market data for broadcasts - skip expensive signal generation
+      const [stocks, cryptos] = await Promise.allSettled([
         marketService.getCryptoStocks(),
-        marketService.getTopCryptos(12),
-        crossMarketService.getCorrelationMatrix('1h'),
-        crossMarketService.getMarketRegimeAnalysis('1h')
+        marketService.getTopCryptos(12)
       ]);
-      
-      // Get latest pattern alerts (last 5 minutes)
-      const patterns = await patternService.getPatternAlerts();
-      const recentPatterns = patterns.filter(p => 
-        new Date(p.timestamp).getTime() > Date.now() - 5 * 60 * 1000
-      );
-      
-      // Get latest cross-market signals
-      const signals = await crossMarketService.getUnifiedSignals();
       
       // Create data hashes to detect changes
       const currentData = {
         stocks: JSON.stringify(stocks.status === 'fulfilled' ? stocks.value : []),
         cryptos: JSON.stringify(cryptos.status === 'fulfilled' ? cryptos.value : []),
-        patterns: JSON.stringify(recentPatterns),
-        signals: JSON.stringify(signals),
-        correlations: JSON.stringify(correlations.status === 'fulfilled' ? correlations.value : {}),
-        regime: JSON.stringify(regime.status === 'fulfilled' ? regime.value : {})
+        patterns: '[]',
+        signals: '[]',
+        correlations: '{}',
+        regime: '{}'
       };
       
       // Broadcast updates for changed data only
@@ -11861,41 +11848,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      if (currentData.patterns !== lastBroadcastData.patterns && recentPatterns.length > 0) {
-        updates.push({
-          type: 'patternAlert',
-          data: { patterns: recentPatterns },
-          timestamp: new Date().toISOString()
-        });
-      }
-      
-      if (currentData.signals !== lastBroadcastData.signals && signals.length > 0) {
-        updates.push({
-          type: 'signalUpdate',
-          data: { signals },
-          timestamp: new Date().toISOString()
-        });
-      }
-      
-      if (currentData.correlations !== lastBroadcastData.correlations && correlations.status === 'fulfilled') {
-        // Only broadcast correlation changes if significant
-        const corrData = correlations.value;
-        if (corrData && Object.keys(corrData).length > 0) {
-          updates.push({
-            type: 'correlationUpdate',
-            data: { correlations: corrData },
-            timestamp: new Date().toISOString()
-          });
-        }
-      }
-      
-      if (currentData.regime !== lastBroadcastData.regime && regime.status === 'fulfilled') {
-        updates.push({
-          type: 'regimeUpdate',
-          data: { regime: regime.value },
-          timestamp: new Date().toISOString()
-        });
-      }
+      // Note: Pattern, signal, correlation, and regime broadcasts disabled to prevent memory issues
+      // These are available on-demand via dedicated API endpoints
       
       // Send updates to all connected clients
       if (updates.length > 0) {
@@ -16452,8 +16406,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('🎤 Autonomous Avatar Voice Streaming Service initialized');
 
   // Start enhanced real-time updates with multiple intervals
-  const marketUpdateInterval = setInterval(broadcastMarketUpdates, 15000); // Every 15 seconds for comprehensive data
-  const volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 45000); // Every 45 seconds for volatility alerts
+  const marketUpdateInterval = setInterval(broadcastMarketUpdates, 60000); // Every 60 seconds for market data
+  const volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 120000); // Every 2 minutes for volatility alerts
   
   // Cleanup on server close
   httpServer.on('close', () => {
