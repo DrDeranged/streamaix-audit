@@ -67,7 +67,8 @@ import {
   Search,
   HelpCircle,
   Sparkles,
-  PlayCircle
+  PlayCircle,
+  UserPlus
 } from 'lucide-react';
 
 interface Summary {
@@ -192,6 +193,12 @@ export default function Dashboard() {
   // Fetch user's followed avatars
   const { data: followedAvatarsData, isLoading: followedAvatarsLoading } = useQuery({
     queryKey: [`/api/users/${user?.id}/followed-avatars`],
+    enabled: !!user?.id,
+  });
+
+  // Fetch user's follow stats (followers/following counts)
+  const { data: followStatsData } = useQuery<{ followersCount: number; followingCount: number }>({
+    queryKey: ['/api/users', user?.id, 'follow', 'stats'],
     enabled: !!user?.id,
   });
 
@@ -572,6 +579,78 @@ export default function Dashboard() {
                   </div>
                   <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Rank</p>
                   <p className="text-white text-xl font-bold">{stats.level}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+
+        {/* Engagement Stats Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        >
+          {/* Followers Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-pink-500/20 backdrop-blur-xl hover:border-pink-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
+                    <Users className="h-6 w-6 text-pink-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Followers</p>
+                  <p className="text-white text-xl font-bold" data-testid="stat-followers">{followStatsData?.followersCount || 0}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Following Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-violet-500/20 backdrop-blur-xl hover:border-violet-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-3">
+                    <UserPlus className="h-6 w-6 text-violet-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Following</p>
+                  <p className="text-white text-xl font-bold" data-testid="stat-following">{followStatsData?.followingCount || 0}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Followed Avatars Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-cyan-500/20 backdrop-blur-xl hover:border-cyan-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-teal-500/20 flex items-center justify-center mx-auto mb-3">
+                    <Sparkles className="h-6 w-6 text-cyan-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Avatars</p>
+                  <p className="text-white text-xl font-bold" data-testid="stat-avatars">{(followedAvatarsData as any)?.followedAvatars?.length || 0}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Streak Card */}
+          <div className="relative group">
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-orange-500 via-yellow-500 to-amber-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
+            <Card className="relative bg-slate-950/40 border border-orange-500/20 backdrop-blur-xl hover:border-orange-500/40 transition-all duration-300 touch-manipulation">
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-orange-500/20 to-yellow-500/20 flex items-center justify-center mx-auto mb-3">
+                    <Zap className="h-6 w-6 text-orange-300" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Streak</p>
+                  <p className="text-white text-xl font-bold" data-testid="stat-streak">{stats.streak} days</p>
                 </div>
               </CardContent>
             </Card>
