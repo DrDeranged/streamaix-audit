@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -14,11 +14,13 @@ import {
   Sparkles,
   Bot,
   User,
-  CheckCircle
+  CheckCircle,
+  X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -128,9 +130,19 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[80vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border-purple-500/30 z-[100]">
-        <DialogHeader className="px-6 py-4 border-b border-purple-500/20 bg-slate-950/80 backdrop-blur-xl">
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[200] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content 
+          className="fixed left-[50%] top-[50%] z-[200] translate-x-[-50%] translate-y-[-50%] max-w-2xl w-[95vw] h-[80vh] max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border border-purple-500/30 rounded-lg shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95" 
+          onClick={(e) => e.stopPropagation()} 
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-[210] text-white">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        <div className="px-6 py-4 border-b border-purple-500/20 bg-slate-950/80 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="relative">
               <Avatar className="w-12 h-12 ring-2 ring-purple-500/40 border-2 border-slate-800">
@@ -153,12 +165,12 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
               </div>
             </div>
             <div className="flex-1">
-              <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <DialogPrimitive.Title className="text-lg font-bold text-white flex items-center gap-2">
                 Chat with {avatar.name}
                 <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 text-xs">
                   AI Persona
                 </Badge>
-              </DialogTitle>
+              </DialogPrimitive.Title>
               <p className="text-sm text-purple-300/70">{avatar.expertise}</p>
             </div>
             {messages.length > 0 && (
@@ -174,7 +186,7 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
               </Button>
             )}
           </div>
-        </DialogHeader>
+        </div>
 
         <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef}>
           <div className="space-y-4">
@@ -313,7 +325,8 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
             This is an AI persona. Responses are for educational purposes only, not financial advice.
           </p>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

@@ -966,7 +966,7 @@ export default function PredictionMarket() {
                     </div>
                     <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
                       <span className="text-slate-400">Creator</span>
-                      <span className="text-white font-mono text-sm">{market.creatorWallet.slice(0, 6)}...{market.creatorWallet.slice(-4)}</span>
+                      <span className="text-white font-mono text-sm">{market.creatorWallet ? `${market.creatorWallet.slice(0, 6)}...${market.creatorWallet.slice(-4)}` : 'Unknown'}</span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
                       <span className="text-slate-400">Status</span>
