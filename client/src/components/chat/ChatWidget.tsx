@@ -482,7 +482,11 @@ export function ChatWidget() {
             exit={{ scale: 0, opacity: 0 }}
             className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
           >
-            <EnergyOrbButton onClick={() => setIsOpen(true)} />
+            <EnergyOrbButton onClick={() => {
+              // Dispatch event to close any open avatar dialogs on mobile
+              window.dispatchEvent(new CustomEvent('streamaix-chat-open'));
+              setIsOpen(true);
+            }} />
           </motion.div>
         )}
       </AnimatePresence>

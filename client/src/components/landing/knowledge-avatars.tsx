@@ -1145,6 +1145,16 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [showPortfolioSimulator, setShowPortfolioSimulator] = useState(false);
+  const [openAvatarDialog, setOpenAvatarDialog] = useState<string | null>(null);
+  
+  // Close avatar dialog when chat opens to prevent mobile overlay conflicts
+  useEffect(() => {
+    const handleChatOpen = () => {
+      setOpenAvatarDialog(null);
+    };
+    window.addEventListener('streamaix-chat-open', handleChatOpen);
+    return () => window.removeEventListener('streamaix-chat-open', handleChatOpen);
+  }, []);
 
   // Fetch real avatars from API
   const { data: avatarsResponse, isLoading } = useQuery<{ avatars: DatabaseAvatar[] }>({
@@ -1612,7 +1622,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       minWidth: isMobile ? '100%' : 'auto'
                     }}
                   >
-                    <Dialog>
+                    <Dialog open={openAvatarDialog === avatar.id} onOpenChange={(open) => setOpenAvatarDialog(open ? avatar.id : null)}>
                       <DialogTrigger asChild>
                         <div 
                           className="w-full h-full" 
@@ -1859,9 +1869,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       </DialogTrigger>
                       
                       {/* Compact Popup Modal - Responsive */}
-                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[75vh] md:h-[75vh] max-h-[90vh]">
+                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[85vh] md:h-[75vh] max-h-[90vh] z-40">
                         {/* Two-Column Grid Layout - Stacks on Mobile */}
-                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full overflow-y-auto md:overflow-hidden">
+                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full overflow-y-auto md:overflow-hidden pb-safe">
                           
                           {/* LEFT SIDEBAR - Compact Profile */}
                           <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-3 md:p-4 border-b md:border-b-0 md:border-r border-muted/30 flex flex-col">
@@ -1938,8 +1948,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                           </div>
                           
-                          {/* RIGHT CONTENT AREA */}
-                          <div className="p-3 flex flex-col gap-2 overflow-hidden">
+                          {/* RIGHT CONTENT AREA - Scrollable on mobile */}
+                          <div className="p-3 flex flex-col gap-2 overflow-y-auto md:overflow-hidden">
                             
                             {/* Compact Performance Cards - 2x2 Grid */}
                             <div className="grid grid-cols-2 gap-1.5 md:gap-2">
