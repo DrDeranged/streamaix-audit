@@ -6919,6 +6919,7 @@ export const tradingWatchlist = pgTable("trading_watchlist", {
   symbol: text("symbol").notNull(),
   assetName: text("asset_name").notNull(),
   assetType: text("asset_type").notNull(),
+  coingeckoId: text("coingecko_id"),
   notes: text("notes"),
   alertEnabled: boolean("alert_enabled").default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -6984,6 +6985,8 @@ export const insertTradingWatchlistSchema = createInsertSchema(tradingWatchlist)
   id: true,
   createdAt: true,
 });
+
+export const MAX_WATCHLIST_ITEMS = 5;
 
 export const insertAiTradingAlertSchema = createInsertSchema(aiTradingAlerts).omit({
   id: true,

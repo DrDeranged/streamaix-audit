@@ -132,6 +132,10 @@ import {
   type GovernanceVote,
   type InsertGovernanceProposal,
   type InsertGovernanceVote,
+  // Trading Watchlist
+  tradingWatchlist,
+  type TradingWatchlist,
+  type InsertTradingWatchlist,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -560,6 +564,13 @@ export interface IStorage {
   getVotesByUser(userId: string): Promise<any[]>;
   getUserVoteOnProposal(proposalId: string, userId: string): Promise<any | undefined>;
   getGovernanceStats(): Promise<{ totalProposals: number; activeProposals: number; totalVoters: number; participationRate: number; successRate: number }>;
+  
+  // Trading Watchlist operations
+  getUserWatchlist(userId: string): Promise<TradingWatchlist[]>;
+  addToWatchlist(item: InsertTradingWatchlist): Promise<TradingWatchlist>;
+  removeFromWatchlist(userId: string, itemId: string): Promise<boolean>;
+  getWatchlistCount(userId: string): Promise<number>;
+  isInWatchlist(userId: string, symbol: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3456,6 +3467,42 @@ export class DatabaseStorage implements IStorage {
       participationRate,
       successRate,
     };
+  }
+
+  // Trading Watchlist operations
+  async getUserWatchlist(userId: string): Promise<TradingWatchlist[]> {
+    return await db.select().from(tradingWatchlist)
+      .where(eq(tradingWatchlist.userId, userId))
+      .orderBy(desc(tradingWatchlist.createdAt));
+  }
+
+  async addToWatchlist(item: InsertTradingWatchlist): Promise<TradingWatchlist> {
+    const [newItem] = await db.insert(tradingWatchlist).values(item).returning();
+    return newItem;
+  }
+
+  async removeFromWatchlist(userId: string, itemId: string): Promise<boolean> {
+    const result = await db.delete(tradingWatchlist)
+      .where(and(
+        eq(tradingWatchlist.userId, userId),
+        eq(tradingWatchlist.id, itemId)
+      ));
+    return true;
+  }
+
+  async getWatchlistCount(userId: string): Promise<number> {
+    const items = await db.select().from(tradingWatchlist)
+      .where(eq(tradingWatchlist.userId, userId));
+    return items.length;
+  }
+
+  async isInWatchlist(userId: string, symbol: string): Promise<boolean> {
+    const [item] = await db.select().from(tradingWatchlist)
+      .where(and(
+        eq(tradingWatchlist.userId, userId),
+        eq(tradingWatchlist.symbol, symbol)
+      ));
+    return !!item;
   }
 }
 

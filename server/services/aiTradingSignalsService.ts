@@ -820,8 +820,77 @@ export function getTrackedAssets(): TradingAsset[] {
   return TRACKED_ASSETS;
 }
 
+export interface CryptoSearchResult {
+  id: string;
+  symbol: string;
+  name: string;
+  thumb: string;
+  large: string;
+  marketCapRank: number | null;
+}
+
+export async function searchCryptoAssets(query: string): Promise<CryptoSearchResult[]> {
+  try {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`CoinGecko search error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return (data.coins || []).slice(0, 10).map((coin: any) => ({
+      id: coin.id,
+      symbol: coin.symbol?.toUpperCase() || '',
+      name: coin.name || '',
+      thumb: coin.thumb || '',
+      large: coin.large || '',
+      marketCapRank: coin.market_cap_rank,
+    }));
+  } catch (error) {
+    console.error('Crypto search error:', error);
+    return [];
+  }
+}
+
+export async function getSignalForCustomAsset(coingeckoId: string, symbol: string, name: string): Promise<TradingSignal | null> {
+  const cacheKey = `custom_${coingeckoId}`;
+  const cached = signalCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.signal;
+  }
+
+  const priceData = await fetchCryptoData(coingeckoId);
+  if (priceData.price === 0) {
+    return null;
+  }
+
+  const asset: TradingAsset = {
+    symbol: symbol.toUpperCase(),
+    name,
+    type: 'crypto',
+    coingeckoId,
+  };
+
+  const fearGreed = await fetchFearGreedIndex();
+  const technicals = calculateTechnicalIndicators(priceData.price, priceData.high24h, priceData.low24h, priceData.change24h);
+  const onChain = calculateOnChainMetrics(priceData.change24h, priceData.volume24h);
+  const sentiment = calculateSentiment(priceData.change24h, fearGreed);
+  const regime = determineMarketRegime(priceData.change24h, priceData.change7d, technicals);
+  const confluence = calculateConfluence(technicals, onChain, sentiment, priceData.change24h);
+
+  const signal = await generateAISignal(asset, priceData, technicals, onChain, sentiment, regime, confluence);
+  signalCache.set(cacheKey, { signal, timestamp: Date.now() });
+  
+  return signal;
+}
+
 export const aiTradingSignalsService = {
   getSignalForAsset,
   getAllSignals,
   getTrackedAssets,
+  searchCryptoAssets,
+  getSignalForCustomAsset,
 };

@@ -7531,6 +7531,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Crypto Search endpoint
+  app.get('/api/crypto-search', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.json({ success: true, results: [] });
+      }
+      const results = await aiTradingSignalsService.searchCryptoAssets(query);
+      res.json({ success: true, results });
+    } catch (error: any) {
+      console.error('Crypto search error:', error);
+      res.json({ success: false, results: [], error: error.message });
+    }
+  }));
+
+  // Custom Watchlist endpoints
+  app.get('/api/trading-watchlist', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+      const items = await storage.getUserWatchlist(userId);
+      res.json({ success: true, items });
+    } catch (error: any) {
+      console.error('Get watchlist error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  app.post('/api/trading-watchlist', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+      
+      const { symbol, assetName, assetType, coingeckoId, notes } = req.body;
+      if (!symbol || !assetName || !assetType) {
+        return res.status(400).json({ success: false, error: 'Missing required fields' });
+      }
+      
+      const count = await storage.getWatchlistCount(userId);
+      if (count >= 5) {
+        return res.status(400).json({ success: false, error: 'Maximum 5 assets allowed in watchlist' });
+      }
+      
+      const exists = await storage.isInWatchlist(userId, symbol);
+      if (exists) {
+        return res.status(400).json({ success: false, error: 'Asset already in watchlist' });
+      }
+      
+      const item = await storage.addToWatchlist({
+        userId,
+        symbol,
+        assetName,
+        assetType,
+        coingeckoId,
+        notes,
+      });
+      res.json({ success: true, item });
+    } catch (error: any) {
+      console.error('Add to watchlist error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  app.delete('/api/trading-watchlist/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+      
+      await storage.removeFromWatchlist(userId, req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Remove from watchlist error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
+  app.get('/api/trading-watchlist/signals', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+      
+      const items = await storage.getUserWatchlist(userId);
+      const signals = [];
+      
+      for (const item of items) {
+        if (item.coingeckoId) {
+          const signal = await aiTradingSignalsService.getSignalForCustomAsset(
+            item.coingeckoId,
+            item.symbol,
+            item.assetName
+          );
+          if (signal) {
+            signals.push({ ...signal, watchlistId: item.id });
+          }
+        }
+      }
+      
+      res.json({ success: true, signals });
+    } catch (error: any) {
+      console.error('Get watchlist signals error:', error);
+      res.status(500).json({ success: false, signals: [], error: error.message });
+    }
+  }));
+
   console.log('📍 Registering health check endpoint: GET /api/health');
   app.get('/api/health', asyncHandler(async (req: Request, res: Response) => {
     console.log('✅ Health check endpoint hit!');
