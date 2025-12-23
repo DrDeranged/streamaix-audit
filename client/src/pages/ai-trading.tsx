@@ -1272,10 +1272,9 @@ function MyWatchlistSection() {
             />
             <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
-          </div>
 
-          {hasResults && (
-            <div className="absolute z-50 w-full max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-xl mt-1 max-h-80 overflow-y-auto">
+            {hasResults && (
+              <div className="absolute left-0 right-0 top-full z-50 bg-slate-900 border border-slate-700 rounded-lg shadow-xl mt-1 max-h-80 overflow-y-auto">
               {stockResults.length > 0 && (
                 <>
                   <div className="px-3 py-2 bg-blue-500/20 text-xs text-blue-300 font-medium flex items-center gap-2">
@@ -1326,8 +1325,9 @@ function MyWatchlistSection() {
                   ))}
                 </>
               )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {watchlistItems.length === 0 ? (
             <div className="text-center py-8 text-slate-400">
