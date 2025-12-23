@@ -887,10 +887,109 @@ export async function getSignalForCustomAsset(coingeckoId: string, symbol: strin
   return signal;
 }
 
+export interface StockSearchResult {
+  symbol: string;
+  name: string;
+  type: 'stock';
+  exchange: string;
+}
+
+export async function searchStocks(query: string): Promise<StockSearchResult[]> {
+  try {
+    const finnhubKey = process.env.FINNHUB_API_KEY;
+    if (!finnhubKey) {
+      // Fallback: Match against common US stocks
+      const commonStocks = [
+        { symbol: 'TSLA', name: 'Tesla Inc', exchange: 'NASDAQ' },
+        { symbol: 'AAPL', name: 'Apple Inc', exchange: 'NASDAQ' },
+        { symbol: 'GOOGL', name: 'Alphabet Inc', exchange: 'NASDAQ' },
+        { symbol: 'MSFT', name: 'Microsoft Corp', exchange: 'NASDAQ' },
+        { symbol: 'AMZN', name: 'Amazon.com Inc', exchange: 'NASDAQ' },
+        { symbol: 'META', name: 'Meta Platforms Inc', exchange: 'NASDAQ' },
+        { symbol: 'NVDA', name: 'NVIDIA Corp', exchange: 'NASDAQ' },
+        { symbol: 'AMD', name: 'Advanced Micro Devices', exchange: 'NASDAQ' },
+        { symbol: 'NFLX', name: 'Netflix Inc', exchange: 'NASDAQ' },
+        { symbol: 'JPM', name: 'JPMorgan Chase', exchange: 'NYSE' },
+        { symbol: 'V', name: 'Visa Inc', exchange: 'NYSE' },
+        { symbol: 'BA', name: 'Boeing Co', exchange: 'NYSE' },
+        { symbol: 'DIS', name: 'Walt Disney Co', exchange: 'NYSE' },
+        { symbol: 'COIN', name: 'Coinbase Global', exchange: 'NASDAQ' },
+        { symbol: 'PLTR', name: 'Palantir Technologies', exchange: 'NYSE' },
+        { symbol: 'SQ', name: 'Block Inc', exchange: 'NYSE' },
+        { symbol: 'PYPL', name: 'PayPal Holdings', exchange: 'NASDAQ' },
+        { symbol: 'UBER', name: 'Uber Technologies', exchange: 'NYSE' },
+        { symbol: 'ABNB', name: 'Airbnb Inc', exchange: 'NASDAQ' },
+        { symbol: 'SNAP', name: 'Snap Inc', exchange: 'NYSE' },
+      ];
+      const q = query.toUpperCase();
+      return commonStocks
+        .filter(s => s.symbol.includes(q) || s.name.toUpperCase().includes(q))
+        .slice(0, 5)
+        .map(s => ({ ...s, type: 'stock' as const }));
+    }
+
+    const response = await fetch(
+      `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${finnhubKey}`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Finnhub search error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return (data.result || [])
+      .filter((item: any) => item.type === 'Common Stock')
+      .slice(0, 5)
+      .map((item: any) => ({
+        symbol: item.symbol,
+        name: item.description || item.symbol,
+        type: 'stock' as const,
+        exchange: item.displaySymbol?.split('.')[1] || 'US',
+      }));
+  } catch (error) {
+    console.error('Stock search error:', error);
+    return [];
+  }
+}
+
+export async function getSignalForCustomStock(symbol: string, name: string): Promise<TradingSignal | null> {
+  const cacheKey = `stock_${symbol}`;
+  const cached = signalCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.signal;
+  }
+
+  const priceData = await fetchStockData(symbol);
+  if (priceData.price === 0) {
+    return null;
+  }
+
+  const asset: TradingAsset = {
+    symbol: symbol.toUpperCase(),
+    name,
+    type: 'stock',
+    finnhubSymbol: symbol,
+  };
+
+  const fearGreed = await fetchFearGreedIndex();
+  const technicals = calculateTechnicalIndicators(priceData.price, priceData.high24h, priceData.low24h, priceData.change24h);
+  const onChain = calculateOnChainMetrics(priceData.change24h, priceData.volume24h);
+  const sentiment = calculateSentiment(priceData.change24h, fearGreed);
+  const regime = determineMarketRegime(priceData.change24h, priceData.change7d, technicals);
+  const confluence = calculateConfluence(technicals, onChain, sentiment, priceData.change24h);
+
+  const signal = await generateAISignal(asset, priceData, technicals, onChain, sentiment, regime, confluence);
+  signalCache.set(cacheKey, { signal, timestamp: Date.now() });
+  
+  return signal;
+}
+
 export const aiTradingSignalsService = {
   getSignalForAsset,
   getAllSignals,
   getTrackedAssets,
   searchCryptoAssets,
+  searchStocks,
   getSignalForCustomAsset,
+  getSignalForCustomStock,
 };

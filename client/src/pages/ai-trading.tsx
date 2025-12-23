@@ -857,6 +857,13 @@ interface CryptoSearchResult {
   marketCapRank: number | null;
 }
 
+interface StockSearchResult {
+  symbol: string;
+  name: string;
+  type: 'stock';
+  exchange: string;
+}
+
 interface WatchlistItem {
   id: string;
   symbol: string;
@@ -868,11 +875,12 @@ interface WatchlistItem {
 
 function MyWatchlistSection() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<CryptoSearchResult[]>([]);
+  const [cryptoResults, setCryptoResults] = useState<CryptoSearchResult[]>([]);
+  const [stockResults, setStockResults] = useState<StockSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
-  const { data: watchlistData, refetch: refetchWatchlist } = useQuery<{ success: boolean; items: WatchlistItem[] }>({
+  const { data: watchlistData } = useQuery<{ success: boolean; items: WatchlistItem[] }>({
     queryKey: ['/api/trading-watchlist'],
   });
 
@@ -881,12 +889,12 @@ function MyWatchlistSection() {
     refetchInterval: 60000,
   });
 
-  const addMutation = useMutation({
+  const addCryptoMutation = useMutation({
     mutationFn: async (asset: CryptoSearchResult) => {
       return apiRequest('/api/trading-watchlist', {
         method: 'POST',
         body: JSON.stringify({
-          symbol: asset.symbol,
+          symbol: asset.symbol.toUpperCase(),
           assetName: asset.name,
           assetType: 'crypto',
           coingeckoId: asset.id,
@@ -898,10 +906,36 @@ function MyWatchlistSection() {
       queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist/signals'] });
       toast({ title: 'Added to Watchlist', description: 'Asset added successfully' });
       setSearchQuery('');
-      setSearchResults([]);
+      setCryptoResults([]);
+      setStockResults([]);
     },
     onError: (error: any) => {
       toast({ title: 'Error', description: error.message || 'Failed to add asset', variant: 'destructive' });
+    },
+  });
+
+  const addStockMutation = useMutation({
+    mutationFn: async (asset: StockSearchResult) => {
+      return apiRequest('/api/trading-watchlist', {
+        method: 'POST',
+        body: JSON.stringify({
+          symbol: asset.symbol,
+          assetName: asset.name,
+          assetType: 'stock',
+          coingeckoId: null,
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist/signals'] });
+      toast({ title: 'Added to Watchlist', description: 'Stock added successfully' });
+      setSearchQuery('');
+      setCryptoResults([]);
+      setStockResults([]);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to add stock', variant: 'destructive' });
     },
   });
 
@@ -916,29 +950,33 @@ function MyWatchlistSection() {
     },
   });
 
-  const searchCrypto = async (query: string) => {
+  const searchAssets = async (query: string) => {
     if (query.length < 2) {
-      setSearchResults([]);
+      setCryptoResults([]);
+      setStockResults([]);
       return;
     }
     setIsSearching(true);
     try {
-      const res = await fetch(`/api/crypto-search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/asset-search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
-      setSearchResults(data.results || []);
+      setCryptoResults(data.crypto || []);
+      setStockResults(data.stocks || []);
     } catch {
-      setSearchResults([]);
+      setCryptoResults([]);
+      setStockResults([]);
     }
     setIsSearching(false);
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => searchCrypto(searchQuery), 300);
+    const timer = setTimeout(() => searchAssets(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
   const watchlistItems = watchlistData?.items || [];
   const watchlistSignals = signalsData?.signals || [];
+  const hasResults = cryptoResults.length > 0 || stockResults.length > 0;
 
   return (
     <div className="space-y-6">
@@ -949,41 +987,73 @@ function MyWatchlistSection() {
             My Custom Watchlist
             <Badge variant="secondary" className="ml-2 bg-pink-500/20 text-pink-300">{watchlistItems.length}/5</Badge>
           </CardTitle>
-          <p className="text-sm text-slate-400">Add up to 5 crypto assets for personalized AI analysis with full confluence scoring</p>
+          <p className="text-sm text-slate-400">Add up to 5 stocks or crypto for personalized AI analysis with full confluence scoring</p>
         </CardHeader>
         <CardContent>
           <div className="relative mb-4">
             <Input
-              placeholder="Search for any cryptocurrency..."
+              placeholder="Search for stocks (TSLA, AAPL) or crypto..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-slate-900/50 border-slate-700 pl-10"
-              data-testid="input-crypto-search"
+              data-testid="input-asset-search"
             />
-            <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
           </div>
 
-          {searchResults.length > 0 && (
-            <div className="absolute z-50 w-full max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-xl mt-1 max-h-60 overflow-y-auto">
-              {searchResults.map((result) => (
-                <button
-                  key={result.id}
-                  onClick={() => addMutation.mutate(result)}
-                  disabled={addMutation.isPending || watchlistItems.length >= 5 || watchlistItems.some(w => w.symbol === result.symbol)}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 text-left disabled:opacity-50"
-                  data-testid={`btn-add-${result.symbol}`}
-                >
-                  <img src={result.thumb} alt={result.symbol} className="w-6 h-6 rounded-full" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-white">{result.symbol}</p>
-                    <p className="text-xs text-slate-400">{result.name}</p>
+          {hasResults && (
+            <div className="absolute z-50 w-full max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-xl mt-1 max-h-80 overflow-y-auto">
+              {stockResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 bg-blue-500/20 text-xs text-blue-300 font-medium flex items-center gap-2">
+                    <Building2 className="w-3 h-3" /> Stocks
                   </div>
-                  {result.marketCapRank && (
-                    <Badge variant="outline" className="text-xs">#{result.marketCapRank}</Badge>
-                  )}
-                </button>
-              ))}
+                  {stockResults.map((result) => (
+                    <button
+                      key={result.symbol}
+                      onClick={() => addStockMutation.mutate(result)}
+                      disabled={addStockMutation.isPending || watchlistItems.length >= 5 || watchlistItems.some(w => w.symbol === result.symbol)}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 text-left disabled:opacity-50"
+                      data-testid={`btn-add-stock-${result.symbol}`}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <Building2 className="w-3 h-3 text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">{result.symbol}</p>
+                        <p className="text-xs text-slate-400">{result.name}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">{result.exchange}</Badge>
+                    </button>
+                  ))}
+                </>
+              )}
+              {cryptoResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 bg-amber-500/20 text-xs text-amber-300 font-medium flex items-center gap-2">
+                    <Coins className="w-3 h-3" /> Crypto
+                  </div>
+                  {cryptoResults.map((result) => (
+                    <button
+                      key={result.id}
+                      onClick={() => addCryptoMutation.mutate(result)}
+                      disabled={addCryptoMutation.isPending || watchlistItems.length >= 5 || watchlistItems.some(w => w.symbol.toLowerCase() === result.symbol.toLowerCase())}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 text-left disabled:opacity-50"
+                      data-testid={`btn-add-crypto-${result.symbol}`}
+                    >
+                      <img src={result.thumb} alt={result.symbol} className="w-6 h-6 rounded-full" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">{result.symbol}</p>
+                        <p className="text-xs text-slate-400">{result.name}</p>
+                      </div>
+                      {result.marketCapRank && (
+                        <Badge variant="outline" className="text-xs">#{result.marketCapRank}</Badge>
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
           )}
 

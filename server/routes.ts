@@ -7546,6 +7546,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Combined Asset Search (crypto + stocks)
+  app.get('/api/asset-search', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.json({ success: true, crypto: [], stocks: [] });
+      }
+      
+      const [cryptoResults, stockResults] = await Promise.all([
+        aiTradingSignalsService.searchCryptoAssets(query),
+        aiTradingSignalsService.searchStocks(query),
+      ]);
+      
+      res.json({ 
+        success: true, 
+        crypto: cryptoResults,
+        stocks: stockResults,
+      });
+    } catch (error: any) {
+      console.error('Asset search error:', error);
+      res.json({ success: false, crypto: [], stocks: [], error: error.message });
+    }
+  }));
+
   // Custom Watchlist endpoints
   app.get('/api/trading-watchlist', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
@@ -7624,7 +7648,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const signals = [];
       
       for (const item of items) {
-        if (item.coingeckoId) {
+        if (item.assetType === 'stock') {
+          // Handle stock assets
+          const signal = await aiTradingSignalsService.getSignalForCustomStock(
+            item.symbol,
+            item.assetName
+          );
+          if (signal) {
+            signals.push({ ...signal, watchlistId: item.id });
+          }
+        } else if (item.coingeckoId) {
+          // Handle crypto assets
           const signal = await aiTradingSignalsService.getSignalForCustomAsset(
             item.coingeckoId,
             item.symbol,
