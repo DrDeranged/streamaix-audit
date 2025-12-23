@@ -1869,9 +1869,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       </DialogTrigger>
                       
                       {/* Compact Popup Modal - Responsive */}
-                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[85vh] md:h-[75vh] max-h-[90vh] z-40">
+                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[95vh] md:h-[75vh] max-h-[95vh] md:max-h-[90vh] z-40">
                         {/* Two-Column Grid Layout - Stacks on Mobile */}
-                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full overflow-y-auto md:overflow-hidden pb-safe">
+                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full overflow-y-auto md:overflow-hidden pb-20 md:pb-0">
                           
                           {/* LEFT SIDEBAR - Compact Profile */}
                           <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-3 md:p-4 border-b md:border-b-0 md:border-r border-muted/30 flex flex-col">
@@ -2000,7 +2000,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
                             
                             {/* Compact Analytics Chart Section - Always render with fallback data */}
-                            <div className="flex-1 min-h-0 overflow-hidden">
+                            <div className="flex-1 min-h-[300px] md:min-h-0 overflow-visible md:overflow-hidden mb-8 md:mb-0">
                               <EntrepreneurAnalytics 
                                 entrepreneur={{
                                   name: avatar.name,
