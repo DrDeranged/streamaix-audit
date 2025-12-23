@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,8 +43,232 @@ import {
   BarChart2,
   PieChart,
   History,
-  Newspaper
+  Newspaper,
+  Sparkles,
+  Radio,
+  Cpu,
+  Network
 } from 'lucide-react';
+
+function NeuralBackground() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-slate-900 to-slate-950" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%2306b6d4%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
+      
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-cyan-400/30"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            opacity: [0.2, 0.6, 0.2],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 2,
+          }}
+        />
+      ))}
+      
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0" />
+            <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {[...Array(5)].map((_, i) => (
+          <motion.line
+            key={i}
+            x1="0"
+            y1={`${15 + i * 20}%`}
+            x2="100%"
+            y2={`${15 + i * 20}%`}
+            stroke="url(#lineGrad)"
+            strokeWidth="1"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 0.3, 0] }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              delay: i * 0.8,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function ScanningLine() {
+  return (
+    <motion.div
+      className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+      animate={{ y: [0, 600, 0] }}
+      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+    />
+  );
+}
+
+function AnimatedCounter({ value, suffix = '', prefix = '' }: { value: number; suffix?: string; prefix?: string }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  
+  useEffect(() => {
+    const duration = 1000;
+    const startTime = Date.now();
+    const startValue = displayValue;
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(startValue + (value - startValue) * easeOut));
+      
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    
+    requestAnimationFrame(animate);
+  }, [value]);
+  
+  return <span className="font-mono tabular-nums">{prefix}{displayValue}{suffix}</span>;
+}
+
+function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 }: { 
+  icon: any; 
+  label: string; 
+  value: number | string; 
+  subValue?: string;
+  color: 'cyan' | 'emerald' | 'red' | 'purple' | 'amber';
+  delay?: number;
+}) {
+  const colorClasses = {
+    cyan: {
+      bg: 'from-cyan-500/10 to-cyan-600/5',
+      border: 'border-cyan-500/30 hover:border-cyan-400/50',
+      glow: 'shadow-cyan-500/20 hover:shadow-cyan-500/40',
+      icon: 'from-cyan-500/20 to-cyan-600/30 text-cyan-400',
+      text: 'text-cyan-400',
+      pulse: 'bg-cyan-400',
+    },
+    emerald: {
+      bg: 'from-emerald-500/10 to-emerald-600/5',
+      border: 'border-emerald-500/30 hover:border-emerald-400/50',
+      glow: 'shadow-emerald-500/20 hover:shadow-emerald-500/40',
+      icon: 'from-emerald-500/20 to-emerald-600/30 text-emerald-400',
+      text: 'text-emerald-400',
+      pulse: 'bg-emerald-400',
+    },
+    red: {
+      bg: 'from-red-500/10 to-red-600/5',
+      border: 'border-red-500/30 hover:border-red-400/50',
+      glow: 'shadow-red-500/20 hover:shadow-red-500/40',
+      icon: 'from-red-500/20 to-red-600/30 text-red-400',
+      text: 'text-red-400',
+      pulse: 'bg-red-400',
+    },
+    purple: {
+      bg: 'from-purple-500/10 to-purple-600/5',
+      border: 'border-purple-500/30 hover:border-purple-400/50',
+      glow: 'shadow-purple-500/20 hover:shadow-purple-500/40',
+      icon: 'from-purple-500/20 to-purple-600/30 text-purple-400',
+      text: 'text-purple-400',
+      pulse: 'bg-purple-400',
+    },
+    amber: {
+      bg: 'from-amber-500/10 to-amber-600/5',
+      border: 'border-amber-500/30 hover:border-amber-400/50',
+      glow: 'shadow-amber-500/20 hover:shadow-amber-500/40',
+      icon: 'from-amber-500/20 to-amber-600/30 text-amber-400',
+      text: 'text-amber-400',
+      pulse: 'bg-amber-400',
+    },
+  };
+  
+  const c = colorClasses[color];
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, delay }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      className={`relative group overflow-hidden rounded-2xl border ${c.border} bg-gradient-to-br ${c.bg} backdrop-blur-xl shadow-lg ${c.glow} transition-all duration-300`}
+    >
+      <div className="absolute inset-0 bg-slate-900/40" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      
+      <div className="relative p-4 flex items-center gap-4">
+        <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${c.icon} flex items-center justify-center`}>
+          <Icon className="w-6 h-6" />
+          <motion.div
+            className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${c.pulse}`}
+            animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </div>
+        
+        <div className="flex-1">
+          <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">{label}</p>
+          <p className={`text-2xl font-bold ${c.text} mt-0.5`}>
+            {typeof value === 'number' ? <AnimatedCounter value={value} /> : value}
+          </p>
+          {subValue && <p className="text-[10px] text-slate-500 mt-0.5">{subValue}</p>}
+        </div>
+      </div>
+      
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-[2px]"
+        style={{ background: `linear-gradient(90deg, transparent, ${color === 'cyan' ? '#06b6d4' : color === 'emerald' ? '#10b981' : color === 'red' ? '#ef4444' : color === 'purple' ? '#a855f7' : '#f59e0b'}, transparent)` }}
+        animate={{ opacity: [0.3, 0.7, 0.3] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+    </motion.div>
+  );
+}
+
+function PremiumNavButton({ active, onClick, icon: Icon, label, color, dataTestId }: {
+  active: boolean;
+  onClick: () => void;
+  icon: any;
+  label: string;
+  color: string;
+  dataTestId: string;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`relative flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-300 overflow-hidden ${
+        active 
+          ? `bg-gradient-to-r ${color} text-white shadow-lg` 
+          : 'bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50 border border-slate-700/50'
+      }`}
+      data-testid={dataTestId}
+    >
+      {active && (
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+      )}
+      <span className="relative flex items-center justify-center gap-2">
+        <Icon className="w-4 h-4" />
+        <span className="hidden sm:inline">{label}</span>
+      </span>
+    </motion.button>
+  );
+}
 
 interface TechnicalIndicators {
   rsi: number;
@@ -433,28 +657,52 @@ function NewsCard() {
   ];
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700/50">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Newspaper className="w-4 h-4 text-purple-400" />
-          AI-Scored News
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {newsItems.map((item, i) => (
-          <div key={i} className="flex items-start gap-2 p-2 bg-slate-900/50 rounded-lg">
-            <div className={`w-2 h-2 rounded-full mt-1.5 ${
-              item.sentiment === 'positive' ? 'bg-emerald-500' : 
-              item.sentiment === 'negative' ? 'bg-red-500' : 'bg-slate-500'
-            }`} />
-            <div className="flex-1">
-              <p className="text-xs text-white">{item.title}</p>
-              <p className="text-[10px] text-slate-500">{item.time}</p>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <Newspaper className="w-3.5 h-3.5 text-purple-400" />
             </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+            <span>AI-Scored News</span>
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full bg-purple-400 ml-auto"
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {newsItems.map((item, i) => (
+            <motion.div 
+              key={i} 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="flex items-start gap-3 p-2.5 bg-slate-800/30 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-all group cursor-pointer"
+            >
+              <motion.div 
+                className={`w-2.5 h-2.5 rounded-full mt-1 ${
+                  item.sentiment === 'positive' ? 'bg-emerald-500' : 
+                  item.sentiment === 'negative' ? 'bg-red-500' : 'bg-slate-500'
+                }`}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-200 group-hover:text-white transition-colors truncate">{item.title}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{item.time}</p>
+              </div>
+            </motion.div>
+          ))}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -466,32 +714,56 @@ function WhaleAlertCard() {
   ];
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700/50">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Flame className="w-4 h-4 text-orange-400" />
-          Whale Alerts
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {alerts.map((alert, i) => (
-          <div key={i} className="flex items-center justify-between p-2 bg-slate-900/50 rounded-lg">
-            <div className="flex items-center gap-2">
-              {alert.direction === 'out' ? (
-                <ArrowUpRight className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <ArrowDownRight className="w-4 h-4 text-red-400" />
-              )}
-              <div>
-                <p className="text-xs text-white font-medium">{alert.amount}</p>
-                <p className="text-[10px] text-slate-500">{alert.direction === 'out' ? 'Withdrawn from' : 'Deposited to'} {alert.exchange}</p>
-              </div>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.4 }}
+    >
+      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
+              <Flame className="w-3.5 h-3.5 text-orange-400" />
             </div>
-            <span className="text-[10px] text-slate-400">{alert.time}</span>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+            <span>Whale Alerts</span>
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full bg-orange-400 ml-auto"
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {alerts.map((alert, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="flex items-center justify-between p-2.5 bg-slate-800/30 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                  alert.direction === 'out' ? 'bg-emerald-500/20' : 'bg-red-500/20'
+                }`}>
+                  {alert.direction === 'out' ? (
+                    <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <ArrowDownRight className="w-4 h-4 text-red-400" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-white font-medium font-mono">{alert.amount}</p>
+                  <p className="text-[10px] text-slate-500">{alert.direction === 'out' ? 'Withdrawn from' : 'Deposited to'} {alert.exchange}</p>
+                </div>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">{alert.time}</span>
+            </motion.div>
+          ))}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -1157,124 +1429,250 @@ export default function AITrading() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-      <div className="container mx-auto px-4 py-8 pt-20">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent flex items-center gap-3">
-                <Brain className="w-8 h-8 text-purple-400" />
-                AI Trading Intelligence
-              </h1>
-              <p className="text-slate-400 mt-2">AI-powered multi-factor analysis with live charts and alerts</p>
+    <div className="min-h-screen relative overflow-hidden">
+      <NeuralBackground />
+      
+      <div className="relative z-10 container mx-auto px-4 py-8 pt-20">
+        <motion.div 
+          initial={{ opacity: 0, y: -30 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between flex-wrap gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                <motion.div 
+                  className="relative"
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center border border-cyan-500/30">
+                    <Brain className="w-8 h-8 text-cyan-400" />
+                  </div>
+                  <motion.div
+                    className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    style={{ filter: 'blur(8px)', zIndex: -1 }}
+                  />
+                </motion.div>
+                <div>
+                  <h1 className="text-3xl md:text-5xl font-black tracking-tight">
+                    <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                      AI Trading Intelligence
+                    </span>
+                  </h1>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-slate-400 text-sm">Multi-factor confluence analysis</span>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                      <motion.div 
+                        className="w-2 h-2 rounded-full bg-emerald-400"
+                        animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      <span className="text-xs text-emerald-400 font-medium">LIVE</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-slate-800/50 rounded-lg px-3 py-2">
-                <span className="text-xs text-slate-400">Live</span>
+              <motion.div 
+                className="flex items-center gap-3 bg-slate-800/60 backdrop-blur-xl rounded-xl px-4 py-2.5 border border-slate-700/50"
+                whileHover={{ borderColor: 'rgba(6, 182, 212, 0.3)' }}
+              >
+                <div className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs text-slate-400 font-medium">Auto-refresh</span>
+                </div>
                 <Switch checked={liveMode} onCheckedChange={setLiveMode} data-testid="switch-live-mode" />
-              </div>
-              <Button onClick={() => exportToCSV(signals)} variant="outline" className="border-slate-700" data-testid="btn-export-csv">
-                <Download className="w-4 h-4 mr-2" /> Export
-              </Button>
-              <Button onClick={() => refetch()} disabled={isFetching} className="bg-purple-500/20 border border-purple-500/30 hover:bg-purple-500/30 text-purple-300" data-testid="btn-refresh-signals">
-                <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
-              </Button>
+              </motion.div>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => exportToCSV(signals)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
+                data-testid="btn-export-csv"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm font-medium">Export</span>
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(6, 182, 212, 0.3)' }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-xl border border-cyan-500/30 text-cyan-300 hover:text-white transition-all disabled:opacity-50"
+                data-testid="btn-refresh-signals"
+              >
+                <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+                <span className="text-sm font-medium">Refresh</span>
+              </motion.button>
             </div>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center"><Activity className="w-5 h-5 text-cyan-400" /></div>
-              <div><p className="text-xs text-slate-400">Signals</p><p className="text-xl font-bold text-white">{signals.length}</p></div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-emerald-400" /></div>
-              <div><p className="text-xs text-slate-400">Bullish</p><p className="text-xl font-bold text-emerald-400">{bullishCount}</p></div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center"><TrendingDown className="w-5 h-5 text-red-400" /></div>
-              <div><p className="text-xs text-slate-400">Bearish</p><p className="text-xl font-bold text-red-400">{bearishCount}</p></div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center"><Signal className="w-5 h-5 text-purple-400" /></div>
-              <div><p className="text-xs text-slate-400">Confluence</p><p className="text-xl font-bold text-purple-400">{avgConfluence}%</p></div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center"><Zap className="w-5 h-5 text-amber-400" /></div>
-              <div><p className="text-xs text-slate-400">High Priority</p><p className="text-xl font-bold text-amber-400">{highPriorityCount}</p></div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <GlowingStatCard icon={Network} label="Active Signals" value={signals.length} subValue="Real-time analysis" color="cyan" delay={0} />
+          <GlowingStatCard icon={TrendingUp} label="Bullish" value={bullishCount} subValue="Buy signals" color="emerald" delay={0.1} />
+          <GlowingStatCard icon={TrendingDown} label="Bearish" value={bearishCount} subValue="Sell signals" color="red" delay={0.2} />
+          <GlowingStatCard icon={Cpu} label="Confluence" value={`${avgConfluence}%`} subValue="Multi-factor score" color="purple" delay={0.3} />
+          <GlowingStatCard icon={Zap} label="High Priority" value={highPriorityCount} subValue="Urgent alerts" color="amber" delay={0.4} />
         </div>
 
-        <div className="grid grid-cols-4 gap-2 mb-6">
-          <Button variant={mainView === 'signals' ? 'default' : 'outline'} onClick={() => setMainView('signals')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'signals' ? 'bg-purple-500' : 'border-slate-700'}`} data-testid="btn-view-signals">
-            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Signals
-          </Button>
-          <Button variant={mainView === 'mywatchlist' ? 'default' : 'outline'} onClick={() => setMainView('mywatchlist')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'mywatchlist' ? 'bg-pink-500' : 'border-slate-700'}`} data-testid="btn-view-mywatchlist">
-            <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> My List
-          </Button>
-          <Button variant={mainView === 'analytics' ? 'default' : 'outline'} onClick={() => setMainView('analytics')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'analytics' ? 'bg-cyan-500' : 'border-slate-700'}`} data-testid="btn-view-analytics">
-            <PieChart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Analytics
-          </Button>
-          <Button variant={mainView === 'correlation' ? 'default' : 'outline'} onClick={() => setMainView('correlation')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'correlation' ? 'bg-amber-500' : 'border-slate-700'}`} data-testid="btn-view-correlation">
-            <BarChart2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Correlation
-          </Button>
+        <div className="flex gap-2 mb-8 p-1 bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-slate-700/50">
+          <PremiumNavButton 
+            active={mainView === 'signals'} 
+            onClick={() => setMainView('signals')} 
+            icon={BarChart3} 
+            label="Signals"
+            color="from-purple-500 to-fuchsia-500"
+            dataTestId="btn-view-signals"
+          />
+          <PremiumNavButton 
+            active={mainView === 'mywatchlist'} 
+            onClick={() => setMainView('mywatchlist')} 
+            icon={Star} 
+            label="My Watchlist"
+            color="from-pink-500 to-rose-500"
+            dataTestId="btn-view-mywatchlist"
+          />
+          <PremiumNavButton 
+            active={mainView === 'analytics'} 
+            onClick={() => setMainView('analytics')} 
+            icon={PieChart} 
+            label="Analytics"
+            color="from-cyan-500 to-blue-500"
+            dataTestId="btn-view-analytics"
+          />
+          <PremiumNavButton 
+            active={mainView === 'correlation'} 
+            onClick={() => setMainView('correlation')} 
+            icon={BarChart2} 
+            label="Correlation"
+            color="from-amber-500 to-orange-500"
+            dataTestId="btn-view-correlation"
+          />
         </div>
 
-        <Card className="bg-amber-500/10 border-amber-500/30 mb-6">
-          <CardContent className="p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm text-amber-200 font-medium">Risk Disclaimer</p>
-              <p className="text-xs text-amber-300/70 mt-1">AI signals are for informational purposes only. Always DYOR and never invest more than you can afford to lose.</p>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-amber-500/5 backdrop-blur-xl mb-8"
+        >
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23f59e0b%22%20fill-opacity%3D%220.03%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2213%22%20r%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
+          <div className="relative p-4 flex items-center gap-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex-1">
+              <p className="text-sm text-amber-200 font-semibold">Risk Disclaimer</p>
+              <p className="text-xs text-amber-300/70 mt-0.5">AI signals are for informational purposes only. Always DYOR and never invest more than you can afford to lose.</p>
+            </div>
+            <Sparkles className="w-5 h-5 text-amber-400/50" />
+          </div>
+        </motion.div>
 
         {mainView === 'signals' && (
           <>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-                <TabsList className="bg-slate-800/50 border border-slate-700/50 inline-flex w-auto min-w-full md:min-w-0">
-                  <TabsTrigger value="all" className="data-[state=active]:bg-purple-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-all">All ({signals.length})</TabsTrigger>
-                  <TabsTrigger value="crypto" className="data-[state=active]:bg-amber-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-crypto"><Coins className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Crypto ({cryptoSignals.length})</TabsTrigger>
-                  <TabsTrigger value="stocks" className="data-[state=active]:bg-blue-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-stocks"><Building2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Stocks ({stockSignals.length})</TabsTrigger>
-                  <TabsTrigger value="watchlist" className="data-[state=active]:bg-pink-500/30 flex-shrink-0 text-xs sm:text-sm" data-testid="tab-watchlist"><Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Watchlist ({watchlist.size})</TabsTrigger>
-                </TabsList>
-              </div>
-            </Tabs>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6"
+            >
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <TabsList className="bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-xl inline-flex w-auto min-w-full md:min-w-0 p-1">
+                    <TabsTrigger value="all" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-fuchsia-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-all">
+                      <span className="flex items-center gap-1.5">All <Badge variant="secondary" className="bg-slate-700/50 text-xs">{signals.length}</Badge></span>
+                    </TabsTrigger>
+                    <TabsTrigger value="crypto" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-crypto">
+                      <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 sm:w-4 sm:h-4" />Crypto <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 text-xs">{cryptoSignals.length}</Badge></span>
+                    </TabsTrigger>
+                    <TabsTrigger value="stocks" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-indigo-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
+                      <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 text-xs">{stockSignals.length}</Badge></span>
+                    </TabsTrigger>
+                    <TabsTrigger value="watchlist" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/30 data-[state=active]:to-rose-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
+                      <span className="flex items-center gap-1.5"><Star className="w-3 h-3 sm:w-4 sm:h-4" />Favorites <Badge variant="secondary" className="bg-pink-500/20 text-pink-300 text-xs">{watchlist.size}</Badge></span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+              </Tabs>
+            </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <div className="lg:col-span-3">
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[...Array(4)].map((_, i) => (<div key={i} className="h-96 bg-slate-800/30 rounded-xl animate-pulse" />))}
-                  </div>
-                ) : displaySignals.length === 0 ? (
-                  <Card className="bg-slate-800/50 border-slate-700/50">
-                    <CardContent className="p-12 text-center">
-                      <Brain className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                      <p className="text-slate-400">{activeTab === 'watchlist' ? 'No assets in watchlist. Add some!' : 'No signals available. Click refresh.'}</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {displaySignals.map((signal) => (
-                      <SignalCard key={signal.asset.symbol} signal={signal} isWatchlisted={watchlist.has(signal.asset.symbol)} onWatchlistToggle={() => toggleWatchlist(signal.asset.symbol)} />
-                    ))}
-                  </div>
-                )}
+                <AnimatePresence mode="wait">
+                  {isLoading ? (
+                    <motion.div 
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    >
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-96 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl animate-pulse border border-slate-700/30 overflow-hidden relative">
+                          <div className="absolute inset-0">
+                            <motion.div
+                              className="absolute inset-x-0 h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"
+                              animate={{ y: ['-100%', '100%'] }}
+                              transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  ) : displaySignals.length === 0 ? (
+                    <motion.div
+                      key="empty"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                    >
+                      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden">
+                        <CardContent className="p-16 text-center relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5" />
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 3, repeat: Infinity }}
+                          >
+                            <Brain className="w-16 h-16 text-slate-600 mx-auto mb-6" />
+                          </motion.div>
+                          <p className="text-lg text-slate-300 font-medium mb-2">
+                            {activeTab === 'watchlist' ? 'No favorites yet' : 'No signals available'}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {activeTab === 'watchlist' ? 'Star assets from the signals to track them here' : 'Click refresh to fetch the latest AI analysis'}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="signals"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    >
+                      {displaySignals.map((signal, index) => (
+                        <motion.div
+                          key={signal.asset.symbol}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <SignalCard signal={signal} isWatchlisted={watchlist.has(signal.asset.symbol)} onWatchlistToggle={() => toggleWatchlist(signal.asset.symbol)} />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="space-y-6">
@@ -1286,74 +1684,153 @@ export default function AITrading() {
         )}
 
         {mainView === 'analytics' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader><CardTitle className="text-sm flex items-center gap-2"><PieChart className="w-4 h-4 text-purple-400" />Signal Distribution</CardTitle></CardHeader>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <PieChart className="w-4 h-4 text-purple-400" />
+                  </div>
+                  Signal Distribution
+                </CardTitle>
+              </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {['breakout', 'bounce', 'trend_continuation', 'reversal', 'consolidation'].map(type => {
+                <div className="space-y-4">
+                  {['breakout', 'bounce', 'trend_continuation', 'reversal', 'consolidation'].map((type, i) => {
                     const count = signals.filter(s => s.signalType === type).length;
                     const pct = signals.length > 0 ? (count / signals.length) * 100 : 0;
+                    const colors = ['from-emerald-500 to-cyan-500', 'from-cyan-500 to-blue-500', 'from-purple-500 to-fuchsia-500', 'from-amber-500 to-orange-500', 'from-slate-500 to-slate-600'];
                     return (
-                      <div key={type}>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-slate-400 capitalize">{type.replace('_', ' ')}</span>
-                          <span className="text-white">{count} ({pct.toFixed(0)}%)</span>
+                      <motion.div 
+                        key={type}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                      >
+                        <div className="flex justify-between text-xs mb-2">
+                          <span className="text-slate-300 capitalize font-medium">{type.replace('_', ' ')}</span>
+                          <span className="text-white font-mono">{count} <span className="text-slate-500">({pct.toFixed(0)}%)</span></span>
                         </div>
-                        <Progress value={pct} className="h-2" />
-                      </div>
+                        <div className="h-2 bg-slate-800/80 rounded-full overflow-hidden">
+                          <motion.div 
+                            className={`h-full bg-gradient-to-r ${colors[i]} rounded-full`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ duration: 0.8, delay: i * 0.1 }}
+                          />
+                        </div>
+                      </motion.div>
                     );
                   })}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader><CardTitle className="text-sm flex items-center gap-2"><History className="w-4 h-4 text-cyan-400" />Performance Metrics</CardTitle></CardHeader>
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                    <History className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  Performance Metrics
+                </CardTitle>
+              </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-2xl font-bold text-emerald-400">--</p>
-                    <p className="text-xs text-slate-400">Win Rate</p>
-                  </div>
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-2xl font-bold text-cyan-400">--</p>
-                    <p className="text-xs text-slate-400">Avg R:R</p>
-                  </div>
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-400">{signals.length}</p>
-                    <p className="text-xs text-slate-400">Total Signals</p>
-                  </div>
-                  <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-2xl font-bold text-amber-400">{avgConfluence}%</p>
-                    <p className="text-xs text-slate-400">Avg Confluence</p>
-                  </div>
+                  {[
+                    { label: 'Win Rate', value: '--', color: 'emerald' },
+                    { label: 'Avg R:R', value: '--', color: 'cyan' },
+                    { label: 'Total Signals', value: signals.length.toString(), color: 'purple' },
+                    { label: 'Avg Confluence', value: `${avgConfluence}%`, color: 'amber' },
+                  ].map((metric, i) => (
+                    <motion.div 
+                      key={metric.label}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.1 }}
+                      className={`text-center p-4 bg-gradient-to-br from-${metric.color}-500/10 to-${metric.color}-600/5 rounded-xl border border-${metric.color}-500/20`}
+                    >
+                      <p className={`text-2xl font-bold text-${metric.color}-400 font-mono`}>{metric.value}</p>
+                      <p className="text-xs text-slate-400 mt-1">{metric.label}</p>
+                    </motion.div>
+                  ))}
                 </div>
-                <p className="text-xs text-slate-500 text-center mt-4">Historical tracking coming soon</p>
+                <div className="mt-6 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 text-center">
+                  <p className="text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <Sparkles className="w-3 h-3" /> Historical performance tracking coming soon
+                  </p>
+                </div>
               </CardContent>
             </Card>
-
-          </div>
+          </motion.div>
         )}
 
         {mainView === 'mywatchlist' && (
-          <MyWatchlistSection />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <MyWatchlistSection />
+          </motion.div>
         )}
 
         {mainView === 'correlation' && (
-          <Card className="bg-slate-800/50 border-slate-700/50">
-            <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BarChart2 className="w-4 h-4 text-amber-400" />Asset Correlation Heatmap</CardTitle></CardHeader>
-            <CardContent>
-              <CorrelationHeatmap signals={signals} />
-              <p className="text-xs text-slate-500 text-center mt-4">Correlation based on 30-day price movements</p>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <BarChart2 className="w-4 h-4 text-amber-400" />
+                  </div>
+                  Asset Correlation Heatmap
+                  <Badge variant="outline" className="ml-2 text-xs border-amber-500/30 text-amber-400">30-Day</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CorrelationHeatmap signals={signals} />
+                <div className="mt-6 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 text-center">
+                  <p className="text-xs text-slate-500">Correlation coefficients based on 30-day price movements</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
-        <div className="mt-12 text-center text-xs text-slate-500 space-y-1">
-          <p>Signals refresh every 30s (live mode) | 15min cache TTL | Multi-factor confluence</p>
-          <p>Data: CoinGecko, Finnhub, Alternative.me | AI-Powered Analysis</p>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-16 mb-8"
+        >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-700/30 bg-gradient-to-r from-slate-800/30 via-slate-900/30 to-slate-800/30 backdrop-blur-xl p-6">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%2306b6d4%22%20fill-opacity%3D%220.02%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30" />
+            <div className="relative flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <motion.div 
+                    className="w-2 h-2 rounded-full bg-cyan-400"
+                    animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  <span className="text-xs text-slate-400 font-mono">LIVE FEED</span>
+                </div>
+                <div className="h-4 w-[1px] bg-slate-700" />
+                <span className="text-xs text-slate-500">Refresh: 30s</span>
+                <div className="h-4 w-[1px] bg-slate-700" />
+                <span className="text-xs text-slate-500">Cache: 15min</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 text-amber-400" />CoinGecko</span>
+                <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 text-blue-400" />Finnhub</span>
+                <span className="flex items-center gap-1.5"><Brain className="w-3 h-3 text-purple-400" />AI Analysis</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
