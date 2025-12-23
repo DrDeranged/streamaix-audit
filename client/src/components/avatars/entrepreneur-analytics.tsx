@@ -206,12 +206,12 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
 
       {/* Tabbed Analytics */}
       <Tabs defaultValue="performance" className="w-full">
-        <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
-          <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:grid-cols-4 text-[10px] md:text-sm">
-            <TabsTrigger value="performance" className="px-3 md:px-3 whitespace-nowrap">Performance</TabsTrigger>
-            <TabsTrigger value="best" className="px-3 md:px-3 whitespace-nowrap">Best Calls</TabsTrigger>
-            <TabsTrigger value="worst" className="px-3 md:px-3 whitespace-nowrap">Worst Calls</TabsTrigger>
-            <TabsTrigger value="activity" className="px-3 md:px-3 whitespace-nowrap">Recent Activity</TabsTrigger>
+        <div className="-mx-1 px-1">
+          <TabsList className="grid w-full grid-cols-4 text-[9px] md:text-sm gap-0">
+            <TabsTrigger value="performance" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Perf</TabsTrigger>
+            <TabsTrigger value="best" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Best</TabsTrigger>
+            <TabsTrigger value="worst" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Worst</TabsTrigger>
+            <TabsTrigger value="activity" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Recent</TabsTrigger>
           </TabsList>
         </div>
 
