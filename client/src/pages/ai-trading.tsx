@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createChart, ColorType, LineSeries, AreaSeries, Time } from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { queryClient, apiRequest } from '@/lib/queryClient';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -848,9 +848,206 @@ function exportToCSV(signals: TradingSignal[]) {
   a.click();
 }
 
+interface CryptoSearchResult {
+  id: string;
+  symbol: string;
+  name: string;
+  thumb: string;
+  large: string;
+  marketCapRank: number | null;
+}
+
+interface WatchlistItem {
+  id: string;
+  symbol: string;
+  assetName: string;
+  assetType: string;
+  coingeckoId: string | null;
+  createdAt: string;
+}
+
+function MyWatchlistSection() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<CryptoSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const { toast } = useToast();
+
+  const { data: watchlistData, refetch: refetchWatchlist } = useQuery<{ success: boolean; items: WatchlistItem[] }>({
+    queryKey: ['/api/trading-watchlist'],
+  });
+
+  const { data: signalsData, isLoading: signalsLoading, refetch: refetchSignals } = useQuery<{ success: boolean; signals: TradingSignal[] }>({
+    queryKey: ['/api/trading-watchlist/signals'],
+    refetchInterval: 60000,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (asset: CryptoSearchResult) => {
+      return apiRequest('/api/trading-watchlist', {
+        method: 'POST',
+        body: JSON.stringify({
+          symbol: asset.symbol,
+          assetName: asset.name,
+          assetType: 'crypto',
+          coingeckoId: asset.id,
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist/signals'] });
+      toast({ title: 'Added to Watchlist', description: 'Asset added successfully' });
+      setSearchQuery('');
+      setSearchResults([]);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to add asset', variant: 'destructive' });
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest(`/api/trading-watchlist/${id}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trading-watchlist/signals'] });
+      toast({ title: 'Removed', description: 'Asset removed from watchlist' });
+    },
+  });
+
+  const searchCrypto = async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/crypto-search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setSearchResults(data.results || []);
+    } catch {
+      setSearchResults([]);
+    }
+    setIsSearching(false);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => searchCrypto(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const watchlistItems = watchlistData?.items || [];
+  const watchlistSignals = signalsData?.signals || [];
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Star className="w-5 h-5 text-pink-400" />
+            My Custom Watchlist
+            <Badge variant="secondary" className="ml-2 bg-pink-500/20 text-pink-300">{watchlistItems.length}/5</Badge>
+          </CardTitle>
+          <p className="text-sm text-slate-400">Add up to 5 crypto assets for personalized AI analysis with full confluence scoring</p>
+        </CardHeader>
+        <CardContent>
+          <div className="relative mb-4">
+            <Input
+              placeholder="Search for any cryptocurrency..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-slate-900/50 border-slate-700 pl-10"
+              data-testid="input-crypto-search"
+            />
+            <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="absolute z-50 w-full max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-xl mt-1 max-h-60 overflow-y-auto">
+              {searchResults.map((result) => (
+                <button
+                  key={result.id}
+                  onClick={() => addMutation.mutate(result)}
+                  disabled={addMutation.isPending || watchlistItems.length >= 5 || watchlistItems.some(w => w.symbol === result.symbol)}
+                  className="w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 text-left disabled:opacity-50"
+                  data-testid={`btn-add-${result.symbol}`}
+                >
+                  <img src={result.thumb} alt={result.symbol} className="w-6 h-6 rounded-full" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white">{result.symbol}</p>
+                    <p className="text-xs text-slate-400">{result.name}</p>
+                  </div>
+                  {result.marketCapRank && (
+                    <Badge variant="outline" className="text-xs">#{result.marketCapRank}</Badge>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {watchlistItems.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              <Star className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>No assets in your watchlist yet</p>
+              <p className="text-sm mt-1">Search and add any cryptocurrency above</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {watchlistItems.map((item) => (
+                <Badge key={item.id} className="bg-slate-800 text-white px-3 py-1 flex items-center gap-2">
+                  {item.symbol}
+                  <button
+                    onClick={() => removeMutation.mutate(item.id)}
+                    className="hover:text-red-400"
+                    data-testid={`btn-remove-${item.symbol}`}
+                  >
+                    <StarOff className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {signalsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(2)].map((_, i) => (<div key={i} className="h-96 bg-slate-800/30 rounded-xl animate-pulse" />))}
+        </div>
+      ) : watchlistSignals.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {watchlistSignals.map((signal) => (
+            <SignalCard 
+              key={signal.asset.symbol} 
+              signal={signal} 
+              isWatchlisted={true}
+              onWatchlistToggle={() => {
+                const item = watchlistItems.find(w => w.symbol === signal.asset.symbol);
+                if (item) removeMutation.mutate(item.id);
+              }}
+            />
+          ))}
+        </div>
+      ) : watchlistItems.length > 0 ? (
+        <Card className="bg-slate-800/50 border-slate-700/50">
+          <CardContent className="p-8 text-center">
+            <RefreshCw className="w-8 h-8 text-slate-600 mx-auto mb-3 animate-spin" />
+            <p className="text-slate-400">Generating AI analysis for your assets...</p>
+            <Button onClick={() => refetchSignals()} className="mt-4" variant="outline" data-testid="btn-retry-signals">
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
+  );
+}
+
 export default function AITrading() {
   const [activeTab, setActiveTab] = useState('all');
-  const [mainView, setMainView] = useState<'signals' | 'analytics' | 'correlation'>('signals');
+  const [mainView, setMainView] = useState<'signals' | 'analytics' | 'correlation' | 'mywatchlist'>('signals');
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [liveMode, setLiveMode] = useState(true);
   const { toast } = useToast();
@@ -950,9 +1147,12 @@ export default function AITrading() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-2 mb-6">
           <Button variant={mainView === 'signals' ? 'default' : 'outline'} onClick={() => setMainView('signals')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'signals' ? 'bg-purple-500' : 'border-slate-700'}`} data-testid="btn-view-signals">
             <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Signals
+          </Button>
+          <Button variant={mainView === 'mywatchlist' ? 'default' : 'outline'} onClick={() => setMainView('mywatchlist')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'mywatchlist' ? 'bg-pink-500' : 'border-slate-700'}`} data-testid="btn-view-mywatchlist">
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> My List
           </Button>
           <Button variant={mainView === 'analytics' ? 'default' : 'outline'} onClick={() => setMainView('analytics')} className={`text-xs sm:text-sm px-2 sm:px-4 ${mainView === 'analytics' ? 'bg-cyan-500' : 'border-slate-700'}`} data-testid="btn-view-analytics">
             <PieChart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Analytics
@@ -1064,6 +1264,10 @@ export default function AITrading() {
             </Card>
 
           </div>
+        )}
+
+        {mainView === 'mywatchlist' && (
+          <MyWatchlistSection />
         )}
 
         {mainView === 'correlation' && (
