@@ -42,7 +42,13 @@ export function AvatarChatButton({ avatar, size = "sm", className = "", variant 
       return;
     }
     
-    setChatOpen(true);
+    // Dispatch event to close avatar dialog before opening chat
+    window.dispatchEvent(new CustomEvent('streamaix-chat-open'));
+    
+    // Small delay to allow dialog to close first
+    setTimeout(() => {
+      setChatOpen(true);
+    }, 50);
   };
 
   if (variant === "card") {
