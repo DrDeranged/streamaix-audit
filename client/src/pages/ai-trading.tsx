@@ -1800,37 +1800,13 @@ export default function AITrading() {
           </motion.div>
         )}
 
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-16 mb-8"
-        >
-          <div className="relative overflow-hidden rounded-2xl border border-slate-700/30 bg-gradient-to-r from-slate-800/30 via-slate-900/30 to-slate-800/30 backdrop-blur-xl p-6">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%2306b6d4%22%20fill-opacity%3D%220.02%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30" />
-            <div className="relative flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <motion.div 
-                    className="w-2 h-2 rounded-full bg-cyan-400"
-                    animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                  <span className="text-xs text-slate-400 font-mono">LIVE FEED</span>
-                </div>
-                <div className="h-4 w-[1px] bg-slate-700" />
-                <span className="text-xs text-slate-500">Refresh: 30s</span>
-                <div className="h-4 w-[1px] bg-slate-700" />
-                <span className="text-xs text-slate-500">Cache: 15min</span>
-              </div>
-              <div className="flex items-center gap-4 text-xs text-slate-500">
-                <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 text-amber-400" />CoinGecko</span>
-                <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 text-blue-400" />Finnhub</span>
-                <span className="flex items-center gap-1.5"><Brain className="w-3 h-3 text-purple-400" />AI Analysis</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        <div className="mt-12 text-center text-xs text-slate-500 space-y-1">
+          <p className="flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            Signals refresh every 30s (live mode) | 15min cache TTL | Multi-factor confluence
+          </p>
+          <p>Data: CoinGecko, Finnhub, Alternative.me | AI-Powered Analysis</p>
+        </div>
       </div>
     </div>
   );
