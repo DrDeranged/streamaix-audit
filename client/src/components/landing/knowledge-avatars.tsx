@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
@@ -1870,9 +1871,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       </DialogTrigger>
                       
                       {/* Compact Popup Modal - Responsive */}
-                      <DialogContent className="avatar-modal-scroll max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-y-scroll p-0 h-[95vh] md:h-[85vh] max-h-[95vh] md:max-h-[90vh]" onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[95vh] md:h-[85vh] max-h-[95vh] md:max-h-[90vh]" onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                        <ScrollArea className="h-full w-full" showScrollbar={true} scrollbarVariant="purple">
                         {/* Two-Column Grid Layout - Stacks on Mobile */}
-                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full pb-24 md:pb-0 overscroll-contain touch-pan-y">
+                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] min-h-full pb-24 md:pb-0 overscroll-contain touch-pan-y">
                           
                           {/* LEFT SIDEBAR - Compact Profile */}
                           <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-3 md:p-4 border-b md:border-b-0 md:border-r border-muted/30 flex flex-col">
@@ -2026,6 +2028,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                           </div>
                         </div>
+                        </ScrollArea>
                       </DialogContent>
                     </Dialog>
                     
