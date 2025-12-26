@@ -1224,18 +1224,20 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const canGoPrev = currentIndex > 0;
 
   const nextSlide = () => {
-    if (isTransitioningRef.current || !canGoNext) return;
+    if (isTransitioningRef.current || !containerRef.current) return;
     isTransitioningRef.current = true;
-    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+    const cardWidth = 320 + 24; // card width + gap
+    containerRef.current.scrollBy({ left: cardWidth * 2, behavior: 'smooth' });
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 600);
   };
 
   const prevSlide = () => {
-    if (isTransitioningRef.current || !canGoPrev) return;
+    if (isTransitioningRef.current || !containerRef.current) return;
     isTransitioningRef.current = true;
-    setCurrentIndex(prev => Math.max(prev - 1, 0));
+    const cardWidth = 320 + 24; // card width + gap
+    containerRef.current.scrollBy({ left: -cardWidth * 2, behavior: 'smooth' });
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 600);
@@ -1534,15 +1536,15 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(139, 92, 246, 0.5) rgba(30, 30, 50, 0.3)'
             }}
-            onScroll={isMobile ? (e) => {
+            onScroll={(e) => {
               const container = e.currentTarget;
               const scrollLeft = container.scrollLeft;
-              const cardWidth = container.offsetWidth;
+              const cardWidth = isMobile ? container.offsetWidth : 344; // 320px + 24px gap
               const newIndex = Math.round(scrollLeft / cardWidth);
               if (newIndex !== currentIndex && newIndex >= 0 && newIndex < avatars.length) {
                 setCurrentIndex(newIndex);
               }
-            } : undefined}
+            }}
           >
             {/* Mobile Indicators - sync with scroll position */}
             {isMobile && avatars.length > 1 && (
