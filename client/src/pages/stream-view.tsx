@@ -1375,7 +1375,8 @@ export default function StreamViewPage() {
         </div>
 
         <div className={cn(
-          "w-full lg:w-[380px] xl:w-[420px] flex flex-col border-t lg:border-t-0 lg:border-l border-purple-500/30 overflow-hidden",
+          "w-full lg:w-[380px] xl:w-[420px] flex flex-col border-t lg:border-t-0 lg:border-l border-purple-500/30",
+          "lg:overflow-hidden",
           isTheaterMode && !isFloatingChat && "hidden",
           isTheaterMode && isFloatingChat && "fixed bottom-4 right-4 w-[360px] h-[500px] rounded-xl border shadow-2xl z-50 bg-slate-900",
           !isTheaterMode && "bg-gradient-to-b from-slate-900/60 to-slate-900/80 lg:h-[calc(100vh-56px)] lg:sticky lg:top-14"
@@ -1420,7 +1421,7 @@ export default function StreamViewPage() {
 
           <div className={cn(
             "flex flex-col transition-all duration-300 ease-out overflow-hidden",
-            isChatExpanded ? "h-[50dvh] sm:h-[55dvh] lg:flex-1 max-h-[calc(100dvh-200px)] lg:max-h-none" : "h-0 lg:flex-1"
+            isChatExpanded ? "min-h-[60dvh] sm:min-h-[55dvh] lg:min-h-0 lg:flex-1" : "h-0 lg:flex-1"
           )}>
             <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay' | 'clips' | 'points' | 'tools')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">
