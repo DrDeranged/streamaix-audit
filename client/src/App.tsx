@@ -204,9 +204,11 @@ function Router() {
       </Route>
       
       <Route path="/stream/:id">
-        <Suspense fallback={<DashboardSkeleton />}>
-          <StreamView />
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<DashboardSkeleton />}>
+            <StreamView />
+          </Suspense>
+        </ErrorBoundary>
       </Route>
       
       <Route path="/debate/:id">
