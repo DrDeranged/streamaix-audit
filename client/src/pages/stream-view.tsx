@@ -82,7 +82,13 @@ import {
   ChatCommandsHelp,
   CreateClipButton,
   PinnedMessagesBar,
-  CoStreamPanel
+  CoStreamPanel,
+  ClipsGallery,
+  RaidPanel,
+  ChannelPointsPanel,
+  ChatModerationPanel,
+  GiftSubscriptionPanel,
+  StreamAnalyticsPanel
 } from '@/components/streaming/EnhancedStreamingFeatures';
 import { ConversationPanel } from '@/components/streams/ConversationPanel';
 import { ConversationReplay } from '@/components/streams/ConversationReplay';
@@ -460,7 +466,7 @@ export default function StreamViewPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [streamDuration, setStreamDuration] = useState(0);
-  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay'>('chat');
+  const [chatTab, setChatTab] = useState<'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay' | 'clips' | 'points' | 'tools'>('chat');
   const [isCopied, setIsCopied] = useState(false);
   const [isFloatingChat, setIsFloatingChat] = useState(false);
   const [showCommandsHelp, setShowCommandsHelp] = useState(false);
@@ -1416,7 +1422,7 @@ export default function StreamViewPage() {
             "flex flex-col transition-all duration-300 ease-out overflow-hidden",
             isChatExpanded ? "h-[50dvh] sm:h-[55dvh] lg:flex-1 max-h-[calc(100dvh-200px)] lg:max-h-none" : "h-0 lg:flex-1"
           )}>
-            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay')} className="flex flex-col h-full">
+            <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay' | 'clips' | 'points' | 'tools')} className="flex flex-col h-full">
               <div className="hidden lg:block border-b border-slate-700/40">
                 <TabsList className="bg-transparent w-full justify-start rounded-none h-11 p-0">
                   <TabsTrigger 
@@ -1461,6 +1467,29 @@ export default function StreamViewPage() {
                     <Clock className="w-3.5 h-3.5 mr-1 text-slate-400" />
                     History
                   </TabsTrigger>
+                  <TabsTrigger 
+                    value="clips" 
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-pink-500 data-[state=active]:bg-transparent text-xs"
+                  >
+                    <Scissors className="w-3.5 h-3.5 mr-1 text-pink-400" />
+                    Clips
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="points" 
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-yellow-500 data-[state=active]:bg-transparent text-xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1 text-yellow-400" />
+                    Points
+                  </TabsTrigger>
+                  {isHost && (
+                    <TabsTrigger 
+                      value="tools" 
+                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent text-xs"
+                    >
+                      <Settings className="w-3.5 h-3.5 mr-1 text-red-400" />
+                      Host Tools
+                    </TabsTrigger>
+                  )}
                 </TabsList>
               </div>
 
@@ -1776,6 +1805,40 @@ export default function StreamViewPage() {
                   </div>
                 )}
               </TabsContent>
+
+              <TabsContent value="clips" className="flex-1 flex flex-col m-0 overflow-y-auto">
+                {streamId && <ClipsGallery streamId={streamId} />}
+              </TabsContent>
+
+              <TabsContent value="points" className="flex-1 flex flex-col m-0 overflow-y-auto">
+                {streamId && (
+                  <div className="space-y-4">
+                    <ChannelPointsPanel streamId={streamId} userId={user?.id} channelPoints={user?.streamPoints || 0} />
+                    {isAuthenticated && (
+                      <GiftSubscriptionPanel streamId={streamId} senderUsername={user?.username || 'Anonymous'} />
+                    )}
+                  </div>
+                )}
+              </TabsContent>
+
+              {isHost && (
+                <TabsContent value="tools" className="flex-1 flex flex-col m-0 overflow-y-auto">
+                  {streamId && (
+                    <div className="space-y-4 p-4">
+                      <RaidPanel 
+                        streamId={streamId} 
+                        hostId={user?.id?.toString() || ''} 
+                        currentViewers={stream?.currentViewers || 0} 
+                      />
+                      <ChatModerationPanel 
+                        streamId={streamId} 
+                        isHost={true} 
+                      />
+                      <StreamAnalyticsPanel streamId={streamId} />
+                    </div>
+                  )}
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         </div>
