@@ -14,6 +14,7 @@ export interface User {
   twitterDisplayName?: string;
   twitterVerified?: boolean;
   authProvider?: string;
+  streamPoints?: number;
   createdAt?: string;
 }
 

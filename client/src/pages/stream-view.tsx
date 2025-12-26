@@ -1813,9 +1813,9 @@ export default function StreamViewPage() {
               <TabsContent value="points" className="flex-1 flex flex-col m-0 overflow-y-auto">
                 {streamId && (
                   <div className="space-y-4">
-                    <ChannelPointsPanel streamId={streamId} userId={user?.id} channelPoints={user?.streamPoints || 0} />
+                    <ChannelPointsPanel streamId={streamId} userPoints={user?.streamPoints || 0} isHost={isHost} />
                     {isAuthenticated && (
-                      <GiftSubscriptionPanel streamId={streamId} senderUsername={user?.username || 'Anonymous'} />
+                      <GiftSubscriptionPanel streamId={streamId} streamerId={stream?.hostId?.toString() || ''} streamerUsername={stream?.hostUsername || 'Streamer'} />
                     )}
                   </div>
                 )}
@@ -1827,7 +1827,7 @@ export default function StreamViewPage() {
                     <div className="space-y-4 p-4">
                       <RaidPanel 
                         streamId={streamId} 
-                        hostId={user?.id?.toString() || ''} 
+                        isHost={isHost} 
                         currentViewers={stream?.currentViewers || 0} 
                       />
                       <ChatModerationPanel 
