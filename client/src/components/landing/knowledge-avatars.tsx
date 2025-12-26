@@ -1527,12 +1527,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           
           {/* Working Carousel - CSS scroll-snap for mobile, transforms for desktop */}
           <div 
-            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory' : 'overflow-hidden'} px-4 md:px-12`}
+            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory scrollbar-visible' : 'overflow-x-auto scrollbar-visible'} px-4 md:px-12 pb-4`}
             ref={containerRef}
             style={{ 
               WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(139, 92, 246, 0.5) rgba(30, 30, 50, 0.3)'
             }}
             onScroll={isMobile ? (e) => {
               const container = e.currentTarget;
@@ -1571,12 +1571,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               </div>
             )}
             
-            {/* Carousel Track - uses native scroll on mobile, transforms on desktop */}
+            {/* Carousel Track - uses native scroll on all devices */}
             <div 
-              className={`flex ${isMobile ? '' : 'transition-transform duration-500 ease-out'}`}
+              className="flex gap-6"
               style={{
-                gap: isMobile ? '0' : '1.5rem',
-                transform: isMobile ? 'none' : `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                minWidth: 'max-content',
               }}
             >
               {avatars.map((avatar, index) => {
@@ -1618,8 +1617,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     key={avatar.id} 
                     className={`flex-shrink-0 relative z-10 ${isMobile ? 'snap-start snap-always' : ''}`}
                     style={{
-                      width: isMobile ? '100%' : `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 1.5}rem / ${itemsPerView})`,
-                      minWidth: isMobile ? '100%' : 'auto'
+                      width: isMobile ? '85vw' : '320px',
+                      minWidth: isMobile ? '85vw' : '320px'
                     }}
                   >
                     <Dialog open={openAvatarDialog === avatar.id} onOpenChange={(open) => setOpenAvatarDialog(open ? avatar.id : null)}>
