@@ -248,7 +248,7 @@ const MarketPriceOverlay = memo(function MarketPriceOverlay({ streamId }: { stre
   if (!data?.marketData?.length) return null;
 
   return (
-    <div className="absolute top-12 right-3 z-10 flex flex-col gap-1.5">
+    <div className="absolute top-12 right-3 z-10 hidden sm:flex flex-col gap-1.5">
       {data.marketData.map((coin) => (
         <div
           key={coin.symbol}
@@ -279,7 +279,7 @@ const CoHostsDisplay = memo(function CoHostsDisplay({ streamId }: { streamId: st
   if (!data?.coHosts?.length) return null;
 
   return (
-    <div className="absolute bottom-3 left-3 z-10 flex gap-2">
+    <div className="absolute bottom-3 left-3 z-10 hidden sm:flex gap-2">
       {data.coHosts.map((coHost) => (
         <div key={coHost.id} className="relative animate-scale-in">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center border-2 border-cyan-400/50 overflow-hidden">
@@ -1214,26 +1214,26 @@ export default function StreamViewPage() {
             )}
             
             {isLive && isAuthenticated && !isHost && (
-              <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+              <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-10 flex items-center gap-1.5 sm:gap-2">
                 <CreateClipButton 
                   streamId={streamId || ''} 
                   currentTime={streamDuration}
                 />
                 <Button
                   onClick={() => setShowPredictionPanel(true)}
-                  className="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 h-10 min-h-[44px] px-4 text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-create-prediction"
                 >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Predict
+                  <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Predict</span>
                 </Button>
                 <Button
                   onClick={() => setShowTipPanel(true)}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0 h-10 min-h-[44px] px-4 text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-open-tip-panel"
                 >
-                  <Gift className="w-4 h-4 mr-2" />
-                  Tip
+                  <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Tip</span>
                 </Button>
               </div>
             )}
@@ -1253,9 +1253,9 @@ export default function StreamViewPage() {
 
           {!isTheaterMode && (
             <>
-              <Card className="p-4 bg-slate-900/60 border border-slate-700/40">
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <h1 className="text-xl font-bold text-white font-orbitron line-clamp-2 flex-1">{stream.title}</h1>
+              <Card className="p-3 sm:p-4 bg-slate-900/60 border border-slate-700/40">
+                <div className="flex items-start justify-between gap-2 sm:gap-4 mb-2 sm:mb-3">
+                  <h1 className="text-base sm:text-xl font-bold text-white font-orbitron line-clamp-2 flex-1">{stream.title}</h1>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button
                       variant="outline"
@@ -1280,27 +1280,39 @@ export default function StreamViewPage() {
                 <StreamerCard stream={stream} isFollowing={false} />
                 
                 {stream.description && (
-                  <div className="mt-4 pt-4 border-t border-slate-700/40">
-                    <p className="text-sm text-slate-400">{stream.description}</p>
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-700/40">
+                    <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 sm:line-clamp-none">{stream.description}</p>
                   </div>
                 )}
                 
                 {stream.tags && stream.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {stream.tags.map((tag, i) => (
-                      <Badge key={i} variant="outline" className="border-purple-500/20 text-purple-400 text-xs">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 sm:mt-4">
+                    {stream.tags.slice(0, 4).map((tag, i) => (
+                      <Badge key={i} variant="outline" className="border-purple-500/20 text-purple-400 text-[10px] sm:text-xs px-1.5 sm:px-2">
                         #{tag}
                       </Badge>
                     ))}
+                    {stream.tags.length > 4 && (
+                      <>
+                        {stream.tags.slice(4).map((tag, i) => (
+                          <Badge key={i + 4} variant="outline" className="border-purple-500/20 text-purple-400 text-[10px] sm:text-xs px-1.5 sm:px-2 hidden sm:inline-flex">
+                            #{tag}
+                          </Badge>
+                        ))}
+                        <Badge variant="outline" className="border-slate-500/20 text-slate-400 text-[10px] px-1.5 sm:hidden">
+                          +{stream.tags.length - 4}
+                        </Badge>
+                      </>
+                    )}
                   </div>
                 )}
               </Card>
 
               {isLive && (
-                <Card className="p-4 bg-slate-900/60 border border-slate-700/40">
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-fuchsia-400" />
+                <Card className="p-3 sm:p-4 bg-slate-900/60 border border-slate-700/40">
+                  <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+                    <h3 className="text-xs sm:text-sm font-semibold text-white flex items-center gap-1.5 sm:gap-2">
+                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fuchsia-400" />
                       Engage
                     </h3>
                     
