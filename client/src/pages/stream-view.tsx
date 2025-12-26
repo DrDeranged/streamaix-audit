@@ -811,6 +811,26 @@ export default function StreamViewPage() {
       .slice(-10);
   }, [messages]);
 
+  // These useCallback hooks MUST be defined before any early returns
+  // to satisfy React's rules of hooks (consistent hook order)
+  const handleImmersiveSendMessage = useCallback((msg: string) => {
+    if (isConnected) {
+      sendMessage(msg);
+    }
+  }, [isConnected, sendMessage]);
+
+  const handleImmersiveReaction = useCallback((emoji: string) => {
+    if (isConnected) {
+      sendMessage(`[reaction:${emoji}]`);
+    }
+  }, [isConnected, sendMessage]);
+
+  const handleImmersiveTip = useCallback((amount: number, tipMsg?: string) => {
+    if (streamId) {
+      tipMutation.mutate({ amount, message: tipMsg });
+    }
+  }, [streamId, tipMutation]);
+
   if (isLoading) {
     return (
       <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
@@ -875,24 +895,6 @@ export default function StreamViewPage() {
   const isLive = stream.status === 'live';
   const isScheduled = stream.status === 'scheduled';
   const displayViewerCount = isConnected ? viewerCount : stream.currentViewers;
-
-  const handleImmersiveSendMessage = useCallback((msg: string) => {
-    if (isConnected) {
-      sendMessage(msg);
-    }
-  }, [isConnected, sendMessage]);
-
-  const handleImmersiveReaction = useCallback((emoji: string) => {
-    if (isConnected) {
-      sendMessage(`[reaction:${emoji}]`);
-    }
-  }, [isConnected, sendMessage]);
-
-  const handleImmersiveTip = useCallback((amount: number, tipMsg?: string) => {
-    if (streamId) {
-      tipMutation.mutate({ amount, message: tipMsg });
-    }
-  }, [streamId, tipMutation]);
 
   if (isImmersiveMode && stream && isLive) {
     return (
