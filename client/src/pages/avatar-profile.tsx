@@ -968,15 +968,15 @@ export default function AvatarProfile() {
                 <CardContent className="space-y-2 md:space-y-3 pt-0">
                   <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-300">Total Return</span>
-                    <span className="text-green-400 font-bold">{avatar.investmentReturns.totalReturn}</span>
+                    <span className="text-green-400 font-bold">{avatar.investmentReturns?.totalReturn || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-300">Annual Return</span>
-                    <span className="text-green-400 font-bold">{avatar.investmentReturns.annualizedReturn}</span>
+                    <span className="text-green-400 font-bold">{avatar.investmentReturns?.annualizedReturn || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-300">Portfolio Value</span>
-                    <span className="text-white font-bold">{avatar.investmentReturns.portfolioValue}</span>
+                    <span className="text-white font-bold">{avatar.investmentReturns?.portfolioValue || 'N/A'}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -1058,15 +1058,15 @@ export default function AvatarProfile() {
                 <CardContent className="space-y-4">
                   <div className="p-3 bg-green-500/10 rounded-lg border border-green-400/20">
                     <div className="text-green-400 font-semibold">Best Investment</div>
-                    <div className="text-white">{avatar.investmentReturns.bestInvestment}</div>
+                    <div className="text-white">{avatar.investmentReturns?.bestInvestment || 'N/A'}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-green-400">{avatar.investmentReturns.totalReturn}</div>
+                      <div className="text-2xl font-bold text-green-400">{avatar.investmentReturns?.totalReturn || 'N/A'}</div>
                       <div className="text-sm text-gray-400">Total Return</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-blue-400">{avatar.investmentReturns.annualizedReturn}</div>
+                      <div className="text-2xl font-bold text-blue-400">{avatar.investmentReturns?.annualizedReturn || 'N/A'}</div>
                       <div className="text-sm text-gray-400">Annualized</div>
                     </div>
                   </div>
@@ -1084,7 +1084,7 @@ export default function AvatarProfile() {
               </CardHeader>
               <CardContent>
                 <div className="grid lg:grid-cols-2 gap-4">
-                  {avatar.publicInvestments.map((investment, index) => (
+                  {(avatar.publicInvestments || []).map((investment, index) => (
                     <motion.div
                       key={index}
                       className="p-4 bg-white/5 rounded-lg border border-white/10"
@@ -1131,7 +1131,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {avatar.coreBeliefs.map((belief, index) => (
+                    {(avatar.coreBeliefs || []).map((belief, index) => (
                       <div key={index} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
                         <Quote className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
                         <p className="text-gray-300">{belief}</p>
@@ -1151,7 +1151,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {avatar.mentalModels.map((model, index) => (
+                    {(avatar.mentalModels || []).map((model, index) => (
                       <div key={index} className="p-2 bg-blue-500/10 rounded border border-blue-400/20">
                         <span className="text-blue-300">{model}</span>
                       </div>
@@ -1183,7 +1183,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid lg:grid-cols-2 gap-3">
-                    {avatar.personalPrinciples.map((principle, index) => (
+                    {(avatar.personalPrinciples || []).map((principle, index) => (
                       <div key={index} className="flex items-start gap-3 p-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20">
                         <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-purple-300 text-sm font-semibold">{index + 1}</span>
@@ -1210,7 +1210,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {avatar.currentOpinions.map((opinion, index) => (
+                    {(avatar.currentOpinions || []).map((opinion, index) => (
                       <motion.div
                         key={index}
                         className="p-4 bg-white/5 rounded-lg border border-white/10"
@@ -1248,7 +1248,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {avatar.predictions.map((prediction, index) => (
+                    {(avatar.predictions || []).map((prediction, index) => (
                       <motion.div
                         key={index}
                         className="p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-400/20"
@@ -1290,7 +1290,7 @@ export default function AvatarProfile() {
               </CardHeader>
               <CardContent>
                 <div className="grid lg:grid-cols-2 gap-4">
-                  {avatar.controversialTakes.map((take, index) => (
+                  {(avatar.controversialTakes || []).map((take, index) => (
                     <div key={index} className="p-4 bg-red-500/10 rounded-lg border border-red-400/20">
                       <Quote className="h-4 w-4 text-red-400 mb-2" />
                       <p className="text-gray-300">{take}</p>
@@ -1314,7 +1314,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {avatar.recentContent.map((content, index) => (
+                    {(avatar.recentContent || []).map((content, index) => (
                       <motion.div
                         key={index}
                         className="p-4 bg-white/5 rounded-lg border border-white/10"
@@ -1354,7 +1354,7 @@ export default function AvatarProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {avatar.keyContent.map((content, index) => (
+                    {(avatar.keyContent || []).map((content, index) => (
                       <motion.div
                         key={index}
                         className="p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-400/20"
@@ -1394,7 +1394,7 @@ export default function AvatarProfile() {
               </CardHeader>
               <CardContent>
                 <div className="grid lg:grid-cols-3 gap-4">
-                  {avatar.bookRecommendations.map((book, index) => (
+                  {(avatar.bookRecommendations || []).map((book, index) => (
                     <motion.div
                       key={index}
                       className="p-4 bg-white/5 rounded-lg border border-white/10"
