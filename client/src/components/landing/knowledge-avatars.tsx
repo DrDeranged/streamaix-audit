@@ -1851,19 +1851,23 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                                   <BarChart3 className={`h-3.5 w-3.5 ${selectedForComparison.includes(avatar.id) ? 'text-purple-500' : 'text-purple-500 dark:text-purple-400'}`} />
                                 </Button>
                               </div>
-                              {/* Eye/View Button with Glassmorphism */}
-                              <div className="relative group">
-                                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-70 blur-[1px] transition-opacity duration-300" />
-                                <Button
-                                  onClick={(e) => e.stopPropagation()}
-                                  size="sm"
-                                  variant="outline"
-                                  className="relative px-3 text-xs font-mono bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-700 dark:text-blue-300 hover:bg-white/50 dark:hover:bg-slate-900/60 transition-all duration-300"
-                                  data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                >
-                                  <Eye className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-                                </Button>
-                              </div>
+                              {/* View Profile Link with Glassmorphism */}
+                              <Link 
+                                href={`/knowledge-avatars/${avatar.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="relative group">
+                                  <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-70 blur-[1px] transition-opacity duration-300" />
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="relative px-3 text-xs font-mono bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-700 dark:text-blue-300 hover:bg-white/50 dark:hover:bg-slate-900/60 transition-all duration-300"
+                                    data-testid={`button-view-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                  >
+                                    <Eye className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
+                                  </Button>
+                                </div>
+                              </Link>
                             </div>
                           </CardContent>
                         </Card>

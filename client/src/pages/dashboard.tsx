@@ -819,7 +819,7 @@ export default function Dashboard() {
                                   </div>
                                   
                                   <div className="flex gap-2">
-                                    <Link to={`/avatar/${followData.avatar.handle}`}>
+                                    <Link to={`/knowledge-avatars/${followData.avatar.id}`}>
                                       <Button 
                                         variant="outline" 
                                         size="sm"
