@@ -323,17 +323,18 @@ export default function BountyBoard() {
                   </div>
                   <div className="space-y-3">
                     {trendingBounties.slice(0, 3).map((bounty) => (
-                      <div
-                        key={bounty.id}
-                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
-                        data-testid={`trending-bounty-${bounty.id}`}
-                      >
-                        <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
-                          <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                      <Link key={bounty.id} href={`/bounties/${bounty.id}`}>
+                        <div
+                          className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
+                          data-testid={`trending-bounty-${bounty.id}`}
+                        >
+                          <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
+                            <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </Card>
@@ -351,17 +352,18 @@ export default function BountyBoard() {
                   </div>
                   <div className="space-y-3">
                     {hotBounties.map((bounty) => (
-                      <div
-                        key={bounty.id}
-                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
-                        data-testid={`hot-bounty-${bounty.id}`}
-                      >
-                        <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
-                          <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                      <Link key={bounty.id} href={`/bounties/${bounty.id}`}>
+                        <div
+                          className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
+                          data-testid={`hot-bounty-${bounty.id}`}
+                        >
+                          <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
+                            <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </Card>
@@ -379,17 +381,18 @@ export default function BountyBoard() {
                   </div>
                   <div className="space-y-3">
                     {urgentBounties.map((bounty) => (
-                      <div
-                        key={bounty.id}
-                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
-                        data-testid={`urgent-bounty-${bounty.id}`}
-                      >
-                        <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
-                          <span className="text-xs text-gray-400">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
+                      <Link key={bounty.id} href={`/bounties/${bounty.id}`}>
+                        <div
+                          className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 dark:hover:bg-slate-900/80 hover:scale-[1.02] transition-all duration-200 cursor-pointer border border-purple-500/20"
+                          data-testid={`urgent-bounty-${bounty.id}`}
+                        >
+                          <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
+                            <span className="text-xs text-gray-400">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </Card>
