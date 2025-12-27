@@ -4192,13 +4192,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Real wallet balance endpoint 
   app.get('/api/wallet/balance', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    // TODO: Implement real wallet integration
-    // For now, return zeros instead of fake data
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    // Fetch user's actual streamPoints from database
+    const user = await storage.getUser(userId);
+    const streamPoints = user?.streamPoints ?? 0;
+    
     const balance = {
-      streamTokens: 0,
-      usdValue: 0,
+      streamTokens: streamPoints,
+      usdValue: 0, // USD value not yet implemented
       change24h: 0,
-      totalEarned: 0,
+      totalEarned: streamPoints, // Track earned separately in future
       totalSpent: 0,
       pendingRewards: 0,
     };
