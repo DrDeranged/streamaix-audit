@@ -51,6 +51,7 @@ const StreamReplays = React.lazy(() => import("@/pages/stream-replays"));
 const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 const Points = React.lazy(() => import("@/pages/points"));
 const AITrading = React.lazy(() => import("@/pages/ai-trading"));
+const KnowledgeAvatarProfile = React.lazy(() => import("@/pages/knowledge-avatar-profile"));
 
 function Router() {
   return (
@@ -116,6 +117,12 @@ function Router() {
       <Route path="/avatar/:handle">
         <Suspense fallback={<DashboardSkeleton />}>
           <AvatarProfile />
+        </Suspense>
+      </Route>
+      
+      <Route path="/knowledge-avatars/:id">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <KnowledgeAvatarProfile />
         </Suspense>
       </Route>
       
