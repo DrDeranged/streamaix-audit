@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -1624,20 +1623,18 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       minWidth: isMobile ? '85vw' : '320px'
                     }}
                   >
-                    <Dialog open={openAvatarDialog === avatar.id} onOpenChange={(open) => setOpenAvatarDialog(open ? avatar.id : null)}>
-                      <DialogTrigger asChild>
-                        <div 
-                          className="w-full h-full" 
-                          style={{ pointerEvents: 'auto' }}
-                          onClick={(e) => {
-                            // Prevent dialog from opening if user is swiping
-                            if (isSwipeActive || swipeDirection) {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }
-                          }}
-                        >
-                          <Card className="group cursor-pointer bg-white dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-purple-950/90 dark:to-slate-950/95 backdrop-blur-xl border-2 border-slate-200 dark:border-purple-500/30 hover:border-slate-300 dark:hover:border-purple-400/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
+                    <Link 
+                      href={`/knowledge-avatars/${avatar.id}`}
+                      className="block w-full h-full"
+                      onClick={(e) => {
+                        // Prevent navigation if user is swiping
+                        if (isSwipeActive || swipeDirection) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }
+                      }}
+                    >
+                      <Card className="group cursor-pointer bg-white dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-purple-950/90 dark:to-slate-950/95 backdrop-blur-xl border-2 border-slate-200 dark:border-purple-500/30 hover:border-slate-300 dark:hover:border-purple-400/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 overflow-hidden flex flex-col h-full">
                           {/* Professional Terminal-Style Header */}
                           <div className="relative flex-shrink-0">
                             <div className={`h-32 bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden transition-all duration-500`}>
@@ -1871,170 +1868,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                             </div>
                           </CardContent>
                         </Card>
-                        </div>
-                      </DialogTrigger>
-                      
-                      {/* Compact Popup Modal - Responsive */}
-                      <DialogContent className="max-w-6xl w-full bg-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-hidden p-0 h-[95vh] md:h-[85vh] max-h-[95vh] md:max-h-[90vh]" onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
-                        <ScrollArea className="h-full w-full" showScrollbar={true} scrollbarVariant="purple">
-                        {/* Two-Column Grid Layout - Stacks on Mobile */}
-                        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] min-h-full pb-24 md:pb-0 overscroll-contain touch-pan-y">
-                          
-                          {/* LEFT SIDEBAR - Compact Profile */}
-                          <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-3 md:p-4 border-b md:border-b-0 md:border-r border-muted/30 flex flex-col">
-                            {/* Avatar */}
-                            <div className="flex flex-col items-center mb-3 md:mb-4">
-                              <div className="relative">
-                                <Avatar className="w-12 h-12 md:w-16 md:h-16 ring-2 ring-primary/20 border-2 border-white/10 shadow-lg">
-                                  <AvatarImage 
-                                    src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
-                                    alt={`${avatar.name} avatar`}
-                                  />
-                                  <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                                    {avatar.name.split(' ').map(n => n[0]).join('')}
-                                  </AvatarFallback>
-                                </Avatar>
-                                {avatar.verificationStatus === 'verified' && (
-                                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
-                                    <CheckCircle className="h-3 w-3 text-white" />
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {/* Name & Handle */}
-                              <h3 className="text-sm md:text-base font-bold text-foreground mt-2 text-center">{avatar.name}</h3>
-                              <p className="text-[10px] md:text-xs text-muted-foreground">@{avatar.handle}</p>
-                              
-                              {/* Influence Badge */}
-                              <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-[10px] md:text-xs mt-1.5 md:mt-2">
-                                Influence: {influenceScore}
-                              </Badge>
-                              
-                              {/* Follow Button */}
-                              <FollowButton
-                                avatarId={avatar.id}
-                                avatarName={avatar.name}
-                                className={`bg-gradient-to-r ${getAvatarGradient(avatar.name)} hover:opacity-90 text-white text-xs px-4 py-1.5 mt-2 w-full`}
-                              />
-                            </div>
-                            
-                            {/* Mini Stats Pills */}
-                            <div className="grid grid-cols-3 md:grid-cols-1 gap-1.5 md:gap-2 mb-3 md:mb-4">
-                              <div className="bg-blue-500/10 rounded-lg p-1.5 md:p-2 border border-blue-500/20">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] md:text-xs text-muted-foreground">Followers</span>
-                                  <Users className="h-2.5 w-2.5 md:h-3 md:w-3 text-blue-500" />
-                                </div>
-                                <div className="text-xs md:text-sm font-bold text-foreground mt-0.5">{formatFollowerCount(avatar.followerCount)}</div>
-                              </div>
-                              
-                              <div className="bg-green-500/10 rounded-lg p-1.5 md:p-2 border border-green-500/20">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] md:text-xs text-muted-foreground">Investments</span>
-                                  <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
-                                </div>
-                                <div className="text-xs md:text-sm font-bold text-foreground mt-0.5">{avatar.notableInvestments?.length || 0}</div>
-                              </div>
-                              
-                              <div className="bg-orange-500/10 rounded-lg p-1.5 md:p-2 border border-orange-500/20">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] md:text-xs text-muted-foreground">Net Worth</span>
-                                  <DollarSign className="h-2.5 w-2.5 md:h-3 md:w-3 text-orange-500" />
-                                </div>
-                                <div className="text-xs md:text-sm font-bold text-foreground mt-0.5">{netWorth}</div>
-                              </div>
-                            </div>
-                            
-                            {/* Investment Thesis - Condensed - Always show with fallback */}
-                            <div className="mt-auto hidden md:block">
-                              <div className="flex items-center gap-1 mb-1">
-                                <Target className="h-3 w-3 text-purple-500" />
-                                <span className="text-xs font-semibold text-foreground">Investment Thesis</span>
-                              </div>
-                              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{investmentThesis}</p>
-                            </div>
-                          </div>
-                          
-                          {/* RIGHT CONTENT AREA - Scrollable with visible scrollbar */}
-                          <div className="p-3 flex flex-col gap-2 overflow-y-auto scrollbar-visible">
-                            
-                            {/* Compact Performance Cards - 2x2 Grid */}
-                            <div className="grid grid-cols-2 gap-1.5 md:gap-2">
-                              {/* Total Followers Card */}
-                              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg p-2 md:p-3 border border-blue-500/20">
-                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                                  <div className="text-sm md:text-lg font-bold text-foreground">{formatFollowerCount(avatar.followerCount)}</div>
-                                  <Users className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
-                                </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">Total Followers</div>
-                                <div className="text-[10px] md:text-xs text-green-500">+12.3% this month</div>
-                              </div>
-                              
-                              {/* Portfolio ROI Card */}
-                              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-2 md:p-3 border border-green-500/20">
-                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                                  <div className={`text-sm md:text-lg font-bold ${portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                    {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
-                                  </div>
-                                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
-                                </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">Portfolio ROI</div>
-                                <div className="text-[10px] md:text-xs text-green-500">All-time returns</div>
-                              </div>
-                              
-                              {/* Prediction Accuracy Card */}
-                              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg p-2 md:p-3 border border-purple-500/20">
-                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                                  <div className="text-sm md:text-lg font-bold text-foreground">{accuracyPercentage}%</div>
-                                  <Target className="h-3 w-3 md:h-4 md:w-4 text-purple-500" />
-                                </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">Prediction Accuracy</div>
-                                <div className="text-[10px] md:text-xs text-purple-500">Last 100 predictions</div>
-                              </div>
-                              
-                              {/* Assets Under Management Card */}
-                              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-lg p-2 md:p-3 border border-orange-500/20">
-                                <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                                  <div className="text-xs md:text-base font-bold text-foreground truncate">{netWorth}</div>
-                                  <PieChart className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
-                                </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">Assets Under Management</div>
-                                <div className="text-[10px] md:text-xs text-orange-500">Public portfolio value</div>
-                              </div>
-                            </div>
-                            
-                            {/* Prediction Markets Section */}
-                            <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
-                            
-                            {/* Compact Analytics Chart Section - Always render with fallback data */}
-                            <div className="flex-1 min-h-[300px] md:min-h-0 overflow-visible md:overflow-hidden mb-8 md:mb-0">
-                              <EntrepreneurAnalytics 
-                                entrepreneur={{
-                                  name: avatar.name,
-                                  investmentThesis: investmentThesis,
-                                  bestCalls: bestCallsData,
-                                  worstCalls: worstCallsData,
-                                  recentActivity: recentActivityData.map(activity => ({
-                                    date: activity.time || 'Recent',
-                                    action: activity.text || 'Activity update',
-                                    details: `${(activity.type || 'update').toUpperCase()} - Market impact: ${activity.impact || 'medium'}`
-                                  })),
-                                  category: category,
-                                  riskScore: riskScore,
-                                  volatility: volatility,
-                                  marketOutlook: marketOutlook,
-                                  netWorth: netWorth,
-                                  portfolioRoi: portfolioRoi
-                                }}
-                                showThesis={false}
-                                showMetrics={false}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        </ScrollArea>
-                      </DialogContent>
-                    </Dialog>
+                    </Link>
                     
                    </div>
                 );

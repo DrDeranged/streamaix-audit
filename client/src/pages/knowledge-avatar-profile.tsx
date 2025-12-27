@@ -30,6 +30,7 @@ import { EntrepreneurAnalytics } from "@/components/avatars/entrepreneur-analyti
 import { FollowButton } from "@/components/avatars/follow-button";
 import { PortfolioSimulator } from "@/components/avatars/portfolio-simulator";
 import { AvatarChatButton } from "@/components/avatars/avatar-chat-button";
+import { InlineMarketCard } from "@/components/prediction/InlineMarketCard";
 
 interface DatabaseAvatar {
   id: string;
@@ -179,6 +180,86 @@ const getInfluenceScore = (followerCount: number | undefined | null, investments
   const baseScore = 30;
   return Math.round(followScore + investScore + baseScore);
 };
+
+function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avatarName: string }) {
+  const { data: marketsData, isLoading } = useQuery<{ markets: any[] }>({
+    queryKey: ['/api/avatars', avatarId, 'markets'],
+    enabled: !!avatarId,
+  });
+
+  const markets = marketsData?.markets || [];
+
+  if (isLoading) {
+    return (
+      <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="h-5 w-5 text-purple-500/50" />
+            <span className="text-lg font-semibold text-white/50">Loading Markets...</span>
+          </div>
+          <div className="animate-pulse space-y-3">
+            <div className="h-20 bg-slate-800/50 rounded-lg"></div>
+            <div className="h-20 bg-slate-800/50 rounded-lg"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (markets.length === 0) {
+    return (
+      <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="h-5 w-5 text-purple-500" />
+            <span className="text-lg font-semibold text-white">Prediction Markets</span>
+          </div>
+          <div className="bg-purple-500/5 border border-purple-500/10 rounded-lg p-6 text-center">
+            <TrendingUp className="h-8 w-8 text-purple-500/30 mx-auto mb-2" />
+            <span className="text-sm text-white/50">No prediction markets created by {avatarName} yet</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-purple-500" />
+            <span className="text-lg font-semibold text-white">Live Prediction Markets</span>
+          </div>
+          <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30">
+            {markets.length} Active
+          </Badge>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-3">
+          {markets.slice(0, 4).map((market) => (
+            <InlineMarketCard
+              key={market.id}
+              market={market}
+              variant="mini"
+              context="avatar"
+            />
+          ))}
+        </div>
+        
+        {markets.length > 4 && (
+          <div className="mt-4 text-center">
+            <Link href="/markets">
+              <Button variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300">
+                View all {markets.length} markets
+              </Button>
+            </Link>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function KnowledgeAvatarProfile() {
   const { id } = useParams<{ id: string }>();
@@ -500,6 +581,9 @@ export default function KnowledgeAvatarProfile() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Prediction Markets Section */}
+              <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
 
               {/* Analytics Chart */}
               <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
