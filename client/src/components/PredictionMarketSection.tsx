@@ -218,7 +218,7 @@ export function PredictionMarketSection() {
   const aiStats = aiStatsData;
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative pt-4 pb-20 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-transparent" />
       <div className="absolute inset-0">

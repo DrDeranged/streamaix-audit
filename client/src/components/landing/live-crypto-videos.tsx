@@ -168,7 +168,7 @@ export default function LiveCryptoVideos() {
   }
 
   return (
-    <section className="py-20 bg-transparent">
+    <section className="pt-4 pb-20 bg-transparent">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header with Live Status */}
         <div className="text-center mb-12">

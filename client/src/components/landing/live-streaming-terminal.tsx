@@ -332,7 +332,7 @@ export function LiveStreamingTerminal() {
   };
   
   return (
-    <section className="py-10 sm:py-16 px-4" data-testid="streaming-section">
+    <section className="pt-4 pb-10 sm:pb-16 px-4" data-testid="streaming-section">
       <div className="max-w-5xl mx-auto">
         <div className="relative overflow-hidden rounded-3xl">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-purple-950/20 to-slate-900/95" />

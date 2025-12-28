@@ -213,7 +213,7 @@ export function AISuggestions() {
   const topInvestments = alignedAssets?.slice(0, 5) || [];
 
   return (
-    <section id="suggestions" className="py-20 relative overflow-hidden bg-transparent">
+    <section id="suggestions" className="pt-4 pb-20 relative overflow-hidden bg-transparent">
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-6xl">
         {/* Compact Report Button */}

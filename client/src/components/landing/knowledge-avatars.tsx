@@ -1472,7 +1472,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   }
 
   return (
-    <section id="knowledge-avatars" className="py-20 bg-transparent relative overflow-visible">
+    <section id="knowledge-avatars" className="pt-4 pb-20 bg-transparent relative overflow-visible">
       
       <div className="container mx-auto px-6 relative">
         <motion.div 

@@ -47,11 +47,13 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  const goToSection = useCallback((index: number) => {
-    if (index >= 0 && index < sections.length && !isAnimating) {
-      setDirection(index > currentSection ? 1 : -1);
+  const goToSection = useCallback((index: number, forceDirection?: number) => {
+    if (!isAnimating) {
+      const normalizedIndex = ((index % sections.length) + sections.length) % sections.length;
+      const dir = forceDirection !== undefined ? forceDirection : (index > currentSection ? 1 : -1);
+      setDirection(dir);
       setIsAnimating(true);
-      setCurrentSection(index);
+      setCurrentSection(normalizedIndex);
       setTimeout(() => setIsAnimating(false), 500);
     }
   }, [currentSection, sections.length, isAnimating]);
@@ -70,16 +72,22 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
   }), [goToSection, goToSectionById, currentSection]);
 
   const goNext = useCallback(() => {
-    if (currentSection < sections.length - 1) {
-      goToSection(currentSection + 1);
+    const nextIndex = currentSection + 1;
+    if (nextIndex >= sections.length) {
+      goToSection(0, 1);
+    } else {
+      goToSection(nextIndex, 1);
     }
   }, [currentSection, sections.length, goToSection]);
 
   const goPrev = useCallback(() => {
-    if (currentSection > 0) {
-      goToSection(currentSection - 1);
+    const prevIndex = currentSection - 1;
+    if (prevIndex < 0) {
+      goToSection(sections.length - 1, -1);
+    } else {
+      goToSection(prevIndex, -1);
     }
-  }, [currentSection, goToSection]);
+  }, [currentSection, sections.length, goToSection]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -163,11 +171,11 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
           <>
             <button
               onClick={goPrev}
-              disabled={currentSection === 0 || isAnimating}
+              disabled={isAnimating}
               className={`fixed left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full 
                 bg-black/40 backdrop-blur-md border border-white/20 
                 text-white transition-all duration-300 hidden md:flex items-center justify-center
-                ${currentSection === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/20 hover:scale-110"}`}
+                ${isAnimating ? "opacity-30 cursor-not-allowed" : "hover:bg-white/20 hover:scale-110"}`}
               aria-label="Previous section"
               data-testid="button-prev-section"
             >
@@ -175,11 +183,11 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
             </button>
             <button
               onClick={goNext}
-              disabled={currentSection === sections.length - 1 || isAnimating}
+              disabled={isAnimating}
               className={`fixed right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full 
                 bg-black/40 backdrop-blur-md border border-white/20 
                 text-white transition-all duration-300 hidden md:flex items-center justify-center
-                ${currentSection === sections.length - 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/20 hover:scale-110"}`}
+                ${isAnimating ? "opacity-30 cursor-not-allowed" : "hover:bg-white/20 hover:scale-110"}`}
               aria-label="Next section"
               data-testid="button-next-section"
             >

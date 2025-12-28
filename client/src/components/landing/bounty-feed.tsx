@@ -223,7 +223,7 @@ export function BountyFeed() {
   const stats = statsData?.stats;
 
   return (
-    <section className="py-20 relative overflow-hidden bg-transparent">
+    <section className="pt-4 pb-20 relative overflow-hidden bg-transparent">
 
       {/* Animated gradient orbs */}
       <motion.div
