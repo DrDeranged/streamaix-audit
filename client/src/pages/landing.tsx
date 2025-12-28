@@ -65,29 +65,15 @@ export default function Landing() {
     },
     {
       id: "ai-processor",
-      label: "AI Processor",
+      label: "AI Processing",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
               <AIProcessor />
-            </Suspense>
-          </div>
-        </SectionWrapper>
-      ),
-    },
-    {
-      id: "crypto-videos",
-      label: "Crypto Videos",
-      component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950">
-          <NeuralNetworkBackground />
-          <div className="relative z-10">
-            <Navigation />
-            <Suspense fallback={<SectionLoader />}>
-              <LiveCryptoVideos />
+              <LiveCryptoVideos embedded />
             </Suspense>
           </div>
         </SectionWrapper>

@@ -335,7 +335,7 @@ export function AIProcessor() {
           viewport={{ once: true }}
         >
           <SectionHeader
-            title="Live AI Content Intelligence"
+            title="Live AI Processing"
             subtitle="Paste a YouTube URL and extract AI insights instantly"
             highlightWord="AI"
           />

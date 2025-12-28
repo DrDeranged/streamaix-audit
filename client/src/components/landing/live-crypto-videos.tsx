@@ -10,7 +10,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
-export default function LiveCryptoVideos() {
+interface LiveCryptoVideosProps {
+  embedded?: boolean;
+}
+
+export default function LiveCryptoVideos({ embedded = false }: LiveCryptoVideosProps) {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
@@ -117,6 +121,18 @@ export default function LiveCryptoVideos() {
   };
 
   if (isLoading && !videos.length) {
+    if (embedded) {
+      return (
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <Loader2 className="w-6 h-6 animate-spin" />
+              <span>Loading latest crypto content...</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <section className="pt-20 pb-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
@@ -142,6 +158,19 @@ export default function LiveCryptoVideos() {
   }
 
   if (error) {
+    if (embedded) {
+      return (
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="text-center py-12">
+            <p className="text-red-400 mb-4">Failed to load live content</p>
+            <Button onClick={() => refetch()} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      );
+    }
     return (
       <section className="pt-20 pb-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
@@ -167,10 +196,10 @@ export default function LiveCryptoVideos() {
     );
   }
 
-  return (
-    <section className="pt-20 pb-20 bg-transparent">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Header with Live Status */}
+  const content = (
+    <div className={`max-w-7xl mx-auto px-6 ${embedded ? 'pb-12' : ''}`}>
+      {/* Header with Live Status - only show if not embedded */}
+      {!embedded && (
         <div className="text-center mb-12">
           <SectionHeader
             title="Live AI Processing"
@@ -186,6 +215,16 @@ export default function LiveCryptoVideos() {
             </p>
           )}
         </div>
+      )}
+      
+      {/* Last updated for embedded mode */}
+      {embedded && lastUpdated && (
+        <div className="text-center mb-8">
+          <p className="text-sm text-muted-foreground">
+            Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+          </p>
+        </div>
+      )}
 
         {/* Videos Grid */}
         <div className="relative">
@@ -335,39 +374,48 @@ export default function LiveCryptoVideos() {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div className="text-center mt-12">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Transform hours of crypto content into actionable insights. Our AI processes any podcast or video to extract key points, market analysis, and investment strategies.
-            </p>
-          </div>
-          
-          <div className="flex justify-center items-center">
-            {isAuthenticated ? (
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => setLocation('/dashboard')}
-                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-              >
-                <BarChart3 className="w-5 h-5 mr-2" />
-                View Dashboard
-              </Button>
-            ) : (
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => setLocation('/auth')}
-                className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-              >
-                <FileText className="w-5 h-5 mr-2" />
-                Get Started Free
-              </Button>
-            )}
-          </div>
+      {/* Call to Action */}
+      <div className="text-center mt-12">
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Transform hours of crypto content into actionable insights. Our AI processes any podcast or video to extract key points, market analysis, and investment strategies.
+          </p>
+        </div>
+        
+        <div className="flex justify-center items-center">
+          {isAuthenticated ? (
+            <Button 
+              size="lg"
+              variant="outline"
+              onClick={() => setLocation('/dashboard')}
+              className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+            >
+              <BarChart3 className="w-5 h-5 mr-2" />
+              View Dashboard
+            </Button>
+          ) : (
+            <Button 
+              size="lg"
+              variant="outline"
+              onClick={() => setLocation('/auth')}
+              className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-8 py-3 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Get Started Free
+            </Button>
+          )}
         </div>
       </div>
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <section className="pt-20 pb-20 bg-transparent">
+      {content}
     </section>
   );
 }
