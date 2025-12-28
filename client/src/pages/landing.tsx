@@ -1,35 +1,188 @@
+import { lazy, Suspense, useMemo } from "react";
 import { Navigation } from "@/components/landing/navigation";
 import { HeroSection } from "@/components/landing/hero-section";
-import { LiveStreamingTerminal } from "@/components/landing/live-streaming-terminal";
-import { AIProcessor } from "@/components/landing/rebuilt-ai-demo";
-import LiveCryptoVideos from "@/components/landing/live-crypto-videos";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { KnowledgeAvatars } from "@/components/landing/knowledge-avatars";
-import { AISuggestions } from "@/components/landing/ai-suggestions";
-import { RecentActivity } from "@/components/landing/RecentActivity";
-import { BountyFeed } from "@/components/landing/bounty-feed";
-import { PredictionMarketSection } from "@/components/PredictionMarketSection";
-import { SocialFeed } from "@/components/landing/SocialFeed";
-import { Footer } from "@/components/landing/footer";
+import { SlidingPageContainer, SectionWrapper } from "@/components/sliding-page-container";
+import { Loader2 } from "lucide-react";
+
+const LiveStreamingTerminal = lazy(() => import("@/components/landing/live-streaming-terminal").then(m => ({ default: m.LiveStreamingTerminal })));
+const AIProcessor = lazy(() => import("@/components/landing/rebuilt-ai-demo").then(m => ({ default: m.AIProcessor })));
+const LiveCryptoVideos = lazy(() => import("@/components/landing/live-crypto-videos"));
+const BountyFeed = lazy(() => import("@/components/landing/bounty-feed").then(m => ({ default: m.BountyFeed })));
+const PredictionMarketSection = lazy(() => import("@/components/PredictionMarketSection").then(m => ({ default: m.PredictionMarketSection })));
+const SocialFeed = lazy(() => import("@/components/landing/SocialFeed").then(m => ({ default: m.SocialFeed })));
+const KnowledgeAvatars = lazy(() => import("@/components/landing/knowledge-avatars").then(m => ({ default: m.KnowledgeAvatars })));
+const AISuggestions = lazy(() => import("@/components/landing/ai-suggestions").then(m => ({ default: m.AISuggestions })));
+const RecentActivity = lazy(() => import("@/components/landing/RecentActivity").then(m => ({ default: m.RecentActivity })));
+const Footer = lazy(() => import("@/components/landing/footer").then(m => ({ default: m.Footer })));
+
+function SectionLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-400 mx-auto mb-3" />
+        <p className="text-white/50 text-sm">Loading section...</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Landing() {
+  const sections = useMemo(() => [
+    {
+      id: "hero",
+      label: "Welcome",
+      component: (
+        <SectionWrapper className="relative">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <HeroSection />
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "live-streams",
+      label: "Live Streams",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-purple-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <LiveStreamingTerminal />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "ai-processor",
+      label: "AI Processor",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <AIProcessor />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "crypto-videos",
+      label: "Crypto Videos",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <LiveCryptoVideos />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "bounties",
+      label: "Bounties",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-emerald-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <BountyFeed />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "prediction-markets",
+      label: "Prediction Markets",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-blue-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <PredictionMarketSection />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "social",
+      label: "Social Feed",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-pink-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <SocialFeed />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "avatars",
+      label: "Knowledge Avatars",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-violet-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <KnowledgeAvatars />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "ai-suggestions",
+      label: "AI Suggestions",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-teal-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <AISuggestions />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "activity",
+      label: "Recent Activity",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-orange-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <RecentActivity />
+              <Footer />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+  ], []);
+
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
-      <NeuralNetworkBackground />
-      <div className="relative z-10">
-        <Navigation />
-        <HeroSection />
-        <LiveStreamingTerminal />
-        <AIProcessor />
-        <LiveCryptoVideos />
-        <BountyFeed />
-        <PredictionMarketSection />
-        <SocialFeed />
-        <KnowledgeAvatars />
-        <AISuggestions />
-        <RecentActivity />
-        <Footer />
-      </div>
+    <div className="relative bg-background text-foreground">
+      <SlidingPageContainer sections={sections} />
     </div>
   );
 }
