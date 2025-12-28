@@ -75,7 +75,7 @@ export function AISuggestions() {
 
   if (!isAuthenticated || !user) {
     return (
-      <section id="suggestions" className="pt-4 pb-24 relative overflow-hidden bg-transparent">
+      <section id="suggestions" className="pt-20 pb-24 relative overflow-hidden bg-transparent">
         
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
@@ -138,7 +138,7 @@ export function AISuggestions() {
 
   if (isLoading) {
     return (
-      <section id="suggestions" className="pt-4 pb-24 relative bg-transparent">
+      <section id="suggestions" className="pt-20 pb-24 relative bg-transparent">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-16"
@@ -164,7 +164,7 @@ export function AISuggestions() {
 
   if (error || !data?.success) {
     return (
-      <section id="suggestions" className="pt-4 pb-24 relative bg-transparent">
+      <section id="suggestions" className="pt-20 pb-24 relative bg-transparent">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-16"
@@ -213,7 +213,7 @@ export function AISuggestions() {
   const topInvestments = alignedAssets?.slice(0, 5) || [];
 
   return (
-    <section id="suggestions" className="pt-4 pb-20 relative overflow-hidden bg-transparent">
+    <section id="suggestions" className="pt-20 pb-20 relative overflow-hidden bg-transparent">
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-6xl">
         {/* Compact Report Button */}

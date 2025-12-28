@@ -272,7 +272,7 @@ export function SocialFeed() {
     (activeTab === 'predictions' && marketsError);
 
   return (
-    <section id="social-feed" className="relative overflow-hidden pt-4 pb-8">
+    <section id="social-feed" className="relative overflow-hidden pt-20 pb-8">
       {/* Neural Network Background */}
       <canvas
         ref={canvasRef}

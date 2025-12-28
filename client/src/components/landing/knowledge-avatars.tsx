@@ -1437,7 +1437,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
 
   if (isLoading) {
     return (
-      <section id="profiles" className="pt-4 pb-20 bg-transparent">
+      <section id="profiles" className="pt-20 pb-20 bg-transparent">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1472,7 +1472,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   }
 
   return (
-    <section id="knowledge-avatars" className="pt-4 pb-20 bg-transparent relative overflow-visible">
+    <section id="knowledge-avatars" className="pt-20 pb-20 bg-transparent relative overflow-visible">
       
       <div className="container mx-auto px-6 relative">
         <motion.div 

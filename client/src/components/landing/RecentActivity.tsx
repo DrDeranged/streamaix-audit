@@ -36,7 +36,7 @@ export function RecentActivity() {
   };
 
   return (
-    <section className="pt-4 pb-20 relative overflow-hidden bg-transparent">
+    <section className="pt-20 pb-20 relative overflow-hidden bg-transparent">
       <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
