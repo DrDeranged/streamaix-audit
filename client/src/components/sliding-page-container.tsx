@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, ReactNode, createContext, useContext } from "react";
+import { useState, useRef, useEffect, useCallback, ReactNode, createContext, useContext, forwardRef, useImperativeHandle } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -11,6 +11,7 @@ interface Section {
 interface SlidingContextType {
   currentSection: number;
   goToSection: (index: number) => void;
+  goToSectionById: (id: string) => void;
   sections: Section[];
 }
 
@@ -24,6 +25,12 @@ export function useSlidingNavigation() {
   return context;
 }
 
+export interface SlidingPageContainerHandle {
+  goToSection: (index: number) => void;
+  goToSectionById: (id: string) => void;
+  currentSection: number;
+}
+
 interface SlidingPageContainerProps {
   sections: Section[];
   showNavDots?: boolean;
@@ -31,12 +38,8 @@ interface SlidingPageContainerProps {
   className?: string;
 }
 
-export function SlidingPageContainer({
-  sections,
-  showNavDots = true,
-  showArrows = true,
-  className = "",
-}: SlidingPageContainerProps) {
+export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, SlidingPageContainerProps>(
+  function SlidingPageContainerInner({ sections, showNavDots = true, showArrows = true, className = "" }, ref) {
   const [currentSection, setCurrentSection] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState(0);
@@ -52,6 +55,19 @@ export function SlidingPageContainer({
       setTimeout(() => setIsAnimating(false), 500);
     }
   }, [currentSection, sections.length, isAnimating]);
+
+  const goToSectionById = useCallback((id: string) => {
+    const index = sections.findIndex(s => s.id === id);
+    if (index !== -1) {
+      goToSection(index);
+    }
+  }, [sections, goToSection]);
+
+  useImperativeHandle(ref, () => ({
+    goToSection,
+    goToSectionById,
+    currentSection,
+  }), [goToSection, goToSectionById, currentSection]);
 
   const goNext = useCallback(() => {
     if (currentSection < sections.length - 1) {
@@ -117,7 +133,7 @@ export function SlidingPageContainer({
   };
 
   return (
-    <SlidingContext.Provider value={{ currentSection, goToSection, sections }}>
+    <SlidingContext.Provider value={{ currentSection, goToSection, goToSectionById, sections }}>
       <div
         ref={containerRef}
         className={`relative h-screen overflow-hidden ${className}`}
@@ -223,7 +239,7 @@ export function SlidingPageContainer({
       </div>
     </SlidingContext.Provider>
   );
-}
+});
 
 export function SectionWrapper({ 
   children, 

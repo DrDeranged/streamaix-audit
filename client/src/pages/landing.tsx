@@ -1,8 +1,8 @@
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useMemo, useRef, useCallback } from "react";
 import { Navigation } from "@/components/landing/navigation";
 import { HeroSection } from "@/components/landing/hero-section";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { SlidingPageContainer, SectionWrapper } from "@/components/sliding-page-container";
+import { SlidingPageContainer, SectionWrapper, SlidingPageContainerHandle } from "@/components/sliding-page-container";
 import { Loader2 } from "lucide-react";
 
 const LiveStreamingTerminal = lazy(() => import("@/components/landing/live-streaming-terminal").then(m => ({ default: m.LiveStreamingTerminal })));
@@ -28,6 +28,12 @@ function SectionLoader() {
 }
 
 export default function Landing() {
+  const slidingRef = useRef<SlidingPageContainerHandle>(null);
+
+  const handleNavigateToSection = useCallback((sectionId: string) => {
+    slidingRef.current?.goToSectionById(sectionId);
+  }, []);
+
   const sections = useMemo(() => [
     {
       id: "hero",
@@ -37,7 +43,7 @@ export default function Landing() {
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
-            <HeroSection />
+            <HeroSection onNavigateToSection={handleNavigateToSection} />
           </div>
         </SectionWrapper>
       ),
@@ -178,11 +184,11 @@ export default function Landing() {
         </SectionWrapper>
       ),
     },
-  ], []);
+  ], [handleNavigateToSection]);
 
   return (
     <div className="relative bg-background text-foreground">
-      <SlidingPageContainer sections={sections} />
+      <SlidingPageContainer ref={slidingRef} sections={sections} />
     </div>
   );
 }

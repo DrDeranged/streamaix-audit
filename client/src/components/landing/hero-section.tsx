@@ -5,8 +5,18 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { WaitlistModal } from "@/components/WaitlistModal";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  onNavigateToSection?: (sectionId: string) => void;
+}
+
+export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+
+  const navigateToSection = (sectionId: string) => {
+    if (onNavigateToSection) {
+      onNavigateToSection(sectionId);
+    }
+  };
 
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-16 bg-transparent">
@@ -115,7 +125,7 @@ export function HeroSection() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
                 variant="outline"
-                onClick={() => document.getElementById('ai-processor')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => navigateToSection('ai-processor')}
                 className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-emerald-500/50 hover:bg-emerald-500/5 text-slate-300 hover:text-emerald-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-ai-analysis"
               >
@@ -140,7 +150,7 @@ export function HeroSection() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
                 variant="outline"
-                onClick={() => document.getElementById('social-feed')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => navigateToSection('social')}
                 className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-slate-300 hover:text-indigo-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-social-feed"
               >
@@ -152,7 +162,7 @@ export function HeroSection() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
                 variant="outline"
-                onClick={() => document.getElementById('knowledge-avatars')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => navigateToSection('avatars')}
                 className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-amber-500/50 hover:bg-amber-500/5 text-slate-300 hover:text-amber-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-knowledge-avatars"
               >
