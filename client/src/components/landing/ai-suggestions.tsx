@@ -75,7 +75,7 @@ export function AISuggestions() {
 
   if (!isAuthenticated || !user) {
     return (
-      <section id="suggestions" className="py-24 relative overflow-hidden bg-transparent">
+      <section id="suggestions" className="pt-4 pb-24 relative overflow-hidden bg-transparent">
         
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
@@ -138,7 +138,7 @@ export function AISuggestions() {
 
   if (isLoading) {
     return (
-      <section id="suggestions" className="py-24 relative bg-transparent">
+      <section id="suggestions" className="pt-4 pb-24 relative bg-transparent">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-16"
@@ -164,7 +164,7 @@ export function AISuggestions() {
 
   if (error || !data?.success) {
     return (
-      <section id="suggestions" className="py-24 relative bg-transparent">
+      <section id="suggestions" className="pt-4 pb-24 relative bg-transparent">
         <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div 
             className="text-center mb-16"

@@ -118,7 +118,7 @@ export default function LiveCryptoVideos() {
 
   if (isLoading && !videos.length) {
     return (
-      <section className="py-20 bg-transparent">
+      <section className="pt-4 pb-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <SectionHeader
@@ -143,7 +143,7 @@ export default function LiveCryptoVideos() {
 
   if (error) {
     return (
-      <section className="py-20 bg-transparent">
+      <section className="pt-4 pb-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <SectionHeader
