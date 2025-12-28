@@ -266,7 +266,7 @@ export default function KnowledgeAvatarProfile() {
   const { user } = useAuth();
 
   const { data: avatar, isLoading, error } = useQuery<DatabaseAvatar>({
-    queryKey: ['/api/avatars', id],
+    queryKey: ['/api/avatars/by-id', id],
     enabled: !!id,
   });
 

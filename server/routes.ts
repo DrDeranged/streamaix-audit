@@ -2175,6 +2175,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Get avatar by ID - MUST be before /:handle to avoid route matching issues
+  app.get('/api/avatars/by-id/:id', asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+      const avatar = await storage.getKnowledgeAvatar(id);
+      if (!avatar) {
+        return res.status(404).json({ error: 'Avatar not found' });
+      }
+
+      res.json(avatar);
+    } catch (error) {
+      console.error('Error fetching avatar by ID:', error);
+      res.status(500).json({ error: 'Failed to fetch avatar' });
+    }
+  }));
+
   // Get trending avatars - MUST be before /:handle to avoid route matching issues
   app.get('/api/avatars/trending', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 6;
