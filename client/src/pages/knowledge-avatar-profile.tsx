@@ -262,15 +262,35 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
 }
 
 export default function KnowledgeAvatarProfile() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
+  const id = params?.id;
   const { user } = useAuth();
 
-  const { data: avatar, isLoading, error } = useQuery<DatabaseAvatar>({
-    queryKey: ['/api/avatars/by-id', id],
+  const { data: avatar, isLoading, error, isFetching } = useQuery<DatabaseAvatar>({
+    queryKey: [`/api/avatars/by-id/${id}`],
     enabled: !!id,
   });
 
-  if (isLoading) {
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+        <Card className="bg-slate-900/80 border-red-500/30 p-8 max-w-md">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-white mb-2">Invalid Avatar Link</h2>
+            <p className="text-white/60 mb-4">No avatar ID was provided.</p>
+            <Link href="/">
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoading || isFetching) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
         <div className="text-center">
