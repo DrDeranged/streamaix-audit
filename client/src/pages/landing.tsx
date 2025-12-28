@@ -39,11 +39,15 @@ export default function Landing() {
       id: "hero",
       label: "Welcome",
       component: (
-        <SectionWrapper className="relative">
+        <SectionWrapper className="relative" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
             <HeroSection onNavigateToSection={handleNavigateToSection} />
+            <Suspense fallback={<SectionLoader />}>
+              <RecentActivity />
+              <Footer />
+            </Suspense>
           </div>
         </SectionWrapper>
       ),
