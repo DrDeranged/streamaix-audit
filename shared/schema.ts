@@ -4627,6 +4627,8 @@ export const predictionMarkets = pgTable("prediction_markets", {
   question: text("question").notNull(),
   description: text("description"),
   category: text("category").notNull(),
+  assetClass: text("asset_class").default("crypto"), // crypto, tech_stock, macro, mixed
+  ticker: text("ticker"), // Stock/crypto ticker symbol (AAPL, NVDA, BTC, ETH)
   creatorId: varchar("creator_id").references(() => users.id),
   creatorWallet: text("creator_wallet"),
   deadline: timestamp("deadline").notNull(),

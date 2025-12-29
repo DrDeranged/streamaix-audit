@@ -13,12 +13,13 @@ const firstNames = [
   'Elizabeth', 'Daniel', 'Sofia', 'Matthew', 'Madison', 'Aiden', 'Avery'
 ];
 
-// Crypto/tech-themed descriptors
+// Crypto/tech-themed descriptors (expanded with tech macro)
 const descriptors = [
   'crypto', 'defi', 'nft', 'web3', 'blockchain', 'trader', 'analyst',
   'researcher', 'investor', 'hodler', 'whale', 'degen', 'builder', 'dev',
   'protocol', 'market', 'token', 'chain', 'layer2', 'eth', 'btc', 'alt',
-  'dao', 'yield', 'farm', 'stake', 'validator', 'node', 'alpha', 'beta'
+  'dao', 'yield', 'farm', 'stake', 'validator', 'node', 'alpha', 'beta',
+  'tech', 'macro', 'nvidia', 'ai', 'stocks', 'fed', 'quant', 'earnings'
 ];
 
 // Role-based usernames
@@ -28,15 +29,19 @@ const roles = [
   'curator', 'monitor', 'watcher', 'scout', 'oracle', 'guide', 'sage'
 ];
 
-// Crypto expertise areas
+// Crypto & Tech Macro expertise areas
 const expertiseAreas = [
   'DeFi', 'NFTs', 'Layer 2', 'Tokenomics', 'MEV', 'DAOs', 'Stablecoins',
   'Gaming', 'Social', 'Infrastructure', 'Privacy', 'Security', 'Scalability',
   'Interoperability', 'Governance', 'Yield Farming', 'Liquidity Mining',
-  'Flash Loans', 'Derivatives', 'Perpetuals', 'Options', 'Lending', 'Borrowing'
+  'Flash Loans', 'Derivatives', 'Perpetuals', 'Options', 'Lending', 'Borrowing',
+  // Tech Macro expertise
+  'AI Chips', 'Semiconductors', 'NVIDIA', 'AMD', 'Tech Earnings', 'Fed Policy',
+  'S&P 500', 'FAANG', 'Cloud Computing', 'Enterprise AI', 'Tesla', 'Apple',
+  'Microsoft', 'Google', 'Amazon', 'Meta', 'Macro Economics', 'Interest Rates'
 ];
 
-// Bio templates
+// Bio templates (crypto + tech macro)
 const bioTemplates = [
   (expertise: string) => `${expertise} researcher | Building the future of web3`,
   (expertise: string) => `Professional ${expertise.toLowerCase()} analyst | Sharing alpha daily`,
@@ -48,6 +53,11 @@ const bioTemplates = [
   (expertise: string) => `${expertise} contributor | Building in public`,
   (expertise: string) => `${expertise} observer | Connecting the dots`,
   (expertise: string) => `${expertise} researcher | Evidence-based investing`,
+  // Tech macro bios
+  (expertise: string) => `${expertise} analyst | Covering tech & macro markets`,
+  (expertise: string) => `${expertise} watcher | Tracking earnings & Fed moves`,
+  (expertise: string) => `${expertise} expert | AI chips & semiconductor deep dives`,
+  (expertise: string) => `${expertise} strategist | Cross-asset alpha hunter`,
 ];
 
 // Timezones for realistic activity patterns
