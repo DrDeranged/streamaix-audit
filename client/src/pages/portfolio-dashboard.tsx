@@ -408,12 +408,19 @@ export default function PortfolioDashboard() {
     mutationFn: async () => {
       return apiRequest('/api/portfolios', {
         method: 'POST',
-        body: JSON.stringify({ name: 'New Portfolio' }),
+        body: JSON.stringify({ name: 'My Portfolio' }),
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/portfolios'] });
-      toast({ title: 'Portfolio created' });
+      toast({ title: 'Portfolio created successfully!', description: 'Start adding your assets now.' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Failed to create portfolio', 
+        description: error.message || 'Please try again',
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -484,22 +491,134 @@ export default function PortfolioDashboard() {
           </div>
 
           {portfolios.length === 0 ? (
-            <Card className="bg-slate-900/60 border-slate-700/50 p-12 text-center">
-              <Wallet className="w-16 h-16 mx-auto text-purple-400 mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Create Your First Portfolio</h2>
-              <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                Track all your assets in one place. Add crypto, stocks, ETFs, retirement accounts, and more.
-              </p>
-              <Button
-                onClick={() => createPortfolioMutation.mutate()}
-                disabled={createPortfolioMutation.isPending}
-                className="bg-gradient-to-r from-purple-500 to-fuchsia-500"
-                data-testid="create-portfolio-button"
+            <div className="relative">
+              <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="portfolioGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#a855f7" />
+                    <stop offset="100%" stopColor="#06b6d4" />
+                  </linearGradient>
+                </defs>
+                {[...Array(12)].map((_, i) => {
+                  const x1 = 50 + Math.cos((i * Math.PI * 2) / 12) * 180;
+                  const y1 = 200 + Math.sin((i * Math.PI * 2) / 12) * 120;
+                  const x2 = 50 + Math.cos(((i + 3) * Math.PI * 2) / 12) * 180;
+                  const y2 = 200 + Math.sin(((i + 3) * Math.PI * 2) / 12) * 120;
+                  return (
+                    <g key={i}>
+                      <motion.line
+                        x1={`${x1}%`} y1={y1} x2={`${x2}%`} y2={y2}
+                        stroke="url(#portfolioGrad1)"
+                        strokeWidth="1"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: [0.2, 0.5, 0.2] }}
+                        transition={{ duration: 3, delay: i * 0.2, repeat: Infinity }}
+                      />
+                      <motion.circle
+                        cx={`${x1}%`} cy={y1} r="4"
+                        fill="#a855f7"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }}
+                        transition={{ duration: 2, delay: i * 0.15, repeat: Infinity }}
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="relative z-10"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Portfolio
-              </Button>
-            </Card>
+                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900/80 via-slate-800/50 to-slate-900/80 backdrop-blur-xl border border-purple-500/30 p-8 md:p-12 text-center shadow-2xl shadow-purple-500/10">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-cyan-500/5" />
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-purple-500/20 blur-3xl rounded-full" />
+                  
+                  <div className="relative z-10">
+                    <motion.div 
+                      className="w-24 h-24 mx-auto mb-6 relative"
+                      animate={{ 
+                        boxShadow: ["0 0 30px rgba(168,85,247,0.3)", "0 0 60px rgba(168,85,247,0.5)", "0 0 30px rgba(168,85,247,0.3)"]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-500 animate-pulse" />
+                      <div className="absolute inset-1 rounded-xl bg-slate-900 flex items-center justify-center">
+                        <Wallet className="w-12 h-12 text-purple-400" />
+                      </div>
+                    </motion.div>
+
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+                      Create Your First Portfolio
+                    </h2>
+                    <p className="text-gray-400 mb-8 max-w-lg mx-auto text-lg">
+                      Track all your assets with AI-powered intelligence. Get unified views, health scoring, and smart recommendations.
+                    </p>
+
+                    <Button
+                      onClick={() => createPortfolioMutation.mutate()}
+                      disabled={createPortfolioMutation.isPending}
+                      className="relative group bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-xl shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+                      data-testid="create-portfolio-button"
+                    >
+                      <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400 to-fuchsia-400 opacity-0 group-hover:opacity-20 transition-opacity" />
+                      {createPortfolioMutation.isPending ? (
+                        <>
+                          <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5 mr-2" />
+                          Create Portfolio
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </Card>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                  {[
+                    { 
+                      icon: PieChart, 
+                      title: 'Unified Tracking', 
+                      desc: 'Crypto, stocks, ETFs, retirement accounts, and more in one view',
+                      gradient: 'from-purple-500 to-violet-500'
+                    },
+                    { 
+                      icon: Brain, 
+                      title: 'AI Health Score', 
+                      desc: 'Get instant portfolio health analysis and optimization tips',
+                      gradient: 'from-cyan-500 to-blue-500'
+                    },
+                    { 
+                      icon: Shield, 
+                      title: 'Private & Secure', 
+                      desc: 'Manual entry, no wallet connections, encrypted storage',
+                      gradient: 'from-emerald-500 to-green-500'
+                    }
+                  ].map((feature, i) => (
+                    <motion.div
+                      key={feature.title}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                    >
+                      <Card className="relative overflow-hidden bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 hover:border-purple-500/40 p-6 transition-all duration-300 group hover:shadow-lg hover:shadow-purple-500/10">
+                        <div className={cn("absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:opacity-20 transition-opacity", feature.gradient)} />
+                        <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center mb-4", feature.gradient)}>
+                          <feature.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
+                        <p className="text-sm text-gray-400">{feature.desc}</p>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
           ) : (
             <>
               {portfolios.length > 1 && (
