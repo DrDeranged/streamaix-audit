@@ -49,7 +49,8 @@ import {
   Radio,
   Calendar,
   Mic,
-  History
+  History,
+  GraduationCap
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NotificationSettings } from "@/components/NotificationSettings";
@@ -444,6 +445,15 @@ export function Navigation() {
                       <div>
                         <span className="font-medium block">Leagues</span>
                         <span className="text-xs text-gray-500 dark:text-slate-400">Compete & earn</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/learn" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                      <GraduationCap className="w-4 h-4 text-purple-400" />
+                      <div>
+                        <span className="font-medium block">Learning Hub</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Master Web3 & AI</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -873,6 +883,15 @@ export function Navigation() {
                   >
                     <Coins className="w-4 h-4 text-emerald-400" />
                     STREAM Points
+                  </button>
+                </Link>
+                <Link href="/learn" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                    Learning Hub
                   </button>
                 </Link>
                 <button 
