@@ -16595,6 +16595,585 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // AI PORTFOLIO COMMAND CENTER - Unified asset management with AI intelligence
+  // =============================================================================
+
+  const { portfolios, portfolioAssets, portfolioTransactions, portfolioInsights, portfolioSnapshots } = await import("../shared/schema");
+
+  // Get user's portfolios
+  app.get("/api/portfolios", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const userPortfolios = await db.select().from(portfolios).where(eq(portfolios.userId, userId)).orderBy(desc(portfolios.createdAt));
+    res.json({ success: true, portfolios: userPortfolios });
+  }));
+
+  // Get single portfolio with assets
+  app.get("/api/portfolios/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const [portfolio] = await db.select().from(portfolios).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId)));
+    if (!portfolio) {
+      return res.status(404).json({ error: 'Portfolio not found' });
+    }
+    
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id)).orderBy(desc(portfolioAssets.currentValue));
+    const insights = await db.select().from(portfolioInsights).where(and(eq(portfolioInsights.portfolioId, id), eq(portfolioInsights.isDismissed, false))).orderBy(desc(portfolioInsights.createdAt)).limit(10);
+    
+    res.json({ success: true, portfolio, assets, insights });
+  }));
+
+  // Create new portfolio
+  app.post("/api/portfolios", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { name, description } = req.body;
+    
+    // Check if this is the first portfolio (make it default)
+    const existingPortfolios = await db.select().from(portfolios).where(eq(portfolios.userId, userId));
+    const isDefault = existingPortfolios.length === 0;
+    
+    const [newPortfolio] = await db.insert(portfolios).values({
+      userId,
+      name: name || 'My Portfolio',
+      description,
+      isDefault,
+    }).returning();
+    
+    res.json({ success: true, portfolio: newPortfolio });
+  }));
+
+  // Update portfolio
+  app.patch("/api/portfolios/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { name, description } = req.body;
+    
+    const [updated] = await db.update(portfolios).set({
+      name,
+      description,
+      updatedAt: new Date(),
+    }).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId))).returning();
+    
+    res.json({ success: true, portfolio: updated });
+  }));
+
+  // Delete portfolio
+  app.delete("/api/portfolios/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // Delete related records first
+    await db.delete(portfolioInsights).where(eq(portfolioInsights.portfolioId, id));
+    await db.delete(portfolioSnapshots).where(eq(portfolioSnapshots.portfolioId, id));
+    await db.delete(portfolioTransactions).where(eq(portfolioTransactions.portfolioId, id));
+    await db.delete(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    await db.delete(portfolios).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId)));
+    
+    res.json({ success: true });
+  }));
+
+  // Add asset to portfolio
+  app.post("/api/portfolios/:id/assets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { assetType, symbol, name, quantity, averageCostBasis, accountName, accountType, walletAddress, notes, color } = req.body;
+    
+    // Verify portfolio ownership
+    const [portfolio] = await db.select().from(portfolios).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId)));
+    if (!portfolio) {
+      return res.status(404).json({ error: 'Portfolio not found' });
+    }
+    
+    // Get current price from market data
+    let currentPrice = 0;
+    try {
+      if (assetType === 'crypto' || assetType === 'stablecoin') {
+        const cryptoData = await marketDataService.getCryptoData();
+        const coin = cryptoData?.find((c: any) => c.symbol.toLowerCase() === symbol.toLowerCase());
+        currentPrice = coin?.current_price || averageCostBasis || 0;
+      } else if (assetType === 'stock' || assetType === 'etf') {
+        const stockData = await marketDataService.getStockData();
+        const stock = stockData?.find((s: any) => s.symbol.toUpperCase() === symbol.toUpperCase());
+        currentPrice = stock?.current_price || averageCostBasis || 0;
+      } else if (assetType === 'cash') {
+        currentPrice = 1; // USD
+      } else {
+        currentPrice = averageCostBasis || 0;
+      }
+    } catch (e) {
+      currentPrice = averageCostBasis || 0;
+    }
+    
+    const totalCostBasis = quantity * (averageCostBasis || 0);
+    const currentValue = quantity * currentPrice;
+    const unrealizedPnl = currentValue - totalCostBasis;
+    const unrealizedPnlPercent = totalCostBasis > 0 ? (unrealizedPnl / totalCostBasis) * 100 : 0;
+    
+    const [newAsset] = await db.insert(portfolioAssets).values({
+      portfolioId: id,
+      userId,
+      assetType,
+      symbol: symbol.toUpperCase(),
+      name,
+      quantity,
+      averageCostBasis: averageCostBasis || 0,
+      totalCostBasis,
+      currentPrice,
+      currentValue,
+      unrealizedPnl,
+      unrealizedPnlPercent,
+      priceLastUpdated: new Date(),
+      accountName,
+      accountType,
+      walletAddress,
+      notes,
+      color,
+    }).returning();
+    
+    // Update portfolio totals
+    await updatePortfolioTotals(id);
+    
+    res.json({ success: true, asset: newAsset });
+  }));
+
+  // Update asset
+  app.patch("/api/portfolios/:portfolioId/assets/:assetId", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { portfolioId, assetId } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { quantity, averageCostBasis, accountName, notes, targetAllocation } = req.body;
+    
+    const [asset] = await db.select().from(portfolioAssets).where(and(eq(portfolioAssets.id, assetId), eq(portfolioAssets.userId, userId)));
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+    
+    const newQuantity = quantity !== undefined ? quantity : asset.quantity;
+    const newCostBasis = averageCostBasis !== undefined ? averageCostBasis : asset.averageCostBasis;
+    const totalCostBasis = newQuantity * (newCostBasis || 0);
+    const currentValue = newQuantity * (asset.currentPrice || 0);
+    const unrealizedPnl = currentValue - totalCostBasis;
+    const unrealizedPnlPercent = totalCostBasis > 0 ? (unrealizedPnl / totalCostBasis) * 100 : 0;
+    
+    const [updated] = await db.update(portfolioAssets).set({
+      quantity: newQuantity,
+      averageCostBasis: newCostBasis,
+      totalCostBasis,
+      currentValue,
+      unrealizedPnl,
+      unrealizedPnlPercent,
+      accountName,
+      notes,
+      targetAllocation,
+      updatedAt: new Date(),
+    }).where(and(eq(portfolioAssets.id, assetId), eq(portfolioAssets.userId, userId))).returning();
+    
+    await updatePortfolioTotals(portfolioId);
+    
+    res.json({ success: true, asset: updated });
+  }));
+
+  // Delete asset
+  app.delete("/api/portfolios/:portfolioId/assets/:assetId", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { portfolioId, assetId } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    await db.delete(portfolioTransactions).where(eq(portfolioTransactions.assetId, assetId));
+    await db.delete(portfolioAssets).where(and(eq(portfolioAssets.id, assetId), eq(portfolioAssets.userId, userId)));
+    
+    await updatePortfolioTotals(portfolioId);
+    
+    res.json({ success: true });
+  }));
+
+  // Add transaction
+  app.post("/api/portfolios/:id/transactions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { assetId, transactionType, symbol, quantity, pricePerUnit, fees, exchangeOrBroker, txHash, notes, transactionDate } = req.body;
+    
+    const totalValue = quantity * pricePerUnit;
+    
+    const [transaction] = await db.insert(portfolioTransactions).values({
+      portfolioId: id,
+      assetId,
+      userId,
+      transactionType,
+      symbol: symbol.toUpperCase(),
+      quantity,
+      pricePerUnit,
+      totalValue,
+      fees: fees || 0,
+      exchangeOrBroker,
+      txHash,
+      notes,
+      transactionDate: new Date(transactionDate),
+    }).returning();
+    
+    // If linked to an asset, update cost basis
+    if (assetId && (transactionType === 'buy' || transactionType === 'sell')) {
+      const [asset] = await db.select().from(portfolioAssets).where(eq(portfolioAssets.id, assetId));
+      if (asset) {
+        let newQuantity = asset.quantity || 0;
+        let newTotalCost = asset.totalCostBasis || 0;
+        
+        if (transactionType === 'buy') {
+          newTotalCost += totalValue;
+          newQuantity += quantity;
+        } else if (transactionType === 'sell') {
+          const soldCostBasis = (asset.averageCostBasis || 0) * quantity;
+          const realizedPnl = totalValue - soldCostBasis;
+          newQuantity -= quantity;
+          newTotalCost = (asset.averageCostBasis || 0) * newQuantity;
+          
+          await db.update(portfolioAssets).set({
+            realizedPnl: sql`${portfolioAssets.realizedPnl} + ${realizedPnl}`,
+          }).where(eq(portfolioAssets.id, assetId));
+        }
+        
+        const newAvgCost = newQuantity > 0 ? newTotalCost / newQuantity : 0;
+        const currentValue = newQuantity * (asset.currentPrice || 0);
+        const unrealizedPnl = currentValue - newTotalCost;
+        const unrealizedPnlPercent = newTotalCost > 0 ? (unrealizedPnl / newTotalCost) * 100 : 0;
+        
+        await db.update(portfolioAssets).set({
+          quantity: newQuantity,
+          averageCostBasis: newAvgCost,
+          totalCostBasis: newTotalCost,
+          currentValue,
+          unrealizedPnl,
+          unrealizedPnlPercent,
+          updatedAt: new Date(),
+        }).where(eq(portfolioAssets.id, assetId));
+      }
+    }
+    
+    await updatePortfolioTotals(id);
+    
+    res.json({ success: true, transaction });
+  }));
+
+  // Get portfolio transactions
+  app.get("/api/portfolios/:id/transactions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const transactions = await db.select().from(portfolioTransactions).where(and(eq(portfolioTransactions.portfolioId, id), eq(portfolioTransactions.userId, userId))).orderBy(desc(portfolioTransactions.transactionDate));
+    
+    res.json({ success: true, transactions });
+  }));
+
+  // Sync portfolio prices
+  app.post("/api/portfolios/:id/sync", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    
+    // Fetch current prices
+    let cryptoData: any[] = [];
+    let stockData: any[] = [];
+    
+    try {
+      cryptoData = await marketDataService.getCryptoData() || [];
+      stockData = await marketDataService.getStockData() || [];
+    } catch (e) {
+      console.error('Failed to fetch market data for sync:', e);
+    }
+    
+    for (const asset of assets) {
+      let currentPrice = asset.currentPrice || 0;
+      
+      if (asset.assetType === 'crypto' || asset.assetType === 'stablecoin') {
+        const coin = cryptoData.find((c: any) => c.symbol.toLowerCase() === asset.symbol.toLowerCase());
+        if (coin) currentPrice = coin.current_price;
+      } else if (asset.assetType === 'stock' || asset.assetType === 'etf') {
+        const stock = stockData.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
+        if (stock) currentPrice = stock.current_price;
+      } else if (asset.assetType === 'cash') {
+        currentPrice = 1;
+      }
+      
+      const currentValue = (asset.quantity || 0) * currentPrice;
+      const unrealizedPnl = currentValue - (asset.totalCostBasis || 0);
+      const unrealizedPnlPercent = (asset.totalCostBasis || 0) > 0 ? (unrealizedPnl / (asset.totalCostBasis || 0)) * 100 : 0;
+      
+      await db.update(portfolioAssets).set({
+        currentPrice,
+        currentValue,
+        unrealizedPnl,
+        unrealizedPnlPercent,
+        priceLastUpdated: new Date(),
+      }).where(eq(portfolioAssets.id, asset.id));
+    }
+    
+    await updatePortfolioTotals(id);
+    
+    const [updatedPortfolio] = await db.select().from(portfolios).where(eq(portfolios.id, id));
+    const updatedAssets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    
+    res.json({ success: true, portfolio: updatedPortfolio, assets: updatedAssets });
+  }));
+
+  // Get AI portfolio analysis
+  app.get("/api/portfolios/:id/ai-analysis", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const [portfolio] = await db.select().from(portfolios).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId)));
+    if (!portfolio) {
+      return res.status(404).json({ error: 'Portfolio not found' });
+    }
+    
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    
+    if (assets.length === 0) {
+      return res.json({ 
+        success: true, 
+        analysis: {
+          healthScore: 0,
+          riskLevel: 'unknown',
+          diversificationScore: 0,
+          recommendations: [{ type: 'setup', message: 'Add assets to your portfolio to receive AI analysis', priority: 'high' }],
+          allocation: {},
+        }
+      });
+    }
+    
+    // Calculate allocation by asset type
+    const totalValue = assets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+    const allocation: Record<string, number> = {};
+    assets.forEach(asset => {
+      const type = asset.assetType;
+      allocation[type] = (allocation[type] || 0) + ((asset.currentValue || 0) / totalValue) * 100;
+    });
+    
+    // Calculate diversification score (more types = better diversification)
+    const uniqueTypes = Object.keys(allocation).length;
+    const uniqueSymbols = new Set(assets.map(a => a.symbol)).size;
+    const diversificationScore = Math.min(100, uniqueTypes * 15 + uniqueSymbols * 5);
+    
+    // Calculate risk level based on allocation
+    const cryptoAllocation = (allocation['crypto'] || 0) + (allocation['stablecoin'] || 0);
+    const stockAllocation = (allocation['stock'] || 0) + (allocation['etf'] || 0);
+    const cashAllocation = allocation['cash'] || 0;
+    
+    let riskLevel = 'moderate';
+    if (cryptoAllocation > 70) riskLevel = 'aggressive';
+    else if (cryptoAllocation > 50) riskLevel = 'moderately_aggressive';
+    else if (cashAllocation > 50) riskLevel = 'conservative';
+    else if (stockAllocation > 60 && cashAllocation > 20) riskLevel = 'moderate';
+    
+    // Calculate health score
+    let healthScore = 50;
+    healthScore += diversificationScore * 0.3;
+    if (cashAllocation >= 5 && cashAllocation <= 20) healthScore += 10; // Emergency fund
+    if (uniqueSymbols >= 5) healthScore += 10; // Good diversification
+    healthScore = Math.min(100, Math.round(healthScore));
+    
+    // Generate AI recommendations
+    const recommendations: { type: string; message: string; priority: string; action?: string }[] = [];
+    
+    if (cashAllocation < 5) {
+      recommendations.push({
+        type: 'rebalance',
+        message: 'Consider adding cash/stablecoins for an emergency fund (5-10% recommended)',
+        priority: 'high',
+        action: 'Add cash position'
+      });
+    }
+    
+    if (cryptoAllocation > 70) {
+      recommendations.push({
+        type: 'risk_alert',
+        message: 'High crypto allocation (>70%) increases portfolio volatility. Consider diversifying.',
+        priority: 'medium',
+        action: 'Rebalance to stocks/bonds'
+      });
+    }
+    
+    if (uniqueSymbols < 5) {
+      recommendations.push({
+        type: 'diversification',
+        message: 'Your portfolio has limited diversification. Consider adding more assets.',
+        priority: 'medium'
+      });
+    }
+    
+    // Find underperforming assets
+    const underperformers = assets.filter(a => (a.unrealizedPnlPercent || 0) < -10);
+    if (underperformers.length > 0) {
+      recommendations.push({
+        type: 'tax_loss',
+        message: `${underperformers.length} asset(s) are down >10%. Consider tax-loss harvesting.`,
+        priority: 'low',
+        action: 'Review losses'
+      });
+    }
+    
+    // Update portfolio with analysis
+    await db.update(portfolios).set({
+      healthScore,
+      riskLevel,
+      diversificationScore,
+      aiRecommendations: recommendations,
+      aiAnalysisAt: new Date(),
+    }).where(eq(portfolios.id, id));
+    
+    res.json({
+      success: true,
+      analysis: {
+        healthScore,
+        riskLevel,
+        diversificationScore,
+        recommendations,
+        allocation,
+        totalValue,
+        assetCount: assets.length,
+        topHoldings: assets.slice(0, 5).map(a => ({ symbol: a.symbol, value: a.currentValue, allocation: ((a.currentValue || 0) / totalValue) * 100 })),
+      }
+    });
+  }));
+
+  // Get portfolio historical snapshots
+  app.get("/api/portfolios/:id/history", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const snapshots = await db.select().from(portfolioSnapshots).where(and(eq(portfolioSnapshots.portfolioId, id), eq(portfolioSnapshots.userId, userId))).orderBy(desc(portfolioSnapshots.snapshotDate)).limit(90);
+    
+    res.json({ success: true, snapshots });
+  }));
+
+  // Dismiss insight
+  app.post("/api/portfolios/insights/:insightId/dismiss", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { insightId } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    await db.update(portfolioInsights).set({ isDismissed: true }).where(and(eq(portfolioInsights.id, insightId), eq(portfolioInsights.userId, userId)));
+    
+    res.json({ success: true });
+  }));
+
+  // Scenario simulator - What-if analysis
+  app.post("/api/portfolios/:id/simulate", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const { scenarios } = req.body; // [{ symbol: 'BTC', priceChange: 50 }, ...]
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    
+    let currentTotalValue = 0;
+    let simulatedTotalValue = 0;
+    
+    const simulatedAssets = assets.map(asset => {
+      const scenario = scenarios?.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
+      const priceChange = scenario?.priceChange || 0;
+      const newPrice = (asset.currentPrice || 0) * (1 + priceChange / 100);
+      const newValue = (asset.quantity || 0) * newPrice;
+      
+      currentTotalValue += asset.currentValue || 0;
+      simulatedTotalValue += newValue;
+      
+      return {
+        symbol: asset.symbol,
+        currentPrice: asset.currentPrice,
+        simulatedPrice: newPrice,
+        priceChange,
+        currentValue: asset.currentValue,
+        simulatedValue: newValue,
+        valueChange: newValue - (asset.currentValue || 0),
+        valueChangePercent: (asset.currentValue || 0) > 0 ? ((newValue - (asset.currentValue || 0)) / (asset.currentValue || 0)) * 100 : 0,
+      };
+    });
+    
+    res.json({
+      success: true,
+      simulation: {
+        currentTotalValue,
+        simulatedTotalValue,
+        totalChange: simulatedTotalValue - currentTotalValue,
+        totalChangePercent: currentTotalValue > 0 ? ((simulatedTotalValue - currentTotalValue) / currentTotalValue) * 100 : 0,
+        assets: simulatedAssets,
+      }
+    });
+  }));
+
+  // Helper function to update portfolio totals
+  async function updatePortfolioTotals(portfolioId: string) {
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, portfolioId));
+    
+    const totalValue = assets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+    const totalCostBasis = assets.reduce((sum, a) => sum + (a.totalCostBasis || 0), 0);
+    const totalPnl = totalValue - totalCostBasis;
+    const totalPnlPercent = totalCostBasis > 0 ? (totalPnl / totalCostBasis) * 100 : 0;
+    
+    // Update allocation percentages
+    for (const asset of assets) {
+      const allocationPercent = totalValue > 0 ? ((asset.currentValue || 0) / totalValue) * 100 : 0;
+      await db.update(portfolioAssets).set({ allocationPercent }).where(eq(portfolioAssets.id, asset.id));
+    }
+    
+    await db.update(portfolios).set({
+      totalValue,
+      totalCostBasis,
+      totalPnl,
+      totalPnlPercent,
+      lastSyncedAt: new Date(),
+      updatedAt: new Date(),
+    }).where(eq(portfolios.id, portfolioId));
+  }
+
+  // =============================================================================
   // MARKET INTELLIGENCE HUB - Real-time signals, whale tracking, sentiment
   // =============================================================================
 
