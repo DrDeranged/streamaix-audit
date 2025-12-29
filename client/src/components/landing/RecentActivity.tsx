@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { SectionHeader } from "@/components/ui/section-header";
 import { 
   Activity, 
   UserPlus, 
@@ -36,22 +35,8 @@ export function RecentActivity() {
   };
 
   return (
-    <section className="pt-20 pb-20 relative overflow-hidden bg-transparent">
+    <section className="pt-12 pb-20 relative overflow-hidden bg-transparent">
       <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <SectionHeader
-            title="Live Platform Activity"
-            subtitle="Real-time actions from our community"
-            highlightWord="Platform"
-          />
-        </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

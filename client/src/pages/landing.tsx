@@ -158,22 +158,6 @@ export default function Landing() {
         </SectionWrapper>
       ),
     },
-    {
-      id: "activity",
-      label: "Recent Activity",
-      component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-orange-950/10 to-slate-950">
-          <NeuralNetworkBackground />
-          <div className="relative z-10">
-            <Navigation />
-            <Suspense fallback={<SectionLoader />}>
-              <RecentActivity />
-              <Footer />
-            </Suspense>
-          </div>
-        </SectionWrapper>
-      ),
-    },
   ], [handleNavigateToSection]);
 
   return (
