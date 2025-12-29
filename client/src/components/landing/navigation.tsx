@@ -119,7 +119,7 @@ export function Navigation() {
             transition={{ duration: 0.2 }}
             onClick={() => {
               if (location === '/') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.dispatchEvent(new CustomEvent('go-to-hero'));
               } else {
                 setLocation('/');
               }

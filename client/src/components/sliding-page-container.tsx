@@ -107,6 +107,20 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goNext, goPrev]);
 
+  useEffect(() => {
+    const handleGoToHero = () => {
+      const heroIndex = sections.findIndex(s => s.id === 'hero');
+      if (heroIndex !== -1) {
+        goToSection(heroIndex);
+      } else {
+        goToSection(initialSection);
+      }
+    };
+
+    window.addEventListener("go-to-hero", handleGoToHero);
+    return () => window.removeEventListener("go-to-hero", handleGoToHero);
+  }, [sections, goToSection, initialSection]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
