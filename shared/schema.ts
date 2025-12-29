@@ -7152,3 +7152,163 @@ export type UserLearningProgress = typeof userLearningProgress.$inferSelect;
 
 export type UserLessonCompletion = typeof userLessonCompletions.$inferSelect;
 export type UserQuizAttempt = typeof userQuizAttempts.$inferSelect;
+
+// ==========================================
+// AI PORTFOLIO COMMAND CENTER
+// ==========================================
+
+// User portfolios - encrypted container for all assets
+export const portfolios = pgTable("portfolios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  name: text("name").notNull().default("My Portfolio"),
+  description: text("description"),
+  isDefault: boolean("is_default").default(false),
+  totalValue: real("total_value").default(0), // Cached total USD value
+  totalCostBasis: real("total_cost_basis").default(0), // Total invested
+  totalPnl: real("total_pnl").default(0), // Profit/Loss in USD
+  totalPnlPercent: real("total_pnl_percent").default(0), // P&L percentage
+  lastSyncedAt: timestamp("last_synced_at"),
+  // AI Analysis
+  healthScore: integer("health_score"), // 0-100 portfolio health
+  riskLevel: text("risk_level"), // conservative, moderate, aggressive, extreme
+  diversificationScore: integer("diversification_score"), // 0-100
+  aiRecommendations: jsonb("ai_recommendations"), // [{ type, message, priority, action }]
+  aiAnalysisAt: timestamp("ai_analysis_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual assets in a portfolio
+export const portfolioAssets = pgTable("portfolio_assets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  portfolioId: varchar("portfolio_id").references(() => portfolios.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  // Asset identification
+  assetType: text("asset_type").notNull(), // crypto, stock, etf, bond, retirement, cash, stablecoin, real_estate, commodity, other
+  symbol: text("symbol").notNull(), // BTC, AAPL, SPY, USD, etc
+  name: text("name").notNull(), // Bitcoin, Apple Inc, S&P 500 ETF
+  // Holdings
+  quantity: real("quantity").notNull().default(0),
+  averageCostBasis: real("average_cost_basis").default(0), // Average price paid per unit
+  totalCostBasis: real("total_cost_basis").default(0), // quantity * averageCostBasis
+  // Current value
+  currentPrice: real("current_price").default(0),
+  currentValue: real("current_value").default(0), // quantity * currentPrice
+  priceLastUpdated: timestamp("price_last_updated"),
+  // P&L
+  unrealizedPnl: real("unrealized_pnl").default(0), // currentValue - totalCostBasis
+  unrealizedPnlPercent: real("unrealized_pnl_percent").default(0),
+  realizedPnl: real("realized_pnl").default(0), // From sales
+  // Allocation
+  allocationPercent: real("allocation_percent").default(0), // % of total portfolio
+  targetAllocation: real("target_allocation"), // Desired % allocation
+  // Metadata
+  accountName: text("account_name"), // "Coinbase", "Fidelity 401k", "Bank of America", etc
+  accountType: text("account_type"), // wallet, brokerage, retirement, bank, manual
+  walletAddress: text("wallet_address"), // For crypto - public address only
+  notes: text("notes"),
+  // Display
+  logoUrl: text("logo_url"),
+  color: text("color"), // For charts
+  isHidden: boolean("is_hidden").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Transaction history for assets
+export const portfolioTransactions = pgTable("portfolio_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  portfolioId: varchar("portfolio_id").references(() => portfolios.id).notNull(),
+  assetId: varchar("asset_id").references(() => portfolioAssets.id),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  // Transaction details
+  transactionType: text("transaction_type").notNull(), // buy, sell, transfer_in, transfer_out, dividend, interest, fee, airdrop, stake, unstake
+  symbol: text("symbol").notNull(),
+  quantity: real("quantity").notNull(),
+  pricePerUnit: real("price_per_unit").notNull(),
+  totalValue: real("total_value").notNull(), // quantity * pricePerUnit
+  fees: real("fees").default(0),
+  // Additional context
+  exchangeOrBroker: text("exchange_or_broker"),
+  txHash: text("tx_hash"), // Blockchain transaction hash if applicable
+  notes: text("notes"),
+  transactionDate: timestamp("transaction_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AI Portfolio Insights - stored analysis results
+export const portfolioInsights = pgTable("portfolio_insights", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  portfolioId: varchar("portfolio_id").references(() => portfolios.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  insightType: text("insight_type").notNull(), // rebalance, risk_alert, opportunity, tax_loss, correlation, macro_impact
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  details: jsonb("details"), // Structured data for the insight
+  actionItems: jsonb("action_items"), // [{ action, description, impact }]
+  relatedAssets: text("related_assets").array(), // Array of symbols
+  isRead: boolean("is_read").default(false),
+  isDismissed: boolean("is_dismissed").default(false),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Portfolio snapshots for historical tracking
+export const portfolioSnapshots = pgTable("portfolio_snapshots", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  portfolioId: varchar("portfolio_id").references(() => portfolios.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  totalValue: real("total_value").notNull(),
+  totalCostBasis: real("total_cost_basis").notNull(),
+  totalPnl: real("total_pnl").notNull(),
+  assetBreakdown: jsonb("asset_breakdown").notNull(), // [{ symbol, value, allocation }]
+  healthScore: integer("health_score"),
+  snapshotDate: timestamp("snapshot_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for portfolio tables
+export const insertPortfolioSchema = createInsertSchema(portfolios).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPortfolioAssetSchema = createInsertSchema(portfolioAssets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPortfolioTransactionSchema = createInsertSchema(portfolioTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPortfolioInsightSchema = createInsertSchema(portfolioInsights).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPortfolioSnapshotSchema = createInsertSchema(portfolioSnapshots).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for portfolio system
+export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
+export type Portfolio = typeof portfolios.$inferSelect;
+
+export type InsertPortfolioAsset = z.infer<typeof insertPortfolioAssetSchema>;
+export type PortfolioAsset = typeof portfolioAssets.$inferSelect;
+
+export type InsertPortfolioTransaction = z.infer<typeof insertPortfolioTransactionSchema>;
+export type PortfolioTransaction = typeof portfolioTransactions.$inferSelect;
+
+export type InsertPortfolioInsight = z.infer<typeof insertPortfolioInsightSchema>;
+export type PortfolioInsight = typeof portfolioInsights.$inferSelect;
+
+export type InsertPortfolioSnapshot = z.infer<typeof insertPortfolioSnapshotSchema>;
+export type PortfolioSnapshot = typeof portfolioSnapshots.$inferSelect;
