@@ -208,9 +208,6 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
 
         {showNavDots && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2">
-            <div className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/70 text-sm hidden md:block">
-              {currentSection + 1} / {sections.length}
-            </div>
             <div className="flex gap-1.5">
               {sections.map((section, index) => (
                 <button
