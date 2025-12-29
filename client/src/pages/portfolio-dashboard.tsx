@@ -168,8 +168,24 @@ function AllocationChart({ allocation }: { allocation: Record<string, number> })
   );
 }
 
+interface SearchResult {
+  symbol: string;
+  name: string;
+  type: 'crypto' | 'stock';
+  thumb?: string;
+  exchange?: string;
+  marketCapRank?: number;
+  id?: string;
+}
+
 function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<'search' | 'manual' | 'cash'>('search');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [cryptoResults, setCryptoResults] = useState<SearchResult[]>([]);
+  const [stockResults, setStockResults] = useState<SearchResult[]>([]);
+  const [selectedAsset, setSelectedAsset] = useState<SearchResult | null>(null);
   const [assetType, setAssetType] = useState('crypto');
   const [symbol, setSymbol] = useState('');
   const [name, setName] = useState('');
@@ -177,6 +193,30 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
   const [avgCost, setAvgCost] = useState('');
   const [accountName, setAccountName] = useState('');
   const { toast } = useToast();
+
+  const searchAssets = async (query: string) => {
+    if (query.length < 2) {
+      setCryptoResults([]);
+      setStockResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/asset-search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setCryptoResults(data.crypto || []);
+      setStockResults(data.stocks || []);
+    } catch {
+      setCryptoResults([]);
+      setStockResults([]);
+    }
+    setIsSearching(false);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => searchAssets(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const addAssetMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -203,6 +243,21 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
     setQuantity('');
     setAvgCost('');
     setAccountName('');
+    setSelectedAsset(null);
+    setSearchQuery('');
+    setCryptoResults([]);
+    setStockResults([]);
+    setMode('search');
+  };
+
+  const handleSelectAsset = (asset: SearchResult) => {
+    setSelectedAsset(asset);
+    setSymbol(asset.symbol.toUpperCase());
+    setName(asset.name);
+    setAssetType(asset.type);
+    setSearchQuery('');
+    setCryptoResults([]);
+    setStockResults([]);
   };
 
   const handleSubmit = () => {
@@ -221,106 +276,247 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
     });
   };
 
+  const hasResults = cryptoResults.length > 0 || stockResults.length > 0;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-400 hover:to-fuchsia-400" data-testid="add-asset-button">
+        <Button className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400" data-testid="add-asset-button">
           <Plus className="w-4 h-4 mr-2" />
           Add Asset
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-700 max-w-md">
+      <DialogContent className="bg-slate-900 border-slate-700 max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Wallet className="w-5 h-5 text-purple-400" />
-            Add New Asset
+            Add Asset
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-4">
-          <div>
-            <Label className="text-gray-300">Asset Type</Label>
-            <Select value={assetType} onValueChange={setAssetType}>
-              <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-600">
-                <SelectItem value="crypto">Cryptocurrency</SelectItem>
-                <SelectItem value="stock">Stock</SelectItem>
-                <SelectItem value="etf">ETF</SelectItem>
-                <SelectItem value="bond">Bond</SelectItem>
-                <SelectItem value="retirement">Retirement (401k/IRA)</SelectItem>
-                <SelectItem value="cash">Cash</SelectItem>
-                <SelectItem value="stablecoin">Stablecoin</SelectItem>
-                <SelectItem value="real_estate">Real Estate</SelectItem>
-                <SelectItem value="commodity">Commodity</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-gray-300">Symbol *</Label>
+        
+        <div className="flex gap-2 mb-4">
+          {[
+            { id: 'search', label: 'Search', icon: Activity },
+            { id: 'cash', label: 'Cash/Bank', icon: Banknote },
+            { id: 'manual', label: 'Manual', icon: Edit2 }
+          ].map((tab) => (
+            <Button
+              key={tab.id}
+              variant={mode === tab.id ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => { setMode(tab.id as any); resetForm(); setMode(tab.id as any); }}
+              className={mode === tab.id ? 'bg-purple-600' : 'border-slate-600 text-gray-300'}
+            >
+              <tab.icon className="w-4 h-4 mr-1" />
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+
+        {mode === 'search' && !selectedAsset && (
+          <div className="space-y-4">
+            <div className="relative">
               <Input
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                placeholder="BTC, AAPL..."
-                className="bg-slate-800 border-slate-600 text-white"
-                data-testid="input-symbol"
+                placeholder="Search stocks (AAPL, TSLA) or crypto (BTC, ETH)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-slate-800 border-slate-600 text-white pl-10"
+                data-testid="input-asset-search"
               />
+              <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
+            </div>
+
+            {hasResults && (
+              <div className="bg-slate-800 border border-slate-700 rounded-lg max-h-64 overflow-y-auto">
+                {stockResults.length > 0 && (
+                  <>
+                    <div className="px-3 py-2 bg-blue-500/20 text-xs text-blue-300 font-medium flex items-center gap-2 sticky top-0">
+                      <Building2 className="w-3 h-3" /> Stocks
+                    </div>
+                    {stockResults.slice(0, 5).map((result) => (
+                      <button
+                        key={result.symbol}
+                        onClick={() => handleSelectAsset({ ...result, type: 'stock' })}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-slate-700/50 text-left"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                          <Building2 className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white truncate">{result.symbol}</p>
+                          <p className="text-xs text-slate-400 truncate">{result.name}</p>
+                        </div>
+                        {result.exchange && <Badge variant="outline" className="text-xs shrink-0">{result.exchange}</Badge>}
+                      </button>
+                    ))}
+                  </>
+                )}
+                {cryptoResults.length > 0 && (
+                  <>
+                    <div className="px-3 py-2 bg-orange-500/20 text-xs text-orange-300 font-medium flex items-center gap-2 sticky top-0">
+                      <Bitcoin className="w-3 h-3" /> Crypto
+                    </div>
+                    {cryptoResults.slice(0, 5).map((result: any) => (
+                      <button
+                        key={result.id || result.symbol}
+                        onClick={() => handleSelectAsset({ symbol: result.symbol, name: result.name, type: 'crypto', thumb: result.thumb })}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-slate-700/50 text-left"
+                      >
+                        {result.thumb ? (
+                          <img src={result.thumb} alt={result.symbol} className="w-8 h-8 rounded-full" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                            <Bitcoin className="w-4 h-4 text-orange-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white truncate">{result.symbol.toUpperCase()}</p>
+                          <p className="text-xs text-slate-400 truncate">{result.name}</p>
+                        </div>
+                        {result.marketCapRank && <Badge variant="outline" className="text-xs shrink-0">#{result.marketCapRank}</Badge>}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+
+            {searchQuery.length >= 2 && !hasResults && !isSearching && (
+              <p className="text-center text-gray-500 py-4">No results found</p>
+            )}
+          </div>
+        )}
+
+        {mode === 'cash' && (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-gray-300">Type</Label>
+              <Select value={assetType} onValueChange={(v) => { setAssetType(v); setSymbol(v === 'cash' ? 'USD' : v === 'stablecoin' ? 'USDC' : 'BANK'); setName(v === 'cash' ? 'US Dollar' : v === 'stablecoin' ? 'USD Coin' : 'Bank Account'); }}>
+                <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-600">
+                  <SelectItem value="cash">Cash (USD)</SelectItem>
+                  <SelectItem value="stablecoin">Stablecoin (USDC/USDT)</SelectItem>
+                  <SelectItem value="other">Bank Account</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <Label className="text-gray-300">Name *</Label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Bitcoin, Apple..."
-                className="bg-slate-800 border-slate-600 text-white"
-                data-testid="input-name"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-gray-300">Quantity *</Label>
+              <Label className="text-gray-300">Amount ($)</Label>
               <Input
                 type="number"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="0.00"
+                onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
+                placeholder="10,000"
                 className="bg-slate-800 border-slate-600 text-white"
-                data-testid="input-quantity"
               />
             </div>
             <div>
-              <Label className="text-gray-300">Avg Cost Basis</Label>
+              <Label className="text-gray-300">Account Name</Label>
               <Input
-                type="number"
-                value={avgCost}
-                onChange={(e) => setAvgCost(e.target.value)}
-                placeholder="0.00"
+                value={accountName}
+                onChange={(e) => setAccountName(e.target.value)}
+                placeholder="e.g., Chase Checking, Coinbase"
                 className="bg-slate-800 border-slate-600 text-white"
-                data-testid="input-avg-cost"
               />
             </div>
+            <Button
+              onClick={() => {
+                if (!quantity) { toast({ title: 'Enter an amount', variant: 'destructive' }); return; }
+                const finalSymbol = assetType === 'cash' ? 'USD' : assetType === 'stablecoin' ? 'USDC' : 'BANK';
+                const finalName = assetType === 'cash' ? 'US Dollar' : assetType === 'stablecoin' ? 'USD Coin' : 'Bank Account';
+                addAssetMutation.mutate({
+                  assetType: assetType === 'other' ? 'cash' : assetType,
+                  symbol: finalSymbol,
+                  name: accountName || finalName,
+                  quantity: parseFloat(quantity),
+                  averageCostBasis: 1,
+                  accountName: accountName || finalName,
+                });
+              }}
+              disabled={addAssetMutation.isPending}
+              className="w-full bg-gradient-to-r from-purple-500 to-cyan-500"
+            >
+              {addAssetMutation.isPending ? 'Adding...' : 'Add Cash Balance'}
+            </Button>
           </div>
-          <div>
-            <Label className="text-gray-300">Account (Optional)</Label>
-            <Input
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
-              placeholder="Coinbase, Fidelity, etc."
-              className="bg-slate-800 border-slate-600 text-white"
-            />
+        )}
+
+        {(mode === 'manual' || (mode === 'search' && selectedAsset)) && (
+          <div className="space-y-4">
+            {selectedAsset && (
+              <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-purple-500/30">
+                {selectedAsset.thumb ? (
+                  <img src={selectedAsset.thumb} alt={selectedAsset.symbol} className="w-10 h-10 rounded-full" />
+                ) : (
+                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", selectedAsset.type === 'crypto' ? 'bg-orange-500/20' : 'bg-blue-500/20')}>
+                    {selectedAsset.type === 'crypto' ? <Bitcoin className="w-5 h-5 text-orange-400" /> : <Building2 className="w-5 h-5 text-blue-400" />}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="font-medium text-white">{selectedAsset.symbol.toUpperCase()}</p>
+                  <p className="text-sm text-gray-400">{selectedAsset.name}</p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => { setSelectedAsset(null); setSymbol(''); setName(''); }}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+            
+            {mode === 'manual' && (
+              <>
+                <div>
+                  <Label className="text-gray-300">Asset Type</Label>
+                  <Select value={assetType} onValueChange={setAssetType}>
+                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-600">
+                      <SelectItem value="crypto">Crypto</SelectItem>
+                      <SelectItem value="stock">Stock</SelectItem>
+                      <SelectItem value="etf">ETF</SelectItem>
+                      <SelectItem value="bond">Bond</SelectItem>
+                      <SelectItem value="retirement">Retirement</SelectItem>
+                      <SelectItem value="real_estate">Real Estate</SelectItem>
+                      <SelectItem value="commodity">Commodity</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-gray-300">Symbol</Label>
+                    <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="bg-slate-800 border-slate-600 text-white" />
+                  </div>
+                  <div>
+                    <Label className="text-gray-300">Name</Label>
+                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="bg-slate-800 border-slate-600 text-white" />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-gray-300">Quantity</Label>
+                <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-600 text-white" />
+              </div>
+              <div>
+                <Label className="text-gray-300">Avg Cost ($)</Label>
+                <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-600 text-white" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-gray-300">Account (optional)</Label>
+              <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800 border-slate-600 text-white" />
+            </div>
+            <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full bg-gradient-to-r from-purple-500 to-cyan-500">
+              {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
+            </Button>
           </div>
-          <Button
-            onClick={handleSubmit}
-            disabled={addAssetMutation.isPending}
-            className="w-full bg-gradient-to-r from-purple-500 to-fuchsia-500"
-            data-testid="button-submit-asset"
-          >
-            {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
-          </Button>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
