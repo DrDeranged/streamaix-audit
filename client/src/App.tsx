@@ -52,6 +52,8 @@ const FollowingFeed = React.lazy(() => import("@/pages/following-feed"));
 const Points = React.lazy(() => import("@/pages/points"));
 const AITrading = React.lazy(() => import("@/pages/ai-trading"));
 const KnowledgeAvatarProfile = React.lazy(() => import("@/pages/knowledge-avatar-profile"));
+const LearningHub = React.lazy(() => import("@/pages/learning-hub"));
+const LessonViewer = React.lazy(() => import("@/pages/lesson-viewer"));
 
 function Router() {
   return (
@@ -269,6 +271,24 @@ function Router() {
       <Route path="/points">
         <Suspense fallback={<DashboardSkeleton />}>
           <Points />
+        </Suspense>
+      </Route>
+      
+      <Route path="/learn">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <LearningHub />
+        </Suspense>
+      </Route>
+      
+      <Route path="/learn/:moduleId">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <LessonViewer />
+        </Suspense>
+      </Route>
+      
+      <Route path="/learn/:moduleId/:lessonId">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <LessonViewer />
         </Suspense>
       </Route>
       
