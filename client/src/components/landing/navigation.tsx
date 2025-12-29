@@ -55,7 +55,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { usePointsBalance, formatPoints, useDailyLogin } from "@/hooks/usePoints";
 import { Coins } from "lucide-react";
 
@@ -66,6 +66,7 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [location, setLocation] = useLocation();
   
   const { 
     wallet, 
@@ -110,25 +111,30 @@ export function Navigation() {
       
       <div className="relative container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          {/* Logo with Animated Glow - Navigate to landing page */}
-          <Link href="/">
-            <motion.div 
-              className="flex items-center space-x-3 cursor-pointer group"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-            >
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse" />
-                  <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
+          {/* Logo with Animated Glow - Navigate to landing page or scroll to top */}
+          <motion.div 
+            className="flex items-center space-x-3 cursor-pointer group"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => {
+              if (location === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                setLocation('/');
+              }
+            }}
+          >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse" />
+                <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-300">
-                  StreamAiX
-                </div>
-            </motion.div>
-          </Link>
+              </div>
+              <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-300">
+                StreamAiX
+              </div>
+          </motion.div>
           
           <div className="flex items-center space-x-3 sm:space-x-6">
             {/* Desktop Navigation with Icons */}
