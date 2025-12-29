@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio, LineChart } from "lucide-react";
+import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio, LineChart, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { WaitlistModal } from "@/components/WaitlistModal";
@@ -170,6 +170,19 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
                 Knowledge Avatars
               </Button>
             </motion.div>
+
+            <Link href="/learn">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="outline"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-violet-500/50 hover:bg-violet-500/5 text-slate-300 hover:text-violet-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  data-testid="button-learn"
+                >
+                  <GraduationCap className="w-4 h-4 mr-2 text-violet-400 group-hover:text-violet-300" />
+                  Learn
+                </Button>
+              </motion.div>
+            </Link>
           </motion.div>
           
           {/* Glassmorphism Join Waitlist CTA - Ultra Compact */}
