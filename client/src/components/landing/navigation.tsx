@@ -278,11 +278,11 @@ export function Navigation() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/markets/portfolio" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/portfolio" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
                       <Briefcase className="w-4 h-4 text-fuchsia-400" />
                       <div>
-                        <span className="font-medium block">Portfolio</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Your positions</span>
+                        <span className="font-medium block">Asset Portfolio</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Track all your assets</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -821,13 +821,13 @@ export function Navigation() {
                     Prediction Markets
                   </button>
                 </Link>
-                <Link href="/markets/portfolio" className="block">
+                <Link href="/portfolio" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm"
                   >
                     <Briefcase className="w-4 h-4 text-fuchsia-400" />
-                    Portfolio
+                    Asset Portfolio
                   </button>
                 </Link>
 
