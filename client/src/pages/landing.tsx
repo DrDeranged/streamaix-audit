@@ -36,6 +36,51 @@ export default function Landing() {
 
   const sections = useMemo(() => [
     {
+      id: "bounties",
+      label: "Bounties",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-emerald-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <BountyFeed />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "prediction-markets",
+      label: "Prediction Markets",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-blue-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <PredictionMarketSection />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "social",
+      label: "Social Feed",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-pink-950/10 to-slate-950">
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <SocialFeed />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
       id: "hero",
       label: "Welcome",
       component: (
@@ -84,51 +129,6 @@ export default function Landing() {
       ),
     },
     {
-      id: "bounties",
-      label: "Bounties",
-      component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-emerald-950/10 to-slate-950">
-          <NeuralNetworkBackground />
-          <div className="relative z-10">
-            <Navigation />
-            <Suspense fallback={<SectionLoader />}>
-              <BountyFeed />
-            </Suspense>
-          </div>
-        </SectionWrapper>
-      ),
-    },
-    {
-      id: "prediction-markets",
-      label: "Prediction Markets",
-      component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-blue-950/10 to-slate-950">
-          <NeuralNetworkBackground />
-          <div className="relative z-10">
-            <Navigation />
-            <Suspense fallback={<SectionLoader />}>
-              <PredictionMarketSection />
-            </Suspense>
-          </div>
-        </SectionWrapper>
-      ),
-    },
-    {
-      id: "social",
-      label: "Social Feed",
-      component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-pink-950/10 to-slate-950">
-          <NeuralNetworkBackground />
-          <div className="relative z-10">
-            <Navigation />
-            <Suspense fallback={<SectionLoader />}>
-              <SocialFeed />
-            </Suspense>
-          </div>
-        </SectionWrapper>
-      ),
-    },
-    {
       id: "avatars",
       label: "Knowledge Avatars",
       component: (
@@ -162,7 +162,7 @@ export default function Landing() {
 
   return (
     <div className="relative bg-background text-foreground">
-      <SlidingPageContainer ref={slidingRef} sections={sections} />
+      <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={3} />
     </div>
   );
 }

@@ -36,11 +36,12 @@ interface SlidingPageContainerProps {
   showNavDots?: boolean;
   showArrows?: boolean;
   className?: string;
+  initialSection?: number;
 }
 
 export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, SlidingPageContainerProps>(
-  function SlidingPageContainerInner({ sections, showNavDots = true, showArrows = true, className = "" }, ref) {
-  const [currentSection, setCurrentSection] = useState(0);
+  function SlidingPageContainerInner({ sections, showNavDots = true, showArrows = true, className = "", initialSection = 0 }, ref) {
+  const [currentSection, setCurrentSection] = useState(initialSection);
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
