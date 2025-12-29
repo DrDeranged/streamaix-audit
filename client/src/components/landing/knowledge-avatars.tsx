@@ -1539,7 +1539,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             onScroll={(e) => {
               const container = e.currentTarget;
               const scrollLeft = container.scrollLeft;
-              const cardWidth = isMobile ? container.offsetWidth : 344; // 320px + 24px gap
+              const cardWidth = isMobile ? 304 : 344; // 280px + 24px gap (mobile), 320px + 24px gap (desktop)
               const newIndex = Math.round(scrollLeft / cardWidth);
               if (newIndex !== currentIndex && newIndex >= 0 && newIndex < avatars.length) {
                 setCurrentIndex(newIndex);
@@ -1555,7 +1555,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     onClick={() => {
                       setCurrentIndex(idx);
                       if (containerRef.current) {
-                        const cardWidth = containerRef.current.offsetWidth;
+                        const cardWidth = 304; // 280px card + 24px gap
                         containerRef.current.scrollTo({
                           left: idx * cardWidth,
                           behavior: 'smooth'
@@ -1619,8 +1619,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                     key={avatar.id} 
                     className={`flex-shrink-0 relative z-10 ${isMobile ? 'snap-start snap-always' : ''}`}
                     style={{
-                      width: isMobile ? '160px' : '180px',
-                      minWidth: isMobile ? '160px' : '180px'
+                      width: isMobile ? '280px' : '320px',
+                      minWidth: isMobile ? '280px' : '320px'
                     }}
                   >
                     <Link 
@@ -1633,56 +1633,56 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                         }
                       }}
                     >
-                      <div className="group cursor-pointer flex flex-col items-center p-4 rounded-2xl bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 hover:bg-slate-900/60 dark:hover:bg-slate-950/80 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
+                      <div className="group cursor-pointer flex flex-col items-center p-6 md:p-8 rounded-3xl bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 hover:bg-slate-900/60 dark:hover:bg-slate-950/80 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
                         {/* Floating Avatar with Glow */}
-                        <div className="relative mb-3">
+                        <div className="relative mb-5">
                           {/* Outer glow ring */}
-                          <div className={`absolute -inset-2 rounded-full bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-30 blur-lg group-hover:opacity-60 transition-opacity duration-500`} />
+                          <div className={`absolute -inset-3 rounded-full bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-30 blur-xl group-hover:opacity-60 transition-opacity duration-500`} />
                           {/* Avatar ring */}
-                          <div className={`absolute -inset-1 rounded-full bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
-                          <Avatar className="relative w-20 h-20 ring-2 ring-white/20 border-2 border-slate-900/50 shadow-2xl transition-transform duration-500 group-hover:scale-110">
+                          <div className={`absolute -inset-2 rounded-full bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
+                          <Avatar className="relative w-28 h-28 md:w-32 md:h-32 ring-3 ring-white/20 border-3 border-slate-900/50 shadow-2xl transition-transform duration-500 group-hover:scale-110">
                             <AvatarImage 
                               src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                               alt={`${avatar.name} avatar`}
                               className="object-cover object-top"
                             />
-                            <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-purple-600 to-blue-600 text-white">
+                            <AvatarFallback className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-purple-600 to-blue-600 text-white">
                               {avatar.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
                           {/* LIVE indicator */}
-                          <div className="absolute -top-1 -right-1 flex items-center gap-1 bg-slate-900/90 backdrop-blur-sm rounded-full px-1.5 py-0.5 border border-emerald-500/50">
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
-                            <span className="text-[8px] text-emerald-400 font-mono font-bold">LIVE</span>
+                          <div className="absolute -top-1 -right-1 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-sm rounded-full px-2 py-1 border border-emerald-500/50">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
+                            <span className="text-[10px] text-emerald-400 font-mono font-bold">LIVE</span>
                           </div>
                           {/* Verified badge */}
                           {avatar.verificationStatus === 'verified' && (
-                            <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-1 shadow-lg">
-                              <CheckCircle className="h-3 w-3 text-white" />
+                            <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-1.5 shadow-lg">
+                              <CheckCircle className="h-4 w-4 text-white" />
                             </div>
                           )}
                         </div>
                         
                         {/* Name */}
-                        <h3 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors text-center line-clamp-1 mb-0.5">
+                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-purple-300 transition-colors text-center line-clamp-1 mb-1">
                           {avatar.name.split(' ')[0]}
                         </h3>
-                        <p className="text-[10px] text-purple-400/70 font-mono mb-3">@{avatar.handle}</p>
+                        <p className="text-xs text-purple-400/70 font-mono mb-4">@{avatar.handle}</p>
                         
                         {/* Compact Stats */}
-                        <div className="flex items-center gap-3 text-center">
+                        <div className="flex items-center gap-5 text-center">
                           <div>
-                            <div className={`text-sm font-bold font-mono ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`text-lg md:text-xl font-bold font-mono ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                             </div>
-                            <div className="text-[8px] text-purple-400/60 uppercase tracking-wider">ROI</div>
+                            <div className="text-[10px] md:text-xs text-purple-400/60 uppercase tracking-wider">ROI</div>
                           </div>
-                          <div className="w-px h-6 bg-purple-500/30" />
+                          <div className="w-px h-8 bg-purple-500/30" />
                           <div>
-                            <div className={`text-sm font-bold font-mono ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            <div className={`text-lg md:text-xl font-bold font-mono ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
                               {accuracyPercentage}%
                             </div>
-                            <div className="text-[8px] text-purple-400/60 uppercase tracking-wider">ACC</div>
+                            <div className="text-[10px] md:text-xs text-purple-400/60 uppercase tracking-wider">ACC</div>
                           </div>
                         </div>
                       </div>
