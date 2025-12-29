@@ -7020,3 +7020,135 @@ export type PaperTrade = typeof paperTrades.$inferSelect;
 
 export type InsertUserTradingProfile = z.infer<typeof insertUserTradingProfileSchema>;
 export type UserTradingProfile = typeof userTradingProfile.$inferSelect;
+
+// ==========================================
+// GAMIFIED LEARNING MODULES
+// ==========================================
+
+// Learning modules (courses)
+export const learningModules = pgTable("learning_modules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // web3_basics, defi, ai_trading, prediction_markets, advanced_crypto, macro_economics
+  difficulty: text("difficulty").notNull().default("beginner"), // beginner, intermediate, advanced, expert
+  imageUrl: text("image_url"),
+  estimatedMinutes: integer("estimated_minutes").notNull().default(15),
+  xpReward: integer("xp_reward").notNull().default(500),
+  streamReward: integer("stream_reward").default(100),
+  badgeReward: text("badge_reward"), // Badge key for completion
+  prerequisiteModuleId: varchar("prerequisite_module_id"),
+  lessonCount: integer("lesson_count").default(0),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual lessons within modules
+export const learningLessons = pgTable("learning_lessons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  moduleId: varchar("module_id").references(() => learningModules.id).notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(), // Markdown content
+  lessonType: text("lesson_type").notNull().default("reading"), // reading, interactive, video, quiz
+  videoUrl: text("video_url"),
+  interactiveComponent: text("interactive_component"), // Component key for interactive lessons
+  estimatedMinutes: integer("estimated_minutes").notNull().default(5),
+  xpReward: integer("xp_reward").notNull().default(50),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Quiz questions for lessons
+export const learningQuizzes = pgTable("learning_quizzes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  lessonId: varchar("lesson_id").references(() => learningLessons.id).notNull(),
+  question: text("question").notNull(),
+  questionType: text("question_type").notNull().default("multiple_choice"), // multiple_choice, true_false, fill_blank
+  options: jsonb("options").notNull(), // [{ id, text, isCorrect }]
+  explanation: text("explanation"), // Shown after answering
+  xpReward: integer("xp_reward").notNull().default(25),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User progress on modules
+export const userLearningProgress = pgTable("user_learning_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  moduleId: varchar("module_id").references(() => learningModules.id).notNull(),
+  currentLessonId: varchar("current_lesson_id").references(() => learningLessons.id),
+  lessonsCompleted: integer("lessons_completed").default(0),
+  quizzesCompleted: integer("quizzes_completed").default(0),
+  quizzesPassed: integer("quizzes_passed").default(0),
+  progressPercent: integer("progress_percent").default(0),
+  xpEarned: integer("xp_earned").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  startedAt: timestamp("started_at").defaultNow(),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
+});
+
+// Track individual lesson completions
+export const userLessonCompletions = pgTable("user_lesson_completions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  lessonId: varchar("lesson_id").references(() => learningLessons.id).notNull(),
+  moduleId: varchar("module_id").references(() => learningModules.id).notNull(),
+  xpEarned: integer("xp_earned").default(0),
+  timeSpentSeconds: integer("time_spent_seconds").default(0),
+  completedAt: timestamp("completed_at").defaultNow(),
+});
+
+// Track quiz attempts
+export const userQuizAttempts = pgTable("user_quiz_attempts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  quizId: varchar("quiz_id").references(() => learningQuizzes.id).notNull(),
+  lessonId: varchar("lesson_id").references(() => learningLessons.id).notNull(),
+  selectedAnswer: text("selected_answer").notNull(),
+  isCorrect: boolean("is_correct").notNull(),
+  xpEarned: integer("xp_earned").default(0),
+  attemptNumber: integer("attempt_number").default(1),
+  attemptedAt: timestamp("attempted_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertLearningModuleSchema = createInsertSchema(learningModules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLearningLessonSchema = createInsertSchema(learningLessons).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLearningQuizSchema = createInsertSchema(learningQuizzes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserLearningProgressSchema = createInsertSchema(userLearningProgress).omit({
+  id: true,
+  startedAt: true,
+  lastAccessedAt: true,
+});
+
+// Types
+export type InsertLearningModule = z.infer<typeof insertLearningModuleSchema>;
+export type LearningModule = typeof learningModules.$inferSelect;
+
+export type InsertLearningLesson = z.infer<typeof insertLearningLessonSchema>;
+export type LearningLesson = typeof learningLessons.$inferSelect;
+
+export type InsertLearningQuiz = z.infer<typeof insertLearningQuizSchema>;
+export type LearningQuiz = typeof learningQuizzes.$inferSelect;
+
+export type InsertUserLearningProgress = z.infer<typeof insertUserLearningProgressSchema>;
+export type UserLearningProgress = typeof userLearningProgress.$inferSelect;
+
+export type UserLessonCompletion = typeof userLessonCompletions.$inferSelect;
+export type UserQuizAttempt = typeof userQuizAttempts.$inferSelect;
