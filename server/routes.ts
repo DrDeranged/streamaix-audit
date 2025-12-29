@@ -16409,6 +16409,192 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // GAMIFIED LEARNING MODULES - Web3 and AI Financial Education
+  // =============================================================================
+
+  const { learningModules: learningModulesTable, learningLessons, learningQuizzes, userLearningProgress, userLessonCompletions, userQuizAttempts } = await import("../shared/schema");
+
+  // Get all learning modules
+  app.get("/api/learning/modules", asyncHandler(async (req: Request, res: Response) => {
+    const modules = await db.select().from(learningModulesTable).where(eq(learningModulesTable.isActive, true)).orderBy(asc(learningModulesTable.sortOrder));
+    res.json({ success: true, modules });
+  }));
+
+  // Get learning module by ID with lessons
+  app.get("/api/learning/modules/:id", asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const [module] = await db.select().from(learningModulesTable).where(eq(learningModulesTable.id, id));
+    if (!module) {
+      return res.status(404).json({ success: false, error: 'Module not found' });
+    }
+    const lessons = await db.select().from(learningLessons).where(eq(learningLessons.moduleId, id)).orderBy(asc(learningLessons.sortOrder));
+    res.json({ success: true, module, lessons });
+  }));
+
+  // Get lesson by ID with quizzes
+  app.get("/api/learning/lessons/:id", asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const [lesson] = await db.select().from(learningLessons).where(eq(learningLessons.id, id));
+    if (!lesson) {
+      return res.status(404).json({ success: false, error: 'Lesson not found' });
+    }
+    const quizzes = await db.select().from(learningQuizzes).where(eq(learningQuizzes.lessonId, id)).orderBy(asc(learningQuizzes.sortOrder));
+    res.json({ success: true, lesson, quizzes });
+  }));
+
+  // Get user's learning progress
+  app.get("/api/learning/progress", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const progress = await db.select().from(userLearningProgress).where(eq(userLearningProgress.userId, userId));
+    const totalXp = progress.reduce((sum, p) => sum + (p.xpEarned || 0), 0);
+    const completedModules = progress.filter(p => p.isCompleted).length;
+    res.json({ success: true, progress, totalXp, completedModules });
+  }));
+
+  // Start a module (create progress record)
+  app.post("/api/learning/modules/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const [existing] = await db.select().from(userLearningProgress).where(and(eq(userLearningProgress.userId, userId), eq(userLearningProgress.moduleId, id)));
+    if (existing) {
+      return res.json({ success: true, progress: existing, message: 'Already started' });
+    }
+
+    const [firstLesson] = await db.select().from(learningLessons).where(eq(learningLessons.moduleId, id)).orderBy(asc(learningLessons.sortOrder)).limit(1);
+    
+    const [newProgress] = await db.insert(userLearningProgress).values({
+      userId,
+      moduleId: id,
+      currentLessonId: firstLesson?.id,
+      lessonsCompleted: 0,
+      progressPercent: 0,
+    }).returning();
+    
+    res.json({ success: true, progress: newProgress });
+  }));
+
+  // Complete a lesson
+  app.post("/api/learning/lessons/:id/complete", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const { timeSpentSeconds = 0 } = req.body;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const [lesson] = await db.select().from(learningLessons).where(eq(learningLessons.id, id));
+    if (!lesson) {
+      return res.status(404).json({ success: false, error: 'Lesson not found' });
+    }
+
+    const [existing] = await db.select().from(userLessonCompletions).where(and(eq(userLessonCompletions.userId, userId), eq(userLessonCompletions.lessonId, id)));
+    if (existing) {
+      return res.json({ success: true, completion: existing, xpEarned: 0, message: 'Already completed' });
+    }
+
+    const xpEarned = lesson.xpReward;
+    await db.insert(userLessonCompletions).values({
+      userId,
+      lessonId: id,
+      moduleId: lesson.moduleId,
+      xpEarned,
+      timeSpentSeconds,
+    });
+
+    const allLessons = await db.select().from(learningLessons).where(eq(learningLessons.moduleId, lesson.moduleId));
+    const completedLessons = await db.select().from(userLessonCompletions).where(and(eq(userLessonCompletions.userId, userId), eq(userLessonCompletions.moduleId, lesson.moduleId)));
+    const progressPercent = Math.round((completedLessons.length / allLessons.length) * 100);
+    const isCompleted = progressPercent >= 100;
+
+    await db.update(userLearningProgress).set({
+      lessonsCompleted: completedLessons.length,
+      progressPercent,
+      xpEarned: sql`${userLearningProgress.xpEarned} + ${xpEarned}`,
+      isCompleted,
+      completedAt: isCompleted ? new Date() : undefined,
+      lastAccessedAt: new Date(),
+    }).where(and(eq(userLearningProgress.userId, userId), eq(userLearningProgress.moduleId, lesson.moduleId)));
+
+    await db.update(users).set({
+      streamPoints: sql`${users.streamPoints} + ${xpEarned}`,
+    }).where(eq(users.id, userId));
+
+    res.json({ success: true, xpEarned, progressPercent, isCompleted });
+  }));
+
+  // Submit quiz answer
+  app.post("/api/learning/quizzes/:id/submit", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const { selectedAnswer } = req.body;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const [quiz] = await db.select().from(learningQuizzes).where(eq(learningQuizzes.id, id));
+    if (!quiz) {
+      return res.status(404).json({ success: false, error: 'Quiz not found' });
+    }
+
+    const options = quiz.options as Array<{ id: string; text: string; isCorrect: boolean }>;
+    const correctOption = options.find(o => o.isCorrect);
+    const isCorrect = correctOption?.id === selectedAnswer;
+
+    const existingAttempts = await db.select().from(userQuizAttempts).where(and(eq(userQuizAttempts.userId, userId), eq(userQuizAttempts.quizId, id)));
+    const attemptNumber = existingAttempts.length + 1;
+
+    const xpEarned = isCorrect && attemptNumber === 1 ? quiz.xpReward : (isCorrect ? Math.floor(quiz.xpReward / 2) : 0);
+
+    await db.insert(userQuizAttempts).values({
+      userId,
+      quizId: id,
+      lessonId: quiz.lessonId,
+      selectedAnswer,
+      isCorrect,
+      xpEarned,
+      attemptNumber,
+    });
+
+    if (xpEarned > 0) {
+      await db.update(users).set({
+        streamPoints: sql`${users.streamPoints} + ${xpEarned}`,
+      }).where(eq(users.id, userId));
+    }
+
+    res.json({ 
+      success: true, 
+      isCorrect, 
+      xpEarned, 
+      correctAnswer: correctOption?.id,
+      explanation: quiz.explanation,
+      attemptNumber 
+    });
+  }));
+
+  // Get learning leaderboard
+  app.get("/api/learning/leaderboard", asyncHandler(async (req: Request, res: Response) => {
+    const topLearners = await db.select({
+      id: userLearningProgress.userId,
+      totalXp: sql<number>`SUM(${userLearningProgress.xpEarned})`.as('total_xp'),
+      completedModules: sql<number>`COUNT(CASE WHEN ${userLearningProgress.isCompleted} = true THEN 1 END)`.as('completed_modules'),
+    }).from(userLearningProgress).groupBy(userLearningProgress.userId).orderBy(sql`total_xp DESC`).limit(20);
+    
+    const leaderboard = await Promise.all(topLearners.map(async (l, index) => {
+      const [user] = await db.select({ username: users.username, avatar: users.avatar }).from(users).where(eq(users.id, l.id));
+      return { rank: index + 1, ...l, username: user?.username || 'Anonymous', avatar: user?.avatar };
+    }));
+
+    res.json({ success: true, leaderboard });
+  }));
+
+  // =============================================================================
   // MARKET INTELLIGENCE HUB - Real-time signals, whale tracking, sentiment
   // =============================================================================
 
