@@ -138,7 +138,7 @@ function QuizCard({
             {result.isCorrect ? (
               <>
                 <Sparkles className="w-5 h-5 text-emerald-400" />
-                <span className="text-emerald-400 font-bold">Correct! +{result.xpEarned} XP</span>
+                <span className="text-emerald-400 font-bold">Correct! +{result.xpEarned} STREAM</span>
               </>
             ) : (
               <>
@@ -216,7 +216,7 @@ export default function LessonViewer() {
       if (data.xpEarned > 0) {
         toast({
           title: "Lesson Complete!",
-          description: `You earned ${data.xpEarned} XP`,
+          description: `You earned ${data.xpEarned} STREAM points`,
         });
       }
       queryClient.invalidateQueries({ queryKey: ['/api/learning/progress'] });
@@ -300,7 +300,7 @@ export default function LessonViewer() {
               <p className="text-sm text-gray-400">Lesson {currentLessonIndex + 1} of {lessons.length}</p>
               <div className="flex items-center gap-1 text-amber-400">
                 <Zap className="w-4 h-4" />
-                <span className="font-bold">{currentLesson?.xpReward || 0} XP</span>
+                <span className="font-bold">{currentLesson?.xpReward || 0} STREAM</span>
               </div>
             </div>
           </div>

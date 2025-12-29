@@ -157,7 +157,7 @@ function ModuleCard({
             </div>
             <div className="flex items-center gap-1">
               <Zap className="w-3 h-3 text-amber-400" />
-              {module.xpReward} XP
+              {module.xpReward} STREAM
             </div>
           </div>
           
@@ -315,7 +315,7 @@ export default function LearningHub() {
           />
           <StatsCard 
             icon={Zap} 
-            label="XP Earned" 
+            label="STREAM Earned" 
             value={totalXp.toLocaleString()}
             gradient="from-amber-500 to-orange-500"
           />
@@ -412,7 +412,7 @@ export default function LearningHub() {
                     </div>
                     <div className="text-right">
                       <p className="text-amber-400 font-bold">{learner.totalXp?.toLocaleString() || 0}</p>
-                      <p className="text-xs text-gray-500">XP</p>
+                      <p className="text-xs text-gray-500">STREAM</p>
                     </div>
                   </div>
                 ))}

@@ -90,7 +90,7 @@ function ModulePreviewCard({ module, index }: { module: LearningModule; index: n
             </div>
             <span className="flex items-center gap-1 text-amber-400">
               <Zap className="w-3 h-3" />
-              {module.xpReward} XP
+              {module.xpReward} STREAM
             </span>
           </div>
         </div>
@@ -137,7 +137,7 @@ export function LearningHubSection() {
           </h2>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-6">
             Master Web3, DeFi, AI Trading & Market Intelligence through interactive courses. 
-            Earn XP and STREAM points while you learn.
+            Earn STREAM points while you learn.
           </p>
 
           <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-8">
@@ -151,7 +151,7 @@ export function LearningHubSection() {
               <div className="p-1.5 rounded-lg bg-amber-500/20">
                 <Zap className="w-4 h-4 text-amber-400" />
               </div>
-              <span>4,650+ XP Available</span>
+              <span>3,350+ STREAM Available</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-purple-500/20">
@@ -206,7 +206,7 @@ export function LearningHubSection() {
           {[
             { icon: BookOpen, label: 'Interactive Lessons', value: '14+', color: 'from-purple-500 to-fuchsia-500' },
             { icon: Brain, label: 'Knowledge Quizzes', value: '14+', color: 'from-cyan-500 to-blue-500' },
-            { icon: Trophy, label: 'XP Rewards', value: '4,650+', color: 'from-amber-500 to-orange-500' },
+            { icon: Trophy, label: 'STREAM Rewards', value: '3,350+', color: 'from-amber-500 to-orange-500' },
             { icon: Target, label: 'Skill Levels', value: '3', color: 'from-emerald-500 to-teal-500' },
           ].map((stat, i) => (
             <Card key={i} className="relative overflow-hidden bg-slate-900/60 border-slate-700/50 p-4 text-center backdrop-blur-sm">
