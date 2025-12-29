@@ -101,7 +101,17 @@ const getAvatarGradient = (name: string) => {
     'Tyler Winklevoss': 'from-teal-950 via-cyan-950 to-purple-950',
     'Cameron Winklevoss': 'from-purple-950 via-cyan-950 to-cyan-950',
     'Balaji Srinivasan': 'from-cyan-950 via-purple-950 to-purple-950',
-    'Paul Graham': 'from-slate-950 via-gray-950 to-zinc-950'
+    'Paul Graham': 'from-slate-950 via-gray-950 to-zinc-950',
+    // Tech Macro Leaders
+    'Jensen Huang': 'from-green-950 via-emerald-950 to-green-950',
+    'Satya Nadella': 'from-blue-950 via-cyan-950 to-blue-950',
+    'Tim Cook': 'from-slate-950 via-gray-900 to-slate-950',
+    'Lisa Su': 'from-red-950 via-rose-950 to-red-950',
+    'Sam Altman': 'from-emerald-950 via-teal-950 to-emerald-950',
+    'Jerome Powell': 'from-emerald-950 via-green-950 to-emerald-950',
+    'Andy Jassy': 'from-orange-950 via-amber-950 to-orange-950',
+    'Mark Zuckerberg': 'from-blue-950 via-indigo-950 to-blue-950',
+    'Sundar Pichai': 'from-blue-950 via-sky-950 to-blue-950'
   };
   return gradients[name] || 'from-slate-950 via-gray-950 to-zinc-950';
 };

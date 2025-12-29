@@ -197,6 +197,8 @@ Your job is to analyze prediction markets and make trading decisions based on yo
 Market Question: ${market.question}
 ${market.description ? `Description: ${market.description}` : ''}
 Category: ${market.category}
+${market.assetClass ? `Asset Class: ${market.assetClass}` : ''}
+${market.ticker ? `Ticker: ${market.ticker}` : ''}
 Deadline: ${market.deadline}
 Current YES Price: ${(market.yesPrice / 100).toFixed(1)}%
 Current NO Price: ${(market.noPrice / 100).toFixed(1)}%
@@ -204,6 +206,9 @@ Total Volume: ${market.totalVolume} STREAM
 ${market.tags?.length ? `Tags: ${market.tags.join(', ')}` : ''}
 
 Based on your ${bot.personality} personality and ${bot.riskTolerance} risk tolerance, analyze this market.
+${market.assetClass === 'tech_stock' ? 'Consider tech stock fundamentals, earnings, and market sentiment.' : ''}
+${market.assetClass === 'macro' ? 'Consider macroeconomic factors, central bank policy, and economic indicators.' : ''}
+${market.assetClass === 'crypto' ? 'Consider on-chain metrics, market sentiment, and crypto-specific catalysts.' : ''}
 
 Provide your analysis in JSON format:
 {

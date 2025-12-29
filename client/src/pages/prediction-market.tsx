@@ -694,6 +694,8 @@ export default function PredictionMarket() {
       defi: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
       real_world: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
       community: "bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
+      tech_stock: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      macro: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
     };
     return colors[category] || colors.community;
   };

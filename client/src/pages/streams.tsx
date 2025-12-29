@@ -46,7 +46,8 @@ import {
   Globe,
   MessageSquare,
   ThumbsUp,
-  HelpCircle
+  HelpCircle,
+  Building2
 } from 'lucide-react';
 import { 
   SiEthereum, 
@@ -167,7 +168,7 @@ const streamTypeConfig: Record<string, { icon: any; label: string; color: string
   },
 };
 
-const categories = ['all', 'crypto', 'trading', 'defi', 'nft', 'education', 'ama', 'news', 'analysis'];
+const categories = ['all', 'crypto', 'trading', 'defi', 'nft', 'education', 'ama', 'news', 'analysis', 'tech_stock', 'macro'];
 
 // Brand icon mapping for Knowledge Avatars when profile images fail to load
 // Uses official brand icons from react-icons/si where available, Lucide for others
@@ -202,6 +203,15 @@ const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: stri
   'Michael Saylor': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' }, // MicroStrategy
   'Jack Dorsey': { icon: SiX, color: 'text-white', bgColor: 'bg-slate-700' }, // Block/Twitter
   'Raoul Pal': { icon: TrendingUp, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' }, // Real Vision
+  // Tech Macro Leaders
+  'Jensen Huang': { icon: Zap, color: 'text-green-400', bgColor: 'bg-green-500/20' }, // NVIDIA
+  'Satya Nadella': { icon: Globe, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Microsoft
+  'Tim Cook': { icon: Globe, color: 'text-slate-300', bgColor: 'bg-slate-500/20' }, // Apple
+  'Lisa Su': { icon: Zap, color: 'text-red-400', bgColor: 'bg-red-500/20' }, // AMD
+  'Sundar Pichai': { icon: Globe, color: 'text-blue-400', bgColor: 'bg-blue-500/20' }, // Google
+  'Andy Jassy': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' }, // Amazon
+  'Mark Zuckerberg': { icon: Globe, color: 'text-blue-500', bgColor: 'bg-blue-500/20' }, // Meta
+  'Jerome Powell': { icon: Building2, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' }, // Federal Reserve
 };
 
 const getAvatarFallback = (username?: string) => {
