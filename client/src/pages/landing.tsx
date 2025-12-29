@@ -15,6 +15,8 @@ const KnowledgeAvatars = lazy(() => import("@/components/landing/knowledge-avata
 const AISuggestions = lazy(() => import("@/components/landing/ai-suggestions").then(m => ({ default: m.AISuggestions })));
 const RecentActivity = lazy(() => import("@/components/landing/RecentActivity").then(m => ({ default: m.RecentActivity })));
 const Footer = lazy(() => import("@/components/landing/footer").then(m => ({ default: m.Footer })));
+const DiscoverPage = lazy(() => import("@/pages/discover"));
+const AITradingPage = lazy(() => import("@/pages/ai-trading"));
 
 function SectionLoader() {
   return (
@@ -35,6 +37,20 @@ export default function Landing() {
   }, []);
 
   const sections = useMemo(() => [
+    {
+      id: "discover",
+      label: "Discover",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950" fullHeight={false}>
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Suspense fallback={<SectionLoader />}>
+              <DiscoverPage />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
     {
       id: "bounties",
       label: "Bounties",
@@ -158,11 +174,25 @@ export default function Landing() {
         </SectionWrapper>
       ),
     },
+    {
+      id: "ai-trading",
+      label: "AI Trading",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950" fullHeight={false}>
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Suspense fallback={<SectionLoader />}>
+              <AITradingPage />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
   ], [handleNavigateToSection]);
 
   return (
     <div className="relative bg-background text-foreground">
-      <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={3} />
+      <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={4} />
     </div>
   );
 }
