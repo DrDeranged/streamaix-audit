@@ -18,6 +18,7 @@ const Footer = lazy(() => import("@/components/landing/footer").then(m => ({ def
 const DiscoverPage = lazy(() => import("@/pages/discover"));
 const AITradingPage = lazy(() => import("@/pages/ai-trading"));
 const LearningHubSection = lazy(() => import("@/components/landing/learning-hub-section"));
+const PortfolioSection = lazy(() => import("@/components/landing/portfolio-section"));
 
 function SectionLoader() {
   return (
@@ -184,6 +185,21 @@ export default function Landing() {
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
               <AITradingPage />
+            </Suspense>
+          </div>
+        </SectionWrapper>
+      ),
+    },
+    {
+      id: "portfolio",
+      label: "Portfolio",
+      component: (
+        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-fuchsia-950/10 to-slate-950" fullHeight={false}>
+          <NeuralNetworkBackground />
+          <div className="relative z-10">
+            <Navigation />
+            <Suspense fallback={<SectionLoader />}>
+              <PortfolioSection />
             </Suspense>
           </div>
         </SectionWrapper>
