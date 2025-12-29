@@ -46,6 +46,8 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndY = useRef(0);
 
   const goToSection = useCallback((index: number, forceDirection?: number) => {
     if (!isAnimating) {
@@ -106,18 +108,25 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = () => {
-    const swipeDistance = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50;
+    const swipeDistanceX = touchStartX.current - touchEndX.current;
+    const swipeDistanceY = touchStartY.current - touchEndY.current;
+    const minSwipeDistance = 100;
 
-    if (Math.abs(swipeDistance) > minSwipeDistance) {
-      if (swipeDistance > 0) {
+    const isHorizontalSwipe = Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY) * 1.5;
+
+    if (Math.abs(swipeDistanceX) > minSwipeDistance && isHorizontalSwipe) {
+      if (swipeDistanceX > 0) {
         goNext();
       } else {
         goPrev();
