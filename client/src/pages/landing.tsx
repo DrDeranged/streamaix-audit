@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useRef, useCallback } from "react";
+import { lazy, Suspense, useMemo, useRef, useCallback, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
 import { HeroSection } from "@/components/landing/hero-section";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
@@ -36,6 +36,18 @@ export default function Landing() {
 
   const handleNavigateToSection = useCallback((sectionId: string) => {
     slidingRef.current?.goToSectionById(sectionId);
+  }, []);
+
+  // Listen for custom navigation events from the onboarding tour
+  useEffect(() => {
+    const handleCarouselNavigation = (event: CustomEvent<{ sectionId: string }>) => {
+      if (event.detail?.sectionId) {
+        slidingRef.current?.goToSectionById(event.detail.sectionId);
+      }
+    };
+    
+    window.addEventListener('navigateCarouselSection', handleCarouselNavigation as EventListener);
+    return () => window.removeEventListener('navigateCarouselSection', handleCarouselNavigation as EventListener);
   }, []);
 
   const sections = useMemo(() => [

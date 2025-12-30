@@ -183,23 +183,6 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Gamification & Quests",
-    subtitle: "Level Up Your Trading Journey",
-    description: "Complete daily quests, weekly missions, and seasonal challenges. Earn XP, unlock achievements, and compete on leaderboards.",
-    icon: Gamepad2,
-    gradient: "from-fuchsia-500 via-pink-500 to-rose-500",
-    glowColor: "rgba(217, 70, 239, 0.5)",
-    instructions: [
-      "Complete daily and weekly quests",
-      "Earn XP and level up your profile",
-      "Unlock exclusive badges and rewards"
-    ],
-    action: {
-      label: "View Quests",
-      path: "/gamification"
-    }
-  },
-  {
     title: "Discover & Analytics",
     subtitle: "Real-Time Market Intelligence",
     description: "Live crypto and stock prices, AI signals, whale tracking, and sentiment analysis. Everything you need for informed trading decisions.",
@@ -319,12 +302,12 @@ export function OnboardingTour() {
     if (path.startsWith('/#')) {
       const sectionId = path.substring(2);
       setLocation('/');
+      // Dispatch custom event for carousel navigation
       setTimeout(() => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
+        window.dispatchEvent(new CustomEvent('navigateCarouselSection', { 
+          detail: { sectionId } 
+        }));
+      }, 300);
     } else {
       setLocation(path);
       setTimeout(() => {
