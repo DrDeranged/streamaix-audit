@@ -64,8 +64,8 @@ const steps: OnboardingStep[] = [
   },
   {
     title: "Portfolio Command Center",
-    subtitle: "Unified Asset Management",
-    description: "Track crypto, stocks, ETFs, retirement accounts, and cash in one dashboard. Get AI-powered tax optimization and personalized financial advice.",
+    subtitle: "Unified Asset Management + Tax Analytics",
+    description: "Track crypto, stocks, ETFs, retirement accounts, and cash in one dashboard. Get AI-powered tax optimization (15% long-term vs 32% short-term rates) and personalized financial advice.",
     icon: PieChart,
     gradient: "from-emerald-500 via-teal-500 to-cyan-500",
     glowColor: "rgba(20, 184, 166, 0.5)",
@@ -81,23 +81,6 @@ const steps: OnboardingStep[] = [
     tip: "The AI Financial Advisor gives personalized tips based on your holdings"
   },
   {
-    title: "Tax Analytics",
-    subtitle: "Smart Tax Optimization",
-    description: "See exactly how much you'll owe in taxes. Long-term gains (15%) vs short-term (32%) are calculated automatically based on when you bought each asset.",
-    icon: Receipt,
-    gradient: "from-amber-500 via-orange-500 to-red-500",
-    glowColor: "rgba(245, 158, 11, 0.5)",
-    instructions: [
-      "View estimated tax liability in real-time",
-      "Identify tax-loss harvesting opportunities",
-      "Plan sells to minimize tax burden"
-    ],
-    action: {
-      label: "View Tax Dashboard",
-      path: "/portfolio"
-    }
-  },
-  {
     title: "Knowledge Avatars",
     subtitle: "Chat with AI Crypto Experts",
     description: "Talk to AI personas of legendary investors like Buffett, Saylor, and CZ. Get personalized insights in their unique style.",
@@ -111,7 +94,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Meet Avatars",
-      path: "/"
+      path: "/#avatars"
     }
   },
   {
@@ -145,7 +128,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Try AI Processor",
-      path: "/"
+      path: "/#ai-processor"
     }
   },
   {
@@ -183,12 +166,29 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Your Dashboard",
+    subtitle: "Track Your Performance",
+    description: "Monitor your trading history, open positions, and earnings. See your portfolio performance, prediction accuracy, and STREAM balance all in one place.",
+    icon: BarChart3,
+    gradient: "from-purple-500 via-violet-500 to-indigo-500",
+    glowColor: "rgba(139, 92, 246, 0.5)",
+    instructions: [
+      "View your trading performance and P&L",
+      "Track open positions and predictions",
+      "Monitor your STREAM earnings over time"
+    ],
+    action: {
+      label: "Go to Dashboard",
+      path: "/dashboard"
+    }
+  },
+  {
     title: "Gamification & Quests",
     subtitle: "Level Up Your Trading Journey",
     description: "Complete daily quests, weekly missions, and seasonal challenges. Earn XP, unlock achievements, and compete on leaderboards.",
     icon: Gamepad2,
-    gradient: "from-purple-500 via-violet-500 to-indigo-500",
-    glowColor: "rgba(139, 92, 246, 0.5)",
+    gradient: "from-fuchsia-500 via-pink-500 to-rose-500",
+    glowColor: "rgba(217, 70, 239, 0.5)",
     instructions: [
       "Complete daily and weekly quests",
       "Earn XP and level up your profile",
@@ -200,37 +200,20 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Learning Hub",
-    subtitle: "Master Crypto & Finance",
-    description: "Interactive courses on DeFi, trading strategies, and market analysis. Learn at your own pace and earn certificates.",
-    icon: GraduationCap,
+    title: "Discover & Analytics",
+    subtitle: "Real-Time Market Intelligence",
+    description: "Live crypto and stock prices, AI signals, whale tracking, and sentiment analysis. Everything you need for informed trading decisions.",
+    icon: Globe,
     gradient: "from-blue-500 via-indigo-500 to-violet-500",
     glowColor: "rgba(99, 102, 241, 0.5)",
     instructions: [
-      "Browse courses by topic and difficulty",
-      "Complete lessons to earn STREAM",
-      "Track your learning progress"
+      "View live prices and market data",
+      "Track whale movements and trends",
+      "Analyze market sentiment in real-time"
     ],
     action: {
-      label: "Start Learning",
-      path: "/learning-hub"
-    }
-  },
-  {
-    title: "Prediction Leagues",
-    subtitle: "Compete for Prize Pools",
-    description: "Join leagues to compete with other traders. Top performers share prize pools up to 100K STREAM each season.",
-    icon: Trophy,
-    gradient: "from-yellow-500 via-amber-500 to-orange-500",
-    glowColor: "rgba(234, 179, 8, 0.5)",
-    instructions: [
-      "Join free or premium leagues",
-      "Make accurate predictions to climb ranks",
-      "Win prizes at the end of each season"
-    ],
-    action: {
-      label: "Join Leagues",
-      path: "/leagues"
+      label: "Open Discover",
+      path: "/discover"
     }
   },
   {
