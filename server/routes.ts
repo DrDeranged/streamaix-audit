@@ -16994,6 +16994,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     await updatePortfolioTotals(id);
     
+    try {
+      const { portfolioSnapshotService } = await import('./services/portfolioSnapshotService');
+      await portfolioSnapshotService.captureSnapshotForPortfolio(id, userId);
+    } catch (err: any) {
+      console.log(`[Sync] Snapshot capture skipped:`, err.message);
+    }
+    
     const [updatedPortfolio] = await db.select().from(portfolios).where(eq(portfolios.id, id));
     const updatedAssets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
     
@@ -17476,7 +17483,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const snapshots = await db.select().from(portfolioSnapshots).where(and(eq(portfolioSnapshots.portfolioId, id), eq(portfolioSnapshots.userId, userId))).orderBy(desc(portfolioSnapshots.snapshotDate)).limit(90);
+    let snapshots = await db.select().from(portfolioSnapshots).where(and(eq(portfolioSnapshots.portfolioId, id), eq(portfolioSnapshots.userId, userId))).orderBy(desc(portfolioSnapshots.snapshotDate)).limit(90);
+    
+    if (snapshots.length === 0) {
+      try {
+        const { portfolioSnapshotService } = await import('./services/portfolioSnapshotService');
+        await portfolioSnapshotService.generateHistoricalData(id, userId, 30);
+        
+        snapshots = await db.select().from(portfolioSnapshots).where(and(eq(portfolioSnapshots.portfolioId, id), eq(portfolioSnapshots.userId, userId))).orderBy(desc(portfolioSnapshots.snapshotDate)).limit(90);
+      } catch (err: any) {
+        console.error('[Portfolio History] Failed to generate historical data:', err.message);
+      }
+    }
     
     res.json({ success: true, snapshots });
   }));

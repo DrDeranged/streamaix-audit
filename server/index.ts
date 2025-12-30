@@ -181,6 +181,11 @@ app.use((req, res, next) => {
         marketIntelligenceNotifier.start();
         console.log('✅ Market Intelligence Notifier active - real-time market alerts');
 
+        console.log('📸 Starting Portfolio Snapshot Service...');
+        const { portfolioSnapshotService } = await import('./services/portfolioSnapshotService');
+        portfolioSnapshotService.start();
+        console.log('✅ Portfolio Snapshot Service active - capturing every 6 hours');
+
         console.log('========================================');
         console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL');
         console.log('   • 100 AI Social Agents (bounties, summaries, social)');

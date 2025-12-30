@@ -308,27 +308,95 @@ function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValue
   );
 }
 
-function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null | undefined; assets: PortfolioAsset[] }) {
-  const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y'>('1M');
+interface PortfolioSnapshot {
+  id: string;
+  totalValue: number;
+  totalPnl: number;
+  snapshotDate: string;
+}
+
+function PerformanceChart({ portfolio, assets, portfolioId }: { portfolio: Portfolio | null | undefined; assets: PortfolioAsset[]; portfolioId?: string }) {
+  const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y'>('1W');
   
-  const generateMockData = () => {
-    const points = timeframe === '1D' ? 24 : timeframe === '1W' ? 7 : timeframe === '1M' ? 30 : timeframe === '3M' ? 90 : timeframe === 'YTD' ? 365 : 365;
-    const baseValue = portfolio?.totalValue || 10000;
-    const data = [];
-    let current = baseValue * 0.85;
-    for (let i = 0; i < points; i++) {
-      current = current + (Math.random() - 0.48) * (baseValue * 0.02);
-      data.push(Math.max(0, current));
+  const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: PortfolioSnapshot[] }>({
+    queryKey: ['/api/portfolios', portfolioId, 'history'],
+    enabled: !!portfolioId,
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 60000,
+  });
+
+  const getTimeframeDays = (tf: string): number => {
+    switch (tf) {
+      case '1D': return 1;
+      case '1W': return 7;
+      case '1M': return 30;
+      case '3M': return 90;
+      case 'YTD': 
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        return Math.ceil((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+      case '1Y': return 365;
+      default: return 30;
     }
-    data[data.length - 1] = baseValue;
-    return data;
   };
 
-  const data = generateMockData();
-  const max = Math.max(...data);
-  const min = Math.min(...data);
+  const filteredData = useMemo(() => {
+    if (!historyData?.snapshots?.length) {
+      if (!portfolio?.totalValue) return [];
+      const currentValue = portfolio.totalValue;
+      const costBasis = portfolio.totalCostBasis || currentValue * 0.9;
+      const days = getTimeframeDays(timeframe);
+      const points = Math.min(days, 30);
+      const startValue = costBasis;
+      const step = (currentValue - startValue) / points;
+      return Array.from({ length: points + 1 }, (_, i) => ({
+        value: startValue + step * i + (Math.random() - 0.5) * (currentValue * 0.02),
+        date: new Date(Date.now() - (points - i) * 24 * 60 * 60 * 1000).toISOString(),
+      })).map((d, i, arr) => i === arr.length - 1 ? { ...d, value: currentValue } : d);
+    }
+
+    const days = getTimeframeDays(timeframe);
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    
+    const filtered = historyData.snapshots
+      .filter(s => new Date(s.snapshotDate) >= cutoffDate)
+      .sort((a, b) => new Date(a.snapshotDate).getTime() - new Date(b.snapshotDate).getTime())
+      .map(s => ({ value: s.totalValue, date: s.snapshotDate }));
+
+    if (filtered.length === 0 && historyData.snapshots.length > 0) {
+      return historyData.snapshots
+        .slice(-Math.min(30, historyData.snapshots.length))
+        .sort((a, b) => new Date(a.snapshotDate).getTime() - new Date(b.snapshotDate).getTime())
+        .map(s => ({ value: s.totalValue, date: s.snapshotDate }));
+    }
+
+    if (portfolio?.totalValue && filtered.length > 0) {
+      const lastSnapshot = filtered[filtered.length - 1];
+      if (Math.abs(lastSnapshot.value - portfolio.totalValue) > 1) {
+        filtered.push({ value: portfolio.totalValue, date: new Date().toISOString() });
+      }
+    }
+
+    return filtered;
+  }, [historyData?.snapshots, timeframe, portfolio?.totalValue, portfolio?.totalCostBasis]);
+
+  const chartData = filteredData.map(d => d.value);
+  const max = chartData.length > 0 ? Math.max(...chartData) : 100;
+  const min = chartData.length > 0 ? Math.min(...chartData) : 0;
   const range = max - min || 1;
-  const isPositive = data[data.length - 1] >= data[0];
+  const isPositive = chartData.length > 1 ? chartData[chartData.length - 1] >= chartData[0] : true;
+  
+  const percentChange = chartData.length > 1 
+    ? ((chartData[chartData.length - 1] - chartData[0]) / chartData[0] * 100)
+    : 0;
+
+  if (isLoading) {
+    return (
+      <div className="h-48 flex items-center justify-center">
+        <RefreshCw className="w-5 h-5 text-gray-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -337,6 +405,7 @@ function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null |
           {(['1D', '1W', '1M', '3M', 'YTD', '1Y'] as const).map(tf => (
             <button
               key={tf}
+              data-testid={`timeframe-${tf}`}
               onClick={() => setTimeframe(tf)}
               className={cn(
                 "px-3 py-2 text-xs rounded transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0",
@@ -349,23 +418,42 @@ function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null |
             </button>
           ))}
         </div>
+        {chartData.length > 1 && (
+          <span className={cn("text-xs font-medium", isPositive ? "text-green-400" : "text-red-400")}>
+            {isPositive ? '+' : ''}{percentChange.toFixed(2)}%
+          </span>
+        )}
       </div>
-      <div className="h-32 flex items-end gap-[2px]">
-        {data.map((value, i) => (
-          <div
-            key={i}
-            className={cn(
-              "flex-1 rounded-t transition-all",
-              isPositive ? "bg-green-500/60" : "bg-red-500/60"
-            )}
-            style={{ height: `${((value - min) / range) * 100}%`, minHeight: '2px' }}
-          />
-        ))}
-      </div>
-      <div className="flex justify-between text-[11px] sm:text-[10px] text-gray-500 mt-2">
-        <span>{timeframe === '1D' ? '24h ago' : timeframe === '1W' ? '7d ago' : timeframe === '1M' ? '30d ago' : timeframe === '3M' ? '90d ago' : timeframe === 'YTD' ? 'Jan 1' : '1y ago'}</span>
-        <span>Now</span>
-      </div>
+      
+      {chartData.length === 0 ? (
+        <div className="h-32 flex items-center justify-center border border-dashed border-slate-700 rounded-lg">
+          <div className="text-center">
+            <History className="w-6 h-6 text-gray-600 mx-auto mb-2" />
+            <p className="text-xs text-gray-500">Performance data will appear as your portfolio updates</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="h-32 flex items-end gap-[2px]">
+            {chartData.map((value, i) => (
+              <div
+                key={i}
+                data-testid={`chart-bar-${i}`}
+                className={cn(
+                  "flex-1 rounded-t transition-all hover:opacity-80",
+                  isPositive ? "bg-green-500/60" : "bg-red-500/60"
+                )}
+                style={{ height: `${Math.max(2, ((value - min) / range) * 100)}%` }}
+                title={`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              />
+            ))}
+          </div>
+          <div className="flex justify-between text-[11px] sm:text-[10px] text-gray-500 mt-2">
+            <span>{timeframe === '1D' ? '24h ago' : timeframe === '1W' ? '7d ago' : timeframe === '1M' ? '30d ago' : timeframe === '3M' ? '90d ago' : timeframe === 'YTD' ? 'Jan 1' : '1y ago'}</span>
+            <span>Now</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1629,7 +1717,7 @@ export default function PortfolioDashboard() {
                         {((portfolio?.totalPnlPercent || 0) >= 0 ? '+' : '')}{(portfolio?.totalPnlPercent || 0).toFixed(2)}% all time
                       </Badge>
                     </div>
-                    <PerformanceChart portfolio={portfolio} assets={assets} />
+                    <PerformanceChart portfolio={portfolio} assets={assets} portfolioId={activePortfolioId} />
                   </Card>
 
                   {/* Risk & Metrics Panel */}
