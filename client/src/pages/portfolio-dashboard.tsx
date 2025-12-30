@@ -362,7 +362,7 @@ function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null |
           />
         ))}
       </div>
-      <div className="flex justify-between text-[10px] text-gray-500 mt-2">
+      <div className="flex justify-between text-[11px] sm:text-[10px] text-gray-500 mt-2">
         <span>{timeframe === '1D' ? '24h ago' : timeframe === '1W' ? '7d ago' : timeframe === '1M' ? '30d ago' : timeframe === '3M' ? '90d ago' : timeframe === 'YTD' ? 'Jan 1' : '1y ago'}</span>
         <span>Now</span>
       </div>
@@ -411,12 +411,12 @@ function WatchlistPanel() {
               <Star className="w-3 h-3 text-amber-400" />
               <div>
                 <span className="text-sm font-medium text-white">{item.symbol}</span>
-                <p className="text-[10px] text-gray-500">{item.name}</p>
+                <p className="text-[11px] sm:text-[10px] text-gray-500">{item.name}</p>
               </div>
             </div>
             <div className="text-right">
               <span className="text-sm text-white">${item.price.toFixed(2)}</span>
-              <p className={cn("text-[10px]", item.change >= 0 ? 'text-green-400' : 'text-red-400')}>
+              <p className={cn("text-[11px] sm:text-[10px]", item.change >= 0 ? 'text-green-400' : 'text-red-400')}>
                 {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
               </p>
             </div>
@@ -450,7 +450,7 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
               </div>
               <span className="text-xs text-gray-400">{progress.toFixed(0)}%</span>
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-gray-500">
+            <div className="flex justify-between mt-2 text-[11px] sm:text-[10px] text-gray-500">
               <span>${currentValue.toLocaleString()}</span>
               <span>Goal: ${goal.target.toLocaleString()}</span>
             </div>
@@ -578,19 +578,19 @@ function IncomeTracker({ assets }: { assets: PortfolioAsset[] }) {
           <Badge className="text-[10px] bg-green-500/20 text-green-400">Projected</Badge>
         </div>
         <p className="text-xl font-bold text-green-400">${totalPassiveIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-        <p className="text-[10px] text-gray-500 mt-1">${(totalPassiveIncome / 12).toFixed(0)}/month</p>
+        <p className="text-[11px] sm:text-[10px] text-gray-500 mt-1">${(totalPassiveIncome / 12).toFixed(0)}/month</p>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="p-2 bg-slate-800/50 rounded-lg">
-          <span className="text-[10px] text-gray-400">Dividends</span>
+          <span className="text-[11px] sm:text-[10px] text-gray-400">Dividends</span>
           <p className="text-sm font-medium text-white">${estimatedAnnualDividends.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
         </div>
         <div className="p-2 bg-slate-800/50 rounded-lg">
-          <span className="text-[10px] text-gray-400">Staking Rewards</span>
+          <span className="text-[11px] sm:text-[10px] text-gray-400">Staking Rewards</span>
           <p className="text-sm font-medium text-white">${estimatedStakingRewards.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
         </div>
       </div>
-      <div className="text-[10px] text-gray-500 text-center">
+      <div className="text-[11px] sm:text-[10px] text-gray-500 text-center">
         Based on avg yields: Stocks ~2%, ETFs ~2.5%, Staking ~5%
       </div>
     </div>
@@ -627,8 +627,8 @@ function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white leading-snug line-clamp-2 group-hover:text-purple-300 transition-colors">{item.title}</p>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-[9px] px-1 py-0 text-gray-500 border-slate-600">{item.symbol}</Badge>
-                <span className="text-[10px] text-gray-500">{item.source} • {item.time}</span>
+                <Badge variant="outline" className="text-[11px] sm:text-[9px] px-1.5 py-0.5 text-gray-500 border-slate-600">{item.symbol}</Badge>
+                <span className="text-[11px] sm:text-[10px] text-gray-500">{item.source} • {item.time}</span>
               </div>
             </div>
           </div>
@@ -1172,7 +1172,7 @@ function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioA
         <div>
           <div className="flex items-center gap-2">
             <span className="font-medium text-white text-sm">{asset.symbol}</span>
-            <span className="text-[10px] text-gray-500 uppercase">{asset.assetType}</span>
+            <span className="text-[11px] sm:text-[10px] text-gray-500 uppercase">{asset.assetType}</span>
           </div>
           <p className="text-xs text-gray-500 truncate max-w-[120px]">{asset.name}</p>
         </div>
@@ -1906,7 +1906,7 @@ export default function PortfolioDashboard() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-white text-sm leading-snug">{rec.message}</p>
                                 <div className="flex items-center gap-2 mt-2">
-                                  <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600 px-1.5 py-0">
+                                  <Badge variant="outline" className="text-[11px] sm:text-[10px] text-gray-500 border-slate-600 px-1.5 py-0">
                                     {rec.type}
                                   </Badge>
                                   {rec.action && (
@@ -2042,27 +2042,27 @@ export default function PortfolioDashboard() {
                     <div className="space-y-2">
                       {assets.filter(a => a.assetType === 'stock').length > 0 ? (
                         <>
-                          <div className="p-2.5 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
+                          <div className="p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-xs font-medium text-cyan-400">Earnings</span>
-                              <span className="text-[10px] text-gray-500">Jan 15</span>
+                              <span className="text-[11px] sm:text-[10px] text-gray-500">Jan 15</span>
                             </div>
                             <p className="text-xs text-gray-300">COIN Q4 earnings report</p>
                           </div>
-                          <div className="p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                          <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-xs font-medium text-amber-400">Fed Meeting</span>
-                              <span className="text-[10px] text-gray-500">Jan 29</span>
+                              <span className="text-[11px] sm:text-[10px] text-gray-500">Jan 29</span>
                             </div>
                             <p className="text-xs text-gray-300">FOMC rate decision</p>
                           </div>
                         </>
                       ) : null}
                       {assets.filter(a => a.assetType === 'crypto').length > 0 ? (
-                        <div className="p-2.5 bg-purple-500/5 border border-purple-500/20 rounded-lg">
+                        <div className="p-3 bg-purple-500/5 border border-purple-500/20 rounded-lg">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-xs font-medium text-purple-400">Token Unlock</span>
-                            <span className="text-[10px] text-gray-500">Jan 12</span>
+                            <span className="text-[11px] sm:text-[10px] text-gray-500">Jan 12</span>
                           </div>
                           <p className="text-xs text-gray-300">SOL foundation unlock 2.5M tokens</p>
                         </div>
@@ -2113,7 +2113,7 @@ export default function PortfolioDashboard() {
                         <FileText className="w-4 h-4 text-blue-400" />
                         Latest News
                       </h3>
-                      <Badge variant="outline" className="text-[9px] text-gray-500 border-slate-600">Live</Badge>
+                      <Badge variant="outline" className="text-[11px] sm:text-[9px] text-gray-500 border-slate-600">Live</Badge>
                     </div>
                     <NewsAggregator assets={assets} />
                   </Card>
@@ -2200,7 +2200,7 @@ export default function PortfolioDashboard() {
                           <Percent className="w-3.5 h-3.5 text-amber-400" />
                           <span className="text-xs font-medium text-white">Tax-Loss Harvest</span>
                         </div>
-                        <p className="text-[10px] text-gray-500 group-hover:text-gray-400">
+                        <p className="text-[11px] sm:text-[10px] text-gray-500 group-hover:text-gray-400">
                           {assets.filter(a => (a.unrealizedPnl || 0) < 0).length} assets with losses
                         </p>
                       </button>
@@ -2213,7 +2213,7 @@ export default function PortfolioDashboard() {
                           <Scale className="w-3.5 h-3.5 text-cyan-400" />
                           <span className="text-xs font-medium text-white">Auto-Rebalance</span>
                         </div>
-                        <p className="text-[10px] text-gray-500 group-hover:text-gray-400">Optimize allocation targets</p>
+                        <p className="text-[11px] sm:text-[10px] text-gray-500 group-hover:text-gray-400">Optimize allocation targets</p>
                       </button>
                       <button 
                         onClick={() => setShowGoalsDialog(true)}
