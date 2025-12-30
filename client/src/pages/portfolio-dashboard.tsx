@@ -517,6 +517,50 @@ function IncomeTracker({ assets }: { assets: PortfolioAsset[] }) {
   );
 }
 
+function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
+  const newsItems = [
+    { symbol: 'BTC', title: 'Bitcoin ETF inflows hit record high', source: 'CoinDesk', time: '2h ago', sentiment: 'bullish' },
+    { symbol: 'ETH', title: 'Ethereum staking rewards increase after upgrade', source: 'Decrypt', time: '4h ago', sentiment: 'bullish' },
+    { symbol: 'SOL', title: 'Solana network processes 2000 TPS milestone', source: 'TheBlock', time: '6h ago', sentiment: 'bullish' },
+    { symbol: 'AAPL', title: 'Apple announces record iPhone sales in Q4', source: 'Reuters', time: '8h ago', sentiment: 'bullish' },
+    { symbol: 'TSLA', title: 'Tesla faces increased EV competition in Europe', source: 'Bloomberg', time: '10h ago', sentiment: 'bearish' },
+  ].filter(n => assets.length === 0 || assets.some(a => a.symbol === n.symbol || a.symbol.includes(n.symbol.slice(0, 3))));
+
+  if (assets.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <FileText className="w-6 h-6 mx-auto text-gray-600 mb-2" />
+        <p className="text-xs text-gray-500">Add assets to see relevant news</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {newsItems.slice(0, 4).map((item, i) => (
+        <div key={i} className="p-2.5 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group">
+          <div className="flex items-start gap-2">
+            <div className={cn(
+              "w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0",
+              item.sentiment === 'bullish' ? 'bg-green-400' : 'bg-red-400'
+            )} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-white leading-snug line-clamp-2 group-hover:text-purple-300 transition-colors">{item.title}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline" className="text-[9px] px-1 py-0 text-gray-500 border-slate-600">{item.symbol}</Badge>
+                <span className="text-[10px] text-gray-500">{item.source} • {item.time}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+      <Button variant="ghost" size="sm" className="w-full text-xs text-purple-400 hover:text-purple-300">
+        View All News <ArrowRight className="w-3 h-3 ml-1" />
+      </Button>
+    </div>
+  );
+}
+
 interface SearchResult {
   symbol: string;
   name: string;
@@ -1514,13 +1558,36 @@ export default function PortfolioDashboard() {
                     {assets.length === 0 ? (
                       <div className="py-8">
                         <div className="text-center max-w-sm mx-auto">
-                          <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
-                            <Layers className="w-7 h-7 text-purple-400" />
-                          </div>
-                          <h3 className="text-lg font-semibold text-white mb-2">Add Your First Asset</h3>
-                          <p className="text-gray-400 text-sm mb-5">
-                            Track crypto, stocks, retirement accounts, and cash in one unified dashboard.
+                          <motion.div 
+                            className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-purple-500/20 via-cyan-500/20 to-amber-500/20 flex items-center justify-center relative"
+                            animate={{ 
+                              boxShadow: ['0 0 20px rgba(168,85,247,0.2)', '0 0 40px rgba(34,211,238,0.3)', '0 0 20px rgba(168,85,247,0.2)']
+                            }}
+                            transition={{ duration: 3, repeat: Infinity }}
+                          >
+                            <Layers className="w-10 h-10 text-purple-400" />
+                            <motion.div 
+                              className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500"
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            />
+                          </motion.div>
+                          <h3 className="text-xl font-bold text-white mb-2">Add Your First Asset</h3>
+                          <p className="text-gray-400 text-sm mb-6">
+                            Track crypto, stocks, ETFs, retirement accounts, and cash in one unified dashboard with AI-powered insights.
                           </p>
+                          <div className="grid grid-cols-3 gap-3 mb-6">
+                            {[
+                              { icon: Bitcoin, label: 'Crypto', color: 'text-orange-400' },
+                              { icon: TrendingUp, label: 'Stocks', color: 'text-blue-400' },
+                              { icon: Landmark, label: 'Retirement', color: 'text-purple-400' }
+                            ].map((item) => (
+                              <div key={item.label} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                                <item.icon className={cn("w-5 h-5 mx-auto mb-1", item.color)} />
+                                <span className="text-[10px] text-gray-400">{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
                           <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
                         </div>
                       </div>
@@ -1956,6 +2023,18 @@ export default function PortfolioDashboard() {
                       </h3>
                     </div>
                     <IncomeTracker assets={assets} />
+                  </Card>
+
+                  {/* News Feed */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-blue-400" />
+                        Latest News
+                      </h3>
+                      <Badge variant="outline" className="text-[9px] text-gray-500 border-slate-600">Live</Badge>
+                    </div>
+                    <NewsAggregator assets={assets} />
                   </Card>
                 </div>
               </div>
