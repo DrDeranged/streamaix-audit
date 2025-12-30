@@ -11,7 +11,7 @@ import {
   ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search,
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
   Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
-  Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History
+  Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History, CheckCircle
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -2131,41 +2131,170 @@ export default function PortfolioDashboard() {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Top Recommendation */}
+                    {/* Top Recommendation - Dynamic based on portfolio state */}
                     <div className="md:col-span-2 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-green-500/20 mt-0.5">
-                          <TrendingUp className="w-4 h-4 text-green-400" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-white mb-1">Portfolio Optimization Opportunity</h4>
-                          <p className="text-sm text-gray-400 mb-3">
-                            {assets.length > 0 
-                              ? `Your ${assets[0]?.symbol || 'largest'} position ${showValues ? `(${((assets[0]?.allocationPercent || 0)).toFixed(0)}% allocation)` : ''} may be overweighted. Consider rebalancing to reduce concentration risk.`
-                              : 'Add assets to receive personalized advice on portfolio optimization.'}
-                          </p>
-                          {assets.length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                size="sm" 
-                                onClick={() => setShowStrategyDialog(true)}
-                                className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-7 text-xs"
-                                data-testid="button-view-strategy"
-                              >
-                                <ArrowUpRight className="w-3 h-3 mr-1" />
-                                View Strategy
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => toast({ title: 'Recommendation dismissed' })}
-                                className="text-gray-400 h-7 text-xs"
-                              >
-                                Dismiss
-                              </Button>
-                            </div>
-                          )}
-                        </div>
+                        {(() => {
+                          const sortedByAlloc = [...assets].sort((a, b) => (b.allocationPercent || 0) - (a.allocationPercent || 0));
+                          const topAsset = sortedByAlloc[0];
+                          const losers = assets.filter(a => (a.unrealizedPnlPercent || 0) < -10);
+                          const bigWinners = assets.filter(a => (a.unrealizedPnlPercent || 0) > 30);
+                          const cryptoAlloc = assets.filter(a => a.assetType === 'crypto').reduce((s, a) => s + (a.allocationPercent || 0), 0);
+                          const cashAlloc = assets.filter(a => a.assetType === 'cash').reduce((s, a) => s + (a.allocationPercent || 0), 0);
+                          const diversificationScore = analytics?.diversificationScore || analysis?.diversificationScore || 0;
+                          
+                          if (assets.length === 0) {
+                            return (
+                              <>
+                                <div className="p-2 rounded-lg bg-blue-500/20 mt-0.5">
+                                  <Target className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-white mb-1">Get Started</h4>
+                                  <p className="text-sm text-gray-400 mb-3">
+                                    Add your first assets to receive personalized AI-powered financial advice tailored to your goals.
+                                  </p>
+                                </div>
+                              </>
+                            );
+                          }
+                          
+                          if (taxAnalytics?.taxLossHarvestingOpportunities && taxAnalytics.taxLossHarvestingOpportunities.length >= 2) {
+                            const topLoss = taxAnalytics.taxLossHarvestingOpportunities[0];
+                            return (
+                              <>
+                                <div className="p-2 rounded-lg bg-amber-500/20 mt-0.5">
+                                  <Receipt className="w-4 h-4 text-amber-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-white mb-1">Tax-Loss Harvesting Opportunity</h4>
+                                  <p className="text-sm text-gray-400 mb-3">
+                                    {showValues 
+                                      ? `You have ${taxAnalytics.taxLossHarvestingOpportunities.length} positions with unrealized losses. Selling ${topLoss.symbol} could save ~$${topLoss.potentialTaxSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })} in taxes this year.`
+                                      : `You have ${taxAnalytics.taxLossHarvestingOpportunities.length} positions with unrealized losses that could be harvested for tax savings.`}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => setShowTaxDialog(true)}
+                                      className="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 h-7 text-xs"
+                                    >
+                                      <FileText className="w-3 h-3 mr-1" />
+                                      View Tax Details
+                                    </Button>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
+                          
+                          if (topAsset && (topAsset.allocationPercent || 0) > 35) {
+                            return (
+                              <>
+                                <div className="p-2 rounded-lg bg-red-500/20 mt-0.5">
+                                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-white mb-1">Concentration Risk Alert</h4>
+                                  <p className="text-sm text-gray-400 mb-3">
+                                    {showValues 
+                                      ? `Your ${topAsset.symbol} position represents ${(topAsset.allocationPercent || 0).toFixed(0)}% of your portfolio. Consider rebalancing to reduce single-asset risk.`
+                                      : `Your largest position may be overweighted. Consider rebalancing to reduce single-asset risk.`}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => setShowRebalanceDialog(true)}
+                                      className="bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 h-7 text-xs"
+                                    >
+                                      <Scale className="w-3 h-3 mr-1" />
+                                      Rebalance
+                                    </Button>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
+                          
+                          if (bigWinners.length > 0) {
+                            const topWinner = bigWinners.sort((a, b) => (b.unrealizedPnlPercent || 0) - (a.unrealizedPnlPercent || 0))[0];
+                            return (
+                              <>
+                                <div className="p-2 rounded-lg bg-green-500/20 mt-0.5">
+                                  <TrendingUp className="w-4 h-4 text-green-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-white mb-1">Consider Taking Profits</h4>
+                                  <p className="text-sm text-gray-400 mb-3">
+                                    {showValues 
+                                      ? `${topWinner.symbol} is up ${(topWinner.unrealizedPnlPercent || 0).toFixed(0)}% (+$${(topWinner.unrealizedPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}). Consider selling a portion to lock in gains.`
+                                      : `${topWinner.symbol} is up ${(topWinner.unrealizedPnlPercent || 0).toFixed(0)}%. Consider selling a portion to lock in gains.`}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => setShowStrategyDialog(true)}
+                                      className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-7 text-xs"
+                                    >
+                                      <ArrowUpRight className="w-3 h-3 mr-1" />
+                                      View Strategy
+                                    </Button>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
+                          
+                          if (cryptoAlloc > 50) {
+                            return (
+                              <>
+                                <div className="p-2 rounded-lg bg-purple-500/20 mt-0.5">
+                                  <Gauge className="w-4 h-4 text-purple-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-white mb-1">High Crypto Exposure</h4>
+                                  <p className="text-sm text-gray-400 mb-3">
+                                    {cryptoAlloc.toFixed(0)}% of your portfolio is in crypto. Consider diversifying with stocks or ETFs for a more balanced risk profile.
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => setShowRebalanceDialog(true)}
+                                      className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-7 text-xs"
+                                    >
+                                      <Scale className="w-3 h-3 mr-1" />
+                                      Rebalance
+                                    </Button>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <div className="p-2 rounded-lg bg-green-500/20 mt-0.5">
+                                <CheckCircle className="w-4 h-4 text-green-400" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-white mb-1">Portfolio Looking Healthy</h4>
+                                <p className="text-sm text-gray-400 mb-3">
+                                  Your portfolio is well-diversified with balanced allocations. Keep monitoring for market opportunities.
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => setShowGoalsDialog(true)}
+                                    className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-7 text-xs"
+                                  >
+                                    <Target className="w-3 h-3 mr-1" />
+                                    Set Goals
+                                  </Button>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
 
@@ -2474,47 +2603,102 @@ export default function PortfolioDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Tax-Loss Harvesting Dialog */}
+      {/* Tax Analytics Dialog */}
       <Dialog open={showTaxDialog} onOpenChange={setShowTaxDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg">
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Percent className="w-5 h-5 text-amber-400" />
-              Tax-Loss Harvesting
+              <Receipt className="w-5 h-5 text-amber-400" />
+              Tax Analytics
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <p className="text-sm text-gray-400">
-              These positions have unrealized losses that could offset capital gains:
-            </p>
-            <div className="space-y-2">
-              {assets.filter(a => (a.unrealizedPnl || 0) < 0).length > 0 ? (
-                assets.filter(a => (a.unrealizedPnl || 0) < 0).map(a => (
-                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-red-500/20">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{a.symbol}</span>
-                      <span className="text-xs text-gray-500">{a.name}</span>
+          <div className="space-y-5 pt-4">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-slate-800/50 rounded-lg border border-green-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  <span className="text-xs text-gray-400">Long-term (15% rate)</span>
+                </div>
+                <p className="text-lg font-bold text-green-400">{taxAnalytics?.longTermAssetCount || 0} assets</p>
+                <p className="text-xs text-gray-500">
+                  {taxAnalytics?.longTermGains ? `+$${taxAnalytics.longTermGains.toLocaleString(undefined, { maximumFractionDigits: 0 })} gains` : 'No gains'}
+                </p>
+              </div>
+              <div className="p-3 bg-slate-800/50 rounded-lg border border-amber-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span className="text-xs text-gray-400">Short-term (32% rate)</span>
+                </div>
+                <p className="text-lg font-bold text-amber-400">{taxAnalytics?.shortTermAssetCount || 0} assets</p>
+                <p className="text-xs text-gray-500">
+                  {taxAnalytics?.shortTermGains ? `+$${taxAnalytics.shortTermGains.toLocaleString(undefined, { maximumFractionDigits: 0 })} gains` : 'No gains'}
+                </p>
+              </div>
+            </div>
+            
+            {/* Estimated Tax */}
+            <div className="p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-lg border border-amber-500/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400">Estimated Tax Liability (if sold today)</p>
+                  <p className="text-2xl font-bold text-amber-400">
+                    ${Math.round(taxAnalytics?.totalEstTax || 0).toLocaleString()}
+                  </p>
+                </div>
+                <Percent className="w-8 h-8 text-amber-500/50" />
+              </div>
+            </div>
+
+            {/* Tax-Loss Harvesting */}
+            <div>
+              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+                Tax-Loss Harvesting Opportunities
+              </h4>
+              {taxAnalytics?.taxLossHarvestingOpportunities && taxAnalytics.taxLossHarvestingOpportunities.length > 0 ? (
+                <div className="space-y-2">
+                  {taxAnalytics.taxLossHarvestingOpportunities.map((op, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-red-500/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                        </div>
+                        <div>
+                          <span className="font-medium text-white">{op.symbol}</span>
+                          <p className="text-xs text-gray-500">{op.isLongTerm ? 'Long-term' : 'Short-term'} holding</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-red-400">
+                          -${Math.abs(op.loss).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </p>
+                        <p className="text-[10px] text-green-400">
+                          ~${op.potentialTaxSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })} savings
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-red-400">
-                        ${Math.abs(a.unrealizedPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} loss
-                      </p>
-                      <p className="text-[10px] text-gray-500">{a.unrealizedPnlPercent?.toFixed(1)}%</p>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                  <p className="text-xs text-gray-500 mt-2">
+                    Selling these positions could offset capital gains and reduce your tax bill.
+                  </p>
+                </div>
               ) : (
-                <p className="text-center py-4 text-gray-500">No positions with losses to harvest</p>
+                <p className="text-center py-4 text-gray-500 bg-slate-800/30 rounded-lg">
+                  No positions with significant losses to harvest
+                </p>
               )}
             </div>
+            
             <Button 
               onClick={() => {
-                toast({ title: 'Tax Strategy Applied', description: 'Harvesting opportunities identified' });
+                toast({ title: 'Tax Report Generated', description: 'Check your email for the detailed report' });
                 setShowTaxDialog(false);
               }}
               className="w-full bg-amber-600 hover:bg-amber-500"
             >
-              Harvest Losses
+              <FileText className="w-4 h-4 mr-2" />
+              Generate Full Tax Report
             </Button>
           </div>
         </DialogContent>
