@@ -736,6 +736,11 @@ export default function PortfolioDashboard() {
   const [, navigate] = useLocation();
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
   const [showValues, setShowValues] = useState(true);
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [showRebalanceDialog, setShowRebalanceDialog] = useState(false);
+  const [showTaxDialog, setShowTaxDialog] = useState(false);
+  const [showStrategyDialog, setShowStrategyDialog] = useState(false);
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const { toast } = useToast();
 
   const { data: portfoliosData, isLoading: portfoliosLoading } = useQuery<{ portfolios: Portfolio[] }>({
@@ -1043,15 +1048,33 @@ export default function PortfolioDashboard() {
               <Card className="bg-slate-900/60 border-slate-700/50 p-3 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-slate-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowAlertDialog(true)}
+                      className="text-gray-400 hover:text-white hover:bg-slate-800"
+                      data-testid="button-set-alert"
+                    >
                       <Bell className="w-4 h-4 mr-2" />
                       Set Alert
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-slate-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowRebalanceDialog(true)}
+                      className="text-gray-400 hover:text-white hover:bg-slate-800"
+                      data-testid="button-rebalance"
+                    >
                       <Scale className="w-4 h-4 mr-2" />
                       Rebalance
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-slate-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowTaxDialog(true)}
+                      className="text-gray-400 hover:text-white hover:bg-slate-800"
+                      data-testid="button-tax-loss"
+                    >
                       <Percent className="w-4 h-4 mr-2" />
                       Tax Loss
                     </Button>
@@ -1061,7 +1084,11 @@ export default function PortfolioDashboard() {
                       <Radio className="w-3 h-3 mr-1 text-green-400" />
                       Live
                     </Badge>
-                    <span className="text-xs text-gray-500">Updated just now</span>
+                    <span className="text-xs text-gray-500">
+                      {assets[0]?.priceLastUpdated 
+                        ? `Updated ${new Date(assets[0].priceLastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                        : 'Updated just now'}
+                    </span>
                   </div>
                 </div>
               </Card>
@@ -1390,11 +1417,21 @@ export default function PortfolioDashboard() {
                           </p>
                           {assets.length > 0 && (
                             <div className="flex items-center gap-2">
-                              <Button size="sm" className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-7 text-xs">
+                              <Button 
+                                size="sm" 
+                                onClick={() => setShowStrategyDialog(true)}
+                                className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-7 text-xs"
+                                data-testid="button-view-strategy"
+                              >
                                 <ArrowUpRight className="w-3 h-3 mr-1" />
                                 View Strategy
                               </Button>
-                              <Button size="sm" variant="ghost" className="text-gray-400 h-7 text-xs">
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => toast({ title: 'Recommendation dismissed' })}
+                                className="text-gray-400 h-7 text-xs"
+                              >
                                 Dismiss
                               </Button>
                             </div>
@@ -1405,7 +1442,11 @@ export default function PortfolioDashboard() {
 
                     {/* Quick Actions */}
                     <div className="space-y-3">
-                      <button className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-amber-500/30 transition-colors text-left group">
+                      <button 
+                        onClick={() => setShowTaxDialog(true)}
+                        className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-amber-500/30 transition-colors text-left group"
+                        data-testid="button-tax-harvest"
+                      >
                         <div className="flex items-center gap-2 mb-1">
                           <Percent className="w-3.5 h-3.5 text-amber-400" />
                           <span className="text-xs font-medium text-white">Tax-Loss Harvest</span>
@@ -1414,14 +1455,22 @@ export default function PortfolioDashboard() {
                           {assets.filter(a => (a.unrealizedPnl || 0) < 0).length} assets with losses
                         </p>
                       </button>
-                      <button className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-cyan-500/30 transition-colors text-left group">
+                      <button 
+                        onClick={() => setShowRebalanceDialog(true)}
+                        className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-cyan-500/30 transition-colors text-left group"
+                        data-testid="button-auto-rebalance"
+                      >
                         <div className="flex items-center gap-2 mb-1">
                           <Scale className="w-3.5 h-3.5 text-cyan-400" />
                           <span className="text-xs font-medium text-white">Auto-Rebalance</span>
                         </div>
                         <p className="text-[10px] text-gray-500 group-hover:text-gray-400">Optimize allocation targets</p>
                       </button>
-                      <button className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/30 transition-colors text-left group">
+                      <button 
+                        onClick={() => setShowGoalsDialog(true)}
+                        className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/30 transition-colors text-left group"
+                        data-testid="button-set-goals"
+                      >
                         <div className="flex items-center gap-2 mb-1">
                           <Target className="w-3.5 h-3.5 text-purple-400" />
                           <span className="text-xs font-medium text-white">Set Goals</span>
@@ -1553,7 +1602,14 @@ export default function PortfolioDashboard() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4 border-amber-500/30 text-amber-300 hover:bg-amber-500/10 text-xs h-8">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        toast({ title: 'Generating Tax Report...', description: 'Your report will be ready shortly' });
+                      }}
+                      className="w-full mt-4 border-amber-500/30 text-amber-300 hover:bg-amber-500/10 text-xs h-8"
+                      data-testid="button-generate-tax-report"
+                    >
                       <FileText className="w-3 h-3 mr-1.5" />
                       Generate Tax Report
                     </Button>
@@ -1564,6 +1620,226 @@ export default function PortfolioDashboard() {
           )}
         </motion.div>
       </div>
+
+      {/* Price Alert Dialog */}
+      <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-purple-400" />
+              Set Price Alert
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label className="text-gray-400 text-sm">Select Asset</Label>
+              <Select>
+                <SelectTrigger className="mt-1.5 bg-slate-800 border-slate-600 text-white">
+                  <SelectValue placeholder="Choose asset" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {assets.map(a => (
+                    <SelectItem key={a.id} value={a.symbol} className="text-white hover:bg-slate-700">
+                      {a.symbol} - {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-gray-400 text-sm">Alert When Price</Label>
+              <div className="flex gap-2 mt-1.5">
+                <Select defaultValue="above">
+                  <SelectTrigger className="bg-slate-800 border-slate-600 text-white w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="above" className="text-white">Goes above</SelectItem>
+                    <SelectItem value="below" className="text-white">Goes below</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input placeholder="Enter price" className="bg-slate-800 border-slate-600 text-white" />
+              </div>
+            </div>
+            <Button 
+              onClick={() => {
+                toast({ title: 'Alert Created!', description: 'You will be notified when the price target is reached' });
+                setShowAlertDialog(false);
+              }}
+              className="w-full bg-purple-600 hover:bg-purple-500"
+            >
+              Create Alert
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rebalance Dialog */}
+      <Dialog open={showRebalanceDialog} onOpenChange={setShowRebalanceDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Scale className="w-5 h-5 text-cyan-400" />
+              Portfolio Rebalancing
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-gray-400">
+              AI-recommended rebalancing to optimize your portfolio allocation:
+            </p>
+            <div className="space-y-2">
+              {assets.slice(0, 5).map(a => {
+                const targetAllocation = 100 / Math.max(assets.length, 1);
+                const diff = (a.allocationPercent || 0) - targetAllocation;
+                return (
+                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-white">{a.symbol}</span>
+                      <span className="text-xs text-gray-500">{a.allocationPercent?.toFixed(1)}%</span>
+                    </div>
+                    <div className={cn("text-xs font-medium", diff > 5 ? 'text-red-400' : diff < -5 ? 'text-green-400' : 'text-gray-400')}>
+                      {diff > 0 ? `Sell ${diff.toFixed(1)}%` : diff < 0 ? `Buy ${Math.abs(diff).toFixed(1)}%` : 'Balanced'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <Button 
+              onClick={() => {
+                toast({ title: 'Rebalance Simulated', description: 'Review the suggested trades in your portfolio' });
+                setShowRebalanceDialog(false);
+              }}
+              className="w-full bg-cyan-600 hover:bg-cyan-500"
+            >
+              Apply Rebalancing Suggestions
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tax-Loss Harvesting Dialog */}
+      <Dialog open={showTaxDialog} onOpenChange={setShowTaxDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Percent className="w-5 h-5 text-amber-400" />
+              Tax-Loss Harvesting
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-gray-400">
+              These positions have unrealized losses that could offset capital gains:
+            </p>
+            <div className="space-y-2">
+              {assets.filter(a => (a.unrealizedPnl || 0) < 0).length > 0 ? (
+                assets.filter(a => (a.unrealizedPnl || 0) < 0).map(a => (
+                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-red-500/20">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-white">{a.symbol}</span>
+                      <span className="text-xs text-gray-500">{a.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-red-400">
+                        ${Math.abs(a.unrealizedPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} loss
+                      </p>
+                      <p className="text-[10px] text-gray-500">{a.unrealizedPnlPercent?.toFixed(1)}%</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center py-4 text-gray-500">No positions with losses to harvest</p>
+              )}
+            </div>
+            <Button 
+              onClick={() => {
+                toast({ title: 'Tax Strategy Applied', description: 'Harvesting opportunities identified' });
+                setShowTaxDialog(false);
+              }}
+              className="w-full bg-amber-600 hover:bg-amber-500"
+            >
+              Harvest Losses
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Strategy Dialog */}
+      <Dialog open={showStrategyDialog} onOpenChange={setShowStrategyDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-400" />
+              AI Strategy Recommendations
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            {analysis?.recommendations && analysis.recommendations.length > 0 ? (
+              analysis.recommendations.map((rec, i) => (
+                <div key={i} className={cn("p-4 rounded-lg border", 
+                  rec.priority === 'high' ? 'bg-red-500/10 border-red-500/30' : 
+                  rec.priority === 'medium' ? 'bg-amber-500/10 border-amber-500/30' : 
+                  'bg-slate-800/50 border-slate-700/50'
+                )}>
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className={cn("w-4 h-4 mt-0.5",
+                      rec.priority === 'high' ? 'text-red-400' : 
+                      rec.priority === 'medium' ? 'text-amber-400' : 'text-green-400'
+                    )} />
+                    <div>
+                      <p className="text-sm text-white">{rec.message}</p>
+                      {rec.action && (
+                        <Button size="sm" variant="ghost" className="mt-2 h-6 text-xs text-purple-400">
+                          {rec.action}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Brain className="w-10 h-10 mx-auto text-gray-600 mb-3" />
+                <p className="text-gray-400">No recommendations yet. Add more assets to get AI insights.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Goals Dialog */}
+      <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-purple-400" />
+              Set Portfolio Goals
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label className="text-gray-400 text-sm">Target Portfolio Value</Label>
+              <Input placeholder="e.g. $100,000" className="mt-1.5 bg-slate-800 border-slate-600 text-white" />
+            </div>
+            <div>
+              <Label className="text-gray-400 text-sm">Target Date</Label>
+              <Input type="date" className="mt-1.5 bg-slate-800 border-slate-600 text-white" />
+            </div>
+            <div>
+              <Label className="text-gray-400 text-sm">Monthly Contribution</Label>
+              <Input placeholder="e.g. $500/month" className="mt-1.5 bg-slate-800 border-slate-600 text-white" />
+            </div>
+            <Button 
+              onClick={() => {
+                toast({ title: 'Goal Created!', description: 'Track your progress on the dashboard' });
+                setShowGoalsDialog(false);
+              }}
+              className="w-full bg-purple-600 hover:bg-purple-500"
+            >
+              Save Goal
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

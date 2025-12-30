@@ -1103,9 +1103,16 @@ export class MarketDataService {
       'RIOT': 'Riot Platforms',
       'MARA': 'Marathon Digital',
       'CLSK': 'CleanSpark',
-      'HUT': 'Hut 8 Mining',
+      'HUT': 'Hut 8 Corp',
       'BITF': 'Bitfarms',
       'BTBT': 'Bit Digital',
+      // Crypto mining stocks
+      'GLXY': 'Galaxy Digital',
+      'WULF': 'TeraWulf Inc',
+      'CIFR': 'Cipher Mining',
+      'CORZ': 'Core Scientific',
+      'IREN': 'Iris Energy',
+      'BTDR': 'Bitdeer Tech',
       // Tech companies
       'NVDA': 'NVIDIA',
       'AMD': 'AMD',
@@ -1127,6 +1134,8 @@ export class MarketDataService {
       // ETFs and funds
       'GBTC': 'Grayscale Bitcoin',
       'ETHE': 'Grayscale Ethereum',
+      'IBIT': 'iShares Bitcoin',
+      'FBTC': 'Fidelity Bitcoin',
       'BITI': 'ProShares Bitcoin',
       'BITQ': 'Amplify Crypto',
       'BLOK': 'Amplify Blockchain',
@@ -1137,6 +1146,15 @@ export class MarketDataService {
       'GOOGL': 'Alphabet',
       'MSFT': 'Microsoft',
       'AMZN': 'Amazon',
+      'AAPL': 'Apple',
+      'NFLX': 'Netflix',
+      'ADBE': 'Adobe',
+      'CRM': 'Salesforce',
+      'IBM': 'IBM',
+      'UBER': 'Uber',
+      'LYFT': 'Lyft',
+      'SPOT': 'Spotify',
+      'SNAP': 'Snap Inc',
       'V': 'Visa',
       'MA': 'Mastercard',
       'JPM': 'JPMorgan',
@@ -1146,15 +1164,72 @@ export class MarketDataService {
   }
 
   /**
+   * Get a single stock quote by symbol from Finnhub
+   */
+  async getStockQuote(symbol: string): Promise<StockQuote | null> {
+    if (!this.finnhubApiKey) {
+      console.warn(`⚠️ No Finnhub API key - cannot fetch ${symbol}`);
+      return null;
+    }
+
+    const cacheKey = `stock_quote_${symbol.toUpperCase()}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(`${this.finnhubBaseUrl}/quote`, {
+        params: {
+          symbol: symbol.toUpperCase(),
+          token: this.finnhubApiKey
+        },
+        timeout: 5000
+      });
+
+      const quote = response.data;
+      if (quote && quote.c > 0) {
+        const currentPrice = quote.c;
+        const previousClose = quote.pc || currentPrice;
+        const change = currentPrice - previousClose;
+        const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0;
+
+        const stockQuote: StockQuote = {
+          symbol: symbol.toUpperCase(),
+          name: this.getStockName(symbol.toUpperCase()),
+          price: parseFloat(currentPrice.toFixed(2)),
+          percentChange24h: parseFloat(changePercent.toFixed(2)),
+          volume: quote.v || 0,
+          lastUpdated: new Date().toISOString()
+        };
+
+        this.setCacheWithTimeout(cacheKey, stockQuote, 300000); // 5 min cache
+        return stockQuote;
+      }
+      return null;
+    } catch (error: any) {
+      console.warn(`⚠️ Failed to fetch quote for ${symbol}:`, error.message);
+      return null;
+    }
+  }
+
+  /**
    * Real-time stock data using current market prices (updated frequently)
    */
   
   // Real-time stock data from Finnhub API
   private async getRealTimeStockDataFromFinnhub(): Promise<any[]> {
     const symbols = [
-      'MSTR', 'COIN', 'RIOT', 'MARA', 'NVDA', 'AMD', 'TSLA', 'PYPL', 'CLSK', 'HUT', 
-      'BITF', 'HOOD', 'SQ', 'INTC', 'GBTC', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 
-      'NFLX', 'ADBE', 'CRM', 'ORCL', 'IBM', 'UBER', 'LYFT', 'SPOT', 'TWTR', 'SNAP'
+      // Major crypto companies
+      'MSTR', 'COIN', 'RIOT', 'MARA', 'CLSK', 'HUT', 'BITF', 'BTBT',
+      // Crypto mining stocks
+      'GLXY', 'WULF', 'CIFR', 'CORZ', 'IREN', 'BTDR', 'ARBK', 'DGHI', 'HIVE', 'GREE',
+      // Tech companies with crypto exposure
+      'NVDA', 'AMD', 'TSLA', 'PYPL', 'HOOD', 'SQ', 'INTC',
+      // Major tech
+      'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'IBM',
+      // ETFs and trusts
+      'GBTC', 'ETHE', 'IBIT', 'FBTC',
+      // Other fintech
+      'UBER', 'LYFT', 'SPOT', 'SNAP'
     ];
     const stockData = [];
 

@@ -16948,7 +16948,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           priceChange7d = coin.percentChange7d || 0;
         }
       } else if (asset.assetType === 'stock' || asset.assetType === 'etf') {
-        const stock = stockData.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
+        let stock = stockData.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
+        // If not in batch, try fetching individually
+        if (!stock) {
+          stock = await marketDataService.getStockQuote(asset.symbol);
+        }
         if (stock) {
           currentPrice = stock.price;
           priceChange24h = stock.percentChange24h || 0;
