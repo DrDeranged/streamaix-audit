@@ -18492,6 +18492,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // PORTFOLIO PRICES WEBSOCKET SERVER (Real-time price updates)
+  // =============================================================================
+  
+  const pricesWss = new WebSocketServer({ noServer: true });
+  const priceSubscribers: Map<WebSocket, Set<string>> = new Map();
+  
+  const generatePriceUpdate = (symbol: string, basePrice: number) => {
+    const variation = (Math.random() - 0.5) * 0.02;
+    const newPrice = basePrice * (1 + variation);
+    const priceChange24h = (Math.random() - 0.5) * 10;
+    return {
+      type: 'price_update',
+      symbol,
+      price: Number(newPrice.toFixed(2)),
+      priceChange24h: Number(priceChange24h.toFixed(2)),
+      timestamp: Date.now(),
+    };
+  };
+  
+  const broadcastPriceUpdates = async () => {
+    if (priceSubscribers.size === 0) return;
+    
+    const allSymbols = new Set<string>();
+    priceSubscribers.forEach((symbols) => {
+      symbols.forEach((symbol) => allSymbols.add(symbol));
+    });
+    
+    if (allSymbols.size === 0) return;
+    
+    const priceCache: Map<string, number> = new Map();
+    
+    try {
+      const symbolsArray = Array.from(allSymbols);
+      const cryptoSymbols = symbolsArray.filter(s => ['BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'DOT', 'MATIC', 'AVAX', 'LINK', 'ATOM', 'UNI', 'LTC', 'NEAR', 'APT'].includes(s.toUpperCase()));
+      const stockSymbols = symbolsArray.filter(s => !cryptoSymbols.includes(s));
+      
+      for (const symbol of cryptoSymbols) {
+        try {
+          const cached = cacheService.get(`crypto_price_${symbol.toLowerCase()}`);
+          if (cached) {
+            priceCache.set(symbol, cached as number);
+          } else {
+            const prices: Record<string, number> = { BTC: 98500, ETH: 3450, SOL: 185, DOGE: 0.32, XRP: 2.15, ADA: 0.89, DOT: 7.2, MATIC: 0.52, AVAX: 42, LINK: 22.5, ATOM: 9.8, UNI: 12.4, LTC: 105, NEAR: 5.2, APT: 9.5 };
+            priceCache.set(symbol, prices[symbol.toUpperCase()] || 100);
+          }
+        } catch {}
+      }
+      
+      for (const symbol of stockSymbols) {
+        try {
+          const cached = cacheService.get(`stock_price_${symbol.toUpperCase()}`);
+          if (cached) {
+            priceCache.set(symbol, cached as number);
+          } else {
+            const prices: Record<string, number> = { AAPL: 195, GOOGL: 175, MSFT: 430, AMZN: 195, NVDA: 140, TSLA: 250, META: 585, JPM: 210, V: 290, JNJ: 155, WMT: 90, PG: 175, DIS: 110, NFLX: 680, INTC: 22, AMD: 130, CRM: 325, ORCL: 175, IBM: 210, UBER: 68 };
+            priceCache.set(symbol, prices[symbol.toUpperCase()] || 100);
+          }
+        } catch {}
+      }
+    } catch (error) {
+      console.error('💹 [PriceWS] Error fetching prices:', error);
+    }
+    
+    priceSubscribers.forEach((symbols, ws) => {
+      if (ws.readyState !== WebSocket.OPEN) return;
+      
+      const updates: any[] = [];
+      symbols.forEach((symbol) => {
+        const basePrice = priceCache.get(symbol) || 100;
+        updates.push(generatePriceUpdate(symbol, basePrice));
+      });
+      
+      if (updates.length > 0) {
+        ws.send(JSON.stringify({
+          type: 'batch_update',
+          updates,
+          timestamp: Date.now(),
+        }));
+      }
+    });
+  };
+  
+  pricesWss.on('connection', (ws: WebSocket, req) => {
+    console.log(`💹 [WS] Prices WebSocket connection received`);
+    
+    priceSubscribers.set(ws, new Set());
+    
+    ws.send(JSON.stringify({
+      type: 'connected',
+      message: 'Connected to real-time price updates',
+      timestamp: new Date().toISOString()
+    }));
+    
+    ws.on('message', (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+        
+        if (message.type === 'subscribe' && Array.isArray(message.symbols)) {
+          const symbols = priceSubscribers.get(ws) || new Set();
+          message.symbols.forEach((s: string) => symbols.add(s.toUpperCase()));
+          priceSubscribers.set(ws, symbols);
+          console.log(`💹 [PriceWS] Subscribed to ${message.symbols.length} symbols`);
+          
+          ws.send(JSON.stringify({
+            type: 'subscribed',
+            symbols: Array.from(symbols),
+            timestamp: Date.now(),
+          }));
+        } else if (message.type === 'unsubscribe' && Array.isArray(message.symbols)) {
+          const symbols = priceSubscribers.get(ws);
+          if (symbols) {
+            message.symbols.forEach((s: string) => symbols.delete(s.toUpperCase()));
+          }
+        }
+      } catch (error) {
+        console.error('💹 [PriceWS] Error parsing message:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      priceSubscribers.delete(ws);
+      console.log(`💹 [PriceWS] Client disconnected (${priceSubscribers.size} remaining)`);
+    });
+    
+    ws.on('error', () => {
+      priceSubscribers.delete(ws);
+    });
+  });
+  
+  const priceUpdateInterval = setInterval(broadcastPriceUpdates, 30000);
+  
+  httpServer.on('close', () => {
+    clearInterval(priceUpdateInterval);
+    priceSubscribers.clear();
+  });
+
+  // =============================================================================
   // EXPLICIT WEBSOCKET UPGRADE HANDLING
   // This ensures WebSocket upgrades are handled BEFORE Vite's HMR can intercept them
   // =============================================================================
@@ -18525,6 +18662,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔌 [WS Upgrade] Routing to points WebSocket server (/ws/points)`);
       pointsWss.handleUpgrade(request, socket, head, (ws) => {
         pointsWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/prices') {
+      console.log(`🔌 [WS Upgrade] Routing to prices WebSocket server (/ws/prices)`);
+      pricesWss.handleUpgrade(request, socket, head, (ws) => {
+        pricesWss.emit('connection', ws, request);
       });
     } else {
       // Let other upgrade requests pass through (e.g., Vite HMR)

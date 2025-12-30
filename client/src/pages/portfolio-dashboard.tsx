@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
@@ -12,8 +12,9 @@ import {
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
   Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
   Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History, CheckCircle,
-  BookMarked, ShoppingCart
+  BookMarked, ShoppingCart, Wifi, WifiOff
 } from 'lucide-react';
+import { useWebSocketPrices, type PriceUpdate } from '@/hooks/use-websocket-prices';
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -2387,7 +2388,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
   );
 }
 
-function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean }) {
+function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = false }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean; isRecentlyUpdated?: boolean }) {
   const Icon = assetTypeIcons[asset.assetType] || Wallet;
   const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
   const priceChange = asset.priceChange24h || 0;
@@ -2398,12 +2399,34 @@ function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioA
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:border-slate-600/50 hover:bg-slate-800/50 transition-all cursor-pointer group"
+      animate={{ 
+        opacity: 1, 
+        y: 0,
+        boxShadow: isRecentlyUpdated ? '0 0 0 2px rgba(34, 197, 94, 0.4)' : '0 0 0 0px rgba(34, 197, 94, 0)'
+      }}
+      transition={{ boxShadow: { duration: 0.3 } }}
+      className={cn(
+        "flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border hover:border-slate-600/50 hover:bg-slate-800/50 transition-all cursor-pointer group relative",
+        isRecentlyUpdated ? 'border-green-500/40' : 'border-slate-700/30'
+      )}
     >
+      {isRecentlyUpdated && (
+        <motion.div
+          initial={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: 0, scale: 1.5 }}
+          transition={{ duration: 1.5 }}
+          className="absolute -right-1 -top-1 w-3 h-3 rounded-full bg-green-500"
+        />
+      )}
       <div className="flex items-center gap-3">
-        <div className={cn("p-2 rounded-lg bg-gradient-to-br", colorGradient)}>
+        <div className={cn("p-2 rounded-lg bg-gradient-to-br relative", colorGradient)}>
           <Icon className="w-4 h-4 text-white" />
+          {isRecentlyUpdated && (
+            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+            </span>
+          )}
         </div>
         <div>
           <div className="flex items-center gap-2">
@@ -2419,9 +2442,13 @@ function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioA
         )}
       </div>
       <div className="text-right">
-        <p className="font-medium text-white text-sm">
+        <motion.p 
+          animate={{ color: isRecentlyUpdated ? '#22c55e' : '#ffffff' }}
+          transition={{ duration: 0.5 }}
+          className="font-medium text-sm"
+        >
           {showValues ? `$${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
-        </p>
+        </motion.p>
         <div className="flex items-center justify-end gap-2">
           <div className={cn("flex items-center gap-0.5 text-xs", is24hPositive ? 'text-green-400' : 'text-red-400')}>
             {is24hPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
@@ -2648,21 +2675,48 @@ export default function PortfolioDashboard() {
   });
 
   const portfolio = portfolioData?.portfolio;
-  const assets = portfolioData?.assets || [];
+  const rawAssets = portfolioData?.assets || [];
   const insights = portfolioData?.insights || [];
   const analysis = analysisData?.analysis;
   
+  // WebSocket price updates integration
+  const assetSymbols = useMemo(() => rawAssets.map(a => a.symbol), [rawAssets]);
+  const { isConnected: wsConnected, connectionStatus, prices: livePrices, recentUpdates } = useWebSocketPrices(assetSymbols);
+  
+  // Merge live prices with asset data
+  const assets = useMemo(() => {
+    return rawAssets.map(asset => {
+      const livePrice = livePrices.get(asset.symbol.toUpperCase());
+      if (livePrice) {
+        const newCurrentPrice = livePrice.price;
+        const newCurrentValue = newCurrentPrice * asset.quantity;
+        const newUnrealizedPnl = newCurrentValue - asset.totalCostBasis;
+        const newUnrealizedPnlPercent = asset.totalCostBasis > 0 ? (newUnrealizedPnl / asset.totalCostBasis) * 100 : 0;
+        return {
+          ...asset,
+          currentPrice: newCurrentPrice,
+          currentValue: newCurrentValue,
+          unrealizedPnl: newUnrealizedPnl,
+          unrealizedPnlPercent: newUnrealizedPnlPercent,
+          priceChange24h: livePrice.priceChange24h,
+          priceLastUpdated: new Date(livePrice.timestamp).toISOString(),
+        };
+      }
+      return asset;
+    });
+  }, [rawAssets, livePrices]);
+  
   // Auto-sync prices when portfolio loads and has assets
   useEffect(() => {
-    if (activePortfolioId && assets.length > 0 && !syncMutation.isPending) {
+    if (activePortfolioId && rawAssets.length > 0 && !syncMutation.isPending) {
       // Check if last sync was more than 5 minutes ago
-      const lastUpdated = assets[0]?.priceLastUpdated;
+      const lastUpdated = rawAssets[0]?.priceLastUpdated;
       const needsSync = !lastUpdated || (Date.now() - new Date(lastUpdated).getTime() > 300000);
       if (needsSync) {
         syncMutation.mutate();
       }
     }
-  }, [activePortfolioId, assets.length]);
+  }, [activePortfolioId, rawAssets.length]);
   
   // Calculate total PnL for header display
   const totalPnl = assets.reduce((sum, a) => sum + (a.unrealizedPnl || 0), 0);
@@ -2705,6 +2759,56 @@ export default function PortfolioDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {/* Live connection status indicator */}
+              {assets.length > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div 
+                        className={cn(
+                          "px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all",
+                          connectionStatus === 'connected' 
+                            ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
+                            : connectionStatus === 'connecting'
+                            ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                            : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                        )}
+                        data-testid="live-connection-status"
+                      >
+                        {connectionStatus === 'connected' ? (
+                          <>
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                            </span>
+                            <span className="hidden sm:inline">LIVE</span>
+                            <Wifi className="w-3 h-3 sm:hidden" />
+                          </>
+                        ) : connectionStatus === 'connecting' ? (
+                          <>
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                            <span className="hidden sm:inline">Connecting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <WifiOff className="w-3 h-3" />
+                            <span className="hidden sm:inline">Offline</span>
+                          </>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {connectionStatus === 'connected' 
+                          ? 'Real-time price updates active' 
+                          : connectionStatus === 'connecting'
+                          ? 'Establishing connection...'
+                          : 'Prices update on manual sync'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               {/* Total PnL indicator */}
               {assets.length > 0 && showValues && (
                 <div className={cn("px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5", isPnlPositive ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20')}>
@@ -3060,7 +3164,13 @@ export default function PortfolioDashboard() {
                         ) : (
                           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                             {assets.map((asset) => (
-                              <AssetRow key={asset.id} asset={asset} portfolioId={activePortfolioId!} showValues={showValues} />
+                              <AssetRow 
+                                key={asset.id} 
+                                asset={asset} 
+                                portfolioId={activePortfolioId!} 
+                                showValues={showValues} 
+                                isRecentlyUpdated={recentUpdates.has(asset.symbol.toUpperCase())}
+                              />
                             ))}
                           </div>
                         )}
