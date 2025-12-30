@@ -8,7 +8,7 @@ import {
   DollarSign, Bitcoin, LineChart, Activity, Shield, ChevronRight,
   Sparkles, Eye, EyeOff, ArrowUpRight, ArrowDownRight, Clock,
   Building2, Coins, Banknote, Landmark, Package, MoreHorizontal,
-  ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb
+  ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -286,172 +286,229 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
           Add Asset
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-700 max-w-lg">
+      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="text-white flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-purple-400" />
-            Add Asset
-          </DialogTitle>
+          <DialogTitle className="text-white">Add Asset</DialogTitle>
         </DialogHeader>
         
-        <div className="flex gap-2 mb-4">
-          {[
-            { id: 'search', label: 'Search', icon: Activity },
-            { id: 'cash', label: 'Cash/Bank', icon: Banknote },
-            { id: 'manual', label: 'Manual', icon: Edit2 }
-          ].map((tab) => (
-            <Button
-              key={tab.id}
-              variant={mode === tab.id ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => { setMode(tab.id as any); resetForm(); setMode(tab.id as any); }}
-              className={mode === tab.id ? 'bg-purple-600' : 'border-slate-600 text-gray-300'}
-            >
-              <tab.icon className="w-4 h-4 mr-1" />
-              {tab.label}
-            </Button>
-          ))}
-        </div>
+        <Tabs value={mode} onValueChange={(v) => { setMode(v as any); if (v !== mode) { setSelectedAsset(null); setSearchQuery(''); setCryptoResults([]); setStockResults([]); } }} className="w-full">
+          <TabsList className="w-full bg-slate-800 border border-slate-700 p-1 h-auto">
+            <TabsTrigger value="search" className="flex-1 data-[state=active]:bg-slate-700 data-[state=active]:text-white text-gray-400 py-2">
+              <Search className="w-4 h-4 mr-2" />
+              Search
+            </TabsTrigger>
+            <TabsTrigger value="cash" className="flex-1 data-[state=active]:bg-slate-700 data-[state=active]:text-white text-gray-400 py-2">
+              <Banknote className="w-4 h-4 mr-2" />
+              Cash / Bank
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="flex-1 data-[state=active]:bg-slate-700 data-[state=active]:text-white text-gray-400 py-2">
+              <Edit2 className="w-4 h-4 mr-2" />
+              Manual
+            </TabsTrigger>
+          </TabsList>
 
-        {mode === 'search' && !selectedAsset && (
-          <div className="space-y-4">
-            <div className="relative">
-              <Input
-                placeholder="Search stocks (AAPL, TSLA) or crypto (BTC, ETH)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-slate-800 border-slate-600 text-white pl-10"
-                data-testid="input-asset-search"
-              />
-              <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
-            </div>
+          <TabsContent value="search" className="mt-4">
+            {!selectedAsset ? (
+              <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Input
+                    placeholder="Type to search stocks or crypto..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-slate-800 border-slate-700 text-white pl-10 h-11"
+                    data-testid="input-asset-search"
+                    autoFocus
+                  />
+                  {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 animate-spin" />}
+                </div>
 
-            {hasResults && (
-              <div className="bg-slate-800 border border-slate-700 rounded-lg max-h-64 overflow-y-auto">
-                {stockResults.length > 0 && (
-                  <>
-                    <div className="px-3 py-2 bg-blue-500/20 text-xs text-blue-300 font-medium flex items-center gap-2 sticky top-0">
-                      <Building2 className="w-3 h-3" /> Stocks
-                    </div>
-                    {stockResults.slice(0, 5).map((result) => (
-                      <button
-                        key={result.symbol}
-                        onClick={() => handleSelectAsset({ ...result, type: 'stock' })}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-slate-700/50 text-left"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                          <Building2 className="w-4 h-4 text-blue-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{result.symbol}</p>
-                          <p className="text-xs text-slate-400 truncate">{result.name}</p>
-                        </div>
-                        {result.exchange && <Badge variant="outline" className="text-xs shrink-0">{result.exchange}</Badge>}
-                      </button>
-                    ))}
-                  </>
+                {!searchQuery && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                    <p className="text-sm">Search for stocks like AAPL, TSLA</p>
+                    <p className="text-sm">or crypto like BTC, ETH</p>
+                  </div>
                 )}
-                {cryptoResults.length > 0 && (
-                  <>
-                    <div className="px-3 py-2 bg-orange-500/20 text-xs text-orange-300 font-medium flex items-center gap-2 sticky top-0">
-                      <Bitcoin className="w-3 h-3" /> Crypto
-                    </div>
-                    {cryptoResults.slice(0, 5).map((result: any) => (
-                      <button
-                        key={result.id || result.symbol}
-                        onClick={() => handleSelectAsset({ symbol: result.symbol, name: result.name, type: 'crypto', thumb: result.thumb })}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-slate-700/50 text-left"
-                      >
-                        {result.thumb ? (
-                          <img src={result.thumb} alt={result.symbol} className="w-8 h-8 rounded-full" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                            <Bitcoin className="w-4 h-4 text-orange-400" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{result.symbol.toUpperCase()}</p>
-                          <p className="text-xs text-slate-400 truncate">{result.name}</p>
+
+                {hasResults && (
+                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    {stockResults.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                          <Building2 className="w-3 h-3" /> Stocks
                         </div>
-                        {result.marketCapRank && <Badge variant="outline" className="text-xs shrink-0">#{result.marketCapRank}</Badge>}
-                      </button>
-                    ))}
-                  </>
+                        {stockResults.slice(0, 5).map((result) => (
+                          <button
+                            key={result.symbol}
+                            onClick={() => handleSelectAsset({ ...result, type: 'stock' })}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors"
+                          >
+                            <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                              <Building2 className="w-4 h-4 text-blue-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white">{result.symbol}</p>
+                              <p className="text-xs text-gray-500 truncate">{result.name}</p>
+                            </div>
+                            <span className="text-xs text-gray-500">{result.exchange}</span>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                    {cryptoResults.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                          <Bitcoin className="w-3 h-3" /> Crypto
+                        </div>
+                        {cryptoResults.slice(0, 5).map((result: any) => (
+                          <button
+                            key={result.id || result.symbol}
+                            onClick={() => handleSelectAsset({ symbol: result.symbol, name: result.name, type: 'crypto', thumb: result.thumb })}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors"
+                          >
+                            {result.thumb ? (
+                              <img src={result.thumb} alt={result.symbol} className="w-9 h-9 rounded-lg" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                <Bitcoin className="w-4 h-4 text-orange-400" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white">{result.symbol.toUpperCase()}</p>
+                              <p className="text-xs text-gray-500 truncate">{result.name}</p>
+                            </div>
+                            {result.marketCapRank && <span className="text-xs text-gray-500">#{result.marketCapRank}</span>}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {searchQuery.length >= 2 && !hasResults && !isSearching && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">No results found for "{searchQuery}"</p>
+                    <p className="text-xs mt-1">Try a different symbol or name</p>
+                  </div>
                 )}
               </div>
-            )}
+            ) : null}
+          </TabsContent>
 
-            {searchQuery.length >= 2 && !hasResults && !isSearching && (
-              <p className="text-center text-gray-500 py-4">No results found</p>
-            )}
-          </div>
-        )}
+          <TabsContent value="cash" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-400 text-sm">Type</Label>
+                <Select value={assetType} onValueChange={(v) => { setAssetType(v); setSymbol(v === 'cash' ? 'USD' : v === 'stablecoin' ? 'USDC' : 'BANK'); setName(v === 'cash' ? 'US Dollar' : v === 'stablecoin' ? 'USD Coin' : 'Bank Account'); }}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="cash">Cash (USD)</SelectItem>
+                    <SelectItem value="stablecoin">Stablecoin (USDC/USDT)</SelectItem>
+                    <SelectItem value="other">Bank Account</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-gray-400 text-sm">Amount ($)</Label>
+                <Input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
+                  placeholder="10,000"
+                  className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-400 text-sm">Account Name (optional)</Label>
+                <Input
+                  value={accountName}
+                  onChange={(e) => setAccountName(e.target.value)}
+                  placeholder="e.g., Chase Checking, Coinbase"
+                  className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  if (!quantity) { toast({ title: 'Enter an amount', variant: 'destructive' }); return; }
+                  const finalSymbol = assetType === 'cash' ? 'USD' : assetType === 'stablecoin' ? 'USDC' : 'BANK';
+                  const finalName = assetType === 'cash' ? 'US Dollar' : assetType === 'stablecoin' ? 'USD Coin' : 'Bank Account';
+                  addAssetMutation.mutate({
+                    assetType: assetType === 'other' ? 'cash' : assetType,
+                    symbol: finalSymbol,
+                    name: accountName || finalName,
+                    quantity: parseFloat(quantity),
+                    averageCostBasis: 1,
+                    accountName: accountName || finalName,
+                  });
+                }}
+                disabled={addAssetMutation.isPending}
+                className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white font-medium"
+              >
+                {addAssetMutation.isPending ? 'Adding...' : 'Add Cash Balance'}
+              </Button>
+            </div>
+          </TabsContent>
 
-        {mode === 'cash' && (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-gray-300">Type</Label>
-              <Select value={assetType} onValueChange={(v) => { setAssetType(v); setSymbol(v === 'cash' ? 'USD' : v === 'stablecoin' ? 'USDC' : 'BANK'); setName(v === 'cash' ? 'US Dollar' : v === 'stablecoin' ? 'USD Coin' : 'Bank Account'); }}>
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="cash">Cash (USD)</SelectItem>
-                  <SelectItem value="stablecoin">Stablecoin (USDC/USDT)</SelectItem>
-                  <SelectItem value="other">Bank Account</SelectItem>
-                </SelectContent>
-              </Select>
+          <TabsContent value="manual" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-400 text-sm">Asset Type</Label>
+                <Select value={assetType} onValueChange={setAssetType}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="crypto">Crypto</SelectItem>
+                    <SelectItem value="stock">Stock</SelectItem>
+                    <SelectItem value="etf">ETF</SelectItem>
+                    <SelectItem value="bond">Bond</SelectItem>
+                    <SelectItem value="retirement">Retirement</SelectItem>
+                    <SelectItem value="real_estate">Real Estate</SelectItem>
+                    <SelectItem value="commodity">Commodity</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-gray-400 text-sm">Symbol</Label>
+                  <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-gray-400 text-sm">Name</Label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-gray-400 text-sm">Quantity</Label>
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
+                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-gray-400 text-sm">Account (optional)</Label>
+                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+              </div>
+              <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white font-medium">
+                {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
+              </Button>
             </div>
-            <div>
-              <Label className="text-gray-300">Amount ($)</Label>
-              <Input
-                type="number"
-                value={quantity}
-                onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
-                placeholder="10,000"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-            </div>
-            <div>
-              <Label className="text-gray-300">Account Name</Label>
-              <Input
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                placeholder="e.g., Chase Checking, Coinbase"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-            </div>
-            <Button
-              onClick={() => {
-                if (!quantity) { toast({ title: 'Enter an amount', variant: 'destructive' }); return; }
-                const finalSymbol = assetType === 'cash' ? 'USD' : assetType === 'stablecoin' ? 'USDC' : 'BANK';
-                const finalName = assetType === 'cash' ? 'US Dollar' : assetType === 'stablecoin' ? 'USD Coin' : 'Bank Account';
-                addAssetMutation.mutate({
-                  assetType: assetType === 'other' ? 'cash' : assetType,
-                  symbol: finalSymbol,
-                  name: accountName || finalName,
-                  quantity: parseFloat(quantity),
-                  averageCostBasis: 1,
-                  accountName: accountName || finalName,
-                });
-              }}
-              disabled={addAssetMutation.isPending}
-              className="w-full bg-gradient-to-r from-purple-500 to-cyan-500"
-            >
-              {addAssetMutation.isPending ? 'Adding...' : 'Add Cash Balance'}
-            </Button>
-          </div>
-        )}
+          </TabsContent>
 
-        {(mode === 'manual' || (mode === 'search' && selectedAsset)) && (
-          <div className="space-y-4">
-            {selectedAsset && (
-              <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-purple-500/30">
+          {selectedAsset && mode === 'search' && (
+            <div className="mt-4 space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
                 {selectedAsset.thumb ? (
-                  <img src={selectedAsset.thumb} alt={selectedAsset.symbol} className="w-10 h-10 rounded-full" />
+                  <img src={selectedAsset.thumb} alt={selectedAsset.symbol} className="w-10 h-10 rounded-lg" />
                 ) : (
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", selectedAsset.type === 'crypto' ? 'bg-orange-500/20' : 'bg-blue-500/20')}>
+                  <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", selectedAsset.type === 'crypto' ? 'bg-orange-500/10' : 'bg-blue-500/10')}>
                     {selectedAsset.type === 'crypto' ? <Bitcoin className="w-5 h-5 text-orange-400" /> : <Building2 className="w-5 h-5 text-blue-400" />}
                   </div>
                 )}
@@ -459,64 +516,31 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   <p className="font-medium text-white">{selectedAsset.symbol.toUpperCase()}</p>
                   <p className="text-sm text-gray-400">{selectedAsset.name}</p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => { setSelectedAsset(null); setSymbol(''); setName(''); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setSelectedAsset(null); setSymbol(''); setName(''); }} className="text-gray-400 hover:text-white">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-            )}
-            
-            {mode === 'manual' && (
-              <>
+              
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-gray-300">Asset Type</Label>
-                  <Select value={assetType} onValueChange={setAssetType}>
-                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-600">
-                      <SelectItem value="crypto">Crypto</SelectItem>
-                      <SelectItem value="stock">Stock</SelectItem>
-                      <SelectItem value="etf">ETF</SelectItem>
-                      <SelectItem value="bond">Bond</SelectItem>
-                      <SelectItem value="retirement">Retirement</SelectItem>
-                      <SelectItem value="real_estate">Real Estate</SelectItem>
-                      <SelectItem value="commodity">Commodity</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-gray-400 text-sm">Quantity</Label>
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-gray-300">Symbol</Label>
-                    <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="bg-slate-800 border-slate-600 text-white" />
-                  </div>
-                  <div>
-                    <Label className="text-gray-300">Name</Label>
-                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="bg-slate-800 border-slate-600 text-white" />
-                  </div>
+                <div>
+                  <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
+                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
                 </div>
-              </>
-            )}
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-gray-300">Quantity</Label>
-                <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-600 text-white" />
               </div>
               <div>
-                <Label className="text-gray-300">Avg Cost ($)</Label>
-                <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-600 text-white" />
+                <Label className="text-gray-400 text-sm">Account (optional)</Label>
+                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
               </div>
+              <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white font-medium">
+                {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
+              </Button>
             </div>
-            <div>
-              <Label className="text-gray-300">Account (optional)</Label>
-              <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800 border-slate-600 text-white" />
-            </div>
-            <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full bg-gradient-to-r from-purple-500 to-cyan-500">
-              {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
-            </Button>
-          </div>
-        )}
+          )}
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
