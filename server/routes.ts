@@ -16697,7 +16697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const { assetType, symbol, name, quantity, averageCostBasis, accountName, accountType, walletAddress, notes, color } = req.body;
+    const { assetType, symbol, name, quantity, averageCostBasis, accountName, accountType, walletAddress, notes, color, annualGrowthRate, contributionAmount, contributionFrequency } = req.body;
     
     // Verify portfolio ownership
     const [portfolio] = await db.select().from(portfolios).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId)));
@@ -16749,6 +16749,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       walletAddress,
       notes,
       color,
+      annualGrowthRate,
+      contributionAmount,
+      contributionFrequency,
+      lastGrowthCalculation: annualGrowthRate ? new Date() : null,
     }).returning();
     
     // Update portfolio totals

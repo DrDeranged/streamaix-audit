@@ -180,7 +180,7 @@ interface SearchResult {
 
 function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<'search' | 'manual' | 'cash'>('search');
+  const [mode, setMode] = useState<'search' | 'manual' | 'cash' | 'retirement'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [cryptoResults, setCryptoResults] = useState<SearchResult[]>([]);
@@ -192,6 +192,9 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
   const [quantity, setQuantity] = useState('');
   const [avgCost, setAvgCost] = useState('');
   const [accountName, setAccountName] = useState('');
+  const [growthRate, setGrowthRate] = useState('');
+  const [contributionAmount, setContributionAmount] = useState('');
+  const [contributionFrequency, setContributionFrequency] = useState('monthly');
   const { toast } = useToast();
 
   const searchAssets = async (query: string) => {
@@ -248,6 +251,9 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
     setCryptoResults([]);
     setStockResults([]);
     setMode('search');
+    setGrowthRate('');
+    setContributionAmount('');
+    setContributionFrequency('monthly');
   };
 
   const handleSelectAsset = (asset: SearchResult) => {
@@ -292,16 +298,20 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
         </DialogHeader>
         
         <Tabs value={mode} onValueChange={(v) => { setMode(v as any); if (v !== mode) { setSelectedAsset(null); setSearchQuery(''); setCryptoResults([]); setStockResults([]); } }} className="w-full">
-          <TabsList className="w-full bg-slate-800 border border-slate-700 p-1 h-auto">
-            <TabsTrigger value="search" className="flex-1 data-[state=active]:bg-slate-700 data-[state=active]:text-white text-gray-400 py-2">
+          <TabsList className="w-full bg-transparent border-b border-slate-700 p-0 h-auto rounded-none gap-0">
+            <TabsTrigger value="search" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-white text-gray-500 py-3 bg-transparent data-[state=active]:bg-transparent hover:text-gray-300 transition-colors">
               <Search className="w-4 h-4 mr-2" />
               Search
             </TabsTrigger>
-            <TabsTrigger value="cash" className="flex-1 data-[state=active]:bg-slate-700 data-[state=active]:text-white text-gray-400 py-2">
+            <TabsTrigger value="cash" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-white text-gray-500 py-3 bg-transparent data-[state=active]:bg-transparent hover:text-gray-300 transition-colors">
               <Banknote className="w-4 h-4 mr-2" />
-              Cash / Bank
+              Cash
             </TabsTrigger>
-            <TabsTrigger value="manual" className="flex-1 data-[state=active]:bg-slate-700 data-[state=active]:text-white text-gray-400 py-2">
+            <TabsTrigger value="retirement" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-white text-gray-500 py-3 bg-transparent data-[state=active]:bg-transparent hover:text-gray-300 transition-colors">
+              <Landmark className="w-4 h-4 mr-2" />
+              Retirement
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-white text-gray-500 py-3 bg-transparent data-[state=active]:bg-transparent hover:text-gray-300 transition-colors">
               <Edit2 className="w-4 h-4 mr-2" />
               Manual
             </TabsTrigger>
@@ -316,7 +326,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                     placeholder="Type to search stocks or crypto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-slate-800 border-slate-700 text-white pl-10 h-11"
+                    className="bg-slate-800/50 border-slate-600 text-white pl-10 h-11 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
                     data-testid="input-asset-search"
                     autoFocus
                   />
@@ -401,7 +411,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div>
                 <Label className="text-gray-400 text-sm">Type</Label>
                 <Select value={assetType} onValueChange={(v) => { setAssetType(v); setSymbol(v === 'cash' ? 'USD' : v === 'stablecoin' ? 'USDC' : 'BANK'); setName(v === 'cash' ? 'US Dollar' : v === 'stablecoin' ? 'USD Coin' : 'Bank Account'); }}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -418,7 +428,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   value={quantity}
                   onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
                   placeholder="10,000"
-                  className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5"
+                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
                 />
               </div>
               <div>
@@ -427,7 +437,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
                   placeholder="e.g., Chase Checking, Coinbase"
-                  className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5"
+                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
                 />
               </div>
               <Button
@@ -445,9 +455,111 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   });
                 }}
                 disabled={addAssetMutation.isPending}
-                className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white font-medium"
+                className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium"
               >
                 {addAssetMutation.isPending ? 'Adding...' : 'Add Cash Balance'}
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="retirement" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-400 text-sm">Account Type</Label>
+                <Select value={assetType} onValueChange={setAssetType}>
+                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20">
+                    <SelectValue placeholder="Select account type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="401k">401(k)</SelectItem>
+                    <SelectItem value="ira">Traditional IRA</SelectItem>
+                    <SelectItem value="roth_ira">Roth IRA</SelectItem>
+                    <SelectItem value="403b">403(b)</SelectItem>
+                    <SelectItem value="pension">Pension</SelectItem>
+                    <SelectItem value="sep_ira">SEP IRA</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-gray-400 text-sm">Account Name</Label>
+                <Input 
+                  value={accountName} 
+                  onChange={(e) => { setAccountName(e.target.value); setName(e.target.value); setSymbol('RET'); }}
+                  placeholder="e.g., Fidelity 401k, Vanguard IRA" 
+                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                />
+              </div>
+              <div>
+                <Label className="text-gray-400 text-sm">Current Balance ($)</Label>
+                <Input 
+                  type="number" 
+                  value={quantity} 
+                  onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
+                  placeholder="50,000" 
+                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                />
+              </div>
+              <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+                <Label className="text-gray-300 text-sm font-medium flex items-center gap-2 mb-3">
+                  <TrendingUp className="w-4 h-4 text-green-400" />
+                  Automatic Growth Settings
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-gray-500 text-xs">Annual Growth Rate (%)</Label>
+                    <Input 
+                      type="number" 
+                      value={growthRate} 
+                      onChange={(e) => setGrowthRate(e.target.value)}
+                      placeholder="7" 
+                      className="bg-slate-800/50 border-slate-600 text-white h-10 mt-1 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-500 text-xs">Contribution ($)</Label>
+                    <Input 
+                      type="number" 
+                      value={contributionAmount} 
+                      onChange={(e) => setContributionAmount(e.target.value)}
+                      placeholder="500" 
+                      className="bg-slate-800/50 border-slate-600 text-white h-10 mt-1 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-gray-500 text-xs">Contribution Frequency</Label>
+                  <Select value={contributionFrequency} onValueChange={setContributionFrequency}>
+                    <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-10 mt-1 focus:border-purple-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button
+                onClick={() => {
+                  if (!quantity || !accountName) { toast({ title: 'Enter balance and account name', variant: 'destructive' }); return; }
+                  addAssetMutation.mutate({
+                    assetType: 'retirement',
+                    symbol: assetType.toUpperCase(),
+                    name: accountName,
+                    quantity: parseFloat(quantity),
+                    averageCostBasis: 1,
+                    accountName,
+                    annualGrowthRate: growthRate ? parseFloat(growthRate) : undefined,
+                    contributionAmount: contributionAmount ? parseFloat(contributionAmount) : undefined,
+                    contributionFrequency: contributionFrequency || undefined,
+                  });
+                }}
+                disabled={addAssetMutation.isPending}
+                className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium"
+              >
+                {addAssetMutation.isPending ? 'Adding...' : 'Add Retirement Account'}
               </Button>
             </div>
           </TabsContent>
@@ -457,7 +569,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div>
                 <Label className="text-gray-400 text-sm">Asset Type</Label>
                 <Select value={assetType} onValueChange={setAssetType}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -465,7 +577,6 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                     <SelectItem value="stock">Stock</SelectItem>
                     <SelectItem value="etf">ETF</SelectItem>
                     <SelectItem value="bond">Bond</SelectItem>
-                    <SelectItem value="retirement">Retirement</SelectItem>
                     <SelectItem value="real_estate">Real Estate</SelectItem>
                     <SelectItem value="commodity">Commodity</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
@@ -475,28 +586,28 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-gray-400 text-sm">Symbol</Label>
-                  <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                  <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
                 </div>
                 <div>
                   <Label className="text-gray-400 text-sm">Name</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-gray-400 text-sm">Quantity</Label>
-                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
                 </div>
                 <div>
                   <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
-                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
                 </div>
               </div>
               <div>
                 <Label className="text-gray-400 text-sm">Account (optional)</Label>
-                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
               </div>
-              <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white font-medium">
+              <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium">
                 {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
               </Button>
             </div>
@@ -504,7 +615,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
 
           {selectedAsset && mode === 'search' && (
             <div className="mt-4 space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
+              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                 {selectedAsset.thumb ? (
                   <img src={selectedAsset.thumb} alt={selectedAsset.symbol} className="w-10 h-10 rounded-lg" />
                 ) : (
@@ -524,18 +635,18 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-gray-400 text-sm">Quantity</Label>
-                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
                 </div>
                 <div>
                   <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
-                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
                 </div>
               </div>
               <div>
                 <Label className="text-gray-400 text-sm">Account (optional)</Label>
-                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800 border-slate-700 text-white h-11 mt-1.5" />
+                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
               </div>
-              <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white font-medium">
+              <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium">
                 {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
               </Button>
             </div>

@@ -7208,6 +7208,11 @@ export const portfolioAssets = pgTable("portfolio_assets", {
   accountType: text("account_type"), // wallet, brokerage, retirement, bank, manual
   walletAddress: text("wallet_address"), // For crypto - public address only
   notes: text("notes"),
+  // Growth tracking (for retirement accounts, savings, etc.)
+  annualGrowthRate: real("annual_growth_rate"), // Expected annual growth % (e.g., 7 for 7%)
+  contributionAmount: real("contribution_amount"), // Regular contribution amount
+  contributionFrequency: text("contribution_frequency"), // monthly, biweekly, weekly, yearly
+  lastGrowthCalculation: timestamp("last_growth_calculation"), // When growth was last applied
   // Display
   logoUrl: text("logo_url"),
   color: text("color"), // For charts
