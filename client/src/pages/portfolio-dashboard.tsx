@@ -854,6 +854,503 @@ interface NewsItem {
   url?: string;
 }
 
+interface PortfolioTransaction {
+  id: string;
+  portfolioId: string;
+  symbol: string;
+  name: string;
+  transactionType: 'buy' | 'sell' | 'transfer' | 'dividend';
+  quantity: number;
+  price: number;
+  total: number;
+  fees: number;
+  transactionDate: string;
+  notes?: string;
+}
+
+interface DividendInfo {
+  symbol: string;
+  name: string;
+  nextDividendDate: string;
+  dividendAmount: number;
+  frequency: 'quarterly' | 'monthly' | 'annual';
+  yield: number;
+}
+
+const DIVIDEND_DATA: Record<string, Omit<DividendInfo, 'symbol' | 'name'>> = {
+  AAPL: { nextDividendDate: '2025-02-14', dividendAmount: 0.25, frequency: 'quarterly', yield: 0.48 },
+  MSFT: { nextDividendDate: '2025-03-13', dividendAmount: 0.83, frequency: 'quarterly', yield: 0.72 },
+  JNJ: { nextDividendDate: '2025-03-11', dividendAmount: 1.24, frequency: 'quarterly', yield: 3.0 },
+  KO: { nextDividendDate: '2025-04-01', dividendAmount: 0.485, frequency: 'quarterly', yield: 2.85 },
+  PG: { nextDividendDate: '2025-02-18', dividendAmount: 1.0065, frequency: 'quarterly', yield: 2.36 },
+  XOM: { nextDividendDate: '2025-03-10', dividendAmount: 0.99, frequency: 'quarterly', yield: 3.3 },
+  JPM: { nextDividendDate: '2025-04-05', dividendAmount: 1.25, frequency: 'quarterly', yield: 2.1 },
+  VZ: { nextDividendDate: '2025-02-03', dividendAmount: 0.6775, frequency: 'quarterly', yield: 6.4 },
+  T: { nextDividendDate: '2025-02-03', dividendAmount: 0.2775, frequency: 'quarterly', yield: 4.9 },
+  PEP: { nextDividendDate: '2025-03-28', dividendAmount: 1.355, frequency: 'quarterly', yield: 2.8 },
+  MCD: { nextDividendDate: '2025-03-17', dividendAmount: 1.77, frequency: 'quarterly', yield: 2.2 },
+  HD: { nextDividendDate: '2025-03-20', dividendAmount: 2.25, frequency: 'quarterly', yield: 2.1 },
+  CVX: { nextDividendDate: '2025-03-10', dividendAmount: 1.63, frequency: 'quarterly', yield: 4.2 },
+  MRK: { nextDividendDate: '2025-04-07', dividendAmount: 0.77, frequency: 'quarterly', yield: 2.8 },
+  ABBV: { nextDividendDate: '2025-02-14', dividendAmount: 1.55, frequency: 'quarterly', yield: 3.5 },
+  VYM: { nextDividendDate: '2025-03-25', dividendAmount: 0.85, frequency: 'quarterly', yield: 2.6 },
+  SCHD: { nextDividendDate: '2025-03-27', dividendAmount: 0.63, frequency: 'quarterly', yield: 3.4 },
+  VIG: { nextDividendDate: '2025-03-26', dividendAmount: 0.78, frequency: 'quarterly', yield: 1.7 },
+};
+
+function BenchmarkComparisonChart({ portfolioId, assets }: { portfolioId: string; assets: PortfolioAsset[] }) {
+  const [timeRange, setTimeRange] = useState<'30d' | '90d' | 'YTD'>('30d');
+  
+  const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: PortfolioSnapshot[] }>({
+    queryKey: ['/api/portfolios', portfolioId, 'history'],
+    enabled: !!portfolioId,
+  });
+  
+  const chartData = useMemo(() => {
+    const snapshots = historyData?.snapshots || [];
+    if (snapshots.length === 0) return [];
+    
+    const now = new Date();
+    let cutoff: Date;
+    let days: number;
+    
+    if (timeRange === 'YTD') {
+      cutoff = new Date(now.getFullYear(), 0, 1);
+      days = Math.floor((now.getTime() - cutoff.getTime()) / (1000 * 60 * 60 * 24));
+    } else {
+      days = timeRange === '30d' ? 30 : 90;
+      cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    }
+    
+    const filteredSnapshots = snapshots
+      .filter(s => new Date(s.snapshotDate) >= cutoff)
+      .sort((a, b) => new Date(a.snapshotDate).getTime() - new Date(b.snapshotDate).getTime());
+    
+    if (filteredSnapshots.length === 0) return [];
+    
+    const baseValue = filteredSnapshots[0].totalValue;
+    const sp500YtdReturn = 19.7;
+    const dailySpReturn = sp500YtdReturn / 365;
+    
+    return filteredSnapshots.map((s, index) => {
+      const portfolioReturn = baseValue > 0 ? ((s.totalValue - baseValue) / baseValue) * 100 : 0;
+      const daysFromStart = index;
+      const spReturn = dailySpReturn * daysFromStart;
+      
+      return {
+        date: new Date(s.snapshotDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        portfolio: Number(portfolioReturn.toFixed(2)),
+        sp500: Number(spReturn.toFixed(2)),
+      };
+    });
+  }, [historyData, timeRange]);
+  
+  const latestData = chartData[chartData.length - 1];
+  const portfolioReturn = latestData?.portfolio || 0;
+  const spReturn = latestData?.sp500 || 0;
+  
+  if (isLoading) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <RefreshCw className="w-5 h-5 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+  
+  if (chartData.length < 2 || assets.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center border border-dashed border-slate-700 rounded-lg">
+        <div className="text-center">
+          <LineChart className="w-8 h-8 mx-auto text-gray-600 mb-2" />
+          <p className="text-sm text-gray-400">Not enough history for benchmark comparison</p>
+          <p className="text-xs text-gray-500 mt-1">Add more assets and check back in a few days</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div data-testid="benchmark-comparison-chart">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-purple-500" />
+            <span className="text-xs text-gray-400">Portfolio</span>
+            <span className={cn("text-xs font-medium", portfolioReturn >= 0 ? 'text-green-400' : 'text-red-400')}>
+              {portfolioReturn >= 0 ? '+' : ''}{portfolioReturn.toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-amber-500" />
+            <span className="text-xs text-gray-400">S&P 500</span>
+            <span className="text-xs font-medium text-amber-400">+{spReturn.toFixed(1)}%</span>
+          </div>
+        </div>
+        <div className="flex gap-1">
+          {(['30d', '90d', 'YTD'] as const).map((range) => (
+            <Button
+              key={range}
+              variant="ghost"
+              size="sm"
+              onClick={() => setTimeRange(range)}
+              className={cn(
+                "h-7 px-2 text-xs",
+                timeRange === range ? 'bg-purple-500/20 text-purple-400' : 'text-gray-500 hover:text-white'
+              )}
+              data-testid={`button-benchmark-${range}`}
+            >
+              {range}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <RechartsLineChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            <XAxis 
+              dataKey="date" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: '#6b7280', fontSize: 10 }}
+              interval="preserveStartEnd"
+            />
+            <YAxis 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: '#6b7280', fontSize: 10 }}
+              tickFormatter={(v) => `${v}%`}
+              width={40}
+            />
+            <RechartsTooltip
+              contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+              labelStyle={{ color: '#9ca3af' }}
+              formatter={(value: number, name: string) => [
+                `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`, 
+                name === 'portfolio' ? 'Portfolio' : 'S&P 500'
+              ]}
+            />
+            <Line
+              type="monotone"
+              dataKey="sp500"
+              stroke="#f59e0b"
+              strokeWidth={2}
+              dot={false}
+              name="sp500"
+            />
+            <Line
+              type="monotone"
+              dataKey="portfolio"
+              stroke="#a855f7"
+              strokeWidth={2}
+              dot={false}
+              name="portfolio"
+            />
+          </RechartsLineChart>
+        </ResponsiveContainer>
+      </div>
+      <div className={cn(
+        "mt-3 p-2 rounded-lg text-center text-xs",
+        portfolioReturn >= spReturn ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+      )}>
+        {portfolioReturn >= spReturn 
+          ? `📈 Outperforming S&P 500 by ${(portfolioReturn - spReturn).toFixed(1)}%`
+          : `📉 Underperforming S&P 500 by ${(spReturn - portfolioReturn).toFixed(1)}%`}
+      </div>
+    </div>
+  );
+}
+
+function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfolioId: string; open: boolean; onOpenChange: (open: boolean) => void }) {
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterSymbol, setFilterSymbol] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  
+  const { data: transactionsData, isLoading } = useQuery<{ success: boolean; transactions: PortfolioTransaction[] }>({
+    queryKey: ['/api/portfolios', portfolioId, 'transactions'],
+    enabled: !!portfolioId && open,
+  });
+  
+  const transactions = transactionsData?.transactions || [];
+  
+  const filteredTransactions = useMemo(() => {
+    return transactions
+      .filter(t => filterType === 'all' || t.transactionType === filterType)
+      .filter(t => !filterSymbol || t.symbol.toLowerCase().includes(filterSymbol.toLowerCase()))
+      .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
+  }, [transactions, filterType, filterSymbol]);
+  
+  const totalPages = Math.ceil(filteredTransactions.length / pageSize);
+  const paginatedTransactions = filteredTransactions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  
+  const uniqueSymbols = [...new Set(transactions.map(t => t.symbol))];
+  
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'buy': return 'text-green-400 bg-green-500/20';
+      case 'sell': return 'text-red-400 bg-red-500/20';
+      case 'dividend': return 'text-amber-400 bg-amber-500/20';
+      case 'transfer': return 'text-blue-400 bg-blue-500/20';
+      default: return 'text-gray-400 bg-gray-500/20';
+    }
+  };
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            <History className="w-5 h-5 text-purple-400" />
+            Transaction History
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="flex flex-wrap gap-3 mb-4">
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-32 bg-slate-800/50 border-slate-600 text-white">
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="buy">Buy</SelectItem>
+              <SelectItem value="sell">Sell</SelectItem>
+              <SelectItem value="transfer">Transfer</SelectItem>
+              <SelectItem value="dividend">Dividend</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="relative flex-1 min-w-[150px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Input
+              placeholder="Filter by symbol..."
+              value={filterSymbol}
+              onChange={(e) => setFilterSymbol(e.target.value)}
+              className="bg-slate-800/50 border-slate-600 text-white pl-10"
+              data-testid="input-filter-symbol"
+            />
+          </div>
+        </div>
+        
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="p-3 bg-slate-800/50 rounded-lg animate-pulse">
+                  <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-slate-700 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : filteredTransactions.length === 0 ? (
+            <div className="text-center py-12">
+              <Receipt className="w-12 h-12 mx-auto text-gray-600 mb-3" />
+              <p className="text-gray-400">No transactions found</p>
+              <p className="text-xs text-gray-500 mt-1">Transactions will appear here when you add trades</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {paginatedTransactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:bg-slate-800/80 transition-colors"
+                  data-testid={`transaction-${tx.id}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <Badge className={cn("text-xs uppercase", getTypeColor(tx.transactionType))}>
+                        {tx.transactionType}
+                      </Badge>
+                      <span className="font-medium text-white">{tx.symbol}</span>
+                      <span className="text-xs text-gray-500">{tx.name}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(tx.transactionDate).toLocaleDateString('en-US', { 
+                        month: 'short', day: 'numeric', year: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="text-xs text-gray-500 block">Quantity</span>
+                      <span className="text-white">{tx.quantity.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 block">Price</span>
+                      <span className="text-white">${tx.price.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 block">Total</span>
+                      <span className={cn("font-medium", tx.transactionType === 'sell' || tx.transactionType === 'dividend' ? 'text-green-400' : 'text-white')}>
+                        {tx.transactionType === 'sell' || tx.transactionType === 'dividend' ? '+' : '-'}${tx.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 block">Fees</span>
+                      <span className="text-gray-400">${tx.fees.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  {tx.notes && (
+                    <p className="text-xs text-gray-500 mt-2 italic">{tx.notes}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700">
+            <span className="text-xs text-gray-500">
+              Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, filteredTransactions.length)} of {filteredTransactions.length}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="border-slate-600 text-gray-300"
+                data-testid="button-prev-page"
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="border-slate-600 text-gray-300"
+                data-testid="button-next-page"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DividendCalendar({ assets }: { assets: PortfolioAsset[] }) {
+  const dividendEligibleAssets = assets.filter(a => 
+    ['stock', 'etf'].includes(a.assetType) && DIVIDEND_DATA[a.symbol.toUpperCase()]
+  );
+  
+  const upcomingDividends = useMemo(() => {
+    const now = new Date();
+    const dividends: Array<DividendInfo & { estimatedPayment: number; sharesOwned: number }> = [];
+    
+    dividendEligibleAssets.forEach(asset => {
+      const divData = DIVIDEND_DATA[asset.symbol.toUpperCase()];
+      if (divData) {
+        let nextDate = new Date(divData.nextDividendDate);
+        while (nextDate < now) {
+          const daysToAdd = divData.frequency === 'quarterly' ? 91 : divData.frequency === 'monthly' ? 30 : 365;
+          nextDate = new Date(nextDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+        }
+        
+        dividends.push({
+          symbol: asset.symbol.toUpperCase(),
+          name: asset.name,
+          nextDividendDate: nextDate.toISOString().split('T')[0],
+          dividendAmount: divData.dividendAmount,
+          frequency: divData.frequency,
+          yield: divData.yield,
+          estimatedPayment: asset.quantity * divData.dividendAmount,
+          sharesOwned: asset.quantity,
+        });
+      }
+    });
+    
+    return dividends.sort((a, b) => 
+      new Date(a.nextDividendDate).getTime() - new Date(b.nextDividendDate).getTime()
+    );
+  }, [dividendEligibleAssets]);
+  
+  const annualDividendIncome = useMemo(() => {
+    return upcomingDividends.reduce((sum, div) => {
+      const multiplier = div.frequency === 'quarterly' ? 4 : div.frequency === 'monthly' ? 12 : 1;
+      return sum + (div.estimatedPayment * multiplier);
+    }, 0);
+  }, [upcomingDividends]);
+  
+  if (dividendEligibleAssets.length === 0) {
+    return (
+      <div className="text-center py-6">
+        <Calendar className="w-8 h-8 mx-auto text-gray-600 mb-2" />
+        <p className="text-sm text-gray-400">No dividend-paying stocks in portfolio</p>
+        <p className="text-xs text-gray-500 mt-1">Add stocks like AAPL, MSFT, or dividend ETFs</p>
+      </div>
+    );
+  }
+  
+  const nextThreeDividends = upcomingDividends.slice(0, 3);
+  
+  return (
+    <div className="space-y-4" data-testid="dividend-calendar">
+      <div className="p-3 bg-gradient-to-r from-green-500/10 to-transparent border border-green-500/20 rounded-lg">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-gray-400">Est. Annual Dividend Income</span>
+          <Badge className="text-[10px] bg-green-500/20 text-green-400">Projected</Badge>
+        </div>
+        <p className="text-xl font-bold text-green-400">${annualDividendIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        <p className="text-[10px] text-gray-500 mt-1">${(annualDividendIncome / 12).toFixed(2)}/month avg</p>
+      </div>
+      
+      <div>
+        <h4 className="text-xs font-medium text-gray-400 mb-3 flex items-center gap-2">
+          <Calendar className="w-3.5 h-3.5 text-purple-400" />
+          Upcoming Dividends
+        </h4>
+        <div className="space-y-2">
+          {nextThreeDividends.map((div, idx) => {
+            const daysUntil = Math.ceil((new Date(div.nextDividendDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+            return (
+              <div 
+                key={div.symbol} 
+                className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/30 transition-colors"
+                data-testid={`dividend-${div.symbol}`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-white">{div.symbol}</span>
+                    <span className="text-[10px] text-gray-500 bg-slate-700/50 px-1.5 py-0.5 rounded">
+                      {div.yield.toFixed(1)}% yield
+                    </span>
+                  </div>
+                  <span className={cn(
+                    "text-xs font-medium",
+                    daysUntil <= 7 ? 'text-green-400' : daysUntil <= 30 ? 'text-amber-400' : 'text-gray-400'
+                  )}>
+                    {daysUntil <= 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil}d`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-xs text-gray-500">
+                    {new Date(div.nextDividendDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                  <span className="text-green-400 font-medium">
+                    +${div.estimatedPayment.toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-500 mt-1">
+                  {div.sharesOwned.toLocaleString()} shares × ${div.dividendAmount.toFixed(4)}/share
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        {upcomingDividends.length > 3 && (
+          <p className="text-xs text-gray-500 text-center mt-2">
+            +{upcomingDividends.length - 3} more dividend payments scheduled
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Portfolio | null | undefined; assets: PortfolioAsset[]; portfolioId?: string }) {
   const totalPnl = portfolio?.totalPnl || 0;
   const totalPnlPercent = portfolio?.totalPnlPercent || 0;
@@ -1951,6 +2448,7 @@ export default function PortfolioDashboard() {
   const [showStrategyDialog, setShowStrategyDialog] = useState(false);
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [showStressTestDialog, setShowStressTestDialog] = useState(false);
+  const [showTransactionHistoryDialog, setShowTransactionHistoryDialog] = useState(false);
   
   const [alertSymbol, setAlertSymbol] = useState('');
   const [alertType, setAlertType] = useState<'above' | 'below'>('above');
@@ -2450,6 +2948,16 @@ export default function PortfolioDashboard() {
                     >
                       <Percent className="w-4 h-4 mr-2" />
                       Tax Loss
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowTransactionHistoryDialog(true)}
+                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden lg:flex"
+                      data-testid="button-transaction-history"
+                    >
+                      <History className="w-4 h-4 mr-2" />
+                      Transactions
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
@@ -3359,11 +3867,45 @@ export default function PortfolioDashboard() {
                     </Button>
                   </Card>
                 </div>
+
+                {/* Benchmark Comparison Chart */}
+                {activePortfolioId && (
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-purple-400" />
+                        Portfolio vs Benchmark
+                      </h2>
+                    </div>
+                    <BenchmarkComparisonChart portfolioId={activePortfolioId} assets={assets} />
+                  </Card>
+                )}
+
+                {/* Dividend Calendar */}
+                <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-green-400" />
+                      Dividend Calendar
+                    </h2>
+                    <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Upcoming</Badge>
+                  </div>
+                  <DividendCalendar assets={assets} />
+                </Card>
               </div>
             </>
           )}
         </motion.div>
       </div>
+
+      {/* Transaction History Dialog */}
+      {activePortfolioId && (
+        <TransactionHistoryDialog 
+          portfolioId={activePortfolioId} 
+          open={showTransactionHistoryDialog} 
+          onOpenChange={setShowTransactionHistoryDialog} 
+        />
+      )}
 
       {/* Price Alert Dialog */}
       <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
