@@ -315,7 +315,27 @@ interface PortfolioSnapshot {
   snapshotDate: string;
 }
 
-function PerformanceSummary({ portfolio, assets }: { portfolio: Portfolio | null | undefined; assets: PortfolioAsset[] }) {
+interface PortfolioGoal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount?: number;
+  deadline?: string;
+  goalType: string;
+  priority?: string;
+  status?: string;
+}
+
+interface NewsItem {
+  symbol: string;
+  title: string;
+  source: string;
+  time: string;
+  sentiment: string;
+  url?: string;
+}
+
+function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Portfolio | null | undefined; assets: PortfolioAsset[]; portfolioId?: string }) {
   const totalPnl = portfolio?.totalPnl || 0;
   const totalPnlPercent = portfolio?.totalPnlPercent || 0;
   const isPositive = totalPnl >= 0;
@@ -324,17 +344,36 @@ function PerformanceSummary({ portfolio, assets }: { portfolio: Portfolio | null
   const topGainer = sortedByChange[0];
   const topLoser = sortedByChange[sortedByChange.length - 1];
   
+  const { data: historyData } = useQuery<{ success: boolean; snapshots: PortfolioSnapshot[] }>({
+    queryKey: ['/api/portfolios', portfolioId, 'history'],
+    enabled: !!portfolioId && assets.length > 0,
+  });
+  
   const periodReturns = useMemo(() => {
-    const baseReturn = totalPnlPercent;
+    const snapshots = historyData?.snapshots || [];
+    const currentValue = portfolio?.totalValue || 0;
+    
+    const getReturnForDays = (days: number): number => {
+      if (snapshots.length === 0 || currentValue === 0) return 0;
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - days);
+      const closestSnapshot = snapshots.find(s => new Date(s.snapshotDate) <= targetDate) || snapshots[snapshots.length - 1];
+      if (!closestSnapshot || closestSnapshot.totalValue === 0) return 0;
+      return ((currentValue - closestSnapshot.totalValue) / closestSnapshot.totalValue) * 100;
+    };
+    
+    const yearStart = new Date(new Date().getFullYear(), 0, 1);
+    const daysThisYear = Math.floor((Date.now() - yearStart.getTime()) / (1000 * 60 * 60 * 24));
+    
     return [
-      { label: '1D', value: baseReturn * 0.03, color: baseReturn >= 0 ? 'text-green-400' : 'text-red-400' },
-      { label: '1W', value: baseReturn * 0.12, color: baseReturn >= 0 ? 'text-green-400' : 'text-red-400' },
-      { label: '1M', value: baseReturn * 0.35, color: baseReturn >= 0 ? 'text-green-400' : 'text-red-400' },
-      { label: '3M', value: baseReturn * 0.65, color: baseReturn >= 0 ? 'text-green-400' : 'text-red-400' },
-      { label: 'YTD', value: baseReturn * 0.85, color: baseReturn >= 0 ? 'text-green-400' : 'text-red-400' },
-      { label: 'ALL', value: baseReturn, color: baseReturn >= 0 ? 'text-green-400' : 'text-red-400' },
+      { label: '1D', value: getReturnForDays(1) },
+      { label: '1W', value: getReturnForDays(7) },
+      { label: '1M', value: getReturnForDays(30) },
+      { label: '3M', value: getReturnForDays(90) },
+      { label: 'YTD', value: getReturnForDays(daysThisYear) },
+      { label: 'ALL', value: totalPnlPercent },
     ];
-  }, [totalPnlPercent]);
+  }, [historyData, portfolio?.totalValue, totalPnlPercent]);
 
   if (assets.length === 0) {
     return (
@@ -423,43 +462,202 @@ function PerformanceSummary({ portfolio, assets }: { portfolio: Portfolio | null
 }
 
 function GoalTracker({ currentValue }: { currentValue: number }) {
-  const [goals, setGoals] = useState([
-    { name: 'Financial Freedom', target: 1000000, deadline: '2030-01-01' },
-    { name: 'Emergency Fund', target: 50000, deadline: '2025-06-01' },
-  ]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newGoalName, setNewGoalName] = useState('');
+  const [newGoalTarget, setNewGoalTarget] = useState('');
+  const [newGoalDeadline, setNewGoalDeadline] = useState('');
+  const [newGoalType, setNewGoalType] = useState('net_worth');
+  const { toast } = useToast();
+  
+  const { data: goalsData, isLoading, refetch } = useQuery<{ success: boolean; goals: PortfolioGoal[] }>({
+    queryKey: ['/api/portfolio-goals'],
+  });
+  
+  const goals = goalsData?.goals || [];
+  
+  const createGoalMutation = useMutation({
+    mutationFn: async (data: { name: string; targetAmount: number; deadline?: string; goalType: string }) => {
+      return apiRequest('/api/portfolio-goals', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({ title: 'Goal created successfully' });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolio-goals'] });
+      setDialogOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to create goal', description: error.message, variant: 'destructive' });
+    },
+  });
+  
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      return apiRequest(`/api/portfolio-goals/${goalId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      toast({ title: 'Goal deleted' });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolio-goals'] });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to delete goal', description: error.message, variant: 'destructive' });
+    },
+  });
+  
+  const resetForm = () => {
+    setNewGoalName('');
+    setNewGoalTarget('');
+    setNewGoalDeadline('');
+    setNewGoalType('net_worth');
+  };
+  
+  const handleCreateGoal = () => {
+    if (!newGoalName || !newGoalTarget) {
+      toast({ title: 'Please fill in required fields', variant: 'destructive' });
+      return;
+    }
+    createGoalMutation.mutate({
+      name: newGoalName,
+      targetAmount: parseFloat(newGoalTarget),
+      deadline: newGoalDeadline || undefined,
+      goalType: newGoalType,
+    });
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2].map(i => (
+          <div key={i} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 animate-pulse">
+            <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
+            <div className="h-2 bg-slate-700 rounded w-full"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {goals.map((goal, i) => {
-        const progress = Math.min(100, (currentValue / goal.target) * 100);
-        const daysLeft = Math.max(0, Math.floor((new Date(goal.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-        return (
-          <div key={i} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-white">{goal.name}</span>
-              <span className="text-xs text-gray-500">{daysLeft}d left</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <Progress value={progress} className="h-2" />
+      {goals.length === 0 ? (
+        <div className="text-center py-4">
+          <Target className="w-6 h-6 mx-auto text-gray-600 mb-2" />
+          <p className="text-xs text-gray-500">No goals set yet</p>
+        </div>
+      ) : (
+        goals.map((goal) => {
+          const progress = Math.min(100, (currentValue / goal.targetAmount) * 100);
+          const daysLeft = goal.deadline ? Math.max(0, Math.floor((new Date(goal.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
+          return (
+            <div key={goal.id} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-white">{goal.name}</span>
+                <div className="flex items-center gap-2">
+                  {daysLeft !== null && <span className="text-xs text-gray-500">{daysLeft}d left</span>}
+                  <button 
+                    onClick={() => deleteGoalMutation.mutate(goal.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400"
+                    data-testid={`delete-goal-${goal.id}`}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
-              <span className="text-xs text-gray-400">{progress.toFixed(0)}%</span>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <Progress value={progress} className="h-2" />
+                </div>
+                <span className="text-xs text-gray-400">{progress.toFixed(0)}%</span>
+              </div>
+              <div className="flex justify-between mt-2 text-[11px] sm:text-[10px] text-gray-500">
+                <span>${currentValue.toLocaleString()}</span>
+                <span>Goal: ${goal.targetAmount.toLocaleString()}</span>
+              </div>
             </div>
-            <div className="flex justify-between mt-2 text-[11px] sm:text-[10px] text-gray-500">
-              <span>${currentValue.toLocaleString()}</span>
-              <span>Goal: ${goal.target.toLocaleString()}</span>
+          );
+        })
+      )}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-full text-xs text-purple-400 hover:text-purple-300" data-testid="add-goal-button">
+            <Plus className="w-3 h-3 mr-1" /> Add Goal
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white">Create New Goal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label className="text-gray-300 text-sm">Goal Name *</Label>
+              <Input
+                value={newGoalName}
+                onChange={(e) => setNewGoalName(e.target.value)}
+                placeholder="e.g., Financial Freedom"
+                className="bg-slate-800/50 border-slate-600 text-white mt-1"
+                data-testid="goal-name-input"
+              />
             </div>
+            <div>
+              <Label className="text-gray-300 text-sm">Target Amount *</Label>
+              <Input
+                type="number"
+                value={newGoalTarget}
+                onChange={(e) => setNewGoalTarget(e.target.value)}
+                placeholder="100000"
+                className="bg-slate-800/50 border-slate-600 text-white mt-1"
+                data-testid="goal-target-input"
+              />
+            </div>
+            <div>
+              <Label className="text-gray-300 text-sm">Deadline (Optional)</Label>
+              <Input
+                type="date"
+                value={newGoalDeadline}
+                onChange={(e) => setNewGoalDeadline(e.target.value)}
+                className="bg-slate-800/50 border-slate-600 text-white mt-1"
+                data-testid="goal-deadline-input"
+              />
+            </div>
+            <div>
+              <Label className="text-gray-300 text-sm">Goal Type</Label>
+              <Select value={newGoalType} onValueChange={setNewGoalType}>
+                <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="net_worth">Net Worth Target</SelectItem>
+                  <SelectItem value="savings">Savings Goal</SelectItem>
+                  <SelectItem value="investment_return">Investment Return</SelectItem>
+                  <SelectItem value="asset_target">Asset Target</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              onClick={handleCreateGoal} 
+              className="w-full bg-gradient-to-r from-purple-500 to-cyan-500"
+              disabled={createGoalMutation.isPending}
+              data-testid="create-goal-button"
+            >
+              {createGoalMutation.isPending ? 'Creating...' : 'Create Goal'}
+            </Button>
           </div>
-        );
-      })}
-      <Button variant="ghost" size="sm" className="w-full text-xs text-purple-400 hover:text-purple-300">
-        <Plus className="w-3 h-3 mr-1" /> Add Goal
-      </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function CorrelationMatrix({ assets }: { assets: PortfolioAsset[] }) {
+function CorrelationMatrix({ assets, portfolioId }: { assets: PortfolioAsset[]; portfolioId?: string }) {
+  const { data: correlationData, isLoading } = useQuery<{ success: boolean; correlations: Record<string, Record<string, number>> }>({
+    queryKey: ['/api/portfolios', portfolioId, 'correlations'],
+    enabled: !!portfolioId && assets.length >= 2,
+  });
+  
   if (assets.length < 2) {
     return (
       <div className="text-center py-4">
@@ -468,22 +666,18 @@ function CorrelationMatrix({ assets }: { assets: PortfolioAsset[] }) {
       </div>
     );
   }
+  
+  if (isLoading) {
+    return (
+      <div className="text-center py-4">
+        <RefreshCw className="w-6 h-6 mx-auto text-gray-600 mb-2 animate-spin" />
+        <p className="text-xs text-gray-500">Loading correlations...</p>
+      </div>
+    );
+  }
 
   const topAssets = assets.slice(0, 5);
-  const correlations: Record<string, Record<string, number>> = {};
-  
-  topAssets.forEach(a => {
-    correlations[a.symbol] = {};
-    topAssets.forEach(b => {
-      if (a.symbol === b.symbol) {
-        correlations[a.symbol][b.symbol] = 1;
-      } else {
-        const sameType = a.assetType === b.assetType;
-        const base = sameType ? 0.7 : 0.3;
-        correlations[a.symbol][b.symbol] = base + (Math.random() - 0.5) * 0.4;
-      }
-    });
-  });
+  const correlations = correlationData?.correlations || {};
 
   const getCorrelationColor = (val: number) => {
     if (val >= 0.8) return 'bg-red-500/60 text-white';
@@ -509,16 +703,19 @@ function CorrelationMatrix({ assets }: { assets: PortfolioAsset[] }) {
           {topAssets.map(a => (
             <tr key={a.symbol}>
               <td className="p-1.5 text-gray-400 font-medium text-[11px]">{a.symbol}</td>
-              {topAssets.map(b => (
-                <td key={b.symbol} className="p-1.5">
-                  <div className={cn(
-                    "w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded text-[11px] sm:text-[10px] font-medium",
-                    getCorrelationColor(correlations[a.symbol][b.symbol])
-                  )}>
-                    {correlations[a.symbol][b.symbol].toFixed(1)}
-                  </div>
-                </td>
-              ))}
+              {topAssets.map(b => {
+                const corrValue = correlations[a.symbol]?.[b.symbol] ?? (a.symbol === b.symbol ? 1 : 0.5);
+                return (
+                  <td key={b.symbol} className="p-1.5">
+                    <div className={cn(
+                      "w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded text-[11px] sm:text-[10px] font-medium",
+                      getCorrelationColor(corrValue)
+                    )}>
+                      {corrValue.toFixed(1)}
+                    </div>
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -593,13 +790,14 @@ function IncomeTracker({ assets }: { assets: PortfolioAsset[] }) {
 }
 
 function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
-  const newsItems = [
-    { symbol: 'BTC', title: 'Bitcoin ETF inflows hit record high', source: 'CoinDesk', time: '2h ago', sentiment: 'bullish' },
-    { symbol: 'ETH', title: 'Ethereum staking rewards increase after upgrade', source: 'Decrypt', time: '4h ago', sentiment: 'bullish' },
-    { symbol: 'SOL', title: 'Solana network processes 2000 TPS milestone', source: 'TheBlock', time: '6h ago', sentiment: 'bullish' },
-    { symbol: 'AAPL', title: 'Apple announces record iPhone sales in Q4', source: 'Reuters', time: '8h ago', sentiment: 'bullish' },
-    { symbol: 'TSLA', title: 'Tesla faces increased EV competition in Europe', source: 'Bloomberg', time: '10h ago', sentiment: 'bearish' },
-  ].filter(n => assets.length === 0 || assets.some(a => a.symbol === n.symbol || a.symbol.includes(n.symbol.slice(0, 3))));
+  const symbols = assets.map(a => a.symbol).join(',');
+  
+  const { data: newsData, isLoading, error } = useQuery<{ success: boolean; news: NewsItem[] }>({
+    queryKey: ['/api/portfolio-news', { symbols }],
+    enabled: assets.length > 0,
+  });
+  
+  const newsItems = newsData?.news || [];
 
   if (assets.length === 0) {
     return (
@@ -609,15 +807,41 @@ function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
       </div>
     );
   }
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="p-2.5 bg-slate-800/50 rounded-lg animate-pulse">
+            <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-slate-700 rounded w-1/2"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  if (error || newsItems.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <FileText className="w-6 h-6 mx-auto text-gray-600 mb-2" />
+        <p className="text-xs text-gray-500">No relevant news found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
       {newsItems.slice(0, 4).map((item, i) => (
-        <div key={i} className="p-2.5 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group">
+        <div 
+          key={i} 
+          className="p-2.5 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group"
+          onClick={() => item.url && window.open(item.url, '_blank')}
+        >
           <div className="flex items-start gap-2">
             <div className={cn(
               "w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0",
-              item.sentiment === 'bullish' ? 'bg-green-400' : 'bg-red-400'
+              item.sentiment === 'bullish' ? 'bg-green-400' : item.sentiment === 'bearish' ? 'bg-red-400' : 'bg-gray-400'
             )} />
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white leading-snug line-clamp-2 group-hover:text-purple-300 transition-colors">{item.title}</p>
@@ -1703,7 +1927,7 @@ export default function PortfolioDashboard() {
                         Performance
                       </h2>
                     </div>
-                    <PerformanceSummary portfolio={portfolio} assets={assets} />
+                    <PerformanceSummary portfolio={portfolio} assets={assets} portfolioId={activePortfolioId} />
                   </Card>
 
                   {/* Risk & Metrics Panel */}
@@ -1814,7 +2038,7 @@ export default function PortfolioDashboard() {
                       </h2>
                       <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">30D</Badge>
                     </div>
-                    <CorrelationMatrix assets={assets} />
+                    <CorrelationMatrix assets={assets} portfolioId={activePortfolioId} />
                   </Card>
 
                   {/* AI Insights Feed */}

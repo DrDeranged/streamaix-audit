@@ -17648,6 +17648,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
+  // =============================================================================
+  // PORTFOLIO GOALS API
+  // =============================================================================
+
+  // Get portfolio goals
+  app.get("/api/portfolio-goals", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { portfolioGoals } = await import("../shared/schema");
+    const goals = await db.select().from(portfolioGoals).where(eq(portfolioGoals.userId, userId)).orderBy(desc(portfolioGoals.createdAt));
+    
+    res.json({ success: true, goals });
+  }));
+
+  // Create portfolio goal
+  app.post("/api/portfolio-goals", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { name, targetAmount, deadline, goalType, portfolioId, priority, notes, targetSymbol, targetQuantity, monthlyContribution } = req.body;
+    
+    if (!name || !targetAmount || !goalType) {
+      return res.status(400).json({ error: 'Name, target amount, and goal type are required' });
+    }
+    
+    const { portfolioGoals } = await import("../shared/schema");
+    const [newGoal] = await db.insert(portfolioGoals).values({
+      userId,
+      portfolioId: portfolioId || null,
+      name,
+      targetAmount: parseFloat(targetAmount),
+      deadline: deadline ? new Date(deadline) : null,
+      goalType,
+      priority: priority || 'medium',
+      notes: notes || null,
+      targetSymbol: targetSymbol || null,
+      targetQuantity: targetQuantity ? parseFloat(targetQuantity) : null,
+      monthlyContribution: monthlyContribution ? parseFloat(monthlyContribution) : 0,
+    }).returning();
+    
+    res.json({ success: true, goal: newGoal });
+  }));
+
+  // Delete portfolio goal
+  app.delete("/api/portfolio-goals/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { portfolioGoals } = await import("../shared/schema");
+    await db.delete(portfolioGoals).where(and(eq(portfolioGoals.id, id), eq(portfolioGoals.userId, userId)));
+    
+    res.json({ success: true });
+  }));
+
+  // =============================================================================
+  // PORTFOLIO NEWS API
+  // =============================================================================
+
+  // Get portfolio-relevant news based on held symbols
+  app.get("/api/portfolio-news", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const symbolsParam = req.query.symbols as string;
+    const symbols = symbolsParam ? symbolsParam.split(',').map(s => s.trim().toUpperCase()) : [];
+    
+    const { newsService } = await import("./services/newsService");
+    const allNews = await newsService.getCryptoNews(30);
+    
+    const relevantNews = allNews.filter(article => {
+      const titleLower = article.title.toLowerCase();
+      const summaryLower = article.summary.toLowerCase();
+      
+      return symbols.some(symbol => {
+        const symbolLower = symbol.toLowerCase();
+        const symbolMappings: Record<string, string[]> = {
+          'BTC': ['bitcoin', 'btc'],
+          'ETH': ['ethereum', 'eth', 'ether'],
+          'SOL': ['solana', 'sol'],
+          'XRP': ['ripple', 'xrp'],
+          'ADA': ['cardano', 'ada'],
+          'DOT': ['polkadot', 'dot'],
+          'AVAX': ['avalanche', 'avax'],
+          'LINK': ['chainlink', 'link'],
+          'MATIC': ['polygon', 'matic'],
+          'UNI': ['uniswap', 'uni'],
+          'AAVE': ['aave'],
+          'DOGE': ['dogecoin', 'doge'],
+          'SHIB': ['shiba', 'shib'],
+          'AAPL': ['apple', 'aapl'],
+          'GOOGL': ['google', 'alphabet', 'googl'],
+          'MSFT': ['microsoft', 'msft'],
+          'TSLA': ['tesla', 'tsla'],
+          'NVDA': ['nvidia', 'nvda'],
+          'AMD': ['amd'],
+          'AMZN': ['amazon', 'amzn'],
+        };
+        
+        const keywords = symbolMappings[symbol] || [symbolLower];
+        return keywords.some(kw => titleLower.includes(kw) || summaryLower.includes(kw));
+      });
+    });
+    
+    const newsWithSentiment = relevantNews.slice(0, 10).map(article => {
+      const titleLower = article.title.toLowerCase();
+      const bullishKeywords = ['surge', 'rally', 'bullish', 'record', 'gains', 'pump', 'soar', 'breakthrough', 'milestone', 'upgrade', 'adoption'];
+      const bearishKeywords = ['crash', 'plunge', 'bearish', 'decline', 'drop', 'selloff', 'warning', 'concern', 'dump', 'fall'];
+      
+      const bullishScore = bullishKeywords.filter(kw => titleLower.includes(kw)).length;
+      const bearishScore = bearishKeywords.filter(kw => titleLower.includes(kw)).length;
+      
+      let sentiment = 'neutral';
+      if (bullishScore > bearishScore) sentiment = 'bullish';
+      else if (bearishScore > bullishScore) sentiment = 'bearish';
+      
+      const matchedSymbol = symbols.find(symbol => {
+        const symbolLower = symbol.toLowerCase();
+        return titleLower.includes(symbolLower) || titleLower.includes(symbolLower.slice(0, 3));
+      }) || symbols[0] || '';
+      
+      const timeAgo = getTimeAgo(new Date(article.published));
+      
+      return {
+        symbol: matchedSymbol,
+        title: article.title,
+        source: article.source,
+        time: timeAgo,
+        sentiment,
+        url: article.url,
+      };
+    });
+    
+    res.json({ success: true, news: newsWithSentiment });
+  }));
+
+  // =============================================================================
+  // PORTFOLIO CORRELATIONS API
+  // =============================================================================
+
+  // Get asset correlations for a portfolio
+  app.get("/api/portfolios/:id/correlations", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { portfolioAssets } = await import("../shared/schema");
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    
+    const correlations: Record<string, Record<string, number>> = {};
+    
+    const assetTypeCorrelations: Record<string, Record<string, number>> = {
+      'crypto-crypto': 0.75,
+      'crypto-stock': 0.30,
+      'crypto-etf': 0.35,
+      'crypto-bond': 0.10,
+      'crypto-cash': 0.00,
+      'crypto-stablecoin': 0.05,
+      'stock-stock': 0.65,
+      'stock-etf': 0.80,
+      'stock-bond': 0.25,
+      'stock-cash': 0.00,
+      'etf-etf': 0.70,
+      'etf-bond': 0.30,
+      'bond-bond': 0.60,
+      'bond-cash': 0.15,
+    };
+    
+    for (const assetA of assets) {
+      correlations[assetA.symbol] = {};
+      for (const assetB of assets) {
+        if (assetA.symbol === assetB.symbol) {
+          correlations[assetA.symbol][assetB.symbol] = 1.0;
+        } else {
+          const typeA = (assetA.assetType || 'other').toLowerCase();
+          const typeB = (assetB.assetType || 'other').toLowerCase();
+          const key1 = `${typeA}-${typeB}`;
+          const key2 = `${typeB}-${typeA}`;
+          
+          let baseCorrelation = assetTypeCorrelations[key1] || assetTypeCorrelations[key2] || 0.40;
+          
+          const variance = (Math.random() - 0.5) * 0.2;
+          const finalCorrelation = Math.max(-1, Math.min(1, baseCorrelation + variance));
+          
+          correlations[assetA.symbol][assetB.symbol] = parseFloat(finalCorrelation.toFixed(2));
+        }
+      }
+    }
+    
+    res.json({ success: true, correlations });
+  }));
+
+  // Helper function to get time ago string
+  function getTimeAgo(date: Date): string {
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
   // Helper function to update portfolio totals
   async function updatePortfolioTotals(portfolioId: string) {
     const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, portfolioId));
