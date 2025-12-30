@@ -7195,6 +7195,8 @@ export const portfolioAssets = pgTable("portfolio_assets", {
   // Current value
   currentPrice: real("current_price").default(0),
   currentValue: real("current_value").default(0), // quantity * currentPrice
+  priceChange24h: real("price_change_24h").default(0), // 24h price change percentage
+  priceChange7d: real("price_change_7d").default(0), // 7d price change percentage
   priceLastUpdated: timestamp("price_last_updated"),
   // P&L
   unrealizedPnl: real("unrealized_pnl").default(0), // currentValue - totalCostBasis

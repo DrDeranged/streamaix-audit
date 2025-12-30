@@ -16937,13 +16937,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     for (const asset of assets) {
       let currentPrice = asset.currentPrice || 0;
+      let priceChange24h = 0;
+      let priceChange7d = 0;
       
       if (asset.assetType === 'crypto' || asset.assetType === 'stablecoin') {
         const coin = cryptoQuotes.find((c: any) => c.symbol.toUpperCase() === asset.symbol.toUpperCase());
-        if (coin) currentPrice = coin.price;
+        if (coin) {
+          currentPrice = coin.price;
+          priceChange24h = coin.percentChange24h || 0;
+          priceChange7d = coin.percentChange7d || 0;
+        }
       } else if (asset.assetType === 'stock' || asset.assetType === 'etf') {
         const stock = stockData.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
-        if (stock) currentPrice = stock.price;
+        if (stock) {
+          currentPrice = stock.price;
+          priceChange24h = stock.percentChange24h || 0;
+        }
       } else if (asset.assetType === 'cash') {
         currentPrice = 1;
       }
@@ -16957,6 +16966,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentValue,
         unrealizedPnl,
         unrealizedPnlPercent,
+        priceChange24h,
+        priceChange7d,
         priceLastUpdated: new Date(),
       }).where(eq(portfolioAssets.id, asset.id));
     }

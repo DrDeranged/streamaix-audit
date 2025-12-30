@@ -52,6 +52,8 @@ interface PortfolioAsset {
   currentValue: number;
   unrealizedPnl: number;
   unrealizedPnlPercent: number;
+  priceChange24h?: number;
+  priceChange7d?: number;
   allocationPercent: number;
   accountName?: string;
   color?: string;
@@ -299,7 +301,29 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
           <DialogTitle className="text-white">Add Asset</DialogTitle>
         </DialogHeader>
         
-        <Tabs value={mode} onValueChange={(v) => { setMode(v as any); if (v !== mode) { setSelectedAsset(null); setSearchQuery(''); setCryptoResults([]); setStockResults([]); } }} className="w-full">
+        <Tabs value={mode} onValueChange={(v) => { 
+          setMode(v as any); 
+          if (v !== mode) { 
+            setSelectedAsset(null); 
+            setSearchQuery(''); 
+            setCryptoResults([]); 
+            setStockResults([]); 
+            // Set appropriate default assetType for each tab
+            if (v === 'cash') {
+              setAssetType('cash');
+              setSymbol('USD');
+              setName('US Dollar');
+            } else if (v === 'retirement') {
+              setAssetType('401k');
+              setSymbol('RET');
+              setName('');
+            } else if (v === 'manual') {
+              setAssetType('crypto');
+            } else {
+              setAssetType('crypto');
+            }
+          } 
+        }} className="w-full">
           <TabsList className="w-full bg-transparent border-b border-slate-700 p-0 h-auto rounded-none gap-0">
             <TabsTrigger value="search" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-white text-gray-500 py-3 bg-transparent data-[state=active]:bg-transparent hover:text-gray-300 transition-colors">
               <Search className="w-4 h-4 mr-2" />
@@ -662,7 +686,9 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
 function AssetRow({ asset, portfolioId }: { asset: PortfolioAsset; portfolioId: string }) {
   const Icon = assetTypeIcons[asset.assetType] || Wallet;
   const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
-  const isPositive = asset.unrealizedPnl >= 0;
+  const priceChange = asset.priceChange24h || 0;
+  const is24hPositive = priceChange >= 0;
+  const isPnlPositive = (asset.unrealizedPnlPercent || 0) >= 0;
 
   return (
     <motion.div
@@ -679,14 +705,23 @@ function AssetRow({ asset, portfolioId }: { asset: PortfolioAsset; portfolioId: 
             <span className="font-medium text-white text-sm">{asset.symbol}</span>
             <span className="text-[10px] text-gray-500 uppercase">{asset.assetType}</span>
           </div>
-          <p className="text-xs text-gray-500">{asset.name}</p>
+          <p className="text-xs text-gray-500 truncate max-w-[120px]">{asset.name}</p>
         </div>
       </div>
       <div className="text-right">
         <p className="font-medium text-white text-sm">${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-        <div className={cn("flex items-center justify-end gap-1 text-xs", isPositive ? 'text-green-400' : 'text-red-400')}>
-          {isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-          <span>{isPositive ? '+' : ''}{(asset.unrealizedPnlPercent || 0).toFixed(1)}%</span>
+        <div className="flex items-center justify-end gap-2">
+          {/* 24h price change */}
+          <div className={cn("flex items-center gap-0.5 text-xs", is24hPositive ? 'text-green-400' : 'text-red-400')}>
+            {is24hPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+            <span>{is24hPositive ? '+' : ''}{priceChange.toFixed(1)}%</span>
+          </div>
+          {/* PnL indicator */}
+          {asset.assetType !== 'cash' && asset.assetType !== 'stablecoin' && (
+            <span className={cn("text-[10px] px-1 py-0.5 rounded", isPnlPositive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}>
+              PnL {isPnlPositive ? '+' : ''}{(asset.unrealizedPnlPercent || 0).toFixed(0)}%
+            </span>
+          )}
         </div>
       </div>
     </motion.div>
