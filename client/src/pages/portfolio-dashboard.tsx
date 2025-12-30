@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
@@ -8,7 +8,9 @@ import {
   DollarSign, Bitcoin, LineChart, Activity, Shield, ChevronRight,
   Sparkles, Eye, EyeOff, ArrowUpRight, ArrowDownRight, Clock,
   Building2, Coins, Banknote, Landmark, Package, MoreHorizontal,
-  ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search
+  ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search,
+  Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
+  Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -664,35 +666,28 @@ function AssetRow({ asset, portfolioId }: { asset: PortfolioAsset; portfolioId: 
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-purple-500/30 transition-all"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:border-slate-600/50 hover:bg-slate-800/50 transition-all cursor-pointer group"
     >
-      <div className="flex items-center gap-4">
-        <div className={cn("p-2.5 rounded-xl bg-gradient-to-br", colorGradient)}>
-          <Icon className="w-5 h-5 text-white" />
+      <div className="flex items-center gap-3">
+        <div className={cn("p-2 rounded-lg bg-gradient-to-br", colorGradient)}>
+          <Icon className="w-4 h-4 text-white" />
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">{asset.symbol}</span>
-            <Badge variant="outline" className="text-xs text-gray-400 border-gray-600">
-              {asset.assetType}
-            </Badge>
+            <span className="font-medium text-white text-sm">{asset.symbol}</span>
+            <span className="text-[10px] text-gray-500 uppercase">{asset.assetType}</span>
           </div>
-          <p className="text-sm text-gray-400">{asset.name}</p>
-          {asset.accountName && (
-            <p className="text-xs text-gray-500">{asset.accountName}</p>
-          )}
+          <p className="text-xs text-gray-500">{asset.name}</p>
         </div>
       </div>
       <div className="text-right">
-        <p className="font-semibold text-white">${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
-        <div className={cn("flex items-center justify-end gap-1 text-sm", isPositive ? 'text-green-400' : 'text-red-400')}>
-          {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-          <span>${Math.abs(asset.unrealizedPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-          <span>({(asset.unrealizedPnlPercent || 0).toFixed(2)}%)</span>
+        <p className="font-medium text-white text-sm">${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+        <div className={cn("flex items-center justify-end gap-1 text-xs", isPositive ? 'text-green-400' : 'text-red-400')}>
+          {isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+          <span>{isPositive ? '+' : ''}{(asset.unrealizedPnlPercent || 0).toFixed(1)}%</span>
         </div>
-        <p className="text-xs text-gray-500">{asset.quantity?.toLocaleString(undefined, { maximumFractionDigits: 6 })} units</p>
       </div>
     </motion.div>
   );
@@ -783,24 +778,24 @@ export default function PortfolioDashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-lg shadow-purple-500/25">
-                <Wallet className="w-8 h-8 text-white" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/20">
+                <Briefcase className="w-7 h-7 text-purple-400" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
-                  AI Portfolio Command Center
+                <h1 className="text-2xl lg:text-3xl font-bold text-white">
+                  Portfolio Command Center
                 </h1>
-                <p className="text-gray-400">Unified asset management powered by AI intelligence</p>
+                <p className="text-sm text-gray-500">Unified asset management with AI intelligence</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setShowValues(!showValues)}
-                className="border-slate-600 text-gray-300"
+                className="text-gray-400 hover:text-white hover:bg-slate-800"
               >
                 {showValues ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
@@ -809,11 +804,11 @@ export default function PortfolioDashboard() {
                 size="sm"
                 onClick={() => syncMutation.mutate()}
                 disabled={syncMutation.isPending || !activePortfolioId}
-                className="border-slate-600 text-gray-300"
+                className="border-slate-700 text-gray-300 hover:bg-slate-800 hover:text-white"
                 data-testid="sync-portfolio-button"
               >
                 <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
-                Sync Prices
+                Sync
               </Button>
               {activePortfolioId && (
                 <AddAssetDialog portfolioId={activePortfolioId} onSuccess={() => refetchPortfolio()} />
@@ -899,74 +894,139 @@ export default function PortfolioDashboard() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <Card className="bg-slate-900/60 border-slate-700/50 p-5 backdrop-blur-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm">Total Value</span>
-                    <DollarSign className="w-4 h-4 text-green-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-white">
-                    {showValues ? `$${(portfolio?.totalValue || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}` : '••••••'}
-                  </p>
-                  <div className={cn("flex items-center gap-1 text-sm mt-1", (portfolio?.totalPnl || 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
-                    {(portfolio?.totalPnl || 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                    <span>{showValues ? `$${Math.abs(portfolio?.totalPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}` : '••••'}</span>
-                    <span>({(portfolio?.totalPnlPercent || 0).toFixed(2)}%)</span>
+              {/* Premium Stats Row */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                {/* Total Value Card - Primary */}
+                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/30 border-purple-500/20 p-5">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 rounded-lg bg-purple-500/20">
+                        <DollarSign className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <span className="text-gray-400 text-sm font-medium">Net Worth</span>
+                    </div>
+                    <p className="text-3xl font-bold text-white tracking-tight">
+                      {showValues ? `$${(portfolio?.totalValue || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••••'}
+                    </p>
+                    <div className={cn("flex items-center gap-1.5 text-sm mt-2 font-medium", (portfolio?.totalPnl || 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
+                      <div className={cn("flex items-center gap-0.5 px-1.5 py-0.5 rounded", (portfolio?.totalPnl || 0) >= 0 ? 'bg-green-500/10' : 'bg-red-500/10')}>
+                        {(portfolio?.totalPnl || 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        <span>{(portfolio?.totalPnlPercent || 0).toFixed(2)}%</span>
+                      </div>
+                      <span className="text-gray-500">
+                        {showValues ? `${(portfolio?.totalPnl || 0) >= 0 ? '+' : ''}$${(portfolio?.totalPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : ''}
+                      </span>
+                    </div>
                   </div>
                 </Card>
 
-                <Card className="bg-slate-900/60 border-slate-700/50 p-5 backdrop-blur-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm">Cost Basis</span>
-                    <Target className="w-4 h-4 text-blue-400" />
+                {/* Cost Basis Card */}
+                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-slate-600/50 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="p-2 rounded-lg bg-blue-500/10">
+                      <Target className="w-4 h-4 text-blue-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm font-medium">Invested</span>
                   </div>
                   <p className="text-2xl font-bold text-white">
-                    {showValues ? `$${(portfolio?.totalCostBasis || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}` : '••••••'}
+                    {showValues ? `$${(portfolio?.totalCostBasis || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••••'}
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">Total invested</p>
+                  <p className="text-xs text-gray-500 mt-2">Total cost basis</p>
                 </Card>
 
-                <Card className="bg-slate-900/60 border-slate-700/50 p-5 backdrop-blur-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm">Assets</span>
-                    <PieChart className="w-4 h-4 text-purple-400" />
+                {/* Assets Count Card */}
+                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-slate-600/50 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="p-2 rounded-lg bg-cyan-500/10">
+                      <Layers className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm font-medium">Holdings</span>
                   </div>
                   <p className="text-2xl font-bold text-white">{assets.length}</p>
-                  <p className="text-sm text-gray-400 mt-1">Holdings tracked</p>
+                  <p className="text-xs text-gray-500 mt-2">Positions tracked</p>
                 </Card>
 
-                <Card className="bg-slate-900/60 border-slate-700/50 p-5 backdrop-blur-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm">Health Score</span>
-                    <Brain className="w-4 h-4 text-amber-400" />
+                {/* AI Health Score Card */}
+                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-amber-900/20 border-amber-500/20 p-5">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 rounded-lg bg-amber-500/20">
+                        <Brain className="w-4 h-4 text-amber-400" />
+                      </div>
+                      <span className="text-gray-400 text-sm font-medium">AI Score</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-bold text-white">{analysis?.healthScore || portfolio?.healthScore || '--'}</p>
+                      <span className="text-gray-500 text-sm">/100</span>
+                    </div>
+                    <Badge className={cn("mt-2 text-xs", riskLevelColors[analysis?.riskLevel || portfolio?.riskLevel || ''] || 'text-gray-400 bg-gray-500/20')}>
+                      {(analysis?.riskLevel || portfolio?.riskLevel || 'Analyzing...').replace('_', ' ')}
+                    </Badge>
                   </div>
-                  <p className="text-2xl font-bold text-white">{analysis?.healthScore || portfolio?.healthScore || '--'}</p>
-                  <Badge className={riskLevelColors[analysis?.riskLevel || portfolio?.riskLevel || ''] || 'text-gray-400 bg-gray-500/20'}>
-                    {(analysis?.riskLevel || portfolio?.riskLevel || 'unknown').replace('_', ' ')}
-                  </Badge>
                 </Card>
               </div>
 
+              {/* Quick Actions Bar */}
+              <Card className="bg-slate-900/60 border-slate-700/50 p-3 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-slate-800">
+                      <Bell className="w-4 h-4 mr-2" />
+                      Set Alert
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-slate-800">
+                      <Scale className="w-4 h-4 mr-2" />
+                      Rebalance
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-slate-800">
+                      <Percent className="w-4 h-4 mr-2" />
+                      Tax Loss
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-gray-500 border-slate-600 text-xs">
+                      <Radio className="w-3 h-3 mr-1 text-green-400" />
+                      Live
+                    </Badge>
+                    <span className="text-xs text-gray-500">Updated just now</span>
+                  </div>
+                </div>
+              </Card>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                  <Card className="bg-slate-900/60 border-slate-700/50 p-6 backdrop-blur-sm">
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                        <Wallet className="w-5 h-5 text-purple-400" />
+                        <Briefcase className="w-5 h-5 text-purple-400" />
                         Holdings
                       </h2>
-                      <Badge variant="outline" className="text-gray-400 border-gray-600">
-                        {assets.length} assets
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-gray-400 border-slate-600 text-xs">
+                          {assets.length} positions
+                        </Badge>
+                        {assets.length > 0 && (
+                          <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
+                        )}
+                      </div>
                     </div>
                     {assets.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Package className="w-12 h-12 mx-auto text-gray-600 mb-3" />
-                        <p className="text-gray-400 mb-4">No assets yet. Add your first asset to get started.</p>
-                        <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
+                      <div className="py-8">
+                        <div className="text-center max-w-sm mx-auto">
+                          <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
+                            <Layers className="w-7 h-7 text-purple-400" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-white mb-2">Add Your First Asset</h3>
+                          <p className="text-gray-400 text-sm mb-5">
+                            Track crypto, stocks, retirement accounts, and cash in one unified dashboard.
+                          </p>
+                          <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
+                        </div>
                       </div>
                     ) : (
-                      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                         {assets.map((asset) => (
                           <AssetRow key={asset.id} asset={asset} portfolioId={activePortfolioId!} />
                         ))}
@@ -974,114 +1034,187 @@ export default function PortfolioDashboard() {
                     )}
                   </Card>
 
-                  {analysis?.recommendations && analysis.recommendations.length > 0 && (
-                    <Card className="bg-slate-900/60 border-slate-700/50 p-6 backdrop-blur-sm">
-                      <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-                        <Lightbulb className="w-5 h-5 text-amber-400" />
-                        AI Recommendations
+                  {/* Risk & Metrics Panel */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <Gauge className="w-5 h-5 text-cyan-400" />
+                        Risk Metrics
                       </h2>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Activity className="w-4 h-4 text-blue-400" />
+                          <span className="text-xs text-gray-400">Volatility</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {assets.length > 0 ? 'Medium' : '--'}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Crosshair className="w-4 h-4 text-amber-400" />
+                          <span className="text-xs text-gray-400">Concentration</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {assets.length > 0 ? `${assets.length > 1 ? Math.round(100 / assets.length) : 100}%` : '--'}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Shield className="w-4 h-4 text-green-400" />
+                          <span className="text-xs text-gray-400">Diversification</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {analysis?.diversificationScore || portfolio?.diversificationScore || '--'}%
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* AI Insights Feed */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-amber-400" />
+                        AI Insights
+                      </h2>
+                      <Button variant="ghost" size="sm" className="text-purple-400 text-xs">
+                        View All
+                      </Button>
+                    </div>
+                    {analysis?.recommendations && analysis.recommendations.length > 0 ? (
                       <div className="space-y-3">
-                        {analysis.recommendations.map((rec, index) => (
+                        {analysis.recommendations.slice(0, 3).map((rec, index) => (
                           <div
                             key={index}
                             className={cn(
-                              "p-4 rounded-lg border",
-                              rec.priority === 'high' ? 'bg-red-500/10 border-red-500/30' :
-                              rec.priority === 'medium' ? 'bg-amber-500/10 border-amber-500/30' :
-                              'bg-slate-800/50 border-slate-700/50'
+                              "p-3 rounded-lg border transition-colors cursor-pointer hover:border-purple-500/30",
+                              rec.priority === 'high' ? 'bg-red-500/5 border-red-500/20' :
+                              rec.priority === 'medium' ? 'bg-amber-500/5 border-amber-500/20' :
+                              'bg-slate-800/30 border-slate-700/50'
                             )}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3">
-                                <AlertTriangle className={cn(
-                                  "w-4 h-4 mt-0.5",
-                                  rec.priority === 'high' ? 'text-red-400' :
-                                  rec.priority === 'medium' ? 'text-amber-400' :
-                                  'text-gray-400'
-                                )} />
-                                <div>
-                                  <p className="text-white text-sm">{rec.message}</p>
+                            <div className="flex items-start gap-3">
+                              <div className={cn(
+                                "p-1.5 rounded-md mt-0.5",
+                                rec.priority === 'high' ? 'bg-red-500/10' :
+                                rec.priority === 'medium' ? 'bg-amber-500/10' :
+                                'bg-slate-700/50'
+                              )}>
+                                {rec.priority === 'high' ? (
+                                  <Flame className="w-3.5 h-3.5 text-red-400" />
+                                ) : rec.priority === 'medium' ? (
+                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                                ) : (
+                                  <Lightbulb className="w-3.5 h-3.5 text-gray-400" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white text-sm leading-snug">{rec.message}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600 px-1.5 py-0">
+                                    {rec.type}
+                                  </Badge>
                                   {rec.action && (
-                                    <Button variant="link" size="sm" className="text-purple-400 p-0 h-auto mt-1">
-                                      {rec.action} <ChevronRight className="w-3 h-3 ml-1" />
-                                    </Button>
+                                    <span className="text-xs text-purple-400 hover:text-purple-300">
+                                      {rec.action} →
+                                    </span>
                                   )}
                                 </div>
                               </div>
-                              <Badge variant="outline" className="text-xs text-gray-400 border-gray-600">
-                                {rec.type}
-                              </Badge>
                             </div>
                           </div>
                         ))}
                       </div>
-                    </Card>
-                  )}
+                    ) : (
+                      <div className="text-center py-6">
+                        <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-amber-400" />
+                        </div>
+                        <p className="text-sm text-gray-400">Add assets to receive AI-powered insights</p>
+                      </div>
+                    )}
+                  </Card>
                 </div>
 
                 <div className="space-y-6">
-                  {analysis && (
-                    <Card className="bg-slate-900/60 border-slate-700/50 p-6 backdrop-blur-sm">
-                      <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-                        <Brain className="w-5 h-5 text-purple-400" />
-                        AI Analysis
-                      </h2>
-                      <div className="flex justify-center mb-4">
-                        <HealthScoreRing score={analysis.healthScore} />
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-400">Diversification</span>
-                            <span className="text-white">{analysis.diversificationScore}%</span>
-                          </div>
-                          <Progress value={analysis.diversificationScore} className="h-2" />
+                  {/* AI Health Analysis */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                      <Brain className="w-5 h-5 text-purple-400" />
+                      Portfolio Health
+                    </h2>
+                    <div className="flex justify-center mb-5">
+                      <HealthScoreRing score={analysis?.healthScore || portfolio?.healthScore || 0} />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-slate-800/50 rounded-lg">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-gray-400">Diversification</span>
+                          <span className="text-white font-medium">{analysis?.diversificationScore || portfolio?.diversificationScore || 0}%</span>
                         </div>
-                        <div className="pt-2 border-t border-slate-700">
-                          <p className="text-sm text-gray-400 mb-2">Risk Level</p>
-                          <Badge className={cn("text-sm", riskLevelColors[analysis.riskLevel] || 'text-gray-400 bg-gray-500/20')}>
-                            {analysis.riskLevel.replace('_', ' ')}
-                          </Badge>
-                        </div>
+                        <Progress value={analysis?.diversificationScore || portfolio?.diversificationScore || 0} className="h-1.5" />
                       </div>
-                    </Card>
-                  )}
+                      <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <span className="text-sm text-gray-400">Risk Profile</span>
+                        <Badge className={cn("text-xs", riskLevelColors[analysis?.riskLevel || portfolio?.riskLevel || ''] || 'text-gray-400 bg-gray-500/20')}>
+                          {(analysis?.riskLevel || portfolio?.riskLevel || 'Unknown').replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    </div>
+                  </Card>
 
-                  {analysis?.allocation && Object.keys(analysis.allocation).length > 0 && (
-                    <Card className="bg-slate-900/60 border-slate-700/50 p-6 backdrop-blur-sm">
-                      <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-                        <PieChart className="w-5 h-5 text-cyan-400" />
-                        Allocation
-                      </h2>
-                      <div className="flex justify-center mb-4">
-                        <AllocationChart allocation={analysis.allocation} />
-                      </div>
-                      <div className="space-y-2">
-                        {Object.entries(analysis.allocation).map(([type, percent]) => {
-                          const colorGradient = assetTypeColors[type] || assetTypeColors.other;
-                          return (
-                            <div key={type} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className={cn("w-3 h-3 rounded-full bg-gradient-to-r", colorGradient)} />
-                                <span className="text-sm text-gray-300 capitalize">{type.replace('_', ' ')}</span>
+                  {/* Asset Allocation */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                      <PieChart className="w-5 h-5 text-cyan-400" />
+                      Allocation
+                    </h2>
+                    {analysis?.allocation && Object.keys(analysis.allocation).length > 0 ? (
+                      <>
+                        <div className="flex justify-center mb-4">
+                          <AllocationChart allocation={analysis.allocation} />
+                        </div>
+                        <div className="space-y-2">
+                          {Object.entries(analysis.allocation).map(([type, percent]) => {
+                            const colorGradient = assetTypeColors[type] || assetTypeColors.other;
+                            return (
+                              <div key={type} className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-slate-800/50 transition-colors">
+                                <div className="flex items-center gap-2">
+                                  <div className={cn("w-2.5 h-2.5 rounded-full bg-gradient-to-r", colorGradient)} />
+                                  <span className="text-sm text-gray-300 capitalize">{type.replace('_', ' ')}</span>
+                                </div>
+                                <span className="text-sm text-white font-medium">{percent.toFixed(1)}%</span>
                               </div>
-                              <span className="text-sm text-white font-medium">{percent.toFixed(1)}%</span>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-6">
+                        <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                          <PieChart className="w-5 h-5 text-cyan-400" />
+                        </div>
+                        <p className="text-sm text-gray-400">Add assets to see allocation</p>
                       </div>
-                    </Card>
-                  )}
+                    )}
+                  </Card>
 
-                  <Card className="bg-gradient-to-br from-purple-900/40 to-fuchsia-900/40 border-purple-500/30 p-6">
+                  {/* Tools */}
+                  <Card className="bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/20 border-purple-500/20 p-5">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 rounded-lg bg-purple-500/20">
-                        <Calculator className="w-5 h-5 text-purple-400" />
+                        <Calculator className="w-4 h-4 text-purple-400" />
                       </div>
-                      <h3 className="font-semibold text-white">Scenario Simulator</h3>
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Scenario Simulator</h3>
+                        <p className="text-xs text-gray-500">What-if analysis</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-300 mb-4">
-                      Test "what if" scenarios. See how price changes would affect your portfolio.
+                    <p className="text-xs text-gray-400 mb-3">
+                      Test how market moves would impact your portfolio value.
                     </p>
                     <Button variant="outline" className="w-full border-purple-500/50 text-purple-300 hover:bg-purple-500/20">
                       <Sparkles className="w-4 h-4 mr-2" />
