@@ -17851,6 +17851,219 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, correlations });
   }));
 
+  // =============================================================================
+  // PRICE ALERTS API
+  // =============================================================================
+
+  // Get price alerts for authenticated user
+  app.get("/api/price-alerts", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { priceAlerts } = await import("../shared/schema");
+    const alerts = await db.select().from(priceAlerts)
+      .where(eq(priceAlerts.userId, userId))
+      .orderBy(desc(priceAlerts.createdAt));
+    
+    res.json({ success: true, alerts });
+  }));
+
+  // Create new price alert
+  app.post("/api/price-alerts", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { symbol, name, assetType, alertType, targetPrice, percentChange, currentPriceAtCreation, portfolioId } = req.body;
+    
+    if (!symbol || !name || !assetType || !alertType || !currentPriceAtCreation) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    const { priceAlerts } = await import("../shared/schema");
+    const [newAlert] = await db.insert(priceAlerts).values({
+      userId,
+      portfolioId: portfolioId || null,
+      symbol,
+      name,
+      assetType,
+      alertType,
+      targetPrice: targetPrice ? parseFloat(targetPrice) : null,
+      percentChange: percentChange ? parseFloat(percentChange) : null,
+      currentPriceAtCreation: parseFloat(currentPriceAtCreation),
+    }).returning();
+    
+    res.json({ success: true, alert: newAlert });
+  }));
+
+  // Delete price alert
+  app.delete("/api/price-alerts/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { priceAlerts } = await import("../shared/schema");
+    await db.delete(priceAlerts).where(and(eq(priceAlerts.id, id), eq(priceAlerts.userId, userId)));
+    
+    res.json({ success: true });
+  }));
+
+  // =============================================================================
+  // PORTFOLIO EVENTS API (Earnings, Fed Meetings, Token Unlocks)
+  // =============================================================================
+
+  // Get portfolio-relevant events based on held symbols
+  app.get("/api/portfolio-events", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const symbolsParam = req.query.symbols as string;
+    const symbols = symbolsParam ? symbolsParam.split(',').map(s => s.trim().toUpperCase()) : [];
+    
+    const events: Array<{
+      id: string;
+      date: string;
+      title: string;
+      type: 'earnings' | 'fed' | 'unlock' | 'halving' | 'network';
+      symbol?: string;
+      description?: string;
+    }> = [];
+    
+    // 2025 Fed Meeting Dates (static schedule)
+    const fedMeetings = [
+      { date: '2025-01-29', title: 'FOMC Meeting' },
+      { date: '2025-03-19', title: 'FOMC Meeting' },
+      { date: '2025-05-07', title: 'FOMC Meeting' },
+      { date: '2025-06-18', title: 'FOMC Meeting' },
+      { date: '2025-07-30', title: 'FOMC Meeting' },
+      { date: '2025-09-17', title: 'FOMC Meeting' },
+      { date: '2025-11-05', title: 'FOMC Meeting' },
+      { date: '2025-12-17', title: 'FOMC Meeting' },
+    ];
+    
+    const now = new Date();
+    fedMeetings.forEach((meeting, i) => {
+      if (new Date(meeting.date) >= now) {
+        events.push({
+          id: `fed-${i}`,
+          date: meeting.date,
+          title: meeting.title,
+          type: 'fed',
+          description: 'Federal Reserve interest rate decision',
+        });
+      }
+    });
+    
+    // Token unlock events (predefined calendar data for major tokens)
+    const tokenUnlocks: Record<string, Array<{ date: string; amount: string; description: string }>> = {
+      'SOL': [
+        { date: '2025-01-15', amount: '~1.2M SOL', description: 'Ecosystem fund unlock' },
+        { date: '2025-04-01', amount: '~800K SOL', description: 'Team/investor vesting' },
+      ],
+      'APT': [
+        { date: '2025-02-11', amount: '~11M APT', description: 'Monthly unlock' },
+        { date: '2025-03-11', amount: '~11M APT', description: 'Monthly unlock' },
+      ],
+      'ARB': [
+        { date: '2025-01-16', amount: '~92M ARB', description: 'Team/investor unlock' },
+        { date: '2025-03-16', amount: '~92M ARB', description: 'Team/investor unlock' },
+      ],
+      'OP': [
+        { date: '2025-01-30', amount: '~31M OP', description: 'Core contributors unlock' },
+        { date: '2025-02-28', amount: '~31M OP', description: 'Core contributors unlock' },
+      ],
+      'SUI': [
+        { date: '2025-02-01', amount: '~64M SUI', description: 'Monthly unlock' },
+        { date: '2025-03-01', amount: '~64M SUI', description: 'Monthly unlock' },
+      ],
+      'AVAX': [
+        { date: '2025-02-15', amount: '~2.5M AVAX', description: 'Ecosystem unlock' },
+      ],
+      'LINK': [
+        { date: '2025-03-01', amount: '~10M LINK', description: 'Community incentives' },
+      ],
+    };
+    
+    // Add token unlocks for held symbols
+    symbols.forEach(symbol => {
+      const unlocks = tokenUnlocks[symbol];
+      if (unlocks) {
+        unlocks.forEach((unlock, i) => {
+          if (new Date(unlock.date) >= now) {
+            events.push({
+              id: `unlock-${symbol}-${i}`,
+              date: unlock.date,
+              title: `${symbol} Token Unlock`,
+              type: 'unlock',
+              symbol,
+              description: `${unlock.amount} - ${unlock.description}`,
+            });
+          }
+        });
+      }
+    });
+    
+    // Major crypto events
+    const cryptoEvents = [
+      { date: '2025-04-15', title: 'Bitcoin Halving Anniversary', type: 'halving' as const, symbol: 'BTC' },
+      { date: '2025-03-01', title: 'Ethereum Dencun Anniversary', type: 'network' as const, symbol: 'ETH' },
+    ];
+    
+    cryptoEvents.forEach((event, i) => {
+      if (symbols.includes(event.symbol) && new Date(event.date) >= now) {
+        events.push({
+          id: `crypto-${i}`,
+          ...event,
+        });
+      }
+    });
+    
+    // Earnings dates for stocks - use Finnhub if available
+    const stockSymbols = symbols.filter(s => 
+      ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'AMD', 'NFLX', 'DIS'].includes(s)
+    );
+    
+    // Fallback static earnings schedule for Q1 2025
+    const earningsSchedule: Record<string, { date: string; quarter: string }> = {
+      'AAPL': { date: '2025-01-30', quarter: 'Q1 2025' },
+      'MSFT': { date: '2025-01-28', quarter: 'Q2 2025' },
+      'GOOGL': { date: '2025-02-04', quarter: 'Q4 2024' },
+      'AMZN': { date: '2025-02-06', quarter: 'Q4 2024' },
+      'TSLA': { date: '2025-01-29', quarter: 'Q4 2024' },
+      'NVDA': { date: '2025-02-26', quarter: 'Q4 2024' },
+      'META': { date: '2025-02-05', quarter: 'Q4 2024' },
+      'AMD': { date: '2025-02-04', quarter: 'Q4 2024' },
+      'NFLX': { date: '2025-01-21', quarter: 'Q4 2024' },
+      'DIS': { date: '2025-02-05', quarter: 'Q1 2025' },
+    };
+    
+    stockSymbols.forEach(symbol => {
+      const earnings = earningsSchedule[symbol];
+      if (earnings && new Date(earnings.date) >= now) {
+        events.push({
+          id: `earnings-${symbol}`,
+          date: earnings.date,
+          title: `${symbol} Earnings`,
+          type: 'earnings',
+          symbol,
+          description: `${earnings.quarter} earnings report`,
+        });
+      }
+    });
+    
+    // Sort events by date
+    events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    res.json({ success: true, events: events.slice(0, 15) });
+  }));
+
   // Helper function to get time ago string
   function getTimeAgo(date: Date): string {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);

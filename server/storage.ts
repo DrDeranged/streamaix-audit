@@ -136,6 +136,9 @@ import {
   tradingWatchlist,
   type TradingWatchlist,
   type InsertTradingWatchlist,
+  priceAlerts,
+  type PriceAlert,
+  type InsertPriceAlert,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -571,6 +574,11 @@ export interface IStorage {
   removeFromWatchlist(userId: string, itemId: string): Promise<boolean>;
   getWatchlistCount(userId: string): Promise<number>;
   isInWatchlist(userId: string, symbol: string): Promise<boolean>;
+
+  // Price Alerts operations
+  getPriceAlerts(userId: string): Promise<PriceAlert[]>;
+  createPriceAlert(alert: InsertPriceAlert): Promise<PriceAlert>;
+  deletePriceAlert(id: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3503,6 +3511,27 @@ export class DatabaseStorage implements IStorage {
         eq(tradingWatchlist.symbol, symbol)
       ));
     return !!item;
+  }
+
+  // Price Alerts operations
+  async getPriceAlerts(userId: string): Promise<PriceAlert[]> {
+    return await db.select().from(priceAlerts)
+      .where(eq(priceAlerts.userId, userId))
+      .orderBy(desc(priceAlerts.createdAt));
+  }
+
+  async createPriceAlert(alert: InsertPriceAlert): Promise<PriceAlert> {
+    const [newAlert] = await db.insert(priceAlerts).values(alert).returning();
+    return newAlert;
+  }
+
+  async deletePriceAlert(id: string, userId: string): Promise<boolean> {
+    await db.delete(priceAlerts)
+      .where(and(
+        eq(priceAlerts.id, id),
+        eq(priceAlerts.userId, userId)
+      ));
+    return true;
   }
 }
 

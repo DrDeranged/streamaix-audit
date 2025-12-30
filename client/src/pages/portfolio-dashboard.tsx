@@ -1427,6 +1427,27 @@ export default function PortfolioDashboard() {
   const [showTaxDialog, setShowTaxDialog] = useState(false);
   const [showStrategyDialog, setShowStrategyDialog] = useState(false);
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
+  const [showStressTestDialog, setShowStressTestDialog] = useState(false);
+  
+  const [alertSymbol, setAlertSymbol] = useState('');
+  const [alertType, setAlertType] = useState<'above' | 'below'>('above');
+  const [alertTargetPrice, setAlertTargetPrice] = useState('');
+  
+  const [customScenario, setCustomScenario] = useState<Record<string, number>>({
+    crypto: 30,
+    stock: 20,
+    etf: 15,
+    bond: 5,
+    retirement: 10,
+    cash: 0,
+    stablecoin: 1,
+    real_estate: 10,
+    commodity: 15,
+    other: 15,
+  });
+  
+  const [targetAllocations, setTargetAllocations] = useState<Record<string, number>>({});
+  
   const { toast } = useToast();
 
   const { data: portfoliosData, isLoading: portfoliosLoading } = useQuery<{ portfolios: Portfolio[] }>({
@@ -1508,6 +1529,71 @@ export default function PortfolioDashboard() {
   });
 
   const taxAnalytics = taxData?.taxAnalytics;
+
+  // Fetch price alerts
+  const { data: alertsData, refetch: refetchAlerts } = useQuery<{ alerts: Array<{
+    id: string;
+    symbol: string;
+    name: string;
+    assetType: string;
+    alertType: string;
+    targetPrice: number | null;
+    currentPriceAtCreation: number;
+    isActive: boolean;
+    isTriggered: boolean;
+    createdAt: string;
+  }> }>({
+    queryKey: ['/api/price-alerts'],
+  });
+
+  const priceAlerts = alertsData?.alerts || [];
+
+  // Fetch portfolio events (Fed meetings, token unlocks, earnings)
+  const symbolsString = assets.map(a => a.symbol).join(',');
+  const { data: eventsData } = useQuery<{ events: Array<{
+    id: string;
+    date: string;
+    title: string;
+    type: 'earnings' | 'fed' | 'unlock' | 'halving' | 'network';
+    symbol?: string;
+    description?: string;
+  }> }>({
+    queryKey: ['/api/portfolio-events', symbolsString],
+    enabled: assets.length > 0,
+  });
+
+  const portfolioEvents = eventsData?.events || [];
+
+  // Create alert mutation
+  const createAlertMutation = useMutation({
+    mutationFn: async (data: { symbol: string; name: string; assetType: string; alertType: string; targetPrice: number; currentPriceAtCreation: number; portfolioId?: string }) => {
+      return apiRequest('/api/price-alerts', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/price-alerts'] });
+      toast({ title: 'Alert Created!', description: 'You will be notified when the price target is reached' });
+      setShowAlertDialog(false);
+      setAlertSymbol('');
+      setAlertTargetPrice('');
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to create alert', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Delete alert mutation
+  const deleteAlertMutation = useMutation({
+    mutationFn: async (alertId: string) => {
+      return apiRequest(`/api/price-alerts/${alertId}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/price-alerts'] });
+      toast({ title: 'Alert deleted' });
+    },
+  });
 
   const syncMutation = useMutation({
     mutationFn: async () => {
@@ -2182,26 +2268,44 @@ export default function PortfolioDashboard() {
                       </div>
                     </div>
                     <div className="space-y-2 mb-3">
-                      <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
-                        <span className="text-xs text-gray-400">If BTC drops 30%</span>
-                        <span className="text-xs font-medium text-red-400">
-                          {showValues ? `-$${Math.round((assets.find(a => a.symbol === 'BTC')?.currentValue || 0) * 0.3).toLocaleString()}` : '••••'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
-                        <span className="text-xs text-gray-400">If stocks drop 20%</span>
-                        <span className="text-xs font-medium text-red-400">
-                          {showValues ? `-$${Math.round(assets.filter(a => a.assetType === 'stock').reduce((sum, a) => sum + (a.currentValue || 0), 0) * 0.2).toLocaleString()}` : '••••'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
-                        <span className="text-xs text-gray-400">Worst case (50% crash)</span>
-                        <span className="text-xs font-medium text-red-400">
-                          {showValues ? `-$${Math.round((portfolio?.totalValue || 0) * 0.5).toLocaleString()}` : '••••'}
-                        </span>
-                      </div>
+                      {(() => {
+                        const assetTypes = [...new Set(assets.map(a => a.assetType))];
+                        const impactByType = assetTypes.map(type => {
+                          const typeAssets = assets.filter(a => a.assetType === type);
+                          const typeValue = typeAssets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+                          const dropPercent = customScenario[type] || 20;
+                          const impact = typeValue * (dropPercent / 100);
+                          return { type, typeValue, dropPercent, impact };
+                        }).filter(t => t.typeValue > 0);
+                        
+                        const totalImpact = impactByType.reduce((sum, t) => sum + t.impact, 0);
+                        
+                        return (
+                          <>
+                            {impactByType.slice(0, 3).map((t) => (
+                              <div key={t.type} className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
+                                <span className="text-xs text-gray-400 capitalize">If {t.type} drops {t.dropPercent}%</span>
+                                <span className="text-xs font-medium text-red-400">
+                                  {showValues ? `-$${Math.round(t.impact).toLocaleString()}` : '••••'}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between items-center p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                              <span className="text-xs text-gray-300 font-medium">Total Custom Scenario Impact</span>
+                              <span className="text-xs font-bold text-red-400">
+                                {showValues ? `-$${Math.round(totalImpact).toLocaleString()}` : '••••'}
+                              </span>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
-                    <Button variant="outline" className="w-full border-red-500/30 text-red-300 hover:bg-red-500/10 text-xs h-8">
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-red-500/30 text-red-300 hover:bg-red-500/10 text-xs h-8"
+                      onClick={() => setShowStressTestDialog(true)}
+                      data-testid="button-custom-scenario"
+                    >
                       <Calculator className="w-3 h-3 mr-1.5" />
                       Custom Scenario
                     </Button>
@@ -2214,37 +2318,45 @@ export default function PortfolioDashboard() {
                         <Calendar className="w-4 h-4 text-cyan-400" />
                         Upcoming Events
                       </h3>
+                      {portfolioEvents.length > 0 && (
+                        <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">
+                          {portfolioEvents.length} events
+                        </Badge>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      {assets.filter(a => a.assetType === 'stock').length > 0 ? (
-                        <>
-                          <div className="p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-cyan-400">Earnings</span>
-                              <span className="text-[11px] sm:text-[10px] text-gray-500">Jan 15</span>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {portfolioEvents.length > 0 ? (
+                        portfolioEvents.slice(0, 5).map((event) => {
+                          const eventDate = new Date(event.date);
+                          const formattedDate = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                          const eventColors: Record<string, { bg: string; border: string; text: string }> = {
+                            earnings: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/20', text: 'text-cyan-400' },
+                            fed: { bg: 'bg-amber-500/5', border: 'border-amber-500/20', text: 'text-amber-400' },
+                            unlock: { bg: 'bg-purple-500/5', border: 'border-purple-500/20', text: 'text-purple-400' },
+                            halving: { bg: 'bg-orange-500/5', border: 'border-orange-500/20', text: 'text-orange-400' },
+                            network: { bg: 'bg-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400' },
+                          };
+                          const colors = eventColors[event.type] || eventColors.fed;
+                          
+                          return (
+                            <div key={event.id} className={cn("p-3 rounded-lg border", colors.bg, colors.border)}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className={cn("text-xs font-medium capitalize", colors.text)}>
+                                  {event.type === 'fed' ? 'Fed Meeting' : event.type === 'unlock' ? 'Token Unlock' : event.type}
+                                </span>
+                                <span className="text-[11px] sm:text-[10px] text-gray-500">{formattedDate}</span>
+                              </div>
+                              <p className="text-xs text-gray-300">{event.title}</p>
+                              {event.description && (
+                                <p className="text-[10px] text-gray-500 mt-0.5">{event.description}</p>
+                              )}
                             </div>
-                            <p className="text-xs text-gray-300">COIN Q4 earnings report</p>
-                          </div>
-                          <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-amber-400">Fed Meeting</span>
-                              <span className="text-[11px] sm:text-[10px] text-gray-500">Jan 29</span>
-                            </div>
-                            <p className="text-xs text-gray-300">FOMC rate decision</p>
-                          </div>
-                        </>
-                      ) : null}
-                      {assets.filter(a => a.assetType === 'crypto').length > 0 ? (
-                        <div className="p-3 bg-purple-500/5 border border-purple-500/20 rounded-lg">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium text-purple-400">Token Unlock</span>
-                            <span className="text-[11px] sm:text-[10px] text-gray-500">Jan 12</span>
-                          </div>
-                          <p className="text-xs text-gray-300">SOL foundation unlock 2.5M tokens</p>
-                        </div>
-                      ) : null}
-                      {assets.length === 0 && (
+                          );
+                        })
+                      ) : assets.length === 0 ? (
                         <p className="text-xs text-gray-500 text-center py-4">Add assets to see relevant events</p>
+                      ) : (
+                        <p className="text-xs text-gray-500 text-center py-4">No upcoming events for your holdings</p>
                       )}
                     </div>
                   </Card>
@@ -2694,60 +2806,134 @@ export default function PortfolioDashboard() {
 
       {/* Price Alert Dialog */}
       <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-purple-400" />
-              Set Price Alert
+              Price Alerts
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <div>
-              <Label className="text-gray-400 text-sm">Select Asset</Label>
-              <Select>
-                <SelectTrigger className="mt-1.5 bg-slate-800 border-slate-600 text-white">
-                  <SelectValue placeholder="Choose asset" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {assets.map(a => (
-                    <SelectItem key={a.id} value={a.symbol} className="text-white hover:bg-slate-700">
-                      {a.symbol} - {a.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-gray-400 text-sm">Alert When Price</Label>
-              <div className="flex gap-2 mt-1.5">
-                <Select defaultValue="above">
-                  <SelectTrigger className="bg-slate-800 border-slate-600 text-white w-28">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="above" className="text-white">Goes above</SelectItem>
-                    <SelectItem value="below" className="text-white">Goes below</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input placeholder="Enter price" className="bg-slate-800 border-slate-600 text-white" />
+            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <h4 className="text-sm font-medium text-white mb-3">Create New Alert</h4>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-gray-400 text-xs">Select Asset</Label>
+                  <Select value={alertSymbol} onValueChange={setAlertSymbol}>
+                    <SelectTrigger className="mt-1 bg-slate-800 border-slate-600 text-white" data-testid="select-alert-asset">
+                      <SelectValue placeholder="Choose asset" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {assets.map(a => (
+                        <SelectItem key={a.id} value={a.symbol} className="text-white hover:bg-slate-700">
+                          {a.symbol} - {a.name} (${a.currentPrice?.toLocaleString()})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-gray-400 text-xs">Alert When Price</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Select value={alertType} onValueChange={(v) => setAlertType(v as 'above' | 'below')}>
+                      <SelectTrigger className="bg-slate-800 border-slate-600 text-white w-28" data-testid="select-alert-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="above" className="text-white">Goes above</SelectItem>
+                        <SelectItem value="below" className="text-white">Goes below</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input 
+                      placeholder="Target price" 
+                      value={alertTargetPrice}
+                      onChange={(e) => setAlertTargetPrice(e.target.value)}
+                      className="bg-slate-800 border-slate-600 text-white" 
+                      data-testid="input-alert-price"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => {
+                    const selectedAsset = assets.find(a => a.symbol === alertSymbol);
+                    if (!selectedAsset || !alertTargetPrice) {
+                      toast({ title: 'Please select an asset and enter a target price', variant: 'destructive' });
+                      return;
+                    }
+                    createAlertMutation.mutate({
+                      symbol: selectedAsset.symbol,
+                      name: selectedAsset.name,
+                      assetType: selectedAsset.assetType,
+                      alertType: alertType,
+                      targetPrice: parseFloat(alertTargetPrice),
+                      currentPriceAtCreation: selectedAsset.currentPrice,
+                      portfolioId: activePortfolioId,
+                    });
+                  }}
+                  disabled={createAlertMutation.isPending || !alertSymbol || !alertTargetPrice}
+                  className="w-full bg-purple-600 hover:bg-purple-500"
+                  data-testid="button-create-alert"
+                >
+                  {createAlertMutation.isPending ? 'Creating...' : 'Create Alert'}
+                </Button>
               </div>
             </div>
-            <Button 
-              onClick={() => {
-                toast({ title: 'Alert Created!', description: 'You will be notified when the price target is reached' });
-                setShowAlertDialog(false);
-              }}
-              className="w-full bg-purple-600 hover:bg-purple-500"
-            >
-              Create Alert
-            </Button>
+            
+            {priceAlerts.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-white mb-2 flex items-center justify-between">
+                  <span>Active Alerts ({priceAlerts.filter(a => a.isActive && !a.isTriggered).length})</span>
+                </h4>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {priceAlerts.filter(a => a.isActive).map((alert) => (
+                    <div key={alert.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white text-sm">{alert.symbol}</span>
+                          <Badge variant="outline" className={cn("text-[10px]", 
+                            alert.alertType === 'above' ? 'border-green-500/30 text-green-400' : 'border-red-500/30 text-red-400'
+                          )}>
+                            {alert.alertType === 'above' ? '↑ Above' : '↓ Below'}
+                          </Badge>
+                          {alert.isTriggered && (
+                            <Badge className="text-[10px] bg-amber-500/20 text-amber-400">Triggered</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Target: ${alert.targetPrice?.toLocaleString()} (was ${alert.currentPriceAtCreation?.toLocaleString()})
+                        </p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400"
+                        onClick={() => deleteAlertMutation.mutate(alert.id)}
+                        disabled={deleteAlertMutation.isPending}
+                        data-testid={`button-delete-alert-${alert.id}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Rebalance Dialog */}
-      <Dialog open={showRebalanceDialog} onOpenChange={setShowRebalanceDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg">
+      <Dialog open={showRebalanceDialog} onOpenChange={(open) => {
+        setShowRebalanceDialog(open);
+        if (open && Object.keys(targetAllocations).length === 0) {
+          const assetTypes = [...new Set(assets.map(a => a.assetType))];
+          const equalAlloc = 100 / assetTypes.length;
+          const initialTargets: Record<string, number> = {};
+          assetTypes.forEach(type => { initialTargets[type] = Math.round(equalAlloc); });
+          setTargetAllocations(initialTargets);
+        }
+      }}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Scale className="w-5 h-5 text-cyan-400" />
@@ -2755,34 +2941,135 @@ export default function PortfolioDashboard() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <p className="text-sm text-gray-400">
-              AI-recommended rebalancing to optimize your portfolio allocation:
-            </p>
-            <div className="space-y-2">
-              {assets.slice(0, 5).map(a => {
-                const targetAllocation = 100 / Math.max(assets.length, 1);
-                const diff = (a.allocationPercent || 0) - targetAllocation;
-                return (
-                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{a.symbol}</span>
-                      <span className="text-xs text-gray-500">{a.allocationPercent?.toFixed(1)}%</span>
+            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <h4 className="text-sm font-medium text-white mb-3">Set Target Allocations by Asset Type</h4>
+              <div className="space-y-2">
+                {[...new Set(assets.map(a => a.assetType))].map(type => {
+                  const currentAlloc = assets.filter(a => a.assetType === type).reduce((sum, a) => sum + (a.allocationPercent || 0), 0);
+                  return (
+                    <div key={type} className="flex items-center gap-3">
+                      <span className="text-sm text-gray-300 capitalize flex-1 min-w-[80px]">{type}</span>
+                      <span className="text-xs text-gray-500 w-16">Now: {currentAlloc.toFixed(1)}%</span>
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={targetAllocations[type] || 0}
+                          onChange={(e) => setTargetAllocations(prev => ({ ...prev, [type]: parseFloat(e.target.value) || 0 }))}
+                          className="w-16 h-8 text-center bg-slate-800 border-slate-600 text-white text-sm"
+                          data-testid={`input-target-${type}`}
+                        />
+                        <span className="text-xs text-gray-400">%</span>
+                      </div>
                     </div>
-                    <div className={cn("text-xs font-medium", diff > 5 ? 'text-red-400' : diff < -5 ? 'text-green-400' : 'text-gray-400')}>
-                      {diff > 0 ? `Sell ${diff.toFixed(1)}%` : diff < 0 ? `Buy ${Math.abs(diff).toFixed(1)}%` : 'Balanced'}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+                <div className="pt-2 border-t border-slate-700/50 flex justify-between text-xs">
+                  <span className="text-gray-400">Total:</span>
+                  <span className={cn("font-medium", Object.values(targetAllocations).reduce((a, b) => a + b, 0) === 100 ? 'text-green-400' : 'text-amber-400')}>
+                    {Object.values(targetAllocations).reduce((a, b) => a + b, 0).toFixed(0)}%
+                    {Object.values(targetAllocations).reduce((a, b) => a + b, 0) !== 100 && ' (should be 100%)'}
+                  </span>
+                </div>
+              </div>
             </div>
+
+            <div>
+              <h4 className="text-sm font-medium text-white mb-2">Suggested Trades</h4>
+              <div className="space-y-2 max-h-[250px] overflow-y-auto">
+                {(() => {
+                  const totalValue = portfolio?.totalValue || 0;
+                  const trades: Array<{ symbol: string; type: string; action: 'buy' | 'sell'; amountPercent: number; amountDollars: number; shares: number }> = [];
+                  
+                  assets.forEach(asset => {
+                    const currentAlloc = asset.allocationPercent || 0;
+                    const assetTypeTotal = assets.filter(a => a.assetType === asset.assetType).reduce((s, a) => s + (a.allocationPercent || 0), 0);
+                    const targetTotal = targetAllocations[asset.assetType] || 0;
+                    
+                    if (assetTypeTotal === 0) return;
+                    
+                    const assetShareOfType = currentAlloc / assetTypeTotal;
+                    const newTargetForAsset = targetTotal * assetShareOfType;
+                    const diff = newTargetForAsset - currentAlloc;
+                    
+                    if (Math.abs(diff) > 1) {
+                      const dollarAmount = (Math.abs(diff) / 100) * totalValue;
+                      const shares = asset.currentPrice ? dollarAmount / asset.currentPrice : 0;
+                      trades.push({
+                        symbol: asset.symbol,
+                        type: asset.assetType,
+                        action: diff > 0 ? 'buy' : 'sell',
+                        amountPercent: Math.abs(diff),
+                        amountDollars: dollarAmount,
+                        shares,
+                      });
+                    }
+                  });
+                  
+                  trades.sort((a, b) => b.amountDollars - a.amountDollars);
+                  
+                  if (trades.length === 0) {
+                    return (
+                      <div className="text-center py-4 text-gray-400 text-sm">
+                        <CheckCircle className="w-6 h-6 mx-auto mb-2 text-green-400" />
+                        Portfolio is balanced according to your targets
+                      </div>
+                    );
+                  }
+                  
+                  return trades.map((trade, i) => (
+                    <div key={i} className={cn("p-3 rounded-lg border", 
+                      trade.action === 'buy' ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge className={cn("text-[10px]", 
+                            trade.action === 'buy' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                          )}>
+                            {trade.action.toUpperCase()}
+                          </Badge>
+                          <span className="font-medium text-white">{trade.symbol}</span>
+                        </div>
+                        <span className={cn("text-sm font-medium", trade.action === 'buy' ? 'text-green-400' : 'text-red-400')}>
+                          ${trade.amountDollars.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {trade.action === 'buy' ? 'Buy' : 'Sell'} ~{trade.shares.toFixed(4)} units ({trade.amountPercent.toFixed(1)}% of portfolio)
+                      </p>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+            
             <Button 
               onClick={() => {
-                toast({ title: 'Rebalance Simulated', description: 'Review the suggested trades in your portfolio' });
+                const trades = assets.map(asset => {
+                  const currentAlloc = asset.allocationPercent || 0;
+                  const targetTotal = targetAllocations[asset.assetType] || 0;
+                  const assetTypeTotal = assets.filter(a => a.assetType === asset.assetType).reduce((s, a) => s + (a.allocationPercent || 0), 0);
+                  if (assetTypeTotal === 0) return null;
+                  const assetShareOfType = currentAlloc / assetTypeTotal;
+                  const diff = (targetTotal * assetShareOfType) - currentAlloc;
+                  if (Math.abs(diff) > 1) {
+                    return `${diff > 0 ? 'BUY' : 'SELL'} ${asset.symbol}: $${Math.round((Math.abs(diff) / 100) * (portfolio?.totalValue || 0)).toLocaleString()}`;
+                  }
+                  return null;
+                }).filter(Boolean);
+                
+                toast({ 
+                  title: 'Rebalancing Plan Generated', 
+                  description: trades.length > 0 ? trades.slice(0, 3).join(', ') + (trades.length > 3 ? ` and ${trades.length - 3} more` : '') : 'No trades needed'
+                });
                 setShowRebalanceDialog(false);
               }}
               className="w-full bg-cyan-600 hover:bg-cyan-500"
+              data-testid="button-apply-rebalance"
             >
-              Apply Rebalancing Suggestions
+              <ArrowRight className="w-4 h-4 mr-2" />
+              Generate Rebalancing Plan
             </Button>
           </div>
         </DialogContent>
@@ -2963,6 +3250,144 @@ export default function PortfolioDashboard() {
             >
               Save Goal
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Stress Test Dialog */}
+      <Dialog open={showStressTestDialog} onOpenChange={setShowStressTestDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+              Custom Stress Test Scenario
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-gray-400">
+              Set a hypothetical market crash percentage for each asset type to see the potential impact on your portfolio.
+            </p>
+            
+            <div className="space-y-3">
+              {Object.entries(customScenario).map(([type, dropPercent]) => {
+                const typeAssets = assets.filter(a => a.assetType === type);
+                const typeValue = typeAssets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+                const impact = typeValue * (dropPercent / 100);
+                
+                if (typeValue === 0 && !['crypto', 'stock', 'etf', 'bond'].includes(type)) return null;
+                
+                return (
+                  <div key={type} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-white capitalize">{type.replace('_', ' ')}</span>
+                      {typeValue > 0 && (
+                        <span className="text-xs text-gray-500">
+                          Current: ${typeValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="80"
+                        value={dropPercent}
+                        onChange={(e) => setCustomScenario(prev => ({ ...prev, [type]: parseInt(e.target.value) }))}
+                        className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                        data-testid={`slider-drop-${type}`}
+                      />
+                      <div className="flex items-center gap-1 w-16">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={dropPercent}
+                          onChange={(e) => setCustomScenario(prev => ({ ...prev, [type]: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
+                          className="w-12 h-7 text-center bg-slate-800 border-slate-600 text-white text-xs p-1"
+                        />
+                        <span className="text-xs text-gray-400">%</span>
+                      </div>
+                    </div>
+                    {typeValue > 0 && impact > 0 && (
+                      <p className="text-xs text-red-400 mt-2">
+                        Impact: -${impact.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-4 bg-red-500/10 rounded-lg border border-red-500/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-white">Total Portfolio Impact</span>
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+              </div>
+              {(() => {
+                const totalImpact = Object.entries(customScenario).reduce((total, [type, dropPercent]) => {
+                  const typeValue = assets.filter(a => a.assetType === type).reduce((sum, a) => sum + (a.currentValue || 0), 0);
+                  return total + (typeValue * (dropPercent / 100));
+                }, 0);
+                const portfolioValue = portfolio?.totalValue || 0;
+                const impactPercent = portfolioValue > 0 ? (totalImpact / portfolioValue) * 100 : 0;
+                const remainingValue = portfolioValue - totalImpact;
+                
+                return (
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <p className="text-xs text-gray-400">Loss Amount</p>
+                      <p className="text-lg font-bold text-red-400">
+                        {showValues ? `-$${totalImpact.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400">Loss %</p>
+                      <p className="text-lg font-bold text-red-400">
+                        -{impactPercent.toFixed(1)}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400">Remaining</p>
+                      <p className="text-lg font-bold text-white">
+                        {showValues ? `$${remainingValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                onClick={() => setCustomScenario({
+                  crypto: 30,
+                  stock: 20,
+                  etf: 15,
+                  bond: 5,
+                  retirement: 10,
+                  cash: 0,
+                  stablecoin: 1,
+                  real_estate: 10,
+                  commodity: 15,
+                  other: 15,
+                })}
+                className="flex-1 border-slate-600 text-gray-300 hover:bg-slate-800"
+                data-testid="button-reset-scenario"
+              >
+                Reset to Default
+              </Button>
+              <Button 
+                onClick={() => {
+                  toast({ title: 'Scenario Saved', description: 'Your custom stress test scenario has been applied' });
+                  setShowStressTestDialog(false);
+                }}
+                className="flex-1 bg-red-600 hover:bg-red-500"
+                data-testid="button-apply-scenario"
+              >
+                Apply Scenario
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
