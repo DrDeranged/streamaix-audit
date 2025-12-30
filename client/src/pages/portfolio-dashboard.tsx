@@ -1088,13 +1088,29 @@ export default function PortfolioDashboard() {
 
               {/* Quick Actions Bar */}
               <Card className="bg-slate-900/60 border-slate-700/50 p-3 mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        syncMutation.mutate();
+                        refetchPortfolio();
+                        refetchAnalysis();
+                        refetchAnalytics();
+                      }}
+                      disabled={syncMutation.isPending}
+                      className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10"
+                      data-testid="button-refresh"
+                    >
+                      <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
+                      {syncMutation.isPending ? 'Syncing...' : 'Refresh'}
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowAlertDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800"
+                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden sm:flex"
                       data-testid="button-set-alert"
                     >
                       <Bell className="w-4 h-4 mr-2" />
@@ -1104,7 +1120,7 @@ export default function PortfolioDashboard() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowRebalanceDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800"
+                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden sm:flex"
                       data-testid="button-rebalance"
                     >
                       <Scale className="w-4 h-4 mr-2" />
@@ -1114,7 +1130,7 @@ export default function PortfolioDashboard() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowTaxDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800"
+                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden md:flex"
                       data-testid="button-tax-loss"
                     >
                       <Percent className="w-4 h-4 mr-2" />

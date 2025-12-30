@@ -146,13 +146,20 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Detect mobile for optimized refetching
+const isMobile = typeof window !== 'undefined' && (
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+  window.innerWidth < 768
+);
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: 10 * 60 * 1000, // 10 minutes - increased for better performance
+      refetchOnWindowFocus: isMobile, // Enable on mobile to refresh when app returns to foreground
+      refetchOnReconnect: true, // Refetch when network reconnects
+      staleTime: isMobile ? 5 * 60 * 1000 : 10 * 60 * 1000, // 5 min mobile, 10 min desktop
       gcTime: 30 * 60 * 1000, // 30 minutes garbage collection (renamed from cacheTime in v5)
       retry: (failureCount: number, error: any) => {
         // Don't retry on 4xx errors
@@ -170,3 +177,12 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Listen for visibility changes to refetch on mobile when app comes back
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isMobile) {
+      queryClient.invalidateQueries();
+    }
+  });
+}
