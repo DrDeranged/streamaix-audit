@@ -308,7 +308,7 @@ function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValue
   );
 }
 
-function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null; assets: PortfolioAsset[] }) {
+function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null | undefined; assets: PortfolioAsset[] }) {
   const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y'>('1M');
   
   const generateMockData = () => {
@@ -333,13 +333,13 @@ function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null; 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
           {(['1D', '1W', '1M', '3M', 'YTD', '1Y'] as const).map(tf => (
             <button
               key={tf}
               onClick={() => setTimeframe(tf)}
               className={cn(
-                "px-2 py-1 text-xs rounded transition-colors",
+                "px-3 py-2 text-xs rounded transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0",
                 timeframe === tf 
                   ? "bg-purple-500/20 text-purple-400" 
                   : "text-gray-500 hover:text-gray-300"
@@ -500,24 +500,24 @@ function CorrelationMatrix({ assets }: { assets: PortfolioAsset[] }) {
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs">
+    <div className="overflow-x-auto -mx-2 px-2">
+      <table className="w-full text-xs min-w-[280px]">
         <thead>
           <tr>
-            <th className="p-1"></th>
+            <th className="p-1.5"></th>
             {topAssets.map(a => (
-              <th key={a.symbol} className="p-1 text-gray-400 font-medium">{a.symbol}</th>
+              <th key={a.symbol} className="p-1.5 text-gray-400 font-medium text-[11px]">{a.symbol}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {topAssets.map(a => (
             <tr key={a.symbol}>
-              <td className="p-1 text-gray-400 font-medium">{a.symbol}</td>
+              <td className="p-1.5 text-gray-400 font-medium text-[11px]">{a.symbol}</td>
               {topAssets.map(b => (
-                <td key={b.symbol} className="p-1">
+                <td key={b.symbol} className="p-1.5">
                   <div className={cn(
-                    "w-8 h-8 flex items-center justify-center rounded text-[10px] font-medium",
+                    "w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded text-[11px] sm:text-[10px] font-medium",
                     getCorrelationColor(correlations[a.symbol][b.symbol])
                   )}>
                     {correlations[a.symbol][b.symbol].toFixed(1)}
@@ -528,7 +528,7 @@ function CorrelationMatrix({ assets }: { assets: PortfolioAsset[] }) {
           ))}
         </tbody>
       </table>
-      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-gray-500">
+      <div className="flex items-center justify-center gap-4 mt-3 text-[11px] sm:text-[10px] text-gray-500">
         <span className="flex items-center gap-1">
           <div className="w-3 h-3 rounded bg-red-500/60"></div> High
         </span>
@@ -1703,13 +1703,13 @@ export default function PortfolioDashboard() {
                         Risk Metrics
                       </h2>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                         <div className="flex items-center gap-2 mb-2">
                           <Activity className="w-4 h-4 text-blue-400" />
                           <span className="text-xs text-gray-400">Volatility</span>
                         </div>
-                        <p className="text-xl font-bold text-white">
+                        <p className="text-lg sm:text-xl font-bold text-white">
                           {assets.length > 0 ? 'Medium' : '--'}
                         </p>
                       </div>
@@ -1718,7 +1718,7 @@ export default function PortfolioDashboard() {
                           <Crosshair className="w-4 h-4 text-amber-400" />
                           <span className="text-xs text-gray-400">Concentration</span>
                         </div>
-                        <p className="text-xl font-bold text-white">
+                        <p className="text-lg sm:text-xl font-bold text-white">
                           {assets.length > 0 ? `${assets.length > 1 ? Math.round(100 / assets.length) : 100}%` : '--'}
                         </p>
                       </div>
@@ -1727,7 +1727,7 @@ export default function PortfolioDashboard() {
                           <Shield className="w-4 h-4 text-green-400" />
                           <span className="text-xs text-gray-400">Diversification</span>
                         </div>
-                        <p className="text-xl font-bold text-white">
+                        <p className="text-lg sm:text-xl font-bold text-white">
                           {analysis?.diversificationScore || portfolio?.diversificationScore || '--'}%
                         </p>
                       </div>
