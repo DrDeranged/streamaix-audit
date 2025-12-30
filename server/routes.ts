@@ -17079,6 +17079,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
     
+    // Growth Strategy: DCA opportunity for assets that are down
+    const dcaCandidates = assets.filter(a => (a.priceChange24h || 0) < -5 && a.assetType !== 'cash');
+    if (dcaCandidates.length > 0) {
+      const topCandidate = dcaCandidates.sort((a, b) => (a.priceChange24h || 0) - (b.priceChange24h || 0))[0];
+      recommendations.push({
+        type: 'growth_dca',
+        message: `${topCandidate.symbol} is down ${Math.abs(topCandidate.priceChange24h || 0).toFixed(1)}% today. Consider dollar-cost averaging to lower your cost basis.`,
+        priority: 'medium',
+        action: 'Add to position'
+      });
+    }
+    
+    // Growth Strategy: Take profit on winners
+    const winners = assets.filter(a => (a.unrealizedPnlPercent || 0) > 50);
+    if (winners.length > 0) {
+      const topWinner = winners.sort((a, b) => (b.unrealizedPnlPercent || 0) - (a.unrealizedPnlPercent || 0))[0];
+      recommendations.push({
+        type: 'growth_profit',
+        message: `${topWinner.symbol} is up ${(topWinner.unrealizedPnlPercent || 0).toFixed(0)}%. Consider taking partial profits to lock in gains.`,
+        priority: 'low',
+        action: 'Take profits'
+      });
+    }
+    
+    // Growth Strategy: Momentum play
+    const momentumAssets = assets.filter(a => (a.priceChange24h || 0) > 5 && (a.priceChange7d || 0) > 10);
+    if (momentumAssets.length > 0) {
+      recommendations.push({
+        type: 'growth_momentum',
+        message: `${momentumAssets.length} asset(s) showing strong momentum. Monitor for potential breakout opportunities.`,
+        priority: 'low',
+        action: 'View trending'
+      });
+    }
+    
+    // Growth Strategy: Concentration risk - rebalancing opportunity
+    const largestHolding = assets.sort((a, b) => (b.currentValue || 0) - (a.currentValue || 0))[0];
+    if (largestHolding && totalValue > 0) {
+      const largestAllocation = ((largestHolding.currentValue || 0) / totalValue) * 100;
+      if (largestAllocation > 40) {
+        recommendations.push({
+          type: 'growth_rebalance',
+          message: `${largestHolding.symbol} represents ${largestAllocation.toFixed(0)}% of your portfolio. Rebalancing could reduce risk and improve returns.`,
+          priority: 'high',
+          action: 'Rebalance'
+        });
+      }
+    }
+    
     // Update portfolio with analysis
     await db.update(portfolios).set({
       healthScore,

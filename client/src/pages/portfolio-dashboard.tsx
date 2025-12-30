@@ -55,6 +55,7 @@ interface PortfolioAsset {
   unrealizedPnlPercent: number;
   priceChange24h?: number;
   priceChange7d?: number;
+  priceLastUpdated?: string;
   allocationPercent: number;
   accountName?: string;
   color?: string;
@@ -792,6 +793,23 @@ export default function PortfolioDashboard() {
   const assets = portfolioData?.assets || [];
   const insights = portfolioData?.insights || [];
   const analysis = analysisData?.analysis;
+  
+  // Auto-sync prices when portfolio loads and has assets
+  useEffect(() => {
+    if (activePortfolioId && assets.length > 0 && !syncMutation.isPending) {
+      // Check if last sync was more than 5 minutes ago
+      const lastUpdated = assets[0]?.priceLastUpdated;
+      const needsSync = !lastUpdated || (Date.now() - new Date(lastUpdated).getTime() > 300000);
+      if (needsSync) {
+        syncMutation.mutate();
+      }
+    }
+  }, [activePortfolioId, assets.length]);
+  
+  // Calculate total PnL for header display
+  const totalPnl = assets.reduce((sum, a) => sum + (a.unrealizedPnl || 0), 0);
+  const totalPnlPercent = portfolio?.totalValue ? (totalPnl / (portfolio.totalValue - totalPnl)) * 100 : 0;
+  const isPnlPositive = totalPnl >= 0;
 
   if (portfoliosLoading) {
     return (
@@ -828,7 +846,15 @@ export default function PortfolioDashboard() {
                 <p className="text-sm text-gray-500">Unified asset management with AI intelligence</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Total PnL indicator */}
+              {assets.length > 0 && showValues && (
+                <div className={cn("px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5", isPnlPositive ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20')}>
+                  {isPnlPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+                  <span>{isPnlPositive ? '+' : ''}{totalPnlPercent.toFixed(1)}%</span>
+                  <span className="text-xs opacity-70 ml-1">${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -837,17 +863,24 @@ export default function PortfolioDashboard() {
               >
                 {showValues ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => syncMutation.mutate()}
-                disabled={syncMutation.isPending || !activePortfolioId}
-                className="border-slate-700 text-gray-300 hover:bg-slate-800 hover:text-white"
-                data-testid="sync-portfolio-button"
-              >
-                <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
-                Sync
-              </Button>
+              <div className="flex flex-col items-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => syncMutation.mutate()}
+                  disabled={syncMutation.isPending || !activePortfolioId}
+                  className="border-slate-700 text-gray-300 hover:bg-slate-800 hover:text-white"
+                  data-testid="sync-portfolio-button"
+                >
+                  <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
+                  {syncMutation.isPending ? 'Syncing...' : 'Sync Prices'}
+                </Button>
+                {assets[0]?.priceLastUpdated && (
+                  <span className="text-[10px] text-gray-500 mt-0.5">
+                    Updated {new Date(assets[0].priceLastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
               {activePortfolioId && (
                 <AddAssetDialog portfolioId={activePortfolioId} onSuccess={() => refetchPortfolio()} />
               )}
