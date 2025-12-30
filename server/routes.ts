@@ -16920,16 +16920,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .filter(a => a.assetType === 'stock' || a.assetType === 'etf')
       .map(a => a.symbol.toUpperCase());
     
-    // Fetch current prices in batch
+    console.log(`📊 Syncing portfolio prices: ${cryptoSymbols.length} crypto, ${stockSymbols.length} stocks`);
+    
+    // Fetch current prices - crypto in batch (CoinGecko Pro), stocks individually (Finnhub)
     let cryptoQuotes: any[] = [];
-    let stockData: any[] = [];
+    const stockQuotes = new Map<string, any>();
     
     try {
+      // Crypto: Use CoinGecko Pro batch API (7-tier fallback)
       if (cryptoSymbols.length > 0) {
+        console.log(`🪙 Fetching crypto prices from CoinGecko Pro: ${cryptoSymbols.join(', ')}`);
         cryptoQuotes = await marketDataService.getCryptoQuotes(cryptoSymbols) || [];
+        console.log(`✅ Got ${cryptoQuotes.length} crypto quotes`);
       }
+      
+      // Stocks: Fetch each individually from Finnhub for accuracy
       if (stockSymbols.length > 0) {
-        stockData = await marketDataService.getCryptoStocks() || [];
+        console.log(`📈 Fetching stock prices from Finnhub: ${stockSymbols.join(', ')}`);
+        for (const symbol of stockSymbols) {
+          const quote = await marketDataService.getStockQuote(symbol);
+          if (quote) {
+            stockQuotes.set(symbol, quote);
+          }
+        }
+        console.log(`✅ Got ${stockQuotes.size} stock quotes`);
       }
     } catch (e) {
       console.error('Failed to fetch market data for sync:', e);
@@ -16946,16 +16960,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentPrice = coin.price;
           priceChange24h = coin.percentChange24h || 0;
           priceChange7d = coin.percentChange7d || 0;
+          console.log(`  ✅ ${asset.symbol}: $${currentPrice.toLocaleString()} (${priceChange24h > 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`);
+        } else {
+          console.log(`  ⚠️ ${asset.symbol}: No price data found`);
         }
       } else if (asset.assetType === 'stock' || asset.assetType === 'etf') {
-        let stock = stockData.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
-        // If not in batch, try fetching individually
-        if (!stock) {
-          stock = await marketDataService.getStockQuote(asset.symbol);
-        }
+        const stock = stockQuotes.get(asset.symbol.toUpperCase());
         if (stock) {
           currentPrice = stock.price;
           priceChange24h = stock.percentChange24h || 0;
+          console.log(`  ✅ ${asset.symbol}: $${currentPrice.toLocaleString()} (${priceChange24h > 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`);
+        } else {
+          console.log(`  ⚠️ ${asset.symbol}: No price data found`);
         }
       } else if (asset.assetType === 'cash') {
         currentPrice = 1;
