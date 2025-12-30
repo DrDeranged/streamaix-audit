@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
@@ -105,6 +106,85 @@ const riskLevelColors: Record<string, string> = {
   aggressive: 'text-orange-400 bg-orange-500/20',
   extreme: 'text-red-400 bg-red-500/20',
 };
+
+function CollapsibleSection({ 
+  title, 
+  icon: Icon, 
+  iconColor, 
+  children, 
+  defaultOpen = true,
+  badge 
+}: { 
+  title: string; 
+  icon: any; 
+  iconColor: string; 
+  children: React.ReactNode; 
+  defaultOpen?: boolean;
+  badge?: React.ReactNode;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="bg-slate-900/80 border-slate-700/50 overflow-hidden">
+        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+          <div className="flex items-center gap-2">
+            <Icon className={cn("w-5 h-5", iconColor)} />
+            <h2 className="text-lg font-semibold text-white">{title}</h2>
+            {badge}
+          </div>
+          <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", isOpen && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="px-6 pb-6">
+            {children}
+          </div>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+}
+
+function QuickStatCard({ 
+  label, 
+  value, 
+  subtext, 
+  trend, 
+  icon: Icon, 
+  iconColor,
+  bgGradient 
+}: { 
+  label: string; 
+  value: string; 
+  subtext?: string; 
+  trend?: 'up' | 'down' | 'neutral'; 
+  icon: any; 
+  iconColor: string;
+  bgGradient?: string;
+}) {
+  return (
+    <div className={cn(
+      "relative overflow-hidden rounded-xl p-4 border transition-all hover:scale-[1.02]",
+      bgGradient || "bg-slate-800/50 border-slate-700/50"
+    )}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-gray-400 mb-1">{label}</p>
+          <p className="text-xl font-bold text-white">{value}</p>
+          {subtext && (
+            <p className={cn("text-xs mt-1", 
+              trend === 'up' ? 'text-green-400' : 
+              trend === 'down' ? 'text-red-400' : 'text-gray-500'
+            )}>{subtext}</p>
+          )}
+        </div>
+        <div className={cn("p-2 rounded-lg bg-white/5")}>
+          <Icon className={cn("w-4 h-4", iconColor)} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function HealthScoreRing({ score }: { score: number }) {
   const circumference = 2 * Math.PI * 45;
@@ -1320,6 +1400,7 @@ export default function PortfolioDashboard() {
               )}
             </div>
           </div>
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4" />
 
           {portfolios.length === 0 ? (
             <motion.div
@@ -1402,7 +1483,7 @@ export default function PortfolioDashboard() {
               {/* Premium Stats Row */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                 {/* Total Value Card - Primary */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/30 border-purple-500/20 p-5">
+                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/30 border-purple-500/20 p-5 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
@@ -1427,7 +1508,7 @@ export default function PortfolioDashboard() {
                 </Card>
 
                 {/* Cost Basis Card */}
-                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-slate-600/50 transition-colors">
+                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5 transition-all">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-2 rounded-lg bg-blue-500/10">
                       <Target className="w-4 h-4 text-blue-400" />
@@ -1441,7 +1522,7 @@ export default function PortfolioDashboard() {
                 </Card>
 
                 {/* Assets Count Card */}
-                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-slate-600/50 transition-colors">
+                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/5 transition-all">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-2 rounded-lg bg-cyan-500/10">
                       <Layers className="w-4 h-4 text-cyan-400" />
@@ -1453,7 +1534,7 @@ export default function PortfolioDashboard() {
                 </Card>
 
                 {/* AI Health Score Card */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-amber-900/20 border-amber-500/20 p-5">
+                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-amber-900/20 border-amber-500/20 p-5 hover:border-amber-500/40 transition-all hover:shadow-lg hover:shadow-amber-500/10">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
@@ -2036,6 +2117,16 @@ export default function PortfolioDashboard() {
                     </div>
                     <NewsAggregator assets={assets} />
                   </Card>
+                </div>
+              </div>
+
+              {/* Section Divider */}
+              <div className="relative py-8">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-700/50" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-slate-950 px-4 text-xs text-gray-500 uppercase tracking-wider">Advanced Analytics</span>
                 </div>
               </div>
 
