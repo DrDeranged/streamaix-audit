@@ -16709,19 +16709,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let currentPrice = 0;
     try {
       if (assetType === 'crypto' || assetType === 'stablecoin') {
-        const cryptoData = await marketDataService.getCryptoData();
-        const coin = cryptoData?.find((c: any) => c.symbol.toLowerCase() === symbol.toLowerCase());
-        currentPrice = coin?.current_price || averageCostBasis || 0;
+        const quotes = await marketDataService.getCryptoQuotes([symbol.toUpperCase()]);
+        const coin = quotes?.find((c: any) => c.symbol.toUpperCase() === symbol.toUpperCase());
+        currentPrice = coin?.price || averageCostBasis || 0;
       } else if (assetType === 'stock' || assetType === 'etf') {
-        const stockData = await marketDataService.getStockData();
+        const stockData = await marketDataService.getCryptoStocks();
         const stock = stockData?.find((s: any) => s.symbol.toUpperCase() === symbol.toUpperCase());
-        currentPrice = stock?.current_price || averageCostBasis || 0;
+        currentPrice = stock?.price || averageCostBasis || 0;
       } else if (assetType === 'cash') {
         currentPrice = 1; // USD
       } else {
         currentPrice = averageCostBasis || 0;
       }
     } catch (e) {
+      console.error('Failed to fetch price for', symbol, e);
       currentPrice = averageCostBasis || 0;
     }
     
@@ -16911,13 +16912,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
     
-    // Fetch current prices
-    let cryptoData: any[] = [];
+    // Collect all crypto and stock symbols
+    const cryptoSymbols = assets
+      .filter(a => a.assetType === 'crypto' || a.assetType === 'stablecoin')
+      .map(a => a.symbol.toUpperCase());
+    const stockSymbols = assets
+      .filter(a => a.assetType === 'stock' || a.assetType === 'etf')
+      .map(a => a.symbol.toUpperCase());
+    
+    // Fetch current prices in batch
+    let cryptoQuotes: any[] = [];
     let stockData: any[] = [];
     
     try {
-      cryptoData = await marketDataService.getCryptoData() || [];
-      stockData = await marketDataService.getStockData() || [];
+      if (cryptoSymbols.length > 0) {
+        cryptoQuotes = await marketDataService.getCryptoQuotes(cryptoSymbols) || [];
+      }
+      if (stockSymbols.length > 0) {
+        stockData = await marketDataService.getCryptoStocks() || [];
+      }
     } catch (e) {
       console.error('Failed to fetch market data for sync:', e);
     }
@@ -16926,11 +16939,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let currentPrice = asset.currentPrice || 0;
       
       if (asset.assetType === 'crypto' || asset.assetType === 'stablecoin') {
-        const coin = cryptoData.find((c: any) => c.symbol.toLowerCase() === asset.symbol.toLowerCase());
-        if (coin) currentPrice = coin.current_price;
+        const coin = cryptoQuotes.find((c: any) => c.symbol.toUpperCase() === asset.symbol.toUpperCase());
+        if (coin) currentPrice = coin.price;
       } else if (asset.assetType === 'stock' || asset.assetType === 'etf') {
         const stock = stockData.find((s: any) => s.symbol.toUpperCase() === asset.symbol.toUpperCase());
-        if (stock) currentPrice = stock.current_price;
+        if (stock) currentPrice = stock.price;
       } else if (asset.assetType === 'cash') {
         currentPrice = 1;
       }
