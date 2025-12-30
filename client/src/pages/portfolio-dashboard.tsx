@@ -2596,22 +2596,6 @@ export default function PortfolioDashboard() {
 
   const priceAlerts = alertsData?.alerts || [];
 
-  // Fetch portfolio events (Fed meetings, token unlocks, earnings)
-  const symbolsString = assets.map(a => a.symbol).join(',');
-  const { data: eventsData } = useQuery<{ events: Array<{
-    id: string;
-    date: string;
-    title: string;
-    type: 'earnings' | 'fed' | 'unlock' | 'halving' | 'network';
-    symbol?: string;
-    description?: string;
-  }> }>({
-    queryKey: ['/api/portfolio-events', symbolsString],
-    enabled: assets.length > 0,
-  });
-
-  const portfolioEvents = eventsData?.events || [];
-
   // Create alert mutation
   const createAlertMutation = useMutation({
     mutationFn: async (data: { symbol: string; name: string; assetType: string; alertType: string; targetPrice: number; currentPriceAtCreation: number; portfolioId?: string }) => {
@@ -2705,6 +2689,22 @@ export default function PortfolioDashboard() {
       return asset;
     });
   }, [rawAssets, livePrices]);
+
+  // Fetch portfolio events (Fed meetings, token unlocks, earnings)
+  const symbolsString = assets.map(a => a.symbol).join(',');
+  const { data: eventsData } = useQuery<{ events: Array<{
+    id: string;
+    date: string;
+    title: string;
+    type: 'earnings' | 'fed' | 'unlock' | 'halving' | 'network';
+    symbol?: string;
+    description?: string;
+  }> }>({
+    queryKey: ['/api/portfolio-events', symbolsString],
+    enabled: assets.length > 0,
+  });
+
+  const portfolioEvents = eventsData?.events || [];
   
   // Auto-sync prices when portfolio loads and has assets
   useEffect(() => {
