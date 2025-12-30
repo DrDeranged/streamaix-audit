@@ -11,7 +11,7 @@ import {
   ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search,
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
   Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
-  Calendar, Receipt, FileText
+  Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
@@ -170,6 +172,214 @@ function AllocationChart({ allocation }: { allocation: Record<string, number> })
         })}
         <circle cx="50" cy="50" r="25" fill="#0f172a" />
       </svg>
+    </div>
+  );
+}
+
+function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValues: boolean }) {
+  const sortedByChange = [...assets].sort((a, b) => 
+    Math.abs(b.priceChange24h || 0) - Math.abs(a.priceChange24h || 0)
+  );
+  const gainers = sortedByChange.filter(a => (a.priceChange24h || 0) > 0).slice(0, 3);
+  const losers = sortedByChange.filter(a => (a.priceChange24h || 0) < 0).slice(0, 3);
+
+  if (assets.length === 0) {
+    return (
+      <div className="text-center py-6">
+        <Activity className="w-8 h-8 mx-auto text-gray-600 mb-2" />
+        <p className="text-sm text-gray-400">Add assets to see top movers</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <h4 className="text-xs font-medium text-green-400 mb-2 flex items-center gap-1">
+          <TrendingUp className="w-3 h-3" /> Top Gainers
+        </h4>
+        <div className="space-y-2">
+          {gainers.length > 0 ? gainers.map(asset => (
+            <div key={asset.id} className="flex items-center justify-between p-2 bg-green-500/5 border border-green-500/20 rounded-lg">
+              <span className="text-sm font-medium text-white">{asset.symbol}</span>
+              <span className="text-xs text-green-400">+{(asset.priceChange24h || 0).toFixed(2)}%</span>
+            </div>
+          )) : (
+            <p className="text-xs text-gray-500 py-2">No gainers today</p>
+          )}
+        </div>
+      </div>
+      <div>
+        <h4 className="text-xs font-medium text-red-400 mb-2 flex items-center gap-1">
+          <TrendingDown className="w-3 h-3" /> Top Losers
+        </h4>
+        <div className="space-y-2">
+          {losers.length > 0 ? losers.map(asset => (
+            <div key={asset.id} className="flex items-center justify-between p-2 bg-red-500/5 border border-red-500/20 rounded-lg">
+              <span className="text-sm font-medium text-white">{asset.symbol}</span>
+              <span className="text-xs text-red-400">{(asset.priceChange24h || 0).toFixed(2)}%</span>
+            </div>
+          )) : (
+            <p className="text-xs text-gray-500 py-2">No losers today</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null; assets: PortfolioAsset[] }) {
+  const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y'>('1M');
+  
+  const generateMockData = () => {
+    const points = timeframe === '1D' ? 24 : timeframe === '1W' ? 7 : timeframe === '1M' ? 30 : timeframe === '3M' ? 90 : timeframe === 'YTD' ? 365 : 365;
+    const baseValue = portfolio?.totalValue || 10000;
+    const data = [];
+    let current = baseValue * 0.85;
+    for (let i = 0; i < points; i++) {
+      current = current + (Math.random() - 0.48) * (baseValue * 0.02);
+      data.push(Math.max(0, current));
+    }
+    data[data.length - 1] = baseValue;
+    return data;
+  };
+
+  const data = generateMockData();
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const isPositive = data[data.length - 1] >= data[0];
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex gap-1">
+          {(['1D', '1W', '1M', '3M', 'YTD', '1Y'] as const).map(tf => (
+            <button
+              key={tf}
+              onClick={() => setTimeframe(tf)}
+              className={cn(
+                "px-2 py-1 text-xs rounded transition-colors",
+                timeframe === tf 
+                  ? "bg-purple-500/20 text-purple-400" 
+                  : "text-gray-500 hover:text-gray-300"
+              )}
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="h-32 flex items-end gap-[2px]">
+        {data.map((value, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex-1 rounded-t transition-all",
+              isPositive ? "bg-green-500/60" : "bg-red-500/60"
+            )}
+            style={{ height: `${((value - min) / range) * 100}%`, minHeight: '2px' }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-between text-[10px] text-gray-500 mt-2">
+        <span>{timeframe === '1D' ? '24h ago' : timeframe === '1W' ? '7d ago' : timeframe === '1M' ? '30d ago' : timeframe === '3M' ? '90d ago' : timeframe === 'YTD' ? 'Jan 1' : '1y ago'}</span>
+        <span>Now</span>
+      </div>
+    </div>
+  );
+}
+
+function WatchlistPanel() {
+  const [watchlist, setWatchlist] = useState([
+    { symbol: 'AAPL', name: 'Apple Inc.', price: 178.45, change: 1.2 },
+    { symbol: 'TSLA', name: 'Tesla Inc.', price: 245.80, change: -2.5 },
+    { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 495.20, change: 3.8 },
+  ]);
+  const [newSymbol, setNewSymbol] = useState('');
+
+  const addToWatchlist = () => {
+    if (newSymbol.trim()) {
+      setWatchlist([...watchlist, { 
+        symbol: newSymbol.toUpperCase(), 
+        name: newSymbol.toUpperCase(), 
+        price: Math.random() * 500, 
+        change: (Math.random() - 0.5) * 10 
+      }]);
+      setNewSymbol('');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-3">
+        <Input
+          placeholder="Add symbol..."
+          value={newSymbol}
+          onChange={(e) => setNewSymbol(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addToWatchlist()}
+          className="h-8 text-xs bg-slate-800 border-slate-600"
+        />
+        <Button size="sm" onClick={addToWatchlist} className="h-8 px-2 bg-purple-600 hover:bg-purple-500">
+          <Plus className="w-4 h-4" />
+        </Button>
+      </div>
+      <div className="space-y-2">
+        {watchlist.map((item, i) => (
+          <div key={i} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group">
+            <div className="flex items-center gap-2">
+              <Star className="w-3 h-3 text-amber-400" />
+              <div>
+                <span className="text-sm font-medium text-white">{item.symbol}</span>
+                <p className="text-[10px] text-gray-500">{item.name}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-sm text-white">${item.price.toFixed(2)}</span>
+              <p className={cn("text-[10px]", item.change >= 0 ? 'text-green-400' : 'text-red-400')}>
+                {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GoalTracker({ currentValue }: { currentValue: number }) {
+  const [goals, setGoals] = useState([
+    { name: 'Financial Freedom', target: 1000000, deadline: '2030-01-01' },
+    { name: 'Emergency Fund', target: 50000, deadline: '2025-06-01' },
+  ]);
+
+  return (
+    <div className="space-y-3">
+      {goals.map((goal, i) => {
+        const progress = Math.min(100, (currentValue / goal.target) * 100);
+        const daysLeft = Math.max(0, Math.floor((new Date(goal.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+        return (
+          <div key={i} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-white">{goal.name}</span>
+              <span className="text-xs text-gray-500">{daysLeft}d left</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <Progress value={progress} className="h-2" />
+              </div>
+              <span className="text-xs text-gray-400">{progress.toFixed(0)}%</span>
+            </div>
+            <div className="flex justify-between mt-2 text-[10px] text-gray-500">
+              <span>${currentValue.toLocaleString()}</span>
+              <span>Goal: ${goal.target.toLocaleString()}</span>
+            </div>
+          </div>
+        );
+      })}
+      <Button variant="ghost" size="sm" className="w-full text-xs text-purple-400 hover:text-purple-300">
+        <Plus className="w-3 h-3 mr-1" /> Add Goal
+      </Button>
     </div>
   );
 }
@@ -1190,6 +1400,20 @@ export default function PortfolioDashboard() {
                     )}
                   </Card>
 
+                  {/* Performance Chart */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <LineChart className="w-5 h-5 text-green-400" />
+                        Performance
+                      </h2>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">
+                        {((portfolio?.totalPnlPercent || 0) >= 0 ? '+' : '')}{(portfolio?.totalPnlPercent || 0).toFixed(2)}% all time
+                      </Badge>
+                    </div>
+                    <PerformanceChart portfolio={portfolio} assets={assets} />
+                  </Card>
+
                   {/* Risk & Metrics Panel */}
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1336,6 +1560,17 @@ export default function PortfolioDashboard() {
                       )}
                     </Card>
                   </div>
+
+                  {/* Top Movers */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-purple-400" />
+                        Top Movers (24h)
+                      </h2>
+                    </div>
+                    <TopMovers assets={assets} showValues={showValues} />
+                  </Card>
 
                   {/* AI Insights Feed */}
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
@@ -1543,6 +1778,28 @@ export default function PortfolioDashboard() {
                         <p className="text-xs text-gray-500 text-center py-4">Add assets to see relevant events</p>
                       )}
                     </div>
+                  </Card>
+
+                  {/* Watchlist */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <Star className="w-4 h-4 text-amber-400" />
+                        Watchlist
+                      </h3>
+                    </div>
+                    <WatchlistPanel />
+                  </Card>
+
+                  {/* Goal Tracker */}
+                  <Card className="bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/20 border-purple-500/20 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <Target className="w-4 h-4 text-purple-400" />
+                        Goals
+                      </h3>
+                    </div>
+                    <GoalTracker currentValue={portfolio?.totalValue || 0} />
                   </Card>
                 </div>
               </div>
