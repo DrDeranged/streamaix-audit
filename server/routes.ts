@@ -17711,6 +17711,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // =============================================================================
+  // PORTFOLIO WATCHLIST API (watchlistItems table)
+  // =============================================================================
+
+  // Get user's portfolio watchlist
+  app.get("/api/watchlist", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const items = await storage.getPortfolioWatchlist(userId);
+    res.json({ success: true, items });
+  }));
+
+  // Add item to portfolio watchlist
+  app.post("/api/watchlist", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { symbol, name, assetType, addedPrice, logoUrl, notes } = req.body;
+    
+    if (!symbol || !name || !assetType || addedPrice === undefined) {
+      return res.status(400).json({ error: 'Symbol, name, asset type, and price are required' });
+    }
+    
+    const newItem = await storage.addToPortfolioWatchlist({
+      userId,
+      symbol: symbol.toUpperCase(),
+      name,
+      assetType,
+      addedPrice: parseFloat(addedPrice),
+      currentPrice: parseFloat(addedPrice),
+      priceChange24h: 0,
+      priceChangeSinceAdded: 0,
+      logoUrl: logoUrl || null,
+      notes: notes || null,
+    });
+    
+    res.json({ success: true, item: newItem });
+  }));
+
+  // Remove item from portfolio watchlist
+  app.delete("/api/watchlist/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    await storage.removeFromPortfolioWatchlist(id, userId);
+    res.json({ success: true });
+  }));
+
+  // =============================================================================
   // PORTFOLIO NEWS API
   // =============================================================================
 

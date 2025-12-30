@@ -11,8 +11,19 @@ import {
   ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search,
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
   Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
-  Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History, CheckCircle
+  Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History, CheckCircle,
+  BookMarked, ShoppingCart
 } from 'lucide-react';
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from 'recharts';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +82,29 @@ interface AIAnalysis {
   recommendations: Array<{ type: string; message: string; priority: string; action?: string }>;
   allocation: Record<string, number>;
   totalValue: number;
+}
+
+interface WatchlistItemType {
+  id: string;
+  symbol: string;
+  name: string;
+  assetType: string;
+  addedPrice: number;
+  currentPrice: number | null;
+  priceChange24h: number | null;
+  priceChangeSinceAdded: number | null;
+  logoUrl?: string | null;
+  notes?: string | null;
+  createdAt?: string;
+}
+
+interface PortfolioSnapshot {
+  id: string;
+  portfolioId: string;
+  totalValue: number;
+  totalCostBasis: number;
+  totalPnl: number;
+  snapshotDate: string;
 }
 
 const assetTypeIcons: Record<string, any> = {
@@ -256,6 +290,498 @@ function AllocationChart({ allocation }: { allocation: Record<string, number> })
   );
 }
 
+function Sparkline({ priceChange7d }: { priceChange7d: number }) {
+  const data = useMemo(() => {
+    const change = priceChange7d || 0;
+    const points = 7;
+    const result = [];
+    for (let i = 0; i < points; i++) {
+      const progress = i / (points - 1);
+      const value = 100 + (change * progress) + (Math.random() - 0.5) * Math.abs(change) * 0.3;
+      result.push({ value });
+    }
+    return result;
+  }, [priceChange7d]);
+  
+  const isPositive = (priceChange7d || 0) >= 0;
+  const color = isPositive ? '#22c55e' : '#ef4444';
+  
+  return (
+    <div className="w-16 h-6" data-testid="sparkline-chart">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id={`sparkGrad-${isPositive ? 'up' : 'down'}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="100%" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={1.5}
+            fill={`url(#sparkGrad-${isPositive ? 'up' : 'down'})`}
+            dot={false}
+            isAnimationActive={false}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function NetWorthChart({ portfolioId }: { portfolioId: string }) {
+  const [timeRange, setTimeRange] = useState<'30d' | '90d' | '1y'>('30d');
+  
+  const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: PortfolioSnapshot[] }>({
+    queryKey: ['/api/portfolios', portfolioId, 'history'],
+    enabled: !!portfolioId,
+  });
+  
+  const chartData = useMemo(() => {
+    const snapshots = historyData?.snapshots || [];
+    if (snapshots.length === 0) return [];
+    
+    const now = new Date();
+    const daysMap: Record<string, number> = { '30d': 30, '90d': 90, '1y': 365 };
+    const days = daysMap[timeRange];
+    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    
+    return snapshots
+      .filter(s => new Date(s.snapshotDate) >= cutoff)
+      .sort((a, b) => new Date(a.snapshotDate).getTime() - new Date(b.snapshotDate).getTime())
+      .map(s => ({
+        date: new Date(s.snapshotDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        value: s.totalValue,
+        costBasis: s.totalCostBasis,
+      }));
+  }, [historyData, timeRange]);
+  
+  const formatValue = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value.toFixed(0)}`;
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="h-48 flex items-center justify-center">
+        <RefreshCw className="w-5 h-5 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+  
+  if (chartData.length === 0) {
+    return (
+      <div className="h-48 flex items-center justify-center border border-dashed border-slate-700 rounded-lg">
+        <div className="text-center">
+          <LineChart className="w-8 h-8 mx-auto text-gray-600 mb-2" />
+          <p className="text-sm text-gray-400">Not enough data for chart</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div data-testid="net-worth-chart">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-purple-500" />
+            <span className="text-xs text-gray-400">Value</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-slate-500" />
+            <span className="text-xs text-gray-400">Cost Basis</span>
+          </div>
+        </div>
+        <div className="flex gap-1">
+          {(['30d', '90d', '1y'] as const).map((range) => (
+            <Button
+              key={range}
+              variant="ghost"
+              size="sm"
+              onClick={() => setTimeRange(range)}
+              className={cn(
+                "h-7 px-2 text-xs",
+                timeRange === range ? 'bg-purple-500/20 text-purple-400' : 'text-gray-500 hover:text-white'
+              )}
+              data-testid={`button-range-${range}`}
+            >
+              {range.toUpperCase()}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            <defs>
+              <linearGradient id="valueGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#a855f7" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#a855f7" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis 
+              dataKey="date" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: '#6b7280', fontSize: 10 }}
+              interval="preserveStartEnd"
+            />
+            <YAxis 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: '#6b7280', fontSize: 10 }}
+              tickFormatter={formatValue}
+              width={50}
+            />
+            <RechartsTooltip
+              contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+              labelStyle={{ color: '#9ca3af' }}
+              formatter={(value: number) => [`$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, '']}
+            />
+            <Area
+              type="monotone"
+              dataKey="costBasis"
+              stroke="#64748b"
+              strokeWidth={1}
+              fill="none"
+              dot={false}
+              name="Cost Basis"
+            />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#a855f7"
+              strokeWidth={2}
+              fill="url(#valueGradient)"
+              dot={false}
+              name="Value"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function WatchlistItemRow({ 
+  item, 
+  onRemove, 
+  onBuy 
+}: { 
+  item: WatchlistItemType; 
+  onRemove: (id: string) => void;
+  onBuy: (item: WatchlistItemType) => void;
+}) {
+  const Icon = assetTypeIcons[item.assetType] || Wallet;
+  const colorGradient = assetTypeColors[item.assetType] || assetTypeColors.other;
+  const priceChange = item.priceChangeSinceAdded || 0;
+  const isPositive = priceChange >= 0;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:border-slate-600/50 hover:bg-slate-800/50 transition-all group"
+      data-testid={`watchlist-item-${item.symbol}`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={cn("p-2 rounded-lg bg-gradient-to-br", colorGradient)}>
+          <Icon className="w-4 h-4 text-white" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-white text-sm">{item.symbol}</span>
+            <span className="text-[10px] text-gray-500 uppercase">{item.assetType}</span>
+          </div>
+          <p className="text-xs text-gray-500 truncate max-w-[120px]">{item.name}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="text-right">
+          <p className="font-medium text-white text-sm">
+            ${(item.currentPrice || item.addedPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <div className={cn("flex items-center justify-end gap-0.5 text-xs", isPositive ? 'text-green-400' : 'text-red-400')}>
+            {isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+            <span>{isPositive ? '+' : ''}{priceChange.toFixed(1)}% since added</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onBuy(item)}
+            className="h-7 px-2 text-green-400 hover:bg-green-500/20"
+            data-testid={`button-buy-${item.symbol}`}
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onRemove(item.id)}
+            className="h-7 px-2 text-gray-400 hover:text-red-400 hover:bg-red-500/20"
+            data-testid={`button-remove-${item.symbol}`}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cryptoResults, setCryptoResults] = useState<any[]>([]);
+  const [stockResults, setStockResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setCryptoResults([]);
+      setStockResults([]);
+      return;
+    }
+    
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const [cryptoRes, stockRes] = await Promise.all([
+          fetch(`/api/crypto/search?q=${encodeURIComponent(searchQuery)}`).then(r => r.json()).catch(() => ({ coins: [] })),
+          fetch(`/api/stocks/search?q=${encodeURIComponent(searchQuery)}`).then(r => r.json()).catch(() => ({ results: [] })),
+        ]);
+        setCryptoResults(cryptoRes.coins || []);
+        setStockResults(stockRes.results || []);
+      } catch (error) {
+        console.error('Search failed:', error);
+      }
+      setIsSearching(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  
+  const addMutation = useMutation({
+    mutationFn: async (data: { symbol: string; name: string; assetType: string; addedPrice: number; logoUrl?: string }) => {
+      return apiRequest('/api/watchlist', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/watchlist'] });
+      toast({ title: 'Added to Watchlist', description: 'Asset is now being tracked' });
+      setOpen(false);
+      setSearchQuery('');
+      setCryptoResults([]);
+      setStockResults([]);
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to add', description: error.message, variant: 'destructive' });
+    },
+  });
+  
+  const handleSelect = async (result: any, type: 'crypto' | 'stock') => {
+    let price = 0;
+    try {
+      if (type === 'crypto') {
+        const res = await fetch(`/api/crypto/${result.id}/price`).then(r => r.json());
+        price = res.price || 0;
+      } else {
+        const res = await fetch(`/api/stocks/${result.symbol}/quote`).then(r => r.json());
+        price = res.price || 0;
+      }
+    } catch {}
+    
+    addMutation.mutate({
+      symbol: result.symbol.toUpperCase(),
+      name: result.name,
+      assetType: type,
+      addedPrice: price,
+      logoUrl: result.thumb || undefined,
+    });
+  };
+  
+  const hasResults = cryptoResults.length > 0 || stockResults.length > 0;
+  
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400" data-testid="add-watchlist-button">
+          <BookMarked className="w-4 h-4 mr-2" />
+          Add to Watchlist
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white">Add to Watchlist</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Input
+              placeholder="Search stocks or crypto..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-slate-800/50 border-slate-600 text-white pl-10 h-11"
+              data-testid="input-watchlist-search"
+              autoFocus
+            />
+            {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 animate-spin" />}
+          </div>
+          
+          {!searchQuery && (
+            <div className="text-center py-8 text-gray-500">
+              <BookMarked className="w-10 h-10 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">Track assets without buying</p>
+            </div>
+          )}
+          
+          {hasResults && (
+            <div className="border border-slate-700 rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
+              {stockResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                    <Building2 className="w-3 h-3" /> Stocks
+                  </div>
+                  {stockResults.slice(0, 5).map((result) => (
+                    <button
+                      key={result.symbol}
+                      onClick={() => handleSelect(result, 'stock')}
+                      disabled={addMutation.isPending}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors disabled:opacity-50"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                        <Building2 className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white">{result.symbol}</p>
+                        <p className="text-xs text-gray-500 truncate">{result.name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+              {cryptoResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                    <Bitcoin className="w-3 h-3" /> Crypto
+                  </div>
+                  {cryptoResults.slice(0, 5).map((result: any) => (
+                    <button
+                      key={result.id || result.symbol}
+                      onClick={() => handleSelect(result, 'crypto')}
+                      disabled={addMutation.isPending}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors disabled:opacity-50"
+                    >
+                      {result.thumb ? (
+                        <img src={result.thumb} alt={result.symbol} className="w-9 h-9 rounded-lg" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                          <Bitcoin className="w-4 h-4 text-orange-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white">{result.symbol.toUpperCase()}</p>
+                        <p className="text-xs text-gray-500 truncate">{result.name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+          
+          {searchQuery.length >= 2 && !hasResults && !isSearching && (
+            <div className="text-center py-8 text-gray-500">
+              <p className="text-sm">No results for "{searchQuery}"</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function WatchlistTab({ portfolioId, onBuyFromWatchlist }: { portfolioId: string; onBuyFromWatchlist: (item: WatchlistItemType) => void }) {
+  const { toast } = useToast();
+  
+  const { data: watchlistData, isLoading, refetch } = useQuery<{ items: WatchlistItemType[] }>({
+    queryKey: ['/api/watchlist'],
+  });
+  
+  const watchlistItems = watchlistData?.items || [];
+  
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest(`/api/watchlist/${id}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/watchlist'] });
+      toast({ title: 'Removed from watchlist' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to remove', description: error.message, variant: 'destructive' });
+    },
+  });
+  
+  if (isLoading) {
+    return (
+      <div className="py-8 flex items-center justify-center">
+        <RefreshCw className="w-5 h-5 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+  
+  if (watchlistItems.length === 0) {
+    return (
+      <div className="py-8">
+        <div className="text-center max-w-sm mx-auto">
+          <motion.div 
+            className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/20 flex items-center justify-center"
+          >
+            <BookMarked className="w-10 h-10 text-amber-400" />
+          </motion.div>
+          <h3 className="text-xl font-bold text-white mb-2">Track Assets to Watch</h3>
+          <p className="text-gray-400 text-sm mb-6">
+            Add stocks and crypto to your watchlist to track their prices without buying them.
+          </p>
+          <AddToWatchlistDialog onSuccess={() => refetch()} />
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-end">
+        <AddToWatchlistDialog onSuccess={() => refetch()} />
+      </div>
+      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+        <AnimatePresence>
+          {watchlistItems.map((item) => (
+            <WatchlistItemRow
+              key={item.id}
+              item={item}
+              onRemove={(id) => removeMutation.mutate(id)}
+              onBuy={onBuyFromWatchlist}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
 function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValues: boolean }) {
   const sortedByChange = [...assets].sort((a, b) => 
     Math.abs(b.priceChange24h || 0) - Math.abs(a.priceChange24h || 0)
@@ -306,13 +832,6 @@ function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValue
       </div>
     </div>
   );
-}
-
-interface PortfolioSnapshot {
-  id: string;
-  totalValue: number;
-  totalPnl: number;
-  snapshotDate: string;
 }
 
 interface PortfolioGoal {
@@ -1377,6 +1896,7 @@ function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioA
   const priceChange = asset.priceChange24h || 0;
   const is24hPositive = priceChange >= 0;
   const isPnlPositive = (asset.unrealizedPnlPercent || 0) >= 0;
+  const showSparkline = asset.assetType !== 'cash' && asset.assetType !== 'stablecoin' && asset.assetType !== 'retirement';
 
   return (
     <motion.div
@@ -1395,18 +1915,21 @@ function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioA
           </div>
           <p className="text-xs text-gray-500 truncate max-w-[120px]">{asset.name}</p>
         </div>
+        {showSparkline && (
+          <div className="hidden sm:block">
+            <Sparkline priceChange7d={asset.priceChange7d || 0} />
+          </div>
+        )}
       </div>
       <div className="text-right">
         <p className="font-medium text-white text-sm">
           {showValues ? `$${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
         </p>
         <div className="flex items-center justify-end gap-2">
-          {/* 24h price change - always show % change */}
           <div className={cn("flex items-center gap-0.5 text-xs", is24hPositive ? 'text-green-400' : 'text-red-400')}>
             {is24hPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
             <span>{is24hPositive ? '+' : ''}{priceChange.toFixed(1)}%</span>
           </div>
-          {/* PnL indicator */}
           {asset.assetType !== 'cash' && asset.assetType !== 'stablecoin' && (
             <span className={cn("text-[10px] px-1 py-0.5 rounded", isPnlPositive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}>
               PnL {isPnlPositive ? '+' : ''}{(asset.unrealizedPnlPercent || 0).toFixed(0)}%
@@ -1943,66 +2466,104 @@ export default function PortfolioDashboard() {
                 </div>
               </Card>
 
+              {/* Net Worth Historical Chart */}
+              {activePortfolioId && assets.length > 0 && (
+                <Card className="bg-slate-900/80 border-slate-700/50 p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <LineChart className="w-5 h-5 text-purple-400" />
+                      Net Worth History
+                    </h2>
+                  </div>
+                  <NetWorthChart portfolioId={activePortfolioId} />
+                </Card>
+              )}
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                        <Briefcase className="w-5 h-5 text-purple-400" />
-                        Holdings
-                      </h2>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-gray-400 border-slate-600 text-xs">
-                          {assets.length} positions
-                        </Badge>
-                        {assets.length > 0 && (
-                          <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
-                        )}
-                      </div>
-                    </div>
-                    {assets.length === 0 ? (
-                      <div className="py-8">
-                        <div className="text-center max-w-sm mx-auto">
-                          <motion.div 
-                            className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-purple-500/20 via-cyan-500/20 to-amber-500/20 flex items-center justify-center relative"
-                            animate={{ 
-                              boxShadow: ['0 0 20px rgba(168,85,247,0.2)', '0 0 40px rgba(34,211,238,0.3)', '0 0 20px rgba(168,85,247,0.2)']
-                            }}
-                            transition={{ duration: 3, repeat: Infinity }}
+                    <Tabs defaultValue="holdings" className="w-full">
+                      <div className="flex items-center justify-between mb-4">
+                        <TabsList className="bg-transparent border-none p-0 h-auto">
+                          <TabsTrigger 
+                            value="holdings" 
+                            className="data-[state=active]:bg-transparent data-[state=active]:text-white text-gray-500 px-0 mr-4"
+                            data-testid="tab-holdings"
                           >
-                            <Layers className="w-10 h-10 text-purple-400" />
-                            <motion.div 
-                              className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500"
-                              animate={{ scale: [1, 1.2, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            />
-                          </motion.div>
-                          <h3 className="text-xl font-bold text-white mb-2">Add Your First Asset</h3>
-                          <p className="text-gray-400 text-sm mb-6">
-                            Track crypto, stocks, ETFs, retirement accounts, and cash in one unified dashboard with AI-powered insights.
-                          </p>
-                          <div className="grid grid-cols-3 gap-3 mb-6">
-                            {[
-                              { icon: Bitcoin, label: 'Crypto', color: 'text-orange-400' },
-                              { icon: TrendingUp, label: 'Stocks', color: 'text-blue-400' },
-                              { icon: Landmark, label: 'Retirement', color: 'text-purple-400' }
-                            ].map((item) => (
-                              <div key={item.label} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                                <item.icon className={cn("w-5 h-5 mx-auto mb-1", item.color)} />
-                                <span className="text-[11px] sm:text-[10px] text-gray-400">{item.label}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
+                            <Briefcase className="w-4 h-4 mr-2" />
+                            Holdings
+                            <Badge variant="outline" className="ml-2 text-gray-400 border-slate-600 text-xs">
+                              {assets.length}
+                            </Badge>
+                          </TabsTrigger>
+                          <TabsTrigger 
+                            value="watchlist" 
+                            className="data-[state=active]:bg-transparent data-[state=active]:text-white text-gray-500 px-0"
+                            data-testid="tab-watchlist"
+                          >
+                            <BookMarked className="w-4 h-4 mr-2" />
+                            Watchlist
+                          </TabsTrigger>
+                        </TabsList>
+                        <div className="flex items-center gap-2">
+                          {assets.length > 0 && (
+                            <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                        {assets.map((asset) => (
-                          <AssetRow key={asset.id} asset={asset} portfolioId={activePortfolioId!} showValues={showValues} />
-                        ))}
-                      </div>
-                    )}
+                      
+                      <TabsContent value="holdings" className="mt-0">
+                        {assets.length === 0 ? (
+                          <div className="py-8">
+                            <div className="text-center max-w-sm mx-auto">
+                              <motion.div 
+                                className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-purple-500/20 via-cyan-500/20 to-amber-500/20 flex items-center justify-center relative"
+                                animate={{ 
+                                  boxShadow: ['0 0 20px rgba(168,85,247,0.2)', '0 0 40px rgba(34,211,238,0.3)', '0 0 20px rgba(168,85,247,0.2)']
+                                }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                              >
+                                <Layers className="w-10 h-10 text-purple-400" />
+                                <motion.div 
+                                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500"
+                                  animate={{ scale: [1, 1.2, 1] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                />
+                              </motion.div>
+                              <h3 className="text-xl font-bold text-white mb-2">Add Your First Asset</h3>
+                              <p className="text-gray-400 text-sm mb-6">
+                                Track crypto, stocks, ETFs, retirement accounts, and cash in one unified dashboard with AI-powered insights.
+                              </p>
+                              <div className="grid grid-cols-3 gap-3 mb-6">
+                                {[
+                                  { icon: Bitcoin, label: 'Crypto', color: 'text-orange-400' },
+                                  { icon: TrendingUp, label: 'Stocks', color: 'text-blue-400' },
+                                  { icon: Landmark, label: 'Retirement', color: 'text-purple-400' }
+                                ].map((item) => (
+                                  <div key={item.label} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                                    <item.icon className={cn("w-5 h-5 mx-auto mb-1", item.color)} />
+                                    <span className="text-[11px] sm:text-[10px] text-gray-400">{item.label}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <AddAssetDialog portfolioId={activePortfolioId!} onSuccess={() => refetchPortfolio()} />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                            {assets.map((asset) => (
+                              <AssetRow key={asset.id} asset={asset} portfolioId={activePortfolioId!} showValues={showValues} />
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+                      
+                      <TabsContent value="watchlist" className="mt-0">
+                        <WatchlistTab portfolioId={activePortfolioId!} onBuyFromWatchlist={(item) => {
+                          setAlertSymbol(item.symbol);
+                        }} />
+                      </TabsContent>
+                    </Tabs>
                   </Card>
 
                   {/* Performance Summary */}

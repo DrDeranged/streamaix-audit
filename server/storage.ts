@@ -139,6 +139,10 @@ import {
   priceAlerts,
   type PriceAlert,
   type InsertPriceAlert,
+  // Portfolio Watchlist
+  watchlistItems,
+  type WatchlistItem,
+  type InsertWatchlistItem,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -579,6 +583,12 @@ export interface IStorage {
   getPriceAlerts(userId: string): Promise<PriceAlert[]>;
   createPriceAlert(alert: InsertPriceAlert): Promise<PriceAlert>;
   deletePriceAlert(id: string, userId: string): Promise<boolean>;
+  
+  // Portfolio Watchlist operations (watchlistItems table)
+  getPortfolioWatchlist(userId: string): Promise<WatchlistItem[]>;
+  addToPortfolioWatchlist(item: InsertWatchlistItem): Promise<WatchlistItem>;
+  removeFromPortfolioWatchlist(id: string, userId: string): Promise<boolean>;
+  updateWatchlistItemPrice(id: string, currentPrice: number, priceChange24h: number): Promise<WatchlistItem | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3532,6 +3542,38 @@ export class DatabaseStorage implements IStorage {
         eq(priceAlerts.userId, userId)
       ));
     return true;
+  }
+
+  // Portfolio Watchlist operations (watchlistItems table)
+  async getPortfolioWatchlist(userId: string): Promise<WatchlistItem[]> {
+    return await db.select().from(watchlistItems)
+      .where(eq(watchlistItems.userId, userId))
+      .orderBy(desc(watchlistItems.createdAt));
+  }
+
+  async addToPortfolioWatchlist(item: InsertWatchlistItem): Promise<WatchlistItem> {
+    const [newItem] = await db.insert(watchlistItems).values(item).returning();
+    return newItem;
+  }
+
+  async removeFromPortfolioWatchlist(id: string, userId: string): Promise<boolean> {
+    await db.delete(watchlistItems)
+      .where(and(
+        eq(watchlistItems.id, id),
+        eq(watchlistItems.userId, userId)
+      ));
+    return true;
+  }
+
+  async updateWatchlistItemPrice(id: string, currentPrice: number, priceChange24h: number): Promise<WatchlistItem | undefined> {
+    const [item] = await db.select().from(watchlistItems).where(eq(watchlistItems.id, id));
+    if (!item) return undefined;
+    const priceChangeSinceAdded = item.addedPrice > 0 ? ((currentPrice - item.addedPrice) / item.addedPrice) * 100 : 0;
+    const [updated] = await db.update(watchlistItems)
+      .set({ currentPrice, priceChange24h, priceChangeSinceAdded, priceLastUpdated: new Date() })
+      .where(eq(watchlistItems.id, id))
+      .returning();
+    return updated;
   }
 }
 
