@@ -684,7 +684,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
   );
 }
 
-function AssetRow({ asset, portfolioId }: { asset: PortfolioAsset; portfolioId: string }) {
+function AssetRow({ asset, portfolioId, showValues = true }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean }) {
   const Icon = assetTypeIcons[asset.assetType] || Wallet;
   const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
   const priceChange = asset.priceChange24h || 0;
@@ -710,9 +710,11 @@ function AssetRow({ asset, portfolioId }: { asset: PortfolioAsset; portfolioId: 
         </div>
       </div>
       <div className="text-right">
-        <p className="font-medium text-white text-sm">${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+        <p className="font-medium text-white text-sm">
+          {showValues ? `$${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
+        </p>
         <div className="flex items-center justify-end gap-2">
-          {/* 24h price change */}
+          {/* 24h price change - always show % change */}
           <div className={cn("flex items-center gap-0.5 text-xs", is24hPositive ? 'text-green-400' : 'text-red-400')}>
             {is24hPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
             <span>{is24hPositive ? '+' : ''}{priceChange.toFixed(1)}%</span>
@@ -1064,7 +1066,7 @@ export default function PortfolioDashboard() {
                     ) : (
                       <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                         {assets.map((asset) => (
-                          <AssetRow key={asset.id} asset={asset} portfolioId={activePortfolioId!} />
+                          <AssetRow key={asset.id} asset={asset} portfolioId={activePortfolioId!} showValues={showValues} />
                         ))}
                       </div>
                     )}
@@ -1253,19 +1255,19 @@ export default function PortfolioDashboard() {
                       <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
                         <span className="text-xs text-gray-400">If BTC drops 30%</span>
                         <span className="text-xs font-medium text-red-400">
-                          -${Math.round((assets.find(a => a.symbol === 'BTC')?.currentValue || 0) * 0.3).toLocaleString()}
+                          {showValues ? `-$${Math.round((assets.find(a => a.symbol === 'BTC')?.currentValue || 0) * 0.3).toLocaleString()}` : '••••'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
                         <span className="text-xs text-gray-400">If stocks drop 20%</span>
                         <span className="text-xs font-medium text-red-400">
-                          -${Math.round(assets.filter(a => a.assetType === 'stock').reduce((sum, a) => sum + (a.currentValue || 0), 0) * 0.2).toLocaleString()}
+                          {showValues ? `-$${Math.round(assets.filter(a => a.assetType === 'stock').reduce((sum, a) => sum + (a.currentValue || 0), 0) * 0.2).toLocaleString()}` : '••••'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
                         <span className="text-xs text-gray-400">Worst case (50% crash)</span>
                         <span className="text-xs font-medium text-red-400">
-                          -${Math.round((portfolio?.totalValue || 0) * 0.5).toLocaleString()}
+                          {showValues ? `-$${Math.round((portfolio?.totalValue || 0) * 0.5).toLocaleString()}` : '••••'}
                         </span>
                       </div>
                     </div>
@@ -1350,7 +1352,7 @@ export default function PortfolioDashboard() {
                           <h4 className="font-medium text-white mb-1">Portfolio Optimization Opportunity</h4>
                           <p className="text-sm text-gray-400 mb-3">
                             {assets.length > 0 
-                              ? `Your ${assets[0]?.symbol || 'largest'} position (${((assets[0]?.allocationPercent || 0)).toFixed(0)}% allocation) may be overweighted. Consider rebalancing to reduce concentration risk.`
+                              ? `Your ${assets[0]?.symbol || 'largest'} position ${showValues ? `(${((assets[0]?.allocationPercent || 0)).toFixed(0)}% allocation)` : ''} may be overweighted. Consider rebalancing to reduce concentration risk.`
                               : 'Add assets to receive personalized advice on portfolio optimization.'}
                           </p>
                           {assets.length > 0 && (
@@ -1454,10 +1456,12 @@ export default function PortfolioDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-gray-400">YTD Performance vs S&P 500</p>
-                          <p className="text-lg font-bold text-green-400">+12.4% outperformance</p>
+                          <p className="text-lg font-bold text-green-400">
+                            {showValues && assets.length > 0 ? '+12.4% outperformance' : assets.length > 0 ? '••••' : '--'}
+                          </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-gray-500">Your return: +32.1%</p>
+                          <p className="text-xs text-gray-500">Your return: {showValues && assets.length > 0 ? '+32.1%' : assets.length > 0 ? '••••' : '--'}</p>
                           <p className="text-xs text-gray-500">S&P 500: +19.7%</p>
                         </div>
                       </div>
