@@ -7304,6 +7304,98 @@ export const insertPortfolioSnapshotSchema = createInsertSchema(portfolioSnapsho
   createdAt: true,
 });
 
+// Price Alerts - user-configurable price notifications
+export const priceAlerts = pgTable("price_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  portfolioId: varchar("portfolio_id").references(() => portfolios.id),
+  symbol: text("symbol").notNull(),
+  name: text("name").notNull(),
+  assetType: text("asset_type").notNull(), // crypto, stock, etf
+  alertType: text("alert_type").notNull(), // above, below, percent_change
+  targetPrice: real("target_price"), // For above/below alerts
+  percentChange: real("percent_change"), // For percent_change alerts
+  currentPriceAtCreation: real("current_price_at_creation").notNull(),
+  isTriggered: boolean("is_triggered").default(false),
+  triggeredAt: timestamp("triggered_at"),
+  triggeredPrice: real("triggered_price"),
+  isActive: boolean("is_active").default(true),
+  notificationSent: boolean("notification_sent").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Watchlist - track assets without owning them
+export const watchlistItems = pgTable("watchlist_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  symbol: text("symbol").notNull(),
+  name: text("name").notNull(),
+  assetType: text("asset_type").notNull(), // crypto, stock, etf
+  addedPrice: real("added_price").notNull(), // Price when added to watchlist
+  currentPrice: real("current_price").default(0),
+  priceChange24h: real("price_change_24h").default(0),
+  priceChangeSinceAdded: real("price_change_since_added").default(0),
+  priceLastUpdated: timestamp("price_last_updated"),
+  notes: text("notes"),
+  logoUrl: text("logo_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Portfolio Goals - user financial goals
+export const portfolioGoals = pgTable("portfolio_goals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  portfolioId: varchar("portfolio_id").references(() => portfolios.id),
+  name: text("name").notNull(),
+  targetAmount: real("target_amount").notNull(),
+  currentAmount: real("current_amount").default(0),
+  deadline: timestamp("deadline"),
+  goalType: text("goal_type").notNull(), // net_worth, savings, investment_return, asset_target
+  targetSymbol: text("target_symbol"), // For asset_target goals (e.g., "own 1 BTC")
+  targetQuantity: real("target_quantity"), // For asset_target goals
+  monthlyContribution: real("monthly_contribution").default(0),
+  priority: text("priority").default("medium"), // low, medium, high
+  status: text("status").default("active"), // active, completed, paused, cancelled
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Asset Price History - for sparklines and performance charts
+export const assetPriceHistory = pgTable("asset_price_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull(),
+  assetType: text("asset_type").notNull(),
+  price: real("price").notNull(),
+  volume: real("volume"),
+  marketCap: real("market_cap"),
+  recordedAt: timestamp("recorded_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for new tables
+export const insertPriceAlertSchema = createInsertSchema(priceAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWatchlistItemSchema = createInsertSchema(watchlistItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPortfolioGoalSchema = createInsertSchema(portfolioGoals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssetPriceHistorySchema = createInsertSchema(assetPriceHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types for portfolio system
 export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
 export type Portfolio = typeof portfolios.$inferSelect;
@@ -7319,3 +7411,15 @@ export type PortfolioInsight = typeof portfolioInsights.$inferSelect;
 
 export type InsertPortfolioSnapshot = z.infer<typeof insertPortfolioSnapshotSchema>;
 export type PortfolioSnapshot = typeof portfolioSnapshots.$inferSelect;
+
+export type InsertPriceAlert = z.infer<typeof insertPriceAlertSchema>;
+export type PriceAlert = typeof priceAlerts.$inferSelect;
+
+export type InsertWatchlistItem = z.infer<typeof insertWatchlistItemSchema>;
+export type WatchlistItem = typeof watchlistItems.$inferSelect;
+
+export type InsertPortfolioGoal = z.infer<typeof insertPortfolioGoalSchema>;
+export type PortfolioGoal = typeof portfolioGoals.$inferSelect;
+
+export type InsertAssetPriceHistory = z.infer<typeof insertAssetPriceHistorySchema>;
+export type AssetPriceHistory = typeof assetPriceHistory.$inferSelect;
