@@ -370,63 +370,6 @@ function PerformanceChart({ portfolio, assets }: { portfolio: Portfolio | null |
   );
 }
 
-function WatchlistPanel() {
-  const [watchlist, setWatchlist] = useState([
-    { symbol: 'AAPL', name: 'Apple Inc.', price: 178.45, change: 1.2 },
-    { symbol: 'TSLA', name: 'Tesla Inc.', price: 245.80, change: -2.5 },
-    { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 495.20, change: 3.8 },
-  ]);
-  const [newSymbol, setNewSymbol] = useState('');
-
-  const addToWatchlist = () => {
-    if (newSymbol.trim()) {
-      setWatchlist([...watchlist, { 
-        symbol: newSymbol.toUpperCase(), 
-        name: newSymbol.toUpperCase(), 
-        price: Math.random() * 500, 
-        change: (Math.random() - 0.5) * 10 
-      }]);
-      setNewSymbol('');
-    }
-  };
-
-  return (
-    <div>
-      <div className="flex gap-2 mb-3">
-        <Input
-          placeholder="Add symbol..."
-          value={newSymbol}
-          onChange={(e) => setNewSymbol(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addToWatchlist()}
-          className="h-8 text-xs bg-slate-800 border-slate-600"
-        />
-        <Button size="sm" onClick={addToWatchlist} className="h-8 px-2 bg-purple-600 hover:bg-purple-500">
-          <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-      <div className="space-y-2">
-        {watchlist.map((item, i) => (
-          <div key={i} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group">
-            <div className="flex items-center gap-2">
-              <Star className="w-3 h-3 text-amber-400" />
-              <div>
-                <span className="text-sm font-medium text-white">{item.symbol}</span>
-                <p className="text-[11px] sm:text-[10px] text-gray-500">{item.name}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <span className="text-sm text-white">${item.price.toFixed(2)}</span>
-              <p className={cn("text-[11px] sm:text-[10px]", item.change >= 0 ? 'text-green-400' : 'text-red-400')}>
-                {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function GoalTracker({ currentValue }: { currentValue: number }) {
   const [goals, setGoals] = useState([
     { name: 'Financial Freedom', target: 1000000, deadline: '2030-01-01' },
@@ -1247,12 +1190,6 @@ export default function PortfolioDashboard() {
     refetchInterval: 300000,
   });
 
-  // Fetch Fear & Greed Index
-  const { data: fearGreedData } = useQuery<{ fearGreed: { value: number; classification: string } }>({
-    queryKey: ['/api/market/fear-greed'],
-    refetchInterval: 600000, // 10 minutes
-  });
-
   // Fetch AI Trade Signals
   const { data: tradeSignalsData } = useQuery<{ signals: Array<{
     type: string;
@@ -1269,7 +1206,6 @@ export default function PortfolioDashboard() {
   });
 
   const analytics = analyticsData?.analytics;
-  const fearGreed = fearGreedData?.fearGreed;
   const tradeSignals = tradeSignalsData?.signals || [];
 
   const syncMutation = useMutation({
@@ -1735,66 +1671,8 @@ export default function PortfolioDashboard() {
                     </div>
                   </Card>
 
-                  {/* Fear & Greed Index + AI Trade Signals Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Fear & Greed Index */}
-                    <Card className="bg-slate-900/80 border-slate-700/50 p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Gauge className="w-5 h-5 text-amber-400" />
-                          Fear & Greed Index
-                        </h2>
-                        <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Live</Badge>
-                      </div>
-                      <div className="flex items-center justify-center py-4">
-                        <div className="relative w-32 h-32">
-                          {/* Circular gauge */}
-                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#334155" strokeWidth="8" />
-                            <circle 
-                              cx="50" cy="50" r="40" fill="none" 
-                              stroke={
-                                (fearGreed?.value || 50) >= 75 ? '#22c55e' : 
-                                (fearGreed?.value || 50) >= 55 ? '#84cc16' : 
-                                (fearGreed?.value || 50) >= 45 ? '#eab308' : 
-                                (fearGreed?.value || 50) >= 25 ? '#f97316' : '#ef4444'
-                              }
-                              strokeWidth="8" 
-                              strokeDasharray={`${((fearGreed?.value || 50) / 100) * 251.2} 251.2`}
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-3xl font-bold text-white">{fearGreed?.value || 50}</span>
-                            <span className={cn("text-xs font-medium",
-                              (fearGreed?.value || 50) >= 75 ? 'text-green-400' : 
-                              (fearGreed?.value || 50) >= 55 ? 'text-lime-400' : 
-                              (fearGreed?.value || 50) >= 45 ? 'text-amber-400' : 
-                              (fearGreed?.value || 50) >= 25 ? 'text-orange-400' : 'text-red-400'
-                            )}>
-                              {fearGreed?.classification || 'Neutral'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-[10px] text-gray-500 px-4">
-                        <span>Extreme Fear</span>
-                        <span>Fear</span>
-                        <span>Neutral</span>
-                        <span>Greed</span>
-                        <span>Extreme Greed</span>
-                      </div>
-                      <p className="text-xs text-gray-400 text-center mt-4">
-                        {(fearGreed?.value || 50) >= 75 
-                          ? 'Market may be overheated - consider taking profits' 
-                          : (fearGreed?.value || 50) <= 25 
-                            ? 'Market fear high - potential buying opportunity' 
-                            : 'Market sentiment is balanced'}
-                      </p>
-                    </Card>
-
-                    {/* AI Trade Signals */}
-                    <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  {/* AI Trade Signals */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                           <Zap className="w-5 h-5 text-cyan-400" />
@@ -1841,7 +1719,6 @@ export default function PortfolioDashboard() {
                         </div>
                       )}
                     </Card>
-                  </div>
 
                   {/* Top Movers */}
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
@@ -2072,17 +1949,6 @@ export default function PortfolioDashboard() {
                         <p className="text-xs text-gray-500 text-center py-4">Add assets to see relevant events</p>
                       )}
                     </div>
-                  </Card>
-
-                  {/* Watchlist */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-                        <Star className="w-4 h-4 text-amber-400" />
-                        Watchlist
-                      </h3>
-                    </div>
-                    <WatchlistPanel />
                   </Card>
 
                   {/* Goal Tracker */}
