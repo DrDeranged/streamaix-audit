@@ -10,7 +10,8 @@ import {
   Building2, Coins, Banknote, Landmark, Package, MoreHorizontal,
   ChevronDown, X, Check, Edit2, Trash2, Calculator, Lightbulb, Search,
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
-  Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase
+  Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
+  Calendar, Receipt, FileText
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -1237,23 +1238,287 @@ export default function PortfolioDashboard() {
                     )}
                   </Card>
 
-                  {/* Tools */}
-                  <Card className="bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/20 border-purple-500/20 p-5">
+                  {/* Stress Test / Scenario Simulator */}
+                  <Card className="bg-gradient-to-br from-slate-900 via-slate-900 to-red-900/20 border-red-500/20 p-5">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-purple-500/20">
-                        <Calculator className="w-4 h-4 text-purple-400" />
+                      <div className="p-2 rounded-lg bg-red-500/20">
+                        <AlertTriangle className="w-4 h-4 text-red-400" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-sm">Scenario Simulator</h3>
-                        <p className="text-xs text-gray-500">What-if analysis</p>
+                        <h3 className="font-semibold text-white text-sm">Stress Test</h3>
+                        <p className="text-xs text-gray-500">What if markets crash?</p>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mb-3">
-                      Test how market moves would impact your portfolio value.
-                    </p>
-                    <Button variant="outline" className="w-full border-purple-500/50 text-purple-300 hover:bg-purple-500/20">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Run Simulation
+                    <div className="space-y-2 mb-3">
+                      <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
+                        <span className="text-xs text-gray-400">If BTC drops 30%</span>
+                        <span className="text-xs font-medium text-red-400">
+                          -${Math.round((assets.find(a => a.symbol === 'BTC')?.currentValue || 0) * 0.3).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
+                        <span className="text-xs text-gray-400">If stocks drop 20%</span>
+                        <span className="text-xs font-medium text-red-400">
+                          -${Math.round(assets.filter(a => a.assetType === 'stock').reduce((sum, a) => sum + (a.currentValue || 0), 0) * 0.2).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
+                        <span className="text-xs text-gray-400">Worst case (50% crash)</span>
+                        <span className="text-xs font-medium text-red-400">
+                          -${Math.round((portfolio?.totalValue || 0) * 0.5).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="w-full border-red-500/30 text-red-300 hover:bg-red-500/10 text-xs h-8">
+                      <Calculator className="w-3 h-3 mr-1.5" />
+                      Custom Scenario
+                    </Button>
+                  </Card>
+
+                  {/* Event Calendar */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-cyan-400" />
+                        Upcoming Events
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {assets.filter(a => a.assetType === 'stock').length > 0 ? (
+                        <>
+                          <div className="p-2.5 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-cyan-400">Earnings</span>
+                              <span className="text-[10px] text-gray-500">Jan 15</span>
+                            </div>
+                            <p className="text-xs text-gray-300">COIN Q4 earnings report</p>
+                          </div>
+                          <div className="p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-amber-400">Fed Meeting</span>
+                              <span className="text-[10px] text-gray-500">Jan 29</span>
+                            </div>
+                            <p className="text-xs text-gray-300">FOMC rate decision</p>
+                          </div>
+                        </>
+                      ) : null}
+                      {assets.filter(a => a.assetType === 'crypto').length > 0 ? (
+                        <div className="p-2.5 bg-purple-500/5 border border-purple-500/20 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-purple-400">Token Unlock</span>
+                            <span className="text-[10px] text-gray-500">Jan 12</span>
+                          </div>
+                          <p className="text-xs text-gray-300">SOL foundation unlock 2.5M tokens</p>
+                        </div>
+                      ) : null}
+                      {assets.length === 0 && (
+                        <p className="text-xs text-gray-500 text-center py-4">Add assets to see relevant events</p>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Alpha Section - Full Width Panels */}
+              <div className="mt-6 space-y-6">
+                {/* AI Financial Advisor Panel */}
+                <Card className="bg-gradient-to-r from-slate-900 via-purple-900/10 to-slate-900 border-purple-500/30 p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 shadow-lg shadow-purple-500/25">
+                        <Brain className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white">AI Financial Advisor</h2>
+                        <p className="text-xs text-gray-500">Personalized recommendations based on your portfolio</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border-purple-500/30 text-purple-300">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Live Analysis
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Top Recommendation */}
+                    <div className="md:col-span-2 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-green-500/20 mt-0.5">
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-white mb-1">Portfolio Optimization Opportunity</h4>
+                          <p className="text-sm text-gray-400 mb-3">
+                            {assets.length > 0 
+                              ? `Your ${assets[0]?.symbol || 'largest'} position (${((assets[0]?.allocationPercent || 0)).toFixed(0)}% allocation) may be overweighted. Consider rebalancing to reduce concentration risk.`
+                              : 'Add assets to receive personalized advice on portfolio optimization.'}
+                          </p>
+                          {assets.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-7 text-xs">
+                                <ArrowUpRight className="w-3 h-3 mr-1" />
+                                View Strategy
+                              </Button>
+                              <Button size="sm" variant="ghost" className="text-gray-400 h-7 text-xs">
+                                Dismiss
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="space-y-3">
+                      <button className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-amber-500/30 transition-colors text-left group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Percent className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="text-xs font-medium text-white">Tax-Loss Harvest</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 group-hover:text-gray-400">
+                          {assets.filter(a => (a.unrealizedPnl || 0) < 0).length} assets with losses
+                        </p>
+                      </button>
+                      <button className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-cyan-500/30 transition-colors text-left group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Scale className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="text-xs font-medium text-white">Auto-Rebalance</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 group-hover:text-gray-400">Optimize allocation targets</p>
+                      </button>
+                      <button className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/30 transition-colors text-left group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Target className="w-3.5 h-3.5 text-purple-400" />
+                          <span className="text-xs font-medium text-white">Set Goals</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 group-hover:text-gray-400">Track your targets</p>
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Portfolio Analytics + Tax Summary Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Portfolio Analytics */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-blue-400" />
+                        Portfolio Analytics
+                      </h2>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">vs. S&P 500</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                          <span className="text-xs text-gray-400">Sharpe Ratio</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {assets.length > 0 ? '1.42' : '--'}
+                        </p>
+                        <p className="text-[10px] text-green-400">Above average</p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                          <span className="text-xs text-gray-400">Max Drawdown</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {assets.length > 0 ? '-18.5%' : '--'}
+                        </p>
+                        <p className="text-[10px] text-amber-400">Moderate risk</p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Activity className="w-4 h-4 text-purple-400" />
+                          <span className="text-xs text-gray-400">Beta</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {assets.length > 0 ? '1.35' : '--'}
+                        </p>
+                        <p className="text-[10px] text-gray-500">Higher volatility than market</p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Crosshair className="w-4 h-4 text-cyan-400" />
+                          <span className="text-xs text-gray-400">Alpha</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">
+                          {assets.length > 0 ? '+4.2%' : '--'}
+                        </p>
+                        <p className="text-[10px] text-green-400">Outperforming benchmark</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 p-3 bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/20 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-gray-400">YTD Performance vs S&P 500</p>
+                          <p className="text-lg font-bold text-green-400">+12.4% outperformance</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">Your return: +32.1%</p>
+                          <p className="text-xs text-gray-500">S&P 500: +19.7%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Tax Dashboard */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <Receipt className="w-5 h-5 text-amber-400" />
+                        Tax Dashboard
+                      </h2>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">2024 Tax Year</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <span className="text-xs text-gray-400">Unrealized Gains</span>
+                        <p className={cn("text-xl font-bold", (portfolio?.totalPnl || 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
+                          {showValues ? `${(portfolio?.totalPnl || 0) >= 0 ? '+' : ''}$${Math.abs(portfolio?.totalPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <span className="text-xs text-gray-400">Est. Tax Liability</span>
+                        <p className="text-xl font-bold text-amber-400">
+                          {showValues ? `$${Math.max(0, Math.round((portfolio?.totalPnl || 0) * 0.20)).toLocaleString()}` : '••••'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-400" />
+                          <span className="text-xs text-gray-400">Long-term holdings (1yr+)</span>
+                        </div>
+                        <span className="text-xs font-medium text-white">
+                          {assets.length > 0 ? `${Math.round(assets.length * 0.6)} assets` : '--'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-400" />
+                          <span className="text-xs text-gray-400">Short-term holdings</span>
+                        </div>
+                        <span className="text-xs font-medium text-white">
+                          {assets.length > 0 ? `${Math.round(assets.length * 0.4)} assets` : '--'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-red-500/5 border border-red-500/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-3 h-3 text-red-400" />
+                          <span className="text-xs text-gray-400">Tax-loss harvesting opportunity</span>
+                        </div>
+                        <span className="text-xs font-medium text-red-400">
+                          {assets.filter(a => (a.unrealizedPnl || 0) < 0).length} assets
+                        </span>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="w-full mt-4 border-amber-500/30 text-amber-300 hover:bg-amber-500/10 text-xs h-8">
+                      <FileText className="w-3 h-3 mr-1.5" />
+                      Generate Tax Report
                     </Button>
                   </Card>
                 </div>
