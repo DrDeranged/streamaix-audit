@@ -217,20 +217,20 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "You've Earned 2,500 STREAM!",
-    subtitle: "Your Signup Bonus is Ready",
-    description: "Welcome to StreamAiX! Start trading, chatting with avatars, and earning more rewards today.",
+    title: "Get 2,500 STREAM Free!",
+    subtitle: "Sign Up to Claim Your Bonus",
+    description: "Create your account and receive 2,500 STREAM points instantly. Start trading, chatting with avatars, and earning more rewards.",
     icon: Coins,
     gradient: "from-yellow-400 via-amber-500 to-orange-500",
     glowColor: "rgba(251, 191, 36, 0.5)",
     instructions: [
-      "2,500 STREAM bonus added to your wallet",
+      "Sign up to receive 2,500 STREAM bonus",
       "Earn more by trading and completing quests",
       "Daily login streaks multiply rewards"
     ],
     action: {
-      label: "View Points",
-      path: "/points"
+      label: "Sign Up Now",
+      path: "/signup"
     }
   }
 ];
