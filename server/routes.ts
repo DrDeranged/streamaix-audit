@@ -17499,6 +17499,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, snapshots });
   }));
 
+  // Tax analytics - real calculations based on transaction dates
+  app.get("/api/portfolios/:id/tax-analytics", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
+    const transactions = await db.select().from(portfolioTransactions).where(eq(portfolioTransactions.portfolioId, id));
+    
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    const assetTaxInfo = assets.map(asset => {
+      const assetTxs = transactions.filter(t => 
+        t.symbol.toUpperCase() === asset.symbol.toUpperCase() && 
+        (t.transactionType === 'buy' || t.transactionType === 'transfer_in')
+      );
+      
+      const earliestPurchase = assetTxs.length > 0 
+        ? new Date(Math.min(...assetTxs.map(t => new Date(t.transactionDate).getTime())))
+        : asset.createdAt ? new Date(asset.createdAt) : new Date();
+      
+      const isLongTerm = earliestPurchase <= oneYearAgo;
+      const holdingDays = Math.floor((Date.now() - earliestPurchase.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return {
+        symbol: asset.symbol,
+        name: asset.name,
+        unrealizedPnl: asset.unrealizedPnl || 0,
+        unrealizedPnlPercent: asset.unrealizedPnlPercent || 0,
+        isLongTerm,
+        holdingDays,
+        purchaseDate: earliestPurchase.toISOString(),
+        currentValue: asset.currentValue || 0,
+        costBasis: asset.totalCostBasis || 0,
+      };
+    });
+    
+    const longTermAssets = assetTaxInfo.filter(a => a.isLongTerm);
+    const shortTermAssets = assetTaxInfo.filter(a => !a.isLongTerm);
+    
+    const longTermGains = longTermAssets.reduce((sum, a) => sum + Math.max(0, a.unrealizedPnl), 0);
+    const longTermLosses = longTermAssets.reduce((sum, a) => sum + Math.min(0, a.unrealizedPnl), 0);
+    const shortTermGains = shortTermAssets.reduce((sum, a) => sum + Math.max(0, a.unrealizedPnl), 0);
+    const shortTermLosses = shortTermAssets.reduce((sum, a) => sum + Math.min(0, a.unrealizedPnl), 0);
+    
+    const longTermTaxRate = 0.15;
+    const shortTermTaxRate = 0.32;
+    
+    const estLongTermTax = Math.max(0, longTermGains + longTermLosses) * longTermTaxRate;
+    const estShortTermTax = Math.max(0, shortTermGains + shortTermLosses) * shortTermTaxRate;
+    const totalEstTax = estLongTermTax + estShortTermTax;
+    
+    const taxLossHarvestingOpportunities = assetTaxInfo
+      .filter(a => a.unrealizedPnl < -50)
+      .sort((a, b) => a.unrealizedPnl - b.unrealizedPnl)
+      .slice(0, 5)
+      .map(a => ({
+        symbol: a.symbol,
+        name: a.name,
+        loss: a.unrealizedPnl,
+        lossPercent: a.unrealizedPnlPercent,
+        potentialTaxSavings: Math.abs(a.unrealizedPnl) * (a.isLongTerm ? longTermTaxRate : shortTermTaxRate),
+        isLongTerm: a.isLongTerm,
+      }));
+    
+    res.json({
+      success: true,
+      taxAnalytics: {
+        longTermAssetCount: longTermAssets.length,
+        shortTermAssetCount: shortTermAssets.length,
+        longTermGains,
+        longTermLosses,
+        shortTermGains,
+        shortTermLosses,
+        totalUnrealizedGains: longTermGains + shortTermGains,
+        totalUnrealizedLosses: longTermLosses + shortTermLosses,
+        netUnrealized: longTermGains + longTermLosses + shortTermGains + shortTermLosses,
+        estLongTermTax,
+        estShortTermTax,
+        totalEstTax,
+        taxLossHarvestingOpportunities,
+        assets: assetTaxInfo,
+      }
+    });
+  }));
+
   // Dismiss insight
   app.post("/api/portfolios/insights/:insightId/dismiss", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;

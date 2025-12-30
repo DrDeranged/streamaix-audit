@@ -1296,6 +1296,31 @@ export default function PortfolioDashboard() {
   const analytics = analyticsData?.analytics;
   const tradeSignals = tradeSignalsData?.signals || [];
 
+  // Fetch tax analytics with real long-term/short-term calculations
+  const { data: taxData } = useQuery<{ taxAnalytics: {
+    longTermAssetCount: number;
+    shortTermAssetCount: number;
+    longTermGains: number;
+    longTermLosses: number;
+    shortTermGains: number;
+    shortTermLosses: number;
+    totalEstTax: number;
+    taxLossHarvestingOpportunities: Array<{
+      symbol: string;
+      name: string;
+      loss: number;
+      lossPercent: number;
+      potentialTaxSavings: number;
+      isLongTerm: boolean;
+    }>;
+  } }>({
+    queryKey: ['/api/portfolios', activePortfolioId, 'tax-analytics'],
+    enabled: !!activePortfolioId,
+    refetchInterval: 300000,
+  });
+
+  const taxAnalytics = taxData?.taxAnalytics;
+
   const syncMutation = useMutation({
     mutationFn: async () => {
       return apiRequest(`/api/portfolios/${activePortfolioId}/sync`, { method: 'POST' });
@@ -2287,7 +2312,10 @@ export default function PortfolioDashboard() {
                       <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                         <span className="text-xs text-gray-400">Est. Tax Liability</span>
                         <p className="text-xl font-bold text-amber-400">
-                          {showValues ? `$${Math.max(0, Math.round((portfolio?.totalPnl || 0) * 0.20)).toLocaleString()}` : '••••'}
+                          {showValues ? `$${Math.round(taxAnalytics?.totalEstTax || (portfolio?.totalPnl || 0) * 0.20).toLocaleString()}` : '••••'}
+                        </p>
+                        <p className="text-[9px] text-gray-500 mt-0.5">
+                          {taxAnalytics ? `15% long-term • 32% short-term` : '~20% blended rate'}
                         </p>
                       </div>
                     </div>
@@ -2298,7 +2326,7 @@ export default function PortfolioDashboard() {
                           <span className="text-xs text-gray-400">Long-term holdings (1yr+)</span>
                         </div>
                         <span className="text-xs font-medium text-white">
-                          {assets.length > 0 ? `${Math.round(assets.length * 0.6)} assets` : '--'}
+                          {taxAnalytics ? `${taxAnalytics.longTermAssetCount} assets` : assets.length > 0 ? '--' : '--'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded-lg">
@@ -2307,7 +2335,7 @@ export default function PortfolioDashboard() {
                           <span className="text-xs text-gray-400">Short-term holdings</span>
                         </div>
                         <span className="text-xs font-medium text-white">
-                          {assets.length > 0 ? `${Math.round(assets.length * 0.4)} assets` : '--'}
+                          {taxAnalytics ? `${taxAnalytics.shortTermAssetCount} assets` : assets.length > 0 ? '--' : '--'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between p-2 bg-red-500/5 border border-red-500/20 rounded-lg">
@@ -2316,20 +2344,31 @@ export default function PortfolioDashboard() {
                           <span className="text-xs text-gray-400">Tax-loss harvesting opportunity</span>
                         </div>
                         <span className="text-xs font-medium text-red-400">
-                          {assets.filter(a => (a.unrealizedPnl || 0) < 0).length} assets
+                          {taxAnalytics?.taxLossHarvestingOpportunities?.length || assets.filter(a => (a.unrealizedPnl || 0) < 0).length} assets
                         </span>
                       </div>
+                      {taxAnalytics?.taxLossHarvestingOpportunities && taxAnalytics.taxLossHarvestingOpportunities.length > 0 && (
+                        <div className="mt-2 p-2 bg-red-500/5 rounded-lg border border-red-500/10">
+                          <p className="text-[10px] text-gray-400 mb-1.5">Top loss harvest candidates:</p>
+                          <div className="space-y-1">
+                            {taxAnalytics.taxLossHarvestingOpportunities.slice(0, 2).map((op, i) => (
+                              <div key={i} className="flex items-center justify-between">
+                                <span className="text-[10px] font-medium text-white">{op.symbol}</span>
+                                <span className="text-[10px] text-red-400">${Math.abs(op.loss).toLocaleString()} loss → ~${op.potentialTaxSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })} savings</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <Button 
                       variant="outline" 
-                      onClick={() => {
-                        toast({ title: 'Generating Tax Report...', description: 'Your report will be ready shortly' });
-                      }}
+                      onClick={() => setShowTaxDialog(true)}
                       className="w-full mt-4 border-amber-500/30 text-amber-300 hover:bg-amber-500/10 text-xs h-8"
                       data-testid="button-generate-tax-report"
                     >
                       <FileText className="w-3 h-3 mr-1.5" />
-                      Generate Tax Report
+                      View Tax Details
                     </Button>
                   </Card>
                 </div>
