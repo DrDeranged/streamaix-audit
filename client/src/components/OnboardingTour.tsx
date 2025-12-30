@@ -4,7 +4,7 @@ import {
   X, ChevronRight, ChevronLeft, Sparkles, Coins, TrendingUp, Bot, Wallet, 
   Zap, Users, Shield, Trophy, BarChart3, Radio, Rocket, Globe, Crown,
   LineChart, ArrowRight, MousePointer2, CheckCircle2, Target, Share2,
-  MessageCircle, Brain, Play, GraduationCap, Gamepad2, Swords, PieChart,
+  MessageCircle, Brain, Play, GraduationCap, Swords, PieChart,
   Receipt, Lightbulb, Hand, ArrowLeftRight, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
