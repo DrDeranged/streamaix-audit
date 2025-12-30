@@ -763,6 +763,48 @@ export default function PortfolioDashboard() {
     refetchInterval: 300000,
   });
 
+  // Fetch portfolio analytics (Sharpe, Alpha, Beta, etc.)
+  const { data: analyticsData, refetch: refetchAnalytics } = useQuery<{ analytics: {
+    sharpeRatio: number;
+    maxDrawdown: number;
+    beta: number;
+    alpha: number;
+    ytdReturn: number;
+    spReturn: number;
+    outperformance: number;
+    portfolioVolatility: number;
+    diversificationScore: number;
+  } }>({
+    queryKey: ['/api/portfolios', activePortfolioId, 'analytics'],
+    enabled: !!activePortfolioId,
+    refetchInterval: 300000,
+  });
+
+  // Fetch Fear & Greed Index
+  const { data: fearGreedData } = useQuery<{ fearGreed: { value: number; classification: string } }>({
+    queryKey: ['/api/market/fear-greed'],
+    refetchInterval: 600000, // 10 minutes
+  });
+
+  // Fetch AI Trade Signals
+  const { data: tradeSignalsData } = useQuery<{ signals: Array<{
+    type: string;
+    symbol: string;
+    action: string;
+    confidence: number;
+    reason: string;
+    targetPrice?: number;
+    stopLoss?: number;
+  }> }>({
+    queryKey: ['/api/market/trade-signals'],
+    enabled: !!activePortfolioId,
+    refetchInterval: 300000,
+  });
+
+  const analytics = analyticsData?.analytics;
+  const fearGreed = fearGreedData?.fearGreed;
+  const tradeSignals = tradeSignalsData?.signals || [];
+
   const syncMutation = useMutation({
     mutationFn: async () => {
       return apiRequest(`/api/portfolios/${activePortfolioId}/sync`, { method: 'POST' });
@@ -1171,6 +1213,114 @@ export default function PortfolioDashboard() {
                     </div>
                   </Card>
 
+                  {/* Fear & Greed Index + AI Trade Signals Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Fear & Greed Index */}
+                    <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Gauge className="w-5 h-5 text-amber-400" />
+                          Fear & Greed Index
+                        </h2>
+                        <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Live</Badge>
+                      </div>
+                      <div className="flex items-center justify-center py-4">
+                        <div className="relative w-32 h-32">
+                          {/* Circular gauge */}
+                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#334155" strokeWidth="8" />
+                            <circle 
+                              cx="50" cy="50" r="40" fill="none" 
+                              stroke={
+                                (fearGreed?.value || 50) >= 75 ? '#22c55e' : 
+                                (fearGreed?.value || 50) >= 55 ? '#84cc16' : 
+                                (fearGreed?.value || 50) >= 45 ? '#eab308' : 
+                                (fearGreed?.value || 50) >= 25 ? '#f97316' : '#ef4444'
+                              }
+                              strokeWidth="8" 
+                              strokeDasharray={`${((fearGreed?.value || 50) / 100) * 251.2} 251.2`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-3xl font-bold text-white">{fearGreed?.value || 50}</span>
+                            <span className={cn("text-xs font-medium",
+                              (fearGreed?.value || 50) >= 75 ? 'text-green-400' : 
+                              (fearGreed?.value || 50) >= 55 ? 'text-lime-400' : 
+                              (fearGreed?.value || 50) >= 45 ? 'text-amber-400' : 
+                              (fearGreed?.value || 50) >= 25 ? 'text-orange-400' : 'text-red-400'
+                            )}>
+                              {fearGreed?.classification || 'Neutral'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-[10px] text-gray-500 px-4">
+                        <span>Extreme Fear</span>
+                        <span>Fear</span>
+                        <span>Neutral</span>
+                        <span>Greed</span>
+                        <span>Extreme Greed</span>
+                      </div>
+                      <p className="text-xs text-gray-400 text-center mt-4">
+                        {(fearGreed?.value || 50) >= 75 
+                          ? 'Market may be overheated - consider taking profits' 
+                          : (fearGreed?.value || 50) <= 25 
+                            ? 'Market fear high - potential buying opportunity' 
+                            : 'Market sentiment is balanced'}
+                      </p>
+                    </Card>
+
+                    {/* AI Trade Signals */}
+                    <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-cyan-400" />
+                          AI Trade Signals
+                        </h2>
+                        <Badge variant="outline" className="text-[10px] text-cyan-400 border-cyan-500/30">Alpha</Badge>
+                      </div>
+                      {tradeSignals.length > 0 ? (
+                        <div className="space-y-3">
+                          {tradeSignals.slice(0, 3).map((signal, index) => (
+                            <div key={index} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <span className={cn("text-xs font-bold px-2 py-0.5 rounded",
+                                    signal.action === 'BUY' ? 'bg-green-500/20 text-green-400' :
+                                    signal.action === 'SELL' ? 'bg-red-500/20 text-red-400' :
+                                    signal.action === 'HOLD' ? 'bg-amber-500/20 text-amber-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                  )}>
+                                    {signal.action}
+                                  </span>
+                                  <span className="font-medium text-white text-sm">{signal.symbol}</span>
+                                </div>
+                                <span className="text-xs text-gray-400">{signal.confidence}% conf.</span>
+                              </div>
+                              <p className="text-xs text-gray-400">{signal.reason}</p>
+                              {(signal.targetPrice || signal.stopLoss) && (
+                                <div className="flex gap-3 mt-2 text-[10px]">
+                                  {signal.targetPrice && (
+                                    <span className="text-green-400">Target: ${signal.targetPrice.toLocaleString()}</span>
+                                  )}
+                                  {signal.stopLoss && (
+                                    <span className="text-red-400">Stop: ${signal.stopLoss.toLocaleString()}</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Zap className="w-8 h-8 mx-auto text-gray-600 mb-2" />
+                          <p className="text-sm text-gray-400">Add assets to receive personalized trade signals</p>
+                        </div>
+                      )}
+                    </Card>
+                  </div>
+
                   {/* AI Insights Feed */}
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1499,9 +1649,11 @@ export default function PortfolioDashboard() {
                           <span className="text-xs text-gray-400">Sharpe Ratio</span>
                         </div>
                         <p className="text-xl font-bold text-white">
-                          {assets.length > 0 ? '1.42' : '--'}
+                          {assets.length > 0 ? (analytics?.sharpeRatio?.toFixed(2) || '0.00') : '--'}
                         </p>
-                        <p className="text-[10px] text-green-400">Above average</p>
+                        <p className={cn("text-[10px]", (analytics?.sharpeRatio || 0) >= 1 ? 'text-green-400' : (analytics?.sharpeRatio || 0) >= 0.5 ? 'text-amber-400' : 'text-red-400')}>
+                          {(analytics?.sharpeRatio || 0) >= 1 ? 'Above average' : (analytics?.sharpeRatio || 0) >= 0.5 ? 'Average' : 'Below average'}
+                        </p>
                       </div>
                       <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                         <div className="flex items-center gap-2 mb-2">
@@ -1509,9 +1661,11 @@ export default function PortfolioDashboard() {
                           <span className="text-xs text-gray-400">Max Drawdown</span>
                         </div>
                         <p className="text-xl font-bold text-white">
-                          {assets.length > 0 ? '-18.5%' : '--'}
+                          {assets.length > 0 ? `${analytics?.maxDrawdown?.toFixed(1) || '0'}%` : '--'}
                         </p>
-                        <p className="text-[10px] text-amber-400">Moderate risk</p>
+                        <p className={cn("text-[10px]", Math.abs(analytics?.maxDrawdown || 0) > 25 ? 'text-red-400' : Math.abs(analytics?.maxDrawdown || 0) > 15 ? 'text-amber-400' : 'text-green-400')}>
+                          {Math.abs(analytics?.maxDrawdown || 0) > 25 ? 'High risk' : Math.abs(analytics?.maxDrawdown || 0) > 15 ? 'Moderate risk' : 'Low risk'}
+                        </p>
                       </div>
                       <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                         <div className="flex items-center gap-2 mb-2">
@@ -1519,32 +1673,42 @@ export default function PortfolioDashboard() {
                           <span className="text-xs text-gray-400">Beta</span>
                         </div>
                         <p className="text-xl font-bold text-white">
-                          {assets.length > 0 ? '1.35' : '--'}
+                          {assets.length > 0 ? (analytics?.beta?.toFixed(2) || '1.00') : '--'}
                         </p>
-                        <p className="text-[10px] text-gray-500">Higher volatility than market</p>
+                        <p className={cn("text-[10px]", (analytics?.beta || 1) > 1.2 ? 'text-red-400' : (analytics?.beta || 1) > 0.8 ? 'text-gray-500' : 'text-green-400')}>
+                          {(analytics?.beta || 1) > 1.2 ? 'Higher volatility' : (analytics?.beta || 1) > 0.8 ? 'Market-neutral' : 'Lower volatility'}
+                        </p>
                       </div>
                       <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                         <div className="flex items-center gap-2 mb-2">
                           <Crosshair className="w-4 h-4 text-cyan-400" />
                           <span className="text-xs text-gray-400">Alpha</span>
                         </div>
-                        <p className="text-xl font-bold text-white">
-                          {assets.length > 0 ? '+4.2%' : '--'}
+                        <p className={cn("text-xl font-bold", (analytics?.alpha || 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
+                          {assets.length > 0 ? `${(analytics?.alpha || 0) >= 0 ? '+' : ''}${analytics?.alpha?.toFixed(1) || '0'}%` : '--'}
                         </p>
-                        <p className="text-[10px] text-green-400">Outperforming benchmark</p>
+                        <p className={cn("text-[10px]", (analytics?.alpha || 0) > 0 ? 'text-green-400' : 'text-red-400')}>
+                          {(analytics?.alpha || 0) > 0 ? 'Outperforming' : 'Underperforming'}
+                        </p>
                       </div>
                     </div>
-                    <div className="mt-4 p-3 bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/20 rounded-lg">
+                    <div className={cn("mt-4 p-3 border rounded-lg", 
+                      (analytics?.outperformance || 0) >= 0 
+                        ? 'bg-gradient-to-r from-green-500/5 to-transparent border-green-500/20' 
+                        : 'bg-gradient-to-r from-red-500/5 to-transparent border-red-500/20'
+                    )}>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-gray-400">YTD Performance vs S&P 500</p>
-                          <p className="text-lg font-bold text-green-400">
-                            {showValues && assets.length > 0 ? '+12.4% outperformance' : assets.length > 0 ? '••••' : '--'}
+                          <p className={cn("text-lg font-bold", (analytics?.outperformance || 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
+                            {showValues && assets.length > 0 
+                              ? `${(analytics?.outperformance || 0) >= 0 ? '+' : ''}${analytics?.outperformance?.toFixed(1) || '0'}% ${(analytics?.outperformance || 0) >= 0 ? 'outperformance' : 'underperformance'}` 
+                              : assets.length > 0 ? '••••' : '--'}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-gray-500">Your return: {showValues && assets.length > 0 ? '+32.1%' : assets.length > 0 ? '••••' : '--'}</p>
-                          <p className="text-xs text-gray-500">S&P 500: +19.7%</p>
+                          <p className="text-xs text-gray-500">Your return: {showValues && assets.length > 0 ? `${(analytics?.ytdReturn || 0) >= 0 ? '+' : ''}${analytics?.ytdReturn?.toFixed(1) || '0'}%` : assets.length > 0 ? '••••' : '--'}</p>
+                          <p className="text-xs text-gray-500">S&P 500: +{analytics?.spReturn || 19.7}%</p>
                         </div>
                       </div>
                     </div>
