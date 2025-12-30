@@ -4,7 +4,8 @@ import {
   X, ChevronRight, ChevronLeft, Sparkles, Coins, TrendingUp, Bot, Wallet, 
   Zap, Users, Shield, Trophy, BarChart3, Radio, Rocket, Globe, Crown,
   LineChart, ArrowRight, MousePointer2, CheckCircle2, Target, Share2,
-  MessageCircle, Brain, Play
+  MessageCircle, Brain, Play, GraduationCap, Gamepad2, Swords, PieChart,
+  Receipt, Lightbulb, Hand, ArrowLeftRight, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
@@ -22,13 +23,14 @@ interface OnboardingStep {
     label: string;
     path: string;
   };
+  tip?: string;
 }
 
 const steps: OnboardingStep[] = [
   {
     title: "Welcome to StreamAiX",
-    subtitle: "AI-Powered Prediction Markets on Base",
-    description: "Turn videos into insights, trade on predictions, and chat with AI experts. 100+ AI agents trading 24/7.",
+    subtitle: "AI-Powered Finance & Prediction Markets",
+    description: "Your unified command center for crypto, stocks, and prediction markets. 100+ AI agents trade 24/7 while you earn rewards.",
     icon: Sparkles,
     gradient: "from-violet-600 via-purple-500 to-fuchsia-500",
     glowColor: "rgba(139, 92, 246, 0.5)",
@@ -43,26 +45,79 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Navigation & Carousel",
+    subtitle: "Swipe Through Content Sections",
+    description: "The home page uses a sliding carousel. Swipe left/right on mobile or use arrow buttons on desktop to explore different content sections.",
+    icon: ArrowLeftRight,
+    gradient: "from-sky-500 via-blue-500 to-indigo-500",
+    glowColor: "rgba(56, 189, 248, 0.5)",
+    instructions: [
+      "Swipe horizontally to browse sections",
+      "Click dots at the bottom to jump to sections",
+      "Use arrow buttons on larger screens"
+    ],
+    action: {
+      label: "Try Carousel",
+      path: "/"
+    },
+    tip: "The sidebar menu gives you quick access to all pages"
+  },
+  {
+    title: "Portfolio Command Center",
+    subtitle: "Unified Asset Management",
+    description: "Track crypto, stocks, ETFs, retirement accounts, and cash in one dashboard. Get AI-powered tax optimization and personalized financial advice.",
+    icon: PieChart,
+    gradient: "from-emerald-500 via-teal-500 to-cyan-500",
+    glowColor: "rgba(20, 184, 166, 0.5)",
+    instructions: [
+      "Add assets from crypto wallets or manually",
+      "View real-time PnL and allocation charts",
+      "Get tax-loss harvesting recommendations"
+    ],
+    action: {
+      label: "Open Portfolio",
+      path: "/portfolio"
+    },
+    tip: "The AI Financial Advisor gives personalized tips based on your holdings"
+  },
+  {
+    title: "Tax Analytics",
+    subtitle: "Smart Tax Optimization",
+    description: "See exactly how much you'll owe in taxes. Long-term gains (15%) vs short-term (32%) are calculated automatically based on when you bought each asset.",
+    icon: Receipt,
+    gradient: "from-amber-500 via-orange-500 to-red-500",
+    glowColor: "rgba(245, 158, 11, 0.5)",
+    instructions: [
+      "View estimated tax liability in real-time",
+      "Identify tax-loss harvesting opportunities",
+      "Plan sells to minimize tax burden"
+    ],
+    action: {
+      label: "View Tax Dashboard",
+      path: "/portfolio"
+    }
+  },
+  {
     title: "Knowledge Avatars",
     subtitle: "Chat with AI Crypto Experts",
-    description: "Talk to AI personas of top crypto thinkers like Vitalik, CZ, and Cathie Wood. Get personalized insights and market analysis.",
+    description: "Talk to AI personas of legendary investors like Buffett, Saylor, and CZ. Get personalized insights in their unique style.",
     icon: Brain,
     gradient: "from-cyan-500 via-blue-500 to-purple-600",
     glowColor: "rgba(6, 182, 212, 0.5)",
     instructions: [
       "Choose from 17+ AI expert personas",
-      "Ask questions about crypto, markets, DeFi",
-      "Get real-time analysis in their unique style"
+      "Ask questions about crypto, stocks, macro",
+      "Watch live avatar streams with voice"
     ],
     action: {
       label: "Meet Avatars",
-      path: "/#knowledge-avatars"
+      path: "/"
     }
   },
   {
     title: "Prediction Markets",
     subtitle: "Trade YES/NO on Future Events",
-    description: "Bet on crypto predictions, DeFi events, and market outcomes. Join leagues to compete for prize pools up to 100K STREAM.",
+    description: "Bet on crypto predictions, earnings reports, Fed decisions, and market outcomes. Join leagues to compete for prize pools.",
     icon: TrendingUp,
     gradient: "from-emerald-500 via-green-500 to-teal-500",
     glowColor: "rgba(16, 185, 129, 0.5)",
@@ -90,20 +145,20 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Try AI Processor",
-      path: "/#ai-processor"
+      path: "/"
     }
   },
   {
-    title: "Live Streams",
+    title: "Live Streams & Debates",
     subtitle: "24/7 AI-Powered Broadcasting",
-    description: "Watch AI Avatars stream live with voice commentary, Q&A sessions, debates, and real-time market reactions.",
+    description: "Watch AI Avatars stream live with voice commentary, debate each other on markets, and react to breaking news in real-time.",
     icon: Radio,
     gradient: "from-rose-500 via-pink-500 to-purple-500",
     glowColor: "rgba(244, 63, 94, 0.5)",
     instructions: [
       "Watch live streams from AI Avatars",
-      "Ask questions and vote on Q&A",
-      "Join debates and react to markets"
+      "Vote in real-time avatar debates",
+      "Ask questions and influence discussions"
     ],
     action: {
       label: "Watch Streams",
@@ -113,14 +168,14 @@ const steps: OnboardingStep[] = [
   {
     title: "Bounty Feed",
     subtitle: "Earn Rewards for Quality Work",
-    description: "Complete bounties by summarizing content, creating predictions, or moderating. Earn STREAM points and build reputation.",
+    description: "Complete bounties by summarizing content, creating predictions, or moderating. Earn STREAM points and build your reputation.",
     icon: Target,
     gradient: "from-orange-500 via-amber-500 to-yellow-500",
     glowColor: "rgba(249, 115, 22, 0.5)",
     instructions: [
       "Browse available bounties by category",
-      "Submit high-quality summaries and content",
-      "Earn points and climb the leaderboard"
+      "Submit high-quality summaries",
+      "Earn points and unlock badges"
     ],
     action: {
       label: "View Bounties",
@@ -128,71 +183,71 @@ const steps: OnboardingStep[] = [
     }
   },
   {
-    title: "Social Feed",
-    subtitle: "Connect with the Community",
-    description: "Follow traders, share predictions, and engage with the StreamAiX community. See what top performers are trading.",
-    icon: MessageCircle,
-    gradient: "from-pink-500 via-rose-500 to-red-500",
-    glowColor: "rgba(236, 72, 153, 0.5)",
+    title: "Gamification & Quests",
+    subtitle: "Level Up Your Trading Journey",
+    description: "Complete daily quests, weekly missions, and seasonal challenges. Earn XP, unlock achievements, and compete on leaderboards.",
+    icon: Gamepad2,
+    gradient: "from-purple-500 via-violet-500 to-indigo-500",
+    glowColor: "rgba(139, 92, 246, 0.5)",
     instructions: [
-      "Follow top traders and AI agents",
-      "Share your predictions and insights",
-      "Engage with posts and build your network"
+      "Complete daily and weekly quests",
+      "Earn XP and level up your profile",
+      "Unlock exclusive badges and rewards"
     ],
     action: {
-      label: "View Social Feed",
-      path: "/#social-feed"
+      label: "View Quests",
+      path: "/gamification"
     }
   },
   {
-    title: "Discover & Analytics",
-    subtitle: "Real-Time Crypto Intelligence",
-    description: "Live prices, AI signals, whale tracking, and sentiment analysis. Everything you need for informed predictions.",
-    icon: BarChart3,
+    title: "Learning Hub",
+    subtitle: "Master Crypto & Finance",
+    description: "Interactive courses on DeFi, trading strategies, and market analysis. Learn at your own pace and earn certificates.",
+    icon: GraduationCap,
     gradient: "from-blue-500 via-indigo-500 to-violet-500",
     glowColor: "rgba(99, 102, 241, 0.5)",
     instructions: [
-      "View live crypto prices and charts",
-      "Track whale movements and AI signals",
-      "Analyze market sentiment trends"
+      "Browse courses by topic and difficulty",
+      "Complete lessons to earn STREAM",
+      "Track your learning progress"
     ],
     action: {
-      label: "Open Discover",
-      path: "/discover"
+      label: "Start Learning",
+      path: "/learning-hub"
+    }
+  },
+  {
+    title: "Prediction Leagues",
+    subtitle: "Compete for Prize Pools",
+    description: "Join leagues to compete with other traders. Top performers share prize pools up to 100K STREAM each season.",
+    icon: Trophy,
+    gradient: "from-yellow-500 via-amber-500 to-orange-500",
+    glowColor: "rgba(234, 179, 8, 0.5)",
+    instructions: [
+      "Join free or premium leagues",
+      "Make accurate predictions to climb ranks",
+      "Win prizes at the end of each season"
+    ],
+    action: {
+      label: "Join Leagues",
+      path: "/leagues"
     }
   },
   {
     title: "AI Trading Intelligence",
     subtitle: "Multi-Factor Signal Analysis",
-    description: "Get AI-powered trading signals with confluence scoring, live charts, whale alerts, and correlation heatmaps for crypto and stocks.",
-    icon: TrendingUp,
+    description: "Get AI-powered trading signals combining technical analysis, on-chain data, whale movements, and sentiment for both crypto and stocks.",
+    icon: Lightbulb,
     gradient: "from-purple-500 via-fuchsia-500 to-pink-500",
     glowColor: "rgba(168, 85, 247, 0.5)",
     instructions: [
-      "View AI trading signals with confidence scores",
-      "Analyze technical, on-chain, and sentiment data",
-      "Track correlations and set price alerts"
+      "View AI signals with confidence scores",
+      "Analyze technical + on-chain data",
+      "Set price alerts for key levels"
     ],
     action: {
       label: "Open AI Trading",
       path: "/ai-trading"
-    }
-  },
-  {
-    title: "Your Dashboard",
-    subtitle: "Track Your Performance",
-    description: "Monitor your portfolio, trading history, and earnings. See your predictions, positions, and overall stats in one place.",
-    icon: LineChart,
-    gradient: "from-teal-500 via-cyan-500 to-blue-500",
-    glowColor: "rgba(20, 184, 166, 0.5)",
-    instructions: [
-      "View your trading performance",
-      "Track open positions and P&L",
-      "Monitor your STREAM earnings"
-    ],
-    action: {
-      label: "Go to Dashboard",
-      path: "/dashboard"
     }
   },
   {
@@ -204,7 +259,7 @@ const steps: OnboardingStep[] = [
     glowColor: "rgba(251, 191, 36, 0.5)",
     instructions: [
       "2,500 STREAM bonus added to your wallet",
-      "Earn more by trading and streaming",
+      "Earn more by trading and completing quests",
       "Daily login streaks multiply rewards"
     ],
     action: {
@@ -224,7 +279,6 @@ export function OnboardingTour() {
   const [countdown, setCountdown] = useState(6);
 
   useEffect(() => {
-    // Check for ?tour=1 URL parameter for testing
     const urlParams = new URLSearchParams(window.location.search);
     const forceTour = urlParams.get('tour') === '1';
     
@@ -234,7 +288,6 @@ export function OnboardingTour() {
     }
   }, []);
 
-  // Listen for custom event to trigger tour (for testing)
   useEffect(() => {
     const handleTriggerTour = () => {
       setIsOpen(true);
@@ -246,7 +299,6 @@ export function OnboardingTour() {
     return () => window.removeEventListener('triggerOnboardingTour', handleTriggerTour);
   }, []);
 
-  // Generate random particles for the stream effect
   useEffect(() => {
     const particleArray = Array.from({ length: 20 }, (_, i) => ({
       id: i,
@@ -281,11 +333,9 @@ export function OnboardingTour() {
   };
 
   const handleAction = (path: string) => {
-    // Handle hash navigation for landing page sections
     if (path.startsWith('/#')) {
       const sectionId = path.substring(2);
       setLocation('/');
-      // Wait for navigation then scroll to section
       setTimeout(() => {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -294,18 +344,15 @@ export function OnboardingTour() {
       }, 100);
     } else {
       setLocation(path);
-      // Scroll to top of page for non-section navigation
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
     }
     
     if (currentStep === steps.length - 1) {
-      // Last step - close tour after navigating
       handleClose();
       return;
     }
-    // Advance to next step and minimize so user can see the page
     setCurrentStep(currentStep + 1);
     setIsMinimized(true);
   };
@@ -314,7 +361,6 @@ export function OnboardingTour() {
     setIsMinimized(!isMinimized);
   };
 
-  // Auto-timer: bring tour back after 6 seconds when minimized with countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
     let countdownInterval: NodeJS.Timeout;
@@ -349,7 +395,6 @@ export function OnboardingTour() {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Minimized Floating Widget - Mobile Responsive */}
           {isMinimized && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 100 }}
@@ -437,7 +482,6 @@ export function OnboardingTour() {
             </motion.div>
           )}
 
-          {/* Full Tour Modal - Mobile Responsive */}
           {!isMinimized && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -446,12 +490,10 @@ export function OnboardingTour() {
               className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-2 sm:p-4"
               onClick={handleSkip}
             >
-              {/* Neural Network Background */}
               <div className="absolute inset-0 overflow-hidden">
                 <NeuralNetworkBackground />
               </div>
 
-              {/* Modal Container - Better mobile sizing */}
               <motion.div
                 ref={modalRef}
                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -461,9 +503,7 @@ export function OnboardingTour() {
                 className="relative w-full max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Main Card with Liquid Gradient Background */}
                 <div className="relative neural-glass rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden iridescent-border liquid-gradient">
-                  {/* Flowing Particle Stream - Reduced opacity */}
                   <div className="particle-stream opacity-30">
                     {particles.map((p) => (
                       <div
@@ -478,7 +518,6 @@ export function OnboardingTour() {
                     ))}
                   </div>
                   
-                  {/* Control Buttons */}
                   <div className="absolute top-6 right-6 z-20 flex gap-2">
                     <button
                       onClick={toggleMinimize}
@@ -496,12 +535,9 @@ export function OnboardingTour() {
                     </button>
                   </div>
 
-                  {/* Content Container - Mobile optimized */}
                   <div className="overflow-y-auto max-h-[75vh] sm:max-h-[85vh] scrollbar-thin relative z-10">
                     <div className="p-3 sm:p-4 md:p-6">
-                      {/* Header Section */}
                       <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-5 mb-4 sm:mb-5">
-                        {/* Circular Progress & Icon with Energy Flow */}
                         <div className="relative flex-shrink-0 mx-auto sm:mx-0">
                           <svg className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transform -rotate-90">
                             <defs>
@@ -535,7 +571,6 @@ export function OnboardingTour() {
                             />
                           </svg>
                           
-                          {/* Icon in center */}
                           <motion.div
                             key={currentStep}
                             initial={{ scale: 0, rotate: -180 }}
@@ -549,7 +584,6 @@ export function OnboardingTour() {
                           </motion.div>
                         </div>
 
-                        {/* Text Content */}
                         <div className="flex-1 min-w-0 text-center sm:text-left">
                           <motion.div
                             key={currentStep}
@@ -576,7 +610,6 @@ export function OnboardingTour() {
                         </div>
                       </div>
 
-                      {/* Instructions Section */}
                       <motion.div
                         key={currentStep}
                         initial={{ opacity: 0, y: 20 }}
@@ -584,101 +617,85 @@ export function OnboardingTour() {
                         transition={{ delay: 0.4 }}
                         className="mb-4 sm:mb-5"
                       >
-                        <div className="relative neural-glass rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border border-purple-500/20 overflow-hidden">
-                          <div className="absolute inset-0 iridescent-shimmer rounded-lg sm:rounded-xl opacity-50" />
-                          
-                          <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                              <div className={`p-1.5 bg-gradient-to-br ${currentStepData.gradient} rounded-lg`}>
-                                <MousePointer2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                        <div className="grid gap-2 sm:gap-2.5">
+                          {currentStepData.instructions.map((instruction, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.5 + index * 0.1 }}
+                              className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
+                            >
+                              <div className={`p-1 sm:p-1.5 bg-gradient-to-br ${currentStepData.gradient} rounded-md sm:rounded-lg flex-shrink-0`}>
+                                <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                               </div>
-                              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white font-orbitron">Quick Start Guide</h3>
-                            </div>
-                            
-                            <div className="grid gap-1.5 sm:gap-2">
-                              {currentStepData.instructions.map((instruction, index) => (
-                                <motion.div
-                                  key={index}
-                                  initial={{ opacity: 0, x: -30 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.5 + index * 0.08 }}
-                                  className="flex items-start gap-2 group hover:bg-white/5 p-1 sm:p-1.5 rounded-lg transition-all"
-                                >
-                                  {/* Simple numbered indicator */}
-                                  <span className={`flex-shrink-0 text-xs font-bold bg-gradient-to-br ${currentStepData.gradient} text-transparent bg-clip-text pt-0.5`}>
-                                    {index + 1}.
-                                  </span>
-                                  <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
-                                    {instruction}
-                                  </p>
-                                </motion.div>
-                              ))}
-                            </div>
-                          </div>
+                              <span className="text-xs sm:text-sm text-gray-200">{instruction}</span>
+                            </motion.div>
+                          ))}
                         </div>
+                        
+                        {currentStepData.tip && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8 }}
+                            className="mt-3 p-2.5 sm:p-3 rounded-lg bg-amber-500/10 border border-amber-500/30"
+                          >
+                            <div className="flex items-start gap-2">
+                              <Lightbulb className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                              <p className="text-xs sm:text-sm text-amber-200">{currentStepData.tip}</p>
+                            </div>
+                          </motion.div>
+                        )}
                       </motion.div>
 
-                      {/* Main Action Button - Sleek Modern Design */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
-                        className="flex justify-center mb-3 sm:mb-4"
-                      >
-                        <motion.button
-                          onClick={() => handleAction(currentStepData.action.path)}
-                          className={`group relative px-5 py-2 bg-gradient-to-r ${currentStepData.gradient} rounded-lg overflow-hidden`}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          data-testid={`button-action-step-${currentStep}`}
-                        >
-                          {/* Subtle shimmer on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:translate-x-full transition-all duration-700" />
-                          
-                          <span className="relative flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white">
-                            {currentStepData.action.label}
-                            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-                          </span>
-                        </motion.button>
-                      </motion.div>
-
-                      {/* Navigation Footer */}
-                      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-white/10">
-                        <button
+                      <div className="flex items-center justify-between gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-white/10">
+                        <Button
+                          variant="ghost"
                           onClick={handlePrevious}
                           disabled={currentStep === 0}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
+                          className="text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 text-xs sm:text-sm px-2 sm:px-4"
                           data-testid="button-previous-step"
                         >
-                          <ChevronLeft className="h-3.5 w-3.5" />
-                          Back
-                        </button>
-
-                        {/* Step Dots */}
-                        <div className="flex items-center gap-1.5">
-                          {steps.map((step, index) => (
+                          <ChevronLeft className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Previous</span>
+                        </Button>
+                        
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          {steps.map((_, index) => (
                             <button
                               key={index}
                               onClick={() => setCurrentStep(index)}
-                              className={`h-1.5 rounded-full transition-all duration-300 ${
+                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
                                 index === currentStep 
-                                  ? `w-6 bg-gradient-to-r ${step.gradient}` 
-                                  : index < currentStep
-                                  ? 'w-1.5 bg-emerald-500'
-                                  : 'w-1.5 bg-white/25 hover:bg-white/40'
+                                  ? 'bg-gradient-to-r from-purple-500 via-cyan-500 to-pink-500 w-4 sm:w-6' 
+                                  : index < currentStep 
+                                    ? 'bg-white/50' 
+                                    : 'bg-white/20'
                               }`}
+                              data-testid={`button-step-indicator-${index}`}
                             />
                           ))}
                         </div>
 
-                        <button
-                          onClick={currentStep === steps.length - 1 ? handleClose : handleNext}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
-                          data-testid="button-next-step"
-                        >
-                          {currentStep === steps.length - 1 ? 'Done' : 'Skip'}
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="flex gap-1.5 sm:gap-2">
+                          <Button
+                            variant="ghost"
+                            onClick={handleSkip}
+                            className="text-gray-400 hover:text-white hover:bg-white/10 text-xs sm:text-sm px-2 sm:px-4"
+                            data-testid="button-skip-tour"
+                          >
+                            Skip
+                          </Button>
+                          <Button
+                            onClick={() => handleAction(currentStepData.action.path)}
+                            className={`bg-gradient-to-r ${currentStepData.gradient} hover:opacity-90 text-white font-medium text-xs sm:text-sm px-3 sm:px-5 shadow-lg`}
+                            data-testid="button-tour-action"
+                          >
+                            {currentStepData.action.label}
+                            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
