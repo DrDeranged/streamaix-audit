@@ -1341,7 +1341,7 @@ export default function PortfolioDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 pb-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 pb-8 px-3 sm:px-4 overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -1360,20 +1360,20 @@ export default function PortfolioDashboard() {
                 <p className="text-sm text-gray-500">Unified asset management with AI intelligence</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {/* Total PnL indicator */}
               {assets.length > 0 && showValues && (
-                <div className={cn("px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5", isPnlPositive ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20')}>
+                <div className={cn("px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5", isPnlPositive ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20')}>
                   {isPnlPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                   <span>{isPnlPositive ? '+' : ''}{totalPnlPercent.toFixed(1)}%</span>
-                  <span className="text-xs opacity-70 ml-1">${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                  <span className="text-xs opacity-70 ml-1 hidden sm:inline">${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                 </div>
               )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowValues(!showValues)}
-                className="text-gray-400 hover:text-white hover:bg-slate-800"
+                className="text-gray-400 hover:text-white hover:bg-slate-800 min-w-[44px] min-h-[44px]"
               >
                 {showValues ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
@@ -1383,14 +1383,15 @@ export default function PortfolioDashboard() {
                   size="sm"
                   onClick={() => syncMutation.mutate()}
                   disabled={syncMutation.isPending || !activePortfolioId}
-                  className="border-slate-700 text-gray-300 hover:bg-slate-800 hover:text-white"
+                  className="border-slate-700 text-gray-300 hover:bg-slate-800 hover:text-white min-h-[44px]"
                   data-testid="sync-portfolio-button"
                 >
                   <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
-                  {syncMutation.isPending ? 'Syncing...' : 'Sync Prices'}
+                  <span className="hidden sm:inline">{syncMutation.isPending ? 'Syncing...' : 'Sync Prices'}</span>
+                  <span className="sm:hidden">{syncMutation.isPending ? '...' : 'Sync'}</span>
                 </Button>
                 {assets[0]?.priceLastUpdated && (
-                  <span className="text-[10px] text-gray-500 mt-0.5">
+                  <span className="text-[11px] sm:text-[10px] text-gray-500 mt-0.5 hidden sm:block">
                     Updated {new Date(assets[0].priceLastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
@@ -1665,7 +1666,7 @@ export default function PortfolioDashboard() {
                             ].map((item) => (
                               <div key={item.label} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
                                 <item.icon className={cn("w-5 h-5 mx-auto mb-1", item.color)} />
-                                <span className="text-[10px] text-gray-400">{item.label}</span>
+                                <span className="text-[11px] sm:text-[10px] text-gray-400">{item.label}</span>
                               </div>
                             ))}
                           </div>
