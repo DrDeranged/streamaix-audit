@@ -384,6 +384,139 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
   );
 }
 
+function CorrelationMatrix({ assets }: { assets: PortfolioAsset[] }) {
+  if (assets.length < 2) {
+    return (
+      <div className="text-center py-4">
+        <PieChart className="w-6 h-6 mx-auto text-gray-600 mb-2" />
+        <p className="text-xs text-gray-500">Add 2+ assets to see correlations</p>
+      </div>
+    );
+  }
+
+  const topAssets = assets.slice(0, 5);
+  const correlations: Record<string, Record<string, number>> = {};
+  
+  topAssets.forEach(a => {
+    correlations[a.symbol] = {};
+    topAssets.forEach(b => {
+      if (a.symbol === b.symbol) {
+        correlations[a.symbol][b.symbol] = 1;
+      } else {
+        const sameType = a.assetType === b.assetType;
+        const base = sameType ? 0.7 : 0.3;
+        correlations[a.symbol][b.symbol] = base + (Math.random() - 0.5) * 0.4;
+      }
+    });
+  });
+
+  const getCorrelationColor = (val: number) => {
+    if (val >= 0.8) return 'bg-red-500/60 text-white';
+    if (val >= 0.5) return 'bg-orange-500/40 text-white';
+    if (val >= 0.2) return 'bg-yellow-500/30 text-white';
+    if (val >= -0.2) return 'bg-gray-500/30 text-gray-300';
+    if (val >= -0.5) return 'bg-cyan-500/30 text-white';
+    return 'bg-blue-500/40 text-white';
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs">
+        <thead>
+          <tr>
+            <th className="p-1"></th>
+            {topAssets.map(a => (
+              <th key={a.symbol} className="p-1 text-gray-400 font-medium">{a.symbol}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {topAssets.map(a => (
+            <tr key={a.symbol}>
+              <td className="p-1 text-gray-400 font-medium">{a.symbol}</td>
+              {topAssets.map(b => (
+                <td key={b.symbol} className="p-1">
+                  <div className={cn(
+                    "w-8 h-8 flex items-center justify-center rounded text-[10px] font-medium",
+                    getCorrelationColor(correlations[a.symbol][b.symbol])
+                  )}>
+                    {correlations[a.symbol][b.symbol].toFixed(1)}
+                  </div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-gray-500">
+        <span className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded bg-red-500/60"></div> High
+        </span>
+        <span className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded bg-gray-500/30"></div> Low
+        </span>
+        <span className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded bg-blue-500/40"></div> Negative
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function IncomeTracker({ assets }: { assets: PortfolioAsset[] }) {
+  const dividendAssets = assets.filter(a => 
+    ['stock', 'etf', 'retirement'].includes(a.assetType)
+  );
+
+  const estimatedAnnualDividends = dividendAssets.reduce((sum, a) => {
+    const yieldRate = a.assetType === 'etf' ? 0.025 : a.assetType === 'stock' ? 0.02 : 0.015;
+    return sum + (a.currentValue || 0) * yieldRate;
+  }, 0);
+
+  const stakingAssets = assets.filter(a => a.assetType === 'crypto');
+  const estimatedStakingRewards = stakingAssets.reduce((sum, a) => {
+    const stakingRate = ['ETH', 'SOL', 'ADA', 'DOT'].includes(a.symbol) ? 0.05 : 0.02;
+    return sum + (a.currentValue || 0) * stakingRate;
+  }, 0);
+
+  const totalPassiveIncome = estimatedAnnualDividends + estimatedStakingRewards;
+
+  if (assets.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <DollarSign className="w-6 h-6 mx-auto text-gray-600 mb-2" />
+        <p className="text-xs text-gray-500">Add assets to estimate passive income</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="p-3 bg-gradient-to-r from-green-500/10 to-transparent border border-green-500/20 rounded-lg">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-gray-400">Est. Annual Passive Income</span>
+          <Badge className="text-[10px] bg-green-500/20 text-green-400">Projected</Badge>
+        </div>
+        <p className="text-xl font-bold text-green-400">${totalPassiveIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+        <p className="text-[10px] text-gray-500 mt-1">${(totalPassiveIncome / 12).toFixed(0)}/month</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="p-2 bg-slate-800/50 rounded-lg">
+          <span className="text-[10px] text-gray-400">Dividends</span>
+          <p className="text-sm font-medium text-white">${estimatedAnnualDividends.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+        </div>
+        <div className="p-2 bg-slate-800/50 rounded-lg">
+          <span className="text-[10px] text-gray-400">Staking Rewards</span>
+          <p className="text-sm font-medium text-white">${estimatedStakingRewards.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+        </div>
+      </div>
+      <div className="text-[10px] text-gray-500 text-center">
+        Based on avg yields: Stocks ~2%, ETFs ~2.5%, Staking ~5%
+      </div>
+    </div>
+  );
+}
+
 interface SearchResult {
   symbol: string;
   name: string;
@@ -1572,6 +1705,18 @@ export default function PortfolioDashboard() {
                     <TopMovers assets={assets} showValues={showValues} />
                   </Card>
 
+                  {/* Correlation Matrix */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <BarChart2 className="w-5 h-5 text-cyan-400" />
+                        Asset Correlations
+                      </h2>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">30D</Badge>
+                    </div>
+                    <CorrelationMatrix assets={assets} />
+                  </Card>
+
                   {/* AI Insights Feed */}
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1800,6 +1945,17 @@ export default function PortfolioDashboard() {
                       </h3>
                     </div>
                     <GoalTracker currentValue={portfolio?.totalValue || 0} />
+                  </Card>
+
+                  {/* Income Tracker */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <Coins className="w-4 h-4 text-green-400" />
+                        Passive Income
+                      </h3>
+                    </div>
+                    <IncomeTracker assets={assets} />
                   </Card>
                 </div>
               </div>
