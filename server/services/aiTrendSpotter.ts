@@ -159,11 +159,12 @@ export class AITrendSpotter {
   }
 
   /**
-   * Gather trending data from various sources
+   * Gather trending data from various sources (both crypto AND stocks/macro)
    */
   private async gatherTrendData(): Promise<string> {
     const dataPoints: string[] = [];
 
+    // === CRYPTO DATA ===
     // Try to get trending crypto data
     try {
       const response = await axios.get('https://api.coingecko.com/api/v3/search/trending', {
@@ -178,7 +179,7 @@ export class AITrendSpotter {
       console.warn('⚠️  Failed to fetch trending crypto:', error.message);
     }
 
-    // Try to get market data
+    // Try to get crypto market data
     try {
       const response = await axios.get('https://api.coingecko.com/api/v3/global', {
         timeout: 5000,
@@ -186,19 +187,53 @@ export class AITrendSpotter {
 
       const data = response.data?.data;
       if (data) {
-        dataPoints.push(`Total Market Cap: $${(data.total_market_cap?.usd / 1e12).toFixed(2)}T`);
+        dataPoints.push(`Crypto Total Market Cap: $${(data.total_market_cap?.usd / 1e12).toFixed(2)}T`);
         dataPoints.push(`Bitcoin Dominance: ${data.market_cap_percentage?.btc?.toFixed(1)}%`);
-        dataPoints.push(`DeFi to Total Cap: ${((data.defi_market_cap / data.total_market_cap?.usd) * 100).toFixed(2)}%`);
       }
     } catch (error: any) {
-      console.warn('⚠️  Failed to fetch global market data:', error.message);
+      console.warn('⚠️  Failed to fetch global crypto market data:', error.message);
     }
+
+    // === STOCK/MACRO DATA ===
+    // Fetch key tech stock quotes from Finnhub
+    const finnhubApiKey = process.env.FINNHUB_API_KEY;
+    if (finnhubApiKey) {
+      const keyStocks = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'TSLA', 'META', 'AMZN', 'AMD', 'COIN', 'MSTR'];
+      const stockData: string[] = [];
+      
+      for (const symbol of keyStocks.slice(0, 5)) { // Limit to 5 to avoid rate limits
+        try {
+          const response = await axios.get(`https://finnhub.io/api/v1/quote`, {
+            params: { symbol, token: finnhubApiKey },
+            timeout: 3000,
+          });
+          
+          if (response.data?.c > 0) {
+            const price = response.data.c;
+            const change = response.data.dp || 0;
+            stockData.push(`${symbol}: $${price.toFixed(2)} (${change > 0 ? '+' : ''}${change.toFixed(2)}%)`);
+          }
+        } catch (e) {
+          // Silent fail for individual stocks
+        }
+      }
+      
+      if (stockData.length > 0) {
+        dataPoints.push(`Key Tech Stocks: ${stockData.join(', ')}`);
+      }
+    }
+
+    // Add macro context
+    dataPoints.push(`Major Tech Companies: NVIDIA, Apple, Microsoft, Google, Tesla, Meta, Amazon, AMD`);
+    dataPoints.push(`Crypto-Related Stocks: Coinbase (COIN), MicroStrategy (MSTR), Marathon (MARA), Riot (RIOT)`);
+    dataPoints.push(`Key ETFs: SPY (S&P 500), QQQ (Nasdaq), IBIT (Bitcoin ETF), ARKK (Innovation)`);
+    dataPoints.push(`Macro Factors: Federal Reserve policy, interest rates, inflation data, employment reports`);
 
     return dataPoints.join('\n');
   }
 
   /**
-   * Use GPT-4 to generate market ideas based on trends
+   * Use GPT-4 to generate market ideas based on trends (balanced crypto + stocks/macro)
    */
   private async generateMarketIdeas(trendData: string): Promise<MarketIdea[]> {
     const currentDate = new Date();
@@ -206,31 +241,41 @@ export class AITrendSpotter {
     const next30Days = new Date(currentDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     const next90Days = new Date(currentDate.getTime() + 90 * 24 * 60 * 60 * 1000);
 
-    const prompt = `You are an autonomous AI system that creates prediction markets based on crypto trends.
+    const prompt = `You are an autonomous AI system that creates prediction markets for a platform covering BOTH cryptocurrency AND traditional finance/tech stocks.
 
 Current Date: ${currentDate.toISOString()}
 Available Market Data:
 ${trendData}
 
-Generate 3-5 interesting prediction market ideas based on current crypto trends.
+Generate 4-6 interesting prediction market ideas with a BALANCED MIX:
+- 2-3 CRYPTO markets (Bitcoin, Ethereum, DeFi, NFTs, Layer 2s, etc.)
+- 2-3 STOCKS/MACRO markets (Tech stocks like NVDA/AAPL/TSLA, earnings, Fed policy, ETFs, market indices)
 
-Respond with JSON array:
-[
+Respond with JSON:
+{"markets": [
   {
-    "question": "Clear yes/no question (e.g., 'Will Bitcoin reach $100k by end of 2024?')",
+    "question": "Clear yes/no question",
     "description": "Detailed description explaining the market and resolution criteria",
-    "category": "crypto|defi|nft|layer2|community",
+    "category": "crypto|defi|nft|layer2|stocks|earnings|macro|etf",
     "deadlineDays": <7|30|90>,
     "confidence": <0.0-1.0 how good this market idea is>,
     "reasoning": "Why this is a timely and interesting market"
   }
-]
+]}
+
+EXAMPLES:
+- Crypto: "Will Bitcoin reach $120,000 by March 2026?"
+- Crypto: "Will Ethereum's market cap exceed $500 billion by Q2 2026?"
+- Stocks: "Will NVIDIA stock price exceed $200 by February 2026?"
+- Stocks: "Will Tesla deliver more than 500,000 vehicles in Q1 2026?"
+- Macro: "Will the Federal Reserve cut interest rates in January 2026?"
+- ETF: "Will Bitcoin ETF (IBIT) reach $100 billion AUM by March 2026?"
 
 GUIDELINES:
-- Focus on objectively resolvable questions
-- Use clear resolution criteria
+- MUST include both crypto AND stocks/macro markets (balanced 50/50)
+- Focus on objectively resolvable questions with clear data sources
+- Use clear resolution criteria (price targets, earnings, official announcements)
 - Mix short-term (7 days) and long-term (30-90 days) markets
-- Avoid markets about subjective outcomes
 - Make questions specific and measurable`;
 
     const completion = await openai.chat.completions.create({
