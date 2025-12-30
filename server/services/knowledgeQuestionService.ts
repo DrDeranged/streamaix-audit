@@ -22,7 +22,9 @@ interface KnowledgeQuestion {
   tags: string[];
 }
 
-const CRYPTO_QUESTION_TOPICS = [
+// Balanced question topics covering both crypto AND stocks/macro (50/50 split)
+const QUESTION_TOPICS = [
+  // === CRYPTO TOPICS (50%) ===
   { topic: "Layer 1 vs Layer 2 blockchain differences", category: "Infrastructure", difficulty: "medium" },
   { topic: "How DeFi lending protocols work", category: "DeFi", difficulty: "medium" },
   { topic: "Explain proof of stake vs proof of work", category: "Infrastructure", difficulty: "easy" },
@@ -43,6 +45,28 @@ const CRYPTO_QUESTION_TOPICS = [
   { topic: "Explain perpetual futures in crypto", category: "Trading", difficulty: "medium" },
   { topic: "What is a governance attack on a DAO", category: "DAOs", difficulty: "expert" },
   { topic: "How do stablecoins maintain their peg", category: "DeFi", difficulty: "medium" },
+  
+  // === STOCKS & MACRO TOPICS (50%) ===
+  { topic: "How do stock options and calls work", category: "Stocks", difficulty: "medium" },
+  { topic: "Explain the Federal Reserve's role in monetary policy", category: "Macro", difficulty: "medium" },
+  { topic: "What is quantitative easing and how does it affect markets", category: "Macro", difficulty: "hard" },
+  { topic: "How do ETFs differ from mutual funds", category: "ETFs", difficulty: "easy" },
+  { topic: "Explain P/E ratio and how to value tech stocks", category: "Stocks", difficulty: "medium" },
+  { topic: "What moves NVIDIA stock price and AI chip demand", category: "Stocks", difficulty: "medium" },
+  { topic: "How do interest rate changes affect stock valuations", category: "Macro", difficulty: "hard" },
+  { topic: "Explain market cap vs enterprise value", category: "Stocks", difficulty: "medium" },
+  { topic: "What is a stock split and why do companies do them", category: "Stocks", difficulty: "easy" },
+  { topic: "How do earnings reports affect stock prices", category: "Earnings", difficulty: "medium" },
+  { topic: "Explain short selling and its risks", category: "Trading", difficulty: "medium" },
+  { topic: "What is the yield curve and why does inversion matter", category: "Macro", difficulty: "hard" },
+  { topic: "How do Bitcoin ETFs work and why are they significant", category: "ETFs", difficulty: "medium" },
+  { topic: "Explain the relationship between inflation and stock markets", category: "Macro", difficulty: "hard" },
+  { topic: "What is dollar cost averaging and when to use it", category: "Trading", difficulty: "easy" },
+  { topic: "How do tech company valuations work (DCF, revenue multiples)", category: "Stocks", difficulty: "expert" },
+  { topic: "Explain the S&P 500 index and how it's weighted", category: "ETFs", difficulty: "easy" },
+  { topic: "What causes stock market corrections and bear markets", category: "Macro", difficulty: "medium" },
+  { topic: "How do stock buybacks affect shareholder value", category: "Stocks", difficulty: "medium" },
+  { topic: "Explain the difference between growth and value investing", category: "Stocks", difficulty: "medium" },
 ];
 
 export class KnowledgeQuestionService {
@@ -53,7 +77,7 @@ export class KnowledgeQuestionService {
     }
 
     try {
-      const topicInfo = CRYPTO_QUESTION_TOPICS[Math.floor(Math.random() * CRYPTO_QUESTION_TOPICS.length)];
+      const topicInfo = QUESTION_TOPICS[Math.floor(Math.random() * QUESTION_TOPICS.length)];
       
       console.log(`[KnowledgeQ] Generating question about: ${topicInfo.topic}`);
       
@@ -109,9 +133,10 @@ export class KnowledgeQuestionService {
     agentUsername: string
   ): Promise<KnowledgeQuestion | null> {
     try {
-      const prompt = `You are ${agentUsername}, an AI agent on the StreamAiX platform creating educational crypto knowledge bounties.
+      const prompt = `You are ${agentUsername}, an AI agent on the StreamAiX platform creating educational knowledge bounties about crypto, stocks, and macro economics.
 
 Generate a challenging but fair knowledge question about: ${topicInfo.topic}
+Category: ${topicInfo.category}
 
 The question should:
 1. Test understanding, not just memorization

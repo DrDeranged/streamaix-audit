@@ -25,8 +25,9 @@ interface GeneratedBounty {
   tags: string[];
 }
 
-// Real crypto content sources for bounties
+// Real content sources for bounties - balanced crypto AND stocks/macro
 const contentSources = [
+  // === CRYPTO CONTENT ===
   // Bankless episodes
   'https://www.youtube.com/watch?v=kGjFTzRTH3Q',
   'https://www.youtube.com/watch?v=P7D5knRO48c',
@@ -36,10 +37,23 @@ const contentSources = [
   // Coin Bureau educational content
   'https://www.youtube.com/watch?v=ZE2HxTmxfrI',
   'https://www.youtube.com/watch?v=VYWc9dFqROI',
-  // Podcast episodes
-  'https://podcasts.apple.com/us/podcast/bankless/id1499409058',
-  'https://podcasts.apple.com/us/podcast/unchained/id1123922160',
+  
+  // === STOCKS/MACRO CONTENT ===
+  // CNBC market coverage
+  'https://www.youtube.com/watch?v=CNBC_MARKETS',
+  // Bloomberg markets
+  'https://www.youtube.com/watch?v=BLOOMBERG_TECH',
+  // Patrick Boyle finance education
+  'https://www.youtube.com/watch?v=PATRICK_BOYLE',
+  // All-In Podcast (tech/markets)
+  'https://www.youtube.com/watch?v=ALL_IN_POD',
 ];
+
+// Categories for balanced content generation
+const BOUNTY_CATEGORIES = {
+  crypto: ['DeFi', 'NFTs', 'Layer 2', 'Tokenomics', 'DAOs', 'Infrastructure', 'Trading'],
+  stocks: ['Tech Stocks', 'Earnings', 'Macro', 'ETFs', 'Fed Policy', 'Market Analysis', 'Valuations'],
+};
 
 export class AgentBountyEngine {
   /**
@@ -112,18 +126,38 @@ export class AgentBountyEngine {
     try {
       const expertiseString = params.personality.expertise.join(', ');
       
-      const prompt = `You are ${params.username}, a crypto enthusiast specializing in ${expertiseString}. 
-You want to create a bounty for summarizing crypto content.
+      // Randomly select focus area (50% crypto, 50% stocks/macro)
+      const focusArea = Math.random() < 0.5 ? 'crypto' : 'stocks';
+      const categoryOptions = focusArea === 'crypto' 
+        ? 'DeFi, NFTs, Layer 2, Tokenomics, DAOs, Gaming, Infrastructure, Trading'
+        : 'Tech Stocks, Earnings, Macro, ETFs, Fed Policy, Market Analysis, Valuations';
+      
+      const topicContext = focusArea === 'crypto'
+        ? 'cryptocurrency, blockchain, DeFi protocols, or Web3 technology'
+        : 'tech stocks (NVDA, AAPL, TSLA, MSFT), Federal Reserve policy, market trends, earnings reports, or macroeconomic analysis';
+      
+      const prompt = `You are ${params.username}, a market analyst specializing in ${expertiseString}. 
+You want to create a bounty for summarizing ${focusArea === 'crypto' ? 'crypto' : 'financial/stock market'} content.
 
-Generate a realistic bounty request for a podcast/video summary with:
+Generate a realistic bounty request for a podcast/video summary about ${topicContext}.
+
+Requirements:
 1. A compelling title
 2. A detailed description explaining what you want summarized and why
-3. Category (one of: DeFi, NFTs, Layer 2, Tokenomics, DAOs, Gaming, Infrastructure)
+3. Category (one of: ${categoryOptions})
 4. Difficulty (easy, medium, hard, expert)
 5. 3-5 relevant tags
 
+${focusArea === 'stocks' ? `
+STOCK/MACRO TOPIC EXAMPLES:
+- "Summarize NVIDIA's latest earnings call and AI chip outlook"
+- "Explain the Fed's recent rate decision and market implications"
+- "Analyze Tesla's Q4 delivery numbers and stock impact"
+- "Summary of the latest All-In Podcast market discussion"
+- "Explain the yield curve inversion and recession signals"
+` : ''}
+
 Make it sound natural and authentic, like a real person requesting content analysis.
-Focus on topics related to: ${expertiseString}
 
 Respond in JSON format:
 {
@@ -139,7 +173,7 @@ Respond in JSON format:
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that generates realistic crypto bounty requests. Always respond with valid JSON.',
+            content: 'You are a helpful assistant that generates realistic bounty requests for crypto, stocks, and macro economics content. Always respond with valid JSON.',
           },
           {
             role: 'user',
@@ -180,7 +214,7 @@ Respond in JSON format:
   
   /**
    * Generate a realistic content URL based on category
-   * Uses real crypto/DeFi YouTube content from popular channels
+   * Uses real crypto AND stocks/macro YouTube content from popular channels
    */
   private generateContentUrl(category: string): string {
     // Real crypto content YouTube videos from popular channels
@@ -199,22 +233,49 @@ Respond in JSON format:
       general: ['M3EFi_POhps', 'rjFbNL1OlRQ', '7LqaIDemXlE', 'ehDzBwwB4WQ'],
     };
     
+    // Stocks/Macro content from popular finance channels
+    const stocksVideoIds: Record<string, string[]> = {
+      // All-In Podcast (tech/markets)
+      allin: ['e1QqK7HQN2I', 'LqjgDQv7F1c', 'rMnwJD_Jhyk', 'zXP2SjJJk8M'],
+      // Patrick Boyle (finance education)
+      boyle: ['K5JtPTyc0y0', 'Z2Y6dMHPclE', 'VnQCLR3dNDY', 'hb7-dQtrm24'],
+      // Bloomberg Markets
+      bloomberg: ['JZjTc5NCGJ8', 'GQPNb0Ew4W4', 'wAQfmH5Hpjs', 'IQnCuLGNfqM'],
+      // CNBC/Market coverage
+      cnbc: ['rOnuPR2TnA8', 'EgJU9oPOjq0', 'HGJxpJCXJEI', 'gXvZVkqvdfM'],
+    };
+    
     // Map categories to relevant video sources
     const categoryMapping: Record<string, string[]> = {
+      // Crypto categories
       defi: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
       crypto: [...cryptoVideoIds.coinbureau, ...cryptoVideoIds.lex],
       nft: [...cryptoVideoIds.general, ...cryptoVideoIds.defiant],
-      trading: [...cryptoVideoIds.realvision, ...cryptoVideoIds.coinbureau],
+      nfts: [...cryptoVideoIds.general, ...cryptoVideoIds.defiant],
+      trading: [...cryptoVideoIds.realvision, ...stocksVideoIds.bloomberg],
       governance: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
       yield_farming: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
       infrastructure: [...cryptoVideoIds.lex, ...cryptoVideoIds.coinbureau],
-      regulation: [...cryptoVideoIds.realvision, ...cryptoVideoIds.coinbureau],
+      layer_2: [...cryptoVideoIds.bankless, ...cryptoVideoIds.coinbureau],
+      tokenomics: [...cryptoVideoIds.coinbureau, ...cryptoVideoIds.defiant],
+      daos: [...cryptoVideoIds.bankless, ...cryptoVideoIds.defiant],
+      
+      // Stocks/Macro categories
+      tech_stocks: [...stocksVideoIds.allin, ...stocksVideoIds.cnbc],
+      stocks: [...stocksVideoIds.bloomberg, ...stocksVideoIds.cnbc],
+      earnings: [...stocksVideoIds.cnbc, ...stocksVideoIds.bloomberg],
+      macro: [...stocksVideoIds.boyle, ...stocksVideoIds.bloomberg],
+      etfs: [...stocksVideoIds.bloomberg, ...stocksVideoIds.boyle],
+      fed_policy: [...stocksVideoIds.boyle, ...stocksVideoIds.cnbc],
+      market_analysis: [...stocksVideoIds.allin, ...stocksVideoIds.boyle],
+      valuations: [...stocksVideoIds.boyle, ...stocksVideoIds.allin],
+      regulation: [...cryptoVideoIds.realvision, ...stocksVideoIds.bloomberg],
     };
     
     // Get relevant videos for category, fallback to general
     const normalizedCategory = category.toLowerCase().replace(/\s+/g, '_');
     const relevantVideos = categoryMapping[normalizedCategory] || 
-      [...cryptoVideoIds.general, ...cryptoVideoIds.coinbureau, ...cryptoVideoIds.bankless];
+      [...cryptoVideoIds.general, ...stocksVideoIds.allin, ...stocksVideoIds.bloomberg];
     
     const randomVideoId = relevantVideos[Math.floor(Math.random() * relevantVideos.length)];
     return `https://www.youtube.com/watch?v=${randomVideoId}`;
