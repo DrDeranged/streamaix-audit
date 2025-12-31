@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot, Rss, Users, Heart, MessageCircle, Gift, Star, Award, Zap } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot, Rss, Users, Heart, MessageCircle, Gift, Star, Award, Zap, ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -153,15 +153,13 @@ export default function BountyBoard() {
           {/* Navigation Buttons */}
           <div className="flex gap-3 mb-6">
             <Button
-              asChild
               variant="outline"
+              onClick={() => window.history.back()}
               className="border-purple-500/30 hover:border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300"
-              data-testid="button-back-home"
+              data-testid="button-back"
             >
-              <Link href="/">
-                <Home className="w-4 h-4 mr-2" />
-                Back to Home
-              </Link>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
             </Button>
             <Button
               asChild

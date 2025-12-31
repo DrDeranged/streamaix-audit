@@ -278,12 +278,13 @@ export default function KnowledgeAvatarProfile() {
           <div className="text-center">
             <h2 className="text-xl font-bold text-white mb-2">Invalid Avatar Link</h2>
             <p className="text-white/60 mb-4">No avatar ID was provided.</p>
-            <Link href="/">
-              <Button className="bg-purple-600 hover:bg-purple-700">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => window.history.back()}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
           </div>
         </Card>
       </div>
@@ -308,12 +309,13 @@ export default function KnowledgeAvatarProfile() {
           <div className="text-center">
             <h2 className="text-xl font-bold text-white mb-2">Avatar Not Found</h2>
             <p className="text-white/60 mb-4">The knowledge avatar you're looking for doesn't exist.</p>
-            <Link href="/">
-              <Button className="bg-purple-600 hover:bg-purple-700">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => window.history.back()}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
           </div>
         </Card>
       </div>

@@ -26,6 +26,7 @@ import {
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
+  ArrowLeft,
   Clock,
   TrendingUpIcon,
   Building,
@@ -1006,16 +1007,15 @@ export default function Discover() {
         <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5 relative">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-              <Link href="/">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-gray-400 hover:text-white hover:bg-white/5 rounded-xl h-8 w-8 sm:h-10 sm:w-10 p-0 flex-shrink-0"
-                  data-testid="button-back-home"
-                >
-                  <Home className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => window.history.back()}
+                className="text-gray-400 hover:text-white hover:bg-white/5 rounded-xl h-8 w-8 sm:h-10 sm:w-10 p-0 flex-shrink-0"
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                 <div className="relative flex-shrink-0 hidden xs:block sm:block">
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-xl blur-lg opacity-50" />
