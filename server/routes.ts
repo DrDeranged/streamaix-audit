@@ -16707,18 +16707,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Get current price from market data
     let currentPrice = 0;
+    const stablecoinSymbols = ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP', 'GUSD', 'FRAX', 'LUSD', 'SUSD'];
+    const isStablecoin = assetType === 'stablecoin' || stablecoinSymbols.includes(symbol.toUpperCase());
+    
     try {
-      if (assetType === 'crypto' || assetType === 'stablecoin') {
+      if (isStablecoin) {
+        // Stablecoins are always $1
+        currentPrice = 1;
+        console.log(`💵 ${symbol}: $1.00 (stablecoin)`);
+      } else if (assetType === 'crypto') {
         const quotes = await marketDataService.getCryptoQuotes([symbol.toUpperCase()]);
         const coin = quotes?.find((c: any) => c.symbol.toUpperCase() === symbol.toUpperCase());
-        currentPrice = coin?.price || averageCostBasis || 0;
+        if (coin?.price) {
+          currentPrice = coin.price;
+          console.log(`🪙 ${symbol}: $${currentPrice.toLocaleString()} from CoinGecko`);
+        } else {
+          currentPrice = averageCostBasis || 0;
+          console.log(`⚠️ ${symbol}: No API price, using cost basis $${currentPrice}`);
+        }
       } else if (assetType === 'stock' || assetType === 'etf') {
-        const stockData = await marketDataService.getCryptoStocks();
-        const stock = stockData?.find((s: any) => s.symbol.toUpperCase() === symbol.toUpperCase());
-        currentPrice = stock?.price || averageCostBasis || 0;
+        // Use individual stock quote for accuracy
+        const quote = await marketDataService.getStockQuote(symbol.toUpperCase());
+        if (quote?.price) {
+          currentPrice = quote.price;
+          console.log(`📈 ${symbol}: $${currentPrice.toLocaleString()} from Finnhub`);
+        } else {
+          currentPrice = averageCostBasis || 0;
+          console.log(`⚠️ ${symbol}: No API price, using cost basis $${currentPrice}`);
+        }
       } else if (assetType === 'cash') {
         currentPrice = 1; // USD
       } else {
+        // For retirement, bonds, real estate, etc. - use user's input
         currentPrice = averageCostBasis || 0;
       }
     } catch (e) {
@@ -16954,7 +16974,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let priceChange24h = 0;
       let priceChange7d = 0;
       
-      if (asset.assetType === 'crypto' || asset.assetType === 'stablecoin') {
+      // Check if this is a stablecoin by symbol (USDC, USDT, DAI, BUSD, etc.)
+      const stablecoinSymbols = ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP', 'GUSD', 'FRAX', 'LUSD', 'SUSD'];
+      const isStablecoin = asset.assetType === 'stablecoin' || stablecoinSymbols.includes(asset.symbol.toUpperCase());
+      
+      if (isStablecoin) {
+        // Stablecoins always = $1 (that's the whole point of them being stable)
+        currentPrice = 1;
+        priceChange24h = 0;
+        priceChange7d = 0;
+        console.log(`  💵 ${asset.symbol}: $1.00 (stablecoin)`);
+      } else if (asset.assetType === 'crypto') {
         const coin = cryptoQuotes.find((c: any) => c.symbol.toUpperCase() === asset.symbol.toUpperCase());
         if (coin) {
           currentPrice = coin.price;
@@ -16981,12 +17011,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For retirement accounts, keep the current value as-is (user-entered)
         // Don't update price since these are account balances, not tradeable assets
         currentPrice = asset.currentPrice || 1;
-        priceChange24h = 0;
-        priceChange7d = 0;
-      }
-      
-      // For stablecoins, force price change to 0 (they're meant to be stable)
-      if (asset.assetType === 'stablecoin') {
         priceChange24h = 0;
         priceChange7d = 0;
       }
@@ -17049,11 +17073,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
     
-    // Calculate allocation by asset type
+    // Calculate allocation by asset type (stablecoins grouped with cash)
     const totalValue = assets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
     const allocation: Record<string, number> = {};
+    const stablecoinSymbols = ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP', 'GUSD', 'FRAX', 'LUSD', 'SUSD'];
+    
     assets.forEach(asset => {
-      const type = asset.assetType;
+      // Group stablecoins with cash for allocation purposes
+      const isStablecoin = asset.assetType === 'stablecoin' || stablecoinSymbols.includes(asset.symbol.toUpperCase());
+      const type = isStablecoin ? 'cash' : asset.assetType;
       allocation[type] = (allocation[type] || 0) + ((asset.currentValue || 0) / totalValue) * 100;
     });
     
@@ -17062,8 +17090,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const uniqueSymbols = new Set(assets.map(a => a.symbol)).size;
     const diversificationScore = Math.min(100, uniqueTypes * 15 + uniqueSymbols * 5);
     
-    // Calculate risk level based on allocation
-    const cryptoAllocation = (allocation['crypto'] || 0) + (allocation['stablecoin'] || 0);
+    // Calculate risk level based on allocation (stablecoins now counted as cash)
+    const cryptoAllocation = allocation['crypto'] || 0;
     const stockAllocation = (allocation['stock'] || 0) + (allocation['etf'] || 0);
     const cashAllocation = allocation['cash'] || 0;
     

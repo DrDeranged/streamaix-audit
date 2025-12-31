@@ -250,6 +250,20 @@ function HealthScoreRing({ score }: { score: number }) {
   );
 }
 
+// Consistent colors for each asset type across all charts and legends
+const assetTypeChartColors: Record<string, string> = {
+  stock: '#3b82f6',      // Blue
+  crypto: '#f59e0b',     // Orange/Amber
+  cash: '#6b7280',       // Gray
+  retirement: '#8b5cf6', // Purple
+  etf: '#06b6d4',        // Cyan
+  bond: '#10b981',       // Green
+  real_estate: '#ec4899', // Pink
+  commodity: '#eab308',  // Yellow
+  stablecoin: '#6b7280', // Gray (same as cash)
+  other: '#9ca3af',      // Light gray
+};
+
 function AllocationChart({ allocation }: { allocation: Record<string, number> }) {
   const entries = Object.entries(allocation).filter(([_, v]) => v > 0);
   let cumulativeRotation = 0;
@@ -257,13 +271,13 @@ function AllocationChart({ allocation }: { allocation: Record<string, number> })
   return (
     <div className="relative w-32 h-32">
       <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-        {entries.map(([type, percent], index) => {
+        {entries.map(([type, percent]) => {
           const sliceAngle = (percent / 100) * 360;
           const startAngle = cumulativeRotation;
           cumulativeRotation += sliceAngle;
 
-          const colors = ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444', '#6b7280'];
-          const color = colors[index % colors.length];
+          // Use consistent color per asset type
+          const color = assetTypeChartColors[type] || assetTypeChartColors.other;
 
           const startRad = (startAngle * Math.PI) / 180;
           const endRad = ((startAngle + sliceAngle) * Math.PI) / 180;
@@ -3451,11 +3465,12 @@ export default function PortfolioDashboard() {
                         </div>
                         <div className="space-y-2">
                           {Object.entries(analysis.allocation).map(([type, percent]) => {
-                            const colorGradient = assetTypeColors[type] || assetTypeColors.other;
+                            // Use same colors as the chart for consistency
+                            const chartColor = assetTypeChartColors[type] || assetTypeChartColors.other;
                             return (
                               <div key={type} className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-slate-800/50 transition-colors">
                                 <div className="flex items-center gap-2">
-                                  <div className={cn("w-2.5 h-2.5 rounded-full bg-gradient-to-r", colorGradient)} />
+                                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColor }} />
                                   <span className="text-sm text-gray-300 capitalize">{type.replace('_', ' ')}</span>
                                 </div>
                                 <span className="text-sm text-white font-medium">{percent.toFixed(1)}%</span>
