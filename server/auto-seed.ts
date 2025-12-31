@@ -1,5 +1,5 @@
 import { db } from './db';
-import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues } from '@shared/schema';
+import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 const avatarSeedData = [
@@ -1491,6 +1491,107 @@ export async function autoSeedDatabase() {
       console.log(`🎉 Added ${leagueCount} new prediction leagues (${existingLeagues.length + leagueCount}/${targetLeagueCount} total)`);
     } else {
       console.log(`✅ Prediction leagues complete (${existingLeagues.length}/${targetLeagueCount})`);
+    }
+    
+    // ===== STAGE 6: SEED LEARNING MODULES =====
+    console.log('\n📚 Stage 6: Seeding Learning Modules...');
+    
+    const existingModules = await db.select().from(learningModules);
+    const targetModuleCount = 6;
+    
+    if (existingModules.length < targetModuleCount) {
+      const moduleSeedData = [
+        {
+          id: 'mod-web3-basics',
+          title: 'Web3 Fundamentals',
+          description: 'Master the basics of Web3, blockchain technology, and decentralized systems. Perfect for beginners entering the crypto space.',
+          category: 'web3_basics',
+          difficulty: 'beginner' as const,
+          estimatedMinutes: 59,
+          xpReward: 475,
+          lessonCount: 5,
+          sortOrder: 1,
+          isActive: true,
+        },
+        {
+          id: 'mod-defi-intro',
+          title: 'DeFi Deep Dive',
+          description: 'Understand decentralized finance protocols, yield farming, liquidity pools, and the future of permissionless banking.',
+          category: 'defi',
+          difficulty: 'intermediate' as const,
+          estimatedMinutes: 81,
+          xpReward: 625,
+          lessonCount: 5,
+          sortOrder: 2,
+          isActive: true,
+        },
+        {
+          id: 'mod-ai-trading',
+          title: 'AI Trading Strategies',
+          description: 'Learn how AI and machine learning are revolutionizing trading. Understand signals, pattern recognition, and automated strategies.',
+          category: 'ai_trading',
+          difficulty: 'intermediate' as const,
+          estimatedMinutes: 86,
+          xpReward: 700,
+          lessonCount: 5,
+          sortOrder: 3,
+          isActive: true,
+        },
+        {
+          id: 'mod-prediction-markets',
+          title: 'Prediction Market Mastery',
+          description: 'Become an expert in prediction markets. Learn probability, market making, and how to profit from information edges.',
+          category: 'prediction_markets',
+          difficulty: 'advanced' as const,
+          estimatedMinutes: 81,
+          xpReward: 625,
+          lessonCount: 5,
+          sortOrder: 4,
+          isActive: true,
+        },
+        {
+          id: 'mod-macro-economics',
+          title: 'Macro Economics for Traders',
+          description: 'Understand how Fed policy, inflation, and global economics impact crypto and stock markets.',
+          category: 'macro_economics',
+          difficulty: 'advanced' as const,
+          estimatedMinutes: 69,
+          xpReward: 475,
+          lessonCount: 4,
+          sortOrder: 5,
+          isActive: true,
+        },
+        {
+          id: 'mod-tech-stocks',
+          title: 'Tech Stock Analysis',
+          description: 'Master fundamental and technical analysis for tech stocks. Analyze NVDA, AAPL, MSFT and more like a pro.',
+          category: 'tech_stocks',
+          difficulty: 'intermediate' as const,
+          estimatedMinutes: 66,
+          xpReward: 450,
+          lessonCount: 4,
+          sortOrder: 6,
+          isActive: true,
+        },
+      ];
+      
+      const existingIds = new Set(existingModules.map(m => m.id));
+      const modulesToCreate = moduleSeedData.filter(m => !existingIds.has(m.id));
+      let moduleCount = 0;
+      
+      for (const seed of modulesToCreate) {
+        try {
+          await db.insert(learningModules).values(seed);
+          moduleCount++;
+          console.log(`  ✓ Created learning module: "${seed.title}"`);
+        } catch (error: any) {
+          console.error(`  ✗ Failed to create module "${seed.title}":`, error.message);
+        }
+      }
+      
+      console.log(`🎉 Added ${moduleCount} new learning modules (${existingModules.length + moduleCount}/${targetModuleCount} total)`);
+    } else {
+      console.log(`✅ Learning modules complete (${existingModules.length}/${targetModuleCount})`);
     }
     
   } catch (error) {
