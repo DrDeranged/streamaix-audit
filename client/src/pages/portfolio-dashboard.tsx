@@ -2425,7 +2425,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
   );
 }
 
-function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = false }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean; isRecentlyUpdated?: boolean }) {
+function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = false, onRefresh }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean; isRecentlyUpdated?: boolean; onRefresh?: () => void }) {
   const Icon = assetTypeIcons[asset.assetType] || Wallet;
   const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
   
@@ -2514,7 +2514,180 @@ function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = f
           )}
         </div>
       </div>
+      <EditAssetDialog asset={asset} portfolioId={portfolioId} onSuccess={onRefresh || (() => {})} />
     </motion.div>
+  );
+}
+
+function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAsset; portfolioId: string; onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [quantity, setQuantity] = useState(asset.quantity.toString());
+  const [avgCost, setAvgCost] = useState(asset.averageCostBasis?.toString() || '');
+  const [accountName, setAccountName] = useState(asset.accountName || '');
+  const { toast } = useToast();
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest(`/api/portfolios/${portfolioId}/assets/${asset.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({ title: 'Asset updated successfully' });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolios', portfolioId] });
+      onSuccess();
+      setOpen(false);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to update asset', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/portfolios/${portfolioId}/assets/${asset.id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      toast({ title: 'Asset removed from portfolio' });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolios', portfolioId] });
+      onSuccess();
+      setOpen(false);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to delete asset', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!quantity || parseFloat(quantity) <= 0) {
+      toast({ title: 'Please enter a valid quantity', variant: 'destructive' });
+      return;
+    }
+    updateMutation.mutate({
+      quantity: parseFloat(quantity),
+      averageCostBasis: avgCost ? parseFloat(avgCost) : undefined,
+      accountName: accountName || undefined,
+    });
+  };
+
+  const isCashLike = asset.assetType === 'cash' || asset.assetType === 'stablecoin';
+  const Icon = assetTypeIcons[asset.assetType] || Wallet;
+  const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 bg-slate-700/80 hover:bg-slate-600 text-gray-400 hover:text-white"
+          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          data-testid={`edit-asset-${asset.symbol}`}
+        >
+          <Edit2 className="w-3.5 h-3.5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-3">
+            <div className={cn("p-2 rounded-lg bg-gradient-to-br", colorGradient)}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            Edit {asset.symbol}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <div>
+              <p className="font-medium text-white">{asset.symbol}</p>
+              <p className="text-sm text-gray-400">{asset.name}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-400">Current Price</p>
+              <p className="font-medium text-white">${asset.currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-gray-400 text-sm">Quantity</Label>
+              <Input 
+                type="number" 
+                value={quantity} 
+                onChange={(e) => setQuantity(e.target.value)} 
+                placeholder="0.00" 
+                className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500" 
+              />
+            </div>
+            <div>
+              <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
+              <Input 
+                type="number" 
+                value={avgCost} 
+                onChange={(e) => setAvgCost(e.target.value)} 
+                placeholder="0.00" 
+                className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500"
+                disabled={isCashLike}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label className="text-gray-400 text-sm">Account (optional)</Label>
+            <Input 
+              value={accountName} 
+              onChange={(e) => setAccountName(e.target.value)} 
+              placeholder="Coinbase, Fidelity..." 
+              className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500" 
+            />
+          </div>
+
+          <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Est. Value</span>
+              <span className="text-white font-medium">
+                ${(parseFloat(quantity || '0') * (asset.currentPrice || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            {!isCashLike && avgCost && (
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-400">Est. PnL</span>
+                <span className={cn("font-medium", 
+                  (parseFloat(quantity || '0') * (asset.currentPrice || 0)) - (parseFloat(quantity || '0') * parseFloat(avgCost || '0')) >= 0 
+                    ? 'text-green-400' : 'text-red-400'
+                )}>
+                  ${((parseFloat(quantity || '0') * (asset.currentPrice || 0)) - (parseFloat(quantity || '0') * parseFloat(avgCost || '0'))).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex gap-2 pt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => deleteMutation.mutate()} 
+              disabled={deleteMutation.isPending}
+              className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              data-testid={`delete-asset-${asset.symbol}`}
+            >
+              {deleteMutation.isPending ? 'Removing...' : <><Trash2 className="w-4 h-4 mr-2" /> Remove</>}
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={updateMutation.isPending} 
+              className="flex-1 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400"
+              data-testid={`save-asset-${asset.symbol}`}
+            >
+              {updateMutation.isPending ? 'Saving...' : <><Check className="w-4 h-4 mr-2" /> Save Changes</>}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -3223,6 +3396,7 @@ export default function PortfolioDashboard() {
                                 portfolioId={activePortfolioId!} 
                                 showValues={showValues} 
                                 isRecentlyUpdated={recentUpdates.has(asset.symbol.toUpperCase())}
+                                onRefresh={() => refetchPortfolio()}
                               />
                             ))}
                           </div>
