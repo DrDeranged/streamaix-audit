@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation, Link } from "wouter";
-import { Home, ChevronUp, Coins } from "lucide-react";
+import { ArrowLeft, ChevronUp, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePointsBalance, formatPoints } from "@/hooks/usePoints";
@@ -66,18 +66,17 @@ export function GlobalMobileHeader() {
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
         <div className="relative flex items-center justify-between h-14 px-3">
-          {/* Left: Back to Home button */}
-          <Link href="/">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-slate-300 hover:text-white hover:bg-white/10 gap-1.5 px-2"
-              data-testid="button-back-home"
-            >
-              <Home className="w-4 h-4" />
-              <span className="text-sm font-medium">Home</span>
-            </Button>
-          </Link>
+          {/* Left: Back button - uses browser history */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-300 hover:text-white hover:bg-white/10 gap-1.5 px-2"
+            data-testid="button-back"
+            onClick={() => window.history.back()}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Back</span>
+          </Button>
 
           {/* Center: StreamAiX Logo - absolutely positioned for true centering on mobile */}
           <button
