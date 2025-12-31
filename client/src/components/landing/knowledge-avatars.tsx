@@ -1539,7 +1539,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           
           {/* Working Carousel - CSS scroll-snap for mobile, transforms for desktop */}
           <div 
-            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory scrollbar-visible' : 'overflow-x-auto scrollbar-visible'} px-4 md:px-12 pb-4`}
+            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory scrollbar-visible flex justify-center' : 'overflow-x-auto scrollbar-visible'} px-4 md:px-12 pb-4`}
             ref={containerRef}
             style={{ 
               WebkitOverflowScrolling: 'touch',

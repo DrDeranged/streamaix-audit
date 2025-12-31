@@ -350,12 +350,14 @@ export default function KnowledgeAvatarProfile() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Back Button */}
           <div className="mb-6">
-            <Link href="/">
-              <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              className="text-white/70 hover:text-white hover:bg-white/10"
+              onClick={() => window.history.back()}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
           </div>
 
           {/* Hero Header */}
