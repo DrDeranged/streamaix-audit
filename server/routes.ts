@@ -16975,6 +16975,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else if (asset.assetType === 'cash') {
         currentPrice = 1;
+        priceChange24h = 0;
+        priceChange7d = 0;
+      } else if (asset.assetType === 'retirement') {
+        // For retirement accounts, keep the current value as-is (user-entered)
+        // Don't update price since these are account balances, not tradeable assets
+        currentPrice = asset.currentPrice || 1;
+        priceChange24h = 0;
+        priceChange7d = 0;
+      }
+      
+      // For stablecoins, force price change to 0 (they're meant to be stable)
+      if (asset.assetType === 'stablecoin') {
+        priceChange24h = 0;
+        priceChange7d = 0;
       }
       
       const currentValue = (asset.quantity || 0) * currentPrice;

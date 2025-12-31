@@ -1369,13 +1369,36 @@ function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Por
   const periodReturns = useMemo(() => {
     const snapshots = historyData?.snapshots || [];
     const currentValue = portfolio?.totalValue || 0;
+    const costBasis = portfolio?.totalCostBasis || 0;
     
     const getReturnForDays = (days: number): number => {
-      if (snapshots.length === 0 || currentValue === 0) return 0;
+      if (currentValue === 0) return 0;
+      
+      // If no historical snapshots, fall back to total PnL
+      if (snapshots.length === 0) {
+        return costBasis > 0 ? ((currentValue - costBasis) / costBasis) * 100 : 0;
+      }
+      
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() - days);
-      const closestSnapshot = snapshots.find(s => new Date(s.snapshotDate) <= targetDate) || snapshots[snapshots.length - 1];
-      if (!closestSnapshot || closestSnapshot.totalValue === 0) return 0;
+      
+      // Snapshots are ordered newest first (desc), so find the first one older than target
+      const olderSnapshots = snapshots.filter(s => new Date(s.snapshotDate) <= targetDate);
+      const closestSnapshot = olderSnapshots.length > 0 ? olderSnapshots[0] : null;
+      
+      // If no snapshot exists for that period, use the oldest available or cost basis
+      if (!closestSnapshot) {
+        const oldestSnapshot = snapshots[snapshots.length - 1];
+        if (oldestSnapshot && new Date(oldestSnapshot.snapshotDate) > targetDate) {
+          // Snapshot is newer than target, use cost basis instead
+          return costBasis > 0 ? ((currentValue - costBasis) / costBasis) * 100 : 0;
+        }
+        return oldestSnapshot && oldestSnapshot.totalValue > 0 
+          ? ((currentValue - oldestSnapshot.totalValue) / oldestSnapshot.totalValue) * 100 
+          : 0;
+      }
+      
+      if (closestSnapshot.totalValue === 0) return 0;
       return ((currentValue - closestSnapshot.totalValue) / closestSnapshot.totalValue) * 100;
     };
     
@@ -1390,7 +1413,7 @@ function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Por
       { label: 'YTD', value: getReturnForDays(daysThisYear) },
       { label: 'ALL', value: totalPnlPercent },
     ];
-  }, [historyData, portfolio?.totalValue, totalPnlPercent]);
+  }, [historyData, portfolio?.totalValue, portfolio?.totalCostBasis, totalPnlPercent]);
 
   if (assets.length === 0) {
     return (
@@ -2391,10 +2414,16 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
 function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = false }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean; isRecentlyUpdated?: boolean }) {
   const Icon = assetTypeIcons[asset.assetType] || Wallet;
   const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
-  const priceChange = asset.priceChange24h || 0;
+  
+  // Cash and stablecoins should never show price changes
+  const isCashLike = asset.assetType === 'cash' || asset.assetType === 'stablecoin';
+  const priceChange = isCashLike ? 0 : (asset.priceChange24h || 0);
   const is24hPositive = priceChange >= 0;
+  
+  // For retirement accounts, don't show % PnL (it's not meaningful for contribution-based accounts)
+  const isRetirement = asset.assetType === 'retirement';
   const isPnlPositive = (asset.unrealizedPnlPercent || 0) >= 0;
-  const showSparkline = asset.assetType !== 'cash' && asset.assetType !== 'stablecoin' && asset.assetType !== 'retirement';
+  const showSparkline = !isCashLike && !isRetirement;
 
   return (
     <motion.div
@@ -2450,13 +2479,23 @@ function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = f
           {showValues ? `$${asset.currentValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
         </motion.p>
         <div className="flex items-center justify-end gap-2">
-          <div className={cn("flex items-center gap-0.5 text-xs", is24hPositive ? 'text-green-400' : 'text-red-400')}>
-            {is24hPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-            <span>{is24hPositive ? '+' : ''}{priceChange.toFixed(1)}%</span>
-          </div>
-          {asset.assetType !== 'cash' && asset.assetType !== 'stablecoin' && (
+          {!isCashLike && (
+            <div className={cn("flex items-center gap-0.5 text-xs", is24hPositive ? 'text-green-400' : 'text-red-400')}>
+              {is24hPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+              <span>{is24hPositive ? '+' : ''}{priceChange.toFixed(1)}%</span>
+            </div>
+          )}
+          {!isCashLike && !isRetirement && asset.unrealizedPnlPercent !== null && (
             <span className={cn("text-[10px] px-1 py-0.5 rounded", isPnlPositive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}>
               PnL {isPnlPositive ? '+' : ''}{(asset.unrealizedPnlPercent || 0).toFixed(0)}%
+            </span>
+          )}
+          {isCashLike && (
+            <span className="text-[10px] text-gray-500">Cash</span>
+          )}
+          {isRetirement && asset.unrealizedPnl !== null && (
+            <span className={cn("text-[10px] px-1 py-0.5 rounded", isPnlPositive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}>
+              {isPnlPositive ? '+' : ''}${Math.abs(asset.unrealizedPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </span>
           )}
         </div>
