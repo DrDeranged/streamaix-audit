@@ -16952,6 +16952,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`🪙 Fetching crypto prices from CoinGecko Pro: ${cryptoSymbols.join(', ')}`);
         cryptoQuotes = await marketDataService.getCryptoQuotes(cryptoSymbols) || [];
         console.log(`✅ Got ${cryptoQuotes.length} crypto quotes`);
+        
+        // Cache crypto prices for WebSocket to use
+        for (const coin of cryptoQuotes) {
+          if (coin && coin.symbol && coin.price > 0) {
+            cacheService.set(`crypto_price_${coin.symbol.toLowerCase()}`, coin.price, 300); // 5 min cache
+            cacheService.set(`crypto_change24h_${coin.symbol.toLowerCase()}`, coin.percentChange24h || 0, 300);
+          }
+        }
       }
       
       // Stocks: Fetch each individually from Finnhub for accuracy
@@ -16961,6 +16969,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const quote = await marketDataService.getStockQuote(symbol);
           if (quote) {
             stockQuotes.set(symbol, quote);
+            // Cache stock prices for WebSocket to use
+            if (quote.price > 0) {
+              cacheService.set(`stock_price_${symbol.toUpperCase()}`, quote.price, 300); // 5 min cache
+              cacheService.set(`stock_change24h_${symbol.toUpperCase()}`, quote.percentChange24h || 0, 300);
+            }
           }
         }
         console.log(`✅ Got ${stockQuotes.size} stock quotes`);
@@ -18540,14 +18553,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const pricesWss = new WebSocketServer({ noServer: true });
   const priceSubscribers: Map<WebSocket, Set<string>> = new Map();
   
-  const generatePriceUpdate = (symbol: string, basePrice: number) => {
-    const variation = (Math.random() - 0.5) * 0.02;
-    const newPrice = basePrice * (1 + variation);
-    const priceChange24h = (Math.random() - 0.5) * 10;
+  // Create a price update message with EXACT prices (no random variation)
+  const createPriceUpdate = (symbol: string, price: number, priceChange24h: number = 0) => {
     return {
       type: 'price_update',
       symbol,
-      price: Number(newPrice.toFixed(2)),
+      price: Number(price.toFixed(2)),
       priceChange24h: Number(priceChange24h.toFixed(2)),
       timestamp: Date.now(),
     };
@@ -18563,38 +18574,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     if (allSymbols.size === 0) return;
     
-    const priceCache: Map<string, number> = new Map();
+    // Store real prices with their 24h change
+    const priceData: Map<string, { price: number; change24h: number }> = new Map();
+    
+    // Known crypto symbols that we can look up
+    const knownCryptoSymbols = ['BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'DOT', 'MATIC', 'AVAX', 'LINK', 'ATOM', 'UNI', 'LTC', 'NEAR', 'APT', 'USDC', 'USDT'];
+    // Known stock/ETF symbols that we can look up
+    const knownStockSymbols = ['AAPL', 'GOOGL', 'GOOG', 'MSFT', 'AMZN', 'NVDA', 'TSLA', 'META', 'JPM', 'V', 'JNJ', 'WMT', 'PG', 'DIS', 'NFLX', 'INTC', 'AMD', 'CRM', 'ORCL', 'IBM', 'UBER', 'VOO', 'SPY', 'QQQ', 'VTI', 'IWM', 'HUT', 'MARA', 'RIOT', 'COIN'];
     
     try {
       const symbolsArray = Array.from(allSymbols);
-      const cryptoSymbols = symbolsArray.filter(s => ['BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'DOT', 'MATIC', 'AVAX', 'LINK', 'ATOM', 'UNI', 'LTC', 'NEAR', 'APT'].includes(s.toUpperCase()));
-      const stockSymbols = symbolsArray.filter(s => !cryptoSymbols.includes(s));
       
+      // Only process symbols we actually know about
+      const cryptoSymbols = symbolsArray.filter(s => knownCryptoSymbols.includes(s.toUpperCase()));
+      const stockSymbols = symbolsArray.filter(s => knownStockSymbols.includes(s.toUpperCase()));
+      
+      // Get crypto prices from cache (populated by the main price sync)
       for (const symbol of cryptoSymbols) {
         try {
           const cached = cacheService.get(`crypto_price_${symbol.toLowerCase()}`);
-          if (cached) {
-            priceCache.set(symbol, cached as number);
-          } else {
-            const prices: Record<string, number> = { BTC: 98500, ETH: 3450, SOL: 185, DOGE: 0.32, XRP: 2.15, ADA: 0.89, DOT: 7.2, MATIC: 0.52, AVAX: 42, LINK: 22.5, ATOM: 9.8, UNI: 12.4, LTC: 105, NEAR: 5.2, APT: 9.5 };
-            priceCache.set(symbol, prices[symbol.toUpperCase()] || 100);
+          if (cached && typeof cached === 'number' && cached > 0) {
+            // Get 24h change if available
+            const changeKey = `crypto_change24h_${symbol.toLowerCase()}`;
+            const change24h = cacheService.get(changeKey) as number || 0;
+            priceData.set(symbol.toUpperCase(), { price: cached, change24h });
           }
+          // If not in cache, skip this symbol - don't use fallback prices
         } catch {}
       }
       
+      // Get stock prices from cache (populated by Finnhub sync)
       for (const symbol of stockSymbols) {
         try {
           const cached = cacheService.get(`stock_price_${symbol.toUpperCase()}`);
-          if (cached) {
-            priceCache.set(symbol, cached as number);
-          } else {
-            const prices: Record<string, number> = { AAPL: 195, GOOGL: 175, MSFT: 430, AMZN: 195, NVDA: 140, TSLA: 250, META: 585, JPM: 210, V: 290, JNJ: 155, WMT: 90, PG: 175, DIS: 110, NFLX: 680, INTC: 22, AMD: 130, CRM: 325, ORCL: 175, IBM: 210, UBER: 68 };
-            priceCache.set(symbol, prices[symbol.toUpperCase()] || 100);
+          if (cached && typeof cached === 'number' && cached > 0) {
+            const changeKey = `stock_change24h_${symbol.toUpperCase()}`;
+            const change24h = cacheService.get(changeKey) as number || 0;
+            priceData.set(symbol.toUpperCase(), { price: cached, change24h });
           }
+          // If not in cache, skip this symbol - don't use fallback prices
         } catch {}
       }
     } catch (error) {
       console.error('💹 [PriceWS] Error fetching prices:', error);
+    }
+    
+    // Only broadcast if we have real data
+    if (priceData.size === 0) {
+      return;
     }
     
     priceSubscribers.forEach((symbols, ws) => {
@@ -18602,8 +18629,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updates: any[] = [];
       symbols.forEach((symbol) => {
-        const basePrice = priceCache.get(symbol) || 100;
-        updates.push(generatePriceUpdate(symbol, basePrice));
+        const data = priceData.get(symbol.toUpperCase());
+        // Only send update if we have real cached price data
+        if (data) {
+          updates.push(createPriceUpdate(symbol.toUpperCase(), data.price, data.change24h));
+        }
+        // Skip symbols without real price data - don't use $100 fallback
       });
       
       if (updates.length > 0) {
