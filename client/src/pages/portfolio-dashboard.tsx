@@ -2890,14 +2890,30 @@ export default function PortfolioDashboard() {
   const analysis = analysisData?.analysis;
   
   // WebSocket price updates integration
-  const assetSymbols = useMemo(() => rawAssets.map(a => a.symbol), [rawAssets]);
+  // Only subscribe to price updates for tradable assets (crypto, stock, etf, bond, commodity)
+  // Skip cash, stablecoin, and retirement as they have static/user-defined values
+  const assetSymbols = useMemo(() => {
+    const skipTypes = ['cash', 'stablecoin', 'retirement'];
+    return rawAssets
+      .filter(a => !skipTypes.includes(a.assetType))
+      .map(a => a.symbol);
+  }, [rawAssets]);
   const { isConnected: wsConnected, connectionStatus, prices: livePrices, recentUpdates } = useWebSocketPrices(assetSymbols);
   
   // Merge live prices with asset data
+  // Skip WebSocket price updates for cash, stablecoin, and retirement assets
+  // These should maintain their static values (cash = $1, retirement = fixed dollar amount)
   const assets = useMemo(() => {
+    const skipPriceUpdateTypes = ['cash', 'stablecoin', 'retirement'];
+    
     return rawAssets.map(asset => {
+      // Don't apply live price updates to cash-like assets
+      if (skipPriceUpdateTypes.includes(asset.assetType)) {
+        return asset;
+      }
+      
       const livePrice = livePrices.get(asset.symbol.toUpperCase());
-      if (livePrice) {
+      if (livePrice && livePrice.price > 0) {
         const newCurrentPrice = livePrice.price;
         const newCurrentValue = newCurrentPrice * asset.quantity;
         const newUnrealizedPnl = newCurrentValue - asset.totalCostBasis;
