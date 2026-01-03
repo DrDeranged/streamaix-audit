@@ -217,17 +217,6 @@ export default function LeagueDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <Link href="/#prediction-markets">
-          <Button 
-            variant="ghost" 
-            className="mb-6 text-gray-400 hover:text-white"
-            data-testid="btn-back"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Leagues
-          </Button>
-        </Link>
-
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

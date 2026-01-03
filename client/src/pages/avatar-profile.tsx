@@ -790,15 +790,6 @@ export default function AvatarProfile() {
         {/* Banner */}
         <div className="h-40 sm:h-48 md:h-64 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => window.history.back()}
-            className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 z-10 text-white border-purple-500/30 hover:bg-purple-900/20 h-8 text-xs sm:text-sm"
-          >
-            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
-            Back
-          </Button>
         </div>
 
         {/* Profile Info */}

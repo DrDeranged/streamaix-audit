@@ -449,18 +449,6 @@ export default function BountyDetail() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Back Button */}
-        <Link href="/#bounties">
-          <Button
-            variant="ghost"
-            className="mb-6 text-gray-400 hover:text-white"
-            data-testid="button-back-to-bounties"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Bounties
-          </Button>
-        </Link>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">

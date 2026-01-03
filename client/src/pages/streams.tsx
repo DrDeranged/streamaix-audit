@@ -1050,15 +1050,6 @@ export default function StreamsPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => window.history.back()}
-                className="text-slate-400 hover:text-white hover:bg-purple-500/20 h-8 w-8 sm:h-10 sm:w-10 streaming-edge-glow rounded-xl flex-shrink-0" 
-                data-testid="button-back"
-              >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
               <div className="relative p-2 sm:p-3 rounded-xl sm:rounded-2xl streaming-morph-border overflow-hidden flex-shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-pink-500/20 backdrop-blur-xl" />
                 <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 relative z-10" />
