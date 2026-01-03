@@ -392,6 +392,7 @@ export class MarketDataService {
     // Convert symbols to CoinGecko IDs (complete mapping for top cryptos)
     const coinIds = symbols.map(symbol => {
       const mapping: { [key: string]: string } = {
+        // Major cryptocurrencies
         'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin', 'XRP': 'ripple',
         'SOL': 'solana', 'ADA': 'cardano', 'AVAX': 'avalanche-2', 'DOT': 'polkadot',
         'MATIC': 'matic-network', 'LINK': 'chainlink', 'LTC': 'litecoin', 'BCH': 'bitcoin-cash',
@@ -401,7 +402,18 @@ export class MarketDataService {
         'SHIB': 'shiba-inu', 'TRX': 'tron', 'NEAR': 'near', 'APT': 'aptos',
         'ARB': 'arbitrum', 'OP': 'optimism', 'SUI': 'sui', 'TON': 'the-open-network',
         'PEPE': 'pepe', 'AAVE': 'aave', 'MKR': 'maker', 'CRV': 'curve-dao-token',
-        'LDO': 'lido-dao', 'RNDR': 'render-token', 'INJ': 'injective-protocol'
+        'LDO': 'lido-dao', 'RNDR': 'render-token', 'INJ': 'injective-protocol',
+        // Additional trending cryptos
+        'HYPE': 'hyperliquid', 'SEI': 'sei-network', 'TIA': 'celestia',
+        'JUP': 'jupiter-exchange-solana', 'ONDO': 'ondo-finance', 'WIF': 'dogwifcoin',
+        'BONK': 'bonk', 'PYTH': 'pyth-network', 'JTO': 'jito-governance-token',
+        'W': 'wormhole', 'ENA': 'ethena', 'FET': 'artificial-superintelligence-alliance',
+        'TAO': 'bittensor', 'RENDER': 'render-token', 'NOT': 'notcoin',
+        // Stablecoins
+        'USDC': 'usd-coin', 'USDT': 'tether', 'DAI': 'dai', 'BUSD': 'binance-usd',
+        // DeFi tokens
+        'SNX': 'havven', 'COMP': 'compound-governance-token', 'FXS': 'frax-share',
+        'RPL': 'rocket-pool'
       };
       return mapping[symbol.toUpperCase()] || symbol.toLowerCase();
     });
@@ -638,34 +650,30 @@ export class MarketDataService {
   private async getCryptoQuotesFromCoinGecko(symbols: string[]): Promise<CryptoQuote[]> {
     const cacheKey = `coingecko_${symbols.join(',').toUpperCase()}`;
     
-    // Convert symbols to CoinGecko IDs (complete mapping for 25 top cryptos)
+    // Convert symbols to CoinGecko IDs (comprehensive mapping)
     const coinIds = symbols.map(symbol => {
       const mapping: { [key: string]: string } = {
-        'BTC': 'bitcoin',
-        'ETH': 'ethereum',
-        'BNB': 'binancecoin',
-        'XRP': 'ripple',
-        'SOL': 'solana',
-        'ADA': 'cardano',
-        'AVAX': 'avalanche-2',
-        'DOT': 'polkadot',
-        'MATIC': 'matic-network',
-        'LINK': 'chainlink',
-        'LTC': 'litecoin',
-        'BCH': 'bitcoin-cash',
-        'UNI': 'uniswap',
-        'ATOM': 'cosmos',
-        'FTT': 'ftx-token',
-        'ALGO': 'algorand',
-        'XLM': 'stellar',
-        'VET': 'vechain',
-        'ICP': 'internet-computer',
-        'FIL': 'filecoin',
-        'HBAR': 'hedera-hashgraph',
-        'ETC': 'ethereum-classic',
-        'XMR': 'monero',
-        'EOS': 'eos',
-        'BSV': 'bitcoin-sv'
+        // Major cryptocurrencies
+        'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin', 'XRP': 'ripple',
+        'SOL': 'solana', 'ADA': 'cardano', 'AVAX': 'avalanche-2', 'DOT': 'polkadot',
+        'MATIC': 'matic-network', 'LINK': 'chainlink', 'LTC': 'litecoin', 'BCH': 'bitcoin-cash',
+        'UNI': 'uniswap', 'ATOM': 'cosmos', 'ALGO': 'algorand', 'XLM': 'stellar',
+        'VET': 'vechain', 'ICP': 'internet-computer', 'FIL': 'filecoin', 'HBAR': 'hedera-hashgraph',
+        'ETC': 'ethereum-classic', 'XMR': 'monero', 'EOS': 'eos', 'DOGE': 'dogecoin',
+        'SHIB': 'shiba-inu', 'TRX': 'tron', 'NEAR': 'near', 'APT': 'aptos',
+        'ARB': 'arbitrum', 'OP': 'optimism', 'SUI': 'sui', 'TON': 'the-open-network',
+        'PEPE': 'pepe', 'AAVE': 'aave', 'MKR': 'maker', 'CRV': 'curve-dao-token',
+        'LDO': 'lido-dao', 'RNDR': 'render-token', 'INJ': 'injective-protocol',
+        // Additional trending cryptos
+        'HYPE': 'hyperliquid', 'SEI': 'sei-network', 'TIA': 'celestia',
+        'JUP': 'jupiter-exchange-solana', 'ONDO': 'ondo-finance', 'WIF': 'dogwifcoin',
+        'BONK': 'bonk', 'PYTH': 'pyth-network', 'JTO': 'jito-governance-token',
+        'W': 'wormhole', 'ENA': 'ethena', 'FET': 'artificial-superintelligence-alliance',
+        'TAO': 'bittensor', 'RENDER': 'render-token', 'NOT': 'notcoin',
+        // Stablecoins
+        'USDC': 'usd-coin', 'USDT': 'tether', 'DAI': 'dai', 'BUSD': 'binance-usd',
+        // DeFi tokens
+        'SNX': 'havven', 'COMP': 'compound-governance-token', 'FXS': 'frax-share', 'RPL': 'rocket-pool'
       };
       return mapping[symbol.toUpperCase()] || symbol.toLowerCase();
     });
