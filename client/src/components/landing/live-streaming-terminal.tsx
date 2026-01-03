@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { 
@@ -11,24 +10,20 @@ import {
   Calendar,
   Clock,
   ChevronRight,
-  Sparkles,
   Target,
-  Coins,
   Headphones,
   Radio,
   Zap,
-  ArrowRight,
   Mic,
-  MessageSquare,
-  History,
   Brain,
-  Wifi,
   Shield,
   Wallet,
   BarChart3,
   Rocket,
   Globe,
-  Hexagon
+  Hexagon,
+  Sparkles,
+  Waves
 } from 'lucide-react';
 import { 
   SiEthereum, 
@@ -77,6 +72,7 @@ const streamTypeConfig = {
     bgColor: 'bg-fuchsia-500/10',
     borderColor: 'border-fuchsia-500/30',
     shadowColor: 'shadow-fuchsia-500/20',
+    glowColor: 'rgba(217, 70, 239, 0.4)',
   },
   trading_room: {
     icon: TrendingUp,
@@ -86,6 +82,7 @@ const streamTypeConfig = {
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/30',
     shadowColor: 'shadow-cyan-500/20',
+    glowColor: 'rgba(6, 182, 212, 0.4)',
   },
   audio_space: {
     icon: Headphones,
@@ -95,6 +92,7 @@ const streamTypeConfig = {
     bgColor: 'bg-violet-500/10',
     borderColor: 'border-violet-500/30',
     shadowColor: 'shadow-violet-500/20',
+    glowColor: 'rgba(139, 92, 246, 0.4)',
   },
   live_bounty: {
     icon: Target,
@@ -104,6 +102,7 @@ const streamTypeConfig = {
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30',
     shadowColor: 'shadow-amber-500/20',
+    glowColor: 'rgba(245, 158, 11, 0.4)',
   },
 };
 
@@ -172,45 +171,77 @@ function StreamCard({ stream }: { stream: LiveStream }) {
   };
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className="group cursor-pointer"
+    <div
+      className="group cursor-pointer transition-all duration-300 hover:-translate-y-1"
       onClick={handleJoin}
       data-testid={`stream-card-${stream.id}`}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 hover:border-fuchsia-500/40 transition-all duration-300 shadow-xl hover:shadow-fuchsia-500/10">
-        <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative overflow-hidden rounded-2xl transition-all duration-300">
+        <div 
+          className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{
+            background: `linear-gradient(135deg, ${config.glowColor}, transparent 50%, ${config.glowColor})`,
+            filter: 'blur(1px)',
+          }}
+        />
         
-        <div className={cn("absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r", config.color)} />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-950/90 backdrop-blur-xl" />
         
-        <div className="relative p-3 md:p-4">
-          <div className="flex items-center justify-between mb-2 md:mb-3">
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <div className={cn("p-1.5 md:p-2 rounded-lg md:rounded-xl bg-gradient-to-br shadow-lg", config.color, config.shadowColor)}>
-                <Icon className="w-3 h-3 md:w-4 md:h-4 text-white" />
+        <div className="absolute inset-[1px] rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent" />
+          
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+              background: `radial-gradient(ellipse at 50% 0%, ${config.glowColor.replace('0.4', '0.15')}, transparent 70%)`,
+            }}
+          />
+        </div>
+        
+        <div className={cn(
+          "absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r transition-all duration-300",
+          config.color,
+          "group-hover:h-[3px] group-hover:shadow-lg",
+        )} 
+        style={{ boxShadow: `0 0 20px ${config.glowColor}` }}
+        />
+        
+        <div className="relative p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "relative p-2 rounded-xl bg-gradient-to-br shadow-lg transition-transform duration-300 group-hover:scale-110", 
+                config.color
+              )}
+              style={{ boxShadow: `0 4px 20px ${config.glowColor}` }}
+              >
+                <Icon className="w-4 h-4 text-white" />
               </div>
               {stream.status === 'live' && (
-                <Badge className="bg-red-500/90 text-white border-0 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 font-semibold shadow-lg shadow-red-500/30 animate-pulse">
-                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white mr-1" />
-                  LIVE
-                </Badge>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-red-500 rounded-full blur-md opacity-60 animate-pulse" />
+                  <Badge className="relative bg-red-500/90 text-white border-0 text-[10px] px-2.5 py-1 font-bold shadow-lg shadow-red-500/40">
+                    <span className="relative flex h-1.5 w-1.5 mr-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
+                    </span>
+                    LIVE
+                  </Badge>
+                </div>
               )}
             </div>
-            <div className="flex items-center gap-1 text-slate-400 text-[10px] md:text-xs bg-slate-800/60 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-md md:rounded-lg border border-slate-700/30">
-              <Eye className="w-3 h-3 md:w-3.5 md:h-3.5 text-fuchsia-400" />
-              <span className="font-medium text-fuchsia-300">{stream.currentViewers}</span>
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/50 backdrop-blur-sm group-hover:border-fuchsia-500/30 transition-colors">
+              <Eye className="w-3.5 h-3.5 text-fuchsia-400" />
+              <span className="font-semibold text-fuchsia-300">{stream.currentViewers}</span>
             </div>
           </div>
           
-          <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-fuchsia-200 transition-colors leading-tight">
+          <h3 className="font-semibold text-white text-sm mb-4 line-clamp-2 group-hover:text-fuchsia-100 transition-colors leading-snug min-h-[2.5rem]">
             {stream.title}
           </h3>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {(() => {
                 const brandFallback = getAvatarFallback(stream.hostUsername);
                 const BrandIcon = brandFallback?.icon;
@@ -218,7 +249,10 @@ function StreamCard({ stream }: { stream: LiveStream }) {
                 
                 if (showBrandIcon && BrandIcon) {
                   return (
-                    <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shadow-lg", brandFallback.bgColor)}>
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all", 
+                      brandFallback.bgColor
+                    )}>
                       <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
                     </div>
                   );
@@ -227,11 +261,11 @@ function StreamCard({ stream }: { stream: LiveStream }) {
                   <img 
                     src={getDiceBearAvatar(stream.hostUsername)} 
                     alt="" 
-                    className="w-7 h-7 rounded-full object-cover shadow-lg"
+                    className="w-8 h-8 rounded-full object-cover shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all"
                   />
                 );
               })()}
-              <span className="text-xs text-slate-400 font-medium">@{stream.hostUsername || 'anon'}</span>
+              <span className="text-xs text-slate-400 font-medium group-hover:text-slate-300 transition-colors">@{stream.hostUsername || 'anon'}</span>
             </div>
             
             <Button
@@ -243,16 +277,17 @@ function StreamCard({ stream }: { stream: LiveStream }) {
               disabled={isNavigating}
               data-testid={`join-stream-${stream.id}`}
               className={cn(
-                "h-8 px-4 text-xs font-semibold rounded-xl bg-gradient-to-r border-0 shadow-lg transition-all",
-                "from-fuchsia-500 to-purple-500 hover:from-fuchsia-400 hover:to-purple-400",
-                "hover:shadow-xl hover:shadow-fuchsia-500/30"
+                "h-9 px-4 text-xs font-bold rounded-xl border-0 transition-all duration-300",
+                "bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-[length:200%_100%]",
+                "hover:bg-[position:100%_0] hover:shadow-xl hover:shadow-fuchsia-500/40 hover:scale-105",
+                "active:scale-95"
               )}
             >
               {isNavigating ? (
                 <span className="animate-pulse">...</span>
               ) : (
                 <>
-                  <Play className="w-3 h-3 mr-1.5 fill-current" />
+                  <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
                   Join
                 </>
               )}
@@ -260,7 +295,7 @@ function StreamCard({ stream }: { stream: LiveStream }) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -270,24 +305,23 @@ function ScheduledCard({ stream }: { stream: LiveStream }) {
   const config = streamTypeConfig[stream.streamType];
   
   return (
-    <motion.div 
-      whileHover={{ x: 4 }}
+    <div 
       onClick={() => setLocation(`/stream/${stream.id}`)}
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30 hover:border-fuchsia-500/30 cursor-pointer transition-all duration-200 group"
+      className="flex items-center gap-3 p-3.5 rounded-xl bg-gradient-to-r from-slate-800/60 to-slate-800/40 border border-slate-700/40 hover:border-fuchsia-500/40 cursor-pointer transition-all duration-300 group hover:bg-slate-800/80 backdrop-blur-sm"
       data-testid={`scheduled-stream-${stream.id}`}
     >
-      <div className={cn("p-2 rounded-lg bg-gradient-to-br", config.color, "opacity-80")}>
+      <div className={cn("p-2.5 rounded-xl bg-gradient-to-br shadow-lg", config.color)}>
         <Calendar className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
         <h4 className="text-sm font-medium text-white truncate group-hover:text-fuchsia-200 transition-colors">{stream.title}</h4>
-        <div className="flex items-center gap-1 text-[11px] text-slate-500">
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
           <Clock className="w-3 h-3" />
           {scheduledDate?.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) || 'TBD'}
         </div>
       </div>
-      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-fuchsia-400 transition-colors" />
-    </motion.div>
+      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-fuchsia-400 group-hover:translate-x-1 transition-all" />
+    </div>
   );
 }
 
@@ -299,7 +333,7 @@ export function LiveStreamingTerminal() {
   
   const { data: streamsData, isLoading } = useQuery<{ streams: LiveStream[] }>({
     queryKey: ['/api/streams/live'],
-    refetchInterval: 30000, // Reduced from 10s to 30s for performance
+    refetchInterval: 30000,
     staleTime: 15000,
   });
   
@@ -335,257 +369,244 @@ export function LiveStreamingTerminal() {
     <section className="pt-20 pb-10 sm:pb-16 px-4" data-testid="streaming-section">
       <div className="max-w-5xl mx-auto">
         <div className="relative overflow-hidden rounded-3xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-purple-950/20 to-slate-900/95" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950" />
           <div className="absolute inset-0 backdrop-blur-3xl" />
           
-          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-fuchsia-500/50 via-cyan-500/30 to-purple-500/50" />
+          <div className="absolute top-20 -left-20 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse" />
+          <div className="absolute bottom-20 -right-20 w-96 h-96 bg-cyan-600/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
           
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
+          <div className="absolute inset-0 opacity-30">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="stream-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <circle cx="20" cy="20" r="1" fill="rgba(217, 70, 239, 0.3)" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#stream-grid)" />
+            </svg>
+          </div>
           
-          <div className="relative m-[1px] rounded-3xl bg-slate-900/80 overflow-hidden">
-            <div className="absolute top-0 left-1/4 right-1/4 h-40 bg-gradient-to-b from-fuchsia-500/15 via-purple-500/10 to-transparent blur-3xl" />
+          <div 
+            className="absolute -inset-[1px] rounded-3xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(217, 70, 239, 0.5) 0%, rgba(6, 182, 212, 0.3) 50%, rgba(139, 92, 246, 0.5) 100%)',
+              padding: '1px',
+            }}
+          />
+          
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/80 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
+          
+          <div className="relative m-[1px] rounded-3xl bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 overflow-hidden">
+            <div className="absolute top-0 left-1/4 right-1/4 h-60 bg-gradient-to-b from-fuchsia-500/20 via-purple-500/10 to-transparent blur-3xl" />
             
-            <div className="absolute inset-0 opacity-[0.03]" style={{
-              backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(16, 185, 129, 0.1) 2px, rgba(16, 185, 129, 0.1) 4px)`
+            <div className="absolute inset-0 opacity-[0.02]" style={{
+              backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(217, 70, 239, 0.1) 2px, rgba(217, 70, 239, 0.1) 4px)`
             }} />
             
             <div className="relative p-5 sm:p-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-purple-500 rounded-2xl blur-xl opacity-50 animate-pulse" />
-                    <div className="relative p-3.5 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-500 shadow-lg shadow-fuchsia-500/30">
-                      <Radio className="w-6 h-6 text-white" />
+                  <div className="relative group">
+                    <div className="absolute -inset-2 bg-gradient-to-br from-fuchsia-500 via-purple-500 to-cyan-500 rounded-3xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity animate-pulse" />
+                    <div className="relative p-4 rounded-2xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-fuchsia-600 shadow-2xl shadow-fuchsia-500/40">
+                      <Radio className="w-7 h-7 text-white" />
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-fuchsia-200 to-cyan-200 bg-clip-text text-transparent">
+                    <h2 className="text-2xl sm:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-fuchsia-200 to-cyan-200 bg-clip-text text-transparent flex items-center gap-2">
                       StreamAiX Live
+                      <Sparkles className="w-5 h-5 text-fuchsia-400 animate-pulse" />
                     </h2>
-                    <p className="text-sm text-slate-400 mt-0.5 flex items-center gap-2">
-                      <Brain className="w-3.5 h-3.5 text-fuchsia-400" />
+                    <p className="text-sm text-slate-400 mt-1 flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-fuchsia-400" />
                       AI-powered voice conversations & trading rooms
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-fuchsia-500/20">
-                    <div className="relative flex items-center justify-center">
-                      <span className="absolute w-3 h-3 rounded-full bg-red-500 animate-ping opacity-50" />
-                      <span className="relative w-2 h-2 rounded-full bg-red-500" />
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-red-500/30 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity animate-pulse" />
+                    <div className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-950/80 to-red-900/60 border border-red-500/40 backdrop-blur-sm">
+                      <div className="relative flex items-center justify-center">
+                        <span className="absolute w-4 h-4 rounded-full bg-red-500 animate-ping opacity-40" />
+                        <span className="relative w-2.5 h-2.5 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
+                      </div>
+                      <span className="text-sm font-bold text-red-400">{totalLive} Live</span>
                     </div>
-                    <span className="text-sm font-semibold text-red-400">{totalLive} Live</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-cyan-500/20">
+                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-950/60 to-cyan-900/40 border border-cyan-500/30 backdrop-blur-sm">
                     <Users className="w-4 h-4 text-cyan-400" />
-                    <span className="text-sm font-semibold text-cyan-400">{totalViewers}</span>
+                    <span className="text-sm font-bold text-cyan-400">{totalViewers.toLocaleString()}</span>
                   </div>
                   
                   <Button 
                     onClick={handleGoLive}
                     data-testid="go-live-button"
-                    className="h-10 px-5 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 hover:from-fuchsia-400 hover:via-purple-400 hover:to-fuchsia-400 text-white font-semibold border-0 shadow-lg shadow-fuchsia-500/30 hover:shadow-xl hover:shadow-fuchsia-500/40 transition-all rounded-xl"
+                    className="relative h-11 px-6 overflow-hidden bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-bold border-0 shadow-xl shadow-fuchsia-500/40 hover:shadow-2xl hover:shadow-fuchsia-500/50 transition-all duration-500 rounded-xl group"
                   >
-                    <Video className="w-4 h-4 mr-2" />
-                    Go Live
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <Video className="w-4 h-4 mr-2 relative z-10" />
+                    <span className="relative z-10">Go Live</span>
                   </Button>
                 </div>
               </div>
               
-              <div className="flex gap-1 p-1.5 mb-6 rounded-2xl bg-slate-800/50 border border-slate-700/30 backdrop-blur-sm">
-                {streamTypes.map((type) => {
-                  const config = streamTypeConfig[type];
-                  const Icon = config.icon;
-                  const count = liveStreams.filter(s => s.streamType === type && s.status === 'live').length;
-                  const isActive = activeTab === type;
-                  
-                  return (
-                    <motion.button
-                      key={type}
-                      onClick={() => setActiveTab(type)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      data-testid={`tab-${type}`}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200",
-                        isActive 
-                          ? cn("bg-gradient-to-r text-white shadow-lg", config.color)
-                          : "text-slate-400 hover:text-white hover:bg-slate-700/50"
-                      )}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="hidden sm:inline">{config.label}</span>
-                      {count > 0 && (
-                        <span className={cn(
-                          "px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[18px] text-center",
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-cyan-500/10 rounded-2xl blur-xl" />
+                <div className="relative flex gap-1.5 p-2 rounded-2xl bg-slate-900/80 border border-slate-700/50 backdrop-blur-xl shadow-inner">
+                  {streamTypes.map((type) => {
+                    const config = streamTypeConfig[type];
+                    const Icon = config.icon;
+                    const count = liveStreams.filter(s => s.streamType === type && s.status === 'live').length;
+                    const isActive = activeTab === type;
+                    
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => setActiveTab(type)}
+                        data-testid={`tab-${type}`}
+                        className={cn(
+                          "relative flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300",
                           isActive 
-                            ? "bg-white/20 text-white" 
-                            : "bg-slate-700 text-slate-300"
-                        )}>
-                          {count}
-                        </span>
-                      )}
-                    </motion.button>
-                  );
-                })}
+                            ? "text-white"
+                            : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                        )}
+                      >
+                        {isActive && (
+                          <>
+                            <div className={cn("absolute inset-0 rounded-xl bg-gradient-to-r shadow-lg", config.color)} />
+                            <div 
+                              className="absolute inset-0 rounded-xl opacity-60"
+                              style={{ boxShadow: `0 0 30px ${config.glowColor}` }}
+                            />
+                          </>
+                        )}
+                        <Icon className={cn("w-4 h-4 relative z-10", isActive && "drop-shadow-lg")} />
+                        <span className="hidden sm:inline relative z-10">{config.label}</span>
+                        {count > 0 && (
+                          <span className={cn(
+                            "relative z-10 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center transition-colors",
+                            isActive 
+                              ? "bg-white/25 text-white shadow-inner" 
+                              : "bg-slate-700/80 text-slate-300"
+                          )}>
+                            {count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-36 rounded-2xl bg-gradient-to-br from-slate-800/30 to-slate-800/10 animate-pulse border border-slate-700/20" />
-                      ))}
-                    </div>
-                  ) : filteredLiveStreams.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredLiveStreams.slice(0, 6).map((stream) => (
-                        <StreamCard key={stream.id} stream={stream} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-slate-800/30 border border-slate-700/30 text-center backdrop-blur-sm">
-                        <div className="relative mb-4">
-                          <div className={cn("absolute inset-0 bg-gradient-to-br rounded-2xl blur-xl opacity-40", streamTypeConfig[activeTab].color)} />
-                          <div className={cn("relative p-4 rounded-2xl bg-gradient-to-br shadow-lg", streamTypeConfig[activeTab].color)}>
-                            {(() => {
-                              const Icon = streamTypeConfig[activeTab].icon;
-                              return <Icon className="w-7 h-7 text-white" />;
-                            })()}
-                          </div>
-                        </div>
-                        <p className="text-sm text-slate-400 mb-4">No {streamTypeConfig[activeTab].label.toLowerCase()} live right now</p>
-                        <Button 
-                          onClick={handleGoLive}
-                          data-testid="be-first-button"
-                          className="bg-gradient-to-r from-fuchsia-500 to-purple-500 hover:from-fuchsia-400 hover:to-purple-400 border-0 shadow-lg shadow-fuchsia-500/20 rounded-xl"
-                        >
-                          <Zap className="w-4 h-4 mr-2" />
-                          Be the First
-                        </Button>
+              <div className="transition-all duration-300">
+                {isLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="relative h-40 rounded-2xl overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50 animate-pulse" />
+                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-fuchsia-500/50 to-purple-500/50" />
+                        <div className="absolute inset-0 border border-slate-700/30 rounded-2xl" />
                       </div>
+                    ))}
+                  </div>
+                ) : filteredLiveStreams.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredLiveStreams.slice(0, 6).map((stream) => (
+                      <StreamCard key={stream.id} stream={stream} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative flex flex-col items-center justify-center p-10 rounded-2xl overflow-hidden backdrop-blur-xl text-center group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/60 to-slate-900/60" />
+                      <div className="absolute inset-[1px] rounded-2xl border border-slate-700/40" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       
-                      {filteredScheduled.length > 0 && (
-                        <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30 backdrop-blur-sm">
-                          <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-cyan-400" />
-                            Coming Up
-                          </h4>
-                          <div className="space-y-2">
-                            {filteredScheduled.slice(0, 3).map((stream) => (
-                              <ScheduledCard key={stream.id} stream={stream} />
-                            ))}
-                          </div>
+                      <div className="relative mb-5">
+                        <div className={cn("absolute -inset-4 bg-gradient-to-br rounded-3xl blur-2xl opacity-50 animate-pulse", streamTypeConfig[activeTab].color)} />
+                        <div className={cn("relative p-5 rounded-2xl bg-gradient-to-br shadow-2xl", streamTypeConfig[activeTab].color)}
+                          style={{ boxShadow: `0 8px 40px ${streamTypeConfig[activeTab].glowColor}` }}
+                        >
+                          {(() => {
+                            const Icon = streamTypeConfig[activeTab].icon;
+                            return <Icon className="w-8 h-8 text-white" />;
+                          })()}
                         </div>
-                      )}
+                      </div>
+                      <p className="relative text-sm text-slate-400 mb-5">No {streamTypeConfig[activeTab].label.toLowerCase()} live right now</p>
+                      <Button 
+                        onClick={handleGoLive}
+                        data-testid="be-first-button"
+                        className="relative overflow-hidden bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-[length:200%_100%] hover:bg-[position:100%_0] border-0 shadow-xl shadow-fuchsia-500/30 rounded-xl font-bold transition-all duration-500 group/btn"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
+                        <Zap className="w-4 h-4 mr-2 relative z-10" />
+                        <span className="relative z-10">Be the First</span>
+                      </Button>
                     </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
+                    
+                    {filteredScheduled.length > 0 && (
+                      <div className="relative p-6 rounded-2xl overflow-hidden backdrop-blur-xl">
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/60 to-slate-900/60" />
+                        <div className="absolute inset-[1px] rounded-2xl border border-slate-700/40" />
+                        
+                        <h4 className="relative text-sm font-bold text-white mb-5 flex items-center gap-2">
+                          <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30">
+                            <Calendar className="w-4 h-4 text-white" />
+                          </div>
+                          Coming Up
+                        </h4>
+                        <div className="relative space-y-2.5">
+                          {filteredScheduled.slice(0, 3).map((stream) => (
+                            <ScheduledCard key={stream.id} stream={stream} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
               
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-5 border-t border-slate-700/30">
+              <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-700/40">
                 <div className="flex flex-wrap items-center gap-3">
-                  <motion.span 
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-fuchsia-500/10 to-fuchsia-500/5 border border-fuchsia-500/20 cursor-default"
-                  >
-                    <Mic className="w-3.5 h-3.5 text-fuchsia-400" />
-                    <span className="text-xs text-fuchsia-300 font-medium">Voice Chat</span>
-                  </motion.span>
-                  <motion.span 
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 cursor-default"
-                  >
-                    <Brain className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-xs text-cyan-300 font-medium">AI Insights</span>
-                  </motion.span>
-                  <motion.span 
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-violet-500/5 border border-violet-500/20 cursor-default"
-                  >
-                    <History className="w-3.5 h-3.5 text-violet-400" />
-                    <span className="text-xs text-violet-300 font-medium">Replay</span>
-                  </motion.span>
-                  <motion.span 
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 cursor-default"
-                  >
-                    <Coins className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs text-amber-300 font-medium">STREAM Tips</span>
-                  </motion.span>
-                  <motion.span 
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500/10 to-rose-500/5 border border-rose-500/20 cursor-default"
-                  >
-                    <Target className="w-3.5 h-3.5 text-rose-400" />
-                    <span className="text-xs text-rose-300 font-medium">Predictions</span>
-                  </motion.span>
+                  {[
+                    { icon: Mic, label: 'Voice Chat', color: 'fuchsia' },
+                    { icon: Brain, label: 'AI Avatars', color: 'cyan' },
+                    { icon: Waves, label: 'Real-time', color: 'purple' },
+                  ].map(({ icon: FeatureIcon, label, color }) => (
+                    <span 
+                      key={label}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-xl cursor-default transition-all duration-300 hover:scale-105",
+                        `bg-gradient-to-r from-${color}-500/15 to-${color}-500/5`,
+                        `border border-${color}-500/25 hover:border-${color}-500/40`
+                      )}
+                      style={{
+                        background: `linear-gradient(135deg, rgba(var(--${color}-rgb, 217, 70, 239), 0.15), rgba(var(--${color}-rgb, 217, 70, 239), 0.05))`,
+                      }}
+                    >
+                      <FeatureIcon className={cn("w-4 h-4", `text-${color}-400`)} />
+                      <span className={cn("text-xs font-medium", `text-${color}-300`)}>{label}</span>
+                    </span>
+                  ))}
                 </div>
                 
                 <Link href="/streams">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <Button 
+                    variant="ghost"
+                    className="text-sm text-slate-400 hover:text-fuchsia-300 hover:bg-fuchsia-500/10 gap-2 rounded-xl font-medium transition-all group"
+                    data-testid="view-all-streams"
                   >
-                    <Button 
-                      size="default" 
-                      data-testid="view-all-streams"
-                      className="relative bg-gradient-to-r from-fuchsia-600 via-purple-600 to-cyan-600 hover:from-fuchsia-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 overflow-hidden group"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <span className="relative flex items-center gap-2">
-                        <Play className="w-4 h-4" />
-                        View All Streams
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                      </span>
-                    </Button>
-                  </motion.div>
+                    View All Streams
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
                 </Link>
               </div>
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-fuchsia-500/5 via-purple-500/5 to-cyan-500/5 border border-fuchsia-500/20"
-              >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-500 shadow-lg shadow-fuchsia-500/20">
-                      <Mic className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-white">Real-Time AI Voice Conversations</h4>
-                      <p className="text-xs text-slate-400">Talk directly with Knowledge Avatars using your microphone</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-auto">
-                    <span className="flex items-center gap-1.5 text-[10px] text-fuchsia-400 font-medium px-2 py-1 rounded-lg bg-fuchsia-500/10">
-                      <Wifi className="w-3 h-3" />
-                      WebSocket
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[10px] text-cyan-400 font-medium px-2 py-1 rounded-lg bg-cyan-500/10">
-                      <Sparkles className="w-3 h-3" />
-                      AI
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[10px] text-violet-400 font-medium px-2 py-1 rounded-lg bg-violet-500/10">
-                      <MessageSquare className="w-3 h-3" />
-                      TTS
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </div>
         </div>
@@ -593,5 +614,3 @@ export function LiveStreamingTerminal() {
     </section>
   );
 }
-
-export default LiveStreamingTerminal;
