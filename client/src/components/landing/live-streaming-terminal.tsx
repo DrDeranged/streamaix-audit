@@ -159,17 +159,34 @@ function PlatformStatsBar({ stats }: { stats: PlatformStats }) {
   );
 }
 
-function RecentActivityFeed({ streams }: { streams: LiveStream[] }) {
-  const recentActivity = useMemo(() => {
-    const activities = [
-      { type: 'join', user: 'whale_trader', stream: 'Market Analysis', time: '2m ago', icon: Users },
-      { type: 'tip', user: 'alpha_seeker', amount: 50, time: '5m ago', icon: DollarSign },
-      { type: 'live', user: 'Naval Ravikant', stream: 'Breaking Down The Charts', time: '8m ago', icon: Radio },
-      { type: 'tip', user: 'degen_king', amount: 125, time: '12m ago', icon: DollarSign },
-      { type: 'join', user: 'crypto_mike', stream: 'Trading Room', time: '15m ago', icon: Users },
-    ];
-    return activities;
-  }, []);
+interface ActivityItem {
+  type: string;
+  user: string;
+  amount?: number;
+  stream?: string;
+  time: string;
+}
+
+function RecentActivityFeed({ activities }: { activities: ActivityItem[] }) {
+  const getIcon = (type: string) => {
+    switch(type) {
+      case 'tip': return DollarSign;
+      case 'live': return Radio;
+      default: return Users;
+    }
+  };
+
+  if (activities.length === 0) {
+    return (
+      <div className="relative overflow-hidden rounded-xl bg-slate-800/40 border border-slate-700/30 p-3">
+        <div className="flex items-center gap-2 mb-3">
+          <Activity className="w-4 h-4 text-fuchsia-400" />
+          <span className="text-xs font-semibold text-white">Live Activity</span>
+        </div>
+        <p className="text-xs text-slate-500 text-center py-4">No recent activity yet</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-slate-800/40 border border-slate-700/30 p-3">
@@ -183,29 +200,32 @@ function RecentActivityFeed({ streams }: { streams: LiveStream[] }) {
       </div>
       
       <div className="space-y-2 max-h-[120px] overflow-hidden">
-        {recentActivity.map((activity, idx) => (
-          <div 
-            key={idx} 
-            className="flex items-center gap-2 text-xs animate-fade-in"
-            style={{ animationDelay: `${idx * 100}ms` }}
-          >
-            <activity.icon className={cn(
-              "w-3 h-3",
-              activity.type === 'tip' ? 'text-amber-400' : 
-              activity.type === 'live' ? 'text-red-400' : 'text-cyan-400'
-            )} />
-            <span className="text-slate-300 truncate flex-1">
-              {activity.type === 'tip' ? (
-                <><span className="text-amber-400 font-medium">{activity.user}</span> tipped <span className="text-amber-400">${activity.amount}</span></>
-              ) : activity.type === 'live' ? (
-                <><span className="text-fuchsia-400 font-medium">{activity.user}</span> went live</>
-              ) : (
-                <><span className="text-cyan-400 font-medium">{activity.user}</span> joined {activity.stream}</>
-              )}
-            </span>
-            <span className="text-slate-500 text-[10px]">{activity.time}</span>
-          </div>
-        ))}
+        {activities.map((activity, idx) => {
+          const IconComponent = getIcon(activity.type);
+          return (
+            <div 
+              key={idx} 
+              className="flex items-center gap-2 text-xs animate-fade-in"
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <IconComponent className={cn(
+                "w-3 h-3",
+                activity.type === 'tip' ? 'text-amber-400' : 
+                activity.type === 'live' ? 'text-red-400' : 'text-cyan-400'
+              )} />
+              <span className="text-slate-300 truncate flex-1">
+                {activity.type === 'tip' ? (
+                  <><span className="text-amber-400 font-medium">{activity.user}</span> tipped <span className="text-amber-400">${activity.amount}</span></>
+                ) : activity.type === 'live' ? (
+                  <><span className="text-fuchsia-400 font-medium">{activity.user}</span> went live</>
+                ) : (
+                  <><span className="text-cyan-400 font-medium">{activity.user}</span> joined {activity.stream}</>
+                )}
+              </span>
+              <span className="text-slate-500 text-[10px]">{activity.time}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -541,6 +561,22 @@ function ScheduledCard({ stream }: { stream: LiveStream }) {
   );
 }
 
+interface PlatformStatsResponse {
+  success: boolean;
+  stats: PlatformStats;
+  recentActivity: Array<{
+    type: string;
+    user: string;
+    amount?: number;
+    stream?: string;
+    time: string;
+  }>;
+  topEarners: Array<{
+    username: string;
+    earnings: number;
+  }>;
+}
+
 export function LiveStreamingTerminal() {
   const [activeTab, setActiveTab] = useState<StreamType>('broadcast');
   const { isAuthenticated } = useAuth();
@@ -558,6 +594,12 @@ export function LiveStreamingTerminal() {
     refetchInterval: 30000,
   });
   
+  const { data: platformStatsData } = useQuery<PlatformStatsResponse>({
+    queryKey: ['/api/platform-stats'],
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+  
   const liveStreams = streamsData?.streams || [];
   const scheduledStreams = scheduledData?.streams || [];
   
@@ -566,16 +608,28 @@ export function LiveStreamingTerminal() {
   
   const totalLive = liveStreams.filter(s => s.status === 'live').length;
   const totalViewers = liveStreams.reduce((acc, s) => acc + (s.currentViewers || 0), 0);
-  const totalTips = liveStreams.reduce((acc, s) => acc + (s.totalTipsReceived || 0), 0);
   
-  const platformStats: PlatformStats = useMemo(() => ({
-    totalStreams: 12847 + liveStreams.length,
-    totalHoursWatched: 89432 + Math.floor(totalViewers * 0.5),
-    totalTipsEarned: 247830 + totalTips,
-    totalCreators: 1247 + Math.floor(liveStreams.length * 0.3),
-    platformFeeRate: 0.5,
-    weeklyGrowth: 23.4,
-  }), [liveStreams.length, totalViewers, totalTips]);
+  const platformStats: PlatformStats = useMemo(() => {
+    if (platformStatsData?.stats) {
+      return platformStatsData.stats;
+    }
+    return {
+      totalStreams: 0,
+      totalHoursWatched: 0,
+      totalTipsEarned: 0,
+      totalCreators: 0,
+      platformFeeRate: 0.5,
+      weeklyGrowth: 0,
+    };
+  }, [platformStatsData]);
+  
+  const recentActivity = useMemo(() => {
+    return platformStatsData?.recentActivity || [];
+  }, [platformStatsData]);
+  
+  const topEarners = useMemo(() => {
+    return platformStatsData?.topEarners || [];
+  }, [platformStatsData]);
   
   const featuredStream = useMemo(() => {
     const allLive = liveStreams.filter(s => s.status === 'live');
@@ -834,18 +888,17 @@ export function LiveStreamingTerminal() {
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
                 <div className="lg:col-span-2">
-                  <RecentActivityFeed streams={liveStreams} />
+                  <RecentActivityFeed activities={recentActivity} />
                 </div>
                 <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 border border-fuchsia-500/20 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Award className="w-4 h-4 text-fuchsia-400" />
-                    <span className="text-xs font-semibold text-white">Top Earners Today</span>
+                    <span className="text-xs font-semibold text-white">Top Earners</span>
                   </div>
-                  <div className="space-y-2">
-                    {['Naval Ravikant', 'Balaji Srinivasan', 'Vitalik Buterin'].map((name, idx) => {
-                      const earnings = [2450, 1820, 1340][idx];
-                      return (
-                        <div key={name} className="flex items-center justify-between text-xs">
+                  {topEarners.length > 0 ? (
+                    <div className="space-y-2">
+                      {topEarners.slice(0, 5).map((earner, idx) => (
+                        <div key={earner.username} className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
                             <span className={cn(
                               "w-5 h-5 flex items-center justify-center rounded-full font-bold text-[10px]",
@@ -855,13 +908,15 @@ export function LiveStreamingTerminal() {
                             )}>
                               {idx + 1}
                             </span>
-                            <span className="text-slate-300">{name}</span>
+                            <span className="text-slate-300">{earner.username}</span>
                           </div>
-                          <span className="text-amber-400 font-semibold">${earnings.toLocaleString()}</span>
+                          <span className="text-amber-400 font-semibold">${earner.earnings.toLocaleString()}</span>
                         </div>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500 text-center py-4">No earnings data yet</p>
+                  )}
                 </div>
               </div>
               
