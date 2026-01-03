@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
@@ -264,7 +264,7 @@ const assetTypeChartColors: Record<string, string> = {
   other: '#9ca3af',      // Light gray
 };
 
-function AllocationChart({ allocation }: { allocation: Record<string, number> }) {
+const AllocationChart = memo(function AllocationChart({ allocation }: { allocation: Record<string, number> }) {
   const entries = Object.entries(allocation).filter(([_, v]) => v > 0);
   let cumulativeRotation = 0;
 
@@ -303,9 +303,9 @@ function AllocationChart({ allocation }: { allocation: Record<string, number> })
       </svg>
     </div>
   );
-}
+});
 
-function Sparkline({ priceChange7d }: { priceChange7d: number }) {
+const Sparkline = memo(function Sparkline({ priceChange7d }: { priceChange7d: number }) {
   const data = useMemo(() => {
     const change = priceChange7d || 0;
     const points = 7;
@@ -344,9 +344,9 @@ function Sparkline({ priceChange7d }: { priceChange7d: number }) {
       </ResponsiveContainer>
     </div>
   );
-}
+});
 
-function NetWorthChart({ portfolioId }: { portfolioId: string }) {
+const NetWorthChart = memo(function NetWorthChart({ portfolioId }: { portfolioId: string }) {
   const [timeRange, setTimeRange] = useState<'30d' | '90d' | '1y'>('30d');
   
   const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: PortfolioSnapshot[] }>({
@@ -480,7 +480,7 @@ function NetWorthChart({ portfolioId }: { portfolioId: string }) {
       </div>
     </div>
   );
-}
+});
 
 function WatchlistItemRow({ 
   item, 
@@ -797,12 +797,12 @@ function WatchlistTab({ portfolioId, onBuyFromWatchlist }: { portfolioId: string
   );
 }
 
-function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValues: boolean }) {
-  const sortedByChange = [...assets].sort((a, b) => 
+const TopMovers = memo(function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValues: boolean }) {
+  const sortedByChange = useMemo(() => [...assets].sort((a, b) => 
     Math.abs(b.priceChange24h || 0) - Math.abs(a.priceChange24h || 0)
-  );
-  const gainers = sortedByChange.filter(a => (a.priceChange24h || 0) > 0).slice(0, 3);
-  const losers = sortedByChange.filter(a => (a.priceChange24h || 0) < 0).slice(0, 3);
+  ), [assets]);
+  const gainers = useMemo(() => sortedByChange.filter(a => (a.priceChange24h || 0) > 0).slice(0, 3), [sortedByChange]);
+  const losers = useMemo(() => sortedByChange.filter(a => (a.priceChange24h || 0) < 0).slice(0, 3), [sortedByChange]);
 
   if (assets.length === 0) {
     return (
@@ -847,7 +847,7 @@ function TopMovers({ assets, showValues }: { assets: PortfolioAsset[]; showValue
       </div>
     </div>
   );
-}
+});
 
 interface PortfolioGoal {
   id: string;
@@ -913,12 +913,13 @@ const DIVIDEND_DATA: Record<string, Omit<DividendInfo, 'symbol' | 'name'>> = {
   VIG: { nextDividendDate: '2025-03-26', dividendAmount: 0.78, frequency: 'quarterly', yield: 1.7 },
 };
 
-function BenchmarkComparisonChart({ portfolioId, assets }: { portfolioId: string; assets: PortfolioAsset[] }) {
+const BenchmarkComparisonChart = memo(function BenchmarkComparisonChart({ portfolioId, assets }: { portfolioId: string; assets: PortfolioAsset[] }) {
   const [timeRange, setTimeRange] = useState<'30d' | '90d' | 'YTD'>('30d');
   
   const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: PortfolioSnapshot[] }>({
     queryKey: ['/api/portfolios', portfolioId, 'history'],
     enabled: !!portfolioId,
+    staleTime: 300000, // 5 minutes
   });
   
   const chartData = useMemo(() => {
@@ -1073,7 +1074,7 @@ function BenchmarkComparisonChart({ portfolioId, assets }: { portfolioId: string
       </div>
     </div>
   );
-}
+});
 
 function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfolioId: string; open: boolean; onOpenChange: (open: boolean) => void }) {
   const [filterType, setFilterType] = useState<string>('all');
@@ -1843,8 +1844,8 @@ function IncomeTracker({ assets }: { assets: PortfolioAsset[] }) {
   );
 }
 
-function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
-  const symbols = assets.map(a => a.symbol).join(',');
+const NewsAggregator = memo(function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
+  const symbols = useMemo(() => assets.map(a => a.symbol).join(','), [assets]);
   
   const { data: newsData, isLoading, error } = useQuery<{ success: boolean; news: NewsItem[] }>({
     queryKey: ['/api/portfolio-news', { symbols }],
@@ -1914,7 +1915,7 @@ function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
       </Button>
     </div>
   );
-}
+});
 
 interface SearchResult {
   symbol: string;
@@ -2427,7 +2428,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
   );
 }
 
-function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = false, onRefresh }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean; isRecentlyUpdated?: boolean; onRefresh?: () => void }) {
+const AssetRow = memo(function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = false, onRefresh }: { asset: PortfolioAsset; portfolioId: string; showValues?: boolean; isRecentlyUpdated?: boolean; onRefresh?: () => void }) {
   const Icon = assetTypeIcons[asset.assetType] || Wallet;
   const colorGradient = assetTypeColors[asset.assetType] || assetTypeColors.other;
   
@@ -2442,16 +2443,9 @@ function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = f
   const showSparkline = !isCashLike && !isRetirement;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ 
-        opacity: 1, 
-        y: 0,
-        boxShadow: isRecentlyUpdated ? '0 0 0 2px rgba(34, 197, 94, 0.4)' : '0 0 0 0px rgba(34, 197, 94, 0)'
-      }}
-      transition={{ boxShadow: { duration: 0.3 } }}
+    <div
       className={cn(
-        "flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border hover:border-slate-600/50 hover:bg-slate-800/50 transition-all cursor-pointer group relative",
+        "flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border hover:border-slate-600/50 hover:bg-slate-800/50 transition-colors cursor-pointer group relative",
         isRecentlyUpdated ? 'border-green-500/40' : 'border-slate-700/30'
       )}
     >
@@ -2517,9 +2511,9 @@ function AssetRow({ asset, portfolioId, showValues = true, isRecentlyUpdated = f
         </div>
       </div>
       <EditAssetDialog asset={asset} portfolioId={portfolioId} onSuccess={onRefresh || (() => {})} />
-    </motion.div>
+    </div>
   );
-}
+});
 
 function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAsset; portfolioId: string; onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
