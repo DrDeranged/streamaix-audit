@@ -55,6 +55,7 @@ const KnowledgeAvatarProfile = React.lazy(() => import("@/pages/knowledge-avatar
 const LearningHub = React.lazy(() => import("@/pages/learning-hub"));
 const LessonViewer = React.lazy(() => import("@/pages/lesson-viewer"));
 const PortfolioDashboard = React.lazy(() => import("@/pages/portfolio-dashboard"));
+const NotificationSettings = React.lazy(() => import("@/pages/notification-settings"));
 
 function Router() {
   return (
@@ -272,6 +273,12 @@ function Router() {
       <Route path="/points">
         <Suspense fallback={<DashboardSkeleton />}>
           <Points />
+        </Suspense>
+      </Route>
+      
+      <Route path="/settings/notifications">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <NotificationSettings />
         </Suspense>
       </Route>
       

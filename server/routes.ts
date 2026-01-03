@@ -13388,6 +13388,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         whaleAlerts: s.whaleAlerts,
         volumeSpikes: s.volumeSpikes,
         weeklyPreview: s.weeklyPreview,
+        streamLive: s.streamLive,
+        streamTips: s.streamTips,
+        streamMilestones: s.streamMilestones,
+        streamReminders: s.streamReminders,
         lastUsed: s.lastUsed,
       }))
     });
@@ -13403,7 +13407,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       marketResolutions, priceAlerts, bountyUpdates, tradeConfirmations, 
       aiAgentActivity, weeklyDigest, morningBriefing, eveningRecap,
       marketMovers, macroAlerts, breakingNews, coinDeskNews,
-      fundingRateAlerts, liquidationAlerts, whaleAlerts, volumeSpikes, weeklyPreview
+      fundingRateAlerts, liquidationAlerts, whaleAlerts, volumeSpikes, weeklyPreview,
+      streamLive, streamTips, streamMilestones, streamReminders
     } = req.body;
 
     const result = await pushNotificationService.updatePreferences(req.user.id, {
@@ -13424,6 +13429,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       whaleAlerts,
       volumeSpikes,
       weeklyPreview,
+      streamLive,
+      streamTips,
+      streamMilestones,
+      streamReminders,
     });
 
     res.json({ success: true, ...result });
