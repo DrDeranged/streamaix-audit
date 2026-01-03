@@ -14278,6 +14278,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, stream: newStream });
   }));
 
+  // Generate LiveKit token for stream
+  app.post("/api/streams/:id/token", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    
+    const streamId = req.params.id;
+    const { AccessToken } = await import('livekit-server-sdk');
+    
+    // Check if stream exists
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, streamId))
+      .limit(1);
+    
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+    
+    const isHost = stream.hostId === req.user.id;
+    const roomName = stream.roomId || `stream_${streamId}`;
+    
+    // Create LiveKit access token
+    const apiKey = process.env.LIVEKIT_API_KEY;
+    const apiSecret = process.env.LIVEKIT_API_SECRET;
+    const wsUrl = process.env.LIVEKIT_URL;
+    
+    if (!apiKey || !apiSecret || !wsUrl) {
+      return res.status(500).json({ success: false, error: 'LiveKit not configured' });
+    }
+    
+    const at = new AccessToken(apiKey, apiSecret, {
+      identity: req.user.id,
+      name: req.user.username || 'Anonymous',
+      ttl: '4h',
+    });
+    
+    at.addGrant({
+      room: roomName,
+      roomJoin: true,
+      canPublish: isHost,
+      canSubscribe: true,
+      canPublishData: true,
+    });
+    
+    const token = await at.toJwt();
+    
+    res.json({ 
+      success: true, 
+      token,
+      wsUrl,
+      roomName,
+      isHost,
+    });
+  }));
+
   // Start a scheduled stream
   app.post("/api/streams/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
