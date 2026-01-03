@@ -178,11 +178,5 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Listen for visibility changes to refetch on mobile when app comes back
-if (typeof document !== 'undefined') {
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && isMobile) {
-      queryClient.invalidateQueries();
-    }
-  });
-}
+// Disabled: visibility-based invalidation was too aggressive and caused performance issues
+// React Query's built-in refetchOnWindowFocus handles this more efficiently

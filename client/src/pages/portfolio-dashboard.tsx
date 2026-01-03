@@ -1849,6 +1849,8 @@ function NewsAggregator({ assets }: { assets: PortfolioAsset[] }) {
   const { data: newsData, isLoading, error } = useQuery<{ success: boolean; news: NewsItem[] }>({
     queryKey: ['/api/portfolio-news', { symbols }],
     enabled: assets.length > 0,
+    staleTime: 600000, // 10 minutes - news doesn't change frequently
+    refetchOnWindowFocus: false,
   });
   
   const newsItems = newsData?.news || [];
@@ -2726,7 +2728,8 @@ export default function PortfolioDashboard() {
 
   const { data: portfoliosData, isLoading: portfoliosLoading } = useQuery<{ portfolios: Portfolio[] }>({
     queryKey: ['/api/portfolios'],
-    refetchInterval: 60000,
+    refetchInterval: 180000, // 3 minutes - reduced for performance
+    staleTime: 120000, // 2 minutes
   });
 
   const portfolios = portfoliosData?.portfolios || [];
@@ -2735,13 +2738,15 @@ export default function PortfolioDashboard() {
   const { data: portfolioData, isLoading: portfolioLoading, refetch: refetchPortfolio } = useQuery<{ portfolio: Portfolio; assets: PortfolioAsset[]; insights: any[] }>({
     queryKey: ['/api/portfolios', activePortfolioId],
     enabled: !!activePortfolioId,
-    refetchInterval: 60000,
+    refetchInterval: 180000, // 3 minutes - reduced for performance
+    staleTime: 120000, // 2 minutes
   });
 
   const { data: analysisData, refetch: refetchAnalysis } = useQuery<{ analysis: AIAnalysis }>({
     queryKey: ['/api/portfolios', activePortfolioId, 'ai-analysis'],
     enabled: !!activePortfolioId,
-    refetchInterval: 300000,
+    refetchInterval: 600000, // 10 minutes - AI analysis is expensive
+    staleTime: 300000, // 5 minutes
   });
 
   // Fetch portfolio analytics (Sharpe, Alpha, Beta, etc.)
@@ -2758,7 +2763,8 @@ export default function PortfolioDashboard() {
   } }>({
     queryKey: ['/api/portfolios', activePortfolioId, 'analytics'],
     enabled: !!activePortfolioId,
-    refetchInterval: 300000,
+    refetchInterval: 600000, // 10 minutes
+    staleTime: 300000, // 5 minutes
   });
 
   // Fetch AI Trade Signals
@@ -2773,7 +2779,8 @@ export default function PortfolioDashboard() {
   }> }>({
     queryKey: ['/api/market/trade-signals'],
     enabled: !!activePortfolioId,
-    refetchInterval: 300000,
+    refetchInterval: 600000, // 10 minutes
+    staleTime: 300000, // 5 minutes
   });
 
   const analytics = analyticsData?.analytics;
@@ -2799,7 +2806,8 @@ export default function PortfolioDashboard() {
   } }>({
     queryKey: ['/api/portfolios', activePortfolioId, 'tax-analytics'],
     enabled: !!activePortfolioId,
-    refetchInterval: 300000,
+    refetchInterval: 600000, // 10 minutes
+    staleTime: 300000, // 5 minutes
   });
 
   const taxAnalytics = taxData?.taxAnalytics;
@@ -2944,6 +2952,8 @@ export default function PortfolioDashboard() {
   }> }>({
     queryKey: ['/api/portfolio-events', symbolsString],
     enabled: assets.length > 0,
+    staleTime: 1800000, // 30 minutes - events are fairly static
+    refetchOnWindowFocus: false,
   });
 
   const portfolioEvents = eventsData?.events || [];

@@ -18752,7 +18752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  const priceUpdateInterval = setInterval(broadcastPriceUpdates, 30000);
+  const priceUpdateInterval = setInterval(broadcastPriceUpdates, 60000); // 60 seconds - reduced for performance
   
   httpServer.on('close', () => {
     clearInterval(priceUpdateInterval);
