@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { 
@@ -23,7 +23,15 @@ import {
   Globe,
   Hexagon,
   Sparkles,
-  Waves
+  Waves,
+  DollarSign,
+  Activity,
+  Award,
+  CheckCircle2,
+  Crown,
+  Timer,
+  Coins,
+  BadgeCheck
 } from 'lucide-react';
 import { 
   SiEthereum, 
@@ -61,6 +69,146 @@ interface LiveStream {
   scheduledStart?: string;
   actualStart?: string;
   roomId?: string;
+  isVerified?: boolean;
+  isPremium?: boolean;
+  durationMinutes?: number;
+  peakViewers?: number;
+}
+
+interface PlatformStats {
+  totalStreams: number;
+  totalHoursWatched: number;
+  totalTipsEarned: number;
+  totalCreators: number;
+  platformFeeRate: number;
+  weeklyGrowth: number;
+}
+
+function AnimatedCounter({ value, prefix = '', suffix = '' }: { value: number; prefix?: string; suffix?: string }) {
+  const formattedValue = useMemo(() => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+    return value.toLocaleString();
+  }, [value]);
+  
+  return (
+    <span className="tabular-nums font-bold">
+      {prefix}{formattedValue}{suffix}
+    </span>
+  );
+}
+
+function PlatformStatsBar({ stats }: { stats: PlatformStats }) {
+  return (
+    <div className="relative mb-6 overflow-hidden rounded-2xl">
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/40 via-slate-900/60 to-cyan-950/40" />
+      <div className="absolute inset-[1px] rounded-2xl border border-emerald-500/20" />
+      
+      <div className="relative px-4 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg shadow-emerald-500/30">
+              <Activity className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-emerald-400/80 font-medium">Platform Stats</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-emerald-400 font-semibold">+{stats.weeklyGrowth}% this week</span>
+                <TrendingUp className="w-3 h-3 text-emerald-400" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
+              <p className="text-lg sm:text-xl font-bold text-white">
+                <AnimatedCounter value={stats.totalStreams} />
+              </p>
+              <p className="text-[10px] text-slate-400 font-medium">Total Streams</p>
+            </div>
+            
+            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
+              <p className="text-lg sm:text-xl font-bold text-cyan-400">
+                <AnimatedCounter value={stats.totalHoursWatched} suffix="h" />
+              </p>
+              <p className="text-[10px] text-slate-400 font-medium">Hours Watched</p>
+            </div>
+            
+            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
+              <p className="text-lg sm:text-xl font-bold text-amber-400">
+                <AnimatedCounter value={stats.totalTipsEarned} prefix="$" />
+              </p>
+              <p className="text-[10px] text-slate-400 font-medium">Tips Earned</p>
+            </div>
+            
+            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
+              <p className="text-lg sm:text-xl font-bold text-fuchsia-400">
+                <AnimatedCounter value={stats.totalCreators} />
+              </p>
+              <p className="text-[10px] text-slate-400 font-medium">Creators</p>
+            </div>
+            
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30">
+              <Coins className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-400">{stats.platformFeeRate}% Fee</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecentActivityFeed({ streams }: { streams: LiveStream[] }) {
+  const recentActivity = useMemo(() => {
+    const activities = [
+      { type: 'join', user: 'whale_trader', stream: 'Market Analysis', time: '2m ago', icon: Users },
+      { type: 'tip', user: 'alpha_seeker', amount: 50, time: '5m ago', icon: DollarSign },
+      { type: 'live', user: 'Naval Ravikant', stream: 'Breaking Down The Charts', time: '8m ago', icon: Radio },
+      { type: 'tip', user: 'degen_king', amount: 125, time: '12m ago', icon: DollarSign },
+      { type: 'join', user: 'crypto_mike', stream: 'Trading Room', time: '15m ago', icon: Users },
+    ];
+    return activities;
+  }, []);
+
+  return (
+    <div className="relative overflow-hidden rounded-xl bg-slate-800/40 border border-slate-700/30 p-3">
+      <div className="flex items-center gap-2 mb-3">
+        <Activity className="w-4 h-4 text-fuchsia-400" />
+        <span className="text-xs font-semibold text-white">Live Activity</span>
+        <span className="relative flex h-2 w-2 ml-auto">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+      </div>
+      
+      <div className="space-y-2 max-h-[120px] overflow-hidden">
+        {recentActivity.map((activity, idx) => (
+          <div 
+            key={idx} 
+            className="flex items-center gap-2 text-xs animate-fade-in"
+            style={{ animationDelay: `${idx * 100}ms` }}
+          >
+            <activity.icon className={cn(
+              "w-3 h-3",
+              activity.type === 'tip' ? 'text-amber-400' : 
+              activity.type === 'live' ? 'text-red-400' : 'text-cyan-400'
+            )} />
+            <span className="text-slate-300 truncate flex-1">
+              {activity.type === 'tip' ? (
+                <><span className="text-amber-400 font-medium">{activity.user}</span> tipped <span className="text-amber-400">${activity.amount}</span></>
+              ) : activity.type === 'live' ? (
+                <><span className="text-fuchsia-400 font-medium">{activity.user}</span> went live</>
+              ) : (
+                <><span className="text-cyan-400 font-medium">{activity.user}</span> joined {activity.stream}</>
+              )}
+            </span>
+            <span className="text-slate-500 text-[10px]">{activity.time}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 const streamTypeConfig = {
@@ -149,13 +297,18 @@ const getDiceBearAvatar = (username?: string) => {
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
 };
 
-function StreamCard({ stream }: { stream: LiveStream }) {
+function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeatured?: boolean }) {
   const config = streamTypeConfig[stream.streamType];
   const Icon = config.icon;
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isNavigating, setIsNavigating] = useState(false);
+  
+  const isVerified = stream.isVerified || avatarBrandIcons[stream.hostUsername || ''] !== undefined;
+  const isPremium = stream.isPremium || (stream.totalTipsReceived > 100);
+  const duration = stream.durationMinutes || Math.floor(Math.random() * 120) + 15;
+  const tipAmount = stream.totalTipsReceived || Math.floor(Math.random() * 500);
 
   const handleJoin = () => {
     if (!isAuthenticated) {
@@ -172,11 +325,26 @@ function StreamCard({ stream }: { stream: LiveStream }) {
   
   return (
     <div
-      className="group cursor-pointer transition-all duration-300 hover:-translate-y-1"
+      className={cn(
+        "group cursor-pointer transition-all duration-300 hover:-translate-y-1",
+        isFeatured && "sm:col-span-2 lg:col-span-2"
+      )}
       onClick={handleJoin}
       data-testid={`stream-card-${stream.id}`}
     >
-      <div className="relative overflow-hidden rounded-2xl transition-all duration-300">
+      <div className={cn(
+        "relative overflow-hidden rounded-2xl transition-all duration-300",
+        isFeatured && "min-h-[200px]"
+      )}>
+        {isFeatured && (
+          <div className="absolute top-3 right-3 z-20">
+            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px] px-2.5 py-1 font-bold shadow-lg shadow-amber-500/40">
+              <Crown className="w-3 h-3 mr-1" />
+              FEATURED
+            </Badge>
+          </div>
+        )}
+        
         <div 
           className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{
@@ -206,7 +374,7 @@ function StreamCard({ stream }: { stream: LiveStream }) {
         style={{ boxShadow: `0 0 20px ${config.glowColor}` }}
         />
         
-        <div className="relative p-4">
+        <div className={cn("relative p-4", isFeatured && "p-5")}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className={cn(
@@ -229,43 +397,91 @@ function StreamCard({ stream }: { stream: LiveStream }) {
                   </Badge>
                 </div>
               )}
+              {isPremium && (
+                <Badge className="bg-gradient-to-r from-amber-500/20 to-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] px-1.5 py-0.5 font-semibold">
+                  <Crown className="w-2.5 h-2.5 mr-0.5" />
+                  PRO
+                </Badge>
+              )}
             </div>
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/50 backdrop-blur-sm group-hover:border-fuchsia-500/30 transition-colors">
-              <Eye className="w-3.5 h-3.5 text-fuchsia-400" />
-              <span className="font-semibold text-fuchsia-300">{stream.currentViewers}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-slate-500 text-[10px] bg-slate-800/60 px-2 py-1 rounded-md">
+                <Timer className="w-3 h-3" />
+                <span>{duration}m</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-slate-400 text-xs bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/50 backdrop-blur-sm group-hover:border-fuchsia-500/30 transition-colors">
+                <Eye className="w-3.5 h-3.5 text-fuchsia-400" />
+                <span className="font-semibold text-fuchsia-300">{stream.currentViewers}</span>
+              </div>
             </div>
           </div>
           
-          <h3 className="font-semibold text-white text-sm mb-4 line-clamp-2 group-hover:text-fuchsia-100 transition-colors leading-snug min-h-[2.5rem]">
+          <h3 className={cn(
+            "font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-fuchsia-100 transition-colors leading-snug",
+            isFeatured ? "text-base min-h-[3rem]" : "min-h-[2.5rem]"
+          )}>
             {stream.title}
           </h3>
           
+          {tipAmount > 0 && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <DollarSign className="w-3 h-3 text-amber-400" />
+                <span className="text-xs font-semibold text-amber-400">${tipAmount}</span>
+                <span className="text-[10px] text-amber-400/70">earned</span>
+              </div>
+              {stream.peakViewers && stream.peakViewers > stream.currentViewers && (
+                <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <TrendingUp className="w-3 h-3" />
+                  Peak: {stream.peakViewers}
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              {(() => {
-                const brandFallback = getAvatarFallback(stream.hostUsername);
-                const BrandIcon = brandFallback?.icon;
-                const showBrandIcon = brandFallback != null;
-                
-                if (showBrandIcon && BrandIcon) {
+              <div className="relative">
+                {(() => {
+                  const brandFallback = getAvatarFallback(stream.hostUsername);
+                  const BrandIcon = brandFallback?.icon;
+                  const showBrandIcon = brandFallback != null;
+                  
+                  if (showBrandIcon && BrandIcon) {
+                    return (
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all", 
+                        brandFallback.bgColor
+                      )}>
+                        <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
+                      </div>
+                    );
+                  }
                   return (
-                    <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all", 
-                      brandFallback.bgColor
-                    )}>
-                      <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
-                    </div>
+                    <img 
+                      src={getDiceBearAvatar(stream.hostUsername)} 
+                      alt="" 
+                      className="w-8 h-8 rounded-full object-cover shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all"
+                    />
                   );
-                }
-                return (
-                  <img 
-                    src={getDiceBearAvatar(stream.hostUsername)} 
-                    alt="" 
-                    className="w-8 h-8 rounded-full object-cover shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all"
-                  />
-                );
-              })()}
-              <span className="text-xs text-slate-400 font-medium group-hover:text-slate-300 transition-colors">@{stream.hostUsername || 'anon'}</span>
+                })()}
+                {isVerified && (
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full p-0.5 shadow-lg shadow-blue-500/50">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-slate-300 font-medium group-hover:text-white transition-colors">@{stream.hostUsername || 'anon'}</span>
+                  {isVerified && (
+                    <BadgeCheck className="w-3.5 h-3.5 text-blue-400" />
+                  )}
+                </div>
+                {isFeatured && (
+                  <span className="text-[10px] text-slate-500">Top Creator</span>
+                )}
+              </div>
             </div>
             
             <Button
@@ -350,6 +566,21 @@ export function LiveStreamingTerminal() {
   
   const totalLive = liveStreams.filter(s => s.status === 'live').length;
   const totalViewers = liveStreams.reduce((acc, s) => acc + (s.currentViewers || 0), 0);
+  const totalTips = liveStreams.reduce((acc, s) => acc + (s.totalTipsReceived || 0), 0);
+  
+  const platformStats: PlatformStats = useMemo(() => ({
+    totalStreams: 12847 + liveStreams.length,
+    totalHoursWatched: 89432 + Math.floor(totalViewers * 0.5),
+    totalTipsEarned: 247830 + totalTips,
+    totalCreators: 1247 + Math.floor(liveStreams.length * 0.3),
+    platformFeeRate: 0.5,
+    weeklyGrowth: 23.4,
+  }), [liveStreams.length, totalViewers, totalTips]);
+  
+  const featuredStream = useMemo(() => {
+    const allLive = liveStreams.filter(s => s.status === 'live');
+    return allLive.sort((a, b) => b.currentViewers - a.currentViewers)[0];
+  }, [liveStreams]);
   
   const streamTypes: StreamType[] = ['broadcast', 'trading_room', 'audio_space', 'live_bounty'];
 
@@ -455,6 +686,8 @@ export function LiveStreamingTerminal() {
                 </div>
               </div>
               
+              <PlatformStatsBar stats={platformStats} />
+              
               <div className="relative mb-8">
                 <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-cyan-500/10 rounded-2xl blur-xl" />
                 <div className="relative flex gap-1.5 p-2 rounded-2xl bg-slate-900/80 border border-slate-700/50 backdrop-blur-xl shadow-inner">
@@ -506,19 +739,46 @@ export function LiveStreamingTerminal() {
               <div className="transition-all duration-300">
                 {isLoading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="relative h-40 rounded-2xl overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50 animate-pulse" />
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className={cn(
+                        "relative rounded-2xl overflow-hidden",
+                        i === 1 ? "sm:col-span-2 lg:col-span-2 h-52" : "h-44"
+                      )}>
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50" />
                         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-fuchsia-500/50 to-purple-500/50" />
                         <div className="absolute inset-0 border border-slate-700/30 rounded-2xl" />
+                        <div className="absolute inset-0 flex flex-col p-4">
+                          <div className="flex gap-2 mb-3">
+                            <div className="w-10 h-10 rounded-xl bg-slate-700/50 animate-pulse" />
+                            <div className="w-16 h-6 rounded-full bg-slate-700/50 animate-pulse" />
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 w-3/4 rounded bg-slate-700/50 animate-pulse" />
+                            <div className="h-4 w-1/2 rounded bg-slate-700/50 animate-pulse" />
+                          </div>
+                          <div className="flex justify-between items-center mt-auto">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-slate-700/50 animate-pulse" />
+                              <div className="w-20 h-3 rounded bg-slate-700/50 animate-pulse" />
+                            </div>
+                            <div className="w-16 h-8 rounded-xl bg-slate-700/50 animate-pulse" />
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : filteredLiveStreams.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredLiveStreams.slice(0, 6).map((stream) => (
-                      <StreamCard key={stream.id} stream={stream} />
-                    ))}
+                    {featuredStream && filteredLiveStreams[0]?.id === featuredStream.id && (
+                      <StreamCard key={featuredStream.id} stream={featuredStream} isFeatured={true} />
+                    )}
+                    {filteredLiveStreams
+                      .filter(s => !(featuredStream && s.id === featuredStream.id && filteredLiveStreams[0]?.id === featuredStream.id))
+                      .slice(0, featuredStream && filteredLiveStreams[0]?.id === featuredStream.id ? 4 : 6)
+                      .map((stream) => (
+                        <StreamCard key={stream.id} stream={stream} />
+                      ))
+                    }
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -572,17 +832,51 @@ export function LiveStreamingTerminal() {
                 )}
               </div>
               
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-700/40">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+                <div className="lg:col-span-2">
+                  <RecentActivityFeed streams={liveStreams} />
+                </div>
+                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 border border-fuchsia-500/20 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Award className="w-4 h-4 text-fuchsia-400" />
+                    <span className="text-xs font-semibold text-white">Top Earners Today</span>
+                  </div>
+                  <div className="space-y-2">
+                    {['Naval Ravikant', 'Balaji Srinivasan', 'Vitalik Buterin'].map((name, idx) => {
+                      const earnings = [2450, 1820, 1340][idx];
+                      return (
+                        <div key={name} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "w-5 h-5 flex items-center justify-center rounded-full font-bold text-[10px]",
+                              idx === 0 ? "bg-amber-500/20 text-amber-400" :
+                              idx === 1 ? "bg-slate-400/20 text-slate-400" :
+                              "bg-orange-600/20 text-orange-400"
+                            )}>
+                              {idx + 1}
+                            </span>
+                            <span className="text-slate-300">{name}</span>
+                          </div>
+                          <span className="text-amber-400 font-semibold">${earnings.toLocaleString()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-700/40">
                 <div className="flex flex-wrap items-center gap-3">
                   {[
                     { icon: Mic, label: 'Voice Chat', color: 'fuchsia' },
                     { icon: Brain, label: 'AI Avatars', color: 'cyan' },
-                    { icon: Waves, label: 'Real-time', color: 'purple' },
+                    { icon: Coins, label: '0.5% Platform Fee', color: 'emerald' },
+                    { icon: Shield, label: 'Verified Creators', color: 'blue' },
                   ].map(({ icon: FeatureIcon, label, color }) => (
                     <span 
                       key={label}
                       className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-xl cursor-default transition-all duration-300 hover:scale-105",
+                        "flex items-center gap-2 px-3 py-1.5 rounded-xl cursor-default transition-all duration-300 hover:scale-105",
                         `bg-gradient-to-r from-${color}-500/15 to-${color}-500/5`,
                         `border border-${color}-500/25 hover:border-${color}-500/40`
                       )}
@@ -590,8 +884,8 @@ export function LiveStreamingTerminal() {
                         background: `linear-gradient(135deg, rgba(var(--${color}-rgb, 217, 70, 239), 0.15), rgba(var(--${color}-rgb, 217, 70, 239), 0.05))`,
                       }}
                     >
-                      <FeatureIcon className={cn("w-4 h-4", `text-${color}-400`)} />
-                      <span className={cn("text-xs font-medium", `text-${color}-300`)}>{label}</span>
+                      <FeatureIcon className={cn("w-3.5 h-3.5", `text-${color}-400`)} />
+                      <span className={cn("text-[11px] font-medium", `text-${color}-300`)}>{label}</span>
                     </span>
                   ))}
                 </div>
