@@ -1,10 +1,62 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, Link } from "wouter";
 import { ArrowLeft, ChevronUp, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePointsBalance, formatPoints } from "@/hooks/usePoints";
 import { useAuth } from "@/hooks/useAuth";
+
+// Maps routes to their corresponding landing page section IDs
+const routeToSectionMap: Record<string, string> = {
+  '/portfolio': 'portfolio',
+  '/markets': 'prediction-markets',
+  '/prediction-market': 'prediction-markets',
+  '/bounties': 'bounties',
+  '/bounty': 'bounties',
+  '/ai-trading': 'ai-trading',
+  '/discover': 'discover',
+  '/streams': 'live-streams',
+  '/stream-view': 'live-streams',
+  '/go-live': 'live-streams',
+  '/debates': 'live-streams',
+  '/debate-view': 'live-streams',
+  '/avatars': 'avatars',
+  '/knowledge-avatar-profile': 'avatars',
+  '/avatar': 'avatars',
+  '/learning-hub': 'learn',
+  '/lesson-viewer': 'learn',
+  '/leagues': 'prediction-markets',
+  '/league-detail': 'prediction-markets',
+  '/market-portfolio': 'prediction-markets',
+  '/market-leaderboard': 'prediction-markets',
+  '/market-achievements': 'prediction-markets',
+  '/dashboard': 'hero',
+  '/wallet-dashboard': 'hero',
+  '/leaderboard': 'bounties',
+  '/hunter': 'bounties',
+  '/chat': 'ai-suggestions',
+  '/social': 'social',
+  '/following': 'social',
+  '/summaries': 'ai-processor',
+  '/summary-view': 'ai-processor',
+  '/create-summary': 'ai-processor',
+  '/processing-results': 'ai-processor',
+};
+
+function getSectionForRoute(path: string): string {
+  // Exact match
+  if (routeToSectionMap[path]) {
+    return routeToSectionMap[path];
+  }
+  // Check if path starts with any mapped route
+  for (const [route, section] of Object.entries(routeToSectionMap)) {
+    if (path.startsWith(route)) {
+      return section;
+    }
+  }
+  // Default to hero
+  return 'hero';
+}
 
 export function GlobalMobileHeader() {
   const [location] = useLocation();
@@ -15,6 +67,9 @@ export function GlobalMobileHeader() {
 
   // Don't show on landing page - it has its own navigation
   const isLandingPage = location === "/";
+  
+  // Determine which section to return to based on current route
+  const targetSection = useMemo(() => getSectionForRoute(location), [location]);
   
   // Track scroll position to show/hide scroll-to-top indicator
   useEffect(() => {
@@ -66,17 +121,18 @@ export function GlobalMobileHeader() {
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
         <div className="relative flex items-center justify-between h-14 px-3">
-          {/* Left: Back button - uses browser history */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-slate-300 hover:text-white hover:bg-white/10 gap-1.5 px-2"
-            data-testid="button-back"
-            onClick={() => window.history.back()}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back</span>
-          </Button>
+          {/* Left: Back button - navigates to landing page section */}
+          <Link href={`/#${targetSection}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-300 hover:text-white hover:bg-white/10 gap-1.5 px-2"
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back</span>
+            </Button>
+          </Link>
 
           {/* Center: StreamAiX Logo - absolutely positioned for true centering on mobile */}
           <button

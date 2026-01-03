@@ -124,7 +124,7 @@ export default function MarketPortfolio() {
             transition={{ duration: 0.6 }}
             className="text-center space-y-4"
           >
-            <Link href="/markets">
+            <Link href="/#prediction-markets">
               <Button variant="ghost" className="mb-4 text-slate-400 hover:text-white">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Markets

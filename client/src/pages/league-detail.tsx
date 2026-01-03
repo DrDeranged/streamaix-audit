@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useParams, useLocation } from 'wouter';
+import { useParams, useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { Trophy, Users, Clock, Coins, Medal, Crown, ArrowLeft, TrendingUp, Target, Calendar, DollarSign, Timer, Award, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -194,9 +194,11 @@ export default function LeagueDetailPage() {
         <Card className="bg-slate-900/50 border-red-500/30 p-8 text-center">
           <h2 className="text-xl font-bold text-white mb-2">League Not Found</h2>
           <p className="text-gray-400 mb-4">This league doesn't exist or has been removed.</p>
-          <Button onClick={() => setLocation('/leagues')} data-testid="btn-back-to-leagues">
-            Back to Leagues
-          </Button>
+          <Link href="/#prediction-markets">
+            <Button data-testid="btn-back-to-leagues">
+              Back to Leagues
+            </Button>
+          </Link>
         </Card>
       </div>
     );
@@ -215,15 +217,16 @@ export default function LeagueDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <Button 
-          variant="ghost" 
-          className="mb-6 text-gray-400 hover:text-white"
-          onClick={() => setLocation('/leagues')}
-          data-testid="btn-back"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Leagues
-        </Button>
+        <Link href="/#prediction-markets">
+          <Button 
+            variant="ghost" 
+            className="mb-6 text-gray-400 hover:text-white"
+            data-testid="btn-back"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Leagues
+          </Button>
+        </Link>
 
         <motion.div
           initial={{ opacity: 0, y: -20 }}

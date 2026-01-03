@@ -121,6 +121,26 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
     return () => window.removeEventListener("go-to-hero", handleGoToHero);
   }, [sections, goToSection, initialSection]);
 
+  // Handle hash-based navigation on mount and hash changes
+  useEffect(() => {
+    const handleHashNavigation = () => {
+      const hash = window.location.hash.slice(1); // Remove the '#'
+      if (hash) {
+        const index = sections.findIndex(s => s.id === hash);
+        if (index !== -1 && index !== currentSection) {
+          goToSection(index);
+        }
+      }
+    };
+
+    // Check hash on mount
+    handleHashNavigation();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashNavigation);
+    return () => window.removeEventListener('hashchange', handleHashNavigation);
+  }, [sections, goToSection, currentSection]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;

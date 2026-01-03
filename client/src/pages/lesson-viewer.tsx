@@ -269,7 +269,7 @@ export default function LessonViewer() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 flex flex-col items-center justify-center gap-4">
         <p className="text-gray-400">Course not found</p>
-        <Link href="/learn">
+        <Link href="/#learn">
           <Button variant="outline">Back to Learning Hub</Button>
         </Link>
       </div>
@@ -280,7 +280,7 @@ export default function LessonViewer() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 pb-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center gap-2 mb-6">
-          <Link href="/learn">
+          <Link href="/#learn">
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Courses

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { Trophy, Users, Clock, Coins, Medal, Crown, ArrowRight, ArrowLeft, Plus, TrendingUp, Target, Zap, Calendar, DollarSign, Timer } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -298,15 +298,16 @@ export default function LeaguesPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <Button 
-                variant="ghost" 
-                className="mb-3 text-gray-400 hover:text-white hover:bg-purple-500/20 -ml-2"
-                onClick={() => setLocation('/markets')}
-                data-testid="btn-back-to-markets"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Prediction Markets
-              </Button>
+              <Link href="/#prediction-markets">
+                <Button 
+                  variant="ghost" 
+                  className="mb-3 text-gray-400 hover:text-white hover:bg-purple-500/20 -ml-2"
+                  data-testid="btn-back-to-markets"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Prediction Markets
+                </Button>
+              </Link>
               <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
                 Prediction Leagues
               </h1>

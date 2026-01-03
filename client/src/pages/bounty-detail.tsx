@@ -435,7 +435,7 @@ export default function BountyDetail() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl text-white mb-4">Bounty not found</h2>
-          <Link href="/bounties">
+          <Link href="/#bounties">
             <Button variant="outline" className="border-purple-500/30">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Bounties
@@ -450,7 +450,7 @@ export default function BountyDetail() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Back Button */}
-        <Link href="/bounties">
+        <Link href="/#bounties">
           <Button
             variant="ghost"
             className="mb-6 text-gray-400 hover:text-white"

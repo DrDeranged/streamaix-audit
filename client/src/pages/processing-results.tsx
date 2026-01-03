@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -157,10 +157,12 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Invalid URL</h2>
           <p className="text-sm sm:text-base text-gray-400 mb-4">No summary ID provided in URL</p>
-          <Button onClick={() => setLocation('/')} className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
+          <Link href="/#ai-processor">
+            <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -172,10 +174,12 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
         <div className="text-center">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Content Not Found</h2>
           <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
-          <Button onClick={() => setLocation('/')} className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
+          <Link href="/#ai-processor">
+            <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -191,14 +195,15 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => setLocation('/')}
-                className="text-gray-300 hover:text-gray-900 dark:text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
+              <Link href="/#ai-processor">
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-300 hover:text-gray-900 dark:text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Home
+                </Button>
+              </Link>
               <div className="h-8 w-px bg-white/20" />
               <div>
                 <h1 className="text-xl font-orbitron font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">

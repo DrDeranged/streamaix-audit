@@ -152,15 +152,16 @@ export default function BountyBoard() {
         <div className="mb-12 animate-fade-in">
           {/* Navigation Buttons */}
           <div className="flex gap-3 mb-6">
-            <Button
-              variant="outline"
-              onClick={() => window.history.back()}
-              className="border-purple-500/30 hover:border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300"
-              data-testid="button-back"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
+            <Link href="/#bounties">
+              <Button
+                variant="outline"
+                className="border-purple-500/30 hover:border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300"
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
             <Button
               asChild
               variant="outline"

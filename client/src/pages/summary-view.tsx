@@ -305,7 +305,7 @@ export default function SummaryView() {
         <div className="text-center">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Content Not Found</h2>
           <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
-          <Link href="/dashboard">
+          <Link href="/#ai-processor">
             <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
@@ -346,7 +346,7 @@ export default function SummaryView() {
         <div className="max-w-7xl mx-auto px-3 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Link href="/dashboard">
+              <Link href="/#ai-processor">
                 <Button 
                   variant="ghost" 
                   size="sm"
