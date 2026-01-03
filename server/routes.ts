@@ -17836,7 +17836,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const symbols = symbolsParam ? symbolsParam.split(',').map(s => s.trim().toUpperCase()) : [];
     
     const { newsService } = await import("./services/newsService");
-    const allNews = await newsService.getCryptoNews(30);
+    const allNews = await newsService.getCryptoNews(50);
+    
+    // Expanded symbol mappings including crypto, stocks, ETFs, and mining companies
+    const symbolMappings: Record<string, string[]> = {
+      // Major cryptos
+      'BTC': ['bitcoin', 'btc'],
+      'ETH': ['ethereum', 'eth', 'ether'],
+      'SOL': ['solana', 'sol'],
+      'XRP': ['ripple', 'xrp'],
+      'ADA': ['cardano', 'ada'],
+      'DOT': ['polkadot', 'dot'],
+      'AVAX': ['avalanche', 'avax'],
+      'LINK': ['chainlink', 'link'],
+      'MATIC': ['polygon', 'matic'],
+      'UNI': ['uniswap', 'uni'],
+      'AAVE': ['aave'],
+      'DOGE': ['dogecoin', 'doge'],
+      'SHIB': ['shiba', 'shib'],
+      // New cryptos
+      'HYPE': ['hyperliquid', 'hype', 'hlp'],
+      'SUI': ['sui'],
+      'SEI': ['sei network', 'sei'],
+      'TIA': ['celestia', 'tia'],
+      'INJ': ['injective', 'inj'],
+      'ARB': ['arbitrum', 'arb'],
+      'OP': ['optimism', 'op token'],
+      'PEPE': ['pepe'],
+      'WIF': ['dogwifhat', 'wif'],
+      'TON': ['toncoin', 'ton', 'telegram'],
+      // Tech stocks
+      'AAPL': ['apple', 'aapl', 'iphone'],
+      'GOOGL': ['google', 'alphabet', 'googl'],
+      'MSFT': ['microsoft', 'msft'],
+      'TSLA': ['tesla', 'tsla', 'elon'],
+      'NVDA': ['nvidia', 'nvda', 'gpu', 'ai chip'],
+      'AMD': ['amd', 'advanced micro'],
+      'AMZN': ['amazon', 'amzn', 'aws'],
+      'META': ['meta', 'facebook', 'zuckerberg'],
+      // Bitcoin mining stocks
+      'MARA': ['marathon digital', 'mara', 'marathon'],
+      'RIOT': ['riot platforms', 'riot blockchain', 'riot'],
+      'HUT': ['hut 8', 'hut8'],
+      'CORZ': ['core scientific', 'corz'],
+      'WULF': ['terawulf', 'wulf'],
+      'GLXY': ['galaxy digital', 'glxy', 'novogratz'],
+      'CLSK': ['cleanspark', 'clsk'],
+      'BITF': ['bitfarms', 'bitf'],
+      'IREN': ['iris energy', 'iren'],
+      // Crypto-related stocks
+      'COIN': ['coinbase', 'coin'],
+      'MSTR': ['microstrategy', 'mstr', 'saylor'],
+      // ETFs
+      'IBIT': ['ibit', 'blackrock bitcoin'],
+      'FBTC': ['fidelity bitcoin', 'fbtc'],
+      'GBTC': ['grayscale', 'gbtc'],
+      'SPY': ['s&p 500', 'spy', 'sp500'],
+      'QQQ': ['nasdaq', 'qqq', 'tech stocks'],
+    };
     
     const relevantNews = allNews.filter(article => {
       const titleLower = article.title.toLowerCase();
@@ -17844,35 +17901,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return symbols.some(symbol => {
         const symbolLower = symbol.toLowerCase();
-        const symbolMappings: Record<string, string[]> = {
-          'BTC': ['bitcoin', 'btc'],
-          'ETH': ['ethereum', 'eth', 'ether'],
-          'SOL': ['solana', 'sol'],
-          'XRP': ['ripple', 'xrp'],
-          'ADA': ['cardano', 'ada'],
-          'DOT': ['polkadot', 'dot'],
-          'AVAX': ['avalanche', 'avax'],
-          'LINK': ['chainlink', 'link'],
-          'MATIC': ['polygon', 'matic'],
-          'UNI': ['uniswap', 'uni'],
-          'AAVE': ['aave'],
-          'DOGE': ['dogecoin', 'doge'],
-          'SHIB': ['shiba', 'shib'],
-          'AAPL': ['apple', 'aapl'],
-          'GOOGL': ['google', 'alphabet', 'googl'],
-          'MSFT': ['microsoft', 'msft'],
-          'TSLA': ['tesla', 'tsla'],
-          'NVDA': ['nvidia', 'nvda'],
-          'AMD': ['amd'],
-          'AMZN': ['amazon', 'amzn'],
-        };
-        
-        const keywords = symbolMappings[symbol] || [symbolLower];
+        const keywords = symbolMappings[symbol.toUpperCase()] || [symbolLower];
         return keywords.some(kw => titleLower.includes(kw) || summaryLower.includes(kw));
       });
     });
     
-    const newsWithSentiment = relevantNews.slice(0, 10).map(article => {
+    // If no relevant news found but user has assets, show general market news
+    let finalNews = relevantNews;
+    if (relevantNews.length < 3 && allNews.length > 0) {
+      // Add general crypto/market news as fallback
+      const marketKeywords = ['market', 'crypto', 'bitcoin', 'stock', 'price', 'rally', 'drop'];
+      const generalNews = allNews.filter(article => {
+        const titleLower = article.title.toLowerCase();
+        return marketKeywords.some(kw => titleLower.includes(kw));
+      }).slice(0, 5 - relevantNews.length);
+      finalNews = [...relevantNews, ...generalNews];
+    }
+    
+    const newsWithSentiment = finalNews.slice(0, 10).map(article => {
       const titleLower = article.title.toLowerCase();
       const bullishKeywords = ['surge', 'rally', 'bullish', 'record', 'gains', 'pump', 'soar', 'breakthrough', 'milestone', 'upgrade', 'adoption'];
       const bearishKeywords = ['crash', 'plunge', 'bearish', 'decline', 'drop', 'selloff', 'warning', 'concern', 'dump', 'fall'];
@@ -18577,10 +18623,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Store real prices with their 24h change
     const priceData: Map<string, { price: number; change24h: number }> = new Map();
     
-    // Known crypto symbols that we can look up
-    const knownCryptoSymbols = ['BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'DOT', 'MATIC', 'AVAX', 'LINK', 'ATOM', 'UNI', 'LTC', 'NEAR', 'APT', 'USDC', 'USDT'];
-    // Known stock/ETF symbols that we can look up
-    const knownStockSymbols = ['AAPL', 'GOOGL', 'GOOG', 'MSFT', 'AMZN', 'NVDA', 'TSLA', 'META', 'JPM', 'V', 'JNJ', 'WMT', 'PG', 'DIS', 'NFLX', 'INTC', 'AMD', 'CRM', 'ORCL', 'IBM', 'UBER', 'VOO', 'SPY', 'QQQ', 'VTI', 'IWM', 'HUT', 'MARA', 'RIOT', 'COIN'];
+    // Known crypto symbols that we can look up (expanded list including altcoins)
+    const knownCryptoSymbols = [
+      'BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'DOT', 'MATIC', 'AVAX', 'LINK', 
+      'ATOM', 'UNI', 'LTC', 'NEAR', 'APT', 'USDC', 'USDT', 'DAI', 'BUSD',
+      'HYPE', 'SUI', 'SEI', 'TIA', 'INJ', 'ARB', 'OP', 'PEPE', 'SHIB', 'WIF',
+      'BONK', 'JUP', 'ONDO', 'RENDER', 'FET', 'TAO', 'PYTH', 'JTO', 'W', 'ENA',
+      'TON', 'NOT', 'AAVE', 'MKR', 'CRV', 'LDO', 'RPL', 'FXS', 'COMP', 'SNX'
+    ];
+    // Known stock/ETF symbols including crypto-related mining stocks
+    const knownStockSymbols = [
+      'AAPL', 'GOOGL', 'GOOG', 'MSFT', 'AMZN', 'NVDA', 'TSLA', 'META', 'JPM', 'V', 
+      'JNJ', 'WMT', 'PG', 'DIS', 'NFLX', 'INTC', 'AMD', 'CRM', 'ORCL', 'IBM', 'UBER',
+      'VOO', 'SPY', 'QQQ', 'VTI', 'IWM', 'ARKK', 'ARKB', 'IBIT', 'FBTC', 'GBTC',
+      'HUT', 'MARA', 'RIOT', 'COIN', 'CORZ', 'WULF', 'GLXY', 'CLSK', 'BITF', 'IREN',
+      'MSTR', 'SQ', 'PYPL', 'HOOD', 'SOFI', 'UPST', 'AFRM'
+    ];
     
     try {
       const symbolsArray = Array.from(allSymbols);
