@@ -121,25 +121,21 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
     return () => window.removeEventListener("go-to-hero", handleGoToHero);
   }, [sections, goToSection, initialSection]);
 
-  // Handle hash-based navigation on mount and hash changes
+  // Handle hash-based navigation on mount only (from back button navigation)
   useEffect(() => {
-    const handleHashNavigation = () => {
-      const hash = window.location.hash.slice(1); // Remove the '#'
-      if (hash) {
-        const index = sections.findIndex(s => s.id === hash);
-        if (index !== -1 && index !== currentSection) {
-          goToSection(index);
-        }
+    const hash = window.location.hash.slice(1); // Remove the '#'
+    if (hash) {
+      const index = sections.findIndex(s => s.id === hash);
+      if (index !== -1) {
+        // Navigate to the section
+        goToSection(index);
+        // Clear the hash from URL to prevent interference with dot navigation
+        window.history.replaceState(null, '', window.location.pathname);
       }
-    };
-
-    // Check hash on mount
-    handleHashNavigation();
-
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashNavigation);
-    return () => window.removeEventListener('hashchange', handleHashNavigation);
-  }, [sections, goToSection, currentSection]);
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
