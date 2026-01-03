@@ -99,60 +99,98 @@ function AnimatedCounter({ value, prefix = '', suffix = '' }: { value: number; p
 }
 
 function PlatformStatsBar({ stats }: { stats: PlatformStats }) {
+  const statCards = [
+    { 
+      value: stats.totalStreams, 
+      label: 'Total Streams', 
+      prefix: '', 
+      suffix: '',
+      gradient: 'from-fuchsia-500/20 to-purple-500/10',
+      border: 'border-fuchsia-500/30',
+      textColor: 'text-white',
+      glow: 'shadow-fuchsia-500/20'
+    },
+    { 
+      value: stats.totalHoursWatched, 
+      label: 'Hours Watched', 
+      prefix: '', 
+      suffix: 'h',
+      gradient: 'from-cyan-500/20 to-blue-500/10',
+      border: 'border-cyan-500/30',
+      textColor: 'text-cyan-400',
+      glow: 'shadow-cyan-500/20'
+    },
+    { 
+      value: stats.totalTipsEarned, 
+      label: 'Tips Earned', 
+      prefix: '$', 
+      suffix: '',
+      gradient: 'from-amber-500/20 to-orange-500/10',
+      border: 'border-amber-500/30',
+      textColor: 'text-amber-400',
+      glow: 'shadow-amber-500/20'
+    },
+    { 
+      value: stats.totalCreators, 
+      label: 'Creators', 
+      prefix: '', 
+      suffix: '',
+      gradient: 'from-emerald-500/20 to-green-500/10',
+      border: 'border-emerald-500/30',
+      textColor: 'text-emerald-400',
+      glow: 'shadow-emerald-500/20'
+    },
+  ];
+
   return (
-    <div className="relative mb-6 overflow-hidden rounded-2xl">
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/40 via-slate-900/60 to-cyan-950/40" />
-      <div className="absolute inset-[1px] rounded-2xl border border-emerald-500/20" />
+    <div className="relative mb-8 overflow-hidden rounded-2xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/60 via-slate-900/80 to-slate-950/60" />
+      <div className="absolute inset-[1px] rounded-2xl border border-slate-700/40" />
+      <div className="absolute top-0 left-1/4 right-1/4 h-24 bg-gradient-to-b from-fuchsia-500/10 to-transparent blur-2xl" />
       
-      <div className="relative px-4 py-4 sm:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg shadow-emerald-500/30">
+      <div className="relative px-4 py-5 sm:px-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl blur-md opacity-50" />
+            <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 shadow-lg shadow-emerald-500/30">
               <Activity className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-emerald-400/80 font-medium">Platform Stats</p>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-emerald-400 font-semibold">+{stats.weeklyGrowth}% this week</span>
-                <TrendingUp className="w-3 h-3 text-emerald-400" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-300 font-semibold">Platform Stats</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-emerald-400 font-bold">+{stats.weeklyGrowth}% this week</span>
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {statCards.map((stat, idx) => (
+            <div 
+              key={idx}
+              className={cn(
+                "relative group overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02]",
+                "bg-gradient-to-br",
+                stat.gradient
+              )}
+            >
+              <div className={cn("absolute inset-[1px] rounded-xl", stat.border)} />
+              <div className={cn(
+                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl",
+                stat.glow
+              )} 
+              style={{ boxShadow: `inset 0 0 40px rgba(255,255,255,0.05)` }}
+              />
+              
+              <div className="relative p-3 text-center">
+                <p className={cn("text-2xl sm:text-3xl font-bold tracking-tight", stat.textColor)}>
+                  <AnimatedCounter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
+                </p>
+                <p className="text-[11px] text-slate-400 font-medium mt-0.5">{stat.label}</p>
               </div>
             </div>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-3 sm:gap-6">
-            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
-              <p className="text-lg sm:text-xl font-bold text-white">
-                <AnimatedCounter value={stats.totalStreams} />
-              </p>
-              <p className="text-[10px] text-slate-400 font-medium">Total Streams</p>
-            </div>
-            
-            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
-              <p className="text-lg sm:text-xl font-bold text-cyan-400">
-                <AnimatedCounter value={stats.totalHoursWatched} suffix="h" />
-              </p>
-              <p className="text-[10px] text-slate-400 font-medium">Hours Watched</p>
-            </div>
-            
-            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
-              <p className="text-lg sm:text-xl font-bold text-amber-400">
-                <AnimatedCounter value={stats.totalTipsEarned} prefix="$" />
-              </p>
-              <p className="text-[10px] text-slate-400 font-medium">Tips Earned</p>
-            </div>
-            
-            <div className="text-center px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
-              <p className="text-lg sm:text-xl font-bold text-fuchsia-400">
-                <AnimatedCounter value={stats.totalCreators} />
-              </p>
-              <p className="text-[10px] text-slate-400 font-medium">Creators</p>
-            </div>
-            
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30">
-              <Coins className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400">{stats.platformFeeRate}% Fee</span>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
@@ -744,7 +782,7 @@ export function LiveStreamingTerminal() {
               
               <div className="relative mb-8">
                 <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-cyan-500/10 rounded-2xl blur-xl" />
-                <div className="relative flex gap-1.5 p-2 rounded-2xl bg-slate-900/80 border border-slate-700/50 backdrop-blur-xl shadow-inner">
+                <div className="relative grid grid-cols-4 gap-2 p-2 rounded-2xl bg-slate-900/80 border border-slate-700/50 backdrop-blur-xl shadow-inner">
                   {streamTypes.map((type) => {
                     const config = streamTypeConfig[type];
                     const Icon = config.icon;
@@ -757,33 +795,36 @@ export function LiveStreamingTerminal() {
                         onClick={() => setActiveTab(type)}
                         data-testid={`tab-${type}`}
                         className={cn(
-                          "relative flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300",
+                          "relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl text-xs font-semibold transition-all duration-300",
                           isActive 
-                            ? "text-white"
+                            ? "text-white scale-[1.02]"
                             : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                         )}
                       >
                         {isActive && (
                           <>
-                            <div className={cn("absolute inset-0 rounded-xl bg-gradient-to-r shadow-lg", config.color)} />
+                            <div className={cn("absolute inset-0 rounded-xl bg-gradient-to-br shadow-lg", config.color)} />
                             <div 
-                              className="absolute inset-0 rounded-xl opacity-60"
-                              style={{ boxShadow: `0 0 30px ${config.glowColor}` }}
+                              className="absolute inset-0 rounded-xl"
+                              style={{ boxShadow: `0 0 25px ${config.glowColor}, inset 0 1px 0 rgba(255,255,255,0.15)` }}
                             />
+                            <div className="absolute top-0 left-2 right-2 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                           </>
                         )}
-                        <Icon className={cn("w-4 h-4 relative z-10", isActive && "drop-shadow-lg")} />
-                        <span className="hidden sm:inline relative z-10">{config.label}</span>
-                        {count > 0 && (
-                          <span className={cn(
-                            "relative z-10 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center transition-colors",
-                            isActive 
-                              ? "bg-white/25 text-white shadow-inner" 
-                              : "bg-slate-700/80 text-slate-300"
-                          )}>
-                            {count}
-                          </span>
-                        )}
+                        <div className="relative z-10 flex items-center gap-2">
+                          <Icon className={cn("w-4 h-4", isActive && "drop-shadow-lg")} />
+                          {count > 0 && (
+                            <span className={cn(
+                              "px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[18px] text-center",
+                              isActive 
+                                ? "bg-white/25 text-white" 
+                                : "bg-slate-700/80 text-slate-300"
+                            )}>
+                              {count}
+                            </span>
+                          )}
+                        </div>
+                        <span className="relative z-10 text-[10px] sm:text-xs font-medium">{config.label}</span>
                       </button>
                     );
                   })}
