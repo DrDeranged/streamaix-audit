@@ -13684,6 +13684,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // LIVE STREAMING API
   // =============================================================================
 
+  // Get platform stats (real aggregates from database)
+  app.get("/api/platform-stats", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      // Get total stream count (all streams ever created)
+      const [streamCountResult] = await db.select({
+        count: sql<number>`count(*)`.as('count')
+      }).from(liveStreams);
+      const totalStreams = Number(streamCountResult?.count || 0);
+      
+      // Get total tips earned across all streams
+      const [tipsResult] = await db.select({
+        total: sql<number>`COALESCE(sum(amount), 0)`.as('total')
+      }).from(streamTips);
+      const totalTipsEarned = Number(tipsResult?.total || 0);
+      
+      // Get total hours watched (sum of duration * peak viewers / 60)
+      const [watchTimeResult] = await db.select({
+        hours: sql<number>`COALESCE(sum(COALESCE(duration_seconds, 0) * COALESCE(peak_viewers, 1) / 3600), 0)`.as('hours')
+      }).from(liveStreams);
+      const totalHoursWatched = Math.floor(Number(watchTimeResult?.hours || 0));
+      
+      // Get unique creators (distinct host IDs who have created streams)
+      const [creatorsResult] = await db.select({
+        count: sql<number>`count(distinct host_id)`.as('count')
+      }).from(liveStreams);
+      const totalCreators = Number(creatorsResult?.count || 0);
+      
+      // Calculate weekly growth (comparing streams in last 7 days vs previous 7 days)
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      
+      const [thisWeekResult] = await db.select({
+        count: sql<number>`count(*)`.as('count')
+      }).from(liveStreams)
+        .where(sql`created_at >= ${oneWeekAgo}`);
+      
+      const [lastWeekResult] = await db.select({
+        count: sql<number>`count(*)`.as('count')
+      }).from(liveStreams)
+        .where(sql`created_at >= ${twoWeeksAgo} AND created_at < ${oneWeekAgo}`);
+      
+      const thisWeekCount = Number(thisWeekResult?.count || 0);
+      const lastWeekCount = Number(lastWeekResult?.count || 0);
+      
+      let weeklyGrowth = 0;
+      if (lastWeekCount > 0) {
+        weeklyGrowth = Math.round(((thisWeekCount - lastWeekCount) / lastWeekCount) * 100 * 10) / 10;
+      } else if (thisWeekCount > 0) {
+        weeklyGrowth = 100; // If no streams last week but some this week
+      }
+      
+      // Get recent platform activity (last 10 actions)
+      const recentTips = await db.select({
+        type: sql`'tip'`.as('type'),
+        username: users.username,
+        amount: streamTips.amount,
+        streamTitle: liveStreams.title,
+        createdAt: streamTips.createdAt,
+      })
+      .from(streamTips)
+      .innerJoin(users, eq(users.id, streamTips.tipperId))
+      .innerJoin(liveStreams, eq(liveStreams.id, streamTips.streamId))
+      .orderBy(desc(streamTips.createdAt))
+      .limit(5);
+      
+      const recentStreamsStarted = await db.select({
+        type: sql`'live'`.as('type'),
+        hostId: liveStreams.hostId,
+        streamTitle: liveStreams.title,
+        createdAt: liveStreams.createdAt,
+      })
+      .from(liveStreams)
+      .orderBy(desc(liveStreams.createdAt))
+      .limit(5);
+      
+      // Get top earners (creators with most tips received)
+      const topEarners = await db.select({
+        recipientId: streamTips.recipientId,
+        username: users.username,
+        totalEarnings: sql<number>`sum(${streamTips.amount})`.as('total_earnings'),
+      })
+      .from(streamTips)
+      .innerJoin(users, eq(users.id, streamTips.recipientId))
+      .groupBy(streamTips.recipientId, users.username)
+      .orderBy(desc(sql`sum(${streamTips.amount})`))
+      .limit(5);
+      
+      // Format activity feed with proper time calculation
+      const formatTimeAgo = (date: Date | null) => {
+        if (!date) return 'recently';
+        const seconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        return `${Math.floor(seconds / 86400)}d ago`;
+      };
+      
+      const recentActivity = [
+        ...recentTips.map(t => ({
+          type: 'tip',
+          user: t.username,
+          amount: t.amount,
+          stream: t.streamTitle,
+          time: formatTimeAgo(t.createdAt),
+        })),
+        ...recentStreamsStarted.map(s => ({
+          type: 'live',
+          user: s.hostId,
+          stream: s.streamTitle,
+          time: formatTimeAgo(s.createdAt),
+        })),
+      ].sort((a, b) => {
+        // Sort by time (most recent first)
+        const aMs = a.time?.includes('just') ? 0 : 
+                    a.time?.includes('m ago') ? parseInt(a.time) : 
+                    a.time?.includes('h ago') ? parseInt(a.time) * 60 :
+                    parseInt(a.time) * 60 * 24 || 999;
+        const bMs = b.time?.includes('just') ? 0 : 
+                    b.time?.includes('m ago') ? parseInt(b.time) : 
+                    b.time?.includes('h ago') ? parseInt(b.time) * 60 :
+                    parseInt(b.time) * 60 * 24 || 999;
+        return aMs - bMs;
+      }).slice(0, 5);
+      
+      res.json({
+        success: true,
+        stats: {
+          totalStreams,
+          totalHoursWatched,
+          totalTipsEarned,
+          totalCreators,
+          platformFeeRate: 0.5,
+          weeklyGrowth,
+        },
+        recentActivity,
+        topEarners: topEarners.map(e => ({
+          username: e.username,
+          earnings: Number(e.totalEarnings),
+        })),
+      });
+    } catch (error: any) {
+      console.error('Platform stats error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+
   // Get live streams (currently active)
   app.get("/api/streams/live", asyncHandler(async (req: Request, res: Response) => {
     // Prevent caching to ensure fresh stream data
