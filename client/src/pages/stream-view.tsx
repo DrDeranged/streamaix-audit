@@ -68,9 +68,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useStreamSocket } from '@/hooks/useStreamSocket';
 import { useAwardStreamWatch, useAwardVoiceConversation } from '@/hooks/usePoints';
 import { useViewerStream } from '@/hooks/useViewerStream';
+import { useLiveKitStream } from '@/hooks/useLiveKitStream';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 import { AIAvatarStream } from '@/components/streaming/AIAvatarStream';
+import { LiveKitVideo } from '@/components/streaming/LiveKitVideo';
 import { ViewerPresence } from '@/components/streaming/MobileStreamViewer';
 import { StreamReactions, QuickReactButtons } from '@/components/streaming/StreamReactions';
 import { StreamPoll, CreatePollForm } from '@/components/streaming/StreamPoll';
@@ -502,7 +504,22 @@ export default function StreamViewPage() {
     connectionState: videoConnectionState,
     error: videoError,
     retryConnection: retryVideoConnection,
-  } = useViewerStream(streamId, !isAvatarStream && !!stream);
+  } = useViewerStream(streamId, false);
+  
+  const {
+    isConnected: liveKitConnected,
+    connectionState: liveKitConnectionState,
+    remoteVideoTrack,
+    remoteAudioTrack,
+    localVideoTrack,
+    isHost: isLiveKitHost,
+    error: liveKitError,
+    connect: connectLiveKit,
+    disconnect: disconnectLiveKit,
+    participantCount: liveKitParticipants,
+  } = useLiveKitStream(streamId);
+  
+  const hasLiveKitVideo = !!remoteVideoTrack || (isLiveKitHost && !!localVideoTrack);
   
   const { data: pinnedData } = useQuery<{ messages: { id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[] }>({
     queryKey: ['/api/streams', streamId, 'messages', 'pinned'],
@@ -521,6 +538,19 @@ export default function StreamViewPage() {
         });
     }
   }, [streamId, isAuthenticated]);
+  
+  useEffect(() => {
+    if (stream?.status === 'live' && !stream?.isKnowledgeAvatar && isAuthenticated && !liveKitConnected) {
+      console.log('[StreamView] Auto-connecting to LiveKit for live stream');
+      connectLiveKit();
+    }
+    
+    return () => {
+      if (liveKitConnected) {
+        disconnectLiveKit();
+      }
+    };
+  }, [stream?.status, stream?.isKnowledgeAvatar, isAuthenticated, liveKitConnected, connectLiveKit, disconnectLiveKit]);
   
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
@@ -1100,6 +1130,29 @@ export default function StreamViewPage() {
                 viewerCount={displayViewerCount}
                 onAudioMessage={onAvatarAudio}
               />
+            ) : isLive && liveKitConnected && hasLiveKitVideo ? (
+              <div className="absolute inset-0">
+                <LiveKitVideo 
+                  track={isLiveKitHost ? localVideoTrack : remoteVideoTrack}
+                  className="w-full h-full object-cover"
+                  muted={isMuted}
+                  mirror={isLiveKitHost}
+                />
+                <div className="absolute top-3 left-3 z-10">
+                  <Badge className="backdrop-blur-sm text-xs px-2.5 py-1 bg-emerald-500/80 text-white">
+                    <Wifi className="w-3 h-3 mr-1.5" />
+                    Live via LiveKit
+                  </Badge>
+                </div>
+                {liveKitParticipants > 1 && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <Badge className="backdrop-blur-sm text-xs px-2.5 py-1 bg-purple-500/80 text-white">
+                      <Users className="w-3 h-3 mr-1.5" />
+                      {liveKitParticipants}
+                    </Badge>
+                  </div>
+                )}
+              </div>
             ) : isLive && isReceivingVideo && remoteStream ? (
               <div className="absolute inset-0">
                 <video
@@ -1135,34 +1188,34 @@ export default function StreamViewPage() {
                       config.gradient,
                       "border-white/20"
                     )}>
-                      {videoConnectionState === 'connecting' || videoConnectionState === 'reconnecting' ? (
+                      {liveKitConnectionState === 'connecting' ? (
                         <Radio className="w-12 h-12 text-white animate-pulse" />
-                      ) : videoConnectionState === 'failed' || videoError ? (
+                      ) : liveKitError ? (
                         <WifiOff className="w-12 h-12 text-white" />
                       ) : (
                         <Icon className="w-12 h-12 text-white" />
                       )}
                     </div>
                     <p className="text-lg font-bold text-white mb-2 font-orbitron">
-                      {videoConnectionState === 'connecting' ? 'Connecting to Stream...' : 
-                       videoConnectionState === 'reconnecting' ? 'Reconnecting...' :
-                       videoConnectionState === 'failed' || videoError ? 'Connection Failed' : 'Stream is Live'}
+                      {liveKitConnectionState === 'connecting' ? 'Connecting to Stream...' : 
+                       liveKitError ? 'Connection Failed' : 
+                       liveKitConnected && !hasLiveKitVideo ? 'Waiting for Video...' : 'Stream is Live'}
                     </p>
                     <p className="text-sm text-slate-400 flex items-center justify-center gap-2 mb-3">
-                      {videoConnectionState === 'connecting' ? (
+                      {liveKitConnectionState === 'connecting' ? (
                         <>
                           <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
                           Establishing video connection...
                         </>
-                      ) : videoConnectionState === 'reconnecting' ? (
-                        <>
-                          <Radio className="w-4 h-4 text-amber-400 animate-pulse" />
-                          Attempting to reconnect...
-                        </>
-                      ) : videoConnectionState === 'failed' || videoError ? (
+                      ) : liveKitError ? (
                         <>
                           <WifiOff className="w-4 h-4 text-red-400" />
-                          {videoError || 'Unable to connect to video stream'}
+                          {liveKitError}
+                        </>
+                      ) : liveKitConnected && !hasLiveKitVideo ? (
+                        <>
+                          <Radio className="w-4 h-4 text-purple-400 animate-pulse" />
+                          Waiting for broadcaster to start video...
                         </>
                       ) : (
                         <>
@@ -1171,9 +1224,9 @@ export default function StreamViewPage() {
                         </>
                       )}
                     </p>
-                    {(videoConnectionState === 'failed' || videoError) && (
+                    {liveKitError && (
                       <Button
-                        onClick={retryVideoConnection}
+                        onClick={connectLiveKit}
                         className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white"
                         data-testid="button-retry-video"
                       >
