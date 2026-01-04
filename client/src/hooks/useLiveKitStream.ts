@@ -153,10 +153,44 @@ export function useLiveKitStream(streamId: string | null): UseLiveKitStreamRetur
         setRemoteAudioTrack(null);
       });
 
+      // Wait for room to be fully connected before publishing
+      const waitForConnection = new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Connection timeout - could not connect to LiveKit'));
+        }, 15000);
+        
+        const checkConnection = () => {
+          if (room.state === ConnectionState.Connected) {
+            clearTimeout(timeout);
+            resolve();
+          }
+        };
+        
+        // Check immediately in case already connected
+        checkConnection();
+        
+        // Listen for connection state changes
+        room.on(RoomEvent.ConnectionStateChanged, (state) => {
+          if (state === ConnectionState.Connected) {
+            clearTimeout(timeout);
+            resolve();
+          } else if (state === ConnectionState.Disconnected) {
+            clearTimeout(timeout);
+            reject(new Error('Connection failed'));
+          }
+        });
+      });
+
       await room.connect(tokenData.wsUrl, tokenData.token);
+      
+      // Wait for full connection before publishing
+      await waitForConnection;
+      console.log('[LiveKit] Room fully connected, ready to publish');
+      
       updateParticipantCount();
 
       if (tokenData.isHost) {
+        console.log('[LiveKit] Host mode - creating local tracks...');
         const tracks = await createLocalTracks({
           audio: true,
           video: {
@@ -164,14 +198,17 @@ export function useLiveKitStream(streamId: string | null): UseLiveKitStreamRetur
           },
         });
 
+        console.log('[LiveKit] Publishing', tracks.length, 'tracks...');
         for (const track of tracks) {
           await room.localParticipant.publishTrack(track);
+          console.log('[LiveKit] Published track:', track.kind);
           if (track.kind === Track.Kind.Video) {
             setLocalVideoTrack(track as LocalVideoTrack);
           } else if (track.kind === Track.Kind.Audio) {
             setLocalAudioTrack(track as LocalAudioTrack);
           }
         }
+        console.log('[LiveKit] All tracks published successfully');
         setIsPublishing(true);
       }
 
