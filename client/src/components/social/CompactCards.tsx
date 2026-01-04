@@ -65,7 +65,14 @@ interface CompactMarketCardProps {
 }
 
 export function CompactMarketCard({ id, question, yesPrice, totalVolume, createdAt }: CompactMarketCardProps) {
-  const noPrice = 1 - yesPrice;
+  // Normalize price - handle both basis points (5000 = 50%) and decimal (0.5 = 50%) formats
+  const normalizePrice = (price: number) => {
+    if (price > 10000) return 50; // Invalid, default to 50%
+    if (price <= 1) return Math.round(price * 100); // Decimal format
+    return Math.round(price / 100); // Basis points format
+  };
+  const yesPriceNormalized = normalizePrice(yesPrice);
+  const noPriceNormalized = 100 - yesPriceNormalized;
   
   return (
     <motion.div
@@ -90,11 +97,11 @@ export function CompactMarketCard({ id, question, yesPrice, totalVolume, created
         <div className="flex gap-2 flex-shrink-0">
           <div className="text-center px-3 py-1 rounded-lg bg-green-500/10 border border-green-500/30">
             <div className="text-xs text-gray-400">YES</div>
-            <div className="text-sm font-bold text-green-400">{(yesPrice * 100).toFixed(0)}%</div>
+            <div className="text-sm font-bold text-green-400">{yesPriceNormalized}%</div>
           </div>
           <div className="text-center px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/30">
             <div className="text-xs text-gray-400">NO</div>
-            <div className="text-sm font-bold text-red-400">{(noPrice * 100).toFixed(0)}%</div>
+            <div className="text-sm font-bold text-red-400">{noPriceNormalized}%</div>
           </div>
         </div>
       </div>

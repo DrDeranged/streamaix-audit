@@ -233,7 +233,7 @@ export function SocialFeed() {
 
     if (activeTab === 'predictions' && markets?.markets) {
       markets.markets.forEach((m: any) => {
-        const yesPercentage = Math.round(((m.yesPrice || 500000) / 1000000) * 100);
+        const yesPercentage = (m.yesPrice || 5000) > 10000 ? 50 : Math.round((m.yesPrice || 5000) / 100);
         feed.push({
           id: m.id,
           type: 'market',

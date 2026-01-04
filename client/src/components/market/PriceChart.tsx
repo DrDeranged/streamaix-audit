@@ -29,8 +29,8 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
   const chartData = (data?.history || []).map(point => ({
     time: new Date(point.createdAt).getTime(),
     timeLabel: format(new Date(point.createdAt), 'HH:mm'),
-    yes: point.yesPrice / 100,
-    no: point.noPrice / 100,
+    yes: point.yesPrice > 10000 ? 50 : point.yesPrice / 100,
+    no: point.noPrice > 10000 ? 50 : point.noPrice / 100,
   }));
 
   if (isLoading) {

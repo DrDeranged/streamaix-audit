@@ -225,10 +225,10 @@ export function SocialPost({
             {type === 'market' && (
               <div className="flex items-center gap-3 text-xs">
                 <div className="flex items-center gap-1">
-                  <span className="text-green-400">YES: {Math.round((metadata.yesPrice || 0.5) * 100)}%</span>
+                  <span className="text-green-400">YES: {((metadata.yesPrice || 5000) > 10000 ? 50 : Math.round((metadata.yesPrice || 5000) / 100))}%</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-red-400">NO: {Math.round((1 - (metadata.yesPrice || 0.5)) * 100)}%</span>
+                  <span className="text-red-400">NO: {((metadata.noPrice || 5000) > 10000 ? 50 : Math.round((metadata.noPrice || 5000) / 100))}%</span>
                 </div>
               </div>
             )}

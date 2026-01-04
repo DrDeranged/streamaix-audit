@@ -32,8 +32,14 @@ interface MarketStats {
 }
 
 const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
-  const yesPercentage = market.yesPrice / 100;
-  const noPercentage = market.noPrice / 100;
+  // Normalize price from basis points (5000 = 50%) to percentage
+  // Handle edge cases where values might be incorrectly stored
+  const normalizePrice = (price: number) => {
+    if (price > 10000) return 50; // Invalid value, default to 50%
+    return price / 100;
+  };
+  const yesPercentage = normalizePrice(market.yesPrice);
+  const noPercentage = normalizePrice(market.noPrice);
   const timeLeft = new Date(market.deadline).getTime() - Date.now();
   const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

@@ -174,7 +174,7 @@ const PositionCard = ({ position }: { position: UserPosition }) => {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-green-400">YES</span>
                   <span className="text-sm font-bold text-green-400" data-testid={`price-yes-${position.id}`}>
-                    {(market.yesPrice / 100).toFixed(1)}%
+                    {(market.yesPrice > 10000 ? 50 : market.yesPrice / 100).toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -182,7 +182,7 @@ const PositionCard = ({ position }: { position: UserPosition }) => {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-red-400">NO</span>
                   <span className="text-sm font-bold text-red-400" data-testid={`price-no-${position.id}`}>
-                    {(market.noPrice / 100).toFixed(1)}%
+                    {(market.noPrice > 10000 ? 50 : market.noPrice / 100).toFixed(1)}%
                   </span>
                 </div>
               </div>
