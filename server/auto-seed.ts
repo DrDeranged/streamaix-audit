@@ -1,6 +1,6 @@
 import { db } from './db';
-import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons, streams, streamRecordings } from '@shared/schema';
-import { eq, and, isNull, inArray, notInArray } from 'drizzle-orm';
+import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons, liveStreams, streamRecordings } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const avatarSeedData = [
   {
@@ -1601,16 +1601,16 @@ export async function autoSeedDatabase() {
       // Get all ended streams
       const endedStreams = await db
         .select({
-          id: streams.id,
-          title: streams.title,
-          streamType: streams.streamType,
-          hostId: streams.hostId,
-          thumbnailUrl: streams.thumbnailUrl,
-          startedAt: streams.startedAt,
-          endedAt: streams.endedAt,
+          id: liveStreams.id,
+          title: liveStreams.title,
+          streamType: liveStreams.streamType,
+          hostId: liveStreams.hostId,
+          thumbnailUrl: liveStreams.thumbnailUrl,
+          actualStart: liveStreams.actualStart,
+          actualEnd: liveStreams.actualEnd,
         })
-        .from(streams)
-        .where(eq(streams.status, 'ended'));
+        .from(liveStreams)
+        .where(eq(liveStreams.status, 'ended'));
       
       if (endedStreams.length === 0) {
         console.log(`✅ No ended streams found to backfill`);
@@ -1642,8 +1642,8 @@ export async function autoSeedDatabase() {
               
               // Calculate duration if we have start/end times
               let duration = 0;
-              if (stream.startedAt && stream.endedAt) {
-                duration = Math.floor((new Date(stream.endedAt).getTime() - new Date(stream.startedAt).getTime()) / 1000);
+              if (stream.actualStart && stream.actualEnd) {
+                duration = Math.floor((new Date(stream.actualEnd).getTime() - new Date(stream.actualStart).getTime()) / 1000);
               }
               
               await db.insert(streamRecordings).values({
@@ -1651,10 +1651,7 @@ export async function autoSeedDatabase() {
                 recordingUrl: `/api/streams/${stream.id}/replay`,
                 thumbnailUrl: thumbnailUrl,
                 durationSeconds: Math.max(0, duration),
-                format: 'webm',
-                quality: '720p',
                 status: 'ready',
-                viewCount: 0,
               });
               
               backfilledCount++;
