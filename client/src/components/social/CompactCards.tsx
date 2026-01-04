@@ -66,8 +66,8 @@ interface CompactMarketCardProps {
 
 export function CompactMarketCard({ id, question, yesPrice, totalVolume, createdAt }: CompactMarketCardProps) {
   // Normalize price - handle both basis points (5000 = 50%) and decimal (0.5 = 50%) formats
-  const normalizePrice = (price: number) => {
-    if (price > 10000) return 50; // Invalid, default to 50%
+  const normalizePrice = (price: number | undefined | null) => {
+    if (price == null || price > 10000) return 50; // Invalid/missing, default to 50%
     if (price <= 1) return Math.round(price * 100); // Decimal format
     return Math.round(price / 100); // Basis points format
   };

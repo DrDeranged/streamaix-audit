@@ -33,9 +33,9 @@ interface MarketStats {
 
 const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
   // Normalize price from basis points (5000 = 50%) to percentage
-  // Handle edge cases where values might be incorrectly stored
-  const normalizePrice = (price: number) => {
-    if (price > 10000) return 50; // Invalid value, default to 50%
+  // Handle edge cases where values might be incorrectly stored or undefined
+  const normalizePrice = (price: number | undefined | null) => {
+    if (price == null || price > 10000) return 50; // Invalid or missing value, default to 50%
     return price / 100;
   };
   const yesPercentage = normalizePrice(market.yesPrice);

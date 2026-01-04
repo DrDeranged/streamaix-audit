@@ -3737,7 +3737,7 @@ export default function Discover() {
                       
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-emerald-400 font-medium">
-                          YES {(market.yesPrice > 10000 ? 50 : market.yesPrice / 100).toFixed(0)}%
+                          YES {((market.yesPrice ?? 5000) > 10000 ? 50 : (market.yesPrice ?? 5000) / 100).toFixed(0)}%
                         </span>
                         <span className="text-gray-400">
                           {market.totalTrades} trades

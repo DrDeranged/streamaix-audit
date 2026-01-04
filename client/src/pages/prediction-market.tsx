@@ -682,8 +682,8 @@ export default function PredictionMarket() {
     );
   }
 
-  const yesPercentage = (market.yesPrice > 10000 ? 50 : market.yesPrice / 100).toFixed(1);
-  const noPercentage = (market.noPrice > 10000 ? 50 : market.noPrice / 100).toFixed(1);
+  const yesPercentage = ((market.yesPrice ?? 5000) > 10000 ? 50 : (market.yesPrice ?? 5000) / 100).toFixed(1);
+  const noPercentage = ((market.noPrice ?? 5000) > 10000 ? 50 : (market.noPrice ?? 5000) / 100).toFixed(1);
   const timeLeft = new Date(market.deadline).getTime() - Date.now();
   const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
