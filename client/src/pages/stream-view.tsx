@@ -539,18 +539,23 @@ export default function StreamViewPage() {
     }
   }, [streamId, isAuthenticated]);
   
+  const [hasAttemptedLiveKitConnect, setHasAttemptedLiveKitConnect] = useState(false);
+  
   useEffect(() => {
-    if (stream?.status === 'live' && !stream?.isKnowledgeAvatar && isAuthenticated && !liveKitConnected) {
+    if (stream?.status === 'live' && !stream?.isKnowledgeAvatar && isAuthenticated && !liveKitConnected && !hasAttemptedLiveKitConnect && !liveKitError) {
       console.log('[StreamView] Auto-connecting to LiveKit for live stream');
+      setHasAttemptedLiveKitConnect(true);
       connectLiveKit();
     }
-    
+  }, [stream?.status, stream?.isKnowledgeAvatar, isAuthenticated, liveKitConnected, hasAttemptedLiveKitConnect, liveKitError, connectLiveKit]);
+  
+  useEffect(() => {
     return () => {
       if (liveKitConnected) {
         disconnectLiveKit();
       }
     };
-  }, [stream?.status, stream?.isKnowledgeAvatar, isAuthenticated, liveKitConnected, connectLiveKit, disconnectLiveKit]);
+  }, [liveKitConnected, disconnectLiveKit]);
   
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
@@ -1226,7 +1231,10 @@ export default function StreamViewPage() {
                     </p>
                     {liveKitError && (
                       <Button
-                        onClick={connectLiveKit}
+                        onClick={() => {
+                          setHasAttemptedLiveKitConnect(false);
+                          connectLiveKit();
+                        }}
                         className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white"
                         data-testid="button-retry-video"
                       >

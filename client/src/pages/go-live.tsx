@@ -37,6 +37,8 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 import { useMediaStream } from '@/hooks/useMediaStream';
+import { useLiveKitStream } from '@/hooks/useLiveKitStream';
+import { LiveKitVideo } from '@/components/streaming/LiveKitVideo';
 
 const streamTypes = [
   {
@@ -84,19 +86,41 @@ export default function GoLivePage() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [requiresTicket, setRequiresTicket] = useState(false);
   const [ticketPrice, setTicketPrice] = useState('100');
+  const [createdStreamId, setCreatedStreamId] = useState<string | null>(null);
+  const [isGoingLive, setIsGoingLive] = useState(false);
   
   const {
     stream,
-    videoEnabled,
-    audioEnabled,
+    videoEnabled: mediaVideoEnabled,
+    audioEnabled: mediaAudioEnabled,
     error: mediaError,
     devices,
     startStream,
     stopStream,
-    toggleVideo,
-    toggleAudio,
+    toggleVideo: mediaToggleVideo,
+    toggleAudio: mediaToggleAudio,
     switchCamera,
   } = useMediaStream();
+  
+  const {
+    isConnected: liveKitConnected,
+    isPublishing,
+    localVideoTrack,
+    localAudioTrack,
+    error: liveKitError,
+    connect: connectLiveKit,
+    disconnect: disconnectLiveKit,
+    toggleVideo: liveKitToggleVideo,
+    toggleAudio: liveKitToggleAudio,
+    videoEnabled: liveKitVideoEnabled,
+    audioEnabled: liveKitAudioEnabled,
+    participantCount,
+  } = useLiveKitStream(createdStreamId);
+  
+  const videoEnabled = createdStreamId ? liveKitVideoEnabled : mediaVideoEnabled;
+  const audioEnabled = createdStreamId ? liveKitAudioEnabled : mediaAudioEnabled;
+  const toggleVideo = createdStreamId ? liveKitToggleVideo : mediaToggleVideo;
+  const toggleAudio = createdStreamId ? liveKitToggleAudio : mediaToggleAudio;
 
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -109,8 +133,11 @@ export default function GoLivePage() {
       if (stream) {
         stopStream();
       }
+      if (liveKitConnected) {
+        disconnectLiveKit();
+      }
     };
-  }, []);
+  }, [stream, liveKitConnected, stopStream, disconnectLiveKit]);
 
   const createStreamMutation = useMutation({
     mutationFn: async () => {
@@ -131,13 +158,10 @@ export default function GoLivePage() {
       return response;
     },
     onSuccess: (data) => {
-      toast({
-        title: "You're live!",
-        description: "Your stream has started successfully",
-      });
-      setLocation(`/stream/${data.stream.id}`);
+      setCreatedStreamId(data.stream.id);
     },
     onError: (error: any) => {
+      setIsGoingLive(false);
       toast({
         title: "Couldn't start stream",
         description: error.message || "Something went wrong. Please try again.",
@@ -145,6 +169,35 @@ export default function GoLivePage() {
       });
     },
   });
+  
+  useEffect(() => {
+    if (createdStreamId && !liveKitConnected && !liveKitError) {
+      console.log('[GoLive] Connecting to LiveKit for stream:', createdStreamId);
+      connectLiveKit();
+    }
+  }, [createdStreamId, liveKitConnected, liveKitError, connectLiveKit]);
+  
+  useEffect(() => {
+    if (isPublishing && createdStreamId) {
+      toast({
+        title: "You're live!",
+        description: "Your stream has started successfully",
+      });
+      stopStream();
+      setLocation(`/stream/${createdStreamId}`);
+    }
+  }, [isPublishing, createdStreamId, toast, stopStream, setLocation]);
+  
+  useEffect(() => {
+    if (liveKitError && createdStreamId) {
+      toast({
+        title: "Connection failed",
+        description: liveKitError,
+        variant: "destructive",
+      });
+      setIsGoingLive(false);
+    }
+  }, [liveKitError, createdStreamId, toast]);
 
   if (!isAuthenticated) {
     return (
@@ -174,6 +227,7 @@ export default function GoLivePage() {
       });
       return;
     }
+    setIsGoingLive(true);
     createStreamMutation.mutate();
   };
 
@@ -543,14 +597,14 @@ export default function GoLivePage() {
               </Button>
               <Button
                 onClick={handleStartStream}
-                disabled={createStreamMutation.isPending}
+                disabled={isGoingLive || createStreamMutation.isPending}
                 className="flex-[2] bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 h-12 gap-2 font-semibold"
                 data-testid="button-go-live"
               >
-                {createStreamMutation.isPending ? (
+                {isGoingLive ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Starting...
+                    {createdStreamId ? 'Connecting to LiveKit...' : 'Creating stream...'}
                   </>
                 ) : (
                   <>
