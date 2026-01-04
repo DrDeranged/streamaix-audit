@@ -1,6 +1,6 @@
 import { db } from './db';
-import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons, streams, streamRecordings } from '@shared/schema';
+import { eq, and, isNull, inArray, notInArray } from 'drizzle-orm';
 
 const avatarSeedData = [
   {
@@ -1592,6 +1592,83 @@ export async function autoSeedDatabase() {
       console.log(`🎉 Added ${moduleCount} new learning modules (${existingModules.length + moduleCount}/${targetModuleCount} total)`);
     } else {
       console.log(`✅ Learning modules complete (${existingModules.length}/${targetModuleCount})`);
+    }
+
+    // ===== BACKFILL STREAM RECORDINGS (IDEMPOTENT) =====
+    console.log(`\n📹 Checking for missing stream recordings...`);
+    
+    try {
+      // Get all ended streams
+      const endedStreams = await db
+        .select({
+          id: streams.id,
+          title: streams.title,
+          streamType: streams.streamType,
+          hostId: streams.hostId,
+          thumbnailUrl: streams.thumbnailUrl,
+          startedAt: streams.startedAt,
+          endedAt: streams.endedAt,
+        })
+        .from(streams)
+        .where(eq(streams.status, 'ended'));
+      
+      if (endedStreams.length === 0) {
+        console.log(`✅ No ended streams found to backfill`);
+      } else {
+        // Get all existing recordings
+        const existingRecordings = await db
+          .select({ streamId: streamRecordings.streamId })
+          .from(streamRecordings);
+        
+        const recordedStreamIds = new Set(existingRecordings.map(r => r.streamId));
+        const streamsNeedingRecordings = endedStreams.filter(s => !recordedStreamIds.has(s.id));
+        
+        if (streamsNeedingRecordings.length === 0) {
+          console.log(`✅ Stream recordings complete (${existingRecordings.length}/${endedStreams.length} streams have recordings)`);
+        } else {
+          console.log(`🔧 Backfilling ${streamsNeedingRecordings.length} missing stream recordings...`);
+          
+          let backfilledCount = 0;
+          for (const stream of streamsNeedingRecordings) {
+            try {
+              // Get host info
+              const host = stream.hostId ? await db
+                .select({ avatar: users.avatar })
+                .from(users)
+                .where(eq(users.id, stream.hostId))
+                .limit(1) : [];
+              
+              const thumbnailUrl = stream.thumbnailUrl || host[0]?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.id}`;
+              
+              // Calculate duration if we have start/end times
+              let duration = 0;
+              if (stream.startedAt && stream.endedAt) {
+                duration = Math.floor((new Date(stream.endedAt).getTime() - new Date(stream.startedAt).getTime()) / 1000);
+              }
+              
+              await db.insert(streamRecordings).values({
+                streamId: stream.id,
+                recordingUrl: `/api/streams/${stream.id}/replay`,
+                thumbnailUrl: thumbnailUrl,
+                durationSeconds: Math.max(0, duration),
+                format: 'webm',
+                quality: '720p',
+                status: 'ready',
+                viewCount: 0,
+              });
+              
+              backfilledCount++;
+            } catch (error: any) {
+              console.error(`  ✗ Failed to create recording for stream ${stream.id}:`, error.message);
+            }
+          }
+          
+          console.log(`🎉 Backfilled ${backfilledCount} stream recordings (${existingRecordings.length + backfilledCount}/${endedStreams.length} total)`);
+        }
+      }
+    } catch (error: any) {
+      console.error('⚠️ Stream recording backfill failed:', error.message);
+      // Don't throw - continue with server startup
     }
     
   } catch (error) {
