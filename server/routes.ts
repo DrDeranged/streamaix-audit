@@ -14456,6 +14456,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .set({ isActive: false, leftAt: new Date() })
       .where(eq(streamParticipants.streamId, req.params.id));
     
+    // Create recording for replays in the fallback path too
+    try {
+      await db.insert(streamRecordings).values({
+        streamId: req.params.id,
+        recordingUrl: `/api/streams/${req.params.id}/replay`,
+        thumbnailUrl: stream.thumbnailUrl || null,
+        durationSeconds,
+        status: 'ready',
+      });
+      console.log(`[Routes] 📹 Created replay recording for stream ${req.params.id.slice(0, 8)}...`);
+    } catch (recordingError) {
+      console.error('[Routes] Error creating stream recording:', recordingError);
+    }
+    
     res.json({ success: true, stream: updatedStream });
   }));
 
