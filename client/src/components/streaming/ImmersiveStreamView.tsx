@@ -34,6 +34,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import type { LocalVideoTrack, RemoteVideoTrack } from 'livekit-client';
 
 interface ChatMessage {
   id: string;
@@ -74,6 +75,7 @@ interface ImmersiveStreamViewProps {
   messages: ChatMessage[];
   videoRef: React.RefObject<HTMLVideoElement>;
   remoteStream: MediaStream | null;
+  liveKitVideoTrack?: RemoteVideoTrack | LocalVideoTrack | null;
   onSendMessage: (message: string) => void;
   onToggleMute: () => void;
   onReaction: (emoji: string) => void;
@@ -250,6 +252,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
   messages,
   videoRef,
   remoteStream,
+  liveKitVideoTrack,
   onSendMessage,
   onToggleMute,
   onReaction,
@@ -273,6 +276,20 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const liveKitVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Attach LiveKit video track to video element
+  useEffect(() => {
+    if (liveKitVideoTrack && liveKitVideoRef.current) {
+      console.log('[ImmersiveStreamView] Attaching LiveKit video track');
+      liveKitVideoTrack.attach(liveKitVideoRef.current);
+      return () => {
+        if (liveKitVideoTrack) {
+          liveKitVideoTrack.detach(liveKitVideoRef.current!);
+        }
+      };
+    }
+  }, [liveKitVideoTrack]);
 
   // ESC key handler to exit immersive mode
   useEffect(() => {
@@ -425,9 +442,17 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
       className="fixed inset-0 bg-black z-[100] overflow-hidden"
       data-testid="immersive-stream-view"
     >
-      {/* Video Background */}
+      {/* Video Background - prioritize LiveKit video track over WebRTC MediaStream */}
       <div className="absolute inset-0">
-        {remoteStream ? (
+        {liveKitVideoTrack ? (
+          <video
+            ref={liveKitVideoRef}
+            autoPlay
+            playsInline
+            muted={isMuted}
+            className="w-full h-full object-cover"
+          />
+        ) : remoteStream ? (
           <video
             ref={videoRef}
             autoPlay

@@ -937,6 +937,21 @@ export default function StreamViewPage() {
   const isScheduled = stream.status === 'scheduled';
   const displayViewerCount = isConnected ? viewerCount : stream.currentViewers;
 
+  // Determine effective connection state - prioritize LiveKit over WebRTC
+  const effectiveLiveKitConnected = liveKitConnected && (!!remoteVideoTrack || (isLiveKitHost && !!localVideoTrack));
+  const effectiveConnectionState = effectiveLiveKitConnected 
+    ? 'connected' 
+    : liveKitConnectionState === 'connected' 
+      ? 'connected'
+      : liveKitConnectionState === 'connecting' 
+        ? 'connecting' 
+        : videoConnectionState === 'disconnected' 
+          ? 'failed' 
+          : videoConnectionState;
+  
+  // Get the effective video track (prioritize host's local track if they're the host, otherwise remote)
+  const effectiveVideoTrack = isLiveKitHost ? localVideoTrack : remoteVideoTrack;
+
   if (isImmersiveMode && stream && isLive) {
     return (
       <ImmersiveStreamView
@@ -948,8 +963,8 @@ export default function StreamViewPage() {
         streamDuration={streamDuration}
         isLive={isLive}
         isMuted={isMuted}
-        isConnected={isConnected}
-        connectionState={videoConnectionState === 'disconnected' ? 'failed' : videoConnectionState}
+        isConnected={effectiveLiveKitConnected || isConnected}
+        connectionState={effectiveConnectionState}
         messages={messages.map(m => ({
           id: m.id,
           username: m.username,
@@ -961,6 +976,7 @@ export default function StreamViewPage() {
         }))}
         videoRef={viewerVideoRef}
         remoteStream={remoteStream}
+        liveKitVideoTrack={effectiveVideoTrack}
         onSendMessage={handleImmersiveSendMessage}
         onToggleMute={() => setIsMuted(!isMuted)}
         onReaction={handleImmersiveReaction}
