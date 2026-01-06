@@ -29,10 +29,10 @@ export function ShareCard({
     >
       <NeuralNetworkStatic />
       
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 z-10">
         <GlowingCore />
         
-        <div className="relative z-20 text-center mt-4">
+        <div className="relative z-20 text-center mt-2 sm:mt-3 md:mt-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -40,7 +40,7 @@ export function ShareCard({
             className="relative"
           >
             <h1 
-              className="text-5xl md:text-7xl font-bold tracking-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight whitespace-nowrap"
               style={{
                 fontFamily: 'Orbitron, sans-serif',
                 background: 'linear-gradient(135deg, #a855f7 0%, #06b6d4 50%, #a855f7 100%)',
@@ -53,10 +53,10 @@ export function ShareCard({
               {title || 'StreamAiX'}
             </h1>
             
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <span className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-purple-500/50" />
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-cyan-500/50" />
+            <div className="flex items-center justify-center gap-2 mt-2 sm:mt-3">
+              <span className="h-px flex-1 max-w-12 sm:max-w-16 bg-gradient-to-r from-transparent to-purple-500/50" />
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-400" />
+              <span className="h-px flex-1 max-w-12 sm:max-w-16 bg-gradient-to-l from-transparent to-cyan-500/50" />
             </div>
           </motion.div>
           
@@ -64,7 +64,7 @@ export function ShareCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-lg md:text-xl text-gray-300 mt-4 font-medium tracking-wide"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mt-2 sm:mt-3 md:mt-4 font-medium tracking-wide px-2"
             style={{ textShadow: '0 0 20px rgba(6, 182, 212, 0.3)' }}
           >
             {subtitle || 'Stream the Noise. Capture the Signal.'}
@@ -75,7 +75,7 @@ export function ShareCard({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
-              className="flex items-center justify-center gap-6 mt-8"
+              className="flex items-center justify-center gap-2 sm:gap-4 md:gap-6 mt-4 sm:mt-6 md:mt-8 flex-wrap"
             >
               {stats.aiAgents && (
                 <StatPill icon={Brain} label="AI Agents" value={stats.aiAgents} color="purple" />
@@ -93,11 +93,11 @@ export function ShareCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="flex items-center justify-center gap-3 mt-8"
+            className="flex items-center justify-center gap-2 sm:gap-3 mt-4 sm:mt-6 md:mt-8 flex-wrap"
           >
-            <FeatureTag icon={Brain} label="100+ AI Agents" />
-            <FeatureTag icon={TrendingUp} label="Prediction Markets" />
-            <FeatureTag icon={Radio} label="Live Streaming" />
+            <FeatureTag icon={Brain} label="100+ AI" />
+            <FeatureTag icon={TrendingUp} label="Prediction" />
+            <FeatureTag icon={Radio} label="Live" />
           </motion.div>
         </div>
       </div>
@@ -194,7 +194,7 @@ function NeuralNetworkStatic() {
 
 function GlowingCore() {
   return (
-    <div className="relative w-32 h-32 md:w-40 md:h-40">
+    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-40 lg:h-40">
       <motion.div
         className="absolute inset-0 rounded-full"
         style={{
@@ -205,7 +205,7 @@ function GlowingCore() {
       />
       
       <motion.div
-        className="absolute inset-4 rounded-full"
+        className="absolute inset-2 sm:inset-3 md:inset-4 rounded-full"
         style={{
           background: 'radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%)'
         }}
@@ -219,7 +219,7 @@ function GlowingCore() {
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
       >
         <div 
-          className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center"
+          className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-full flex items-center justify-center"
           style={{
             background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%)',
             backdropFilter: 'blur(10px)',
@@ -227,14 +227,14 @@ function GlowingCore() {
             boxShadow: '0 0 40px rgba(168, 85, 247, 0.4), inset 0 0 30px rgba(6, 182, 212, 0.2)'
           }}
         >
-          <Brain className="w-10 h-10 md:w-12 md:h-12 text-purple-400" style={{ filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.8))' }} />
+          <Brain className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 lg:w-12 lg:h-12 text-purple-400" style={{ filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.8))' }} />
         </div>
       </motion.div>
       
       {[0, 60, 120, 180, 240, 300].map((angle, i) => (
         <motion.div
           key={i}
-          className="absolute w-2 h-2 rounded-full"
+          className="absolute w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full"
           style={{
             left: '50%',
             top: '50%',
@@ -242,7 +242,7 @@ function GlowingCore() {
             boxShadow: i % 2 === 0 
               ? '0 0 10px rgba(168, 85, 247, 0.8)'
               : '0 0 10px rgba(6, 182, 212, 0.8)',
-            transform: `rotate(${angle}deg) translateX(60px) translateY(-50%)`
+            transform: `rotate(${angle}deg) translateX(30px) translateY(-50%)`
           }}
           animate={{
             opacity: [0.4, 1, 0.4],
@@ -295,7 +295,7 @@ function StatPill({
   
   return (
     <div 
-      className="flex items-center gap-2 px-4 py-2 rounded-full"
+      className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full"
       style={{
         background: colors.bg,
         border: `1px solid ${colors.border}`,
@@ -303,10 +303,10 @@ function StatPill({
         boxShadow: `0 0 20px ${colors.glow}`
       }}
     >
-      <Icon className={`w-4 h-4 ${colors.text}`} />
+      <Icon className={`w-3 h-3 sm:w-4 sm:h-4 ${colors.text}`} />
       <div className="text-left">
-        <div className={`text-sm font-bold ${colors.text}`}>{value}</div>
-        <div className="text-[10px] text-gray-400 uppercase tracking-wider">{label}</div>
+        <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{value}</div>
+        <div className="text-[8px] sm:text-[10px] text-gray-400 uppercase tracking-wider">{label}</div>
       </div>
     </div>
   );
@@ -315,14 +315,14 @@ function StatPill({
 function FeatureTag({ icon: Icon, label }: { icon: typeof Brain; label: string }) {
   return (
     <div 
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs text-gray-300"
+      className="flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs text-gray-300"
       style={{
         background: 'rgba(255, 255, 255, 0.05)',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(5px)'
       }}
     >
-      <Icon className="w-3 h-3 text-purple-400" />
+      <Icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-purple-400" />
       <span>{label}</span>
     </div>
   );
