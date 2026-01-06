@@ -12,7 +12,7 @@ import {
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
   Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
   Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History, CheckCircle,
-  BookMarked, ShoppingCart, Wifi, WifiOff
+  BookMarked, ShoppingCart, Wifi, WifiOff, MessageCircle, Send, Link2, Unlink
 } from 'lucide-react';
 import { useWebSocketPrices, type PriceUpdate } from '@/hooks/use-websocket-prices';
 import {
@@ -1917,6 +1917,467 @@ const NewsAggregator = memo(function NewsAggregator({ assets }: { assets: Portfo
   );
 });
 
+const stockSectors: Record<string, string> = {
+  AAPL: 'Technology', MSFT: 'Technology', GOOGL: 'Technology', META: 'Technology', NVDA: 'Technology', AMD: 'Technology', INTC: 'Technology', TSM: 'Technology', AVGO: 'Technology', ORCL: 'Technology', CRM: 'Technology',
+  AMZN: 'Consumer Discretionary', TSLA: 'Consumer Discretionary', HD: 'Consumer Discretionary', MCD: 'Consumer Discretionary', NKE: 'Consumer Discretionary', SBUX: 'Consumer Discretionary',
+  JPM: 'Financials', BAC: 'Financials', WFC: 'Financials', GS: 'Financials', MS: 'Financials', V: 'Financials', MA: 'Financials', AXP: 'Financials',
+  JNJ: 'Healthcare', PFE: 'Healthcare', UNH: 'Healthcare', MRK: 'Healthcare', ABBV: 'Healthcare', LLY: 'Healthcare',
+  XOM: 'Energy', CVX: 'Energy', COP: 'Energy', SLB: 'Energy',
+  PG: 'Consumer Staples', KO: 'Consumer Staples', PEP: 'Consumer Staples', WMT: 'Consumer Staples', COST: 'Consumer Staples',
+  DIS: 'Communication Services', NFLX: 'Communication Services', T: 'Communication Services', VZ: 'Communication Services',
+  BA: 'Industrials', CAT: 'Industrials', UPS: 'Industrials', HON: 'Industrials',
+  VTI: 'Broad Market ETF', VOO: 'S&P 500 ETF', SPY: 'S&P 500 ETF', QQQ: 'Tech ETF', IWM: 'Small Cap ETF',
+  BTC: 'Cryptocurrency', ETH: 'Cryptocurrency', SOL: 'Cryptocurrency', DOGE: 'Cryptocurrency', XRP: 'Cryptocurrency',
+};
+
+const sectorColors: Record<string, string> = {
+  'Technology': '#3b82f6',
+  'Financials': '#22c55e',
+  'Healthcare': '#ef4444',
+  'Energy': '#f59e0b',
+  'Consumer Discretionary': '#8b5cf6',
+  'Consumer Staples': '#06b6d4',
+  'Communication Services': '#ec4899',
+  'Industrials': '#84cc16',
+  'Broad Market ETF': '#6366f1',
+  'S&P 500 ETF': '#0ea5e9',
+  'Tech ETF': '#a855f7',
+  'Small Cap ETF': '#14b8a6',
+  'Cryptocurrency': '#f97316',
+  'Other Stocks': '#64748b',
+  'ETF': '#9333ea',
+  'Other': '#94a3b8',
+};
+
+const SectorBreakdownChart = memo(function SectorBreakdownChart({ assets }: { assets: PortfolioAsset[] }) {
+  const sectorData = useMemo(() => {
+    const sectorTotals: Record<string, number> = {};
+    let total = 0;
+    
+    assets.forEach(asset => {
+      let sector = stockSectors[asset.symbol.toUpperCase()];
+      if (!sector) {
+        if (asset.assetType === 'crypto') sector = 'Cryptocurrency';
+        else if (asset.assetType === 'etf') sector = 'ETF';
+        else if (asset.assetType === 'stock') sector = 'Other Stocks';
+        else sector = 'Other';
+      }
+      sectorTotals[sector] = (sectorTotals[sector] || 0) + (asset.currentValue || 0);
+      total += asset.currentValue || 0;
+    });
+    
+    return Object.entries(sectorTotals)
+      .map(([sector, value]) => ({
+        sector,
+        value,
+        percent: total > 0 ? (value / total) * 100 : 0,
+        color: sectorColors[sector] || sectorColors.Other,
+      }))
+      .filter(s => s.percent > 0)
+      .sort((a, b) => b.percent - a.percent);
+  }, [assets]);
+
+  if (assets.length === 0 || sectorData.length === 0) {
+    return (
+      <div className="text-center py-6">
+        <PieChart className="w-8 h-8 mx-auto text-gray-600 mb-2" />
+        <p className="text-sm text-gray-400">Add assets to see sector breakdown</p>
+      </div>
+    );
+  }
+
+  let cumulativeRotation = 0;
+
+  return (
+    <div data-testid="sector-breakdown-chart">
+      <div className="flex justify-center mb-4">
+        <div className="relative w-32 h-32">
+          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            {sectorData.map((item) => {
+              const sliceAngle = (item.percent / 100) * 360;
+              const startAngle = cumulativeRotation;
+              cumulativeRotation += sliceAngle;
+
+              const startRad = (startAngle * Math.PI) / 180;
+              const endRad = ((startAngle + sliceAngle) * Math.PI) / 180;
+
+              const x1 = 50 + 40 * Math.cos(startRad);
+              const y1 = 50 + 40 * Math.sin(startRad);
+              const x2 = 50 + 40 * Math.cos(endRad);
+              const y2 = 50 + 40 * Math.sin(endRad);
+
+              const largeArc = sliceAngle > 180 ? 1 : 0;
+
+              return (
+                <path
+                  key={item.sector}
+                  d={`M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                  fill={item.color}
+                  stroke="rgba(0,0,0,0.3)"
+                  strokeWidth="0.5"
+                />
+              );
+            })}
+            <circle cx="50" cy="50" r="25" fill="#0f172a" />
+          </svg>
+        </div>
+      </div>
+      <div className="space-y-1.5 max-h-[180px] overflow-y-auto">
+        {sectorData.slice(0, 8).map((item) => (
+          <div key={item.sector} className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-slate-800/50 transition-colors">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+              <span className="text-xs text-gray-300">{item.sector}</span>
+            </div>
+            <span className="text-xs text-white font-medium">{item.percent.toFixed(1)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+interface ConnectedAccount {
+  id: string;
+  name: string;
+  type: 'brokerage' | 'crypto' | 'bank';
+  status: 'connected' | 'disconnected';
+  lastSync?: string;
+}
+
+const demoConnectedAccounts: ConnectedAccount[] = [
+  { id: '1', name: 'Robinhood', type: 'brokerage', status: 'connected', lastSync: '2 hours ago' },
+  { id: '2', name: 'Fidelity', type: 'brokerage', status: 'connected', lastSync: '1 day ago' },
+  { id: '3', name: 'Coinbase', type: 'crypto', status: 'connected', lastSync: '30 mins ago' },
+  { id: '4', name: 'Schwab', type: 'brokerage', status: 'disconnected' },
+];
+
+function ConnectedAccountsSection() {
+  const { toast } = useToast();
+  
+  const getAccountIcon = (type: ConnectedAccount['type']) => {
+    switch (type) {
+      case 'crypto': return Bitcoin;
+      case 'bank': return Landmark;
+      default: return Building2;
+    }
+  };
+  
+  return (
+    <div data-testid="connected-accounts-section">
+      <div className="space-y-2">
+        {demoConnectedAccounts.map((account) => {
+          const Icon = getAccountIcon(account.type);
+          const isConnected = account.status === 'connected';
+          
+          return (
+            <div
+              key={account.id}
+              className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50"
+              data-testid={`connected-account-${account.id}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg",
+                  isConnected ? "bg-green-500/10" : "bg-gray-500/10"
+                )}>
+                  <Icon className={cn("w-4 h-4", isConnected ? "text-green-400" : "text-gray-500")} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">{account.name}</p>
+                  {account.lastSync && (
+                    <p className="text-[10px] text-gray-500">Synced {account.lastSync}</p>
+                  )}
+                </div>
+              </div>
+              <Badge className={cn(
+                "text-[10px]",
+                isConnected ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"
+              )}>
+                {isConnected ? <Link2 className="w-2.5 h-2.5 mr-1" /> : <Unlink className="w-2.5 h-2.5 mr-1" />}
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </Badge>
+            </div>
+          );
+        })}
+      </div>
+      <Button
+        variant="outline"
+        className="w-full mt-3 border-purple-500/30 text-purple-300 hover:bg-purple-500/10 text-xs h-8"
+        onClick={() => toast({ title: 'Coming Soon', description: 'Plaid integration for automatic account syncing' })}
+        data-testid="button-connect-new-account"
+      >
+        <Plus className="w-3 h-3 mr-1.5" />
+        Connect New Account
+      </Button>
+    </div>
+  );
+}
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+function AIAdvisorChat({ portfolioId, totalValue, assets, allocation }: { 
+  portfolioId: string; 
+  totalValue: number; 
+  assets: PortfolioAsset[];
+  allocation: Record<string, number>;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  
+  const suggestedQuestions = [
+    "How can I reduce risk?",
+    "Should I rebalance?",
+    "Tax saving opportunities?",
+    "Best sectors to invest in?",
+  ];
+  
+  const sendMessage = async (question: string) => {
+    if (!question.trim() || isLoading) return;
+    
+    const userMessage: ChatMessage = { role: 'user', content: question };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+    
+    try {
+      const response = await apiRequest('/api/portfolio/advisor-chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          portfolioId,
+          question,
+          context: { totalValue, assets: assets.slice(0, 10), allocation }
+        }),
+      });
+      
+      const assistantMessage: ChatMessage = { 
+        role: 'assistant', 
+        content: response.response || response.message || "I apologize, but I couldn't generate a response. Please try again."
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: "I'm having trouble connecting right now. Please try again later or contact support if the issue persists."
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
+    
+    setIsLoading(false);
+  };
+  
+  return (
+    <Card className="bg-gradient-to-r from-slate-900 via-purple-900/10 to-slate-900 border-purple-500/30" data-testid="ai-advisor-chat">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500">
+              <MessageCircle className="w-4 h-4 text-white" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-white text-sm">AI Financial Advisor</h3>
+              <p className="text-[10px] text-gray-500">Ask questions about your portfolio</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border-purple-500/30 text-purple-300 text-[10px]">
+              <Sparkles className="w-2.5 h-2.5 mr-1" />
+              AI
+            </Badge>
+            <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", isOpen && "rotate-180")} />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="px-4 pb-4">
+            <div className="h-[200px] overflow-y-auto mb-3 space-y-2 border border-slate-700/50 rounded-lg p-3 bg-slate-900/50">
+              {messages.length === 0 && (
+                <div className="text-center py-6">
+                  <Brain className="w-8 h-8 mx-auto text-purple-400 mb-2" />
+                  <p className="text-sm text-gray-400 mb-3">Ask me anything about your portfolio</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {suggestedQuestions.map((q, i) => (
+                      <Button
+                        key={i}
+                        variant="outline"
+                        size="sm"
+                        className="text-[10px] h-6 px-2 border-slate-600 text-gray-400 hover:text-white hover:border-purple-500/50"
+                        onClick={() => sendMessage(q)}
+                        data-testid={`suggested-question-${i}`}
+                      >
+                        {q}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "p-2 rounded-lg text-xs",
+                    msg.role === 'user' 
+                      ? "bg-purple-500/20 text-purple-100 ml-8" 
+                      : "bg-slate-800 text-gray-300 mr-8"
+                  )}
+                >
+                  {msg.content}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="bg-slate-800 text-gray-400 p-2 rounded-lg text-xs mr-8 flex items-center gap-2">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  Thinking...
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+                placeholder="Ask about your portfolio..."
+                className="bg-slate-800/50 border-slate-600 text-white text-xs h-9"
+                disabled={isLoading}
+                data-testid="input-advisor-chat"
+              />
+              <Button
+                size="sm"
+                onClick={() => sendMessage(input)}
+                disabled={isLoading || !input.trim()}
+                className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 h-9 px-3"
+                data-testid="button-send-advisor"
+              >
+                <Send className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
+  );
+}
+
+interface AssetNewsItem {
+  title: string;
+  source: string;
+  time: string;
+  sentiment?: string;
+  url?: string;
+}
+
+const AssetNewsFeed = memo(function AssetNewsFeed({ assets }: { assets: PortfolioAsset[] }) {
+  const [expandedSymbols, setExpandedSymbols] = useState<Set<string>>(new Set());
+  
+  const uniqueSymbols = useMemo(() => 
+    [...new Set(assets.map(a => a.symbol))].slice(0, 6), 
+    [assets]
+  );
+  
+  const toggleSymbol = (symbol: string) => {
+    setExpandedSymbols(prev => {
+      const next = new Set(prev);
+      if (next.has(symbol)) next.delete(symbol);
+      else next.add(symbol);
+      return next;
+    });
+  };
+
+  if (assets.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <FileText className="w-6 h-6 mx-auto text-gray-600 mb-2" />
+        <p className="text-xs text-gray-500">Add assets to see relevant news</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2" data-testid="asset-news-feed">
+      {uniqueSymbols.map((symbol) => (
+        <AssetNewsSection 
+          key={symbol} 
+          symbol={symbol} 
+          isExpanded={expandedSymbols.has(symbol)}
+          onToggle={() => toggleSymbol(symbol)}
+        />
+      ))}
+    </div>
+  );
+});
+
+function AssetNewsSection({ symbol, isExpanded, onToggle }: { symbol: string; isExpanded: boolean; onToggle: () => void }) {
+  const { data: newsData, isLoading } = useQuery<{ success: boolean; news: AssetNewsItem[] }>({
+    queryKey: ['/api/portfolio/news', symbol],
+    enabled: isExpanded,
+    staleTime: 600000,
+  });
+  
+  const newsItems = newsData?.news || [];
+  
+  return (
+    <Collapsible open={isExpanded} onOpenChange={onToggle}>
+      <CollapsibleTrigger 
+        className="w-full p-2 bg-slate-800/50 rounded-lg flex items-center justify-between hover:bg-slate-800 transition-colors"
+        data-testid={`news-toggle-${symbol}`}
+      >
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 text-gray-400 border-slate-600">{symbol}</Badge>
+          <span className="text-xs text-gray-400">News</span>
+        </div>
+        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", isExpanded && "rotate-180")} />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-1 space-y-1 pl-2">
+          {isLoading ? (
+            <div className="p-2 text-[10px] text-gray-500 flex items-center gap-2">
+              <RefreshCw className="w-3 h-3 animate-spin" />
+              Loading news...
+            </div>
+          ) : newsItems.length === 0 ? (
+            <p className="p-2 text-[10px] text-gray-500">No recent news</p>
+          ) : (
+            <>
+              {newsItems.slice(0, 3).map((item, i) => (
+                <div 
+                  key={i}
+                  className="p-2 bg-slate-800/30 rounded hover:bg-slate-800/60 cursor-pointer transition-colors"
+                  onClick={() => item.url && window.open(item.url, '_blank')}
+                >
+                  <p className="text-[11px] text-gray-300 line-clamp-2">{item.title}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] text-gray-500">{item.source}</span>
+                    <span className="text-[10px] text-gray-600">•</span>
+                    <span className="text-[10px] text-gray-500">{item.time}</span>
+                    {item.sentiment && (
+                      <Badge className={cn(
+                        "text-[9px] px-1 py-0",
+                        item.sentiment === 'bullish' ? 'bg-green-500/20 text-green-400' :
+                        item.sentiment === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      )}>
+                        {item.sentiment}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" size="sm" className="w-full text-[10px] text-purple-400 hover:text-purple-300 h-6">
+                View More <ArrowRight className="w-2.5 h-2.5 ml-1" />
+              </Button>
+            </>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 interface SearchResult {
   symbol: string;
   name: string;
@@ -3553,6 +4014,18 @@ export default function PortfolioDashboard() {
                     <CorrelationMatrix assets={assets} portfolioId={activePortfolioId} />
                   </Card>
 
+                  {/* Sector Breakdown */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <PieChart className="w-5 h-5 text-indigo-400" />
+                        Sector Breakdown
+                      </h2>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">By Industry</Badge>
+                    </div>
+                    <SectorBreakdownChart assets={assets} />
+                  </Card>
+
                   {/* AI Insights Feed */}
                   <Card className="bg-slate-900/80 border-slate-700/50 p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -3644,6 +4117,18 @@ export default function PortfolioDashboard() {
                         </Badge>
                       </div>
                     </div>
+                  </Card>
+
+                  {/* Connected Accounts */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-purple-400" />
+                        Connected Accounts
+                      </h3>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Demo</Badge>
+                    </div>
+                    <ConnectedAccountsSection />
                   </Card>
 
                   {/* Asset Allocation */}
@@ -3820,6 +4305,18 @@ export default function PortfolioDashboard() {
                       <Badge variant="outline" className="text-[11px] sm:text-[9px] text-gray-500 border-slate-600">Live</Badge>
                     </div>
                     <NewsAggregator assets={assets} />
+                  </Card>
+
+                  {/* Per-Asset News Feed */}
+                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-cyan-400" />
+                        News by Asset
+                      </h3>
+                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Per Symbol</Badge>
+                    </div>
+                    <AssetNewsFeed assets={assets} />
                   </Card>
                 </div>
               </div>
@@ -4062,6 +4559,14 @@ export default function PortfolioDashboard() {
                     </div>
                   </div>
                 </Card>
+
+                {/* AI Advisor Chat */}
+                <AIAdvisorChat 
+                  portfolioId={activePortfolioId || ''} 
+                  totalValue={portfolio?.totalValue || 0}
+                  assets={assets}
+                  allocation={analysis?.allocation || {}}
+                />
 
                 {/* Portfolio Analytics + Tax Summary Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

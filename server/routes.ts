@@ -18176,6 +18176,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, news: newsWithSentiment });
   }));
 
+  // Get news for a specific asset symbol
+  app.get("/api/portfolio/news/:symbol", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { symbol } = req.params;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { newsService } = await import("./services/newsService");
+    const allNews = await newsService.getCryptoNews(50);
+    
+    const symbolMappings: Record<string, string[]> = {
+      'BTC': ['bitcoin', 'btc'], 'ETH': ['ethereum', 'eth', 'ether'], 'SOL': ['solana', 'sol'],
+      'XRP': ['ripple', 'xrp'], 'ADA': ['cardano', 'ada'], 'DOT': ['polkadot', 'dot'],
+      'AVAX': ['avalanche', 'avax'], 'LINK': ['chainlink', 'link'], 'MATIC': ['polygon', 'matic'],
+      'DOGE': ['dogecoin', 'doge'], 'SHIB': ['shiba', 'shib'], 'HYPE': ['hyperliquid', 'hype'],
+      'AAPL': ['apple', 'aapl'], 'GOOGL': ['google', 'alphabet'], 'MSFT': ['microsoft', 'msft'],
+      'TSLA': ['tesla', 'tsla'], 'NVDA': ['nvidia', 'nvda'], 'AMD': ['amd'], 'AMZN': ['amazon', 'amzn'],
+      'META': ['meta', 'facebook'], 'COIN': ['coinbase', 'coin'], 'MSTR': ['microstrategy', 'mstr'],
+      'SPY': ['s&p 500', 'spy'], 'QQQ': ['nasdaq', 'qqq'], 'IBIT': ['ibit', 'blackrock bitcoin'],
+    };
+    
+    const keywords = symbolMappings[symbol.toUpperCase()] || [symbol.toLowerCase()];
+    
+    const relevantNews = allNews.filter(article => {
+      const titleLower = article.title.toLowerCase();
+      const summaryLower = article.summary.toLowerCase();
+      return keywords.some(kw => titleLower.includes(kw) || summaryLower.includes(kw));
+    }).slice(0, 5);
+    
+    const bullishKeywords = ['surge', 'rally', 'bullish', 'record', 'gains', 'pump', 'soar', 'breakthrough'];
+    const bearishKeywords = ['crash', 'plunge', 'bearish', 'decline', 'drop', 'selloff', 'warning'];
+    
+    const newsWithSentiment = relevantNews.map(article => {
+      const titleLower = article.title.toLowerCase();
+      const bullishScore = bullishKeywords.filter(kw => titleLower.includes(kw)).length;
+      const bearishScore = bearishKeywords.filter(kw => titleLower.includes(kw)).length;
+      let sentiment = 'neutral';
+      if (bullishScore > bearishScore) sentiment = 'bullish';
+      else if (bearishScore > bullishScore) sentiment = 'bearish';
+      
+      return {
+        title: article.title,
+        source: article.source,
+        time: getTimeAgo(new Date(article.published)),
+        sentiment,
+        url: article.url,
+      };
+    });
+    
+    res.json({ success: true, news: newsWithSentiment });
+  }));
+
+  // AI Financial Advisor Chat endpoint
+  app.post("/api/portfolio/advisor-chat", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { portfolioId, question, context } = req.body;
+    if (!question) {
+      return res.status(400).json({ error: 'Question is required' });
+    }
+    
+    const portfolioContext = context ? `
+Portfolio Overview:
+- Total Value: $${context.totalValue?.toLocaleString() || 'Unknown'}
+- Number of Assets: ${context.assets?.length || 0}
+- Asset Allocation: ${context.allocation ? Object.entries(context.allocation).map(([k, v]) => `${k}: ${v}%`).join(', ') : 'Unknown'}
+${context.assets?.length > 0 ? `
+Top Holdings:
+${context.assets.slice(0, 5).map((a: any) => `- ${a.symbol} (${a.assetType}): $${a.currentValue?.toLocaleString() || 0}, P&L: ${a.unrealizedPnlPercent?.toFixed(1) || 0}%`).join('\n')}
+` : ''}` : '';
+
+    try {
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a helpful AI financial advisor for StreamAiX, a decentralized investment platform. Provide concise, actionable advice based on the user's portfolio. Be friendly but professional. Focus on:
+- Risk management and diversification
+- Tax optimization strategies
+- Rebalancing recommendations
+- Market insights relevant to their holdings
+Keep responses under 200 words. Do not provide specific buy/sell recommendations for individual securities.`
+          },
+          {
+            role: 'user',
+            content: `${portfolioContext}\n\nUser Question: ${question}`
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+      
+      const response = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response. Please try again.';
+      
+      res.json({ success: true, response });
+    } catch (error: any) {
+      console.error('AI Advisor chat error:', error);
+      res.json({ 
+        success: true, 
+        response: "I'm currently experiencing high demand. Here are some general tips: Consider maintaining a diversified portfolio across asset classes, review your positions regularly, and ensure your risk level matches your investment goals. Feel free to ask again in a moment!"
+      });
+    }
+  }));
+
   // =============================================================================
   // PORTFOLIO CORRELATIONS API
   // =============================================================================
