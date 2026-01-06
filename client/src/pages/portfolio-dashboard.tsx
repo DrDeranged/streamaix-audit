@@ -1099,7 +1099,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
   const totalPages = Math.ceil(filteredTransactions.length / pageSize);
   const paginatedTransactions = filteredTransactions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   
-  const uniqueSymbols = [...new Set(transactions.map(t => t.symbol))];
+  const uniqueSymbols = Array.from(new Set(transactions.map(t => t.symbol)));
   
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -2275,7 +2275,7 @@ const AssetNewsFeed = memo(function AssetNewsFeed({ assets }: { assets: Portfoli
   const [expandedSymbols, setExpandedSymbols] = useState<Set<string>>(new Set());
   
   const uniqueSymbols = useMemo(() => 
-    [...new Set(assets.map(a => a.symbol))].slice(0, 6), 
+    Array.from(new Set(assets.map(a => a.symbol))).slice(0, 6), 
     [assets]
   );
   
@@ -4181,7 +4181,7 @@ export default function PortfolioDashboard() {
                     </div>
                     <div className="space-y-2 mb-3">
                       {(() => {
-                        const assetTypes = [...new Set(assets.map(a => a.assetType))];
+                        const assetTypes = Array.from(new Set(assets.map(a => a.assetType)));
                         const impactByType = assetTypes.map(type => {
                           const typeAssets = assets.filter(a => a.assetType === type);
                           const typeValue = typeAssets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
@@ -4892,7 +4892,7 @@ export default function PortfolioDashboard() {
       <Dialog open={showRebalanceDialog} onOpenChange={(open) => {
         setShowRebalanceDialog(open);
         if (open && Object.keys(targetAllocations).length === 0) {
-          const assetTypes = [...new Set(assets.map(a => a.assetType))];
+          const assetTypes = Array.from(new Set(assets.map(a => a.assetType)));
           const equalAlloc = 100 / assetTypes.length;
           const initialTargets: Record<string, number> = {};
           assetTypes.forEach(type => { initialTargets[type] = Math.round(equalAlloc); });
@@ -4910,7 +4910,7 @@ export default function PortfolioDashboard() {
             <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
               <h4 className="text-sm font-medium text-white mb-3">Set Target Allocations by Asset Type</h4>
               <div className="space-y-2">
-                {[...new Set(assets.map(a => a.assetType))].map(type => {
+                {Array.from(new Set(assets.map(a => a.assetType))).map(type => {
                   const currentAlloc = assets.filter(a => a.assetType === type).reduce((sum, a) => sum + (a.allocationPercent || 0), 0);
                   return (
                     <div key={type} className="flex items-center gap-3">
