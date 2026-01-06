@@ -56,8 +56,6 @@ const LearningHub = React.lazy(() => import("@/pages/learning-hub"));
 const LessonViewer = React.lazy(() => import("@/pages/lesson-viewer"));
 const PortfolioDashboard = React.lazy(() => import("@/pages/portfolio-dashboard"));
 const NotificationSettings = React.lazy(() => import("@/pages/notification-settings"));
-const ShareCardPreviewPage = React.lazy(() => import("@/pages/share-card-preview"));
-
 function Router() {
   return (
     <Switch>
@@ -330,12 +328,6 @@ function Router() {
       </Route>
       
       <Route path="/auth" component={Auth} />
-      
-      <Route path="/share-preview">
-        <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
-          <ShareCardPreviewPage />
-        </Suspense>
-      </Route>
       
       <Route component={NotFound} />
     </Switch>

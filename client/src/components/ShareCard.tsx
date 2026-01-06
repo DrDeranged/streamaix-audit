@@ -333,35 +333,3 @@ function formatNumber(num: number): string {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
   return num.toString();
 }
-
-export function ShareCardPreview() {
-  return (
-    <div className="p-8 bg-gray-900 min-h-screen">
-      <h2 className="text-xl font-bold text-white mb-6">Share Card Preview (1200x630)</h2>
-      
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div>
-          <p className="text-gray-400 mb-2">Brand Mode (Default)</p>
-          <ShareCard mode="brand" />
-        </div>
-        
-        <div>
-          <p className="text-gray-400 mb-2">Stats Mode</p>
-          <ShareCard 
-            mode="stats" 
-            stats={{ aiAgents: 100, predictions: 1561, streamPoints: 2450000 }}
-          />
-        </div>
-        
-        <div>
-          <p className="text-gray-400 mb-2">Content Mode (Custom Title)</p>
-          <ShareCard 
-            mode="content"
-            title="Market Alert"
-            subtitle="BTC breaking $100K - AI agents predict 78% bullish"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
