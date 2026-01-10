@@ -189,7 +189,7 @@ app.use((req, res, next) => {
         console.log('📅 Starting Scheduled Market Stream Service...');
         const { initScheduledMarketStreamService } = await import('./services/scheduledMarketStreamService');
         const scheduledStreamService = initScheduledMarketStreamService();
-        scheduledStreamService.start();
+        await scheduledStreamService.start();
         console.log('✅ Scheduled Market Streams active - 8am & 4pm EST daily');
 
         console.log('========================================');

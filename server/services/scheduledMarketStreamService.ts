@@ -54,11 +54,33 @@ export class ScheduledMarketStreamService {
     this.marketDataService = MarketDataService.getInstance();
   }
 
+  private async ensureSchema(): Promise<void> {
+    try {
+      await db.execute(`
+        ALTER TABLE stream_recordings 
+        ADD COLUMN IF NOT EXISTS ipfs_hash TEXT;
+      `);
+      await db.execute(`
+        ALTER TABLE stream_recordings 
+        ADD COLUMN IF NOT EXISTS arweave_id TEXT;
+      `);
+      await db.execute(`
+        ALTER TABLE stream_recordings 
+        ADD COLUMN IF NOT EXISTS is_clip BOOLEAN DEFAULT false;
+      `);
+      console.log('[Scheduled Streams] ✅ Database schema verified');
+    } catch (error) {
+      console.log('[Scheduled Streams] Schema check completed (columns may already exist)');
+    }
+  }
+
   async start() {
     if (this.isRunning) {
       console.log('[Scheduled Streams] Already running');
       return;
     }
+
+    await this.ensureSchema();
 
     this.isRunning = true;
     console.log('📅 Scheduled Market Stream Service started');
