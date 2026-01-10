@@ -89,6 +89,14 @@ Comprehensive performance optimizations have been applied to reduce lag and impr
       - Uses Finnhub API for real-time stock data in trend spotting and portfolio management
     - **Autonomous Avatar Voice Streaming**: 35 Knowledge Avatars host 24/7 autonomous live streams with AI-generated voice commentary (OpenAI TTS-1), continuous podcast-style commentary, market reaction segments, and viewer Q&A responses.
     - **Unified Streaming Architecture**: Provides user-avatar streaming parity with features like on-demand TTS, Q&A queues, debate mode, audio caching, stream scheduling, and market reactions. Users can choose TTS voice, browser microphone, or text-only mode.
+    - **Scheduled Daily Market Streams (January 2026)**: Automated daily market briefings hosted by random Knowledge Avatars:
+      - Morning Update: 8:00 AM EST - Market overview, overnight crypto moves, pre-market stocks analysis
+      - Market Close Recap: 4:00 PM EST - Daily performance summary, top movers, key events
+      - Uses real market data from CoinGecko Pro and Finnhub APIs (BTC/ETH prices, Fear & Greed Index, crypto stocks)
+      - AI-generated 2-3 minute commentary using GPT-4o-mini
+      - Auto-saves as VOD/replays in stream_recordings table
+      - API endpoints: `/api/scheduled-streams`, `/api/stream-replays`, `/api/streams/:streamId/replay`
+      - Manual trigger: `POST /api/admin/trigger-scheduled-stream` with type `morning_update` or `market_close`
 
 ## External Dependencies
 - **Database**: PostgreSQL, Drizzle ORM, Neon serverless.
