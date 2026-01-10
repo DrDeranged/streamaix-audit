@@ -186,6 +186,12 @@ app.use((req, res, next) => {
         portfolioSnapshotService.start();
         console.log('✅ Portfolio Snapshot Service active - capturing every 6 hours');
 
+        console.log('📅 Starting Scheduled Market Stream Service...');
+        const { initScheduledMarketStreamService } = await import('./services/scheduledMarketStreamService');
+        const scheduledStreamService = initScheduledMarketStreamService();
+        scheduledStreamService.start();
+        console.log('✅ Scheduled Market Streams active - 8am & 4pm EST daily');
+
         console.log('========================================');
         console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL');
         console.log('   • 100 AI Social Agents (bounties, summaries, social)');
@@ -199,6 +205,7 @@ app.use((req, res, next) => {
         console.log('   • Meta-Trader (arbitrage & efficiency)');
         console.log('   • Newsletter (Mon/Fri 8am EST)');
         console.log('   • Market Intelligence (real-time alerts)');
+        console.log('   • Scheduled Streams (8am & 4pm EST)');
         console.log('========================================\n');
       } else {
         console.log('⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)');

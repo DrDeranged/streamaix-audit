@@ -13693,6 +13693,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // LIVE STREAMING API
   // =============================================================================
 
+  // Get scheduled market streams and replays
+  app.get("/api/scheduled-streams", asyncHandler(async (req: Request, res: Response) => {
+    const { getScheduledMarketStreamService } = await import('./services/scheduledMarketStreamService');
+    const service = getScheduledMarketStreamService();
+    
+    if (!service) {
+      return res.json({ success: true, schedule: [], replays: [] });
+    }
+
+    const [schedule, replays] = await Promise.all([
+      service.getUpcomingSchedule(),
+      service.getRecentReplays(20)
+    ]);
+
+    res.json({ success: true, schedule, replays });
+  }));
+
+  // Get stream replays (VODs)
+  app.get("/api/stream-replays", asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    
+    const replays = await db.select({
+      id: streamRecordings.id,
+      streamId: streamRecordings.streamId,
+      recordingUrl: streamRecordings.recordingUrl,
+      thumbnailUrl: streamRecordings.thumbnailUrl,
+      durationSeconds: streamRecordings.durationSeconds,
+      status: streamRecordings.status,
+      createdAt: streamRecordings.createdAt,
+      streamTitle: liveStreams.title,
+      streamDescription: liveStreams.description,
+      streamCategory: liveStreams.category,
+      hostAvatarId: liveStreams.hostAvatarId,
+    })
+    .from(streamRecordings)
+    .innerJoin(liveStreams, eq(streamRecordings.streamId, liveStreams.id))
+    .where(eq(streamRecordings.status, 'ready'))
+    .orderBy(desc(streamRecordings.createdAt))
+    .limit(limit);
+
+    // Enrich with avatar info
+    const enrichedReplays = await Promise.all(replays.map(async (replay) => {
+      if (replay.hostAvatarId) {
+        const [avatar] = await db.select({
+          name: knowledgeAvatars.name,
+          imageUrl: knowledgeAvatars.imageUrl,
+          expertise: knowledgeAvatars.expertise,
+        })
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, replay.hostAvatarId))
+        .limit(1);
+        
+        return { ...replay, hostAvatar: avatar || null };
+      }
+      return { ...replay, hostAvatar: null };
+    }));
+
+    res.json({ success: true, replays: enrichedReplays });
+  }));
+
+  // Get single stream replay with messages (for playback)
+  app.get("/api/streams/:streamId/replay", asyncHandler(async (req: Request, res: Response) => {
+    const { streamId } = req.params;
+
+    const [stream] = await db.select()
+      .from(liveStreams)
+      .where(eq(liveStreams.id, streamId))
+      .limit(1);
+
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+
+    const [recording] = await db.select()
+      .from(streamRecordings)
+      .where(eq(streamRecordings.streamId, streamId))
+      .limit(1);
+
+    let hostAvatar = null;
+    if (stream.hostAvatarId) {
+      const [avatar] = await db.select()
+        .from(knowledgeAvatars)
+        .where(eq(knowledgeAvatars.id, stream.hostAvatarId))
+        .limit(1);
+      hostAvatar = avatar;
+    }
+
+    // Get transcript messages ordered by time
+    const messages = await db.select()
+      .from(streamMessages)
+      .where(eq(streamMessages.streamId, streamId))
+      .orderBy(streamMessages.createdAt)
+      .limit(100);
+
+    res.json({
+      success: true,
+      stream,
+      recording,
+      hostAvatar,
+      messages,
+      transcript: messages.map(m => m.content),
+    });
+  }));
+
+  // Admin: Trigger manual scheduled stream (for testing)
+  app.post("/api/admin/trigger-scheduled-stream", asyncHandler(async (req: Request, res: Response) => {
+    const { type } = req.body;
+    
+    if (!type || !['morning_update', 'market_close'].includes(type)) {
+      return res.status(400).json({ success: false, error: 'Invalid stream type' });
+    }
+
+    const { getScheduledMarketStreamService } = await import('./services/scheduledMarketStreamService');
+    const service = getScheduledMarketStreamService();
+    
+    if (!service) {
+      return res.status(500).json({ success: false, error: 'Scheduled stream service not running' });
+    }
+
+    const streamId = await service.triggerManualStream(type);
+    
+    res.json({ 
+      success: !!streamId, 
+      streamId,
+      message: streamId ? `Started ${type} stream` : 'Failed to start stream'
+    });
+  }));
+
   // Get platform stats (real aggregates from database)
   app.get("/api/platform-stats", asyncHandler(async (req: Request, res: Response) => {
     try {
