@@ -90,21 +90,26 @@ export class AvatarVoiceService {
   static async textToSpeech(
     text: string, 
     avatarName: string,
-    options?: { useCache?: boolean }
+    options?: { useCache?: boolean; forceGenerate?: boolean }
   ): Promise<Buffer> {
     // Check if TTS is explicitly disabled or API is paused
-    if (process.env.DISABLE_OPENAI_TTS === 'true') {
-      console.log(`[TTS] ⏸️ TTS is disabled - skipping TTS generation for ${avatarName}`);
-      throw new Error('OpenAI TTS is disabled');
-    }
-    
-    // Check if API is paused AND avatar is not in the allowed list
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      if (!this.isAvatarTtsEnabled(avatarName)) {
-        console.log(`[TTS] ⏸️ OpenAI API paused - skipping TTS generation for ${avatarName}`);
-        throw new Error('OpenAI API usage is paused');
+    // forceGenerate bypasses checks for scheduled streams and test streams
+    if (!options?.forceGenerate) {
+      if (process.env.DISABLE_OPENAI_TTS === 'true') {
+        console.log(`[TTS] ⏸️ TTS is disabled - skipping TTS generation for ${avatarName}`);
+        throw new Error('OpenAI TTS is disabled');
       }
-      console.log(`[TTS] 🎙️ ON-DEMAND: ${avatarName} is TTS-enabled, generating audio despite API pause`);
+      
+      // Check if API is paused AND avatar is not in the allowed list
+      if (process.env.PAUSE_OPENAI_API === 'true') {
+        if (!this.isAvatarTtsEnabled(avatarName)) {
+          console.log(`[TTS] ⏸️ OpenAI API paused - skipping TTS generation for ${avatarName}`);
+          throw new Error('OpenAI API usage is paused');
+        }
+        console.log(`[TTS] 🎙️ ON-DEMAND: ${avatarName} is TTS-enabled, generating audio despite API pause`);
+      }
+    } else {
+      console.log(`[TTS] 🎙️ SCHEDULED: Force generating TTS for ${avatarName}`);
     }
 
     const cacheKey = `${avatarName}:${text.substring(0, 100)}`;
@@ -146,9 +151,10 @@ export class AvatarVoiceService {
 
   static async textToSpeechBase64(
     text: string, 
-    avatarName: string
+    avatarName: string,
+    options?: { forceGenerate?: boolean }
   ): Promise<string> {
-    const audioBuffer = await this.textToSpeech(text, avatarName, { useCache: true });
+    const audioBuffer = await this.textToSpeech(text, avatarName, { useCache: true, forceGenerate: options?.forceGenerate });
     return audioBuffer.toString('base64');
   }
 

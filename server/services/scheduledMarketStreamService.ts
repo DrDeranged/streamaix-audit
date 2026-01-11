@@ -358,9 +358,10 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     let audioBase64: string | null = null;
     
     // Generate TTS audio for the full commentary
+    // Use forceGenerate to bypass DISABLE_OPENAI_TTS for scheduled streams
     try {
       console.log(`[Scheduled Streams] 🎙️ Generating TTS audio for ${avatar.name} (${fullCommentary.length} chars)`);
-      audioBase64 = await AvatarVoiceService.textToSpeechBase64(fullCommentary, avatar.name);
+      audioBase64 = await AvatarVoiceService.textToSpeechBase64(fullCommentary, avatar.name, { forceGenerate: true });
       console.log(`[Scheduled Streams] ✅ TTS audio generated (${(audioBase64.length / 1024).toFixed(1)} KB)`);
       
       // Store audio in memory for replay
