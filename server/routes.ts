@@ -13787,6 +13787,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .orderBy(streamMessages.createdAt)
       .limit(100);
 
+    // Check if TTS audio is available
+    const { hasScheduledStreamAudio } = await import('./services/scheduledMarketStreamService');
+    const hasAudio = hasScheduledStreamAudio(streamId);
+
     res.json({
       success: true,
       stream,
@@ -13794,7 +13798,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       hostAvatar,
       messages,
       transcript: messages.map(m => m.content),
+      hasAudio,
+      audioUrl: hasAudio ? `/api/streams/${streamId}/audio` : null,
     });
+  }));
+
+  // Serve TTS audio for stream replay
+  app.get("/api/streams/:streamId/audio", asyncHandler(async (req: Request, res: Response) => {
+    const { streamId } = req.params;
+    
+    const { getScheduledStreamAudio } = await import('./services/scheduledMarketStreamService');
+    const audioBase64 = getScheduledStreamAudio(streamId);
+    
+    if (!audioBase64) {
+      return res.status(404).json({ success: false, error: 'Audio not available for this stream' });
+    }
+    
+    const audioBuffer = Buffer.from(audioBase64, 'base64');
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': audioBuffer.length,
+      'Cache-Control': 'public, max-age=3600',
+    });
+    res.send(audioBuffer);
   }));
 
   // Admin: Trigger manual scheduled stream (for testing)

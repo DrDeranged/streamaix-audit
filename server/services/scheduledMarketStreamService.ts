@@ -3,10 +3,14 @@ import { liveStreams, knowledgeAvatars, streamRecordings } from '@shared/schema'
 import { eq, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
+import { AvatarVoiceService } from './avatarVoiceService';
 import OpenAI from 'openai';
 import * as cron from 'node-cron';
 
 const openai = new OpenAI();
+
+// In-memory audio storage for scheduled stream replays
+const scheduledStreamAudio = new Map<string, string>(); // streamId -> base64 audio
 
 interface ScheduledStream {
   id: string;
@@ -345,9 +349,25 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     }
   }
 
-  private async deliverCommentary(streamId: string, avatar: any, segments: string[]): Promise<void> {
+  private async deliverCommentary(streamId: string, avatar: any, segments: string[]): Promise<string | null> {
     const streamingService = getStreamingService();
     const delayPerSegment = Math.floor((STREAM_DURATION_SECONDS * 1000) / segments.length);
+    
+    // Combine all segments into one text for TTS (more cost-effective than multiple calls)
+    const fullCommentary = segments.join('\n\n');
+    let audioBase64: string | null = null;
+    
+    // Generate TTS audio for the full commentary
+    try {
+      console.log(`[Scheduled Streams] 🎙️ Generating TTS audio for ${avatar.name} (${fullCommentary.length} chars)`);
+      audioBase64 = await AvatarVoiceService.textToSpeechBase64(fullCommentary, avatar.name);
+      console.log(`[Scheduled Streams] ✅ TTS audio generated (${(audioBase64.length / 1024).toFixed(1)} KB)`);
+      
+      // Store audio in memory for replay
+      scheduledStreamAudio.set(streamId, audioBase64);
+    } catch (error) {
+      console.error(`[Scheduled Streams] ⚠️ TTS generation failed, continuing with text-only:`, error);
+    }
 
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
@@ -366,6 +386,8 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
         await new Promise(resolve => setTimeout(resolve, delayPerSegment));
       }
     }
+    
+    return audioBase64;
   }
 
   private async endAndSaveStream(streamId: string, avatar: any, transcript: string[]): Promise<void> {
@@ -464,4 +486,14 @@ export function initScheduledMarketStreamService(): ScheduledMarketStreamService
 
 export function getScheduledMarketStreamService(): ScheduledMarketStreamService | null {
   return serviceInstance;
+}
+
+// Get TTS audio for a scheduled stream replay
+export function getScheduledStreamAudio(streamId: string): string | null {
+  return scheduledStreamAudio.get(streamId) || null;
+}
+
+// Check if audio exists for a stream
+export function hasScheduledStreamAudio(streamId: string): boolean {
+  return scheduledStreamAudio.has(streamId);
 }
