@@ -42,8 +42,12 @@ export class AutonomousAvatarStreamService {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true' || process.env.DISABLE_OPENAI_TTS === 'true') {
-      console.log('🎙️ [Avatar Voice] ⏸️ TTS is disabled - voice streaming disabled');
+    // DISABLED BY DEFAULT: Background TTS is expensive and should only run when explicitly enabled
+    // Set ENABLE_BACKGROUND_TTS=true to enable continuous avatar voice streaming
+    const enableBackgroundTTS = process.env.ENABLE_BACKGROUND_TTS === 'true';
+    if (!enableBackgroundTTS || process.env.PAUSE_OPENAI_API === 'true' || process.env.DISABLE_OPENAI_TTS === 'true') {
+      console.log('🎙️ [Avatar Voice] ⏸️ Background TTS disabled - voice streaming not started');
+      console.log('   (Set ENABLE_BACKGROUND_TTS=true to enable continuous avatar voice streams)');
       return;
     }
 
