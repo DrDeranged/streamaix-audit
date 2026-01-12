@@ -955,32 +955,7 @@ export default function StreamsPage() {
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [multiStreamLayout, setMultiStreamLayout] = useState<'1x1' | '1x2' | '2x1' | '2x2'>('2x2');
   const [primaryStreamId, setPrimaryStreamId] = useState<string | undefined>();
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const { toast } = useToast();
-
-  const triggerStreamMutation = useMutation({
-    mutationFn: async (type: 'morning_update' | 'market_close') => {
-      return apiRequest('/api/admin/trigger-scheduled-stream', {
-        method: 'POST',
-        body: JSON.stringify({ type }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "Market Update Started",
-        description: data.message || "The scheduled market stream is now running.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/streams/live'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to Start Stream",
-        description: error.message || "Could not trigger the market update.",
-        variant: "destructive"
-      });
-    }
-  });
 
   const handleToggleStreamSelection = (streamId: string) => {
     if (selectedStreams.includes(streamId)) {
@@ -1099,65 +1074,6 @@ export default function StreamsPage() {
               <Badge className="lg:hidden streaming-viewer-glow text-red-400 text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5">
                 {liveStreams.length} Live
               </Badge>
-              
-              {/* Admin: Manual market stream trigger */}
-              <div className="relative">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAdminPanel(!showAdminPanel)}
-                  className="streaming-pill-glass border-amber-500/20 text-amber-300 hover:text-amber-200 h-8 sm:h-9 gap-1 rounded-xl text-xs"
-                >
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Schedule</span>
-                </Button>
-                
-                {showAdminPanel && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900/95 backdrop-blur-xl border border-amber-500/30 rounded-xl p-4 z-50 shadow-xl">
-                    <h3 className="text-sm font-semibold text-amber-300 mb-3 flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      Manual Stream Trigger
-                    </h3>
-                    <div className="space-y-2">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          triggerStreamMutation.mutate('morning_update');
-                          setShowAdminPanel(false);
-                        }}
-                        disabled={triggerStreamMutation.isPending}
-                        className="w-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-200 border border-amber-500/30 text-xs h-9"
-                      >
-                        {triggerStreamMutation.isPending ? (
-                          <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                        ) : (
-                          <span className="mr-2">🌅</span>
-                        )}
-                        Morning Update (8am EST)
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          triggerStreamMutation.mutate('market_close');
-                          setShowAdminPanel(false);
-                        }}
-                        disabled={triggerStreamMutation.isPending}
-                        className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 text-purple-200 border border-purple-500/30 text-xs h-9"
-                      >
-                        {triggerStreamMutation.isPending ? (
-                          <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                        ) : (
-                          <span className="mr-2">🌙</span>
-                        )}
-                        Market Close (4pm EST)
-                      </Button>
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-3">
-                      Triggers run if missed due to server restart
-                    </p>
-                  </div>
-                )}
-              </div>
               
               <Link href="/replays">
                 <Button variant="outline" size="sm" className="streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white h-8 sm:h-9 gap-1 rounded-xl text-xs">

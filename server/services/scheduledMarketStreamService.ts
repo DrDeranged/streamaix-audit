@@ -12,10 +12,6 @@ const openai = new OpenAI();
 // In-memory audio storage for scheduled stream replays
 const scheduledStreamAudio = new Map<string, string>(); // streamId -> base64 audio
 
-// Rate limiting: track last manual trigger times per type
-const lastManualTrigger = new Map<string, Date>(); // type -> last trigger time
-const MANUAL_TRIGGER_COOLDOWN_HOURS = 4; // 4-hour cooldown between same-type triggers
-
 interface ScheduledStream {
   id: string;
   type: 'morning_update' | 'market_close';
@@ -493,72 +489,6 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     console.log(`[Scheduled Streams] ✅ Stream ${streamId.slice(0, 8)}... saved for replay (${durationSeconds}s)`);
     
     this.activeStream = null;
-  }
-
-  async triggerManualStream(type: 'morning_update' | 'market_close'): Promise<{ streamId: string | null; isExisting: boolean; cooldownRemaining?: number }> {
-    console.log(`[Scheduled Streams] 🔧 Manual trigger: ${type}`);
-    
-    // Check rate limit - 4 hour cooldown between same-type triggers
-    const lastTrigger = lastManualTrigger.get(type);
-    const now = new Date();
-    const cooldownMs = MANUAL_TRIGGER_COOLDOWN_HOURS * 60 * 60 * 1000;
-    
-    if (lastTrigger) {
-      const timeSinceLastTrigger = now.getTime() - lastTrigger.getTime();
-      if (timeSinceLastTrigger < cooldownMs) {
-        const cooldownRemaining = Math.ceil((cooldownMs - timeSinceLastTrigger) / (60 * 1000)); // minutes
-        console.log(`[Scheduled Streams] ⏱️ Rate limited: ${type} cooldown has ${cooldownRemaining} minutes remaining`);
-        
-        // Return the most recent stream of this type instead
-        const recentStream = await this.getMostRecentStreamOfType(type);
-        if (recentStream) {
-          console.log(`[Scheduled Streams] 📺 Returning existing replay: ${recentStream.streamId}`);
-          return { streamId: recentStream.streamId, isExisting: true, cooldownRemaining };
-        }
-        
-        // No recent stream found, still rate limited
-        return { streamId: null, isExisting: false, cooldownRemaining };
-      }
-    }
-    
-    // Not rate limited - run the stream and record the trigger time
-    const streamId = await this.runScheduledStream(type);
-    if (streamId) {
-      lastManualTrigger.set(type, now);
-      console.log(`[Scheduled Streams] ⏱️ Cooldown started for ${type} (next trigger allowed in ${MANUAL_TRIGGER_COOLDOWN_HOURS} hours)`);
-    }
-    
-    return { streamId, isExisting: false };
-  }
-
-  private async getMostRecentStreamOfType(type: 'morning_update' | 'market_close'): Promise<{ streamId: string; title: string } | null> {
-    const typeTag = type === 'morning_update' ? 'morning' : 'close';
-    
-    // Find the most recent stream of this type from the last 24 hours
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
-    const recentStreams = await db.select({
-      streamId: streamRecordings.streamId,
-      title: liveStreams.title,
-      createdAt: streamRecordings.createdAt,
-    })
-    .from(streamRecordings)
-    .innerJoin(liveStreams, eq(streamRecordings.streamId, liveStreams.id))
-    .where(eq(streamRecordings.status, 'ready'))
-    .orderBy(desc(streamRecordings.createdAt))
-    .limit(10);
-    
-    // Find one that matches the type
-    const matchingStream = recentStreams.find(s => {
-      const title = (s.title || '').toLowerCase();
-      if (type === 'morning_update') {
-        return title.includes('morning');
-      } else {
-        return title.includes('close') || title.includes('recap');
-      }
-    });
-    
-    return matchingStream ? { streamId: matchingStream.streamId, title: matchingStream.title || '' } : null;
   }
 
   async getUpcomingSchedule(): Promise<Array<{ type: string; nextRun: Date }>> {

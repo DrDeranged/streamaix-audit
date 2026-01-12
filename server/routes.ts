@@ -13823,56 +13823,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(audioBuffer);
   }));
 
-  // Admin: Trigger manual scheduled stream (with 4-hour rate limiting to prevent TTS cost abuse)
-  app.post("/api/admin/trigger-scheduled-stream", asyncHandler(async (req: Request, res: Response) => {
-    const { type } = req.body;
-    
-    if (!type || !['morning_update', 'market_close'].includes(type)) {
-      return res.status(400).json({ success: false, error: 'Invalid stream type' });
-    }
-
-    const { getScheduledMarketStreamService } = await import('./services/scheduledMarketStreamService');
-    const service = getScheduledMarketStreamService();
-    
-    if (!service) {
-      return res.status(500).json({ success: false, error: 'Scheduled stream service not running' });
-    }
-
-    const result = await service.triggerManualStream(type);
-    
-    if (result.isExisting) {
-      // Rate limited - returning existing stream instead
-      res.json({ 
-        success: true, 
-        streamId: result.streamId,
-        isExisting: true,
-        cooldownRemaining: result.cooldownRemaining,
-        message: `Rate limited: returning recent ${type} stream. Next trigger allowed in ${result.cooldownRemaining} minutes.`
-      });
-    } else if (result.streamId) {
-      // New stream created successfully
-      res.json({ 
-        success: true, 
-        streamId: result.streamId,
-        isExisting: false,
-        message: `Started ${type} stream`
-      });
-    } else if (result.cooldownRemaining) {
-      // Rate limited but no existing stream available
-      res.status(429).json({ 
-        success: false, 
-        cooldownRemaining: result.cooldownRemaining,
-        message: `Rate limited: please wait ${result.cooldownRemaining} minutes before triggering another ${type} stream.`
-      });
-    } else {
-      // Failed to create stream for other reasons
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to start stream'
-      });
-    }
-  }));
-
   // Get platform stats (real aggregates from database)
   app.get("/api/platform-stats", asyncHandler(async (req: Request, res: Response) => {
     try {
