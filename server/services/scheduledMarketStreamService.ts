@@ -149,7 +149,7 @@ export class ScheduledMarketStreamService {
         .where(eq(liveStreams.category, 'market_update'));
 
       const todayMarketStreams = todayStreams.filter(s => {
-        const streamDate = new Date(s.actualStart || s.scheduledStart || s.createdAt);
+        const streamDate = new Date(s.actualStart || s.scheduledStart || s.createdAt || new Date());
         return streamDate >= todayStart && streamDate <= todayEnd;
       });
 
