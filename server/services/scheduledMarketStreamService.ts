@@ -106,6 +106,80 @@ export class ScheduledMarketStreamService {
     });
 
     console.log('[Scheduled Streams] ✅ Cron jobs scheduled');
+
+    // Check for missed streams on startup (runs in background)
+    setImmediate(() => this.checkAndRunMissedStreams());
+  }
+
+  private async checkAndRunMissedStreams(): Promise<void> {
+    try {
+      // Get current time in EST
+      const now = new Date();
+      const estFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const estParts = estFormatter.formatToParts(now);
+      const estHour = parseInt(estParts.find(p => p.type === 'hour')?.value || '0');
+      const estMinute = parseInt(estParts.find(p => p.type === 'minute')?.value || '0');
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+
+      // Skip weekends
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        console.log('[Scheduled Streams] 📅 Weekend - skipping missed stream check');
+        return;
+      }
+
+      console.log(`[Scheduled Streams] 🔍 Checking for missed streams (EST: ${estHour}:${estMinute.toString().padStart(2, '0')})`);
+
+      // Get today's date in EST for database lookup
+      const estDateStr = `${estParts.find(p => p.type === 'year')?.value}-${estParts.find(p => p.type === 'month')?.value}-${estParts.find(p => p.type === 'day')?.value}`;
+
+      // Check today's streams in database
+      const todayStart = new Date(estDateStr + 'T00:00:00-05:00');
+      const todayEnd = new Date(estDateStr + 'T23:59:59-05:00');
+
+      const todayStreams = await db.select()
+        .from(liveStreams)
+        .where(eq(liveStreams.category, 'market_update'));
+
+      const todayMarketStreams = todayStreams.filter(s => {
+        const streamDate = new Date(s.actualStart || s.scheduledStart || s.createdAt);
+        return streamDate >= todayStart && streamDate <= todayEnd;
+      });
+
+      const hasMorningStream = todayMarketStreams.some(s => 
+        s.title?.toLowerCase().includes('morning') || s.tags?.includes('morning_update')
+      );
+      const hasCloseStream = todayMarketStreams.some(s => 
+        s.title?.toLowerCase().includes('close') || s.title?.toLowerCase().includes('recap') || s.tags?.includes('market_close')
+      );
+
+      // Morning update: If it's past 8am EST and before 4pm, and no morning stream exists
+      if (estHour >= 8 && estHour < 16 && !hasMorningStream) {
+        console.log('[Scheduled Streams] 🌅 RECOVERY: Running missed Morning Update');
+        await this.runScheduledStream('morning_update');
+      } else if (hasMorningStream) {
+        console.log('[Scheduled Streams] ✅ Morning Update already ran today');
+      }
+
+      // Market close: If it's past 4pm EST and no close stream exists  
+      if (estHour >= 16 && !hasCloseStream) {
+        console.log('[Scheduled Streams] 🌙 RECOVERY: Running missed Market Close Update');
+        await this.runScheduledStream('market_close');
+      } else if (hasCloseStream) {
+        console.log('[Scheduled Streams] ✅ Market Close already ran today');
+      }
+
+      console.log('[Scheduled Streams] 🔍 Missed stream check complete');
+    } catch (error) {
+      console.error('[Scheduled Streams] Error checking missed streams:', error);
+    }
   }
 
   stop() {
